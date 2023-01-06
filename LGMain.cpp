@@ -25,14 +25,14 @@
 
 /*************** header files ***************/
 
+/* console settings */
+#include "LGcons.hpp" // __LGCONS_HPP__
 /* map structs */
 #include "LGmaps.hpp" // __LGMAPS_HPP__
 /* map zipping */
 #include "LGzipmap.hpp" // __LGZIPMAP_HPP__
 /* default maps */
 #include "LGdefmap.hpp" // __LGDEFMAP_HPP__
-/* printings */
-#include "LGcons.hpp" // __LGPRINT_HPP__
 /* Internet base */
 #include "LGweb.hpp" // __LGWEB_HPP__
 /* game options */

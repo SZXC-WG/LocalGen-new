@@ -26,13 +26,13 @@ inline void clearline() { fputs("\033[K",stdout); }
 // make the cursor go to a specticular place in the screen
 inline void gotoxy(int x,int y) { printf("\033[%d:%dH",y,x); }
 // make the cursor move n lines up
-inline void curup(int c) { printf("\033[%dA",c); }
+inline void curup(int c=1) { printf("\033[%dA",c); }
 // make the cursor move n lines down
-inline void curdown(int c) { printf("\033[%dB",c); }
-// make the cursor move n chars left
-inline void curleft(int c) { printf("\033[%dC",c); }
+inline void curdown(int c=1) { printf("\033[%dB",c); }
 // make the cursor move n chars right
-inline void curright(int c) { printf("\033[%dD",c); }
+inline void curright(int c=1) { printf("\033[%dC",c); }
+// make the cursor move n chars left
+inline void curleft(int c=1) { printf("\033[%dD",c); }
 
 // hide cursor
 inline void hideCursor() { fputs("\033[?25l",stdout); }

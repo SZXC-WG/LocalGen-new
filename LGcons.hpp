@@ -39,8 +39,8 @@ inline void hideCursor() { fputs("\033[?25l",stdout); }
 // show cursor
 inline void showCursor() { fputs("\033[?25h",stdout); }
 
-// color init: without this will lead to errors
-inline int initcolor() {
+// attr init: without this will lead to errors
+inline int initattr() {
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE) return GetLastError();
     DWORD dwMode = 0;

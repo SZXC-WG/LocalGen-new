@@ -25,29 +25,7 @@ using std::mt19937;
 // project headers
 #include "LGmaps.hpp"
 
-struct teamS {
-	string name;
-	int color;
-};
-teamS defTeams[64] = {
-	{"Black"s,0xffffff},
-	{"Red"s,0xff0000},
-	{"Green"s,0x00ff00},
-	{"Blue"s,0x0000ff},
-	{"Yellow"s,0xffff00},
-	{"Cyan"s,0x00ffff},
-	{"Rose"s,0xff00ff},
-	{"Orange"s,0xff8000},
-	{"Lime"s,0x80ff00},
-	{"Brown"s,0x804000},
-	{"Grey"s,0x808080},
-	{"Teal"s,0x008080},
-	{"Purple"s,0xc000c0},
-	{"Silver"s,0xc0c0c0},
-	{"Maroon"s,0xc00000},
-	{"Emerald"s,0x00ce80},
-	{"Olive"s,0x808000},
-};
+struct playerCoord { int x,y; };
 
 struct gameStatus {
 	bool isWeb;
@@ -66,18 +44,18 @@ struct gameStatus {
 	// destructor
 	~gameStatus() = default;
 	// move analyzer
-	int analyzeMove(int mv,struct{int x,y;}& coo) {
+	int analyzeMove(int mv,playerCoord& coo) {
 		return 0;
 	}
 	// main
-	int operator() {
+	int operator() () {
 		if(played) return -1;
 		played=1;
 		if(!isWeb) {
 			printMap(cheat);
 			int robotId[64];
-			struct { int x,y; } coordinate[64];
-			for(int i=2; i<=playerCnt; ++i) robotId = mt19937(std::chrono::system_clock::now()::time_since_epoch())()&1;
+			playerCoord coordinate[64];
+			for(int i=2; i<=playerCnt; ++i) robotId = mt19937(std::chrono::system_clock::now()::time_since_epoch().count())()&1;
 			initGenerals(coordinate);
 			deque<int> movement;
 			while(1) {
@@ -99,7 +77,8 @@ struct gameStatus {
 					}
 					case int('h'): movement.emplace_back(0); break;
 					case int('e'): if(!movement.empty()) movement.pop_back(); break;
-					case int('q'): movement.clear();
+					case int('q'): movement.clear(); break;
+					case 27: 
 				}
 				while(analyzeMove(movement.front(),coordinate[1])) movement.pop_front();
 				movement.pop_front();
@@ -107,6 +86,7 @@ struct gameStatus {
 					if(robotId[i]==0) analyzeMove(getMove0(i,coordinate[i]),coordinate[i]);
 					if(robotId[i]==1) analyzeMove(getMove1(i,coordinate[i]),coordinate[i]);
 				}
+				printMap(cheat);
 			}
 		}
 	}

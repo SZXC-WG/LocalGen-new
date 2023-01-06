@@ -28,6 +28,11 @@ using std::mt19937;
 
 struct playerCoord { int x,y; };
 
+int getMove0(int id,playerCoord coos[]) {
+}
+int getMove1(int id,playerCoord coos[]) {
+}
+
 struct gameStatus {
 	bool isWeb;
 	bool cheat;
@@ -35,6 +40,7 @@ struct gameStatus {
 	int isAlive[64];
 	int stepDelay;
 	bool played;
+	
 	// constructor
 	gameStatus() = default;
 	gameStatus(bool iW,bool cht,int pC,int sD) {
@@ -44,12 +50,17 @@ struct gameStatus {
 	}
 	// destructor
 	~gameStatus() = default;
+	
+	void initGenerals(playerCoord coos[]) {
+	}
+	int kill(int p1,int p2) {
+	}
 	// move analyzer
 	int analyzeMove(int mv,playerCoord& coo) {
 		return 0;
 	}
 	// main
-	int operator() () {
+	int operator()() {
 		if(played) return -1;
 		played=1;
 		if(!isWeb) {
@@ -85,8 +96,8 @@ struct gameStatus {
 				while(analyzeMove(movement.front(),coordinate[1])) movement.pop_front();
 				movement.pop_front();
 				for(int i=2; i<=playerCnt; ++i) {
-					if(robotId[i]==0) analyzeMove(getMove0(i,coordinate[i]),coordinate[i]);
-					if(robotId[i]==1) analyzeMove(getMove1(i,coordinate[i]),coordinate[i]);
+					if(robotId[i]==0) analyzeMove(getMove0(i,coordinate),coordinate[i]);
+					if(robotId[i]==1) analyzeMove(getMove1(i,coordinate),coordinate[i]);
 				}
 				printMap(cheat);
 			}
@@ -95,9 +106,9 @@ struct gameStatus {
 	}
 };
 
-void GAME(bool isWeb,bool cheat,int plCnt,int stDel) {
+int GAME(bool isWeb,bool cheat,int plCnt,int stDel) {
 	gameStatus newGame = gameStatus(isWeb,cheat,plCnt,stDel);
-	newGame();
+	return newGame();
 }
 
 #endif // __LGGAME_HPP__

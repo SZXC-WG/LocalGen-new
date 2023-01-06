@@ -48,6 +48,9 @@ teamS defTeams[64] = {
 	{"Olive"s,0x808000},
 };
 
+void printMap() {
+}
+
 #undef ll // long long
 
 #endif // __LGMAPS_HPP

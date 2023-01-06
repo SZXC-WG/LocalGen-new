@@ -48,4 +48,5 @@ signed main(signed argc, char** argv) {
 	exit(0);    // exit program
 }
 
-#endif // __LGMAIN_CPP__ 
+#endif // __LGMAIN_CPP__
+

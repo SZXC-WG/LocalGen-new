@@ -49,6 +49,7 @@ inline int initattr() {
     if (!SetConsoleMode(hOut, dwMode)) return GetLastError();
     return 0;
 }
+
 // foreground color
 inline void setfcolor(int RGB) { printf("\033[38;2;%d;%d;%dm",RGB/65536,RGB/256%256,RGB%256); }
 inline void setfcolor(int R,int G,int B) { printf("\033[38;2;%d;%d;%dm",R,G,B); }

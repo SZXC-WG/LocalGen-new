@@ -18,6 +18,7 @@
 #include <string>
 #include <chrono>
 #include <random>
+#include <thread>
 using std::string;
 using std::mt19937;
 // windows libraries
@@ -55,7 +56,7 @@ struct gameStatus {
 			printMap(cheat);
 			int robotId[64];
 			playerCoord coordinate[64];
-			for(int i=2; i<=playerCnt; ++i) robotId = mt19937(std::chrono::system_clock::now()::time_since_epoch().count())()&1;
+			for(int i=2; i<=playerCnt; ++i) robotId[i] = mt19937(std::chrono::system_clock::now().time_since_epoch().count())()&1;
 			initGenerals(coordinate);
 			deque<int> movement;
 			while(1) {
@@ -78,7 +79,8 @@ struct gameStatus {
 					case int('h'): movement.emplace_back(0); break;
 					case int('e'): if(!movement.empty()) movement.pop_back(); break;
 					case int('q'): movement.clear(); break;
-					case 27: 
+					case 27: break;
+					case '\b': isAlive[1]=0;
 				}
 				while(analyzeMove(movement.front(),coordinate[1])) movement.pop_front();
 				movement.pop_front();
@@ -89,6 +91,7 @@ struct gameStatus {
 				printMap(cheat);
 			}
 		}
+		return 0;
 	}
 };
 

@@ -16,7 +16,7 @@ If you have an idea or find bugs, you can also take part in contributing to the 
 
 ## Copyright
 
-The project is licensed under the MIT license.
+The project is licensed under **the MIT license**.
 
 Copyright (c) 2023 LocalGen-dev
 
@@ -25,6 +25,12 @@ Developers: LocalGen-dev team
 Contributors: see the list on the right bars.
 
 We give our greatest thanks to all contributors who has contributed to our project.
+
+## Warnings
+
+The program can't run under Mac OS or Linux. (maybe?)
+
+The program can't run in Windows versions under Windows 7 (incl.).
 
 ## Releases (Changelog)
 

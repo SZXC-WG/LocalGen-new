@@ -55,7 +55,7 @@ inline void setfcolor(int R,int G,int B) { printf("\033[38;2;%d;%d;%dm",R,G,B); 
 inline void setbcolor(int R,int G,int B) { printf("\033[48;2;%d;%d;%dm",R,G,B); }
 
 // print chars with underline
-inline void underline() { fputs("\033[4m"); }
+inline void underline() { fputs("\033[4m",stdout); }
 
 // reset text attributes
 inline void resetattr() { fputs("\033[0m",stdout); }

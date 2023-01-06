@@ -43,7 +43,7 @@
 /*************** the main function ***************/
 
 signed main(signed argc, char** argv) {
-	initcolor();
+	initattr();
 	MainPage(); // start main page 
 	exit(0);    // exit program
 }

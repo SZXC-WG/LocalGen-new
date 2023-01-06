@@ -9,7 +9,7 @@
 /* must print the copyright information at the front of your product.    */
 /*                                                                       */
 /* The full MIT license this project uses can be found here:             */
-/* http://github.com/LocalGen-dev/Local-Generals.io/blob/main/LICENSE.md */
+/* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md */
 
 #ifndef __LGCONS_HPP__
 #define __LGCONS_HPP__ 

@@ -1,3 +1,6 @@
 
 CheckMap.exe
 *.lg
+*.exe
+try.cpp
+Makefile.win

@@ -32,7 +32,7 @@
 /* default maps */
 #include "LGdefmap.hpp" // __LGDEFMAP_HPP__
 /* printings */
-#include "LGprint.hpp" // __LGPRINT_HPP__
+#include "LGcons.hpp" // __LGPRINT_HPP__
 /* Internet base */
 #include "LGweb.hpp" // __LGWEB_HPP__
 /* game options */
@@ -43,6 +43,7 @@
 /*************** the main function ***************/
 
 signed main(signed argc, char** argv) {
+	initcolor();
 	MainPage(); // start main page 
 	exit(0);    // exit program
 }

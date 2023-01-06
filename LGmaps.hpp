@@ -48,7 +48,7 @@ teamS defTeams[64] = {
 	{"Olive"s,0x808000},
 };
 
-void printMap() {
+void printMap(bool cht) {
 }
 
 #undef ll // long long

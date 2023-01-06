@@ -50,8 +50,10 @@ inline int initattr() {
     return 0;
 }
 // foreground color
+inline void setfcolor(int RGB) { printf("\033[38;2;%d;%d;%dm",RGB/65536,RGB/256%256,RGB%256); }
 inline void setfcolor(int R,int G,int B) { printf("\033[38;2;%d;%d;%dm",R,G,B); }
 // background color
+inline void setbcolor(int RGB) { printf("\033[48;2;%d;%d;%dm",RGB/65536,RGB/256%256,RGB%256); }
 inline void setbcolor(int R,int G,int B) { printf("\033[48;2;%d;%d;%dm",R,G,B); }
 
 // print chars with underline

@@ -26,8 +26,6 @@ using std::mt19937;
 // project headers
 #include "LGmaps.hpp"
 
-struct playerCoord { int x,y; };
-
 int getMove0(int id,playerCoord coos[]) {
 }
 int getMove1(int id,playerCoord coos[]) {
@@ -64,11 +62,11 @@ struct gameStatus {
 		if(played) return -1;
 		played=1;
 		if(!isWeb) {
-			printMap(CHEAT_CODE);
 			int robotId[64];
 			playerCoord coordinate[64];
 			for(int i=2; i<=playerCnt; ++i) robotId[i] = mt19937(std::chrono::system_clock::now().time_since_epoch().count())()&1;
 			initGenerals(coordinate);
+			printMap(cheat,coordinate[1]);
 			deque<int> movement;
 			while(1) {
 				int ch=_getch();
@@ -99,7 +97,7 @@ struct gameStatus {
 					if(robotId[i]==0) analyzeMove(getMove0(i,coordinate),coordinate[i]);
 					if(robotId[i]==1) analyzeMove(getMove1(i,coordinate),coordinate[i]);
 				}
-				printMap(cheat);
+				printMap(cheat,coordinate[1]);
 			}
 		}
 		return 0;

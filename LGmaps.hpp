@@ -56,8 +56,8 @@ teamS defTeams[64] = {
 struct playerCoord { int x,y; };
 
 const char NUM_s[15]={0,'H','K','W','L','M','Q','Y','B','G','T'};
-bool isVisible(int x,int y) {
-	for(int i=-1; i<=1; ++i) for(int j=-1; j<=1; ++j) if(gameMap[x+i][y+j].team==1) return true;
+bool isVisible(int x,int y,int id) {
+	for(int i=-1; i<=1; ++i) for(int j=-1; j<=1; ++j) if(gameMap[x+i][y+j].team==id) return true;
 	return false;
 }
 void printMap(bool cht,playerCoord coo) {

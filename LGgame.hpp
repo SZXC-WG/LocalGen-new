@@ -64,7 +64,7 @@ struct gameStatus {
 		if(played) return -1;
 		played=1;
 		if(!isWeb) {
-			printMap(cheat);
+			printMap(CHEAT_CODE);
 			int robotId[64];
 			playerCoord coordinate[64];
 			for(int i=2; i<=playerCnt; ++i) robotId[i] = mt19937(std::chrono::system_clock::now().time_since_epoch().count())()&1;

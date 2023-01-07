@@ -36,7 +36,7 @@ struct gameStatus {
 	bool cheat;
 	int playerCnt;
 	int isAlive[64];
-	int stepDelay;
+	int stepDelay; /* ms */
 	bool played;
 	
 	// constructor
@@ -98,6 +98,7 @@ struct gameStatus {
 					if(robotId[i]==1) analyzeMove(getMove1(i,coordinate),coordinate[i]);
 				}
 				printMap(cheat,coordinate[1]);
+				std::this_thread::sleep_for(std::chrono::microseconds(stepDelay))
 			}
 		}
 		return 0;

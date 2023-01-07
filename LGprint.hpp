@@ -34,7 +34,7 @@ void initMap(){
 	ptW=mapW*5;
 	
 	for(int i=1;i<=mapH;i++) for(int j=1;j<=mapW;j++)
-	gameMap[i][j].type=0,gameMap[i][j].army=0,gameMap[i][j].team=7;
+	gameMap[i][j].type=0,gameMap[i][j].army=0,gameMap[i][j].team=0;
 }
 
 void printFrame(){
@@ -147,7 +147,7 @@ void writeMap(){
 				turnStr(gameMap[i][j].army);
 				fillNs(i,j*5-3,j*5-1);
 			}else gameMap[i][j].army=0;
-			fillCf(i,j*5-4,i,j*5,gameMap[i][j].team);
+			fillCf(i,j*5-4,i,j*5,defTeams[gameMap[i][j].team].color);
 		}else{
 			switch(gameMap[i][j].type){
 				case 0:
@@ -170,8 +170,8 @@ void printMap(int printCode){
 	for(j=1;j<=ptW;j++)
 	if(!(nptMap[i][j]==ptMap[i][j])){
 		if(nptMap[i][j].colorFront!=ncolorFront||nptMap[i][j].colorBack!=ncolorBack){
-			setfcolor(ncolorFront=nptMap[i][j].colorFront);
-			setbcolor(ncolorBack=nptMap[i][j].colorBack);
+			setfcolor(defTeams[ncolorFront=nptMap[i][j].colorFront].color);
+			setbcolor(defTeams[ncolorBack=nptMap[i][j].colorBack].color);
 		}if(ptMap[i][j].Chr!=nptMap[i][j].Chr){
 			gotoxy(i,j);
 			putchar(nptMap[i][j].Chr);

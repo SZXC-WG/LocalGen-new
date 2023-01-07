@@ -57,6 +57,8 @@ struct gameStatus {
 	int analyzeMove(int mv,playerCoord& coo) {
 		return 0;
 	}
+	void flushMove() {
+	}
 	// main
 	int operator()() {
 		if(played) return -1;
@@ -97,8 +99,9 @@ struct gameStatus {
 					if(robotId[i]==0) analyzeMove(getMove0(i,coordinate),coordinate[i]);
 					if(robotId[i]==1) analyzeMove(getMove1(i,coordinate),coordinate[i]);
 				}
+				flushMove();
 				printMap(cheat,coordinate[1]);
-				std::this_thread::sleep_for(std::chrono::microseconds(stepDelay))
+				std::this_thread::sleep_for(std::chrono::milliseconds(stepDelay));
 			}
 		}
 		return 0;

@@ -18,7 +18,7 @@
 
 struct Block {
 	int team; /* the team who holds this block */
-	int type; /* the block's type: 0->general, 1->plain, 2->mountain, 3->city, 4->swamp */
+	int type; /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
 	ll army; /* count of army on this block */
 };
 

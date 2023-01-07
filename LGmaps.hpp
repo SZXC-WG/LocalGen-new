@@ -14,6 +14,9 @@
 #ifndef __LGMAPS_HPP__
 #define __LGMAPS_HPP__
 
+#include <string>
+using std::string;
+
 #define ll long long
 
 struct Block {

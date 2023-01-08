@@ -215,6 +215,7 @@ struct gameStatus {
 									}
 								}
 							}
+							cheatCode=(1<<playerCnt)-1;
 							break;
 						}
 					}

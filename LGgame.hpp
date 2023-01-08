@@ -25,6 +25,7 @@ using std::string;
 // windows libraries
 #include <conio.h>
 // project headers
+#include "LGcons.hpp"
 #include "LGmaps.hpp"
 
 int getMove0(int id,playerCoord coos[]) {
@@ -34,6 +35,9 @@ int getMove1(int id,playerCoord coos[]) {
 	return 0;
 }
 
+const int dx[5] = {0,-1,0,1,0};
+const int dy[5] = {0,0,-1,0,1};
+
 struct gameStatus {
 	bool isWeb;
 	int cheatCode;
@@ -41,9 +45,6 @@ struct gameStatus {
 	int isAlive[64];
 	int stepDelay; /* ms */
 	bool played;
-	
-	static const int dx[5] = {0,-1,0,1,0};
-	static const int dy[5] = {0,0,-1,0,1};
 	
 	// constructor
 	gameStatus() = default;
@@ -99,7 +100,7 @@ struct gameStatus {
 		sort(gens.begin(),gens.end(),[](playerCoord a,playerCoord b){return a.x==b.x?a.y<b.y:a.x<b.x;});
 		std::shuffle(gens.begin(),gens.end(),std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
 		for(int i=1; i<=playerCnt; ++i) {
-			genCoo[i]=gens[i];
+			coos[i]=genCoo[i]=gens[i-1];
 			gameMap[genCoo[i].x][genCoo[i].y].team=i;
 		}
 		for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) 
@@ -209,12 +210,13 @@ struct gameStatus {
 				if(std::chrono::steady_clock::now().time_since_epoch()-lPT < std::chrono::milliseconds(stepDelay)) continue;
 				updateMap();
 				while(!movement.empty() && analyzeMove(1,movement.front(),coordinate[1])) movement.pop_front();
-				movement.pop_front();
+				if(!movement.empty()) movement.pop_front();
 				for(int i=2; i<=playerCnt; ++i) {
 					if(robotId[i]==0) analyzeMove(i,getMove0(i,coordinate),coordinate[i]);
 					if(robotId[i]==1) analyzeMove(i,getMove1(i,coordinate),coordinate[i]);
 				}
 				flushMove();
+				gotoxy(1,1);
 				printMap(cheatCode,coordinate[1]);
 				lPT=std::chrono::steady_clock::now().time_since_epoch();
 			}

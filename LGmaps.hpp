@@ -103,7 +103,7 @@ void printMap(int printCode,playerCoord coo) {
 								printf(" %s%c ",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
 							}
 						} else fputs("     ",stdout);
-						if(coo.x==i&&coo.y==j) setbcolor(0x000000);
+						setbcolor(0x000000);
 					}
 					break;
 				}
@@ -127,7 +127,7 @@ void printMap(int printCode,playerCoord coo) {
 								printf("=%s%c=",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
 							}
 						} else fputs("=====",stdout);
-						if(coo.x==i&&coo.y==j) setbcolor(0x000000);
+						setbcolor(0x000000);
 					}
 					break;
 				}
@@ -144,7 +144,7 @@ void printMap(int printCode,playerCoord coo) {
 						if(coo.x==i&&coo.y==j) setbcolor(0x000080);
 						if(isVisible(i,j,printCode)) fputs("{GEN}",stdout);
 						else fputs("     ",stdout);
-						if(coo.x==i&&coo.y==j) setfcolor(0x000000);
+						setbcolor(0x000000);
 					}
 					else {
 						setfcolor(defTeams[gameMap[i][j].team].color);
@@ -156,7 +156,7 @@ void printMap(int printCode,playerCoord coo) {
 								printf("{%s%c}",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
 							}
 						} else fputs("     ",stdout);
-						if(coo.x==i&&coo.y==j) setfcolor(0x000000);
+						setbcolor(0x000000);
 					}
 					break;
 				}
@@ -179,7 +179,7 @@ void printMap(int printCode,playerCoord coo) {
 								printf("[%s%c]",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
 							}
 						} else fputs("#####",stdout);
-						if(coo.x==i&&coo.y==j) setfcolor(0x000000);
+						setbcolor(0x000000);
 					} else {
 						setfcolor(defTeams[gameMap[i][j].team].color);
 						if(coo.x==i&&coo.y==j) setbcolor(0x000080);
@@ -197,13 +197,13 @@ void printMap(int printCode,playerCoord coo) {
 								printf("[%s%c]",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
 							}
 						} else fputs("#####",stdout);
-						if(coo.x==i&&coo.y==j) setfcolor(0x000000);
+						setbcolor(0x000000);
 					}
 					break;
 				}
 			}
 		}
-		setbcolor(0x000000);
+		setfcolor(0x000000);
 		clearline();
 		putchar('|');
 		putchar('\n');

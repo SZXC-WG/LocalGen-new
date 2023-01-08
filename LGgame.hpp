@@ -130,9 +130,9 @@ struct gameStatus {
 			case 0: coo=genCoo[id]; break;
 			case 1 ... 4: {
 				playerCoord newCoo{coo.x+dx[mv],coo.y+dy[mv]};
-				if(newCoo.x<1||newCoo.x>mapH||newCoo.y<1||newCoo.y>mapW) return 1;
+				if(newCoo.x<1||newCoo.x>mapH||newCoo.y<1||newCoo.y>mapW||gameMap[newCoo.x][newCoo.y].type==2) return 1;
 				moveS insMv{id,newCoo,0};
-				if(gameMap[coo.x][coo.y].team==id&&gameMap[newCoo.x][newCoo.y].type!=2)
+				if(gameMap[coo.x][coo.y].team==id)
 					insMv.army=gameMap[coo.x][coo.y].army-1,gameMap[coo.x][coo.y].army=1;
 				inlineMove.push_back(insMv);
 				coo=newCoo;

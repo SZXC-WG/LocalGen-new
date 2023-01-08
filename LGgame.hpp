@@ -203,9 +203,9 @@ struct gameStatus {
 						case int('g'): movement.emplace_back(0); break;
 						case int('e'): if(!movement.empty()) movement.pop_back(); break;
 						case int('q'): movement.clear(); break;
-						case 27: MessageBox(nullptr,("YOU QUIT THE GAME."s).c_str(),"",MB_OK); return 0;
+						case 27: MessageBox(nullptr,string("YOU QUIT THE GAME.").c_str(),"",MB_OK); return 0;
 						case '\b': {
-							MessageBox(nullptr,("YOU SURRENDERED."s).c_str(),"",MB_OK);
+							MessageBox(nullptr,string("YOU SURRENDERED.").c_str(),"",MB_OK);
 							isAlive[1]=0;
 							for(int i=1; i<=mapH; ++i) {
 								for(int j=1; j<=mapW; ++j) {
@@ -228,9 +228,9 @@ struct gameStatus {
 					if(robotId[i]==1) analyzeMove(i,getMove1(i,coordinate),coordinate[i]);
 				}
 				flushMove();
-				bool ed=0;
-				for(int i=1; i<=playerCnt; ++i) ed|=isAlive[i];
-				if(!ed) MessageBox(nullptr,("PLAYER "s+name[o1]+" WON!"s+"\n"s+"THE GAME WILL CONTINUE."s+"\n"s+"YOU CAN PRESS [ESC] TO EXIT."s).c_str(),"",MB_OK);
+				int ed=0;
+				for(int i=1; i<=playerCnt; ++i) ed|=(isAlive[i]<<i-1);
+				if(__builtin_popcount(ed)==1) MessageBox(nullptr,("PLAYER "+defTeams[std::__lg(ed)+1].name+" WON!"+"\n"+"THE GAME WILL CONTINUE."+"\n"+"YOU CAN PRESS [ESC] TO EXIT.").c_str(),"",MB_OK);
 				gotoxy(1,1);
 				printMap(cheatCode,coordinate[1]);
 				lPT=std::chrono::steady_clock::now().time_since_epoch();

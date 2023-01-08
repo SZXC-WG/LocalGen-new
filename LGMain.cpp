@@ -42,7 +42,9 @@
 
 /*************** the main function ***************/
 
+HWND hwnd = GetConsoleWindow();
 signed main(signed argc, char** argv) {
+	ShowWindow(hwnd,SW_MAXIMIZE);
 	initattr();
 	MainPage(); // start main page 
 	exit(0);    // exit program

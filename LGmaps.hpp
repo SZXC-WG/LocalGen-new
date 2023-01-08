@@ -82,7 +82,7 @@ void printMap(int printCode,playerCoord coo) {
 							} else if(gameMap[i][j].army<1000) printf(" %3lld ",gameMap[i][j].army);
 							else {
 								string p=to_string(gameMap[i][j].army);
-								printf(" %s%c ",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
+								printf(" %s%c ",p.substr(0,2).c_str(),NUM_s[p.size()-3]);
 							}
 						} else fputs("     ",stdout);
 						setbcolor(0x000000);
@@ -100,7 +100,7 @@ void printMap(int printCode,playerCoord coo) {
 							} else if(gameMap[i][j].army<1000) printf(" %3lld ",gameMap[i][j].army);
 							else {
 								string p=to_string(gameMap[i][j].army);
-								printf(" %s%c ",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
+								printf(" %s%c ",p.substr(0,2).c_str(),NUM_s[p.size()-3]);
 							}
 						} else fputs("     ",stdout);
 						setbcolor(0x000000);
@@ -124,7 +124,7 @@ void printMap(int printCode,playerCoord coo) {
 							else if(gameMap[i][j].army<1000) printf("=%3lld=",gameMap[i][j].army);
 							else {
 								string p=to_string(gameMap[i][j].army);
-								printf("=%s%c=",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
+								printf("=%s%c=",p.substr(0,2).c_str(),NUM_s[p.size()-3]);
 							}
 						} else fputs("=====",stdout);
 						setbcolor(0x000000);
@@ -155,7 +155,7 @@ void printMap(int printCode,playerCoord coo) {
 							if(gameMap[i][j].army<1000) printf("{%3lld}",gameMap[i][j].army);
 							else {
 								string p=to_string(gameMap[i][j].army);
-								printf("{%s%c}",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
+								printf("{%s%c}",p.substr(0,2).c_str(),NUM_s[p.size()-3]);
 							}
 						} else fputs("     ",stdout);
 						setbcolor(0x000000);
@@ -178,7 +178,7 @@ void printMap(int printCode,playerCoord coo) {
 							} else if(gameMap[i][j].army<1000) printf("[%3lld]",gameMap[i][j].army);
 							else {
 								string p=to_string(gameMap[i][j].army);
-								printf("[%s%c]",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
+								printf("[%s%c]",p.substr(0,2).c_str(),NUM_s[p.size()-3]);
 							}
 						} else fputs("#####",stdout);
 						setbcolor(0x000000);
@@ -196,7 +196,7 @@ void printMap(int printCode,playerCoord coo) {
 							} else if(gameMap[i][j].army<1000) printf("[%3lld]",gameMap[i][j].army);
 							else {
 								string p=to_string(gameMap[i][j].army);
-								printf("[%s%c]",p.substr(0,2).c_str(),NUM_s[p.size()-2]);
+								printf("[%s%c]",p.substr(0,2).c_str(),NUM_s[p.size()-3]);
 							}
 						} else fputs("#####",stdout);
 						setbcolor(0x000000);

@@ -15,49 +15,157 @@
 #define __LGGAME_HPP__
 
 // standard libraries
+#include <algorithm>
+#include <deque>
 #include <string>
 #include <chrono>
 #include <random>
 #include <thread>
 using std::string;
-using std::mt19937;
 // windows libraries
 #include <conio.h>
 // project headers
 #include "LGmaps.hpp"
 
 int getMove0(int id,playerCoord coos[]) {
+	return 0;
 }
 int getMove1(int id,playerCoord coos[]) {
+	return 0;
 }
 
 struct gameStatus {
 	bool isWeb;
-	bool cheat;
+	int cheatCode;
 	int playerCnt;
 	int isAlive[64];
 	int stepDelay; /* ms */
 	bool played;
 	
+	static const int dx[5] = {0,-1,0,1,0};
+	static const int dy[5] = {0,0,-1,0,1};
+	
 	// constructor
 	gameStatus() = default;
-	gameStatus(bool iW,bool cht,int pC,int sD) {
-		isWeb=iW; cheat=cht; playerCnt=pC; stepDelay=sD;
+	gameStatus(bool iW,int chtC,int pC,int sD) {
+		isWeb=iW; cheatCode=chtC; playerCnt=pC; stepDelay=sD;
 		for(register int i=1; i<=pC; ++i) isAlive[i]=1;
 		played=0;
 	}
 	// destructor
 	~gameStatus() = default;
 	
+	int curTurn;
+	void updateMap() {
+		++curTurn;
+		for(int i=1; i<=mapH; ++i) {
+			for(int j=1; j<=mapW; ++j) {
+				if(gameMap[i][j].team==0) continue;
+				switch(gameMap[i][j].type) {
+					case 0: /* plain */ {
+						if(curTurn%25==0) ++gameMap[i][j].army;
+						break;
+					}
+					case 1: /* swamp */ {
+						if(gameMap[i][j].army>0) if(!(--gameMap[i][j].army)) gameMap[i][j].team=0;
+						break;
+					}
+					case 2: /* mountain */ break; /* ??? */
+					case 3: /* general */ {
+						++gameMap[i][j].army;
+						break;
+					}
+					case 4: /* city */ {
+						++gameMap[i][j].army;
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	playerCoord genCoo[64];
+	// general init
 	void initGenerals(playerCoord coos[]) {
+		std::deque<playerCoord> gens;
+		for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) if(gameMap[i][j].type==3) gens.push_back(playerCoord{i,j});
+		while(gens.size()<playerCnt) {
+			std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
+			int x,y;
+			do x=p()%mapH+1,y=p()%mapW+1;
+			while(gameMap[x][y].type!=0);
+			gens.push_back(playerCoord{x,y});
+		}
+		sort(gens.begin(),gens.end(),[](playerCoord a,playerCoord b){return a.x==b.x?a.y<b.y:a.x<b.x;});
+		std::shuffle(gens.begin(),gens.end(),std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
+		for(int i=1; i<=playerCnt; ++i) {
+			genCoo[i]=gens[i];
+			gameMap[genCoo[i].x][genCoo[i].y].team=i;
+		}
+		for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) 
+				if(gameMap[i][j].type==3&&gameMap[i][j].team==0) gameMap[i][j].type=0;
 	}
-	int kill(int p1,int p2) {
+	
+	void kill(int p1,int p2) {
+		isAlive[p2]=0;
+		for(int i=1; i<=mapH; ++i) {
+			for(int j=1; j<=mapW; ++j) {
+				if(gameMap[i][j].team==p2&&gameMap[i][j].type!=3) {
+					gameMap[i][j].team=p1;
+					gameMap[i][j].army=(gameMap[i][j].army+1)>>1;
+				}
+			}
+		}
 	}
-	// move analyzer
-	int analyzeMove(int mv,playerCoord& coo) {
+	
+	// struct for movement
+	struct moveS { int id; playerCoord to; int army; };
+	// vector for inline movements
+	std::deque<moveS> inlineMove;
+	
+	// movement analyzer
+	int analyzeMove(int id,int mv,playerCoord& coo) {
+		switch(mv) {
+			case 0: coo=genCoo[id]; break;
+			case 1 ... 4: {
+				playerCoord newCoo{coo.x+dx[mv],coo.y+dy[mv]};
+				if(newCoo.x<1||newCoo.x>mapH||newCoo.y<1||newCoo.y>mapW) return 1;
+				moveS insMv{id,newCoo,0};
+				if(gameMap[coo.x][coo.y].team==id&&gameMap[newCoo.x][newCoo.y].type!=2)
+					insMv.army=gameMap[coo.x][coo.y].army-1,gameMap[coo.x][coo.y].army=1;
+				inlineMove.push_back(insMv);
+				coo=newCoo;
+				break;
+			}
+			case 5 ... 8: {
+				playerCoord newCoo{coo.x+dx[mv-4],coo.y+dy[mv-4]};
+				if(newCoo.x<1||newCoo.x>mapH||newCoo.y<1||newCoo.y>mapW) return 1;
+				coo=newCoo;
+				break;
+			}
+			default: return -1;
+		}
 		return 0;
 	}
+	// flush existing movements
 	void flushMove() {
+		while(!inlineMove.empty()) {
+			moveS cur=inlineMove.front();
+			inlineMove.pop_front();
+			if(gameMap[cur.to.x][cur.to.y].team==cur.id) gameMap[cur.to.x][cur.to.y].army+=cur.army;
+			else {
+				gameMap[cur.to.x][cur.to.y].army-=cur.army;
+				if(gameMap[cur.to.x][cur.to.y].army<0) {
+					gameMap[cur.to.x][cur.to.y].army=-gameMap[cur.to.x][cur.to.y].army;
+					int p=gameMap[cur.to.x][cur.to.y].team;
+					gameMap[cur.to.x][cur.to.y].team=cur.id;
+					if(gameMap[cur.to.x][cur.to.y].type==3) /* general */ {
+						kill(cur.id,p);
+						gameMap[cur.to.x][cur.to.y].type=4;
+					}
+				}
+			}
+		}
 	}
 	// main
 	int operator()() {
@@ -66,50 +174,57 @@ struct gameStatus {
 		if(!isWeb) {
 			int robotId[64];
 			playerCoord coordinate[64];
-			for(int i=2; i<=playerCnt; ++i) robotId[i] = mt19937(std::chrono::system_clock::now().time_since_epoch().count())()&1;
+			for(int i=2; i<=playerCnt; ++i) robotId[i] = std::mt19937(std::chrono::system_clock::now().time_since_epoch().count())()&1;
 			initGenerals(coordinate);
-			printMap(cheat,coordinate[1]);
-			deque<int> movement;
+			updateMap();
+			printMap(cheatCode,coordinate[1]);
+			std::deque<int> movement;
+			curTurn=0;
+			std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
 			while(1) {
-				int ch=_getch();
-				switch(ch=tolower(ch)) {
-					case int('w'): movement.emplace_back(1); break;
-					case int('a'): movement.emplace_back(2); break;
-					case int('s'): movement.emplace_back(3); break;
-					case int('d'): movement.emplace_back(4); break;
-					case 224: /**/ {
-						ch=_getch();
-						switch(ch) {
-							case 72: /*[UP]*/    movement.emplace_back(1); break;
-							case 75: /*[LEFT]*/  movement.emplace_back(2); break;
-							case 77: /*[RIGHT]*/ movement.emplace_back(3); break;
-							case 80: /*[DOWN]*/  movement.emplace_back(4); break;
+				if(_kbhit()) {
+					int ch=_getch();
+					switch(ch=tolower(ch)) {
+						case int('w'): movement.emplace_back(1); break;
+						case int('a'): movement.emplace_back(2); break;
+						case int('s'): movement.emplace_back(3); break;
+						case int('d'): movement.emplace_back(4); break;
+						case 224: /**/ {
+							ch=_getch();
+							switch(ch) {
+								case 72: /*[UP]*/    movement.emplace_back(5); break;
+								case 75: /*[LEFT]*/  movement.emplace_back(6); break;
+								case 77: /*[RIGHT]*/ movement.emplace_back(7); break;
+								case 80: /*[DOWN]*/  movement.emplace_back(8); break;
+							}
+							break;
 						}
-						break;
+						case int('g'): movement.emplace_back(0); break;
+						case int('e'): if(!movement.empty()) movement.pop_back(); break;
+						case int('q'): movement.clear(); break;
+						case 27: return 0;
+						case '\b': isAlive[1]=0; break;
 					}
-					case int('h'): movement.emplace_back(0); break;
-					case int('e'): if(!movement.empty()) movement.pop_back(); break;
-					case int('q'): movement.clear(); break;
-					case 27: break;
-					case '\b': isAlive[1]=0;
 				}
-				while(analyzeMove(movement.front(),coordinate[1])) movement.pop_front();
+				if(std::chrono::steady_clock::now().time_since_epoch()-lPT < std::chrono::milliseconds(stepDelay)) continue;
+				updateMap();
+				while(!movement.empty() && analyzeMove(1,movement.front(),coordinate[1])) movement.pop_front();
 				movement.pop_front();
 				for(int i=2; i<=playerCnt; ++i) {
-					if(robotId[i]==0) analyzeMove(getMove0(i,coordinate),coordinate[i]);
-					if(robotId[i]==1) analyzeMove(getMove1(i,coordinate),coordinate[i]);
+					if(robotId[i]==0) analyzeMove(i,getMove0(i,coordinate),coordinate[i]);
+					if(robotId[i]==1) analyzeMove(i,getMove1(i,coordinate),coordinate[i]);
 				}
 				flushMove();
-				printMap(cheat,coordinate[1]);
-				std::this_thread::sleep_for(std::chrono::milliseconds(stepDelay));
+				printMap(cheatCode,coordinate[1]);
+				lPT=std::chrono::steady_clock::now().time_since_epoch();
 			}
 		}
 		return 0;
 	}
 };
 
-int GAME(bool isWeb,bool cheat,int plCnt,int stDel) {
-	gameStatus newGame = gameStatus(isWeb,cheat,plCnt,stDel);
+int GAME(bool isWeb,int cheatCode,int plCnt,int stDel) {
+	gameStatus newGame = gameStatus(isWeb,cheatCode,plCnt,stDel);
 	return newGame();
 }
 

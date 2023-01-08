@@ -215,7 +215,7 @@ struct gameStatus {
 									}
 								}
 							}
-							cheatCode=(1<<playerCnt)-1;
+							cheatCode=1048575;
 							break;
 						}
 					}

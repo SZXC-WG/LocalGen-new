@@ -4,3 +4,4 @@ CheckMap.exe
 *.exe
 try.cpp
 Makefile.win
+*.gch

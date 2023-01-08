@@ -43,4 +43,25 @@ void Zip(){
 	}strZip[p]='\0';
 }
 
+void DeZip(){
+	register int i,j,k=4;
+	int f,p=0;
+	
+	for(;strdeZip[p]!='\0';p++)
+	strdeZip[p]-=CHAR_AD;
+	
+	mapL=(strdeZip[1]<<6)+strdeZip[0];
+	mapW=(strdeZip[3]<<6)+strdeZip[2];
+	
+	for(i=1;i<=mapL;i++) for(j=1;j<=mapW;j++){
+		gameMap[i][j].type=strdeZip[k]&7;strdeZip[k]>>=3;
+		gameMap[i][j].team=strdeZip[k++];
+		gameMap[i][j].army=0;
+		
+		for(p=10;p>=0;p--)
+		gameMap[i][j].army=(gameMap[i][j].D<<6)+strdeZip[k+p];k+=11;
+		gameMap[i][j].army=strdeZip[k++]?(-gameMap[i][j].D):gameMap[i][j].D;
+	}
+}
+
 #endif

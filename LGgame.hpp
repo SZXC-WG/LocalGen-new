@@ -195,8 +195,8 @@ struct gameStatus {
 							switch(ch) {
 								case 72: /*[UP]*/    movement.emplace_back(5); break;
 								case 75: /*[LEFT]*/  movement.emplace_back(6); break;
-								case 77: /*[RIGHT]*/ movement.emplace_back(7); break;
-								case 80: /*[DOWN]*/  movement.emplace_back(8); break;
+								case 80: /*[RIGHT]*/ movement.emplace_back(7); break;
+								case 77: /*[DOWN]*/  movement.emplace_back(8); break;
 							}
 							break;
 						}

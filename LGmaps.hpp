@@ -134,7 +134,9 @@ void printMap(int printCode,playerCoord coo) {
 				case 2: /* mountain */ {
 					setbcolor(0x000000);
 					setfcolor(0xffffff);
+					if(coo.x==i&&coo.y==j) setbcolor(0x000080);
 					fputs("#####",stdout);
+					setbcolor(0x000000);
 					break;
 				}
 				case 3: /* general */ {

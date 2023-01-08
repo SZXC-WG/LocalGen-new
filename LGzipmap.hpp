@@ -59,8 +59,8 @@ void DeZip(){
 		gameMap[i][j].army=0;
 		
 		for(p=10;p>=0;p--)
-		gameMap[i][j].army=(gameMap[i][j].D<<6)+strdeZip[k+p];k+=11;
-		gameMap[i][j].army=strdeZip[k++]?(-gameMap[i][j].D):gameMap[i][j].D;
+		gameMap[i][j].army=(gameMap[i][j].army<<6)+strdeZip[k+p];k+=11;
+		gameMap[i][j].army=strdeZip[k++]?(-gameMap[i][j].army):gameMap[i][j].;
 	}
 }
 

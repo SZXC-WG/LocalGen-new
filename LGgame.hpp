@@ -107,6 +107,7 @@ struct gameStatus {
 				if(gameMap[i][j].type==3&&gameMap[i][j].team==0) gameMap[i][j].type=0;
 	}
 	
+	int gameMesC=0;
 	void kill(int p1,int p2) {
 		isAlive[p2]=0;
 		for(int i=1; i<=mapH; ++i) {
@@ -117,6 +118,19 @@ struct gameStatus {
 				}
 			}
 		}
+		++gameMesC;
+		gotoxy(mapH+1+gameMesC,64);
+		setfcolor(0xffffff);
+		fputs("PLAYER ",stdout);
+		setfcolor(defTeams[p1].color);
+		printf("%-7s",defTeams[p1].name.c_str());
+		setfcolor(0xffffff);
+		fputs(" KILLED PLAYER ",stdout);
+		setfcolor(defTeams[p2].color);
+		printf("%-7s",defTeams[p2].name.c_str());
+		setfcolor(0xffffff);
+		printf(" AT TURN %d.",curTurn);
+		fflush(stdout);
 	}
 	
 	// struct for movement
@@ -247,7 +261,7 @@ struct gameStatus {
 						case int('e'): if(!movement.empty()) movement.pop_back(); break;
 						case int('q'): movement.clear(); break;
 						case 27: MessageBox(nullptr,string("YOU QUIT THE GAME.").c_str(),"",MB_OK); return 0;
-						case '\b': {
+						case int('\b'): {
 							MessageBox(nullptr,string("YOU SURRENDERED.").c_str(),"",MB_OK);
 							isAlive[1]=0;
 							for(int i=1; i<=mapH; ++i) {
@@ -259,6 +273,15 @@ struct gameStatus {
 								}
 							}
 							cheatCode=1048575;
+							++gameMesC;
+							gotoxy(mapH+1+gameMesC,64);
+							setfcolor(0xffffff);
+							fputs("PLAYER ",stdout);
+							setfcolor(defTeams[1].color);
+							printf("%-7s",defTeams[1].name.c_str());
+							setfcolor(0xffffff);
+							printf(" SURRENDERED AT TURN %d.",curTurn);
+							fflush(stdout);
 							break;
 						}
 					}
@@ -286,6 +309,7 @@ struct gameStatus {
 				}
 				gotoxy(1,1);
 				printMap(cheatCode,coordinate[1]);
+				clearline(); putchar('\n');
 				ranklist(coordinate);
 				lPT=std::chrono::steady_clock::now().time_since_epoch();
 			}

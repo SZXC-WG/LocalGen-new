@@ -5,3 +5,4 @@ CheckMap.exe
 try.cpp
 Makefile.win
 *.gch
+LocalGen-new.layout

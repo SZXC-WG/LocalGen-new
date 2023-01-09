@@ -172,6 +172,7 @@ struct gameStatus {
 		while(!inlineMove.empty()) {
 			moveS cur=inlineMove.front();
 			inlineMove.pop_front();
+			if(!isAlive[cur.id]) continue;
 			if(gameMap[cur.to.x][cur.to.y].team==cur.id) gameMap[cur.to.x][cur.to.y].army+=cur.army;
 			else {
 				gameMap[cur.to.x][cur.to.y].army-=cur.army;
@@ -300,6 +301,7 @@ struct gameStatus {
 				while(!movement.empty() && analyzeMove(1,movement.front(),coordinate[1])) movement.pop_front();
 				if(!movement.empty()) movement.pop_front();
 				for(int i=2; i<=playerCnt; ++i) {
+					if(!isAlive[i]) continue;
 					switch(robotId[i]) {
 						case 0: analyzeMove(i,randomBot(i,coordinate[i]),coordinate[i]); break;
 						default: analyzeMove(i,0,coordinate[i]);

@@ -28,15 +28,20 @@ using std::string;
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
 
-int getMove0(int id,playerCoord coos[]) {
-	return 0;
-}
-int getMove1(int id,playerCoord coos[]) {
-	return 0;
-}
-
 const int dx[5] = {0,-1,0,1,0};
 const int dy[5] = {0,0,-1,0,1};
+
+int randomBot(int id,playerCoord coo) {
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
+	if(mtrd()%100) {
+		int ret=0;
+		do ret=mtrd()%4+1;
+		while(coo.x+dx[ret]<1||coo.x+dx[ret]>mapH||coo.y+dy[ret]<1||coo.y+dy[ret]>mapW||gameMap[coo.x+dx[ret]][coo.y+dy[ret]].type==2);
+		return ret;
+	}
+	return 0;
+} 
 
 struct gameStatus {
 	bool isWeb;
@@ -211,15 +216,17 @@ struct gameStatus {
 			if(gameMap[coos[i].x][coos[i].y].team!=i) continue;
 			rklst[i].armyInHand=gameMap[coos[i].x][coos[i].y].army;
 		}
-		sort(rklst+1,rklst+playerCnt+1,[](node a,node b){return a.army>b.army;});
+		std::sort(rklst+1,rklst+playerCnt+1,[](node a,node b){return a.army>b.army;});
 		setfcolor(0xffffff); underline();
-		printf("| %7s | %8s | %5s | %5s | %5s | %13s |\n","PLAYER","ARMY","PLAIN","CITY","TOT","ARMY IN HAND");
+		printf("| %7s | %8s | %5s | %5s | %5s | %13s |","PLAYER","ARMY","PLAIN","CITY","TOT","ARMY IN HAND");
+		resetattr(); putchar(' '); putchar('\n');
 		for(int i=1; i<=playerCnt; ++i) {
 			setfcolor(defTeams[rklst[i].id].color); underline();
 			printf("| %7s | ",defTeams[rklst[i].id].name.c_str());
 			if(rklst[i].army<100000000) printf("%8lld | ",rklst[i].army);
-			else printf("%7fG | ",rklst[i].army*1.0L/1e9L);
-			printf("%5d | %5d | %5d | %13lld |\n",rklst[i].plain,rklst[i].city,rklst[i].tot,rklst[i].armyInHand);
+			else printf("%7LfG | ",rklst[i].army*1.0L/1e9L);
+			printf("%5d | %5d | %5d | %13lld |",rklst[i].plain,rklst[i].city,rklst[i].tot,rklst[i].armyInHand);
+			resetattr(); putchar(' '); putchar('\n');
 		}
 		resetattr();
 		setfcolor(0xffffff); 
@@ -233,7 +240,7 @@ struct gameStatus {
 		if(!isWeb) {
 			int robotId[64];
 			playerCoord coordinate[64];
-			for(int i=2; i<=playerCnt; ++i) robotId[i] = std::mt19937(std::chrono::system_clock::now().time_since_epoch().count())()&1;
+			for(int i=2; i<=playerCnt; ++i) robotId[i] = std::mt19937(std::chrono::system_clock::now().time_since_epoch().count())()%1;
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode,coordinate[1]);
@@ -293,8 +300,10 @@ struct gameStatus {
 				while(!movement.empty() && analyzeMove(1,movement.front(),coordinate[1])) movement.pop_front();
 				if(!movement.empty()) movement.pop_front();
 				for(int i=2; i<=playerCnt; ++i) {
-					if(robotId[i]==0) analyzeMove(i,getMove0(i,coordinate),coordinate[i]);
-					if(robotId[i]==1) analyzeMove(i,getMove1(i,coordinate),coordinate[i]);
+					switch(robotId[i]) {
+						case 0: analyzeMove(i,randomBot(i,coordinate[i]),coordinate[i]); break;
+						default: analyzeMove(i,0,coordinate[i]);
+					}
 				}
 				flushMove();
 				if(!gameEnd) {

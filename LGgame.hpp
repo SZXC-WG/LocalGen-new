@@ -28,15 +28,20 @@ using std::string;
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
 
-int getMove0(int id,playerCoord coos[]) {
-	return 0;
-}
-int getMove1(int id,playerCoord coos[]) {
-	return 0;
-}
-
 const int dx[5] = {0,-1,0,1,0};
 const int dy[5] = {0,0,-1,0,1};
+
+int randomBot(int id,playerCoord coo) {
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
+	if(mtrd()%100) {
+		int ret=0;
+		do ret=mtrd()%4+1;
+		while(coo.x+dx[ret]<1||coo.x+dx[ret]>mapH||coo.y+dy[ret]<1||coo.y+dy[ret]>mapW||gameMap[coo.x+dx[ret]][coo.y+dy[ret]].type==2);
+		return ret;
+	}
+	return 0;
+} 
 
 struct gameStatus {
 	bool isWeb;
@@ -107,6 +112,7 @@ struct gameStatus {
 				if(gameMap[i][j].type==3&&gameMap[i][j].team==0) gameMap[i][j].type=0;
 	}
 	
+	int gameMesC=0;
 	void kill(int p1,int p2) {
 		isAlive[p2]=0;
 		for(int i=1; i<=mapH; ++i) {
@@ -117,6 +123,19 @@ struct gameStatus {
 				}
 			}
 		}
+		++gameMesC;
+		gotoxy(mapH+1+gameMesC,64);
+		setfcolor(0xffffff);
+		fputs("PLAYER ",stdout);
+		setfcolor(defTeams[p1].color);
+		printf("%-7s",defTeams[p1].name.c_str());
+		setfcolor(0xffffff);
+		fputs(" KILLED PLAYER ",stdout);
+		setfcolor(defTeams[p2].color);
+		printf("%-7s",defTeams[p2].name.c_str());
+		setfcolor(0xffffff);
+		printf(" AT TURN %d.",curTurn);
+		fflush(stdout);
 	}
 	
 	// struct for movement
@@ -153,6 +172,7 @@ struct gameStatus {
 		while(!inlineMove.empty()) {
 			moveS cur=inlineMove.front();
 			inlineMove.pop_front();
+			if(!isAlive[cur.id]) continue;
 			if(gameMap[cur.to.x][cur.to.y].team==cur.id) gameMap[cur.to.x][cur.to.y].army+=cur.army;
 			else {
 				gameMap[cur.to.x][cur.to.y].army-=cur.army;
@@ -168,6 +188,52 @@ struct gameStatus {
 			}
 		}
 	}
+	
+	// ranklist printings
+	void ranklist(playerCoord coos[]) {
+		struct node {
+			int id;
+			long long army;
+			int plain,city,tot;
+			long long armyInHand; 
+		} rklst[64];
+		for(int i=1; i<=playerCnt; ++i) {
+			rklst[i].id=i;
+			rklst[i].army=rklst[i].armyInHand=0;
+			rklst[i].plain=rklst[i].city=rklst[i].tot=0;
+		}
+		for(int i=1; i<=mapH; ++i) {
+			for(int j=1; j<=mapW; ++j) {
+				if(gameMap[i][j].team==0) continue; 
+				if(gameMap[i][j].type==2) continue;
+				++rklst[gameMap[i][j].team].tot;
+				if(gameMap[i][j].type==0) ++rklst[gameMap[i][j].team].plain;
+				else if(gameMap[i][j].type==4) ++rklst[gameMap[i][j].team].city;
+				else if(gameMap[i][j].type==3) ++rklst[gameMap[i][j].team].city;
+				rklst[gameMap[i][j].team].army+=gameMap[i][j].army;
+			}
+		}
+		for(int i=1; i<=playerCnt; ++i) {
+			if(gameMap[coos[i].x][coos[i].y].team!=i) continue;
+			rklst[i].armyInHand=gameMap[coos[i].x][coos[i].y].army;
+		}
+		std::sort(rklst+1,rklst+playerCnt+1,[](node a,node b){return a.army>b.army;});
+		setfcolor(0xffffff); underline();
+		printf("| %7s | %8s | %5s | %5s | %5s | %13s |","PLAYER","ARMY","PLAIN","CITY","TOT","ARMY IN HAND");
+		resetattr(); putchar(' '); putchar('\n');
+		for(int i=1; i<=playerCnt; ++i) {
+			setfcolor(defTeams[rklst[i].id].color); underline();
+			printf("| %7s | ",defTeams[rklst[i].id].name.c_str());
+			if(rklst[i].army<100000000) printf("%8lld | ",rklst[i].army);
+			else printf("%7LfG | ",rklst[i].army*1.0L/1e9L);
+			printf("%5d | %5d | %5d | %13lld |",rklst[i].plain,rklst[i].city,rklst[i].tot,rklst[i].armyInHand);
+			resetattr(); putchar(' '); putchar('\n');
+		}
+		resetattr();
+		setfcolor(0xffffff); 
+		fflush(stdout);
+	}
+	
 	// main
 	int operator()() {
 		if(played) return -1;
@@ -175,12 +241,13 @@ struct gameStatus {
 		if(!isWeb) {
 			int robotId[64];
 			playerCoord coordinate[64];
-			for(int i=2; i<=playerCnt; ++i) robotId[i] = std::mt19937(std::chrono::system_clock::now().time_since_epoch().count())()&1;
+			for(int i=2; i<=playerCnt; ++i) robotId[i] = std::mt19937(std::chrono::system_clock::now().time_since_epoch().count())()%1;
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode,coordinate[1]);
 			std::deque<int> movement;
 			curTurn=0;
+			bool gameEnd=0;
 			std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
 			while(1) {
 				if(_kbhit()) {
@@ -204,7 +271,7 @@ struct gameStatus {
 						case int('e'): if(!movement.empty()) movement.pop_back(); break;
 						case int('q'): movement.clear(); break;
 						case 27: MessageBox(nullptr,string("YOU QUIT THE GAME.").c_str(),"",MB_OK); return 0;
-						case '\b': {
+						case int('\b'): {
 							MessageBox(nullptr,string("YOU SURRENDERED.").c_str(),"",MB_OK);
 							isAlive[1]=0;
 							for(int i=1; i<=mapH; ++i) {
@@ -216,6 +283,15 @@ struct gameStatus {
 								}
 							}
 							cheatCode=1048575;
+							++gameMesC;
+							gotoxy(mapH+1+gameMesC,64);
+							setfcolor(0xffffff);
+							fputs("PLAYER ",stdout);
+							setfcolor(defTeams[1].color);
+							printf("%-7s",defTeams[1].name.c_str());
+							setfcolor(0xffffff);
+							printf(" SURRENDERED AT TURN %d.",curTurn);
+							fflush(stdout);
 							break;
 						}
 					}
@@ -225,15 +301,29 @@ struct gameStatus {
 				while(!movement.empty() && analyzeMove(1,movement.front(),coordinate[1])) movement.pop_front();
 				if(!movement.empty()) movement.pop_front();
 				for(int i=2; i<=playerCnt; ++i) {
-					if(robotId[i]==0) analyzeMove(i,getMove0(i,coordinate),coordinate[i]);
-					if(robotId[i]==1) analyzeMove(i,getMove1(i,coordinate),coordinate[i]);
+					if(!isAlive[i]) continue;
+					switch(robotId[i]) {
+						case 0: analyzeMove(i,randomBot(i,coordinate[i]),coordinate[i]); break;
+						default: analyzeMove(i,0,coordinate[i]);
+					}
 				}
 				flushMove();
-				int ed=0;
-				for(int i=1; i<=playerCnt; ++i) ed|=(isAlive[i]<<i-1);
-				if(__builtin_popcount(ed)==1) MessageBox(nullptr,("PLAYER "+defTeams[std::__lg(ed)+1].name+" WON!"+"\n"+"THE GAME WILL CONTINUE."+"\n"+"YOU CAN PRESS [ESC] TO EXIT.").c_str(),"",MB_OK);
+				if(!gameEnd) {
+					int ed=0;
+					for(int i=1; i<=playerCnt; ++i) ed|=(isAlive[i]<<i);
+					if(__builtin_popcount(ed)==1) {
+						MessageBox(nullptr,
+						           ("PLAYER "+defTeams[std::__lg(ed)].name+" WON!"+"\n"+
+						            "THE GAME WILL CONTINUE."+"\n"+
+									"YOU CAN PRESS [ESC] TO EXIT.").c_str(),
+								   "",MB_OK);
+						gameEnd=1;
+					}
+				}
 				gotoxy(1,1);
 				printMap(cheatCode,coordinate[1]);
+				clearline(); putchar('\n');
+				ranklist(coordinate);
 				lPT=std::chrono::steady_clock::now().time_since_epoch();
 			}
 		}

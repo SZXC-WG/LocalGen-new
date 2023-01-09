@@ -24,7 +24,7 @@ inline void clearance() { fputs("\033[2J",stdout); }
 inline void clearline() { fputs("\033[K",stdout); }
 
 // make the cursor go to a specticular place in the screen
-inline void gotoxy(int x,int y) { printf("\033[%d;%dH",y,x); }
+inline void gotoxy(int x,int y) { printf("\033[%d;%dH",x,y); }
 // make the cursor move n lines up
 inline void curup(int c=1) { printf("\033[%dA",c); }
 // make the cursor move n lines down

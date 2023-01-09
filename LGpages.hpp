@@ -122,6 +122,71 @@ void MainPage(){
 	gotoxy(12,80);for(i=1;i<=5;i++) CB();
 	gotoxy(14,80);for(i=1;i<=4;i++) CB();
 	gotoxy(11,80);CB();gotoxy(13,88);CB();
+	
+	setfcolor(defTeams[0].color);
+	char chCmd=0,fileName[105];
+	int chs=0;
+	FILE *fileP;
+	
+	//Tips 17 6
+	gotoxy(17,6);printf("Use WASD to move,");
+	gotoxy(18,6);printf("Enter to select.");
+	
+	//Choose 17 30
+	gotoxy(17,37);printf(">> Single Mode: Have fun with robots!");
+	gotoxy(18,40);printf("Multiplayer Mode: Have fun with your friends!");
+	
+	while(chCmd!=13){
+		if(_kbhit()){
+			chCmd=_getch();
+			gotoxy(17+chs,37);printf("  ");
+			
+			switch(chCmd){
+				case 'S':
+				case 's':
+				case 'W':
+				case 'w':
+					chs=1-chs;
+					break;
+				default:break;
+			}gotoxy(17+chs,37);printf(">>");
+		}
+	}
+	
+	if(chs) return ;
+	else chCmd=0;
+	
+	gotoxy(17,37);printf(">> Random map.                               ");
+	gotoxy(18,40);printf("   Enter a map:                              ");
+	
+	while(chCmd!=13){
+		if(_kbhit()){
+			chCmd=_getch();
+			gotoxy(17+chs,37);printf("  ");
+			
+			switch(chCmd){
+				case 'S':
+				case 's':
+				case 'W':
+				case 'w':
+					chs=1-chs;
+					break;
+				default:break;
+			}gotoxy(17+chs,37);printf(">>");
+		}
+	}
+	
+	if(chs){
+		gotoxy(18,55);
+		scanf("%s",fileName);
+		fileP=fopen(fileName,"r");
+		fscanf(fileP,"%s",strdeZip);
+		fclose(fileP);
+		DeZip();
+	}else CreateRandomMap();
+	
+	GAME();
+	return ;
 }
 
 #endif

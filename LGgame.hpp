@@ -168,6 +168,48 @@ struct gameStatus {
 			}
 		}
 	}
+	
+	// ranklist printings
+	void ranklist(playerCoord coos[]) {
+		struct node {
+			int id;
+			long long army;
+			int plain,city,tot;
+			long long armyInHand; 
+		} rklst[64];
+		for(int i=1; i<=playerCnt; ++i) {
+			rklst[i].id=i;
+			rklst[i].army=rklst[i].armyInHand=0;
+			rklst[i].plain=rklst[i].city=rklst[i].tot=0;
+		}
+		for(int i=1; i<=mapH; ++i) {
+			for(int j=1; j<=mapW; ++j) {
+				if(gameMap[i][j].team==0) continue; 
+				if(gameMap[i][j].type==2) continue;
+				++rklst[gameMap[i][j].team].tot;
+				if(gameMap[i][j].type==0) ++rklst[gameMap[i][j].team].plain;
+				else if(gameMap[i][j].type==4) ++rklst[gameMap[i][j].team].city;
+				else if(gameMap[i][j].type==3) ++rklst[gameMap[i][j].team].city;
+				rklst[gameMap[i][j].team].army+=gameMap[i][j].army;
+			}
+		}
+		for(int i=1; i<=playerCnt; ++i) {
+			if(gameMap[coos[i].x][coos[i].y].team!=i) continue;
+			rklst[i].armyInHand=gameMap[coos[i].x][coos[i].y].army;
+		}
+		sort(rklst+1,rklst+playerCnt+1,[](node a,node b){return a.army>b.army;});
+		setfcolor(0xffffff);
+		printf("| %7s | %8s | %5s | %5s | %5s | %13s |\n","PLAYER","ARMY","PLAIN","CITY","TOT","ARMY IN HAND");
+		for(int i=1; i<=playerCnt; ++i) {
+			setfcolor(defTeams[rklst[i].id].color);
+			printf("| %7s | ",defTeams[rklst[i].id].name.c_str());
+			if(rklst[i].army<100000000) printf("%8lld | ",rklst[i].army);
+			else printf("%7fG | ",rklst[i].army*1.0L/1e9L);
+			printf("%5d | %5d | %5d | %13lld |\n",rklst[i].plain,rklst[i].city,rklst[i].tot,rklst[i].armyInHand);
+		}
+		fflush(stdout);
+	}
+	
 	// main
 	int operator()() {
 		if(played) return -1;
@@ -244,6 +286,7 @@ struct gameStatus {
 				}
 				gotoxy(1,1);
 				printMap(cheatCode,coordinate[1]);
+				ranklist(coordinate);
 				lPT=std::chrono::steady_clock::now().time_since_epoch();
 			}
 		}

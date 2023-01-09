@@ -212,15 +212,17 @@ struct gameStatus {
 			rklst[i].armyInHand=gameMap[coos[i].x][coos[i].y].army;
 		}
 		sort(rklst+1,rklst+playerCnt+1,[](node a,node b){return a.army>b.army;});
-		setfcolor(0xffffff);
+		setfcolor(0xffffff); underline();
 		printf("| %7s | %8s | %5s | %5s | %5s | %13s |\n","PLAYER","ARMY","PLAIN","CITY","TOT","ARMY IN HAND");
 		for(int i=1; i<=playerCnt; ++i) {
-			setfcolor(defTeams[rklst[i].id].color);
+			setfcolor(defTeams[rklst[i].id].color); underline();
 			printf("| %7s | ",defTeams[rklst[i].id].name.c_str());
 			if(rklst[i].army<100000000) printf("%8lld | ",rklst[i].army);
 			else printf("%7fG | ",rklst[i].army*1.0L/1e9L);
 			printf("%5d | %5d | %5d | %13lld |\n",rklst[i].plain,rklst[i].city,rklst[i].tot,rklst[i].armyInHand);
 		}
+		resetattr();
+		setfcolor(0xffffff); 
 		fflush(stdout);
 	}
 	

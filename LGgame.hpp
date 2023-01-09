@@ -181,6 +181,7 @@ struct gameStatus {
 			printMap(cheatCode,coordinate[1]);
 			std::deque<int> movement;
 			curTurn=0;
+			bool gameEnd=0;
 			std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
 			while(1) {
 				if(_kbhit()) {
@@ -229,9 +230,18 @@ struct gameStatus {
 					if(robotId[i]==1) analyzeMove(i,getMove1(i,coordinate),coordinate[i]);
 				}
 				flushMove();
-				int ed=0;
-				for(int i=1; i<=playerCnt; ++i) ed|=(isAlive[i]<<i-1);
-				if(__builtin_popcount(ed)==1) MessageBox(nullptr,("PLAYER "+defTeams[std::__lg(ed)+1].name+" WON!"+"\n"+"THE GAME WILL CONTINUE."+"\n"+"YOU CAN PRESS [ESC] TO EXIT.").c_str(),"",MB_OK);
+				if(!gameEnd) {
+					int ed=0;
+					for(int i=1; i<=playerCnt; ++i) ed|=(isAlive[i]<<i);
+					if(__builtin_popcount(ed)==1) {
+						MessageBox(nullptr,
+						           ("PLAYER "+defTeams[std::__lg(ed)].name+" WON!"+"\n"+
+						            "THE GAME WILL CONTINUE."+"\n"+
+									"YOU CAN PRESS [ESC] TO EXIT.").c_str(),
+								   "",MB_OK);
+						gameEnd=1;
+					}
+				}
 				gotoxy(1,1);
 				printMap(cheatCode,coordinate[1]);
 				lPT=std::chrono::steady_clock::now().time_since_epoch();

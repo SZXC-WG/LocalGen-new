@@ -222,14 +222,14 @@ struct gameStatus {
 		std::sort(rklst+1,rklst+playerCnt+1,[](node a,node b){return a.army>b.army;});
 		setfcolor(0xffffff); underline();
 		printf("| %7s | %8s | %5s | %5s | %5s | %13s |","PLAYER","ARMY","PLAIN","CITY","TOT","ARMY IN HAND");
-		resetattr(); putchar('|'); putchar('\n');
+		resetattr(); setfcolor(0x000000); putchar('|'); putchar('\n');
 		for(int i=1; i<=playerCnt; ++i) {
 			setfcolor(defTeams[rklst[i].id].color); underline();
 			printf("| %7s | ",defTeams[rklst[i].id].name.c_str());
 			if(rklst[i].army<100000000) printf("%8lld | ",rklst[i].army);
 			else printf("%7LfG | ",rklst[i].army*1.0L/1e9L);
 			printf("%5d | %5d | %5d | %13lld |",rklst[i].plain,rklst[i].city,rklst[i].tot,rklst[i].armyInHand);
-			resetattr(); putchar('|'); putchar('\n');
+			resetattr(); setfcolor(0x000000); putchar('|'); putchar('\n');
 		}
 		resetattr();
 		setfcolor(0xffffff); 
@@ -334,7 +334,6 @@ struct gameStatus {
 };
 
 int GAME(bool isWeb,int cheatCode,int plCnt,int stDel) {
-	clearance();
 	hideCursor();
 	gameStatus newGame = gameStatus(isWeb,cheatCode,plCnt,stDel);
 	return newGame();

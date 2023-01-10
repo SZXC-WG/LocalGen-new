@@ -220,7 +220,7 @@ void printMap(int printCode,playerCoord coo) {
 	fflush(stdout);
 }
 
-void createRandommap(int crtH=-1,int crtW=-1){
+void createRandomMap(int crtH=-1,int crtW=-1){
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	
 	if(crtH<0) crtH=mtrd()%50+1;
@@ -228,6 +228,52 @@ void createRandommap(int crtH=-1,int crtW=-1){
 	
 	for(int i=1;i<=crtH;i++)
 	for(int i=1;i<=crtW;i++);
+}
+
+void createFullCityMap(int crtH,int crtW,int armyMN,int armyMX,int plCnt) {
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	std::uniform_int_distribution rd(armyMN,armyMX);
+	mapH=crtH,mapW=crtW;
+	for(int i=1; i<=mapH; ++i) {
+		for(int j=1; j<=mapW; ++j) {
+			gameMap[i][j].type=4;
+			gameMap[i][j].army=rd(mtrd());
+			gameMap[i][j].team=0;
+		}
+	}
+	for(int i=1; i<=plCnt; ++i) {
+		int x,y;
+		do x=mtrd()%mapH+1,y=mtrd()%mapW+1; while(gameMap[x][y].type!=4);
+		gameMap[x][y].type=3;
+		gameMap[x][y].army=0;
+	}
+}
+void createFullSwampMap(int crtH,int crtW,int plCnt) {
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	mapH=crtH,mapW=crtW;
+	for(int i=1; i<=mapH; ++i) {
+		for(int j=1; j<=mapW; ++j) {
+			gameMap[i][j].type=1;
+			gameMap[i][j].team=0;
+			gameMap[i][j].army=0;
+		}
+	}
+	for(int i=1; i<=plCnt; ++i) {
+		int x,y;
+		do x=mtrd()%mapH+1,y=mtrd()%mapW+1; while(gameMap[x][y].type!=1s);
+		gameMap[x][y].type=3;
+		gameMap[x][y].army=0;
+	}
+}
+void createFullPlainMap(int crtH,int crtW,int plCnt) {
+	mapH=crtH,mapW=crtW;
+	for(int i=1; i<=mapH; ++i) {
+		for(int j=1; j<=mapW; ++j) {
+			gameMap[i][j].type=0;
+			gameMap[i][j].team=0;
+			gameMap[i][j].army=0;
+		}
+	}
 }
 
 #undef ll // long long

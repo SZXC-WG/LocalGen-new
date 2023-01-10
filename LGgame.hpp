@@ -116,6 +116,7 @@ struct gameStatus {
 	
 	int gameMesC=0;
 	void kill(int p1,int p2) {
+		if(p2==1) cheatCode=1048575;
 		isAlive[p2]=0;
 		for(int i=1; i<=mapH; ++i) {
 			for(int j=1; j<=mapW; ++j) {
@@ -274,6 +275,7 @@ struct gameStatus {
 						case int('q'): movement.clear(); break;
 						case 27: MessageBox(nullptr,string("YOU QUIT THE GAME.").c_str(),"",MB_OK); return 0;
 						case int('\b'): {
+							if(!isAlive[1]) break;
 							MessageBox(nullptr,string("YOU SURRENDERED.").c_str(),"",MB_OK);
 							isAlive[1]=0;
 							for(int i=1; i<=mapH; ++i) {
@@ -320,6 +322,16 @@ struct gameStatus {
 									"YOU CAN PRESS [ESC] TO EXIT.").c_str(),
 								   "",MB_OK);
 						gameEnd=1;
+						cheatCode=1048575;
+						++gameMesC;
+						gotoxy(mapH+1+gameMesC,65);
+						setfcolor(0xffffff);
+						fputs("PLAYER ",stdout);
+						setfcolor(defTeams[std::__lg(ed)].color);
+						printf("%-7s",defTeams[std::__lg(ed)].name.c_str());
+						setfcolor(0xffffff);
+						printf(" WON AT TURN %d!!!",curTurn);
+						fflush(stdout);
 					}
 				}
 				gotoxy(1,1);

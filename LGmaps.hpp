@@ -19,6 +19,7 @@
 #include <chrono>
 using std::string;
 using std::to_string;
+#include "LGcons.hpp"
 
 #define ll long long
 

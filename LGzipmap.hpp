@@ -12,7 +12,9 @@
 /* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
 
 #ifndef __LGZIPMAP_HPP__
-#define __LGZIPMAP_DPP__
+#define __LGZIPMAP_HPP__
+
+#include "LGmaps.hpp"
 
 const int LEN_ZIP=100005,CHAR_AD=48;
 char strdeZip[LEN_ZIP];
@@ -47,8 +49,7 @@ void deZip(){
 	register int i,j,k=4;
 	int f,p=0;
 	
-	for(;strdeZip[p]!='\0';p++)
-	strdeZip[p]-=CHAR_AD;
+	for(;strdeZip[p]!='\0';p++) strdeZip[p]-=CHAR_AD;
 	
 	mapH=(strdeZip[1]<<6)+strdeZip[0];
 	mapW=(strdeZip[3]<<6)+strdeZip[2];
@@ -58,7 +59,8 @@ void deZip(){
 		gameMap[i][j].team=strdeZip[k++];
 		gameMap[i][j].army=0;
 		
-		for(p=10;p>=0;p--) gameMap[i][j].army=(gameMap[i][j].army<<6)+strdeZip[k+p];k+=11;
+		for(p=10;p>=0;p--) gameMap[i][j].army=(gameMap[i][j].army<<6)+strdeZip[k+p];
+		k+=11;
 		gameMap[i][j].army=strdeZip[k++]?(-gameMap[i][j].army):gameMap[i][j].army;
 	}
 }

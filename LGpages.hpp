@@ -14,6 +14,13 @@
 #ifndef __LGPAGES_HPP__
 #define __LGPAGES_HPP__
 
+#include <random>
+#include <chrono>
+#include "LGcons.hpp"
+#include "LGmaps.hpp"
+#include "LGzipmap.hpp"
+#include "LGgame.hpp"
+
 inline void CB(int k){
 	setfcolor(defTeams[k].color);
 	printf("¨€ ");
@@ -135,20 +142,18 @@ void MainPage(){
 	gotoxy(18,40);printf("Multiplayer Mode: Have fun with your friends!");
 	
 	while(chCmd!=13){
-		if(_kbhit()){
-			chCmd=_getch();
-			gotoxy(17+chs,37);printf("  ");
-			
-			switch(chCmd){
-				case 'S':
-				case 's':
-				case 'W':
-				case 'w':
-					chs=1-chs;
-					break;
-				default:break;
-			}gotoxy(17+chs,37);printf(">>");
+		chCmd=_getch();
+		gotoxy(17+chs,37); printf("  ");
+		switch(chCmd){
+			case 'S':
+			case 's':
+			case 'W':
+			case 'w':
+				chs=1-chs;
+				break;
+			default:break;
 		}
+		gotoxy(17+chs,37); printf(">>");
 	}
 	
 	if(chs) return ;
@@ -192,9 +197,10 @@ void MainPage(){
 	if(plCnt>8||plCnt<0) goto inputplCnt;
 	
 	inputstDel:;
-	gotoxy(18,40);printf("Please enter the game speed(<21):               ");
+	gotoxy(18,40);printf("Please enter the game speed([1,20]):               ");
 	gotoxy(18,76);scanf("%d",&stDel);
 	if(stDel>20||stDel<1) goto inputstDel;
+	stDel=1000/stDel; 
 	
 	inputCheat:;
 	gotoxy(18,40);printf("Please enter the cheat code(0/1):               ");

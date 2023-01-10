@@ -35,10 +35,12 @@ int randomBot(int id,playerCoord coo) {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
 	if(mtrd()%100) {
-		int ret=0;
-		do ret=mtrd()%4+1;
-		while(coo.x+dx[ret]<1||coo.x+dx[ret]>mapH||coo.y+dy[ret]<1||coo.y+dy[ret]>mapW||gameMap[coo.x+dx[ret]][coo.y+dy[ret]].type==2);
-		return ret;
+		int p[4],pl=0;
+		for(int i=1; i<=4; ++i) {
+			if(coo.x+dx[i]<1||coo.x+dx[i]>mapH||coo.y+dy[i]<1||coo.y+dy[i]>mapW||gameMap[coo.x+dx[i]][coo.y+dy[i]].type==2) continue;
+			p[++pl]=i;
+		}
+		return p[mtrd()%pl+1];
 	}
 	return 0;
 } 

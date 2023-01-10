@@ -125,7 +125,7 @@ void MainPage(){
 	
 	setfcolor(defTeams[0].color);
 	char chCmd=0,fileName[105];
-	int chs=0;
+	int chs=0,plCnt,stDel,cht,cheatCode;
 	FILE *fileP;
 	
 	//Tips 17 6
@@ -156,8 +156,8 @@ void MainPage(){
 	if(chs) return ;
 	else chCmd=0;
 	
-	gotoxy(17,37);printf(">> Random map.                               ");
-	gotoxy(18,40);printf("   Enter a map:                              ");
+	gotoxy(17,37);printf(">> Choose map.                               ");
+	gotoxy(18,40);printf("Import a map:                                ");
 	
 	while(chCmd!=13){
 		if(_kbhit()){
@@ -177,15 +177,34 @@ void MainPage(){
 	}
 	
 	if(chs){
-		gotoxy(18,55);
+		gotoxy(18,54);
 		scanf("%s",fileName);
 		fileP=fopen(fileName,"r");
 		fscanf(fileP,"%s",strdeZip);
 		fclose(fileP);
 		DeZip();
-	}else CreateRandomMap();
+	}else{
+		CreateRandomMap();
+	}
 	
-	GAME();
+	inputplCnt:;
+	gotoxy(17,37);printf("   Settings.                                    ");
+	gotoxy(18,40);printf("Please enter the player number(<9):             ");
+	gotoxy(18,76);scanf("%d",&plCnt);
+	if(plCnt>8||plCnt<0) goto inputplCnt;
+	
+	inputstDel:;
+	gotoxy(18,40);printf("Please enter the game speed(<21):               ");
+	gotoxy(18,76);scanf("%d",&stDel);
+	if(stDel>20||stDel<1) goto inputstDel;
+	
+	inputCheat:;
+	gotoxy(18,40);printf("Please enter the cheat code(0/1):               ");
+	gotoxy(18,76);scanf("%d",&cht);
+	if(cht>1||cht<0) goto inputCheat;
+	if(cht) cheatCode=1048575;
+	
+	GAME(cheatCode,plCnt,stDel);
 	return ;
 }
 

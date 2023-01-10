@@ -13,115 +13,113 @@
 
 #ifndef __LGPAGES_HPP__
 #define __LGPAGES_HPP__
-#include<stdlib.h>
-#include<time.h>
 
-inline void CB(){
-	setfcolor(defTeams[rand()%16].color);
+inline void CB(int k){
+	setfcolor(defTeams[k.color);
 	printf("¨€ ");
 }
 
 void MainPage(){
 	clearance();
 	register int i,j;
-	srand(time(NULL));
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	
 	//L 2 2
-	gotoxy(2,2);CB();
-	gotoxy(3,2);CB();
-	gotoxy(4,2);CB();
-	gotoxy(5,2);CB();
-	gotoxy(6,2);for(i=1;i<=5;i++) CB();
+	gotoxy(2,2);CB(mtrd%16);
+	gotoxy(3,2);CB(mtrd%16);
+	gotoxy(4,2);CB(mtrd%16);
+	gotoxy(5,2);CB(mtrd%16);
+	gotoxy(6,2);for(i=1;i<=5;i++) CB(mtrd%16);
 	
 	//O 2 14
-	gotoxy(2,16);for(i=1;i<=3;i++) CB();
-	gotoxy(6,16);for(i=1;i<=3;i++) CB();
-	gotoxy(3,14);CB();gotoxy(3,22);CB();
-	gotoxy(4,14);CB();gotoxy(4,22);CB();
-	gotoxy(5,14);CB();gotoxy(5,22);CB();
+	gotoxy(2,16);for(i=1;i<=3;i++) CB(mtrd%16);
+	gotoxy(6,16);for(i=1;i<=3;i++) CB(mtrd%16);
+	gotoxy(3,14);CB(mtrd%16);gotoxy(3,22);CB(mtrd%16);
+	gotoxy(4,14);CB(mtrd%16);gotoxy(4,22);CB(mtrd%16);
+	gotoxy(5,14);CB(mtrd%16);gotoxy(5,22);CB(mtrd%16);
 	
 	//C 2 26
-	gotoxy(2,28);for(i=1;i<=3;i++) CB();
-	gotoxy(6,28);for(i=1;i<=3;i++) CB();
-	gotoxy(3,26);CB();gotoxy(3,34);CB();
-	gotoxy(4,26);CB();
-	gotoxy(5,26);CB();gotoxy(5,34);CB();
+	gotoxy(2,28);for(i=1;i<=3;i++) CB(mtrd%16);
+	gotoxy(6,28);for(i=1;i<=3;i++) CB(mtrd%16);
+	gotoxy(3,26);CB(mtrd%16);gotoxy(3,34);CB(mtrd%16);
+	gotoxy(4,26);CB(mtrd%16);
+	gotoxy(5,26);CB(mtrd%16);gotoxy(5,34);CB(mtrd%16);
 	
 	//A 2 38
-	gotoxy(2,40);for(i=1;i<=3;i++) CB();
-	gotoxy(4,38);for(i=1;i<=5;i++) CB();
-	gotoxy(3,38);CB();gotoxy(3,46);CB();
-	gotoxy(5,38);CB();gotoxy(5,46);CB();
-	gotoxy(6,38);CB();gotoxy(6,46);CB();
+	gotoxy(2,40);for(i=1;i<=3;i++) CB(mtrd%16);
+	gotoxy(4,38);for(i=1;i<=5;i++) CB(mtrd%16);
+	gotoxy(3,38);CB(mtrd%16);gotoxy(3,46);CB(mtrd%16);
+	gotoxy(5,38);CB(mtrd%16);gotoxy(5,46);CB(mtrd%16);
+	gotoxy(6,38);CB(mtrd%16);gotoxy(6,46);CB(mtrd%16);
 	
 	//L 2 50
-	gotoxy(2,50);CB();
-	gotoxy(3,50);CB();
-	gotoxy(4,50);CB();
-	gotoxy(5,50);CB();
-	gotoxy(6,50);for(i=1;i<=5;i++) CB();
+	gotoxy(2,50);CB(mtrd%16);
+	gotoxy(3,50);CB(mtrd%16);
+	gotoxy(4,50);CB(mtrd%16);
+	gotoxy(5,50);CB(mtrd%16);
+	gotoxy(6,50);for(i=1;i<=5;i++) CB(mtrd%16);
 	
 	//G 8 2
-	gotoxy(8,4);for(i=1;i<=10;i++) CB();
-	gotoxy(20,4);for(i=1;i<=10;i++) CB();
-	gotoxy(16,8);for(i=1;i<=8;i++) CB();
-	gotoxy(9,2);CB();
-	gotoxy(10,2);CB();
-	gotoxy(11,2);CB();
-	gotoxy(12,2);CB();
-	gotoxy(13,2);CB();
-	gotoxy(14,2);CB();
-	gotoxy(15,2);CB();
-	gotoxy(16,2);CB();
-	gotoxy(17,2);CB();gotoxy(17,24);CB();
-	gotoxy(18,2);CB();gotoxy(18,24);CB();
-	gotoxy(19,2);CB();gotoxy(19,24);CB();
+	gotoxy(8,4);for(i=1;i<=10;i++) CB(mtrd%16);
+	gotoxy(20,4);for(i=1;i<=10;i++) CB(mtrd%16);
+	gotoxy(16,8);for(i=1;i<=8;i++) CB(mtrd%16);
+	gotoxy(9,2);CB(mtrd%16);
+	gotoxy(10,2);CB(mtrd%16);
+	gotoxy(11,2);CB(mtrd%16);
+	gotoxy(12,2);CB(mtrd%16);
+	gotoxy(13,2);CB(mtrd%16);
+	gotoxy(14,2);CB(mtrd%16);
+	gotoxy(15,2);CB(mtrd%16);
+	gotoxy(16,2);CB(mtrd%16);
+	gotoxy(17,2);CB(mtrd%16);gotoxy(17,24);CB(mtrd%16);
+	gotoxy(18,2);CB(mtrd%16);gotoxy(18,24);CB(mtrd%16);
+	gotoxy(19,2);CB(mtrd%16);gotoxy(19,24);CB(mtrd%16);
 	
 	//E 10 8
-	gotoxy(10,10);for(i=1;i<=4;i++) CB();
-	gotoxy(12,8);for(i=1;i<=5;i++) CB();
-	gotoxy(14,10);for(i=1;i<=4;i++) CB();
-	gotoxy(11,8);CB();gotoxy(13,8);CB();
+	gotoxy(10,10);for(i=1;i<=4;i++) CB(mtrd%16);
+	gotoxy(12,8);for(i=1;i<=5;i++) CB(mtrd%16);
+	gotoxy(14,10);for(i=1;i<=4;i++) CB(mtrd%16);
+	gotoxy(11,8);CB(mtrd%16);gotoxy(13,8);CB(mtrd%16);
 	
 	//N 10 20
-	gotoxy(10,20);CB();gotoxy(10,28);CB();
-	gotoxy(11,20);CB();gotoxy(11,22);CB();gotoxy(11,28);CB();
-	gotoxy(12,20);CB();gotoxy(12,24);CB();gotoxy(12,28);CB();
-	gotoxy(13,20);CB();gotoxy(13,26);CB();gotoxy(13,28);CB();
-	gotoxy(14,20);CB();gotoxy(14,28);CB();
+	gotoxy(10,20);CB(mtrd%16);gotoxy(10,28);CB(mtrd%16);
+	gotoxy(11,20);CB(mtrd%16);gotoxy(11,22);CB(mtrd%16);gotoxy(11,28);CB(mtrd%16);
+	gotoxy(12,20);CB(mtrd%16);gotoxy(12,24);CB(mtrd%16);gotoxy(12,28);CB(mtrd%16);
+	gotoxy(13,20);CB(mtrd%16);gotoxy(13,26);CB(mtrd%16);gotoxy(13,28);CB(mtrd%16);
+	gotoxy(14,20);CB(mtrd%16);gotoxy(14,28);CB(mtrd%16);
 	
 	//E 10 32
-	gotoxy(10,34);for(i=1;i<=4;i++) CB();
-	gotoxy(12,32);for(i=1;i<=5;i++) CB();
-	gotoxy(14,34);for(i=1;i<=4;i++) CB();
-	gotoxy(11,32);CB();gotoxy(13,32);CB();
+	gotoxy(10,34);for(i=1;i<=4;i++) CB(mtrd%16);
+	gotoxy(12,32);for(i=1;i<=5;i++) CB(mtrd%16);
+	gotoxy(14,34);for(i=1;i<=4;i++) CB(mtrd%16);
+	gotoxy(11,32);CB(mtrd%16);gotoxy(13,32);CB(mtrd%16);
 	
 	//R 10 44
-	gotoxy(10,46);for(i=1;i<=4;i++) CB();
-	gotoxy(12,44);for(i=1;i<=4;i++) CB();
-	gotoxy(11,44);CB();gotoxy(11,52);CB();
-	gotoxy(13,44);CB();gotoxy(13,50);CB();
-	gotoxy(14,44);CB();gotoxy(14,52);CB();
+	gotoxy(10,46);for(i=1;i<=4;i++) CB(mtrd%16);
+	gotoxy(12,44);for(i=1;i<=4;i++) CB(mtrd%16);
+	gotoxy(11,44);CB(mtrd%16);gotoxy(11,52);CB(mtrd%16);
+	gotoxy(13,44);CB(mtrd%16);gotoxy(13,50);CB(mtrd%16);
+	gotoxy(14,44);CB(mtrd%16);gotoxy(14,52);CB(mtrd%16);
 	
 	//A 10 56
-	gotoxy(10,58);for(i=1;i<=3;i++) CB();
-	gotoxy(12,56);for(i=1;i<=5;i++) CB();
-	gotoxy(11,56);CB();gotoxy(11,64);CB();
-	gotoxy(13,56);CB();gotoxy(13,64);CB();
-	gotoxy(14,56);CB();gotoxy(14,64);CB();
+	gotoxy(10,58);for(i=1;i<=3;i++) CB(mtrd%16);
+	gotoxy(12,56);for(i=1;i<=5;i++) CB(mtrd%16);
+	gotoxy(11,56);CB(mtrd%16);gotoxy(11,64);CB(mtrd%16);
+	gotoxy(13,56);CB(mtrd%16);gotoxy(13,64);CB(mtrd%16);
+	gotoxy(14,56);CB(mtrd%16);gotoxy(14,64);CB(mtrd%16);
 	
 	//L 10 68
-	gotoxy(10,68);CB();
-	gotoxy(11,68);CB();
-	gotoxy(12,68);CB();
-	gotoxy(13,68);CB();
-	gotoxy(14,68);for(i=1;i<=5;i++) CB();
+	gotoxy(10,68);CB(mtrd%16);
+	gotoxy(11,68);CB(mtrd%16);
+	gotoxy(12,68);CB(mtrd%16);
+	gotoxy(13,68);CB(mtrd%16);
+	gotoxy(14,68);for(i=1;i<=5;i++) CB(mtrd%16);
 	
 	//S 10 80
-	gotoxy(10,82);for(i=1;i<=4;i++) CB();
-	gotoxy(12,80);for(i=1;i<=5;i++) CB();
-	gotoxy(14,80);for(i=1;i<=4;i++) CB();
-	gotoxy(11,80);CB();gotoxy(13,88);CB();
+	gotoxy(10,82);for(i=1;i<=4;i++) CB(mtrd%16);
+	gotoxy(12,80);for(i=1;i<=5;i++) CB(mtrd%16);
+	gotoxy(14,80);for(i=1;i<=4;i++) CB(mtrd%16);
+	gotoxy(11,80);CB(mtrd%16);gotoxy(13,88);CB(mtrd%16);
 	
 	setfcolor(defTeams[0].color);
 	char chCmd=0,fileName[105];
@@ -182,9 +180,9 @@ void MainPage(){
 		fileP=fopen(fileName,"r");
 		fscanf(fileP,"%s",strdeZip);
 		fclose(fileP);
-		DeZip();
+		deZip();
 	}else{
-		CreateRandomMap();
+		createRandommap();
 	}
 	
 	inputplCnt:;

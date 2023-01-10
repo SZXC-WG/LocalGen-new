@@ -179,7 +179,7 @@ struct gameStatus {
 	}
 	
 	// struct for movement
-	struct moveS { int id; playerCoord to; int army; };
+	struct moveS { int id; playerCoord to; long long army; };
 	// vector for inline movements
 	std::deque<moveS> inlineMove;
 	
@@ -265,7 +265,10 @@ struct gameStatus {
 			setfcolor(defTeams[rklst[i].id].color); underline();
 			printf("| %7s | ",defTeams[rklst[i].id].name.c_str());
 			if(rklst[i].army<100000000) printf("%8lld | ",rklst[i].army);
-			else printf("%7LfG | ",rklst[i].army*1.0L/1e9L);
+			else {
+				register int p=std::to_string(rklst[i].army*1.0L/1e9L).find('.');
+				printf("%*.*LfG | ",7,7-1-p,rklst[i].army*1.0L/1e9L);
+			}
 			printf("%5d | %5d | %5d | %13lld |",rklst[i].plain,rklst[i].city,rklst[i].tot,rklst[i].armyInHand);
 			resetattr(); setfcolor(0x000000); putchar('|'); putchar('\n');
 		}
@@ -294,6 +297,7 @@ struct gameStatus {
 				if(_kbhit()) {
 					int ch=_getch();
 					switch(ch=tolower(ch)) {
+						case int(' '): while(_getch()!=' '); break;
 						case int('c'): clearance(); break;
 						case int('w'): movement.emplace_back(1); break;
 						case int('a'): movement.emplace_back(2); break;

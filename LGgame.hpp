@@ -152,7 +152,7 @@ struct gameStatus {
 	void kill(int p1,int p2) {
 		if(p2==1) {
 			cheatCode=1048575;
-			MessageBox(nullptr,string("YOU ARE KILLED BY PLAYER "+defTeams[02].name+" AT TURN "+to_string(curTurn)+".").c_str(),"",MB_OK);
+			MessageBox(nullptr,string("YOU ARE KILLED BY PLAYER "+defTeams[p1].name+" AT TURN "+to_string(curTurn)+".").c_str(),"",MB_OK);
 		}
 		isAlive[p2]=0;
 		for(int i=1; i<=mapH; ++i) {

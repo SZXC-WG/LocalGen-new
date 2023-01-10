@@ -187,6 +187,9 @@ void MainPage(){
 		fclose(fileP);
 		deZip();
 	}else{
+		int H,W;
+		char ch=_getch();
+//		gotoxy()
 		createRandommap();
 	}
 	

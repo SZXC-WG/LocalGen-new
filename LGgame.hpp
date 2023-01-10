@@ -35,7 +35,7 @@ int randomBot(int id,playerCoord coo) {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
 	if(mtrd()%100) {
-		int p[4],pl=0;
+		int p[5],pl=0;
 		for(int i=1; i<=4; ++i) {
 			if(coo.x+dx[i]<1||coo.x+dx[i]>mapH||coo.y+dy[i]<1||coo.y+dy[i]>mapW||gameMap[coo.x+dx[i]][coo.y+dy[i]].type==2) continue;
 			p[++pl]=i;
@@ -116,7 +116,10 @@ struct gameStatus {
 	
 	int gameMesC=0;
 	void kill(int p1,int p2) {
-		if(p2==1) cheatCode=1048575;
+		if(p2==1) {
+			cheatCode=1048575;
+			MessageBox(nullptr,string("YOU ARE KILLED BY PLAYER "+defTeams[02].name+" AT TURN "+to_string(curTurn)+".").c_str(),"",MB_OK);
+		}
 		isAlive[p2]=0;
 		for(int i=1; i<=mapH; ++i) {
 			for(int j=1; j<=mapW; ++j) {
@@ -256,6 +259,7 @@ struct gameStatus {
 				if(_kbhit()) {
 					int ch=_getch();
 					switch(ch=tolower(ch)) {
+						case int('c'): clearance(); break;
 						case int('w'): movement.emplace_back(1); break;
 						case int('a'): movement.emplace_back(2); break;
 						case int('s'): movement.emplace_back(3); break;
@@ -347,6 +351,7 @@ struct gameStatus {
 
 int GAME(bool isWeb,int cheatCode,int plCnt,int stDel) {
 	hideCursor();
+	clearance();
 	gameStatus newGame = gameStatus(isWeb,cheatCode,plCnt,stDel);
 	return newGame();
 }

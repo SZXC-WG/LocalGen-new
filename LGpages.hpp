@@ -204,7 +204,7 @@ void MainPage(){
 	if(cht>1||cht<0) goto inputCheat;
 	if(cht) cheatCode=1048575;
 	
-	GAME(cheatCode,plCnt,stDel);
+	GAME(0,cheatCode,plCnt,stDel);
 	return ;
 }
 

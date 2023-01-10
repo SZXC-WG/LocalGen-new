@@ -31,8 +31,6 @@
 #include "LGmaps.hpp" // __LGMAPS_HPP__
 /* map zipping */
 #include "LGzipmap.hpp" // __LGZIPMAP_HPP__
-/* default maps */
-#include "LGdefmap.hpp" // __LGDEFMAP_HPP__
 /* Internet base */
 #include "LGweb.hpp" // __LGWEB_HPP__
 /* game options */
@@ -46,6 +44,7 @@ HWND hwnd = GetConsoleWindow();
 signed main(signed argc, char** argv) {
 	ShowWindow(hwnd,SW_MAXIMIZE);
 	initattr();
+	hideCursor();
 	MainPage(); // start main page 
 	exit(0);    // exit program
 }

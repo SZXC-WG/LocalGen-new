@@ -15,6 +15,8 @@
 #define __LGMAPS_HPP__
 
 #include <string>
+#include <random>
+#include <chrono>
 using std::string;
 using std::to_string;
 
@@ -211,6 +213,16 @@ void printMap(int printCode,playerCoord coo) {
 		putchar('\n');
 	}
 	fflush(stdout);
+}
+
+void createRandommap(int crtH=-1,int crtW=-1){
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	
+	if(crtH<0) crtH=mtrd()%50+1;
+	if(crtW<0) crtW=mtrd()%50+1;
+	
+	for(int i=1;i<=crtH;i++)
+	for(int i=1;i<=crtW;i++);
 }
 
 #undef ll // long long

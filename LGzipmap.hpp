@@ -43,7 +43,7 @@ void Zip(){
 	}strZip[p]='\0';
 }
 
-void DeZip(){
+void deZip(){
 	register int i,j,k=4;
 	int f,p=0;
 	

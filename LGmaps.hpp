@@ -89,9 +89,10 @@ void printMap(int printCode,playerCoord coo) {
 						} else fputs("     ",stdout);
 						setbcolor(0x000000);
 					} else {
-						setfcolor(defTeams[gameMap[i][j].team].color);
+						setfcolor(0xffffff);
 						if(coo.x==i&&coo.y==j) setbcolor(0x000080);
 						if(isVisible(i,j,printCode)) {
+							setfcolor(defTeams[gameMap[i][j].team].color);
 							if(gameMap[i][j].army<0) {
 								int absd=-gameMap[i][j].army;
 								if(absd<100) printf(" %3lld ",gameMap[i][j].army);
@@ -118,9 +119,10 @@ void printMap(int printCode,playerCoord coo) {
 						resetattr();
 						setbcolor(0x000000);
 					} else {
-						setfcolor(defTeams[gameMap[i][j].team].color);
+						setfcolor(0xffffff);
 						if(coo.x==i&&coo.y==j) setbcolor(0x000080);
 						if(isVisible(i,j,printCode)) {
+							setfcolor(defTeams[gameMap[i][j].team].color);
 							if(gameMap[i][j].army<10) printf("===%1lld=",gameMap[i][j].army);
 							else if(gameMap[i][j].army<100) printf("==%2lld=",gameMap[i][j].army);
 							else if(gameMap[i][j].army<1000) printf("=%3lld=",gameMap[i][j].army);
@@ -151,9 +153,10 @@ void printMap(int printCode,playerCoord coo) {
 						setbcolor(0x000000);
 					}
 					else {
-						setfcolor(defTeams[gameMap[i][j].team].color);
+						setfcolor(0xffffff);
 						if(coo.x==i&&coo.y==j) setbcolor(0x000080);
 						if(isVisible(i,j,printCode)) {
+							setfcolor(defTeams[gameMap[i][j].team].color);
 							if(gameMap[i][j].army<1000) printf("{%3lld}",gameMap[i][j].army);
 							else {
 								string p=to_string(gameMap[i][j].army);
@@ -185,9 +188,10 @@ void printMap(int printCode,playerCoord coo) {
 						} else fputs("#####",stdout);
 						setbcolor(0x000000);
 					} else {
-						setfcolor(defTeams[gameMap[i][j].team].color);
+						setfcolor(0xffffff);
 						if(coo.x==i&&coo.y==j) setbcolor(0x000080);
 						if(isVisible(i,j,printCode)) {
+							setfcolor(defTeams[gameMap[i][j].team].color);
 							if(gameMap[i][j].army<0) {
 								int absd=-gameMap[i][j].army;
 								if(absd<100) printf("[%3lld]",gameMap[i][j].army);

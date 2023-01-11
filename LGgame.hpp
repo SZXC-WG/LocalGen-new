@@ -288,7 +288,7 @@ struct gameStatus {
 		if(!isWeb) {
 			int robotId[64];
 			playerCoord coordinate[64];
-			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count())
+			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 			for(int i=2; i<=playerCnt; ++i) robotId[i] = mtrd()%3;
 //			for(int i=2; i<=playerCnt; ++i) robotId[i] = 1; // for robot debug
 			initGenerals(coordinate);

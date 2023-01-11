@@ -35,7 +35,7 @@ const int dx[5] = {0,-1,0,1,0};
 const int dy[5] = {0,0,-1,0,1};
 
 struct passS { int id,turn; };
-vector<passS> passId[505][505];
+std::vector<passS> passId[505][505];
 
 int randomBot(int id,playerCoord coo) {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());

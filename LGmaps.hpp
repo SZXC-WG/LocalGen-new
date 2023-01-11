@@ -1,4 +1,4 @@
-/* This is LGmaps.hpp file of LocalGen.                                  */
+1/* This is LGmaps.hpp file of LocalGen.                                  */
 /* Copyright (c) 2023 LocalGen-dev; All rights reserved.                 */
 /* Developers: http://github.com/LocalGen-dev                            */
 /* Project: http://github.com/LocalGen-dev/LocalGen-new                  */
@@ -230,9 +230,9 @@ void createRandomMap(int crtH=-1,int crtW=-1){
 	for(int i=1;i<=crtW;i++);
 }
 
-void createFullCityMap(int crtH,int crtW,int armyMN,int armyMX,int plCnt) {
+void createFullCityMap(int crtH,int crtW,long long armyMN,long long armyMX,int plCnt) {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-	std::uniform_int_distribution rd(armyMN,armyMX);
+	std::uniform_int_distribution<long long> rd(armyMN,armyMX);
 	mapH=crtH,mapW=crtW;
 	for(int i=1; i<=mapH; ++i) {
 		for(int j=1; j<=mapW; ++j) {

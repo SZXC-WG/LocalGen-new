@@ -24,6 +24,7 @@
 #include <thread>
 using std::string;
 // windows libraries
+#include <windows.h>
 #include <conio.h>
 // project headers
 #include "LGcons.hpp"

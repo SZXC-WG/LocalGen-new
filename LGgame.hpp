@@ -23,6 +23,7 @@
 #include <random>
 #include <thread>
 using std::string;
+using namespace std::literals;
 // windows libraries
 #include <windows.h>
 #include <conio.h>

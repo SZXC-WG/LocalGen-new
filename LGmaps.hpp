@@ -260,7 +260,7 @@ void createFullSwampMap(int crtH,int crtW,int plCnt) {
 	}
 	for(int i=1; i<=plCnt; ++i) {
 		int x,y;
-		do x=mtrd()%mapH+1,y=mtrd()%mapW+1; while(gameMap[x][y].type!=1s);
+		do x=mtrd()%mapH+1,y=mtrd()%mapW+1; while(gameMap[x][y].type!=1);
 		gameMap[x][y].type=3;
 		gameMap[x][y].army=0;
 	}

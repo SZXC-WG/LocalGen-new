@@ -78,6 +78,7 @@ int smartRandomBot(int id,playerCoord coo) {
 		return a.army<b.army;
 	};
 	std::sort(p+1,p+pl+1,cmp);
+	if(pl>=2) return p[2].dir;
 	return p[1].dir;
 }
 

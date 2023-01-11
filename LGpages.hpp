@@ -190,7 +190,7 @@ void MainPage(){
 		int H,W;
 		char ch=_getch();
 //		gotoxy()
-		createRandommap();
+		createFullCityMap(20,20,10,40,4);
 	}
 	
 	inputplCnt:;
@@ -211,6 +211,7 @@ void MainPage(){
 	if(cht>1||cht<0) goto inputCheat;
 	if(cht) cheatCode=1048575;
 	
+	clearance();
 	GAME(0,cheatCode,plCnt,stDel);
 	return ;
 }

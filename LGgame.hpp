@@ -393,6 +393,7 @@ struct gameStatus {
 int GAME(bool isWeb,int cheatCode,int plCnt,int stDel) {
 	hideCursor();
 	clearance();
+	gotoxy(1,1);
 	gameStatus newGame = gameStatus(isWeb,cheatCode,plCnt,stDel);
 	return newGame();
 }

@@ -391,11 +391,13 @@ struct gameStatus {
 };
 
 int GAME(bool isWeb,int cheatCode,int plCnt,int stDel) {
+	setvbuf(stdout,nullptr,_IOFBF,5000000);
 	hideCursor();
 	clearance();
 	gotoxy(1,1);
-	gameStatus newGame = gameStatus(isWeb,cheatCode,plCnt,stDel);
-	return newGame();
+	int ret = gameStatus(isWeb,cheatCode,plCnt,stDel)();
+	setvbuf(stdout,nullptr,_IONBF,0);
+	return ret;
 }
 
 #endif // __LGGAME_HPP__

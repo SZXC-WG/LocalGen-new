@@ -150,6 +150,7 @@ struct gameStatus {
 		for(int i=1; i<=playerCnt; ++i) {
 			coos[i]=genCoo[i]=gens[i-1];
 			gameMap[genCoo[i].x][genCoo[i].y].team=i;
+			gameMap[genCoo[i].x][genCoo[i].y].army=0;
 		}
 		for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) 
 				if(gameMap[i][j].type==3&&gameMap[i][j].team==0) gameMap[i][j].type=0;

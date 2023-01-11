@@ -227,12 +227,44 @@ void printMap(int printCode,playerCoord coo) {
 
 void createRandomMap(int crtH=-1,int crtW=-1){
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	register int i,j;
 	
-	if(crtH<0) crtH=mtrd()%50+1;
-	if(crtW<0) crtW=mtrd()%50+1;
+	if(crtH<0) mapH=mtrd()%50+1;else mapH=crtH;
+	if(crtW<0) mapW=mtrd()%50+1;else mapW=crtW;
 	
-	for(int i=1;i<=crtH;i++)
-	for(int i=1;i<=crtW;i++);
+	for(i=1;i<=mapH;i++)
+	for(j=1;j<=mapW;j++){int x=0,f;
+		if(i-2>0&&gameMap[i-2][j].type==2) x=1;
+		if(i+2<=mapH&&gameMap[i-2][j].type==2) x=1;
+		if(j-2>0&&gameMap[i][j-2].type==2) x=1;
+		if(j+2<=mapW&&gameMap[i][j+2].type==2) x=1;
+		if(i-2>0&&j+2<=mapW&&gameMap[i-2][j+2].type==2) x=1;
+		if(i+2<=mapH&&j+2<=mapW&&gameMap[i+2][j+2].type==2) x=1;
+		if(i-2>0&&j-2>0&&gameMap[i-2][j-2].type==2) x=1;
+		if(i+2<=mapH&&j-2>0&&gameMap[i+2][j-2].type==2) x=1;
+		if(x){
+			f=mtrd()%4;
+			if(f<2){
+				gameMap[i][j].type=f;
+				gameMap[i][j].army=mtrd()%2;
+				
+				if(gameMap[i][j].army)
+				gameMap[i][j].army=mtrd()%100+1;
+			}else{
+				gameMap[i][j].type=f+1;
+				gameMap[i][j].army=mtrd()%2;
+				
+				if(gameMap[i][j].army)
+				gameMap[i][j].army=mtrd()%100+1;
+			}
+		}else{
+			gameMap[i][j].type=mtrd()%5;
+			gameMap[i][j].army=mtrd()%2;
+			
+			if(gameMap[i][j].army)
+			gameMap[i][j].army=mtrd()%100+1;
+		}
+	}
 }
 
 void createFullCityMap(int crtH,int crtW,long long armyMN,long long armyMX,int plCnt) {

@@ -139,6 +139,8 @@ struct gameStatus {
 			do x=p()%mapH+1,y=p()%mapW+1;
 			while(gameMap[x][y].type!=0);
 			gens.push_back(playerCoord{x,y});
+			gameMap[x][y].type=3;
+			gameMap[x][y].army=0;
 		}
 		sort(gens.begin(),gens.end(),[](playerCoord a,playerCoord b){return a.x==b.x?a.y<b.y:a.x<b.x;});
 		std::shuffle(gens.begin(),gens.end(),std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));

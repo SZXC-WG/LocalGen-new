@@ -65,7 +65,9 @@ bool isVisible(int x,int y,int printCode) {
 }
 void printMap(int printCode,playerCoord coo) {
 	setbcolor(0x000000);
+	puts(string(mapW*5+2,'_').c_str());
 	for(int i=1; i<=mapH; ++i) {
+		putchar('|');
 		for(int j=1; j<=mapW; ++j) {
 			switch(gameMap[i][j].type) {
 				case 0: /* plain */ {
@@ -212,11 +214,14 @@ void printMap(int printCode,playerCoord coo) {
 				}
 			}
 		}
-		setfcolor(0x000000);
+		setfcolor(0xffffff);
 		clearline();
 		putchar('|');
 		putchar('\n');
 	}
+	setfcolor(0xffffff);
+	for(register int i=1; i<=mapW*5+1; i+=2) fputs("£þ",stdout);
+	putchar('\n');
 	fflush(stdout);
 }
 

@@ -389,7 +389,6 @@ struct gameStatus {
 				}
 				gotoxy(1,1);
 				printMap(cheatCode,coordinate[1]);
-				clearline(); putchar('\n');
 				ranklist(coordinate);
 				lPT=std::chrono::steady_clock::now().time_since_epoch();
 			}

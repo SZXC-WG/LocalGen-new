@@ -190,7 +190,7 @@ void MainPage(){
 		int H,W;
 		char ch=_getch();
 //		gotoxy()
-		createFullCityMap(20,20,10,40,16);
+		createRandomMap();
 	}
 	
 	inputplCnt:;

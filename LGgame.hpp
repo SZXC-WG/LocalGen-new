@@ -78,11 +78,6 @@ int smartRandomBot(int id,playerCoord coo) {
 		return a.army<b.army;
 	};
 	std::sort(p+1,p+pl+1,cmp);
-	if(p[1].team!=id&&p[1].type==3) return p[1].dir;
-	if(pl>=2) {
-		if(p[1].team!=id&&p[2].team!=id) return p[2].dir; 
-		return p[1].dir;
-	}
 	return p[1].dir;
 }
 
@@ -295,7 +290,7 @@ struct gameStatus {
 			playerCoord coordinate[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 			for(int i=2; i<=playerCnt; ++i) robotId[i] = mtrd()%3;
-//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 1; // for robot debug
+//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 2; // for robot debug
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode,coordinate[1]);

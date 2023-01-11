@@ -30,7 +30,7 @@ struct Block {
 };
 
 int mapH,mapW;
-Block gameMap[1005][1005]; /* maximum 1000*1000 */
+Block gameMap[505][505]; /* maximum 500*500 */
 
 struct teamS {
 	string name; /* team name */

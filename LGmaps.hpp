@@ -27,6 +27,7 @@ struct Block {
 	int team; /* the team who holds this block */
 	int type; /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
 	ll army; /* count of army on this block */
+	bool lit; /* whether the block is lighted(lit) */
 };
 
 int mapH,mapW;
@@ -60,6 +61,7 @@ struct playerCoord { int x,y; };
 
 const char NUM_s[15]={0,'H','K','W','L','M','Q','I','G','B','N','T'};
 bool isVisible(int x,int y,int printCode) {
+	if(gameMap[x][y].lit) return true;
 	for(int i=-1; i<=1; ++i) for(int j=-1; j<=1; ++j) if(printCode&(1<<gameMap[x+i][y+j].team)) return true;
 	return false;
 }
@@ -276,6 +278,7 @@ void createFullCityMap(int crtH,int crtW,long long armyMN,long long armyMX,int p
 			gameMap[i][j].type=4;
 			gameMap[i][j].army=rd(mtrd);
 			gameMap[i][j].team=0;
+			gameMap[i][j].lit=0;
 		}
 	}
 	for(int i=1; i<=plCnt; ++i) {
@@ -293,6 +296,7 @@ void createFullSwampMap(int crtH,int crtW,int plCnt) {
 			gameMap[i][j].type=1;
 			gameMap[i][j].team=0;
 			gameMap[i][j].army=0;
+			gameMap[i][j].lit=0;
 		}
 	}
 	for(int i=1; i<=plCnt; ++i) {
@@ -309,6 +313,7 @@ void createFullPlainMap(int crtH,int crtW,int plCnt) {
 			gameMap[i][j].type=0;
 			gameMap[i][j].team=0;
 			gameMap[i][j].army=0;
+			gameMap[i][j].lit=0;
 		}
 	}
 }

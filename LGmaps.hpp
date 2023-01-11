@@ -237,7 +237,7 @@ void createFullCityMap(int crtH,int crtW,long long armyMN,long long armyMX,int p
 	for(int i=1; i<=mapH; ++i) {
 		for(int j=1; j<=mapW; ++j) {
 			gameMap[i][j].type=4;
-			gameMap[i][j].army=rd(mtrd());
+			gameMap[i][j].army=rd(mtrd);
 			gameMap[i][j].team=0;
 		}
 	}

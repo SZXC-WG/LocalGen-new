@@ -32,13 +32,14 @@ void Zip(){
 	strZip[p++]=PMod(k2)+CHAR_AD;strZip[p++]=PMod(k2)+CHAR_AD;
 	
 	for(i=1;i<=mapH;i++) for(j=1;j<=mapW;j++,p++){
-		strZip[p++]=((gameMap[i][j].team<<3)+gameMap[i][j].team)+CHAR_AD;
+		strZip[p++]=gameMap[i][j].team+CHAR_AD;
+		strZip[p]=(gameMap[i][j].type<<2)+(gameMap[i][j].lit<<1);
 		k1=gameMap[i][j].army;
 		
 		if(k1<0){
 			k1=-k1;
-			strZip[p+11]=CHAR_AD+1;
-		}else strZip[p+11]=CHAR_AD;
+			strZip[p++]+=CHAR_AD+1;
+		}else strZip[p++]+=CHAR_AD;
 		
 		for(k2=1;k2<=11;k2++)
 		strZip[p++]=PMod(k1)+CHAR_AD;
@@ -55,13 +56,15 @@ void deZip(){
 	mapW=(strdeZip[3]<<6)+strdeZip[2];
 	
 	for(i=1;i<=mapH;i++) for(j=1;j<=mapW;j++){
-		gameMap[i][j].type=strdeZip[k]&7;strdeZip[k]>>=3;
 		gameMap[i][j].team=strdeZip[k++];
+		bool f=strdeZip[k]&1;strdeZip[k]>>=1;
+		gameMap[i][j].lit=strdeZip[k]&1;strdeZip[k]>>=1;
+		gameMap[i][j].type=strdeZip[k++];
 		gameMap[i][j].army=0;
 		
-		for(p=10;p>=0;p--) gameMap[i][j].army=(gameMap[i][j].army<<6)+strdeZip[k+p];
-		k+=11;
-		gameMap[i][j].army=strdeZip[k++]?(-gameMap[i][j].army):gameMap[i][j].army;
+		for(p=10;p>=0;p--)
+		gameMap[i][j].army=(gameMap[i][j].army<<6)+strdeZip[k+p];k+=11;
+		gameMap[i][j].army=f?(-gameMap[i][j].army):gameMap[i][j].army;
 	}
 }
 

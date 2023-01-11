@@ -3,7 +3,8 @@ const int T_SEC=1000,CHAR_AD=48;
 
 struct Node{
 	int B,K;
-	long long D; 
+	long long D;
+	bool L;
 };
 
 struct Picxel{
@@ -15,7 +16,7 @@ struct Picxel{
 	}
 };
 
-int sL,sW,rL,rW;
+int sL,sW,rL,rW,Col[15]={7};
 Node Map[80][80];
 Picxel mp[505][505],fmp[505][505];
 char s[15],nm[505],NUM_s[15]={0,'H','K','W','L','M','Q','Y','B','G','T'};
@@ -117,7 +118,8 @@ void WriteMap(){
 			TurnStr(Map[i][j].D);
 			Fills(i,j*5-3,j*5-1);
 		}else Map[i][j].D=0;
-		FillC1(i,j*5-4,i,j*5,Map[i][j].B);
+		FillC1(i,j*5-4,i,j*5,Col[Map[i][j].B]);
+		FillC2(i,j*5-4,i,j*5,Map[i][j].L*16);
 	}
 }
 void PrintMap(){
@@ -149,13 +151,15 @@ void DePack(){
 	rW=sW*5;
 	for(i=1;i<=sL;i++)
 	for(j=1;j<=sW;j++){
-		Map[i][j].K=P_s[k]&7;P_s[k]>>=3;
 		Map[i][j].B=P_s[k++];
+		bool f=P_s[k]&1;P_s[k]>>=1;
+		Map[i][j].L=P_s[k]&1;P_s[k]>>=1;
+		Map[i][j].K=P_s[k++];
 		Map[i][j].D=0;
 		
 		for(p=10;p>=0;p--)
 		Map[i][j].D=(Map[i][j].D<<6)+P_s[k+p];k+=11;
-		Map[i][j].D=P_s[k++]?(-Map[i][j].D):Map[i][j].D;
+		Map[i][j].D=f?(-Map[i][j].D):Map[i][j].D;
 	}
 }
 

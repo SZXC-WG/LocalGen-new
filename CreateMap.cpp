@@ -3,7 +3,8 @@ const int T_SEC=1000,CHAR_AD=48;
 
 struct Node{
 	int B,K;
-	long long D; 
+	long long D;
+	bool L;
 };
 
 struct Picxel{
@@ -15,7 +16,7 @@ struct Picxel{
 	}
 };
 
-int sL,sW,rL,rW,Px,Py;
+int sL,sW,rL,rW,Px,Py,Col[15]={7};
 Node Map[80][80];
 Picxel mp[505][505],fmp[505][505];
 char s[15],nm[505],NUM_s[15]={0,'H','K','W','L','M','Q','Y','B','G','T'};
@@ -39,7 +40,7 @@ void FrameOutput(){Cls();
 	SetPos(2,rW+3);printf("Use 'W', 'A', 'S', 'D' to move.");
 	SetPos(3,rW+3);printf("Setting 'G'->General, 'P'->Plain, 'M'->Mud, 'R'->Rock, 'C'->City.");
 	SetPos(4,rW+3);printf("Use 'Q' to stop and enter the numbers.");
-	SetPos(5,rW+3);printf("Use 'X' to Loadout the Map.");
+	SetPos(5,rW+3);printf("Use 'X' to Loadout the Map and 'L' to Light the block.");
 	SetPos(6,rW+3);printf("Use 'E' to exit.");
 	SetPos(7,rW+3);printf("Input:");
 }
@@ -77,6 +78,7 @@ inline void Move(int x,int y){
 inline void SetK(int x,int y,int k){Map[x][y].K=k;}
 inline void SetD(int x,int y,long long d){Map[x][y].D=d;}
 inline void SetB(int x,int y,int b){Map[x][y].B=b;}
+inline void SetL(int x,int y){Map[x][y].L^=1;}
 inline void SetW(int x,int y,int b,long long d,int k){
 	Map[x][y].B=b;
 	Map[x][y].D=d;
@@ -146,7 +148,8 @@ void WriteMap(){
 			TurnStr(Map[i][j].D);
 			Fills(i,j*5-3,j*5-1);
 		}else Map[i][j].D=0;
-		FillC1(i,j*5-4,i,j*5,Map[i][j].B);
+		FillC1(i,j*5-4,i,j*5,Col[Map[i][j].B]);
+		FillC2(i,j*5-4,i,j*5,Map[i][j].L*16);
 	}
 }
 void PrintMap(){
@@ -166,7 +169,7 @@ void PrintMap(){
 }
 void MakeMp(){
 	for(int i=1;i<=sL;i++) for(int j=1;j<=sW;j++)
-	Map[i][j].K=0,Map[i][j].D=0,Map[i][j].B=7;
+	Map[i][j].K=0,Map[i][j].D=0,Map[i][j].B=0;
 }
 
 inline long long PMod(long long &x){
@@ -179,20 +182,20 @@ void Pack(){
 	long long k1=sL,k2=sW;
 	P_s[p++]=PMod(k1)+CHAR_AD;P_s[p++]=PMod(k1)+CHAR_AD;
 	P_s[p++]=PMod(k2)+CHAR_AD;P_s[p++]=PMod(k2)+CHAR_AD;
-	SetPos(sL+2,0);
+	
 	for(i=1;i<=sL;i++)
 	for(j=1;j<=sW;j++){
-		P_s[p++]=((Map[i][j].B<<3)+Map[i][j].K)+CHAR_AD;
+		P_s[p++]=Map[i][j].B+CHAR_AD;
+		P_s[p]=(Map[i][j].K<<2)+(Map[i][j].L<<1);
 		k1=Map[i][j].D;
 		
 		if(k1<0){
 			k1=-k1;
-			P_s[p+11]=CHAR_AD+1;
-		}else P_s[p+11]=CHAR_AD;
+			P_s[p++]+=CHAR_AD+1;
+		}else P_s[p++]+=CHAR_AD;
 		
 		for(k2=1;k2<=11;k2++)
 		P_s[p++]=PMod(k1)+CHAR_AD;
-		p++;
 	}P_s[p]='\0';
 }
 
@@ -216,6 +219,7 @@ signed main(){
 	while(1){
 		fflush(stdin);
 		WriteMap();
+		Move(0,0);
 		PrintMap();
 		
 		if(_kbhit()){
@@ -251,6 +255,8 @@ signed main(){
 				case 'G':SetK(Px,Py,3);break;
 				case 'c':
 				case 'C':SetK(Px,Py,4);break;
+				case 'l':
+				case 'L':SetL(Px,Py);break;
 				case 'x':
 				case 'X':
 					SetPos(7,rW+9);

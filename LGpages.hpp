@@ -22,7 +22,6 @@
 #include "LGgame.hpp"
 
 #ifndef __DLL_INCLUDED__
-#include "LGoldmaps.hpp"
 #endif // !defined(__DLL_INCLUDED__)
 
 inline void CB(int k){
@@ -185,7 +184,7 @@ void MainPage(){
 		int mapid=0;
 		gotoxy(17,37); printf("Map Lists:"); clearline();
 		gotoxy(18,37); printf("   %2s | %20s | %42s |","ID","CHN name","ENG name");
-		for(int i=1; i<=mapTOT; ++i) gotoxy(18+i,37),printf("   %2d | %-20s | %-42s |",i,maps[i].chiname.c_str(),maps[i].engname.c_str());
+		for(int i=1; i<=mapNum; ++i) gotoxy(18+i,37),printf("   %2d | %-20s | %-42s |",i,maps[i].chiname.c_str(),maps[i].engname.c_str());
 		gotoxy(19,37); printf(">>");
 		int chsd=1;
 		do {
@@ -194,7 +193,7 @@ void MainPage(){
 			gotoxy(18+chsd,37); printf("  ");
 			switch(tolower(ch)){
 				case 'w': if(chsd>1) --chsd; break;
-				case 's': if(chsd<mapTOT) ++chsd; break;
+				case 's': if(chsd<mapNum) ++chsd; break;
 			}
 			gotoxy(18+chsd,37); printf(">>");
 		} while(ch!=13);
@@ -221,7 +220,7 @@ void MainPage(){
 				case 4: createFullPlainMap(H,W,plCnt); break;
 			}
 		}
-		for(int i=-1; i<=mapTOT; ++i) gotoxy(18+i,37),clearline();
+		for(int i=-1; i<=mapNum; ++i) gotoxy(18+i,37),clearline();
 	}
 	
 	inputstDel:;

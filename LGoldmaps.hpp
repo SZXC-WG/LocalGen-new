@@ -137,15 +137,15 @@ void copyMap(int mapid) {
 	int h=maps[mapid].hei,w=maps[mapid].wid;
 	mapH=h,mapW=w;
 	for(int i=1; i<=h; ++i)
-		for(int j=1; j<=w; ++j) mp[i][j].team=0;
+		for(int j=1; j<=w; ++j) gameMap[i][j].team=0;
 	for(int i=1; i<=h; ++i) {
 		for(int j=1; j<=w; ++j) {
 			switch(mapG[mapid].geo[(i-1)*w+j-1]) {
-				case 'S': mp[i][j].type=1; break;
-				case 'G': mp[i][j].type=3; break;
-				case 'P': mp[i][j].type=0; break;
-				case 'M': mp[i][j].type=2; break;
-				case 'C': mp[i][j].type=4; break;
+				case 'S': gameMap[i][j].type=1; break;
+				case 'G': gameMap[i][j].type=3; break;
+				case 'P': gameMap[i][j].type=0; break;
+				case 'M': gameMap[i][j].type=2; break;
+				case 'C': gameMap[i][j].type=4; break;
 			}
 		}
 	}
@@ -154,9 +154,9 @@ void copyMap(int mapid) {
 			int p=0,q=((i-1)*w+j-1)*mapG[mapid].aBits;
 			for(int k=q; k<q+mapG[mapid].aBits; ++k) p=p*26+tolower(mapG[mapid].army[k])-'a';
 			if(isupper(mapG[mapid].army[q])) p=-p;
-			mp[i][j].army=p;
+			gameMap[i][j].army=p;
 		}
 	}
-	for(int i=1; i<=h; ++i) for(int j=1; j<=w; ++j) mp[i][j].lit=mapG[mapid].light[(i-1)*w+j-1]-'0';
+	for(int i=1; i<=h; ++i) for(int j=1; j<=w; ++j) gameMap[i][j].lit=mapG[mapid].light[(i-1)*w+j-1]-'0';
 }
 

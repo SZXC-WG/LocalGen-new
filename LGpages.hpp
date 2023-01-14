@@ -21,6 +21,10 @@
 #include "LGzipmap.hpp"
 #include "LGgame.hpp"
 
+#ifndef __DLL_INCLUDED__
+#include "LGoldmaps.hpp"
+#endif // !defined(__DLL_INCLUDED__)
+
 inline void CB(int k){
 	setbcolor(defTeams[k].color);
 	fputs("  ",stdout); resetattr();
@@ -138,20 +142,16 @@ void MainPage(){
 	gotoxy(18,6);printf("Enter to select.");
 	
 	//Choose 17 30
-	gotoxy(17,37);printf(">> Single Mode: Have fun with robots!");
-	gotoxy(18,40);printf("Multiplayer Mode: Have fun with your friends!");
+	gotoxy(17,37);printf(">> Single: Have fun with robots!"); clearline();
+	gotoxy(18,37);printf("   (not supported) Multiplayer: Have fun with your friends!"); clearline();
 	
-	while(chCmd!=13){
+	while(chCmd!=13) {
 		chCmd=_getch();
+		hideCursor(); 
 		gotoxy(17+chs,37); printf("  ");
-		switch(chCmd){
-			case 'S':
-			case 's':
-			case 'W':
-			case 'w':
-				chs=1-chs;
-				break;
-			default:break;
+		switch(tolower(chCmd)){
+			case 's': if(chs>0) --chs; break;
+			case 'w': if(chs<1) ++chs; break;
 		}
 		gotoxy(17+chs,37); printf(">>");
 	}
@@ -159,51 +159,93 @@ void MainPage(){
 	if(chs) return ;
 	else chCmd=0;
 	
-	gotoxy(17,37);printf(">> Choose map.                               ");
-	gotoxy(18,40);printf("Import a map:                                ");
+	gotoxy(17,37);printf(">> Choose map."); clearline();
+	gotoxy(18,37);printf("   Import a map: "); clearline();
 	
-	while(chCmd!=13){
-		if(_kbhit()){
-			chCmd=_getch();
-			gotoxy(17+chs,37);printf("  ");
-			
-			switch(chCmd){
-				case 'S':
-				case 's':
-				case 'W':
-				case 'w':
-					chs=1-chs;
-					break;
-				default:break;
-			}gotoxy(17+chs,37);printf(">>");
+	while(chCmd!=13) {
+		chCmd=_getch();
+		hideCursor(); 
+		gotoxy(17+chs,37); printf("  ");
+		switch(tolower(chCmd)){
+			case 'w': if(chs>0) --chs; break;
+			case 's': if(chs<1) ++chs; break;
 		}
+		gotoxy(17+chs,37); printf(">>");
 	}
 	
-	if(chs){
+	if(chs) {
 		gotoxy(18,54);
 		scanf("%s",fileName);
 		fileP=fopen(fileName,"r");
 		fscanf(fileP,"%s",strdeZip);
 		fclose(fileP);
 		deZip();
-	}else{
-		int H,W;
-		char ch=_getch();
-//		gotoxy()
-		createRandomMap();
+	} else {
+		char ch;
+		int mapid=0;
+		gotoxy(17,37); printf("Map Lists:"); clearline();
+		gotoxy(18,37); printf("   %2s | %20s | %42s |","ID","CHN name","ENG name");
+		for(int i=1; i<=mapTOT; ++i) gotoxy(18+i,37),printf("   %2d | %-20s | %-42s |",i,maps[i].chiname.c_str(),maps[i].engname.c_str());
+		gotoxy(19,37); printf(">>");
+		int chsd=1;
+		do {
+			ch=_getch();
+			hideCursor();
+			gotoxy(18+chsd,37); printf("  ");
+			switch(tolower(ch)){
+				case 'w': if(chsd>1) --chsd; break;
+				case 's': if(chsd<mapTOT) ++chsd; break;
+			}
+			gotoxy(18+chsd,37); printf(">>");
+		} while(ch!=13);
+		if(chsd>=5) {
+			copyMap(chsd);
+			gotoxy(19,113);
+			int p=maps[chsd].generalcnt+maps[chsd].plaincnt;
+			printf("This map has %d general & plain blocks.",p); clearline();
+			__CHSDPLAYER: gotoxy(20,113); printf("Input Player Count(<%d): ",std::min(p,16)); scanf("%d",&plCnt); if(plCnt<0||plCnt>std::min(p,16)) goto __CHSDPLAYER;
+		}
+		else {
+			int H,W,amn,amx;
+			gotoxy(19,113); printf("Map Height: "); scanf("%d",&H);
+			gotoxy(20,113); printf("Map Width: "); scanf("%d",&W);
+			__CHSDSPEPLAYER: gotoxy(21,113); printf("Player Count(<%d):",std::min(H*W,16)); scanf("%d",&plCnt); if(plCnt<0||plCnt>std::min(H*W,16)) goto __CHSDSPEPLAYER;
+			switch(chsd) {
+				case 1: createRandomMap(H,W); break;
+				case 2: {
+					gotoxy(22,113); printf("MINIMUM Army: "); scanf("%d",&amn);
+					gotoxy(23,113); printf("MAXIMUM Army: "); scanf("%d",&amx);
+					createFullCityMap(H,W,amn,amx,plCnt); break;
+				}
+				case 3: createFullSwampMap(H,W,plCnt); break;
+				case 4: createFullPlainMap(H,W,plCnt); break;
+			}
+		}
+		for(int i=-1; i<=mapTOT; ++i) gotoxy(18+i,37),clearline();
 	}
 	
-	inputplCnt:;
-	gotoxy(17,37);printf("   Settings.                                    ");
-	gotoxy(18,40);printf("Please enter the player number(<9):             ");
-	gotoxy(18,76);scanf("%d",&plCnt);
-	if(plCnt>8||plCnt<0) goto inputplCnt;
-	
 	inputstDel:;
-	gotoxy(18,40);printf("Please enter the game speed([1,20]):               ");
-	gotoxy(18,76);scanf("%d",&stDel);
-	if(stDel>20||stDel<1) goto inputstDel;
-	stDel=1000/stDel; 
+	gotoxy(17,37);printf("Choose Game Speed:"); clearline(); 
+	for(int i=1; i<=20; ++i) {
+		gotoxy(17+i,37+3); printf("%dx",i);
+	}
+	gotoxy(17+21,37+3); printf("FAST!");
+	gotoxy(17+1,37); printf(">> ");
+	chs=1;
+	chCmd=0;
+	while(chCmd!=13) {
+		chCmd=_getch();
+		hideCursor(); 
+		gotoxy(17+chs,37); printf("  ");
+		switch(tolower(chCmd)){
+			case 'w': if(chs>1) --chs; break;
+			case 's': if(chs<21) ++chs; break;
+		}
+		gotoxy(17+chs,37); printf(">>");
+	}
+	if(chs==21) stDel=0;
+	else stDel=1000/chs;
+	for(int i=0; i<=21; ++i) gotoxy(17+i,37),clearline();
 	
 	inputCheat:;
 	gotoxy(18,40);printf("Please enter the cheat code(0/1):               ");

@@ -45,6 +45,7 @@ signed main(signed argc, char** argv) {
 	ShowWindow(hwnd,SW_MAXIMIZE);
 	initattr();
 	hideCursor();
+	initDefMap();
 	MainPage(); // start main page 
 	exit(0);    // exit program
 }

@@ -318,6 +318,75 @@ void createFullPlainMap(int crtH,int crtW,int plCnt) {
 	}
 }
 
+HINSTANCE defMap=LoadLibrary("defMap.dll");
+typedef int(*func1)();
+typedef string(*func2)(int,int);
+typedef int(*func3)(int,int);
+
+func1 statusCheck=(func1)GetProcAddress(defMap,"statusCheck");
+func2 getMapInfoStr=(func2)GetProcAddress(defMap,"getMapInfoStr");
+func3 getMapInfoNum=(func3)GetProcAddress(defMap,"getMapInfoNum");
+
+struct MapInfoS {
+	int id;	string chiname; string engname; string auth; int hei; int wid; int generalcnt; int swampcnt; int citycnt; int mountaincnt; int plaincnt;
+	MapInfoS() = default; ~MapInfoS() = default;
+};MapInfoS maps[205];
+
+struct MapGeoS {
+	int id; string geo; int aBits; string army; string light; 
+};MapGeoS mapG[205];
+
+int mapNum;
+
+void initDefMap(){
+	mapNum=statusCheck();
+	
+	for(int i=0;i<=mapNum;i++){
+		maps[i].id=mapG[i].id=i;
+		maps[i].chiname=getMapInfoStr(i,1);
+		maps[i].engname=getMapInfoStr(i,2);
+		maps[i].auth=getMapInfoStr(i,3);
+		mapG[i].geo=getMapInfoStr(i,4);
+		mapG[i].army=getMapInfoStr(i,5);
+		mapG[i].light=getMapInfoStr(i,6);
+		maps[i].hei=getMapInfoNum(i,1);
+		maps[i].wid=getMapInfoNum(i,2);
+		maps[i].plaincnt=getMapInfoNum(i,3);
+		maps[i].swampcnt=getMapInfoNum(i,4);
+		maps[i].mountaincnt=getMapInfoNum(i,5);
+		maps[i].generalcnt=getMapInfoNum(i,6);
+		maps[i].citycnt=getMapInfoNum(i,7);
+		mapG[i].aBits=getMapInfoNum(i,8);
+	}
+}
+
+void copyMap(int mapid) {
+	int h=maps[mapid].hei,w=maps[mapid].wid;
+	mapH=h,mapW=w;
+	for(int i=1; i<=h; ++i)
+		for(int j=1; j<=w; ++j) gameMap[i][j].team=0;
+	for(int i=1; i<=h; ++i) {
+		for(int j=1; j<=w; ++j) {
+			switch(mapG[mapid].geo[(i-1)*w+j-1]) {
+				case 'S': gameMap[i][j].type=1; break;
+				case 'G': gameMap[i][j].type=3; break;
+				case 'P': gameMap[i][j].type=0; break;
+				case 'M': gameMap[i][j].type=2; break;
+				case 'C': gameMap[i][j].type=4; break;
+			}
+		}
+	}
+	for(int i=1; i<=h; ++i) {
+		for(int j=1; j<=w; ++j) {
+			int p=0,q=((i-1)*w+j-1)*mapG[mapid].aBits;
+			for(int k=q; k<q+mapG[mapid].aBits; ++k) p=p*26+tolower(mapG[mapid].army[k])-'a';
+			if(isupper(mapG[mapid].army[q])) p=-p;
+			gameMap[i][j].army=p;
+		}
+	}
+	for(int i=1; i<=h; ++i) for(int j=1; j<=w; ++j) gameMap[i][j].lit=mapG[mapid].light[(i-1)*w+j-1]-'0';
+}
+
 #undef ll // long long
 
 #endif // __LGMAPS_HPP

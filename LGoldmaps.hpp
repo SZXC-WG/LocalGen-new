@@ -2,7 +2,7 @@ struct MapInfoS {
 	int id;	string chiname; string engname; string auth; int hei; int wid; int generalcnt; int swampcnt; int citycnt; int mountaincnt; int plaincnt;
 	MapInfoS() = default; ~MapInfoS() = default;
 };
-const int mapTOT=25;
+const int mapTOT=26;
 MapInfoS maps[205] = {
 	/* id , chiname , engname , auth , hei , wid , generalcnt , swampcnt , citycnt , mountaincnt , plaincnt */
 	{0, "Пе","void","void",-2,-2,-2,-2,-2,-2,-2},

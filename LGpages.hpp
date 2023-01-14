@@ -21,9 +21,6 @@
 #include "LGzipmap.hpp"
 #include "LGgame.hpp"
 
-#ifndef __DLL_INCLUDED__
-#endif // !defined(__DLL_INCLUDED__)
-
 inline void CB(int k){
 	setbcolor(defTeams[k].color);
 	fputs("  ",stdout); resetattr();

@@ -248,7 +248,7 @@ void MainPage(){
 	gotoxy(18,76);scanf("%d",&cht);
 	if(cht>1||cht<0) goto inputCheat;
 	if(cht) cheatCode=1048575;
-	else cht=2;
+	else cheatCode=2;
 	
 	clearance();
 	GAME(0,cheatCode,plCnt,stDel);

@@ -22,8 +22,8 @@
 #include "LGgame.hpp"
 
 inline void CB(int k){
-	setfcolor(defTeams[k].color);
-	printf("¨€ ");
+	setbcolor(defTeams[k].color);
+	fputs("  ",stdout); resetattr();
 }
 
 void MainPage(){

@@ -172,7 +172,7 @@ struct gameStatus {
 			}
 		}
 		++gameMesC;
-		gotoxy(mapH+1+gameMesC,65);
+		gotoxy(mapH+2+gameMesC,65);
 		setfcolor(0xffffff);
 		fputs("PLAYER ",stdout);
 		setfcolor(defTeams[p1].color);
@@ -231,6 +231,7 @@ struct gameStatus {
 					if(gameMap[cur.to.x][cur.to.y].type==3) /* general */ {
 						kill(cur.id,p);
 						gameMap[cur.to.x][cur.to.y].type=4;
+						for(auto& mv:inlineMove) if(mv.id==p) mv.id=cur.id;
 					}
 				}
 			}
@@ -340,7 +341,7 @@ struct gameStatus {
 							}
 							cheatCode=1048575;
 							++gameMesC;
-							gotoxy(mapH+1+gameMesC,65);
+							gotoxy(mapH+2+gameMesC,65);
 							setfcolor(0xffffff);
 							fputs("PLAYER ",stdout);
 							setfcolor(defTeams[1].color);
@@ -378,7 +379,7 @@ struct gameStatus {
 						gameEnd=1;
 						cheatCode=1048575;
 						++gameMesC;
-						gotoxy(mapH+1+gameMesC,65);
+						gotoxy(mapH+2+gameMesC,65);
 						setfcolor(0xffffff);
 						fputs("PLAYER ",stdout);
 						setfcolor(defTeams[std::__lg(ed)].color);

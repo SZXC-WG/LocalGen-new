@@ -25,6 +25,9 @@
 
 /*************** header files ***************/
 
+/* dev project headers */
+#include "LocalGen-new_private.h"
+
 /* console settings */
 #include "LGcons.hpp" // __LGCONS_HPP__
 /* map structs */
@@ -43,6 +46,7 @@
 HWND hwnd = GetConsoleWindow();
 signed main(signed argc, char** argv) {
 	ShowWindow(hwnd,SW_MAXIMIZE);
+	SetConsoleTitle("Localized Generals.io v" FILE_VERSION);
 	initattr();
 	hideCursor();
 	initDefMap();

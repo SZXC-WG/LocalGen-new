@@ -37,29 +37,6 @@ const int dy[5] = {0,0,-1,0,1};
 struct passS { int id,turn; };
 std::vector<passS> passId[505][505];
 
-int randomBot(int id,playerCoord coo) {
-	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
-	if(mtrd()%100) {
-		int p[5],pl=0;
-		for(int i=1; i<=4; ++i) {
-			if(coo.x+dx[i]<1||coo.x+dx[i]>mapH||coo.y+dy[i]<1||coo.y+dy[i]>mapW||gameMap[coo.x+dx[i]][coo.y+dy[i]].type==2) continue;
-			p[++pl]=i;
-		}
-		return p[mtrd()%pl+1];
-	}
-	return 0;
-}
-int noReturnRandomBot(int id,playerCoord coo) {
-	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
-	int p[5],pl=0;
-	for(int i=1; i<=4; ++i) {
-		if(coo.x+dx[i]<1||coo.x+dx[i]>mapH||coo.y+dy[i]<1||coo.y+dy[i]>mapW||gameMap[coo.x+dx[i]][coo.y+dy[i]].type==2) continue;
-		p[++pl]=i;
-	}
-	return p[mtrd()%pl+1];
-}
 int smartRandomBot(int id,playerCoord coo) {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
@@ -360,9 +337,7 @@ struct gameStatus {
 				for(int i=2; i<=playerCnt; ++i) {
 					if(!isAlive[i]) continue;
 					switch(robotId[i]) {
-						case 0: analyzeMove(i,randomBot(i,coordinate[i]),coordinate[i]); break;
-						case 1: analyzeMove(i,noReturnRandomBot(i,coordinate[i]),coordinate[i]); break;
-						case 2: analyzeMove(i,smartRandomBot(i,coordinate[i]),coordinate[i]); break;
+						case 0: case 1: case 2: analyzeMove(i,smartRandomBot(i,coordinate[i]),coordinate[i]); break;
 						default: analyzeMove(i,0,coordinate[i]);
 					}
 				}

@@ -180,7 +180,7 @@ void MainPage(){
 		char ch;
 		int mapid=0;
 		gotoxy(17,37); printf("Map Lists:"); clearline();
-		gotoxy(18,37); printf("   %2s | %20s | %42s |","ID","CHN name","ENG name");
+		gotoxy(18,37); printf("   %2s | %-20s | %-42s |","ID","CHN name","ENG name");
 		for(int i=1; i<=mapNum; ++i) gotoxy(18+i,37),printf("   %2d | %-20s | %-42s |",i,maps[i].chiname.c_str(),maps[i].engname.c_str());
 		gotoxy(19,37); printf(">>");
 		int chsd=1;
@@ -196,16 +196,21 @@ void MainPage(){
 		} while(ch!=13);
 		if(chsd>=5) {
 			copyMap(chsd);
-			gotoxy(19,113);
-			int p=maps[chsd].generalcnt+maps[chsd].plaincnt;
-			printf("This map has %d general & plain blocks.",p); clearline();
-			__CHSDPLAYER: gotoxy(20,113); printf("Input Player Count(<%d): ",std::min(p,16)); scanf("%d",&plCnt); if(plCnt<0||plCnt>std::min(p,16)) goto __CHSDPLAYER;
+			int g=maps[chsd].generalcnt;
+			int p=maps[chsd].plaincnt;
+			int m=maps[chsd].mountaincnt;
+			int s=maps[chsd].swampcnt;
+			int c=maps[chsd].citycnt;
+			gotoxy(19,113); printf("Map Information",p); clearline();
+			gotoxy(20,113); printf("%2s | %4s | %4s | %4s | %4s |","G","P","C","M","S"); 
+			gotoxy(21,113); printf("%2d | %4d | %4d | %4d | %4d |",g,p,c,m,s); 
+			__CHSDPLAYER: gotoxy(22,113); printf("Input Player Count(<=%d): ",std::min(g+p,16)); scanf("%d",&plCnt); if(plCnt<0||plCnt>std::min(p,16)) goto __CHSDPLAYER;
 		}
 		else {
 			int H,W,amn,amx;
 			gotoxy(19,113); printf("Map Height: "); scanf("%d",&H);
 			gotoxy(20,113); printf("Map Width: "); scanf("%d",&W);
-			__CHSDSPEPLAYER: gotoxy(21,113); printf("Player Count(<%d):",std::min(H*W,16)); scanf("%d",&plCnt); if(plCnt<0||plCnt>std::min(H*W,16)) goto __CHSDSPEPLAYER;
+			__CHSDSPEPLAYER: gotoxy(21,113); printf("Player Count(<=%d):",std::min(H*W,16)); scanf("%d",&plCnt); if(plCnt<0||plCnt>std::min(H*W,16)) goto __CHSDSPEPLAYER;
 			switch(chsd) {
 				case 1: createRandomMap(H,W); break;
 				case 2: {

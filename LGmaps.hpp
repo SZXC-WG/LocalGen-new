@@ -17,6 +17,7 @@
 #include <string>
 #include <random>
 #include <chrono>
+#include <unistd.h>
 using std::string;
 using std::to_string;
 #include "LGcons.hpp"
@@ -318,14 +319,14 @@ void createFullPlainMap(int crtH,int crtW,int plCnt) {
 	}
 }
 
-HINSTANCE defMap=LoadLibrary("defMap.dll");
+HINSTANCE defMap;
 typedef int(*func1)();
 typedef string(*func2)(int,int);
 typedef int(*func3)(int,int);
 
-func1 statusCheck=(func1)GetProcAddress(defMap,"statusCheck");
-func2 getMapInfoStr=(func2)GetProcAddress(defMap,"getMapInfoStr");
-func3 getMapInfoNum=(func3)GetProcAddress(defMap,"getMapInfoNum");
+func1 statusCheck;
+func2 getMapInfoStr;
+func3 getMapInfoNum;
 
 struct MapInfoS {
 	int id;	string chiname; string engname; string auth; int hei; int wid; int generalcnt; int swampcnt; int citycnt; int mountaincnt; int plaincnt;
@@ -336,9 +337,20 @@ struct MapGeoS {
 	int id; string geo; int aBits; string army; string light; 
 };MapGeoS mapG[205];
 
+bool dllExit;
 int mapNum;
 
 void initDefMap(){
+	if(access("defMap.dll",F_OK)==-1){
+		dllExit=0;
+		
+		return ;
+	}else{
+		defMap=LoadLibrary("defMap.dll");
+		statusCheck=(func1)GetProcAddress(defMap,"statusCheck");
+		getMapInfoStr=(func2)GetProcAddress(defMap,"getMapInfoStr");
+		getMapInfoNum=(func3)GetProcAddress(defMap,"getMapInfoNum");
+	}
 	mapNum=statusCheck();
 	
 	for(int i=0;i<=mapNum;i++){

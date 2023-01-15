@@ -27,26 +27,26 @@ CommandLine=
 Folders=
 IncludeVersionInfo=1
 SupportXPThemes=0
-CompilerSet=6
-CompilerSettings=0000000000000000001000000
-UnitCount=4
+CompilerSet=0
+CompilerSettings=0000000000000000000000000
+UnitCount=8
 
 [VersionInfo]
-Major=3
+Major=1
 Minor=0
 Release=0
 Build=0
 LanguageID=1033
 CharsetID=1252
-CompanyName=
-FileVersion=3.0.0.0
-FileDescription=Localized Generals.io
+CompanyName=LocalGen-dev
+FileVersion=1.0.0.0
+FileDescription=Localized Generals.io (new ver.)
 InternalName=
 LegalCopyright=Copyright (c) 2023 LocalGen-dev
 LegalTrademarks=
 OriginalFilename=
-ProductName=Localized Generals.io
-ProductVersion=3.0.0.0
+ProductName=Localized Generals.io (new ver.)
+ProductVersion=1.0.0.0
 AutoIncBuildNr=1
 SyncProduct=1
 
@@ -82,6 +82,46 @@ BuildCmd=
 
 [Unit4]
 FileName=LGgame.hpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit5]
+FileName=LGpages.hpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit6]
+FileName=LGprint.hpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit7]
+FileName=LGweb.hpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit8]
+FileName=LGzipmap.hpp
 CompileCpp=1
 Folder=
 Compile=1

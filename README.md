@@ -2,7 +2,7 @@
 
 > We're developing a new version of LocalGen here!  
 > It will be totally different from the previous versions (except the game rules).
-> The new version will be tagged from `v3.0.0`.
+> The new version will be tagged from `v1.0.0`.
 
 Welcome to the project of Local Generals.io!
 

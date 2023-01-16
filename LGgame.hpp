@@ -88,11 +88,10 @@ int ktqBot(int id,playerCoord coo){
 //	fputs(defTeams[id].name.c_str(),stdout);
 //	printf(": ");
 //	for(int i=1; i<=cnt; ++i) printf("{%d %d %lld %lld %d} ",p[i].to,p[i].team,p[i].army,p[i].del,p[i].type);
-	int go=p[1].to;
 	for(int i=1;i<=cnt;i++){
 		if(p[i].del<gameMap[coo.x][coo.y].army)return p[i].to;
 	}
-	return go;
+	return -1;
 }
 
 struct gameStatus {

@@ -215,6 +215,7 @@ void MainPage(){
 		x=3,y=5,chs=1;
 		chsFrame(x,y,1);
 		
+		chCmd=0;
 		while(chCmd!=13) {
 			chCmd=_getch();
 			chsFrame(x,y,0);

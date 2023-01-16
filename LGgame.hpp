@@ -242,7 +242,7 @@ struct gameStatus {
 					if(gameMap[cur.to.x][cur.to.y].type==3) /* general */ {
 						kill(cur.id,p);
 						gameMap[cur.to.x][cur.to.y].type=4;
-						for(auto& mv:inlineMove) if(mv.id==p) mv.id=cur.id;
+						for(auto& mv:inlineMove) if(mv.id==p) mv.id=cur.id,mv.army=(mv.army+1)>>1;
 					}
 				}
 			}

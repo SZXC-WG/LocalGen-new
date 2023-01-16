@@ -60,6 +60,34 @@ int smartRandomBot(int id,playerCoord coo) {
 	std::sort(p+1,p+pl+1,cmp);
 	return p[1].dir;
 }
+int ktqBot(int id,playerCoord coo){
+	using ll = long long;
+	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
+	struct node{
+		int to,team;
+		ll army,del;
+		int type;
+		bool operator<(node b){
+			return army<b.army||(army==b.army&&del<b.del);
+		}
+	};
+	node p[10];
+	int cnt=0;
+	for(int i=1;i<=4;i++){
+		int tx=coo.x+dx[i],ty=coo.y+dy[i];
+		if(gameMap[tx][ty].type==2||tx<1||tx>mapH||ty<1||ty>mapW)continue;
+		p[++cnt]={1,gameMap[tx][ty].team,gameMap[tx][ty].army,gameMap[tx][ty].army,gameMap[tx][ty].type};
+		if(p[cnt].type==4&&p[cnt].type==id)p[cnt].army*=-2;
+		else if(p[cnt].type==0&&p[cnt].type==id)p[cnt].army*=-1;
+		else if(p[cnt].type==1)p[cnt].del+=80;
+	}
+	std::sort(p+1,p+cnt+1);
+	int go=p[1].to;
+	for(int i=1;i<=cnt;i++){
+		if(p[i].del<gameMap[coo.x][coo.y].army)return p[i].to;
+	}
+	return go;
+}
 
 struct gameStatus {
 	bool isWeb;
@@ -271,7 +299,7 @@ struct gameStatus {
 			int robotId[64];
 			playerCoord coordinate[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-			for(int i=2; i<=playerCnt; ++i) robotId[i] = mtrd()%3;
+			for(int i=2; i<=playerCnt; ++i) robotId[i] = mtrd()%100+1;
 //			for(int i=2; i<=playerCnt; ++i) robotId[i] = 2; // for robot debug
 			initGenerals(coordinate);
 			updateMap();
@@ -337,7 +365,8 @@ struct gameStatus {
 				for(int i=2; i<=playerCnt; ++i) {
 					if(!isAlive[i]) continue;
 					switch(robotId[i]) {
-						case 0: case 1: case 2: analyzeMove(i,smartRandomBot(i,coordinate[i]),coordinate[i]); break;
+						case 1 ... 50: analyzeMove(i,smartRandomBot(i,coordinate[i]),coordinate[i]); break;
+						case 51 ... 100: analyzeMove(i,ktqBot(i,coordinate[i]),coordinate[i]); break;
 						default: analyzeMove(i,0,coordinate[i]);
 					}
 				}

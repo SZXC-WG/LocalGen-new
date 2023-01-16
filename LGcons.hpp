@@ -19,7 +19,7 @@
 #include <conio.h>
 
 // clear the full window: too slow, don't use!
-inline void clearance() { fputs("\033[1;1H\033[2J",stdout); }
+inline void clearance() { fputs("\033c",stdout); }
 // clear the line (only the chars after the cursor)
 inline void clearline() { fputs("\033[K",stdout); }
 

@@ -28,5 +28,5 @@ int ktqBot(int id,playerCoord coo){
 	for(int i=1;i<=cnt;i++){
 		if(p[i].del<gameMap[coo.x][coo.y].army)return p[i].to;
 	}
-  return go;
+	return go;
 }

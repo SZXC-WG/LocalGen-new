@@ -205,6 +205,7 @@ struct gameStatus {
 	// movement analyzer
 	int analyzeMove(int id,int mv,playerCoord& coo) {
 		switch(mv) {
+			case -1: break;
 			case 0: coo=genCoo[id]; break;
 			case 1 ... 4: {
 				playerCoord newCoo{coo.x+dx[mv],coo.y+dy[mv]};

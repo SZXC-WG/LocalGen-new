@@ -77,11 +77,17 @@ int ktqBot(int id,playerCoord coo){
 		int tx=coo.x+dx[i],ty=coo.y+dy[i];
 		if(gameMap[tx][ty].type==2||tx<1||tx>mapH||ty<1||ty>mapW)continue;
 		p[++cnt]={i,gameMap[tx][ty].team,gameMap[tx][ty].army,gameMap[tx][ty].army,gameMap[tx][ty].type};
-		if(p[cnt].type==4&&p[cnt].type==id)p[cnt].army*=-2;
-		else if(p[cnt].type==0&&p[cnt].type==id)p[cnt].army*=-1;
+		if(p[cnt].type!=1&&p[cnt].team==id) p[cnt].army=-p[cnt].army,p[cnt].del=-p[cnt].del;
+		if(p[cnt].type==4&&p[cnt].team!=id)p[cnt].army=2*p[cnt].army-ll(1e15);
+		else if(p[cnt].type==0&&p[cnt].team!=id)p[cnt].army=p[cnt].army-ll(1e15);
 		else if(p[cnt].type==1)p[cnt].del+=80;
+		else if(p[cnt].type==3&&p[cnt].team!=id)p[cnt].army=-ll(1e18);
 	}
 	std::sort(p+1,p+cnt+1);
+	gotoxy(mapH+2+16+1+id,1); clearline();
+	fputs(defTeams[id].name.c_str(),stdout);
+	printf(": ");
+	for(int i=1; i<=cnt; ++i) printf("{%d %d %lld %lld %d} ",p[i].to,p[i].team,p[i].army,p[i].del,p[i].type);
 	int go=p[1].to;
 	for(int i=1;i<=cnt;i++){
 		if(p[i].del<gameMap[coo.x][coo.y].army)return p[i].to;

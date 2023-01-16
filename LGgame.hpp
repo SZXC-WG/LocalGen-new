@@ -84,10 +84,10 @@ int ktqBot(int id,playerCoord coo){
 		else if(p[cnt].type==3&&p[cnt].team!=id)p[cnt].army=-ll(1e18);
 	}
 	std::sort(p+1,p+cnt+1);
-	gotoxy(mapH+2+16+1+id,1); clearline();
-	fputs(defTeams[id].name.c_str(),stdout);
-	printf(": ");
-	for(int i=1; i<=cnt; ++i) printf("{%d %d %lld %lld %d} ",p[i].to,p[i].team,p[i].army,p[i].del,p[i].type);
+//	gotoxy(mapH+2+16+1+id,1); clearline();
+//	fputs(defTeams[id].name.c_str(),stdout);
+//	printf(": ");
+//	for(int i=1; i<=cnt; ++i) printf("{%d %d %lld %lld %d} ",p[i].to,p[i].team,p[i].army,p[i].del,p[i].type);
 	int go=p[1].to;
 	for(int i=1;i<=cnt;i++){
 		if(p[i].del<gameMap[coo.x][coo.y].army)return p[i].to;

@@ -19,7 +19,16 @@
 #include <conio.h>
 
 // clear the full window: too slow, don't use!
-inline void clearance() { fputs("\033c",stdout); }
+inline void clearance() {
+	HANDLE hdout=GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hdout,&csbi);
+    DWORD size=csbi.dwSize.X*csbi.dwSize.Y,num=0;
+    COORD pos={0,0};
+    FillConsoleOutputCharacter(hdout,' ',size,pos,&num);
+    FillConsoleOutputAttribute (hdout,csbi.wAttributes,size,pos,&num);
+    SetConsoleCursorPosition(hdout,pos);
+}
 // clear the line (only the chars after the cursor)
 inline void clearline() { fputs("\033[K",stdout); }
 

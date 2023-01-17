@@ -6,3 +6,5 @@ try.cpp
 Makefile.win
 *.gch
 LocalGen-new.layout
+*.o
+*.res

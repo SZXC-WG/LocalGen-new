@@ -37,8 +37,10 @@ const int dy[5] = {0,0,-1,0,1};
 struct passS { int id,turn; };
 std::vector<passS> passId[505][505];
 
+playerCoord lastTurn[20]; 
+
 int smartRandomBot(int id,playerCoord coo) {
-	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
 	struct node { int type,team; long long army; int dir; };
 	node p[5]; int pl=0;
@@ -61,7 +63,9 @@ int smartRandomBot(int id,playerCoord coo) {
 	return p[1].dir;
 }
 int ktqBot(int id,playerCoord coo){
+	static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	using ll = long long;
+	static int swampDir[20]={3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
 	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
 	struct node{
 		int to,team;
@@ -78,18 +82,19 @@ int ktqBot(int id,playerCoord coo){
 		if(gameMap[tx][ty].type==2||tx<1||tx>mapH||ty<1||ty>mapW)continue;
 		p[++cnt]={i,gameMap[tx][ty].team,gameMap[tx][ty].army,gameMap[tx][ty].army,gameMap[tx][ty].type};
 		if(p[cnt].type!=1&&p[cnt].team==id) p[cnt].army=-p[cnt].army,p[cnt].del=-p[cnt].del;
-		if(p[cnt].type==4&&p[cnt].team!=id)p[cnt].army=2*p[cnt].army-ll(1e15);
-		else if(p[cnt].type==0&&p[cnt].team!=id)p[cnt].army=p[cnt].army-ll(1e15);
-		else if(p[cnt].type==1)p[cnt].del+=80;
-		else if(p[cnt].type==3&&p[cnt].team!=id)p[cnt].army=-ll(1e18);
+		if(p[cnt].type==4&&p[cnt].team!=id) p[cnt].army=2*p[cnt].army-ll(1e15);
+		else if(p[cnt].type==0&&p[cnt].team!=id) p[cnt].army=p[cnt].army-ll(1e15);
+		else if(p[cnt].type==1) { p[cnt].del=200; p[cnt].army=-1e16; }
+		else if(p[cnt].type==3&&p[cnt].team!=id) p[cnt].army=-ll(1e18);
 	}
 	std::sort(p+1,p+cnt+1);
 //	gotoxy(mapH+2+16+1+id,1); clearline();
 //	fputs(defTeams[id].name.c_str(),stdout);
 //	printf(": ");
 //	for(int i=1; i<=cnt; ++i) printf("{%d %d %lld %lld %d} ",p[i].to,p[i].team,p[i].army,p[i].del,p[i].type);
-	for(int i=1;i<=cnt;i++){
-		if(p[i].del<gameMap[coo.x][coo.y].army)return p[i].to;
+//	fflush(stdout); _getch();
+	for(int i=1;i<=cnt;i++) {
+		if(p[i].del<gameMap[coo.x][coo.y].army) return p[i].to;
 	}
 	return -1;
 }
@@ -305,8 +310,8 @@ struct gameStatus {
 			int robotId[64];
 			playerCoord coordinate[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-			for(int i=2; i<=playerCnt; ++i) robotId[i] = mtrd()%100+1;
-//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 2; // for robot debug
+//			for(int i=2; i<=playerCnt; ++i) robotId[i] = mtrd()%100+1;
+			for(int i=2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode,coordinate[1]);

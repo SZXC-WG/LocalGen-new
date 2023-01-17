@@ -275,9 +275,9 @@ void MainPage(){
 			}
 			switch(chs) {
 				case 1: createRandomMap(H,W); break;
-				case 2: createFullCityMap(H,W,amn,amx,plCnt);
-				case 3: createFullSwampMap(H,W,plCnt);
-				case 4: createFullPlainMap(H,W,plCnt);
+				case 2: createFullCityMap(H,W,amn,amx,plCnt); break;
+				case 3: createFullSwampMap(H,W,plCnt); break;
+				case 4: createFullPlainMap(H,W,plCnt); break;
 			}
 		} else copyMap(chs);
 	} else {

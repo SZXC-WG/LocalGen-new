@@ -192,6 +192,14 @@ void MainPage(){
 	}
 	
 	if(!chs){
+		if(!dllExit){
+			clearance();
+			gotoxy(1,1);
+			printf("Oops, it seems like you don't have 'defMap.dll'!");
+			Sleep(2000);
+			exitExe();
+		}
+		
 		i=1,x=4,y=6;
 		clearance();
 		hideCursor();

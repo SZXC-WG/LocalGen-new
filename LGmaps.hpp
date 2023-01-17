@@ -343,15 +343,14 @@ int mapNum;
 void initDefMap(){
 	if(access("defMap.dll",F_OK)==-1){
 		dllExit=0;
-		
 		return ;
 	}else{
+		dllExit=1;
 		defMap=LoadLibrary("defMap.dll");
 		statusCheck=(func1)GetProcAddress(defMap,"statusCheck");
 		getMapInfoStr=(func2)GetProcAddress(defMap,"getMapInfoStr");
 		getMapInfoNum=(func3)GetProcAddress(defMap,"getMapInfoNum");
-	}
-	mapNum=statusCheck();
+	}mapNum=statusCheck();
 	
 	for(int i=0;i<=mapNum;i++){
 		maps[i].id=mapG[i].id=i;
@@ -397,6 +396,11 @@ void copyMap(int mapid) {
 		}
 	}
 	for(int i=1; i<=h; ++i) for(int j=1; j<=w; ++j) gameMap[i][j].lit=mapG[mapid].light[(i-1)*w+j-1]-'0';
+}
+
+void exitExe(){
+	FreeLibrary(defMap);
+	exit(0);
 }
 
 #undef ll // long long

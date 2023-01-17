@@ -50,7 +50,7 @@ signed main(signed argc, char** argv) {
 	initattr();
 	initDefMap();
 	MainPage(); // start main page 
-	exit(0);    // exit program
+	exitExe();    // exit program
 }
 
 #endif // __LGMAIN_CPP__

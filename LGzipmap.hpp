@@ -15,10 +15,15 @@
 #define __LGZIPMAP_HPP__
 
 #include "LGmaps.hpp"
+#include "LGgame.hpp"
 
-const int LEN_ZIP=100005,CHAR_AD=48;
+const int LEN_ZIP=100005,CHAR_AD=48,LEN_MOVE=30005;
 char strdeZip[LEN_ZIP];
 char strZip[LEN_ZIP];
+char strGameZip[4*LEN_ZIP];
+char strdeGameZip[4*LEN_ZIP];
+moveS inlineMove[LEN_MOVE];
+int moveCnt;
 
 inline long long PMod(long long &x){
 	long long res=x&63;
@@ -66,6 +71,14 @@ void deZip(){
 		k+=11;
 		gameMap[i][j].army=f?(-gameMap[i][j].army):gameMap[i][j].army;
 	}
+}
+
+void readMove(gameStatus::moveS move){
+	inlineMove[++moveCnt]=move;
+}
+
+void zipGame(){
+	
 }
 
 #endif

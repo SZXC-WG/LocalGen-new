@@ -22,7 +22,7 @@ char strdeZip[LEN_ZIP];
 char strZip[LEN_ZIP];
 char strGameZip[4*LEN_ZIP];
 char strdeGameZip[4*LEN_ZIP];
-moveS inlineMove[LEN_MOVE];
+gameStatus::moveS inlMove[LEN_MOVE];
 int moveCnt;
 
 inline long long PMod(long long &x){
@@ -74,7 +74,7 @@ void deZip(){
 }
 
 void readMove(gameStatus::moveS move){
-	inlineMove[++moveCnt]=move;
+	inlMove[++moveCnt]=move;
 }
 
 void zipGame(){

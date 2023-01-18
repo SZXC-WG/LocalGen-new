@@ -287,7 +287,9 @@ struct gameStatus {
 		printf("| %7s | %8s | %5s | %5s | %5s | %13s |","PLAYER","ARMY","PLAIN","CITY","TOT","ARMY IN HAND");
 		resetattr(); setfcolor(0x000000); putchar('|'); putchar('\n');
 		for(int i=1; i<=playerCnt; ++i) {
-			setfcolor(defTeams[rklst[i].id].color); underline();
+			if(isAlive[rklst[i].id]) setfcolor(defTeams[rklst[i].id].color);
+			else setfcolor(defTeams[10].color);
+			underline();
 			printf("| %7s | ",defTeams[rklst[i].id].name.c_str());
 			if(rklst[i].army<100000000) printf("%8lld | ",rklst[i].army);
 			else {

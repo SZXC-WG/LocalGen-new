@@ -14,6 +14,7 @@
 #ifndef __LGZIPMAP_HPP__
 #define __LGZIPMAP_HPP__
 
+#include <queue>
 #include "LGmaps.hpp"
 #include "LGgame.hpp"
 
@@ -22,8 +23,10 @@ char strdeZip[LEN_ZIP];
 char strZip[LEN_ZIP];
 char strGameZip[4*LEN_ZIP];
 char strdeGameZip[4*LEN_ZIP];
-gameStatus::moveS inlMove[LEN_MOVE];
-int moveCnt;
+struct movementS{
+	int id,turn,op;
+};
+std::queue<movementS> movementPack;
 
 inline long long PMod(long long &x){
 	long long res=x&63;
@@ -33,6 +36,7 @@ inline long long PMod(long long &x){
 void Zip(){
 	register int p=0,i,j;
 	long long k1=mapH,k2=mapW;
+	strZip[p++]=44;
 	strZip[p++]=PMod(k1)+CHAR_AD;strZip[p++]=PMod(k1)+CHAR_AD;
 	strZip[p++]=PMod(k2)+CHAR_AD;strZip[p++]=PMod(k2)+CHAR_AD;
 	
@@ -53,7 +57,7 @@ void Zip(){
 
 void deZip(){
 	register int i,j,k=4;
-	int f,p=0;
+	int f,p=1;
 	
 	for(;strdeZip[p]!='\0';p++) strdeZip[p]-=CHAR_AD;
 	
@@ -73,11 +77,30 @@ void deZip(){
 	}
 }
 
-void readMove(gameStatus::moveS move){
-	inlMove[++moveCnt]=move;
+void zipGame(long long totTurn){
+	int p=0,curTurn=0;
+	
+	strGameZip[p++]=45;
+	strGameZip[p++]=PMod(totTurn)+CHAR_AD;
+	strGameZip[p++]=PMod(totTurn)+CHAR_AD;
+	
+	while(!movementPack.empty()){
+		if(movementPack.front().turn!=curTurn){
+			for(int i=curTurn+1;i<=movementPack.front().turn;i++){
+				strGameZip[p++]=46;
+			}
+			curTurn=movementPack.front().turn;
+		}
+		strGameZip[p++]=movementPack.front().id+CHAR_AD;
+		strGameZip[p++]=movementPack.front().op+CHAR_AD;
+		movementPack.pop();
+	}
+	
+	strGameZip[p++]=47;
+	strGameZip[p]='\0';
 }
 
-void zipGame(){
+void Replay(){
 	
 }
 

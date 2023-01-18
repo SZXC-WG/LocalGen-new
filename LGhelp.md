@@ -80,3 +80,12 @@ All contributors who contributed to this project should write the functions, var
 > >
 > > Variables:
 > > 
+
+## Bot返回值
+```
+-1~8
+-1：不动
+0：回家
+1-4：带兵上左下右
+5-8：不带兵上左下右（可穿墙）
+```

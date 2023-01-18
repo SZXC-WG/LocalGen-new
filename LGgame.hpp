@@ -347,7 +347,8 @@ struct gameStatus {
 						case 27: MessageBox(nullptr,string("YOU QUIT THE GAME.").c_str(),"",MB_OK); return 0;
 						case int('\b'): {
 							if(!isAlive[1]) break;
-							MessageBox(nullptr,string("YOU SURRENDERED.").c_str(),"",MB_OK);
+							int confirmSur=MessageBox(nullptr,string("ARE YOU SURE TO SURRENDER?").c_str(),"SURRENDER",MB_YESNO);
+							if(confirmSur==7) break;
 							isAlive[1]=0;
 							for(int i=1; i<=mapH; ++i) {
 								for(int j=1; j<=mapW; ++j) {

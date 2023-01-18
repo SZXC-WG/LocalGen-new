@@ -3,3 +3,6 @@
 46 SIG3(CMD)
 47 SIG4(END)
 48 CHAR_AD
+
+.lgmp 地图
+.lgrep 回放

@@ -81,7 +81,7 @@ All contributors who contributed to this project should write the functions, var
 > > Variables:
 > > 
 
-## ** Bot返回值 **
+## Bot返回值
 ```
 -1~8
 -1：不动

@@ -428,4 +428,3 @@ int GAME(bool isWeb,int cheatCode,int plCnt,int stDel) {
 }
 
 #endif // __LGGAME_HPP__
-

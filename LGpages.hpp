@@ -239,7 +239,7 @@ void MainPage(){
 			if(y>frameW*5) y=5,x+=frameH+4;
 			if(y<5) y=21+frameW*4,x=x-frameH-4;
 			chsFrame(x,y,1);
-			gotoxy(160,0);printf("%d %d %d",chs,x,y);
+		//	gotoxy(160,0);printf("%d %d %d",chs,x,y);
 		}
 		
 		clearance(); hideCursor();

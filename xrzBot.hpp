@@ -72,9 +72,9 @@ int xrzBot(int ind, playerCoord player)
             return i;
         if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt == 0)
             return i;
-        int cnt = 5;
+        int cnt = 4;
         if (des.x == previousPos[id].x && des.y == previousPos[id].y)
-            cnt += 10;
+            cnt += turnCount[id]*10;
         if (des.teamOnIt != id && des.teamOnIt != 0)
             cnt--;
         if (des.type == 0)
@@ -85,7 +85,7 @@ int xrzBot(int ind, playerCoord player)
             cnt--;
         if (des.teamOnIt == id && des.Army >= 2000)
             cnt--;
-        cnt += max(0, (int)log2(visitTime[id][des.x][des.y]));
+        cnt += max(0, visitTime[id][des.x][des.y]*10);
         if (mtrd() % cnt == 0)
         {
             previousPos[id] = player;

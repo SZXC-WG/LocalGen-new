@@ -6,9 +6,8 @@ const int attackModeNum = 1;
 const int defenceModeNum = 2;
 static int turnNumber = 0;
 static int defenceModeStart;
-bool isDefenseOK;
 static int operationMode = 114514;
-static int visitTimeCount[505][505];
+
 const int changeOnX[4] = {-1, 0, 1, 0};
 const int changeOnY[4] = {0, -1, 0, 1};
 
@@ -18,13 +17,10 @@ int defenceMode(int id, playerCoord coord)
     {
         int x, y;
         int visited;
-        int visitTime;
         int direction;
         bool operator<(node b)
         {
-            if (visited != b.visited)
-                return visited > b.visited;
-            return visitTime < b.visitTime;
+            return visited > b.visited;
         }
     };
     vector<node> operat;
@@ -36,7 +32,6 @@ int defenceMode(int id, playerCoord coord)
         tmp.direction = i + 1;
         tmp.x = destinationX;
         tmp.y = destinationY;
-        tmp.visitTime = visitTimeCount[destinationX][destinationY];
         if (gameMap[destinationX][destinationY].type == 2)
             continue;
         if (destinationX < 1 || destinationX > mapH || destinationY < 1 || destinationY > mapW)
@@ -69,12 +64,13 @@ int attackMode(int id, playerCoord coord)
             if (isMountain && b.isMountain)
                 return MountainNum < b.MountainNum;
             if (isSwamp != b.isSwamp)
-                return isSwamp >= b.isSwamp;
-            return visited < b.visited;
+                return isSwamp < b.isSwamp;
+            if (visited > rand() % 1000 + 10)
+                return true;
+            return rand() & 1;
         }
     };
     vector<node> operat;
-    int mxEnermyMet;
     for (int i = 0; i < 4; i++)
     {
         int destinationX = coord.x + changeOnX[i];
@@ -100,8 +96,6 @@ int attackMode(int id, playerCoord coord)
         }
         else
             tmp.enermyCount = gameMap[destinationX][destinationY].army;
-        if (gameMap[destinationX][destinationY].team != id)
-            mxEnermyMet = max(1ll * mxEnermyMet, gameMap[destinationX][destinationY].army);
         for (int j = 0; j < 4; j++)
         {
             int secdesX = destinationX + changeOnX[j], secdesY = destinationY + changeOnY[j];
@@ -120,12 +114,11 @@ int attackMode(int id, playerCoord coord)
 int xrzBot(int id, playerCoord coord)
 {
     turnNumber++;
-    visitTimeCount[coord.x][coord.y]++;
     if (operationMode == 114514)
         operationMode = attackModeNum;
     if (gameMap[coord.x][coord.y].team != id || gameMap[coord.x][coord.y].army == 0)
         return 0;
-    if (gameMap[coord.x][coord.y].army < rand() % min(max(1, turnNumber - 100), 10000) && isDefenseOK && turnNumber > 100 && rand() % 4 == 0)
+    if (gameMap[coord.x][coord.y].army < rand() % min(max(1, turnNumber - 100), 10000))
     {
         operationMode = defenceModeNum;
         if (defenceModeStart == 0)

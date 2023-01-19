@@ -202,22 +202,22 @@ int xrzBot(int ind, playerCoord player)
 		des.teamOnIt = gameMap[des.x][des.y].team;
 		if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
 			return i;
-		if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt == 0)
+		if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt != id)
 			return i;
 		int cnt = 4;
 		if (des.x == previousPos[id].x && des.y == previousPos[id].y)
 			cnt += turnCount[id] * 10;
 		if (des.teamOnIt != id && des.teamOnIt != 0)
-			cnt--;
+			cnt -= log2(visitTime[id][des.x][des.y]);
 		if (des.type == 0)
-			cnt--;
+			cnt -= log2(visitTime[id][des.x][des.y]);
 		if (des.type == 1)
-			cnt += 2;
+			cnt += log2(visitTime[id][des.x][des.y]);
 		if (des.teamOnIt == 0)
-			cnt--;
+			cnt -= log2(visitTime[id][des.x][des.y]);
 		if (des.teamOnIt == id && des.Army >= 2000)
-			cnt--;
-		cnt += std::max(0, visitTime[id][des.x][des.y] * 10);
+			cnt -= log2(visitTime[id][des.x][des.y]);
+		cnt += std::max(0, visitTime[id][des.x][des.y]);
 		if (mtrd() % cnt == 0)
 		{
 			previousPos[id] = player;
@@ -528,10 +528,10 @@ struct gameStatus
 			// for (int i = 2; i <= playerCnt; ++i)
 			// 	robotId[i] = mtrd() % 100 + 1;
 			//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
-			// for (int i = 2; i <= playerCnt; ++i)
-			// 	robotId[i] = mtrd() % 300 + 1;
 			for (int i = 2; i <= playerCnt; ++i)
-				robotId[i] = 51; // for robot debug
+				robotId[i] = mtrd() % 300 + 1;
+			// for (int i = 2; i <= playerCnt; ++i)
+			// 	robotId[i] = 51; // for robot debug
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode, coordinate[1]);

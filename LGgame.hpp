@@ -31,7 +31,7 @@ using namespace std::literals;
 // project headers
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
-//Robot
+// Robot
 #include "xrzBot.hpp"
 
 const int dx[5] = {0,-1,0,1,0};

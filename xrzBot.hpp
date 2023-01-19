@@ -83,6 +83,8 @@ int xrzBot(int ind, playerCoord player)
             cnt++;
         if (des.teamOnIt == 0)
             cnt--;
+        if (des.teamOnIt == id && des.Army >= 1000)
+            cnt--;
         cnt += max(0, (int)log2(visitTime[id][des.x][des.y]));
         if (mtrd() % cnt == 0)
         {

@@ -525,13 +525,9 @@ struct gameStatus
 			int robotId[64];
 			playerCoord coordinate[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-			// for (int i = 2; i <= playerCnt; ++i)
-			// 	robotId[i] = mtrd() % 100 + 1;
-			//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
 			for (int i = 2; i <= playerCnt; ++i)
 				robotId[i] = mtrd() % 300 + 1;
-			// for (int i = 2; i <= playerCnt; ++i)
-			// 	robotId[i] = 51; // for robot debug
+			//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode, coordinate[1]);
@@ -648,77 +644,59 @@ struct gameStatus
 					case 1 ... 50:
 						analyzeMove(i, smartRandomBot(i, coordinate[i]), coordinate[i]);
 						break;
-					case 51 ... 100:
+					case 51 ... 300:
 						analyzeMove(i, xrzBot(i, coordinate[i]), coordinate[i]);
 						break;
 					default:
 						analyzeMove(i, 0, coordinate[i]);
-						while (!movement.empty() && analyzeMove(1, movement.front(), coordinate[1]))
-							movement.pop_front();
-						if (!movement.empty())
-							movement.pop_front();
-						for (int i = 2; i <= playerCnt; ++i)
-						{
-							if (!isAlive[i])
-								continue;
-							switch (robotId[i])
-							{
-							case 1 ... 100:
-								analyzeMove(i, smartRandomBot(i, coordinate[i]), coordinate[i]);
-								break;
-							case 101 ... 300:
-								analyzeMove(i, xrzBot(i, coordinate[i]), coordinate[i]);
-								break;
-							default:
-								analyzeMove(i, 0, coordinate[i]);
-							}
-						}
-						flushMove();
-						if (!gameEnd)
-						{
-							int ed = 0;
-							for (int i = 1; i <= playerCnt; ++i)
-								ed |= (isAlive[i] << i);
-							if (__builtin_popcount(ed) == 1)
-							{
-								MessageBox(nullptr,
-										   ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
-											"THE GAME WILL CONTINUE." + "\n" +
-											"YOU CAN PRESS [ESC] TO EXIT.")
-											   .c_str(),
-										   "", MB_OK);
-								gameEnd = 1;
-								cheatCode = 1048575;
-								++gameMesC;
-								gotoxy(mapH + 2 + gameMesC, 65);
-								setfcolor(0xffffff);
-								fputs("PLAYER ", stdout);
-								setfcolor(defTeams[std::__lg(ed)].color);
-								printf("%-7s", defTeams[std::__lg(ed)].name.c_str());
-								setfcolor(0xffffff);
-								printf(" WON AT TURN %d!!!", curTurn);
-								fflush(stdout);
-							}
-						}
-						gotoxy(1, 1);
-						printMap(cheatCode, coordinate[1]);
-						ranklist(coordinate);
-						lPT = std::chrono::steady_clock::now().time_since_epoch();
 					}
 				}
-				return 0;
+				flushMove();
+				if (!gameEnd)
+				{
+					int ed = 0;
+					for (int i = 1; i <= playerCnt; ++i)
+						ed |= (isAlive[i] << i);
+					if (__builtin_popcount(ed) == 1)
+					{
+						MessageBox(nullptr,
+								   ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
+									"THE GAME WILL CONTINUE." + "\n" +
+									"YOU CAN PRESS [ESC] TO EXIT.")
+									   .c_str(),
+								   "", MB_OK);
+						gameEnd = 1;
+						cheatCode = 1048575;
+						++gameMesC;
+						gotoxy(mapH + 2 + gameMesC, 65);
+						setfcolor(0xffffff);
+						fputs("PLAYER ", stdout);
+						setfcolor(defTeams[std::__lg(ed)].color);
+						printf("%-7s", defTeams[std::__lg(ed)].name.c_str());
+						setfcolor(0xffffff);
+						printf(" WON AT TURN %d!!!", curTurn);
+						fflush(stdout);
+					}
+				}
+				gotoxy(1, 1);
+				printMap(cheatCode, coordinate[1]);
+				ranklist(coordinate);
+				lPT = std::chrono::steady_clock::now().time_since_epoch();
 			}
-		};
-
-		int GAME(bool isWeb, int cheatCode, int plCnt, int stDel)
-		{
-			setvbuf(stdout, nullptr, _IOFBF, 5000000);
-			hideCursor();
-			clearance();
-			gotoxy(1, 1);
-			int ret = gameStatus(isWeb, cheatCode, plCnt, stDel)();
-			setvbuf(stdout, nullptr, _IONBF, 0);
-			return ret;
 		}
+		return 0;
+	}
+};
+
+int GAME(bool isWeb, int cheatCode, int plCnt, int stDel)
+{
+	setvbuf(stdout, nullptr, _IOFBF, 5000000);
+	hideCursor();
+	clearance();
+	gotoxy(1, 1);
+	int ret = gameStatus(isWeb, cheatCode, plCnt, stDel)();
+	setvbuf(stdout, nullptr, _IONBF, 0);
+	return ret;
+}
 
 #endif // __LGGAME_HPP__

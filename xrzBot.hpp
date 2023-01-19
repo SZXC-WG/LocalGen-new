@@ -43,7 +43,7 @@ int defenceMode(int id, playerCoord coord)
         operat.push_back(tmp);
     }
     sort(operat.begin(), operat.end());
-    return (*operat.begin()).direction;
+    return operat[0].direction;
 }
 
 int attackMode(int id, playerCoord coord)
@@ -108,7 +108,7 @@ int attackMode(int id, playerCoord coord)
         operat.push_back(tmp);
     }
     sort(operat.begin(), operat.end());
-    return (*operat.begin()).direction;
+    return operat[0].direction;
 }
 
 int xrzBot(int id, playerCoord coord)
@@ -118,7 +118,7 @@ int xrzBot(int id, playerCoord coord)
         operationMode = attackModeNum;
     if (gameMap[coord.x][coord.y].team != id || gameMap[coord.x][coord.y].army == 0)
         return 0;
-    if (gameMap[coord.x][coord.y].army < rand() % min(max(1, turnNumber - 100), 10000))
+    if (gameMap[coord.x][coord.y].army < rand() % min(max(1, turnNumber - 100), 10000) && turnNumber >= 100)
     {
         operationMode = defenceModeNum;
         if (defenceModeStart == 0)

@@ -314,8 +314,8 @@ struct gameStatus {
 			int robotId[64];
 			playerCoord coordinate[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-		//	for(int i=2; i<=playerCnt; ++i) robotId[i] = mtrd()%100+1;
-			for(int i=2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
+			for(int i=2; i<=playerCnt; ++i) robotId[i] = 1;
+//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode,coordinate[1]);
@@ -381,8 +381,7 @@ struct gameStatus {
 				for(int i=2; i<=playerCnt; ++i) {
 					if(!isAlive[i]) continue;
 					switch(robotId[i]) {
-						case 1 ... 50: analyzeMove(i,smartRandomBot(i,coordinate[i]),coordinate[i]); break;
-						case 51 ... 100: analyzeMove(i,xrzBot::xrzBot(i,coordinate[i]),coordinate[i]); break;
+						case 1: analyzeMove(i,xrzBot::xrzBot(i,coordinate[i]),coordinate[i]); break;
 						default: analyzeMove(i,0,coordinate[i]);
 					}
 				}

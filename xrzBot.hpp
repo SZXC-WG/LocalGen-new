@@ -12,7 +12,7 @@ int xrzBot(int ind, playerCoord player)
     static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
     armyNow = gameMap[player.x][player.y].army;
     id = ind;
-    if (gameMap[player.x][player.y].army == 0||gameMap[player.x][player.y].team!=id)
+    if (gameMap[player.x][player.y].army == 0 || gameMap[player.x][player.y].team != id)
         return 0;
     struct node
     {
@@ -41,7 +41,7 @@ int xrzBot(int ind, playerCoord player)
             previousPos[id] = player;
             return i;
         }
-        if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army&&des.teamOnIt!=id)
+        if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt != id)
         {
             previousPos[id] = player;
             return i;

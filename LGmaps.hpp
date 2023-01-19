@@ -306,7 +306,7 @@ void printMap(int printCode, playerCoord coo)
 	}
 	setfcolor(0xffffff);
 	for (register int i = 1; i <= mapW * 5 + 1; i += 2)
-		fputs("??", stdout);
+		fputs("£þ", stdout);
 	putchar('\n');
 	fflush(stdout);
 }

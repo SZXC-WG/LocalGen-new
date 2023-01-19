@@ -41,6 +41,9 @@ int defenceMode(int id, playerCoord coord)
             continue;
         operat.push_back(tmp);
     }
+    node tmp;
+    tmp.direction = rand() % 5;
+    operat.push_back(tmp);
     sort(operat.begin(), operat.end());
     return (*operat.begin()).direction;
 }
@@ -106,6 +109,9 @@ int attackMode(int id, playerCoord coord)
         }
         operat.push_back(tmp);
     }
+    node tmp;
+    tmp.direction = rand() % 5;
+    operat.push_back(tmp);
     sort(operat.begin(), operat.end());
     return (*operat.begin()).direction;
 }

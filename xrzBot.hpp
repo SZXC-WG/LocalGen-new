@@ -7,6 +7,7 @@ const int defenceModeNum = 2;
 static int turnNumber = 0;
 static int defenceModeStart;
 static int operationMode = 114514;
+static int visitTimeCount[MapW][MapH];
 const int changeOnX[4] = {-1, 0, 1, 0};
 const int changeOnY[4] = {0, -1, 0, 1};
 
@@ -16,9 +17,14 @@ int defenceMode(int id, playerCoord coord)
     {
         int x, y;
         int visited;
+        int visitTime;
         int direction;
         bool operator<(node b)
         {
+            if (visitTime > 10)
+                return false;
+            if (b.visitTime > 10)
+                return true;
             return visited > b.visited;
         }
     };
@@ -31,6 +37,7 @@ int defenceMode(int id, playerCoord coord)
         tmp.direction = i + 1;
         tmp.x = destinationX;
         tmp.y = destinationY;
+        tmp.visitTime = visitTimeCount[destinationX][destinationY];
         if (gameMap[destinationX][destinationY].type == 2)
             continue;
         if (destinationX < 1 || destinationX > mapH || destinationY < 1 || destinationY > mapW)
@@ -113,6 +120,7 @@ int attackMode(int id, playerCoord coord)
 int xrzBot(int id, playerCoord coord)
 {
     turnNumber++;
+    visitTimeCount[coord.x][coord.y]++;
     if (operationMode == 114514)
         operationMode = attackModeNum;
     if (gameMap[coord.x][coord.y].team != id || gameMap[coord.x][coord.y].army == 0)

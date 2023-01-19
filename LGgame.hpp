@@ -30,6 +30,7 @@ using namespace std::literals;
 // project headers
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
+#include "xrzBot.hpp"
 
 const int dx[5] = {0,-1,0,1,0};
 const int dy[5] = {0,0,-1,0,1};

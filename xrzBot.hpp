@@ -2,7 +2,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-namespace xrzBot{
+namespace xrzBot
+{
     const int dx[5] = {0, -1, 0, 1, 0};
     const int dy[5] = {0, 0, -1, 0, 1};
     static int armyNow;
@@ -61,8 +62,10 @@ namespace xrzBot{
             }
         }
         int i;
-        while (i = (mtrd() % 4+rand()%4+rand()*rand()%4)%4 + 1)
+        int timeToTry = 1000;
+        while (timeToTry--)
         {
+			i = (mtrd() % 4 + rand() % 4 + rand() * rand() % 4) % 4 + 1;
             node des;
             des.direction = i;
             des.x = player.x + dx[i];
@@ -80,7 +83,7 @@ namespace xrzBot{
                 return i;
             int cnt = 4;
             if (des.x == previousPos[id].x && des.y == previousPos[id].y)
-                cnt += turnCount[id]*10;
+                cnt += turnCount[id] * 10;
             if (des.teamOnIt != id && des.teamOnIt != 0)
                 cnt--;
             if (des.type == 0)
@@ -91,7 +94,7 @@ namespace xrzBot{
                 cnt--;
             if (des.teamOnIt == id && des.Army >= 2000)
                 cnt--;
-            cnt += max(0, visitTime[id][des.x][des.y]*10);
+            cnt += max(0, visitTime[id][des.x][des.y] * 10);
             if (mtrd() % cnt == 0)
             {
                 previousPos[id] = player;

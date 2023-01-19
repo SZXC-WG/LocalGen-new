@@ -36,3 +36,7 @@ The program can't run in Windows versions under Windows 7 (incl.).
 
 [Click this link!](http://github.com/LocalGen-dev/LocalGen-new/releases)
 
+## Donate Please!
+
+![QIM4p.jpg](https://i.imgtg.com/2023/01/19/QIM4p.jpg)
+![Quwij.jpg](https://i.imgtg.com/2023/01/19/Quwij.jpg)

@@ -8,7 +8,7 @@ Welcome to the project of Local Generals.io!
 
 Here you can play [generals.io](http://generals.io) on your computer without **connecting the internet**!
 
-You can play with robots <!--or **play with your friends** connecting the same WLAN--/>.
+You can play with robots ~~or **play with your friends** connecting the same WLAN~~.
 
 Interested? Then go to [the release page](http://github.com/LocalGen-dev/LocalGen-new/releases) to download!
 
@@ -28,7 +28,7 @@ We give our greatest thanks to all contributors who has contributed to our proje
 
 ## Warnings
 
-The program can't run under Mac OS or Linux. (maybe?)
+The program can't run under Mac OS. (maybe?)
 
 The program can't run in Windows versions under Windows 7 (incl.).
 

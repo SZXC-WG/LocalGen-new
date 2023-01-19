@@ -38,5 +38,4 @@ The program can't run in Windows versions under Windows 7 (incl.).
 
 ## Donate Please!
 
-![QIM4p.jpg](https://i.imgtg.com/2023/01/19/QIM4p.jpg)
-![Quwij.jpg](https://i.imgtg.com/2023/01/19/Quwij.jpg)
+[![QIM4p.th.jpg](https://i.imgtg.com/2023/01/19/QIM4p.th.jpg)](https://imgtg.com/image/QIM4p) [![Quwij.th.jpg](https://i.imgtg.com/2023/01/19/Quwij.th.jpg)](https://imgtg.com/image/Quwij)

@@ -187,8 +187,7 @@ int xrzBot(int ind, playerCoord player)
 		}
 	}
 	int i;
-	srand(time(0));
-	while (i = mtrd()*rand() % 4 + 1)
+	while (i = mtrd() % 4 + 1)
 	{
 		node des;
 		des.direction = i;
@@ -203,22 +202,22 @@ int xrzBot(int ind, playerCoord player)
 		des.teamOnIt = gameMap[des.x][des.y].team;
 		if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
 			return i;
-		if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army)
+		if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt == 0)
 			return i;
 		int cnt = 4;
 		if (des.x == previousPos[id].x && des.y == previousPos[id].y)
-			cnt += 2*turnCount[id];
+			cnt += turnCount[id] * 10;
 		if (des.teamOnIt != id && des.teamOnIt != 0)
 			cnt--;
 		if (des.type == 0)
 			cnt--;
 		if (des.type == 1)
-			cnt++;
+			cnt += 2;
 		if (des.teamOnIt == 0)
 			cnt--;
-		if (des.teamOnIt == id && des.Army >= 1000)
+		if (des.teamOnIt == id && des.Army >= 2000)
 			cnt--;
-		cnt += std::max(0, visitTime[id][des.x][des.y]);
+		cnt += std::max(0, visitTime[id][des.x][des.y] * 10);
 		if (mtrd() % cnt == 0)
 		{
 			previousPos[id] = player;
@@ -529,6 +528,9 @@ struct gameStatus
 			for (int i = 2; i <= playerCnt; ++i)
 				robotId[i] = mtrd() % 100 + 1;
 			//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
+			for (int i = 2; i <= playerCnt; ++i)
+				robotId[i] = mtrd() % 300 + 1;
+			//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode, coordinate[1]);
@@ -650,54 +652,72 @@ struct gameStatus
 						break;
 					default:
 						analyzeMove(i, 0, coordinate[i]);
+						while (!movement.empty() && analyzeMove(1, movement.front(), coordinate[1]))
+							movement.pop_front();
+						if (!movement.empty())
+							movement.pop_front();
+						for (int i = 2; i <= playerCnt; ++i)
+						{
+							if (!isAlive[i])
+								continue;
+							switch (robotId[i])
+							{
+							case 1 ... 100:
+								analyzeMove(i, smartRandomBot(i, coordinate[i]), coordinate[i]);
+								break;
+							case 101 ... 300:
+								analyzeMove(i, xrzBot(i, coordinate[i]), coordinate[i]);
+								break;
+							default:
+								analyzeMove(i, 0, coordinate[i]);
+							}
+						}
+						flushMove();
+						if (!gameEnd)
+						{
+							int ed = 0;
+							for (int i = 1; i <= playerCnt; ++i)
+								ed |= (isAlive[i] << i);
+							if (__builtin_popcount(ed) == 1)
+							{
+								MessageBox(nullptr,
+										   ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
+											"THE GAME WILL CONTINUE." + "\n" +
+											"YOU CAN PRESS [ESC] TO EXIT.")
+											   .c_str(),
+										   "", MB_OK);
+								gameEnd = 1;
+								cheatCode = 1048575;
+								++gameMesC;
+								gotoxy(mapH + 2 + gameMesC, 65);
+								setfcolor(0xffffff);
+								fputs("PLAYER ", stdout);
+								setfcolor(defTeams[std::__lg(ed)].color);
+								printf("%-7s", defTeams[std::__lg(ed)].name.c_str());
+								setfcolor(0xffffff);
+								printf(" WON AT TURN %d!!!", curTurn);
+								fflush(stdout);
+							}
+						}
+						gotoxy(1, 1);
+						printMap(cheatCode, coordinate[1]);
+						ranklist(coordinate);
+						lPT = std::chrono::steady_clock::now().time_since_epoch();
 					}
 				}
-				flushMove();
-				if (!gameEnd)
-				{
-					int ed = 0;
-					for (int i = 1; i <= playerCnt; ++i)
-						ed |= (isAlive[i] << i);
-					if (__builtin_popcount(ed) == 1)
-					{
-						MessageBox(nullptr,
-								   ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
-									"THE GAME WILL CONTINUE." + "\n" +
-									"YOU CAN PRESS [ESC] TO EXIT.")
-									   .c_str(),
-								   "", MB_OK);
-						gameEnd = 1;
-						cheatCode = 1048575;
-						++gameMesC;
-						gotoxy(mapH + 2 + gameMesC, 65);
-						setfcolor(0xffffff);
-						fputs("PLAYER ", stdout);
-						setfcolor(defTeams[std::__lg(ed)].color);
-						printf("%-7s", defTeams[std::__lg(ed)].name.c_str());
-						setfcolor(0xffffff);
-						printf(" WON AT TURN %d!!!", curTurn);
-						fflush(stdout);
-					}
-				}
-				gotoxy(1, 1);
-				printMap(cheatCode, coordinate[1]);
-				ranklist(coordinate);
-				lPT = std::chrono::steady_clock::now().time_since_epoch();
+				return 0;
 			}
-		}
-		return 0;
-	}
-};
+		};
 
-int GAME(bool isWeb, int cheatCode, int plCnt, int stDel)
-{
-	setvbuf(stdout, nullptr, _IOFBF, 5000000);
-	hideCursor();
-	clearance();
-	gotoxy(1, 1);
-	int ret = gameStatus(isWeb, cheatCode, plCnt, stDel)();
-	setvbuf(stdout, nullptr, _IONBF, 0);
-	return ret;
-}
+		int GAME(bool isWeb, int cheatCode, int plCnt, int stDel)
+		{
+			setvbuf(stdout, nullptr, _IOFBF, 5000000);
+			hideCursor();
+			clearance();
+			gotoxy(1, 1);
+			int ret = gameStatus(isWeb, cheatCode, plCnt, stDel)();
+			setvbuf(stdout, nullptr, _IONBF, 0);
+			return ret;
+		}
 
 #endif // __LGGAME_HPP__

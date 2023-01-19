@@ -6,8 +6,9 @@ const int attackModeNum = 1;
 const int defenceModeNum = 2;
 static int turnNumber = 0;
 static int defenceModeStart;
+bool isDefenseOK;
 static int operationMode = 114514;
-static int visitTimeCount[MapW][MapH];
+static int visitTimeCount[505][505];
 const int changeOnX[4] = {-1, 0, 1, 0};
 const int changeOnY[4] = {0, -1, 0, 1};
 
@@ -21,11 +22,9 @@ int defenceMode(int id, playerCoord coord)
         int direction;
         bool operator<(node b)
         {
-            if (visitTime > 10)
-                return false;
-            if (b.visitTime > 10)
-                return true;
-            return visited > b.visited;
+            if (visited != b.visited)
+                return visited > b.visited;
+            return visitTime < b.visitTime;
         }
     };
     vector<node> operat;
@@ -70,13 +69,12 @@ int attackMode(int id, playerCoord coord)
             if (isMountain && b.isMountain)
                 return MountainNum < b.MountainNum;
             if (isSwamp != b.isSwamp)
-                return isSwamp < b.isSwamp;
-            if (visited > rand() % 1000 + 10)
-                return true;
-            return rand() & 1;
+                return isSwamp >= b.isSwamp;
+            return visited < b.visited
         }
     };
     vector<node> operat;
+    int mxEnermyMet;
     for (int i = 0; i < 4; i++)
     {
         int destinationX = coord.x + changeOnX[i];
@@ -102,6 +100,8 @@ int attackMode(int id, playerCoord coord)
         }
         else
             tmp.enermyCount = gameMap[destinationX][destinationY].army;
+        if (gameMap[destinationX][destinationY].team != id)
+            mxEnermyMet = max(1ll * mxEnermyMet, gameMap[destinationX][destinationY].army);
         for (int j = 0; j < 4; j++)
         {
             int secdesX = destinationX + changeOnX[j], secdesY = destinationY + changeOnY[j];
@@ -125,7 +125,7 @@ int xrzBot(int id, playerCoord coord)
         operationMode = attackModeNum;
     if (gameMap[coord.x][coord.y].team != id || gameMap[coord.x][coord.y].army == 0)
         return 0;
-    if (gameMap[coord.x][coord.y].army < rand() % min(max(1, turnNumber - 100), 10000))
+    if (gameMap[coord.x][coord.y].army < rand() % min(max(1, turnNumber - 100), 10000) && isDefenseOK && turnNumber > 100 && rand() % 4 == 0)
     {
         operationMode = defenceModeNum;
         if (defenceModeStart == 0)

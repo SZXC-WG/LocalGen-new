@@ -4,9 +4,9 @@ using namespace std;
 const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};
 static int armyNow;
-playerCoord previousPos[16];
-static int visitTime[16][505][505];
-static int turnCount[16];
+playerCoord previousPos[17];
+static int visitTime[17][505][505];
+static int turnCount[17];
 static int id;
 
 int xrzBot(int ind, playerCoord player)

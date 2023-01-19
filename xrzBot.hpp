@@ -36,6 +36,7 @@ namespace xrzBot
         };
         vector<node> operat;
         random_shuffle(checkOrder + 1, checkOrder + 5);
+        int okDir = 0;
         for (int j = 1; j <= 4; j++)
         {
             int i = checkOrder[j];
@@ -47,6 +48,7 @@ namespace xrzBot
                 continue;
             if (des.x < 1 || des.x > mapH || des.y < 1 || des.y > mapW)
                 continue;
+            okDir = i;
             des.type = gameMap[des.x][des.y].type;
             des.Army = gameMap[des.x][des.y].army;
             des.teamOnIt = gameMap[des.x][des.y].team;
@@ -65,7 +67,7 @@ namespace xrzBot
         int timeToTry = 1000;
         while (timeToTry--)
         {
-			i = (mtrd() % 4 + rand() % 4 + rand() * rand() % 4) % 4 + 1;
+            i = (mtrd() % 4 + rand() % 4 + rand() * rand() % 4) % 4 + 1;
             node des;
             des.direction = i;
             des.x = player.x + dx[i];
@@ -101,5 +103,6 @@ namespace xrzBot
                 return i;
             }
         }
+        return okDir;
     }
 }

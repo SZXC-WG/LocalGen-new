@@ -380,7 +380,7 @@ struct gameStatus {
 					if(!isAlive[i]) continue;
 					switch(robotId[i]) {
 						case 1 ... 50: analyzeMove(i,smartRandomBot(i,coordinate[i]),coordinate[i]); break;
-						case 51 ... 100: analyzeMove(i,ktqBot(i,coordinate[i]),coordinate[i]); break;
+						case 51 ... 100: analyzeMove(i,xrzBot(i,coordinate[i]),coordinate[i]); break;
 						default: analyzeMove(i,0,coordinate[i]);
 					}
 				}

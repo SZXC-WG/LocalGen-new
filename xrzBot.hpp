@@ -1,149 +1,86 @@
 #include "LGmaps.hpp"
-#include <algorithm>
+#include <bits/stdc++.h>
 using namespace std;
+const int dx[5] = {0, -1, 0, 1, 0};
+const int dy[5] = {0, 0, -1, 0, 1};
+static int armyNow;
+playerCoord previousPos[16];
+static int id;
 
-const int attackModeNum = 1;
-const int defenceModeNum = 2;
-static int turnNumber = 0;
-static int defenceModeStart;
-static int operationMode = 1;
-const int changeOnX[4] = {-1, 0, 1, 0};
-const int changeOnY[4] = {0, -1, 0, 1};
-static playerCoord previousPos;
-
-int defenceMode(int id, playerCoord coord)
+int xrzBot(int ind, playerCoord player)
 {
+    static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+    armyNow = gameMap[player.x][player.y].army;
+    id = ind;
+    if (gameMap[player.x][player.y].army == 0||gameMap[player.x][player.y].team!=id)
+        return 0;
     struct node
     {
         int x, y;
-        int visited;
+        int type;
+        int Army;
+        int teamOnIt;
         int direction;
-        bool operator<(node b)
-        {
-            return visited > b.visited;
-        }
     };
     vector<node> operat;
-    for (int i = 0; i < 4; i++)
+    for (int i = 1; i <= 4; i++)
     {
-        int destinationX = coord.x + changeOnX[i];
-        int destinationY = coord.y + changeOnY[i];
-        node tmp;
-        tmp.direction = i + 1;
-        tmp.x = destinationX;
-        tmp.y = destinationY;
-        if (gameMap[destinationX][destinationY].type == 2)
+        node des;
+        des.direction = i;
+        des.x = player.x + dx[i];
+        des.y = player.y + dy[i];
+        if (gameMap[des.x][des.y].type == 2)
             continue;
-        if (destinationX < 1 || destinationX > mapH || destinationY < 1 || destinationY > mapW)
+        if (des.x < 1 || des.x > mapH || des.y < 1 || des.y > mapW)
             continue;
-        if (gameMap[destinationX][destinationY].team == id)
-            tmp.visited = gameMap[destinationX][destinationY].army;
-        else
-            continue;
-        operat.push_back(tmp);
-    }
-    node tmp;
-    tmp.direction = rand() % 5;
-    operat.push_back(tmp);
-    sort(operat.begin(), operat.end());
-    previousPos = coord;
-    return (*operat.begin()).direction;
-}
-
-int attackMode(int id, playerCoord coord)
-{
-    struct node
-    {
-        int x = 0, y = 0;
-        int enermyCount = 0;
-        bool isMountain = 0, enermyAround = 0;
-        int MountainNum = 0;
-        bool isSwamp = 0;
-        int visited = 1e9;
-        int direction = 0;
-        bool operator<(node b)
+        des.type = gameMap[des.x][des.y].type;
+        des.Army = gameMap[des.x][des.y].army;
+        des.teamOnIt = gameMap[des.x][des.y].team;
+        if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
         {
-            if (x == previousPos.x && y == previousPos.y)
-                return false;
-            if (b.x == previousPos.x && b.y == previousPos.y)
-                return false;
-            if (visited != b.visited)
-                return visited > b.visited;
-            if (enermyAround != b.enermyAround)
-                return enermyAround < b.enermyAround;
-            if (isMountain && b.isMountain)
-                return MountainNum < b.MountainNum;
-            if (visited > 1000)
-                return true;
-            return visited > b.visited;
+            previousPos[id] = player;
+            return i;
         }
-    };
-    vector<node> operat;
-    for (int i = 0; i < 4; i++)
-    {
-        int destinationX = coord.x + changeOnX[i];
-        int destinationY = coord.y + changeOnY[i];
-        node tmp;
-        tmp.direction = i + 1;
-        tmp.x = destinationX;
-        tmp.y = destinationY;
-        if (gameMap[destinationX][destinationY].type == 2)
-            continue;
-        if (destinationX < 1 || destinationX > mapH || destinationY < 1 || destinationY > mapW)
-            continue;
-        if (gameMap[destinationX][destinationY].type == 4 && gameMap[destinationX][destinationY].army <= gameMap[coord.x][coord.y].army && gameMap[coord.x][coord.y].team != id)
-            return i + 1;
-        if (gameMap[destinationX][destinationY].team == id)
-            tmp.visited = gameMap[destinationX][destinationY].army;
-        else if (gameMap[destinationX][destinationY].team == 0 && gameMap[destinationX][destinationY].army == 0)
-            tmp.visited = 1e9;
-        else if (gameMap[destinationX][destinationY].army != 0)
-            tmp.visited = -gameMap[destinationX][destinationY].army;
-        if (gameMap[destinationX][destinationY].type == 1)
-            tmp.isSwamp = true;
-        if (gameMap[destinationX][destinationY].type == 4)
+        if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army&&des.teamOnIt!=id)
         {
-            tmp.isMountain = true;
-            tmp.MountainNum = gameMap[destinationX][destinationY].army;
+            previousPos[id] = player;
+            return i;
         }
-        else
-            tmp.enermyCount = gameMap[destinationX][destinationY].army;
-        for (int j = 0; j < 4; j++)
+    }
+    for (int i = 1; i <= 4; i++)
+    {
+        node des;
+        des.direction = i;
+        des.x = player.x + dx[i];
+        des.y = player.y + dy[i];
+        if (gameMap[des.x][des.y].type == 2)
+            continue;
+        if (des.x < 1 || des.x > mapH || des.y < 1 || des.y > mapW)
+            continue;
+        des.type = gameMap[des.x][des.y].type;
+        des.Army = gameMap[des.x][des.y].army;
+        des.teamOnIt = gameMap[des.x][des.y].team;
+        if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
+            return i;
+        if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army)
+            return i;
+        int cnt = 4;
+        if (des.x == previousPos[id].x && des.y == previousPos[id].y)
+            cnt += 2;
+        if (des.teamOnIt != id && des.teamOnIt != 0)
+            cnt--;
+        if (des.type == 0)
+            cnt--;
+        if (des.type == 1)
+            cnt++;
+        if (des.teamOnIt == 0)
+            cnt--;
+        if (mtrd() % cnt == 0)
         {
-            int secdesX = destinationX + changeOnX[j], secdesY = destinationY + changeOnY[j];
-            if (gameMap[secdesX][secdesY].team != id && gameMap[secdesX][secdesY].team != 0)
-            {
-                tmp.enermyAround = true;
-            }
+            previousPos[id] = player;
+            return i;
         }
-        operat.push_back(tmp);
     }
-    sort(operat.begin(), operat.end());
-    previousPos = coord;
-    return (*operat.begin()).direction;
-}
-
-int xrzBot(int id, playerCoord coord)
-{
-    srand(time(0));
-    turnNumber++;
-    //    if (operationMode == 114514)
-    //        operationMode = attackModeNum;
-    if (gameMap[coord.x][coord.y].team != id || gameMap[coord.x][coord.y].army <= 0)
-        return 0;
-    if (rand() % 10 == 0)
-    {
-        operationMode = defenceModeNum;
-        if (defenceModeStart == 0)
-            defenceModeStart = turnNumber;
-    }
-    if (turnNumber - defenceModeStart > 4)
-    {
-        operationMode = attackModeNum;
-        defenceModeStart = 0;
-    }
-    if (operationMode == 1)
-        return attackMode(id, coord);
-    else
-        return defenceMode(id, coord);
+    previousPos[id] = player;
+    return mtrd() % 4;
 }

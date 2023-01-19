@@ -5,14 +5,18 @@ const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};
 static int armyNow;
 playerCoord previousPos[16];
+static int visitTime[305][305][16];
 static int id;
+int turnind[16];
 
 int xrzBot(int ind, playerCoord player)
 {
     static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
     armyNow = gameMap[player.x][player.y].army;
+    turnind[ind]++;
     id = ind;
-    if (gameMap[player.x][player.y].army == 0 || gameMap[player.x][player.y].team != id)
+    visitTime[player.x][player.y][id]++;
+    if (gameMap[player.x][player.y].army == max(0,turnind[id]-100) || gameMap[player.x][player.y].team != id)
         return 0;
     struct node
     {
@@ -75,6 +79,7 @@ int xrzBot(int ind, playerCoord player)
             cnt++;
         if (des.teamOnIt == 0)
             cnt--;
+        cnt += max(0, (int)log2(visitTime[des.x][des.y][id]));
         if (mtrd() % cnt == 0)
         {
             previousPos[id] = player;

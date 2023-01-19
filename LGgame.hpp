@@ -202,22 +202,22 @@ int xrzBot(int ind, playerCoord player)
 		des.teamOnIt = gameMap[des.x][des.y].team;
 		if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
 			return i;
-		if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt != id)
+		if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt == 0)
 			return i;
 		int cnt = 4;
 		if (des.x == previousPos[id].x && des.y == previousPos[id].y)
 			cnt += turnCount[id] * 10;
 		if (des.teamOnIt != id && des.teamOnIt != 0)
-			cnt -= log2(visitTime[id][des.x][des.y]);
+			cnt--;
 		if (des.type == 0)
-			cnt -= log2(visitTime[id][des.x][des.y]);
+			cnt--;
 		if (des.type == 1)
-			cnt += log2(visitTime[id][des.x][des.y]);
+			cnt += 2;
 		if (des.teamOnIt == 0)
-			cnt -= log2(visitTime[id][des.x][des.y]);
+			cnt--;
 		if (des.teamOnIt == id && des.Army >= 2000)
-			cnt -= log2(visitTime[id][des.x][des.y]);
-		cnt += std::max(0, visitTime[id][des.x][des.y]);
+			cnt--;
+		cnt += std::max(0, visitTime[id][des.x][des.y] * 10);
 		if (mtrd() % cnt == 0)
 		{
 			previousPos[id] = player;
@@ -525,9 +525,13 @@ struct gameStatus
 			int robotId[64];
 			playerCoord coordinate[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-			for (int i = 2; i <= playerCnt; ++i)
-				robotId[i] = mtrd() % 300 + 1;
+			// for (int i = 2; i <= playerCnt; ++i)
+			// 	robotId[i] = mtrd() % 100 + 1;
 			//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
+			// for (int i = 2; i <= playerCnt; ++i)
+			// 	robotId[i] = mtrd() % 300 + 1;
+			for (int i = 2; i <= playerCnt; ++i)
+				robotId[i] = 51; // for robot debug
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode, coordinate[1]);
@@ -644,7 +648,27 @@ struct gameStatus
 					case 1 ... 50:
 						analyzeMove(i, smartRandomBot(i, coordinate[i]), coordinate[i]);
 						break;
-					case 51 ... 300:
+					case 51 ... 100:
+						analyzeMove(i, xrzBot(i, coordinate[i]), coordinate[i]);
+						break;
+					default:
+						analyzeMove(i, 0, coordinate[i]);
+					}
+				}
+				while (!movement.empty() && analyzeMove(1, movement.front(), coordinate[1]))
+					movement.pop_front();
+				if (!movement.empty())
+					movement.pop_front();
+				for (int i = 2; i <= playerCnt; ++i)
+				{
+					if (!isAlive[i])
+						continue;
+					switch (robotId[i])
+					{
+					case 1 ... 100:
+						analyzeMove(i, smartRandomBot(i, coordinate[i]), coordinate[i]);
+						break;
+					case 101 ... 300:
 						analyzeMove(i, xrzBot(i, coordinate[i]), coordinate[i]);
 						break;
 					default:

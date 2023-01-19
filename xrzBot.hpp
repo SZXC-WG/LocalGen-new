@@ -70,20 +70,20 @@ int xrzBot(int ind, playerCoord player)
         des.teamOnIt = gameMap[des.x][des.y].team;
         if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
             return i;
-        if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army)
+        if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt == 0)
             return i;
-        int cnt = 4;
+        int cnt = 5;
         if (des.x == previousPos[id].x && des.y == previousPos[id].y)
-            cnt += 2;
+            cnt += 10;
         if (des.teamOnIt != id && des.teamOnIt != 0)
             cnt--;
         if (des.type == 0)
             cnt--;
         if (des.type == 1)
-            cnt++;
+            cnt += 2;
         if (des.teamOnIt == 0)
             cnt--;
-        if (des.teamOnIt == id && des.Army >= 1000)
+        if (des.teamOnIt == id && des.Army >= 2000)
             cnt--;
         cnt += max(0, (int)log2(visitTime[id][des.x][des.y]));
         if (mtrd() % cnt == 0)

@@ -10,8 +10,10 @@
 /*                                                                       */
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
+
 #ifndef __LGGAME_HPP__
 #define __LGGAME_HPP__
+
 // standard libraries
 #include <functional>
 #include <algorithm>
@@ -29,11 +31,14 @@ using namespace std::literals;
 // project headers
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
+
 const int dx[5] = {0,-1,0,1,0};
 const int dy[5] = {0,0,-1,0,1};
+
 struct passS { int id,turn; };
 std::vector<passS> passId[505][505];
-playerCoord lastTurn[20]; 
+playerCoord lastTurn[20];
+
 int smartRandomBot(int id,playerCoord coo) {
 	static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
@@ -182,6 +187,7 @@ int xrzBot(int ind, playerCoord player)
         }
     }
 }
+
 struct gameStatus {
 	bool isWeb;
 	int cheatCode;
@@ -499,6 +505,7 @@ struct gameStatus {
 		return 0;
 	}
 };
+
 int GAME(bool isWeb,int cheatCode,int plCnt,int stDel) {
 	setvbuf(stdout,nullptr,_IOFBF,5000000);
 	hideCursor();
@@ -508,4 +515,6 @@ int GAME(bool isWeb,int cheatCode,int plCnt,int stDel) {
 	setvbuf(stdout,nullptr,_IONBF,0);
 	return ret;
 }
+
 #endif // __LGGAME_HPP__
+

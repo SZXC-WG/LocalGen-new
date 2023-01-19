@@ -4,20 +4,23 @@ using namespace std;
 const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};
 static int armyNow;
-playerCoord previousPos[16];
-static int visitTime[305][305][16];
+playerCoord previousPos[17];
+static int visitTime[17][505][505];
+static int turnCount[17];
 static int id;
-int turnind[16];
 
 int xrzBot(int ind, playerCoord player)
 {
     static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
     armyNow = gameMap[player.x][player.y].army;
-    turnind[ind]++;
     id = ind;
-    visitTime[player.x][player.y][id]++;
-    if (gameMap[player.x][player.y].army == max(0,turnind[id]-100) || gameMap[player.x][player.y].team != id)
+    turnCount[id]++;
+    visitTime[id][player.x][player.y]++;
+    if (gameMap[player.x][player.y].army == 0 || gameMap[player.x][player.y].team != id)
+    {
+        memset(visitTime[id], 0, sizeof(visitTime[id]));
         return 0;
+    }
     struct node
     {
         int x, y;
@@ -51,7 +54,8 @@ int xrzBot(int ind, playerCoord player)
             return i;
         }
     }
-    for (int i = 1; i <= 4; i++)
+    int i;
+    while (i = mtrd() % 4 + 1)
     {
         node des;
         des.direction = i;
@@ -79,13 +83,13 @@ int xrzBot(int ind, playerCoord player)
             cnt++;
         if (des.teamOnIt == 0)
             cnt--;
-        cnt += max(0, (int)log2(visitTime[des.x][des.y][id]));
+        if (des.teamOnIt == id && des.Army >= 1000)
+            cnt--;
+        cnt += max(0, (int)log2(visitTime[id][des.x][des.y]));
         if (mtrd() % cnt == 0)
         {
             previousPos[id] = player;
             return i;
         }
     }
-    previousPos[id] = player;
-    return mtrd() % 4;
 }

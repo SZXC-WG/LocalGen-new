@@ -70,7 +70,7 @@ int attackMode(int id, playerCoord coord)
                 return MountainNum < b.MountainNum;
             if (isSwamp != b.isSwamp)
                 return isSwamp >= b.isSwamp;
-            return visited < b.visited
+            return visited < b.visited;
         }
     };
     vector<node> operat;

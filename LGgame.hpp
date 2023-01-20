@@ -205,7 +205,10 @@ struct gameStatus {
 	}
 	
 	// struct for movement
-	struct moveS { int id; playerCoord to; long long army; };
+	struct moveS { int id;
+		playerCoord from;
+		playerCoord to;
+	};
 	// vector for inline movements
 	std::deque<moveS> inlineMove;
 	
@@ -217,9 +220,7 @@ struct gameStatus {
 			case 1 ... 4: {
 				playerCoord newCoo{coo.x+dx[mv],coo.y+dy[mv]};
 				if(newCoo.x<1||newCoo.x>mapH||newCoo.y<1||newCoo.y>mapW||gameMap[newCoo.x][newCoo.y].type==2) return 1;
-				moveS insMv{id,newCoo,0};
-				if(gameMap[coo.x][coo.y].team==id)
-					insMv.army=gameMap[coo.x][coo.y].army-1,gameMap[coo.x][coo.y].army=1;
+				moveS insMv{id,coo,newCoo,};
 				inlineMove.push_back(insMv);
 				coo=newCoo;
 				break;
@@ -240,9 +241,13 @@ struct gameStatus {
 			moveS cur=inlineMove.front();
 			inlineMove.pop_front();
 			if(!isAlive[cur.id]) continue;
-			if(gameMap[cur.to.x][cur.to.y].team==cur.id) gameMap[cur.to.x][cur.to.y].army+=cur.army;
+			if(gameMap[cur.to.x][cur.to.y].team==cur.id){ 
+				gameMap[cur.to.x][cur.to.y].army+=gameMap[cur.from.x][cur.from.y].army-1;
+				gameMap[cur.from.x][cur.from.y].army = 1;
+			}
 			else {
-				gameMap[cur.to.x][cur.to.y].army-=cur.army;
+				gameMap[cur.to.x][cur.to.y].army -= gameMap[cur.from.x][cur.from.y].army - 1;
+				gameMap[cur.from.x][cur.from.y].army = 1;
 				if(gameMap[cur.to.x][cur.to.y].army<0) {
 					gameMap[cur.to.x][cur.to.y].army=-gameMap[cur.to.x][cur.to.y].army;
 					int p=gameMap[cur.to.x][cur.to.y].team;
@@ -250,7 +255,7 @@ struct gameStatus {
 					if(gameMap[cur.to.x][cur.to.y].type==3) /* general */ {
 						kill(cur.id,p);
 						gameMap[cur.to.x][cur.to.y].type=4;
-						for(auto& mv:inlineMove) if(mv.id==p) mv.id=cur.id,mv.army=(mv.army+1)>>1;
+						for(auto& mv:inlineMove) if(mv.id==p) mv.id=cur.id;
 					}
 				}
 			}

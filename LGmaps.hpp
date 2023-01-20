@@ -481,7 +481,7 @@ int mapNum;
 
 void initDefMap()
 {
-	if (access("bin//defMap.dll", F_OK) == -1)
+	if (access("defMap.dll", F_OK) == -1)
 	{
 		dllExit = 0;
 		return;
@@ -489,7 +489,7 @@ void initDefMap()
 	else
 	{
 		dllExit = 1;
-		defMap = LoadLibrary("bin//defMap.dll");
+		defMap = LoadLibrary("defMap.dll");
 		statusCheck = (func1)GetProcAddress(defMap, "statusCheck");
 		getMapInfoStr = (func2)GetProcAddress(defMap, "getMapInfoStr");
 		getMapInfoNum = (func3)GetProcAddress(defMap, "getMapInfoNum");

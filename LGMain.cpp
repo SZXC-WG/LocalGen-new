@@ -35,6 +35,8 @@
 #include "LGzipmap.hpp" // __LGZIPMAP_HPP__
 /* Internet base */
 #include "LGweb.hpp" // __LGWEB_HPP__
+/* generals robot */
+#include "LGbot.hpp" //__LGBOT__
 /* game options */
 #include "LGgame.hpp" // __LGGAME_HPP__
 /* pages */

@@ -31,9 +31,7 @@ using namespace std::literals;
 // project headers
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
-// Robot
-#include "xrzBot.hpp"
-#include "xiaruizeBot.hpp"
+#include "LGbot.hpp"
 
 const int dx[5] = {0,-1,0,1,0};
 const int dy[5] = {0,0,-1,0,1};
@@ -41,66 +39,6 @@ const int dy[5] = {0,0,-1,0,1};
 struct passS { int id,turn; };
 std::vector<passS> passId[505][505];
 playerCoord lastTurn[20];
-
-int smartRandomBot(int id,playerCoord coo) {
-	static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
-	struct node { int type,team; long long army; int dir; };
-	node p[5]; int pl=0;
-	for(int i=1; i<=4; ++i) {
-		if(coo.x+dx[i]<1||coo.x+dx[i]>mapH||coo.y+dy[i]<1||coo.y+dy[i]>mapW||gameMap[coo.x+dx[i]][coo.y+dy[i]].type==2) continue;
-		p[++pl]={gameMap[coo.x+dx[i]][coo.y+dy[i]].type,gameMap[coo.x+dx[i]][coo.y+dy[i]].team,gameMap[coo.x+dx[i]][coo.y+dy[i]].army,i};
-	}
-	bool rdret=mtrd()%2;
-	auto cmp = [&](node a,node b)->bool {
-		if(a.type==3&&a.team!=id) return true;
-		if(b.type==3&&b.team!=id) return false;
-		if(a.team==0) return rdret;
-		if(b.team==0) return !rdret;
-		if(a.team==id&&b.team!=id) return false;
-		if(a.team!=id&&b.team==id) return true;
-		if(a.team==id&&b.team==id) return a.army>b.army;
-		return a.army<b.army;
-	};
-	std::sort(p+1,p+pl+1,cmp);
-	return p[1].dir;
-}
-int ktqBot(int id,playerCoord coo){
-	static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-	using ll = long long;
-	static int swampDir[20]={3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
-	if(gameMap[coo.x][coo.y].team!=id||gameMap[coo.x][coo.y].army==0) return 0;
-	struct node{
-		int to,team;
-		ll army,del;
-		int type;
-		bool operator<(node b){
-			return army<b.army||(army==b.army&&del<b.del);
-		}
-	};
-	node p[10];
-	int cnt=0;
-	for(int i=1;i<=4;i++){
-		int tx=coo.x+dx[i],ty=coo.y+dy[i];
-		if(gameMap[tx][ty].type==2||tx<1||tx>mapH||ty<1||ty>mapW)continue;
-		p[++cnt]={i,gameMap[tx][ty].team,gameMap[tx][ty].army,gameMap[tx][ty].army,gameMap[tx][ty].type};
-		if(p[cnt].type!=1&&p[cnt].team==id) p[cnt].army=-p[cnt].army,p[cnt].del=-p[cnt].del;
-		if(p[cnt].type==4&&p[cnt].team!=id) p[cnt].army=2*p[cnt].army-ll(1e15);
-		else if(p[cnt].type==0&&p[cnt].team!=id) p[cnt].army=p[cnt].army-ll(1e15);
-		else if(p[cnt].type==1) { p[cnt].del=200; p[cnt].army=-1e16; }
-		else if(p[cnt].type==3&&p[cnt].team!=id) p[cnt].army=-ll(1e18);
-	}
-	std::sort(p+1,p+cnt+1);
-//	gotoxy(mapH+2+16+1+id,1); clearline();
-//	fputs(defTeams[id].name.c_str(),stdout);
-//	printf(": ");
-//	for(int i=1; i<=cnt; ++i) printf("{%d %d %lld %lld %d} ",p[i].to,p[i].team,p[i].army,p[i].del,p[i].type);
-//	fflush(stdout); _getch();
-	for(int i=1;i<=cnt;i++) {
-		if(p[i].del<gameMap[coo.x][coo.y].army) return p[i].to;
-	}
-	return -1;
-}
 
 struct gameStatus {
 	bool isWeb;
@@ -388,7 +326,7 @@ struct gameStatus {
 				for(int i=2; i<=playerCnt; ++i) {
 					if(!isAlive[i]) continue;
 					switch(robotId[i]) {
-						case 1 ... 100: analyzeMove(i,smartRandomBot(i,coordinate[i]),coordinate[i]); break;
+						case 1 ... 100: analyzeMove(i,normalBot::smartRandomBot(i,coordinate[i]),coordinate[i]); break;
 						case 101 ... 200: analyzeMove(i,xrzBot::xrzBot(i,coordinate[i]),coordinate[i]); break;
 						case 201 ... 300: analyzeMove(i,xiaruizeBot::xiaruizeBot(i,coordinate[i]),coordinate[i]); break;
 						default: analyzeMove(i,0,coordinate[i]);

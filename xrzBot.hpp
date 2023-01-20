@@ -35,7 +35,7 @@ namespace xrzBot
             int direction;
         };
         vector<node> operat;
-        random_shuffle(checkOrder + 1, checkOrder + 5);
+        shuffle(checkOrder + 1, checkOrder + 5, mtrd);
         int okDir = 0;
         for (int j = 1; j <= 4; j++)
         {

@@ -5,13 +5,14 @@ testing version
 */
 
 #include "LGmaps.hpp"
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
 
-namespace xiaruizeBot{
+namespace xiaruizeBot
+{
     const int dx[5] = {0, -1, 0, 1, 0};
     const int dy[5] = {0, 0, -1, 0, 1};
-    int checkOrder[5]={0,1,2,3,4};
+    int checkOrder[5] = {0, 1, 2, 3, 4};
     int otherRobotProtection[20];
     vector<int> operation[20];
     bool vis[20][505][505];
@@ -20,7 +21,7 @@ namespace xiaruizeBot{
     int backCountCnt[20];
     playerCoord previousPos[20];
 
-    int changeDirection(int x,int &res)
+    int changeDirection(int x, int &res)
     {
         switch (x)
         {
@@ -39,32 +40,10 @@ namespace xiaruizeBot{
         }
     }
 
-    int dfs(int id,playerCoord coord)
+    int dfs(int id, playerCoord coord)
     {
-        shuffle(checkOrder + 1, checkOrder + 5,mtrd);
+        shuffle(checkOrder + 1, checkOrder + 5, mtrd);
         int x;
-        for (int i = 1; i <= 4;i++)
-        {
-            x = checkOrder[i]; 
-            int ToX = coord.x + dx[x];
-            int ToY = coord.y + dy[x];
-            if(ToX<1||ToX>mapH||ToY<1||ToY>mapW)
-                continue;
-            if(gameMap[ToX][ToY].type==2)
-                continue;
-            if(gameMap[ToX][ToY].type==3&&gameMap[ToX][ToY].team!=id)
-            {
-                operation[id].push_back(x);
-                previousPos[id] = coord;
-                if(gameMap[ToX][ToY].army<gameMap[coord.x][coord.y].army)
-                {
-                    if(!operation[gameMap[ToX][ToY].team].empty())
-                        operation[id].insert(operation[id].end(), operation[gameMap[ToX][ToY].team].begin(), operation[gameMap[ToX][ToY].team].end());
-                }
-                return x;
-            }
-        }
-        shuffle(checkOrder + 1, checkOrder + 5,mtrd);
         for (int i = 1; i <= 4; i++)
         {
             x = checkOrder[i];
@@ -74,22 +53,44 @@ namespace xiaruizeBot{
                 continue;
             if (gameMap[ToX][ToY].type == 2)
                 continue;
-            if (gameMap[ToX][ToY].type == 4 && gameMap[ToX][ToY].army<=gameMap[coord.x][coord.y].army&&gameMap[ToX][ToY].team!=id)
+            if (gameMap[ToX][ToY].type == 3 && gameMap[ToX][ToY].team != id)
+            {
+                operation[id].push_back(x);
+                previousPos[id] = coord;
+                // if (gameMap[ToX][ToY].army < gameMap[coord.x][coord.y].army)
+                // {
+                //     if (!operation[gameMap[ToX][ToY].team].empty())
+                //         operation[id].insert(operation[id].end(), operation[gameMap[ToX][ToY].team].begin(), operation[gameMap[ToX][ToY].team].end());
+                // }
+                return x;
+            }
+        }
+        shuffle(checkOrder + 1, checkOrder + 5, mtrd);
+        for (int i = 1; i <= 4; i++)
+        {
+            x = checkOrder[i];
+            int ToX = coord.x + dx[x];
+            int ToY = coord.y + dy[x];
+            if (ToX < 1 || ToX > mapH || ToY < 1 || ToY > mapW)
+                continue;
+            if (gameMap[ToX][ToY].type == 2)
+                continue;
+            if (gameMap[ToX][ToY].type == 4 && gameMap[ToX][ToY].army <= gameMap[coord.x][coord.y].army && gameMap[ToX][ToY].team != id)
             {
                 operation[id].push_back(x);
                 previousPos[id] = coord;
                 return x;
             }
         }
-        shuffle(checkOrder + 1, checkOrder + 5,mtrd);
+        shuffle(checkOrder + 1, checkOrder + 5, mtrd);
         for (int i = 1; i <= 4; i++)
         {
             x = checkOrder[i];
             int ToX = coord.x + dx[x];
             int ToY = coord.y + dy[x];
-            if(ToX<1||ToX>mapH||ToY<1||ToY>mapW)
+            if (ToX < 1 || ToX > mapH || ToY < 1 || ToY > mapW)
                 continue;
-            if(gameMap[ToX][ToY].type==2)
+            if (gameMap[ToX][ToY].type == 2)
                 continue;
             if (vis[id][ToX][ToY])
                 continue;
@@ -97,7 +98,7 @@ namespace xiaruizeBot{
             previousPos[id] = coord;
             return x;
         }
-        shuffle(checkOrder + 1, checkOrder + 5,mtrd);
+        shuffle(checkOrder + 1, checkOrder + 5, mtrd);
         for (int i = 1; i <= 4; i++)
         {
             x = checkOrder[i];
@@ -107,7 +108,7 @@ namespace xiaruizeBot{
                 continue;
             if (gameMap[ToX][ToY].type == 2)
                 continue;
-            if(previousPos[id].x==ToX&&previousPos[id].y==ToY)
+            if (previousPos[id].x == ToX && previousPos[id].y == ToY)
                 continue;
             operation[id].push_back(x);
             previousPos[id] = coord;
@@ -116,9 +117,9 @@ namespace xiaruizeBot{
         return -1;
     }
 
-    int xiaruizeBot(int id,playerCoord coord)
+    int xiaruizeBot(int id, playerCoord coord)
     {
-        if(gameMap[coord.x][coord.y].army==0||gameMap[coord.x][coord.y].team!=id)
+        if (gameMap[coord.x][coord.y].army == 0 || gameMap[coord.x][coord.y].team != id)
         {
             memset(vis[id], 0, sizeof(vis[id]));
             backCountCnt[id] = 1;
@@ -126,7 +127,8 @@ namespace xiaruizeBot{
             sendArmyProcess[id] = 1;
             return 0;
         }
-        if(sendArmyProcess[id])
+        vis[id][coord.x][coord.y] = true;
+        if (sendArmyProcess[id])
         {
             if (sendArmyProcess[id] > operation[id].size())
             {
@@ -134,17 +136,16 @@ namespace xiaruizeBot{
                 return -1;
             }
             sendArmyProcess[id]++;
-            if(otherRobotProtection[id])
+            if (otherRobotProtection[id])
             {
                 otherRobotProtection[id]--;
-                return operation[id][sendArmyProcess[id] - 2]+4;
+                return operation[id][sendArmyProcess[id] - 2] + 4;
             }
             else
                 return operation[id][sendArmyProcess[id] - 2];
         }
-        vis[id][coord.x][coord.y] = true;
         int returnValue = dfs(id, coord);
-        if(returnValue!=-1)
+        if (returnValue != -1)
         {
             backCountCnt[id] = 1;
             sendArmyProcess[id] = 0;

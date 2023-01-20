@@ -305,7 +305,7 @@ struct gameStatus {
 				printf("%*.*LfG | ",7,7-1-p,rklst[i].army*1.0L/1e9L);
 			}
 			printf("%5d | %5d | %5d | %13lld |",rklst[i].plain,rklst[i].city,rklst[i].tot,rklst[i].armyInHand);
-			resetattr(); /*printf("%d",rklst[i].id);*/setfcolor(0x000000); putchar('|'); putchar('\n');
+			resetattr(); setfcolor(0x000000); putchar('|'); putchar('\n');
 		}
 		resetattr();
 		setfcolor(0xffffff); 
@@ -320,7 +320,7 @@ struct gameStatus {
 			int robotId[64];
 			playerCoord coordinate[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = mtrd()%300+1;
+			for(int i=2; i<=playerCnt; ++i) robotId[i] = mtrd()%300+1;
 //			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
 //			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51;// for robot debug
 			initGenerals(coordinate);

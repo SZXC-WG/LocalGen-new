@@ -383,7 +383,7 @@ struct gameStatus {
 					if(!isAlive[i]) continue;
 					switch(robotId[i]) {
 						case 1: analyzeMove(i,xiaruizeBot::xiaruizeBot(i,coordinate[i]),coordinate[i]); break;
-						case 51: analyzeMove(i,xiaruizeBot::xiaruizeBot(i,coordinate[i]),coordinate[i]); break;
+						case 51: analyzeMove(i,xrzBot::xrzBot(i,coordinate[i]),coordinate[i]); break;
 						default: analyzeMove(i,0,coordinate[i]);
 					}
 				}

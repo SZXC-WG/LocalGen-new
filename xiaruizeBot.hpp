@@ -12,6 +12,7 @@ namespace xiaruizeBot{
     const int dx[5] = {0, -1, 0, 1, 0};
     const int dy[5] = {0, 0, -1, 0, 1};
     int checkOrder[5]={0,1,2,3,4};
+    int otherRobotProtection[20];
     vector<int> operation[20];
     bool vis[20][505][505];
     static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
@@ -129,6 +130,7 @@ namespace xiaruizeBot{
         {
             memset(vis[id], 0, sizeof(vis[id]));
             backCountCnt[id] = 1;
+            otherRobotProtection[id] = max(0, min((int)operation[id].size() - 10, rand() % 10));
             sendArmyProcess[id] = 1;
             return 0;
         }
@@ -140,7 +142,13 @@ namespace xiaruizeBot{
                 return -1;
             }
             sendArmyProcess[id]++;
-            return operation[id][sendArmyProcess[id] - 2];
+            if(otherRobotProtection[id])
+            {
+                return operation[id][sendArmyProcess[id] - 2]+4;
+                otherRobotProtection[id]--;
+            }
+            else
+                return operation[id][sendArmyProcess[id] - 2];
         }
         vis[id][coord.x][coord.y] = true;
         int returnValue = dfs(id, coord);

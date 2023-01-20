@@ -41,7 +41,7 @@ namespace xiaruizeBot{
 
     int dfs(int id,playerCoord coord)
     {
-        random_shuffle(checkOrder + 1, checkOrder + 5);
+        shuffle(checkOrder + 1, checkOrder + 5,mtrd());
         int x;
         for (int i = 1; i <= 4;i++)
         {
@@ -59,7 +59,7 @@ namespace xiaruizeBot{
                 return x;
             }
         }
-        random_shuffle(checkOrder + 1, checkOrder + 5);
+        shuffle(checkOrder + 1, checkOrder + 5,mtrd());
         for (int i = 1; i <= 4; i++)
         {
             x = checkOrder[i];
@@ -76,7 +76,7 @@ namespace xiaruizeBot{
                 return x;
             }
         }
-        random_shuffle(checkOrder + 1, checkOrder + 5);
+        shuffle(checkOrder + 1, checkOrder + 5,mtrd());
         for (int i = 1; i <= 4; i++)
         {
             x = checkOrder[i];
@@ -92,7 +92,7 @@ namespace xiaruizeBot{
             previousPos[id] = coord;
             return x;
         }
-        random_shuffle(checkOrder + 1, checkOrder + 5);
+        shuffle(checkOrder + 1, checkOrder + 5,mtrd());
         for (int i = 1; i <= 4; i++)
         {
             x = checkOrder[i];
@@ -108,7 +108,7 @@ namespace xiaruizeBot{
             previousPos[id] = coord;
             return x;
         }
-        random_shuffle(checkOrder + 1, checkOrder + 5);
+        shuffle(checkOrder + 1, checkOrder + 5,mtrd());
         for (int i = 1; i <= 4; i++)
         {
             x = checkOrder[i];

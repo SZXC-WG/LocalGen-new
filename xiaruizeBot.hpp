@@ -56,6 +56,11 @@ namespace xiaruizeBot{
             {
                 operation[id].push_back(x);
                 previousPos[id] = coord;
+                if(gameMap[ToX][ToY].army<gameMap[coord.x][coord.y].army)
+                {
+                    if(!operation[gameMap[ToX][ToY].team].empty())
+                        operation[id].insert(operation[id].end(), operation[gameMap[ToX][ToY].team].begin(), operation[gameMap[ToX][ToY].team].end());
+                }
                 return x;
             }
         }
@@ -108,20 +113,7 @@ namespace xiaruizeBot{
             previousPos[id] = coord;
             return x;
         }
-        shuffle(checkOrder + 1, checkOrder + 5,mtrd);
-        for (int i = 1; i <= 4; i++)
-        {
-            x = checkOrder[i];
-            int ToX = coord.x + dx[x];
-            int ToY = coord.y + dy[x];
-            if (ToX < 1 || ToX > mapH || ToY < 1 || ToY > mapW)
-                continue;
-            if (gameMap[ToX][ToY].type == 2)
-                continue;
-            operation[id].push_back(x);
-            previousPos[id] = coord;
-            return x;
-        }
+        return -1;
     }
 
     int xiaruizeBot(int id,playerCoord coord)
@@ -144,8 +136,8 @@ namespace xiaruizeBot{
             sendArmyProcess[id]++;
             if(otherRobotProtection[id])
             {
-                return operation[id][sendArmyProcess[id] - 2]+4;
                 otherRobotProtection[id]--;
+                return operation[id][sendArmyProcess[id] - 2]+4;
             }
             else
                 return operation[id][sendArmyProcess[id] - 2];
@@ -157,6 +149,13 @@ namespace xiaruizeBot{
             backCountCnt[id] = 1;
             sendArmyProcess[id] = 0;
             return returnValue;
+        }
+        else
+        {
+            int res;
+            changeDirection(operation[id][operation[id].size() - 1], res);
+            operation[id].pop_back();
+            return res;
         }
     }
 }

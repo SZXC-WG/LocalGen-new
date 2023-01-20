@@ -122,7 +122,7 @@ namespace xiaruizeBot{
         {
             memset(vis[id], 0, sizeof(vis[id]));
             backCountCnt[id] = 1;
-            otherRobotProtection[id] = max(0, min((int)operation[id].size() - 10, rand() % 10));
+            otherRobotProtection[id] = max(0, min((int)operation[id].size() - 10, (int)mtrd() % 10));
             sendArmyProcess[id] = 1;
             return 0;
         }

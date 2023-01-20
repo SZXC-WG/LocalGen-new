@@ -300,7 +300,7 @@ struct gameStatus {
 				printf("%*.*LfG | ",7,7-1-p,rklst[i].army*1.0L/1e9L);
 			}
 			printf("%5d | %5d | %5d | %13lld |",rklst[i].plain,rklst[i].city,rklst[i].tot,rklst[i].armyInHand);
-			resetattr(); printf("%d",rklst[i].id);setfcolor(0x000000); putchar('|'); putchar('\n');
+			resetattr(); /*printf("%d",rklst[i].id);*/setfcolor(0x000000); putchar('|'); putchar('\n');
 		}
 		resetattr();
 		setfcolor(0xffffff); 

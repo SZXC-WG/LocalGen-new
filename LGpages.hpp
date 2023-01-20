@@ -494,25 +494,25 @@ void MainPage()
 		x = 3, y = 5;
 		chsFrame(x, y, 1);
 
-		gotoxy(3, 11 + frameW);
 	__defmap_plcnt:
+		gotoxy(3, 11 + frameW);
 		printf("Player Count (<=16): ");
 		clearline();
 		scanf("%d", &plCnt);
 		if (plCnt < 2 || plCnt > 16)
 			goto __defmap_plcnt;
+	__spemap_maph:
 		gotoxy(4, 11 + frameW);
 		if (chs < 5)
 		{
 			int H, W, amn, amx;
-		__spemap_maph:
 			printf("Map Height (<=500): ");
 			clearline();
 			scanf("%d", &H);
 			if (H < 5 || H > 500)
 				goto __spemap_maph;
-			gotoxy(5, 11 + frameW);
 		__spemap_mapw:
+			gotoxy(5, 11 + frameW);
 			printf("Map Width (<=500): ");
 			clearline();
 			scanf("%d", &W);

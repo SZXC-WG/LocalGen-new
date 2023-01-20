@@ -33,6 +33,7 @@ using namespace std::literals;
 #include "LGmaps.hpp"
 // Robot
 #include "xrzBot.hpp"
+#include "xiaruizeBot.hpp"
 
 const int dx[5] = {0,-1,0,1,0};
 const int dy[5] = {0,0,-1,0,1};
@@ -299,7 +300,7 @@ struct gameStatus {
 				printf("%*.*LfG | ",7,7-1-p,rklst[i].army*1.0L/1e9L);
 			}
 			printf("%5d | %5d | %5d | %13lld |",rklst[i].plain,rklst[i].city,rklst[i].tot,rklst[i].armyInHand);
-			resetattr(); setfcolor(0x000000); putchar('|'); putchar('\n');
+			resetattr(); printf("%d",rklst[i].id);setfcolor(0x000000); putchar('|'); putchar('\n');
 		}
 		resetattr();
 		setfcolor(0xffffff); 
@@ -314,8 +315,8 @@ struct gameStatus {
 			int robotId[64];
 			playerCoord coordinate[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-			for(int i=2; i<=playerCnt; ++i) robotId[i] = 1;
-//			for(int i=2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
+			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
+			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51;// for robot debug
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode,coordinate[1]);
@@ -381,7 +382,8 @@ struct gameStatus {
 				for(int i=2; i<=playerCnt; ++i) {
 					if(!isAlive[i]) continue;
 					switch(robotId[i]) {
-						case 1: analyzeMove(i,xrzBot::xrzBot(i,coordinate[i]),coordinate[i]); break;
+						case 1: analyzeMove(i,xiaruizeBot::xiaruizeBot(i,coordinate[i]),coordinate[i]); break;
+						case 51: analyzeMove(i,xiaruizeBot::xiaruizeBot(i,coordinate[i]),coordinate[i]); break;
 						default: analyzeMove(i,0,coordinate[i]);
 					}
 				}

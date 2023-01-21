@@ -18,24 +18,29 @@
 #include "LGmaps.hpp"
 #include "LGgame.hpp"
 
-const int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005;
+const int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005,replaySorter=2000;
 char strdeZip[LEN_ZIP];
 char strZip[LEN_ZIP];
 char strGameZip[4 * LEN_ZIP];
 char strdeGameZip[4 * LEN_ZIP];
+Block curMap[505][505];
+playerCoord mapCoord[17][30],curCoord[30];
 Block mapSet[17][505][505];
-long long totTurn,curTurn;
-std::queue<int> signMap;
-std::queue<int> signCmd;
+
+long long totTurn,curTurn,totMove;
+std::pair<long long,long long> curMoveS;
+std::queue<long long> signMap;
+std::queue<long long> signCmd;
 struct movementS
 {
-	int id, turn, op;
+	int id, op;
+	long long turn;
 	void clear(){
 		id=turn=op=0;
 	}
 };
 std::queue<movementS> movementPack;
-std::queue<movementS> dezipedMovementS;
+movementS dezipedMovementS[4*LEN_ZIP];
 movementS tmp;
 
 inline long long PMod(long long &x)
@@ -57,6 +62,25 @@ void retrans(int cur){
 			mapSet[cur][i][j]=gameMap[i][j];
 		}
 	}
+}
+
+std::pair<long long,long long> bin_search(long long curTurn){
+	long long l=1,r=totMove;
+	std::pair<long long,long long> ans=std::make_pair(0ll,0ll);
+	while(l<=r){
+		long long mid=l+r>>1;
+		if(dezipedMovementS[mid].turn==curTurn) ans.first=mid;
+		if(dezipedMovementS[mid].turn>=curTurn) r=mid-1;
+		else l=mid+1;
+	}
+	l=1,r=totMove;
+	while(l<=r){
+		long long mid=l+r>>1;
+		if(dezipedMovementS[mid].turn==curTurn+1) ans.second=mid;
+		if(dezipedMovementS[mid].turn>=curTurn+1) r=mid-1;
+		else l=mid+1;
+	}
+	return ans;
 }
 
 void Zip()
@@ -148,9 +172,15 @@ void zipGame(long long totTurn)
 	strGameZip[p] = '\0';
 }
 
+void mapReset(int c){
+	for(int i=1;i<=mapH;i++){
+		for(int j=1;j<=mapW;j++) curMap[i][j]=mapSet[c][i][j];
+	}
+}
+
 void deZipGame(){
-	int cur=0,p=0;
-	int beg,fin;
+	long long cur=0,p=0;
+	long long beg,fin;
 
 	while(strdeGameZip[p]!='\0'){
 		if(strdeGameZip[p]==44||strdeGameZip[p]==45){
@@ -173,6 +203,8 @@ void deZipGame(){
 		fin=signMap.front();
 		signMap.pop();
 	}
+
+	mapReset(1);
 
 	p=0;
 	while(strdeGameZip[p]!=45) p++;
@@ -201,7 +233,7 @@ void deZipGame(){
 				}else{
 					tmp.op=strdeGameZip[i]-CHAR_AD;
 					tmp.turn=curTurn;
-					dezipedMovementS.push(tmp);
+					dezipedMovementS[++totMove]=tmp;
 					tmp.clear();
 				}
 			}
@@ -213,10 +245,40 @@ void deZipGame(){
 	}
 }
 
-void Replay(int dir)
+void initializeReplay(gameStatus curStatus){
+	for(int i=1;i<=mapH;i++){
+		for(int j=1;j<=mapW;j++){
+			if(curMap[i][j].type==3){
+				mapCoord[1][curMap[i][j].team].x=curCoord[curMap[i][j].team].x=i;
+				mapCoord[1][curMap[i][j].team].y=curCoord[curMap[i][j].team].y=j;
+			}
+		}
+	}
+	for(int i=1;i<=totMove;i++){
+		curStatus.analyzeMove(dezipedMovementS[i].id,dezipedMovementS[i].op,curCoord[dezipedMovementS[i].id]);
+		if(dezipedMovementS[i].turn%replaySorter==0){
+			mapCoord[dezipedMovementS[i].turn/replaySorter+1][dezipedMovementS[i].id].x=curCoord[dezipedMovementS[i].id].x;
+			mapCoord[dezipedMovementS[i].turn/replaySorter+1][dezipedMovementS[i].id].y=curCoord[dezipedMovementS[i].id].y;
+		}
+	}
+}
+
+void Replay(int dir,long long curTurn,gameStatus curStatus)
 {
 	if(dir){
-
+		curMoveS=bin_search(curTurn+1);
+		for(int i=curMoveS.first;i<curMoveS.second;i++){
+			curStatus.analyzeMove(dezipedMovementS[i].id,dezipedMovementS[i].op,curCoord[dezipedMovementS[i].id]);
+		}
+	}else{
+		for(int i=1;i<=20;i++){
+			curCoord[i]=mapCoord[curTurn/replaySorter+1][i];
+		}
+		curMoveS=bin_search(curTurn/replaySorter*replaySorter);
+		while(dezipedMovementS[curMoveS.first].turn<curTurn){
+			curStatus.analyzeMove(dezipedMovementS[curMoveS.first].id,dezipedMovementS[curMoveS.first].op,curCoord[dezipedMovementS[curMoveS.first].id]);
+			curMoveS.first++;
+		}
 	}
 }
 

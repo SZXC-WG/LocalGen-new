@@ -23,17 +23,40 @@ char strdeZip[LEN_ZIP];
 char strZip[LEN_ZIP];
 char strGameZip[4 * LEN_ZIP];
 char strdeGameZip[4 * LEN_ZIP];
+Block mapSet[17][505][505];
+long long totTurn,curTurn;
+std::queue<int> signMap;
+std::queue<int> signCmd;
 struct movementS
 {
 	int id, turn, op;
+	void clear(){
+		id=turn=op=0;
+	}
 };
 std::queue<movementS> movementPack;
+std::queue<movementS> dezipedMovementS;
+movementS tmp;
 
 inline long long PMod(long long &x)
 {
 	long long res = x & 63;
 	x >>= 6;
 	return res;
+}
+
+void trans(int st,int en){
+	for(int i=st,cur=0;i<en;i++,cur++){
+		strdeZip[cur]=strdeGameZip[i];
+	}
+}
+
+void retrans(int cur){
+	for(int i=1;i<=mapH;i++){
+		for(int j=1;j<=mapW;j++){
+			mapSet[cur][i][j]=gameMap[i][j];
+		}
+	}
 }
 
 void Zip()
@@ -114,8 +137,10 @@ void zipGame(long long totTurn)
 			}
 			curTurn = movementPack.front().turn;
 		}
+		if(movementPack.front().op==-1) goto here;
 		strGameZip[p++] = movementPack.front().id + CHAR_AD;
 		strGameZip[p++] = movementPack.front().op + CHAR_AD;
+		here:;
 		movementPack.pop();
 	}
 
@@ -123,8 +148,75 @@ void zipGame(long long totTurn)
 	strGameZip[p] = '\0';
 }
 
-void Replay()
+void deZipGame(){
+	int cur=0,p=0;
+	int beg,fin;
+
+	while(strdeGameZip[p]!='\0'){
+		if(strdeGameZip[p]==44||strdeGameZip[p]==45){
+			signMap.push(p);
+		}
+		p++;
+	}
+
+	beg=signMap.front();
+	signMap.pop();
+	fin=signMap.front();
+	signMap.pop();
+	
+	while(1){
+		trans(beg,fin);
+		deZip();
+		retrans(++cur);
+		if(signMap.empty()) break;
+		beg=fin;
+		fin=signMap.front();
+		signMap.pop();
+	}
+	
+	p=0;
+	while(strdeGameZip[p]!=45) p++;
+	
+	totTurn=(strdeGameZip[p+2]<<6)+strdeGameZip[p+1];
+	p=p+3;
+	
+	while(strdeGameZip[p]!='\0'){
+		if(strdeGameZip[p]==46||strdeGameZip[p]==47){
+			signCmd.push(p);
+		}
+		p++;
+	}
+	
+	beg=signCmd.front();
+	signCmd.pop();
+	fin=signCmd.front();
+	signCmd.pop();
+
+	while(1){
+		if(fin-beg!=1){
+			for(int i=beg,j=1;i<fin;i++,j++){
+				if(j&1){
+					tmp.id=strdeGameZip[i]-CHAR_AD;
+				}else{
+					tmp.op=strdeGameZip[i]-CHAR_AD;
+					tmp.turn=++curTurn;
+					dezipedMovementS.push(tmp);
+					tmp.clear();
+				}
+			}
+		}
+		if(signCmd.empty()) break;
+		beg=fin;
+		fin=signCmd.front();
+		signCmd.pop();
+	}
+}
+
+void Replay(int dir)
 {
+	if(dir){
+
+	}
 }
 
 #endif

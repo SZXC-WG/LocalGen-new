@@ -163,7 +163,7 @@ void deZipGame(){
 	signMap.pop();
 	fin=signMap.front();
 	signMap.pop();
-	
+
 	while(1){
 		trans(beg,fin);
 		deZip();
@@ -173,20 +173,20 @@ void deZipGame(){
 		fin=signMap.front();
 		signMap.pop();
 	}
-	
+
 	p=0;
 	while(strdeGameZip[p]!=45) p++;
-	
+
 	totTurn=(strdeGameZip[p+2]<<6)+strdeGameZip[p+1];
 	p=p+3;
-	
+
 	while(strdeGameZip[p]!='\0'){
 		if(strdeGameZip[p]==46||strdeGameZip[p]==47){
 			signCmd.push(p);
 		}
 		p++;
 	}
-	
+
 	beg=signCmd.front();
 	signCmd.pop();
 	fin=signCmd.front();

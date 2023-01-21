@@ -1,4 +1,4 @@
-/* This is LGpages.hpp file of LocalGen.                                  */
+/* This is LGweb.hpp file of LocalGen.                                  */
 /* Copyright (c) 2023 LocalGen-dev; All rights reserved.                 */
 /* Developers: http://github.com/LocalGen-dev                            */
 /* Project: http://github.com/LocalGen-dev/LocalGen-new                  */

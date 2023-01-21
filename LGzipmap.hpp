@@ -194,12 +194,13 @@ void deZipGame(){
 
 	while(1){
 		if(fin-beg!=1){
+			++curTurn;
 			for(int i=beg,j=1;i<fin;i++,j++){
 				if(j&1){
 					tmp.id=strdeGameZip[i]-CHAR_AD;
 				}else{
 					tmp.op=strdeGameZip[i]-CHAR_AD;
-					tmp.turn=++curTurn;
+					tmp.turn=curTurn;
 					dezipedMovementS.push(tmp);
 					tmp.clear();
 				}

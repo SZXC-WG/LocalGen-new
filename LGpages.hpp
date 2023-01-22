@@ -23,32 +23,29 @@
 
 const int frameH = 6, frameW = 49;
 
-inline void CB(int k)
-{
+inline void CB(int k) {
 	setbcolor(defTeams[k].color);
 	fputs("  ", stdout);
 	resetattr();
 }
 
-inline void chsFrame(int x, int y, bool f)
-{
+inline void chsFrame(int x, int y, bool f) {
 	register int i;
 	gotoxy(x, y);
 	putchar(f ? '+' : ' ');
 
-	for (i = 1; i <= frameW; i++)
+	for(i = 1; i <= frameW; i++)
 		putchar(f ? '-' : ' ');
 
 	putchar(f ? '+' : ' ');
 	gotoxy(x + frameH + 1, y);
 	putchar(f ? '+' : ' ');
 
-	for (i = 1; i <= frameW; i++)
+	for(i = 1; i <= frameW; i++)
 		putchar(f ? '-' : ' ');
 	putchar(f ? '+' : ' ');
 
-	for (i = 1; i <= frameH; i++)
-	{
+	for(i = 1; i <= frameH; i++) {
 		gotoxy(x + i, y);
 		putchar(f ? '|' : ' ');
 		gotoxy(x + i, y + frameW + 1);
@@ -56,8 +53,7 @@ inline void chsFrame(int x, int y, bool f)
 	}
 }
 
-void MainPage()
-{
+void MainPage() {
 	clearance();
 	hideCursor();
 	register int i, j, x, y;
@@ -73,15 +69,15 @@ void MainPage()
 	gotoxy(5, 2);
 	CB(mtrd() % 16);
 	gotoxy(6, 2);
-	for (i = 1; i <= 5; i++)
+	for(i = 1; i <= 5; i++)
 		CB(mtrd() % 16);
 
 	// O 2 14
 	gotoxy(2, 16);
-	for (i = 1; i <= 3; i++)
+	for(i = 1; i <= 3; i++)
 		CB(mtrd() % 16);
 	gotoxy(6, 16);
-	for (i = 1; i <= 3; i++)
+	for(i = 1; i <= 3; i++)
 		CB(mtrd() % 16);
 	gotoxy(3, 14);
 	CB(mtrd() % 16);
@@ -98,10 +94,10 @@ void MainPage()
 
 	// C 2 26
 	gotoxy(2, 28);
-	for (i = 1; i <= 3; i++)
+	for(i = 1; i <= 3; i++)
 		CB(mtrd() % 16);
 	gotoxy(6, 28);
-	for (i = 1; i <= 3; i++)
+	for(i = 1; i <= 3; i++)
 		CB(mtrd() % 16);
 	gotoxy(3, 26);
 	CB(mtrd() % 16);
@@ -116,10 +112,10 @@ void MainPage()
 
 	// A 2 38
 	gotoxy(2, 40);
-	for (i = 1; i <= 3; i++)
+	for(i = 1; i <= 3; i++)
 		CB(mtrd() % 16);
 	gotoxy(4, 38);
-	for (i = 1; i <= 5; i++)
+	for(i = 1; i <= 5; i++)
 		CB(mtrd() % 16);
 	gotoxy(3, 38);
 	CB(mtrd() % 16);
@@ -144,18 +140,18 @@ void MainPage()
 	gotoxy(5, 50);
 	CB(mtrd() % 16);
 	gotoxy(6, 50);
-	for (i = 1; i <= 5; i++)
+	for(i = 1; i <= 5; i++)
 		CB(mtrd() % 16);
 
 	// G 8 2
 	gotoxy(8, 4);
-	for (i = 1; i <= 10; i++)
+	for(i = 1; i <= 10; i++)
 		CB(mtrd() % 16);
 	gotoxy(20, 4);
-	for (i = 1; i <= 10; i++)
+	for(i = 1; i <= 10; i++)
 		CB(mtrd() % 16);
 	gotoxy(16, 8);
-	for (i = 1; i <= 8; i++)
+	for(i = 1; i <= 8; i++)
 		CB(mtrd() % 16);
 	gotoxy(9, 2);
 	CB(mtrd() % 16);
@@ -188,13 +184,13 @@ void MainPage()
 
 	// E 10 8
 	gotoxy(10, 10);
-	for (i = 1; i <= 4; i++)
+	for(i = 1; i <= 4; i++)
 		CB(mtrd() % 16);
 	gotoxy(12, 8);
-	for (i = 1; i <= 5; i++)
+	for(i = 1; i <= 5; i++)
 		CB(mtrd() % 16);
 	gotoxy(14, 10);
-	for (i = 1; i <= 4; i++)
+	for(i = 1; i <= 4; i++)
 		CB(mtrd() % 16);
 	gotoxy(11, 8);
 	CB(mtrd() % 16);
@@ -231,13 +227,13 @@ void MainPage()
 
 	// E 10 32
 	gotoxy(10, 34);
-	for (i = 1; i <= 4; i++)
+	for(i = 1; i <= 4; i++)
 		CB(mtrd() % 16);
 	gotoxy(12, 32);
-	for (i = 1; i <= 5; i++)
+	for(i = 1; i <= 5; i++)
 		CB(mtrd() % 16);
 	gotoxy(14, 34);
-	for (i = 1; i <= 4; i++)
+	for(i = 1; i <= 4; i++)
 		CB(mtrd() % 16);
 	gotoxy(11, 32);
 	CB(mtrd() % 16);
@@ -246,10 +242,10 @@ void MainPage()
 
 	// R 10 44
 	gotoxy(10, 46);
-	for (i = 1; i <= 4; i++)
+	for(i = 1; i <= 4; i++)
 		CB(mtrd() % 16);
 	gotoxy(12, 44);
-	for (i = 1; i <= 4; i++)
+	for(i = 1; i <= 4; i++)
 		CB(mtrd() % 16);
 	gotoxy(11, 44);
 	CB(mtrd() % 16);
@@ -266,10 +262,10 @@ void MainPage()
 
 	// A 10 56
 	gotoxy(10, 58);
-	for (i = 1; i <= 3; i++)
+	for(i = 1; i <= 3; i++)
 		CB(mtrd() % 16);
 	gotoxy(12, 56);
-	for (i = 1; i <= 5; i++)
+	for(i = 1; i <= 5; i++)
 		CB(mtrd() % 16);
 	gotoxy(11, 56);
 	CB(mtrd() % 16);
@@ -294,18 +290,18 @@ void MainPage()
 	gotoxy(13, 68);
 	CB(mtrd() % 16);
 	gotoxy(14, 68);
-	for (i = 1; i <= 5; i++)
+	for(i = 1; i <= 5; i++)
 		CB(mtrd() % 16);
 
 	// S 10 80
 	gotoxy(10, 82);
-	for (i = 1; i <= 4; i++)
+	for(i = 1; i <= 4; i++)
 		CB(mtrd() % 16);
 	gotoxy(12, 80);
-	for (i = 1; i <= 5; i++)
+	for(i = 1; i <= 5; i++)
 		CB(mtrd() % 16);
 	gotoxy(14, 80);
-	for (i = 1; i <= 4; i++)
+	for(i = 1; i <= 4; i++)
 		CB(mtrd() % 16);
 	gotoxy(11, 80);
 	CB(mtrd() % 16);
@@ -315,7 +311,7 @@ void MainPage()
 	setfcolor(defTeams[0].color);
 	char chCmd = 0, fileName[105];
 	int chs = 0, plCnt, stDel, cht, cheatCode;
-	FILE *fileP;
+	FILE* fileP;
 
 	// Tips 17 6
 	gotoxy(17, 6);
@@ -331,27 +327,25 @@ void MainPage()
 	printf("   (not supported) Multiplayer: Have fun with your friends!");
 	clearline();
 
-	while (chCmd != 13)
-	{
+	while(chCmd != 13) {
 		chCmd = _getch();
 		gotoxy(17 + chs, 37);
 		printf("  ");
-		switch (tolower(chCmd))
-		{
-		case 'w':
-			if (chs > 0)
-				--chs;
-			break;
-		case 's':
-			if (chs < 1)
-				++chs;
-			break;
+		switch(tolower(chCmd)) {
+			case 'w':
+				if(chs > 0)
+					--chs;
+				break;
+			case 's':
+				if(chs < 1)
+					++chs;
+				break;
 		}
 		gotoxy(17 + chs, 37);
 		printf(">>");
 	}
 
-	if (chs)
+	if(chs)
 		return;
 	else
 		chCmd = 0;
@@ -363,30 +357,26 @@ void MainPage()
 	printf("   Import a map:");
 	clearline();
 
-	while (chCmd != 13)
-	{
+	while(chCmd != 13) {
 		chCmd = _getch();
 		gotoxy(17 + chs, 37);
 		printf("  ");
-		switch (tolower(chCmd))
-		{
-		case 'w':
-			if (chs > 0)
-				--chs;
-			break;
-		case 's':
-			if (chs < 1)
-				++chs;
-			break;
+		switch(tolower(chCmd)) {
+			case 'w':
+				if(chs > 0)
+					--chs;
+				break;
+			case 's':
+				if(chs < 1)
+					++chs;
+				break;
 		}
 		gotoxy(17 + chs, 37);
 		printf(">>");
 	}
 
-	if (!chs)
-	{
-		if (!dllExit)
-		{
+	if(!chs) {
+		if(!dllExit) {
 			clearance();
 			gotoxy(1, 1);
 			printf("Oops, it seems like you don't have 'defMap.dll'!");
@@ -398,8 +388,7 @@ void MainPage()
 		clearance();
 		hideCursor();
 
-		for (; i <= mapNum; i++)
-		{
+		for(; i <= mapNum; i++) {
 			gotoxy(x, y);
 			printf("id:%02d", maps[i].id);
 			gotoxy(x, y + 7);
@@ -423,7 +412,7 @@ void MainPage()
 			gotoxy(x + 5, y);
 			printf("CityCnt: %d", maps[i].citycnt);
 
-			if (y > frameW * 4)
+			if(y > frameW * 4)
 				y = 6, x += frameH + 4;
 			else
 				y += frameW + 4;
@@ -433,34 +422,32 @@ void MainPage()
 		chsFrame(x, y, 1);
 
 		chCmd = 0;
-		while (chCmd != 13)
-		{
+		while(chCmd != 13) {
 			chCmd = _getch();
 			chsFrame(x, y, 0);
 
-			switch (tolower(chCmd))
-			{
-			case 'w':
-				if (chs - 5 > 0)
-					chs -= 5, x = x - frameH - 4;
-				break;
-			case 's':
-				if (chs + 5 <= mapNum)
-					chs += 5, x = x + frameH + 4;
-				break;
-			case 'a':
-				if (chs - 1 > 0)
-					chs--, y = y - frameW - 4;
-				break;
-			case 'd':
-				if (chs + 1 <= mapNum)
-					chs++, y = y + frameW + 4;
-				break;
+			switch(tolower(chCmd)) {
+				case 'w':
+					if(chs - 5 > 0)
+						chs -= 5, x = x - frameH - 4;
+					break;
+				case 's':
+					if(chs + 5 <= mapNum)
+						chs += 5, x = x + frameH + 4;
+					break;
+				case 'a':
+					if(chs - 1 > 0)
+						chs--, y = y - frameW - 4;
+					break;
+				case 'd':
+					if(chs + 1 <= mapNum)
+						chs++, y = y + frameW + 4;
+					break;
 			}
 
-			if (y > frameW * 5)
+			if(y > frameW * 5)
 				y = 5, x += frameH + 4;
-			if (y < 5)
+			if(y < 5)
 				y = 21 + frameW * 4, x = x - frameH - 4;
 			chsFrame(x, y, 1);
 			//	gotoxy(160,0);printf("%d %d %d",chs,x,y);
@@ -499,28 +486,26 @@ void MainPage()
 		printf("Player Count (<=16): ");
 		clearline();
 		scanf("%d", &plCnt);
-		if (plCnt < 2 || plCnt > 16)
+		if(plCnt < 2 || plCnt > 16)
 			goto __defmap_plcnt;
 	__spemap_maph:
 		gotoxy(4, 11 + frameW);
-		if (chs < 5)
-		{
+		if(chs < 5) {
 			int H, W, amn, amx;
 			printf("Map Height (<=500): ");
 			clearline();
 			scanf("%d", &H);
-			if (H < 5 || H > 500)
+			if(H < 5 || H > 500)
 				goto __spemap_maph;
 		__spemap_mapw:
 			gotoxy(5, 11 + frameW);
 			printf("Map Width (<=500): ");
 			clearline();
 			scanf("%d", &W);
-			if (W < 5 || W > 500)
+			if(W < 5 || W > 500)
 				goto __spemap_mapw;
 			gotoxy(6, 11 + frameW);
-			if (chs == 2)
-			{
+			if(chs == 2) {
 				printf("MINIMUM Army: ");
 				clearline();
 				scanf("%d", &amn);
@@ -530,27 +515,23 @@ void MainPage()
 				scanf("%d", &amx);
 				gotoxy(8, 11 + frameW);
 			}
-			switch (chs)
-			{
-			case 1:
-				createRandomMap(H, W);
-				break;
-			case 2:
-				createFullCityMap(H, W, amn, amx, plCnt);
-				break;
-			case 3:
-				createFullSwampMap(H, W, plCnt);
-				break;
-			case 4:
-				createFullPlainMap(H, W, plCnt);
-				break;
+			switch(chs) {
+				case 1:
+					createRandomMap(H, W);
+					break;
+				case 2:
+					createFullCityMap(H, W, amn, amx, plCnt);
+					break;
+				case 3:
+					createFullSwampMap(H, W, plCnt);
+					break;
+				case 4:
+					createFullPlainMap(H, W, plCnt);
+					break;
 			}
-		}
-		else
+		} else
 			copyMap(chs);
-	}
-	else
-	{
+	} else {
 		gotoxy(18, 37 + 17);
 		scanf("%s", fileName);
 		fileP = fopen(fileName, "r");
@@ -619,8 +600,7 @@ inputstDel:;
 	gotoxy(3, 41 + frameW);
 	printf("Choose Game Speed:");
 	clearline();
-	for (int i = 1; i <= 20; ++i)
-	{
+	for(int i = 1; i <= 20; ++i) {
 		gotoxy(3 + i, 41 + frameW + 3);
 		printf("%dx", i);
 	}
@@ -630,27 +610,25 @@ inputstDel:;
 	printf(">> ");
 	chs = 1;
 	chCmd = 0;
-	while (chCmd != 13)
-	{
+	while(chCmd != 13) {
 		chCmd = _getch();
 		hideCursor();
 		gotoxy(3 + chs, 41 + frameW);
 		printf("  ");
-		switch (tolower(chCmd))
-		{
-		case 'w':
-			if (chs > 1)
-				--chs;
-			break;
-		case 's':
-			if (chs < 21)
-				++chs;
-			break;
+		switch(tolower(chCmd)) {
+			case 'w':
+				if(chs > 1)
+					--chs;
+				break;
+			case 's':
+				if(chs < 21)
+					++chs;
+				break;
 		}
 		gotoxy(3 + chs, 41 + frameW);
 		printf(">>");
 	}
-	if (chs == 21)
+	if(chs == 21)
 		stDel = 0;
 	else
 		stDel = 1000 / chs;
@@ -660,9 +638,9 @@ inputCheat:;
 	printf("Please enter the cheat code(0/1):");
 	gotoxy(3, 63 + frameW + 36);
 	scanf("%d", &cht);
-	if (cht > 1 || cht < 0)
+	if(cht > 1 || cht < 0)
 		goto inputCheat;
-	if (cht)
+	if(cht)
 		cheatCode = 1048575;
 	else
 		cheatCode = 2;

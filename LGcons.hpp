@@ -19,16 +19,15 @@
 #include <conio.h>
 
 // clear the full window: too slow, don't use!
-inline void clearance()
-{
-    HANDLE hdout = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(hdout, &csbi);
-    DWORD size = csbi.dwSize.X * csbi.dwSize.Y, num = 0;
-    COORD pos = {0, 0};
-    FillConsoleOutputCharacter(hdout, ' ', size, pos, &num);
-    FillConsoleOutputAttribute(hdout, csbi.wAttributes, size, pos, &num);
-    SetConsoleCursorPosition(hdout, pos);
+inline void clearance() {
+	HANDLE hdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(hdout, &csbi);
+	DWORD size = csbi.dwSize.X * csbi.dwSize.Y, num = 0;
+	COORD pos = {0, 0};
+	FillConsoleOutputCharacter(hdout, ' ', size, pos, &num);
+	FillConsoleOutputAttribute(hdout, csbi.wAttributes, size, pos, &num);
+	SetConsoleCursorPosition(hdout, pos);
 }
 // clear the line (only the chars after the cursor)
 inline void clearline() { fputs("\033[K", stdout); }
@@ -50,18 +49,17 @@ inline void hideCursor() { fputs("\033[?25l", stdout); }
 inline void showCursor() { fputs("\033[?25h", stdout); }
 
 // attr init: without this will lead to errors
-inline int initattr()
-{
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE)
-        return GetLastError();
-    DWORD dwMode = 0;
-    if (!GetConsoleMode(hOut, &dwMode))
-        return GetLastError();
-    dwMode |= 0x0004;
-    if (!SetConsoleMode(hOut, dwMode))
-        return GetLastError();
-    return 0;
+inline int initattr() {
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if(hOut == INVALID_HANDLE_VALUE)
+		return GetLastError();
+	DWORD dwMode = 0;
+	if(!GetConsoleMode(hOut, &dwMode))
+		return GetLastError();
+	dwMode |= 0x0004;
+	if(!SetConsoleMode(hOut, dwMode))
+		return GetLastError();
+	return 0;
 }
 
 // foreground color

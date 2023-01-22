@@ -15,11 +15,11 @@
 #define __LGMAIN_CPP__
 
 #if __cplusplus < 201300L
-#error This program should be compiled under the C++14\
- standard. If you use the C++ standard under it,\
- please use a standard greater. In G++, you can\
- compile with option -std=c++14 or -std=gnu++14 to\
- use the C++14 standard.
+	#error This program should be compiled under the C++14\
+	standard. If you use the C++ standard under it,\
+	please use a standard greater. In G++, you can\
+	compile with option -std=c++14 or -std=gnu++14 to\
+	use the C++14 standard.
 #endif // < C++14
 
 /*************** header files ***************/
@@ -45,8 +45,7 @@
 /*************** the main function ***************/
 
 HWND hwnd = GetConsoleWindow();
-signed main(signed argc, char **argv)
-{
+signed main(signed argc, char** argv) {
 	ShowWindow(hwnd, SW_MAXIMIZE);
 	SetConsoleTitle("Localized Generals.io v" FILE_VERSION " (Set your console window font size! Recommended:5-8)");
 	initattr();

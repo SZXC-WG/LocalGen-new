@@ -19,13 +19,13 @@
 
 int failSock;
 
-void initSock(){
+void initSock() {
 	WORD w_req=MAKEWORD(2,2);
 	WSADATA wsadata;
 	int err=WSAStartup(w_req,&wsadata);
-	
+
 	if(err!=0) failSock|=1;
-	if(LOBYTE(wsadata.wVersion)!=2||HIBYTE(wsadata.wHighVersion)!=2){
+	if(LOBYTE(wsadata.wVersion)!=2||HIBYTE(wsadata.wHighVersion)!=2) {
 		failSock|=2;
 		WSACleanup();
 	}

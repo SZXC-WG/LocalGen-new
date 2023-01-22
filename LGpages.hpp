@@ -534,11 +534,21 @@ void MainPage() {
 			copyMap(chs);
 	} else {
 		gotoxy(18, 37 + 17);
+		showCursor();
 		scanf("%s", fileName);
 		fileP = fopen(fileName, "r");
 		fscanf(fileP, "%s", strdeZip);
 		fclose(fileP);
 		deZip();
+		hideCursor();
+	__import_map_plcnt:
+		gotoxy(20, 37);
+		showCursor();
+		printf("Player Count (<=16): ");
+		clearline();
+		scanf("%d", &plCnt);
+		if(plCnt < 2 || plCnt > 16) goto __import_map_plcnt;
+		hideCursor();
 	}
 
 	//	if(chs) {

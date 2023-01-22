@@ -108,7 +108,7 @@ void Zip() {
 
 void deZip() {
 	register int i, j, k = 4;
-	int f, p = 1;
+	int f, p = 0;
 
 	for(; strdeZip[p] != '\0'; p++)
 		strdeZip[p] -= CHAR_AD;

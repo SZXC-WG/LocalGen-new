@@ -87,6 +87,11 @@ void printNum(bool visible, long long army, int team, char lchar, char rchar, ch
 				string p = to_string(army);
 				printf("%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 			} else fputs("-MX",stdout);
+		} else if(army == 0) {
+			putchar(mchar);
+			putchar(mchar);
+			if(lchar=='['||lchar=='$') putchar('0');
+			else putchar(mchar);
 		} else if(army < 10) {
 			putchar(mchar);
 			putchar(mchar);

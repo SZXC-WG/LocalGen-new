@@ -32,7 +32,7 @@ The program can't run under Mac OS. (maybe?)
 
 The program can't run in Windows versions under Windows 7 (incl.).
 
-### File Extensions
+## File Extensions
 
 Local Maps: `.lg`/`.lgmp`
 

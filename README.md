@@ -32,9 +32,19 @@ The program can't run under Mac OS. (maybe?)
 
 The program can't run in Windows versions under Windows 7 (incl.).
 
+### File Extensions
+
+Local Maps: `.lg`/`.lgmp`
+
+Replays: `.lgrep`/`.lgreplay`
+
 ## Releases (Changelog)
 
 [Click this link!](http://github.com/LocalGen-dev/LocalGen-new/releases)
+
+### v1.0.0
+
+First release!
 
 ## Donate Please!
 

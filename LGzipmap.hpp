@@ -82,7 +82,6 @@ std::pair<long long,long long> bin_search(long long curTurn) {
 void Zip() {
 	register int p = 0, i, j;
 	long long k1 = mapH, k2 = mapW;
-	strZip[p++] = 44;
 	strZip[p++] = PMod(k1) + CHAR_AD;
 	strZip[p++] = PMod(k1) + CHAR_AD;
 	strZip[p++] = PMod(k2) + CHAR_AD;

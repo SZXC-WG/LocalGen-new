@@ -181,20 +181,13 @@ void createRandomMap(int crtH = -1, int crtW = -1) {
 			int x = 0, f;
 			if(i - 2 > 0 && gameMap[i - 2][j].type == 2)
 				x = 1;
-			if(i + 2 <= mapH && gameMap[i - 2][j].type == 2)
-				x = 1;
 			if(j - 2 > 0 && gameMap[i][j - 2].type == 2)
-				x = 1;
-			if(j + 2 <= mapW && gameMap[i][j + 2].type == 2)
 				x = 1;
 			if(i - 2 > 0 && j + 2 <= mapW && gameMap[i - 2][j + 2].type == 2)
 				x = 1;
-			if(i + 2 <= mapH && j + 2 <= mapW && gameMap[i + 2][j + 2].type == 2)
-				x = 1;
 			if(i - 2 > 0 && j - 2 > 0 && gameMap[i - 2][j - 2].type == 2)
 				x = 1;
-			if(i + 2 <= mapH && j - 2 > 0 && gameMap[i + 2][j - 2].type == 2)
-				x = 1;
+			gameMap[i][j].lit=(mtrd()%114514==1);
 			if(x) {
 				f = mtrd() % 4;
 				if(f < 2) {
@@ -216,6 +209,53 @@ void createRandomMap(int crtH = -1, int crtW = -1) {
 
 				if(gameMap[i][j].army)
 					gameMap[i][j].army = mtrd() % 100 + 1;
+			}
+		}
+}
+void createStandardMap(int crtH = -1, int crtW = -1) {
+	//3/4 mountain 1/2 swamp 3 plain 1 city 1 general
+	//2/3 swamp 4/5 plain 2 city 1 general
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	register int i, j;
+
+	if(crtH < 0)
+		mapH = mtrd() % 50 + 1;
+	else
+		mapH = crtH;
+	if(crtW < 0)
+		mapW = mtrd() % 50 + 1;
+	else
+		mapW = crtW;
+
+	for(i = 1; i <= mapH; i++)
+		for(j = 1; j <= mapW; j++) {
+			int x1 = 0, x2=0, f;
+			if(i - 2 > 0 && gameMap[i - 2][j].type == 2)
+				x1 = 1;
+			if(j - 2 > 0 && gameMap[i][j - 2].type == 2)
+				x1 = 1;
+			if(i - 2 > 0 && j + 2 <= mapW && gameMap[i - 2][j + 2].type == 2)
+				x1 = 1;
+			if(i - 2 > 0 && j - 2 > 0 && gameMap[i - 2][j - 2].type == 2)
+				x1 = 1;
+			if(i-1>0&&gameMap[i-1][j].type==1) x2=1;
+			if(j-1>0&&gameMap[i][j-1].type==1) x2=1;
+			
+			gameMap[i][j].army=0;
+			gameMap[i][j].lit=0;
+			f=mtrd()%10;
+			
+			if(x1){
+				if(f<4-x2) gameMap[i][j].type=2;
+				else if(f<5) gameMap[i][j].type=1;
+				else if(f<8) gameMap[i][j].type=0;
+				else if(f<9) gameMap[i][j].type=3;
+				else gameMap[i][j].type=4,gameMap[i][j].army=40;
+			}else{
+				if(f<2+x2) gameMap[i][j].type=1;
+				else if(f<7) gameMap[i][j].type=0;
+				else if(f<8) gameMap[i][j].type=3;
+				else gameMap[i][j].type=4,gameMap[i][j].army=40;
 			}
 		}
 }

@@ -490,7 +490,7 @@ void MainPage() {
 			goto __defmap_plcnt;
 	__spemap_maph:
 		gotoxy(4, 11 + frameW);
-		if(chs < 5) {
+		if(chs < 6) {
 			int H, W;
 			long long amn, amx;
 			printf("Map Height (<=500): ");
@@ -506,7 +506,7 @@ void MainPage() {
 			if(W < 5 || W > 500)
 				goto __spemap_mapw;
 			gotoxy(6, 11 + frameW);
-			if(chs == 2) {
+			if(chs == 3) {
 				printf("MINIMUM Army: ");
 				clearline();
 				scanf("%lld", &amn);
@@ -521,12 +521,15 @@ void MainPage() {
 					createRandomMap(H, W);
 					break;
 				case 2:
-					createFullCityMap(H, W, amn, amx, plCnt);
+					createStandardMap(H,W);
 					break;
 				case 3:
-					createFullSwampMap(H, W, plCnt);
+					createFullCityMap(H, W, amn, amx, plCnt);
 					break;
 				case 4:
+					createFullSwampMap(H, W, plCnt);
+					break;
+				case 5:
 					createFullPlainMap(H, W, plCnt);
 					break;
 			}

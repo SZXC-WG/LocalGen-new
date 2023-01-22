@@ -62,7 +62,7 @@ struct playerCoord {
 	int x, y;
 };
 
-const char NUM_s[15] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
+const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
 bool isVisible(int x, int y, int printCode) {
 	if(gameMap[x][y].lit)
 		return true;
@@ -72,186 +72,81 @@ bool isVisible(int x, int y, int printCode) {
 				return true;
 	return false;
 }
+void printNum(bool visible, long long army, int team, char lchar, char rchar, char mchar=' ', char repchar=' ') {
+	if(visible) {
+		setfcolor(defTeams[team].color);
+		putchar(lchar);
+		if(army < 0) {
+			register long long absd = -army;
+			if(absd < 10) {
+				putchar(mchar);
+				printf("%2lld", army);
+			} else if(absd < 100) {
+				printf("%3lld", army);
+			} else if(absd < (ll)(1e13)) {
+				string p = to_string(army);
+				printf("%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+			} else fputs("-MX",stdout);
+		} else if(army < 10) {
+			putchar(mchar);
+			putchar(mchar);
+			printf("%1lld", army);
+		} else if(army < 100) {
+			putchar(mchar);
+			printf("%2lld", army);
+		} else if(army < 1000) {
+			printf("%3lld", army);
+		} else if(army < (ll)(1e14)) {
+			string p = to_string(army);
+			printf("%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+		} else fputs("MAX",stdout);
+		putchar(rchar);
+	} else {
+		putchar(repchar);
+		putchar(repchar);
+		putchar(repchar);
+		putchar(repchar);
+		putchar(repchar);
+	}
+	resetattr();
+	setbcolor(0x000000);
+}
 void printMap(int printCode, playerCoord coo) {
 	setbcolor(0x000000);
 	puts(string(mapW * 5 + 2, '_').c_str());
 	for(int i = 1; i <= mapH; ++i) {
 		putchar('|');
 		for(int j = 1; j <= mapW; ++j) {
+			setbcolor(0x000000);
+			setfcolor(0xffffff);
+			if(coo.x==i && coo.y==j) setbcolor(0x000080);
 			switch(gameMap[i][j].type) {
 				case 0: { /* plain */
-					if(!gameMap[i][j].team) {
-						setbcolor(0x000000);
-						setfcolor(0xffffff);
-						if(coo.x == i && coo.y == j)
-							setbcolor(0x000080);
-						if(isVisible(i, j, printCode)) {
-							if(!gameMap[i][j].army)
-								fputs("     ", stdout);
-							else if(gameMap[i][j].army < 0) {
-								int absd = -gameMap[i][j].army;
-								if(absd < 100)
-									printf(" %3lld ", gameMap[i][j].army);
-								else {
-									string p = to_string(gameMap[i][j].army);
-									printf(" %s%c ", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-								}
-							} else if(gameMap[i][j].army < 1000)
-								printf(" %3lld ", gameMap[i][j].army);
-							else {
-								string p = to_string(gameMap[i][j].army);
-								printf(" %s%c ", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-							}
-						} else
-							fputs("     ", stdout);
-						setbcolor(0x000000);
-					} else {
-						setfcolor(0xffffff);
-						if(coo.x == i && coo.y == j)
-							setbcolor(0x000080);
-						if(isVisible(i, j, printCode)) {
-							setfcolor(defTeams[gameMap[i][j].team].color);
-							if(gameMap[i][j].army < 0) {
-								int absd = -gameMap[i][j].army;
-								if(absd < 100)
-									printf(" %3lld ", gameMap[i][j].army);
-								else {
-									string p = to_string(gameMap[i][j].army);
-									printf(" %s%c ", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-								}
-							} else if(gameMap[i][j].army < 1000)
-								printf(" %3lld ", gameMap[i][j].army);
-							else {
-								string p = to_string(gameMap[i][j].army);
-								printf(" %s%c ", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-							}
-						} else
-							fputs("     ", stdout);
-						setbcolor(0x000000);
-					}
+					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,' ',' ');
 					break;
 				}
 				case 1: { /* swamp */
-					if(!gameMap[i][j].team) {
-						setbcolor(0x000000);
-						setfcolor(0xffffff);
-						if(coo.x == i && coo.y == j)
-							setbcolor(0x000080);
-						fputs("=====", stdout);
-						resetattr();
-						setbcolor(0x000000);
-					} else {
-						setfcolor(0xffffff);
-						if(coo.x == i && coo.y == j)
-							setbcolor(0x000080);
-						if(isVisible(i, j, printCode)) {
-							setfcolor(defTeams[gameMap[i][j].team].color);
-							if(gameMap[i][j].army < 10)
-								printf("===%1lld=", gameMap[i][j].army);
-							else if(gameMap[i][j].army < 100)
-								printf("==%2lld=", gameMap[i][j].army);
-							else if(gameMap[i][j].army < 1000)
-								printf("=%3lld=", gameMap[i][j].army);
-							else {
-								string p = to_string(gameMap[i][j].army);
-								printf("=%s%c=", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-							}
-						} else
-							fputs("=====", stdout);
-						setbcolor(0x000000);
-					}
+					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'=','=','=','=');
 					break;
 				}
 				case 2: { /* mountain */
-					setbcolor(0x000000);
-					setfcolor(0xffffff);
-					if(coo.x == i && coo.y == j)
-						setbcolor(0x000080);
 					fputs("#####", stdout);
-					setbcolor(0x000000);
 					break;
 				}
 				case 3: { /* general */
 					if(!gameMap[i][j].team) {
-						setbcolor(0x000000);
-						setfcolor(0xffffff);
-						if(coo.x == i && coo.y == j)
-							setbcolor(0x000080);
-						if(isVisible(i, j, printCode))
-							fputs("{GEN}", stdout);
-						else
-							fputs("     ", stdout);
-						setbcolor(0x000000);
-					} else {
-						setfcolor(0xffffff);
-						if(coo.x == i && coo.y == j)
-							setbcolor(0x000080);
-						if(isVisible(i, j, printCode)) {
-							setfcolor(defTeams[gameMap[i][j].team].color);
-							if(gameMap[i][j].army < 1000)
-								printf("{%3lld}", gameMap[i][j].army);
-							else {
-								string p = to_string(gameMap[i][j].army);
-								printf("{%s%c}", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-							}
-						} else
-							fputs("     ", stdout);
-						setbcolor(0x000000);
-					}
+						if(isVisible(i, j, printCode)) fputs("$GEN$", stdout);
+						else fputs("     ", stdout);
+					} else printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'$','$');
 					break;
 				}
 				case 4: { /* city */
-					if(!gameMap[i][j].team) {
-						setbcolor(0x000000);
-						setfcolor(0xffffff);
-						if(coo.x == i && coo.y == j)
-							setbcolor(0x000080);
-						if(isVisible(i, j, printCode)) {
-							if(gameMap[i][j].army < 0) {
-								int absd = -gameMap[i][j].army;
-								if(absd < 100)
-									printf("[%3lld]", gameMap[i][j].army);
-								else {
-									string p = to_string(gameMap[i][j].army);
-									printf("[%s%c]", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-								}
-							} else if(gameMap[i][j].army < 1000)
-								printf("[%3lld]", gameMap[i][j].army);
-							else {
-								string p = to_string(gameMap[i][j].army);
-								printf("[%s%c]", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-							}
-						} else
-							fputs("#####", stdout);
-						setbcolor(0x000000);
-					} else {
-						setfcolor(0xffffff);
-						if(coo.x == i && coo.y == j)
-							setbcolor(0x000080);
-						if(isVisible(i, j, printCode)) {
-							setfcolor(defTeams[gameMap[i][j].team].color);
-							if(gameMap[i][j].army < 0) {
-								int absd = -gameMap[i][j].army;
-								if(absd < 100)
-									printf("[%3lld]", gameMap[i][j].army);
-								else {
-									string p = to_string(gameMap[i][j].army);
-									printf("[%s%c]", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-								}
-							} else if(gameMap[i][j].army < 1000)
-								printf("[%3lld]", gameMap[i][j].army);
-							else {
-								string p = to_string(gameMap[i][j].army);
-								printf("[%s%c]", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-							}
-						} else
-							fputs("#####", stdout);
-						setbcolor(0x000000);
-					}
+					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'[',']',' ','#');
 					break;
 				}
 			}
 		}
+		clearline();
 		setfcolor(0xffffff);
 		putchar('|');
 		putchar('\n');

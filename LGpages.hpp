@@ -21,7 +21,7 @@
 #include "LGzipmap.hpp"
 #include "LGgame.hpp"
 
-const int frameH = 6, frameW = 49;
+const int frameH = 7, frameW = 49;
 
 inline void CB(int k) {
 	setbcolor(defTeams[k].color);
@@ -384,7 +384,7 @@ void MainPage() {
 			exitExe();
 		}
 
-		i = 1, x = 4, y = 6;
+		i = 1, x = 3, y = 6;
 		clearance();
 		hideCursor();
 
@@ -405,20 +405,18 @@ void MainPage() {
 			printf("GeneralCnt: %d", maps[i].generalcnt);
 			gotoxy(x + 4, y + 20);
 			printf("PlainCnt: %d", maps[i].plaincnt);
-			gotoxy(x + 4, y);
-			printf("SwampCnt: %d", maps[i].swampcnt);
-			gotoxy(x + 4, y + 20);
-			printf("MountainCnt: %d", maps[i].mountaincnt);
 			gotoxy(x + 5, y);
+			printf("SwampCnt: %d", maps[i].swampcnt);
+			gotoxy(x + 5, y + 20);
+			printf("MountainCnt: %d", maps[i].mountaincnt);
+			gotoxy(x + 6, y);
 			printf("CityCnt: %d", maps[i].citycnt);
 
-			if(y > frameW * 4)
-				y = 6, x += frameH + 4;
-			else
-				y += frameW + 4;
+			if(y > frameW * 4) y = 6, x += frameH + 2;
+			else y += frameW + 2;
 		}
 
-		x = 3, y = 5, chs = 1;
+		x = 2, y = 4, chs = 1;
 		chsFrame(x, y, 1);
 
 		chCmd = 0;
@@ -429,28 +427,28 @@ void MainPage() {
 			switch(tolower(chCmd)) {
 				case 'w':
 					if(chs - 5 > 0)
-						chs -= 5, x = x - frameH - 4;
+						chs -= 5, x = x - frameH - 2;
 					break;
 				case 's':
 					if(chs + 5 <= mapNum)
-						chs += 5, x = x + frameH + 4;
+						chs += 5, x = x + frameH + 2;
 					break;
 				case 'a':
 					if(chs - 1 > 0)
-						chs--, y = y - frameW - 4;
+						chs--, y = y - frameW - 2;
 					break;
 				case 'd':
 					if(chs + 1 <= mapNum)
-						chs++, y = y + frameW + 4;
+						chs++, y = y + frameW + 2;
 					break;
 			}
 
 			if(y > frameW * 5)
-				y = 5, x += frameH + 4;
-			if(y < 5)
-				y = 21 + frameW * 4, x = x - frameH - 4;
+				y = 4, x += frameH + 2;
+			if(y < 4)
+				y = 12 + frameW * 4, x = x - frameH - 2;
 			chsFrame(x, y, 1);
-			//	gotoxy(160,0);printf("%d %d %d",chs,x,y);
+			gotoxy(100,1); printf("%d %d %d",chs,x,y);
 		}
 
 		clearance();

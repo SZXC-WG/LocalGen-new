@@ -42,10 +42,6 @@ Replays: `.lgrep`/`.lgreplay`
 
 [Click this link!](http://github.com/LocalGen-dev/LocalGen-new/releases)
 
-### v1.0.0
-
-First release!
-
 ## Donate Please!
 
 [![QIM4p.md.jpg](https://i.imgtg.com/2023/01/19/QIM4p.md.jpg)](https://imgtg.com/image/QIM4p)

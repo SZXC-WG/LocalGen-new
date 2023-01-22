@@ -491,7 +491,8 @@ void MainPage() {
 	__spemap_maph:
 		gotoxy(4, 11 + frameW);
 		if(chs < 5) {
-			int H, W, amn, amx;
+			int H, W;
+			long long amn, amx;
 			printf("Map Height (<=500): ");
 			clearline();
 			scanf("%d", &H);
@@ -508,11 +509,11 @@ void MainPage() {
 			if(chs == 2) {
 				printf("MINIMUM Army: ");
 				clearline();
-				scanf("%d", &amn);
+				scanf("%lld", &amn);
 				gotoxy(7, 11 + frameW);
 				printf("MAXIMUM Army: ");
 				clearline();
-				scanf("%d", &amx);
+				scanf("%lld", &amx);
 				gotoxy(8, 11 + frameW);
 			}
 			switch(chs) {

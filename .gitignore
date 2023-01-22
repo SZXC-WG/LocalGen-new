@@ -8,3 +8,4 @@ Makefile.win
 LocalGen-new.layout
 *.o
 *.res
+*.lgmp

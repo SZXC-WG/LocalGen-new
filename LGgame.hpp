@@ -236,6 +236,8 @@ struct gameStatus
 			inlineMove.pop_front();
 			if (!isAlive[cur.id])
 				continue;
+			if (gameMap[cur.from.x][cur.from.y].team != cur.id)
+				continue; 
 			if (gameMap[cur.to.x][cur.to.y].team == cur.id)
 			{
 				gameMap[cur.to.x][cur.to.y].army += gameMap[cur.from.x][cur.from.y].army - 1;

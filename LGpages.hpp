@@ -613,19 +613,19 @@ inputstDel:;
 	printf("Choose Game Speed:");
 	clearline();
 	for(int i = 1; i <= 20; ++i) {
-		gotoxy(3 + i, 41 + frameW + 3);
+		gotoxy(2 + i, 41 + frameW + 3);
 		printf("%dx", i);
 	}
-	gotoxy(3 + 21, 41 + frameW + 3);
+	gotoxy(2 + 21, 41 + frameW + 3);
 	printf("FAST!");
-	gotoxy(3 + 1, 41 + frameW);
+	gotoxy(2 + 1, 41 + frameW);
 	printf(">> ");
 	chs = 1;
 	chCmd = 0;
 	while(chCmd != 13) {
 		chCmd = _getch();
 		hideCursor();
-		gotoxy(3 + chs, 41 + frameW);
+		gotoxy(2 + chs, 41 + frameW);
 		printf("  ");
 		switch(tolower(chCmd)) {
 			case 'w':
@@ -637,25 +637,62 @@ inputstDel:;
 					++chs;
 				break;
 		}
-		gotoxy(3 + chs, 41 + frameW);
+		gotoxy(2 + chs, 41 + frameW);
 		printf(">>");
 	}
-	if(chs == 21)
-		stDel = 0;
-	else
-		stDel = 1000 / chs;
+	if(chs == 21) stDel = 0;
+	else stDel = 1000 / chs;
 
-inputCheat:;
 	gotoxy(2, 63 + frameW);
-	printf("Please enter the cheat code(0/1):");
-	gotoxy(2, 63 + frameW + 36);
-	scanf("%d", &cht);
-	if(cht > 1 || cht < 0)
+	printf("Cheat Code:");
+	gotoxy(3, 63 + frameW);
+	printf("Select the players you want to watch directly.");
+	cheatCode = 2;
+	chs = 1;
+inputCheat:;
+	hideCursor();
+	for(int i=1; i<=plCnt; ++i) {
+		gotoxy(3+i, 63+frameW+3);
+		setfcolor(defTeams[i].color);
+		if(cheatCode&(1<<i)) underline();
+		printf("%s",defTeams[i].name.c_str());
+		resetattr();
+		setfcolor(0); setbcolor(0);
+		printf("|");
+		resetattr();
+	}
+	gotoxy(3+plCnt+1,63+frameW+3);
+	printf("Overall");
+	if(cheatCode==1048575) {
+		gotoxy(3+plCnt+1,63+frameW+3+7+1);
+		underline();
+		printf("Selected");
+		resetattr();
+		setfcolor(0); setbcolor(0);
+		printf("|");
+		resetattr();
+	} else printf("         ");
+	gotoxy(3+plCnt+2,63+frameW+3);
+	printf("COMPLETE SELECTION");
+	gotoxy(3+chs,63+frameW);
+	printf(">>");
+	chCmd=0;
+	while(chCmd!=13) {
+		chCmd=_getch();
+		gotoxy(3+chs,63+frameW);
+		printf("  ");
+		switch(tolower(chCmd)) {
+			case 'w': if(chs>1)	--chs; break;
+			case 's': if(chs<plCnt+2) ++chs; break;
+		}
+		gotoxy(3+chs,63+frameW);
+		printf(">>");
+	}
+	if(chs!=plCnt+2) {
+		if(chs==plCnt+1) cheatCode=((cheatCode&1)?2:1048575);
+		else cheatCode^=(1<<chs);
 		goto inputCheat;
-	if(cht)
-		cheatCode = 1048575;
-	else
-		cheatCode = 2;
+	}
 
 	clearance();
 	GAME(0, cheatCode, plCnt, stDel);

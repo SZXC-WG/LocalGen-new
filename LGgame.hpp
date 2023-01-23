@@ -133,10 +133,7 @@ struct gameStatus {
 
 	int gameMesC = 0;
 	void kill(int p1, int p2) {
-		if(p2 == 1) {
-			cheatCode = 1048575;
-			MessageBox(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK);
-		}
+		if(p2 == 1) MessageBox(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK);
 		isAlive[p2] = 0;
 		for(int i = 1; i <= mapH; ++i) {
 			for(int j = 1; j <= mapW; ++j) {
@@ -303,8 +300,7 @@ struct gameStatus {
 
 	// main
 	int operator()() {
-		if(played)
-			return -1;
+		if(played) return -1;
 		played = 1;
 		if(!isWeb) {
 			int robotId[64];
@@ -312,8 +308,8 @@ struct gameStatus {
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 			for(int i = 2; i <= playerCnt; ++i)
 				robotId[i] = mtrd() % 300 + 1;
-			//			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
-			//			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51;// for robot debug
+//			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
+//			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
 			initGenerals(coordinate);
 			updateMap();
 			printMap(cheatCode, coordinate[1]);
@@ -391,7 +387,6 @@ struct gameStatus {
 									}
 								}
 							}
-							cheatCode = 1048575;
 							++gameMesC;
 							gotoxy(mapH + 2 + gameMesC, 65);
 							setfcolor(0xffffff);
@@ -430,6 +425,16 @@ struct gameStatus {
 					}
 				}
 				flushMove();
+				if(cheatCode!=1048575) {
+					int alldead = 0;
+					for(int i=1; i<=playerCnt&&!alldead; ++i) {
+						if(cheatCode&(1<<i)) if(isAlive[i]) alldead=1;
+					}
+					if(!alldead) {
+						cheatCode=1048575;
+						MessageBox(nullptr,"ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.","TIP",MB_OK);
+					}
+				}
 				if(!gameEnd) {
 					int ed = 0;
 					for(int i = 1; i <= playerCnt; ++i)

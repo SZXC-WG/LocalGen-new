@@ -369,12 +369,12 @@ struct gameStatus {
 							movement.clear();
 							break;
 						case 27:
-							MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "", MB_OK);
+							MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK);
 							return 0;
 						case int('\b'): {
 							if(!isAlive[1])
 								break;
-							int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "SURRENDER", MB_YESNO);
+							int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO);
 							if(confirmSur == 7)
 								break;
 							isAlive[1] = 0;
@@ -445,7 +445,7 @@ struct gameStatus {
 						            "THE GAME WILL CONTINUE." + "\n" +
 						            "YOU CAN PRESS [ESC] TO EXIT.")
 						           .c_str(),
-						           "", MB_OK);
+						           "GAME END", MB_OK);
 						gameEnd = 1;
 						cheatCode = 1048575;
 						++gameMesC;

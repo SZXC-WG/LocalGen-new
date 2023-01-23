@@ -213,8 +213,8 @@ void createRandomMap(int crtH = -1, int crtW = -1) {
 		}
 }
 void createStandardMap(int crtH = -1, int crtW = -1) {
-	//3/4 mountain 1/2 swamp 3 plain 1 city 1 general
-	//1/2 swamp 5/6 plain 1 city 1 general
+	//7/8 mountain 1/2 swamp 9 plain 1 city 1 general
+	//1/2 swamp 16/17 plain 1 city 1 general
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	register int i, j;
 
@@ -243,18 +243,18 @@ void createStandardMap(int crtH = -1, int crtW = -1) {
 			
 			gameMap[i][j].army=0;
 			gameMap[i][j].lit=0;
-			f=mtrd()%10;
+			f=mtrd()%20;
 			
 			if(!x1){
-				if(f<4-x2) gameMap[i][j].type=2;
-				else if(f<5) gameMap[i][j].type=1;
-				else if(f<8) gameMap[i][j].type=0;
-				else if(f<9) gameMap[i][j].type=3;
+				if(f<8-x2) gameMap[i][j].type=2;
+				else if(f<9) gameMap[i][j].type=1;
+				else if(f<18) gameMap[i][j].type=0;
+				else if(f<19) gameMap[i][j].type=3;
 				else gameMap[i][j].type=4,gameMap[i][j].army=40;
 			}else{
 				if(f<1+x2) gameMap[i][j].type=1;
-				else if(f<7) gameMap[i][j].type=0;
-				else if(f<8) gameMap[i][j].type=3;
+				else if(f<18) gameMap[i][j].type=0;
+				else if(f<19) gameMap[i][j].type=3;
 				else gameMap[i][j].type=4,gameMap[i][j].army=40;
 			}
 		}

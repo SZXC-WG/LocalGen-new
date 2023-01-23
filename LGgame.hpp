@@ -66,6 +66,42 @@ struct gameStatus {
 	~gameStatus() = default;
 
 	int curTurn;
+	struct gMes {
+		int turn,plId;
+		string mes;
+	} mess[205];
+	int gameMesC;
+	
+	void addGameMessage(int turn,int plId,string mes) {
+		++gameMesC;
+		mess[gameMesC].turn=turn;
+		mess[gameMesC].plId=plId;
+		mess[gameMesC].mes=mes;
+	}
+	void printGameMessage() {
+		gotoxy(2+mapH+1,63); underline(); printf("| %-41s |","G a m e   M e s s a g e"); resetattr(); putchar('|');
+		gotoxy(2+mapH+2,63); underline(); printf("| %6s | %7s | %-22s |","TURN","PLAYER","MESSAGE"); resetattr(); putchar('|');
+		for(int i=1; i<=gameMesC; ++i) {
+			gotoxy(2+mapH+2+i,63);
+			underline();
+			printf("| %6d | ",mess[i].turn);
+			setfcolor(defTeams[mess[i].plId].color);
+			printf("%7s",defTeams[mess[i].plId].name.c_str());
+			setfcolor(0xffffff);
+			printf(" | ");
+			printf("%s",mess[i].mes.c_str());
+			setfcolor(0xffffff);
+			fflush(stdout);
+			int x=0,y=0; getxy(x,y);
+			while(y<106) putchar(' '),++y;
+			gotoxy(2+mapH+2+i,107);
+			printf("|");
+			resetattr();
+			printf("|");
+		}
+		fflush(stdout);
+	}
+	
 	void updateMap() {
 		++curTurn;
 		for(int i = 1; i <= mapH; ++i) {
@@ -110,15 +146,13 @@ struct gameStatus {
 		while(gens.size() < playerCnt) {
 			std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
 			int x, y;
-			do
-				x = p() % mapH + 1, y = p() % mapW + 1;
+			do x = p() % mapH + 1, y = p() % mapW + 1;
 			while(gameMap[x][y].type != 0);
 			gens.push_back(playerCoord{x, y});
 			gameMap[x][y].type = 3;
 			gameMap[x][y].army = 0;
 		}
-		sort(gens.begin(), gens.end(), [](playerCoord a, playerCoord b)
-		{ return a.x == b.x ? a.y < b.y : a.x < b.x; });
+		sort(gens.begin(), gens.end(), [](playerCoord a, playerCoord b){ return a.x == b.x ? a.y < b.y : a.x < b.x; });
 		std::shuffle(gens.begin(), gens.end(), std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
 		for(int i = 1; i <= playerCnt; ++i) {
 			coos[i] = genCoo[i] = gens[i - 1];
@@ -131,7 +165,6 @@ struct gameStatus {
 					gameMap[i][j].type = 0;
 	}
 
-	int gameMesC = 0;
 	void kill(int p1, int p2) {
 		if(p2 == 1) MessageBox(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK);
 		isAlive[p2] = 0;
@@ -143,19 +176,21 @@ struct gameStatus {
 				}
 			}
 		}
-		++gameMesC;
-		gotoxy(mapH + 2 + gameMesC, 65);
-		setfcolor(0xffffff);
-		fputs("PLAYER ", stdout);
-		setfcolor(defTeams[p1].color);
-		printf("%-7s", defTeams[p1].name.c_str());
-		setfcolor(0xffffff);
-		fputs(" KILLED PLAYER ", stdout);
-		setfcolor(defTeams[p2].color);
-		printf("%-7s", defTeams[p2].name.c_str());
-		setfcolor(0xffffff);
-		printf(" AT TURN %d.", curTurn);
-		fflush(stdout);
+//		++gameMesC;
+		int p2col=defTeams[p2].color;
+		addGameMessage(curTurn,p1,string("KILLED PLAYER \033[38;2;"+to_string(p2col/65536)+";"+to_string(p2col/256%256)+";"+to_string(p2col%256)+"m"+defTeams[p2].name));
+//		gotoxy(mapH + 2 + gameMesC, 65);
+//		setfcolor(0xffffff);
+//		fputs("PLAYER ", stdout);
+//		setfcolor(defTeams[p1].color);
+//		printf("%-7s", defTeams[p1].name.c_str());
+//		setfcolor(0xffffff);
+//		fputs(" KILLED PLAYER ", stdout);
+//		setfcolor(defTeams[p2].color);
+//		printf("%-7s", defTeams[p2].name.c_str());
+//		setfcolor(0xffffff);
+//		printf(" AT TURN %d.", curTurn);
+//		fflush(stdout);
 	}
 
 	// struct for movement
@@ -265,13 +300,19 @@ struct gameStatus {
 				continue;
 			rklst[i].armyInHand = gameMap[coos[i].x][coos[i].y].army;
 		}
-		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b)
-		{ return a.army > b.army; });
+		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b){ return a.army > b.army; });
+		setfcolor(0xffffff);
+		underline();
+		printf("|     R      A      N      K      L      I      S      T     |");
+		resetattr();
+//		setfcolor(0x000000);
+		putchar('|');
+		putchar('\n');
 		setfcolor(0xffffff);
 		underline();
 		printf("| %7s | %8s | %5s | %5s | %5s | %13s |", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
 		resetattr();
-		setfcolor(0x000000);
+//		setfcolor(0x000000);
 		putchar('|');
 		putchar('\n');
 		for(int i = 1; i <= playerCnt; ++i) {
@@ -289,7 +330,7 @@ struct gameStatus {
 			}
 			printf("%5d | %5d | %5d | %13lld |", rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
 			resetattr();
-			setfcolor(0x000000);
+//			setfcolor(0x000000);
 			putchar('|');
 			putchar('\n');
 		}
@@ -302,6 +343,7 @@ struct gameStatus {
 	int operator()() {
 		if(played) return -1;
 		played = 1;
+		gameMesC = 0;
 		if(!isWeb) {
 			int robotId[64];
 			playerCoord coordinate[64];
@@ -462,6 +504,8 @@ struct gameStatus {
 				gotoxy(1, 1);
 				printMap(cheatCode, coordinate[1]);
 				ranklist(coordinate);
+				printGameMessage();
+				fflush(stdout);
 				lPT = std::chrono::steady_clock::now().time_since_epoch();
 			}
 		}

@@ -32,6 +32,13 @@ inline void clearance() {
 // clear the line (only the chars after the cursor)
 inline void clearline() { fputs("\033[K", stdout); }
 
+// get the cursor's position
+void getxy(int& x, int& y) {
+	CONSOLE_SCREEN_BUFFER_INFO bInfo;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &bInfo);
+	y = bInfo.dwCursorPosition.X;
+	x = bInfo.dwCursorPosition.Y;
+}
 // make the cursor go to a specticular place in the screen
 inline void gotoxy(int x, int y) { printf("\033[%d;%dH", x, y); }
 // make the cursor move n lines up

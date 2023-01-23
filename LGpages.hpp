@@ -453,7 +453,7 @@ void MainPage() {
 
 		clearance();
 		hideCursor();
-		x = 4, y = 6;
+		x = 3, y = 6;
 		gotoxy(x, y);
 		printf("id:%02d", maps[chs].id);
 		gotoxy(x, y + 7);
@@ -470,24 +470,24 @@ void MainPage() {
 		printf("GeneralCnt: %d", maps[chs].generalcnt);
 		gotoxy(x + 4, y + 20);
 		printf("PlainCnt: %d", maps[chs].plaincnt);
-		gotoxy(x + 4, y);
-		printf("SwampCnt: %d", maps[chs].swampcnt);
-		gotoxy(x + 4, y + 20);
-		printf("MountainCnt: %d", maps[chs].mountaincnt);
 		gotoxy(x + 5, y);
+		printf("SwampCnt: %d", maps[chs].swampcnt);
+		gotoxy(x + 5, y + 20);
+		printf("MountainCnt: %d", maps[chs].mountaincnt);
+		gotoxy(x + 6, y);
 		printf("CityCnt: %d", maps[chs].citycnt);
-		x = 3, y = 5;
+		x = 2, y = 4;
 		chsFrame(x, y, 1);
 
 	__defmap_plcnt:
-		gotoxy(3, 11 + frameW);
+		gotoxy(2, 11 + frameW);
 		printf("Player Count (<=16): ");
 		clearline();
 		scanf("%d", &plCnt);
 		if(plCnt < 2 || plCnt > 16)
 			goto __defmap_plcnt;
 	__spemap_maph:
-		gotoxy(4, 11 + frameW);
+		gotoxy(3, 11 + frameW);
 		if(chs < 6) {
 			int H, W;
 			long long amn, amx;
@@ -497,22 +497,22 @@ void MainPage() {
 			if(H < 5 || H > 500)
 				goto __spemap_maph;
 		__spemap_mapw:
-			gotoxy(5, 11 + frameW);
+			gotoxy(4, 11 + frameW);
 			printf("Map Width (<=500): ");
 			clearline();
 			scanf("%d", &W);
 			if(W < 5 || W > 500)
 				goto __spemap_mapw;
-			gotoxy(6, 11 + frameW);
+			gotoxy(5, 11 + frameW);
 			if(chs == 3) {
 				printf("MINIMUM Army: ");
 				clearline();
 				scanf("%lld", &amn);
-				gotoxy(7, 11 + frameW);
+				gotoxy(6, 11 + frameW);
 				printf("MAXIMUM Army: ");
 				clearline();
 				scanf("%lld", &amx);
-				gotoxy(8, 11 + frameW);
+				gotoxy(7, 11 + frameW);
 			}
 			switch(chs) {
 				case 1:
@@ -609,7 +609,7 @@ void MainPage() {
 	//	}
 
 inputstDel:;
-	gotoxy(3, 41 + frameW);
+	gotoxy(2, 41 + frameW);
 	printf("Choose Game Speed:");
 	clearline();
 	for(int i = 1; i <= 20; ++i) {
@@ -646,9 +646,9 @@ inputstDel:;
 		stDel = 1000 / chs;
 
 inputCheat:;
-	gotoxy(3, 63 + frameW);
+	gotoxy(2, 63 + frameW);
 	printf("Please enter the cheat code(0/1):");
-	gotoxy(3, 63 + frameW + 36);
+	gotoxy(2, 63 + frameW + 36);
 	scanf("%d", &cht);
 	if(cht > 1 || cht < 0)
 		goto inputCheat;

@@ -15,9 +15,19 @@
 #define __LGWEB_HPP__
 
 #include <stdio.h>
-#include <winsock.h>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <winsock2.h>
+using namespace std;
 
-int failSock;
+const int SSN=205,SSL=100005;
+
+int failSock,ky;
+mutex mLock;
+bool stopSock,usedStr[SSN];
+char *sockStr[SSN][SSL];
+queue<int> strSend,strRecv;
 
 void initSock() {
 	WORD w_req=MAKEWORD(2,2);
@@ -31,6 +41,38 @@ void initSock() {
 	}
 }
 
+void pushSendPack(){
+	lock_guard<mutex> mGuard(mLock);
+	strSend.push(ky);
+	usedStr[ky]=true;
+}
 
+void pushRecvPack(){
+	lock_guard<mutex> mGuard(mLock);
+	strRecv.push(ky);
+	usedStr[ky]=true;
+}
+
+int pullSendPack(){
+	lock_guard<mutex> mGuard(mLock);
+	int res=strSend.front();
+	strSend.pop();
+	usedStr[res]=false;
+	ky=ky>res?res:ky;
+	return res;
+}
+
+int pullRecvPack(){
+	lock_guard<mutex> mGuard(mLock);
+	int res=strRecv.front();
+	strRecv.pop();
+	usedStr[res]=false;
+	ky=ky>res?res:ky;
+	return res;
+}
+
+void sockListen(){
+	
+}
 
 #endif

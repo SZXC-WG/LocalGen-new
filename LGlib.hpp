@@ -22,7 +22,7 @@
 const int advertisementCnt=2,advertisementChg=1000;
 char advertisementStr[2][105]={\
 "Movements: You can use 'W''A''S''D' to move, 'G' for home, 'Q' for surrander,and ESC to quit!",\
-"???"};
+"Thanks to ZLY, CHR, XRZ and KTQ for devoting their hair to this game!"};
 
 void gameAdvertisement(){
 	static int chs=-1;

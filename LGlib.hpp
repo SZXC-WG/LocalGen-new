@@ -23,7 +23,7 @@ const int advertisementCnt=3,advertisementChg=4000;
 char advertisementStr[advertisementCnt+5][205]={\
 "Movements: You can use 'W''A''S''D' to move, 'G' to go home, 'Q' to surrender, and ESC to quit!                ",\
 "Thanks to ZLY, CHR, XRZ and KTQ for devoting their hair to this game!                                          ",\
-"This game is going to have web function, but CHR is a bit confused..."};
+"This game is going to have web function, but CHR is a bit confused...                                          "};
 
 void gameAdvertisement(){
 	static int chs=-1;

@@ -142,22 +142,22 @@ struct gameStatus {
 	playerCoord genCoo[64];
 	// general init
 	void initGenerals(playerCoord coos[]) {
+		std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 		std::deque<playerCoord> gens;
 		for(int i = 1; i <= mapH; ++i)
 			for(int j = 1; j <= mapW; ++j)
 				if(gameMap[i][j].type == 3)
 					gens.push_back(playerCoord{i, j});
 		while(gens.size() < playerCnt) {
-			std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
 			int x, y;
-			do x = p() % mapH + 1, y = p() % mapW + 1;
+			do x = mtrd() % mapH + 1, y = mtrd() % mapW + 1;
 			while(gameMap[x][y].type != 0);
 			gens.push_back(playerCoord{x, y});
 			gameMap[x][y].type = 3;
 			gameMap[x][y].army = 0;
 		}
 		sort(gens.begin(), gens.end(), [](playerCoord a, playerCoord b){ return a.x == b.x ? a.y < b.y : a.x < b.x; });
-		std::shuffle(gens.begin(), gens.end(), std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
+		std::shuffle(gens.begin(), gens.end(), mtrd);
 		for(int i = 1; i <= playerCnt; ++i) {
 			coos[i] = genCoo[i] = gens[i - 1];
 			gameMap[genCoo[i].x][genCoo[i].y].team = i;
@@ -180,20 +180,8 @@ struct gameStatus {
 				}
 			}
 		}
-//		++gameMesC;
 		int p2col=defTeams[p2].color;
 		addGameMessage(curTurn,p1,string("KILLED PLAYER \033[38;2;"+to_string(p2col/65536)+";"+to_string(p2col/256%256)+";"+to_string(p2col%256)+"m"+defTeams[p2].name));
-//		gotoxy(mapH + 2 + gameMesC, 65);
-//		setfcolor(0xffffff);
-//		fputs("PLAYER ", stdout);
-//		setfcolor(defTeams[p1].color);
-//		printf("%-7s", defTeams[p1].name.c_str());
-//		setfcolor(0xffffff);
-//		fputs(" KILLED PLAYER ", stdout);
-//		setfcolor(defTeams[p2].color);
-//		printf("%-7s", defTeams[p2].name.c_str());
-//		setfcolor(0xffffff);
-//		printf(" AT TURN %d.", curTurn);
 		fflush(stdout);
 	}
 
@@ -433,15 +421,7 @@ struct gameStatus {
 									}
 								}
 							}
-							++gameMesC;
-							gotoxy(mapH + 2 + gameMesC, 65);
-							setfcolor(0xffffff);
-							fputs("PLAYER ", stdout);
-							setfcolor(defTeams[1].color);
-							printf("%-7s", defTeams[1].name.c_str());
-							setfcolor(0xffffff);
-							printf(" SURRENDERED AT TURN %d.", curTurn);
-							fflush(stdout);
+							addGameMessage(curTurn,1,"SURRENDERED."); 
 							break;
 						}
 					}
@@ -494,15 +474,7 @@ struct gameStatus {
 						           "GAME END", MB_OK);
 						gameEnd = 1;
 						cheatCode = 1048575;
-						++gameMesC;
-						gotoxy(mapH + 2 + gameMesC, 65);
-						setfcolor(0xffffff);
-						fputs("PLAYER ", stdout);
-						setfcolor(defTeams[std::__lg(ed)].color);
-						printf("%-7s", defTeams[std::__lg(ed)].name.c_str());
-						setfcolor(0xffffff);
-						printf(" WON AT TURN %d!!!", curTurn);
-						fflush(stdout);
+						addGameMessage(curTurn,std::__lg(ed),"WON!");
 					}
 				}
 				gotoxy(1, 1);

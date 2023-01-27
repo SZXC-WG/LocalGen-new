@@ -80,6 +80,6 @@ inline void setbcolor(int R, int G, int B) { printf("\033[48;2;%d;%d;%dm", R, G,
 inline void underline() { fputs("\033[4m", stdout); }
 
 // reset text attributes
-inline void resetattr() { fputs("\033[0m", stdout);setfcolor(0xffffff); }
+inline void resetattr() { fputs("\033[0m\033[38;2;255;255;255m", stdout); }
 
 #endif // __LGCONS_HPP__

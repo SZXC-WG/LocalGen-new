@@ -19,24 +19,32 @@
 #include <time.h>
 #include <chrono>
 
+#include "LGcons.hpp"
+
 const int advertisementCnt=3,advertisementChg=4000;
-char advertisementStr[advertisementCnt+5][205]={\
-"Movements: You can use 'W''A''S''D' to move, 'G' to go home, 'Q' to surrender, and ESC to quit!                ",\
-"Thanks to ZLY, CHR, XRZ and KTQ for devoting their hair to this game!                                          ",\
-"This game is going to have web function, but CHR is a bit confused...                                          "};
+char advertisementStr[advertisementCnt+5][205] = {
+	"Press 'E' can cancel your last un-processed move.",
+	"Press 'Q' can erase all your un-processed moves.",
+	"Press WASD to move your aim!",
+	"Press [ESC] can make you exit the game.",
+	"Press [BACKSPACE] to surrender.",
+	"Thanks to ZLY, CHR, XRZ and KTQ for devoting their hair to this game!",
+	"This game is going to have web function, but CHR is a bit confused...",
+};
 
 void gameAdvertisement(){
 	static int chs=-1;
 	static std::chrono::nanoseconds lPT=std::chrono::steady_clock::now().time_since_epoch();
+	static std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
 	
-	if(chs!=-1&&std::chrono::steady_clock::now().time_since_epoch()-lPT<std::chrono::milliseconds(advertisementChg))
-	printf("%s",advertisementStr[chs]);
-	else{
-		std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
+	if(chs!=-1&&std::chrono::steady_clock::now().time_since_epoch()-lPT<std::chrono::milliseconds(advertisementChg)) 
+		printf("%s",advertisementStr[chs]),clearline();
+	else {
 		chs=p()%advertisementCnt;
-		printf("%s",advertisementStr[chs]);
+		printf("%s",advertisementStr[chs]),clearline();
 		lPT=std::chrono::steady_clock::now().time_since_epoch();
-	}return ;
+	} 
+	return ;
 }
 
 /*

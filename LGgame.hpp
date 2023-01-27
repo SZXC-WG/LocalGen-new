@@ -181,7 +181,7 @@ struct gameStatus {
 			}
 		}
 		int p2col=defTeams[p2].color;
-		addGameMessage(curTurn,p1,string("KILLED PLAYER \033[38;2;"+to_string(p2col/65536)+";"+to_string(p2col/256%256)+";"+to_string(p2col%256)+"m"+defTeams[p2].name));
+		addGameMessage(curTurn,p1,string("KILLED PLAYER \033[38;2;"+to_string(p2col/65536)+";"+to_string(p2col/256%256)+";"+to_string(p2col%256)+"m"+defTeams[p2].name+"\033[0m."));
 		fflush(stdout);
 	}
 

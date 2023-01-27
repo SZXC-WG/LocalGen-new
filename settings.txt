@@ -1,9 +1,0 @@
-44 SIG1(MAP)
-45 SIG2(START)
-46 SIG3(CMD)
-47 SIG4(END)
-48 CHAR_AD
-36 $ 字报开头结尾
-
-.lgmp 地图
-.lgrep 回放

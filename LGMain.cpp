@@ -27,6 +27,8 @@
 /* dev project headers */
 #include "LocalGen-new_private.h"
 
+/* test settings */
+#include "LGlib.hpp" 
 /* console settings */
 #include "LGcons.hpp" // __LGCONS_HPP__
 /* map structs */

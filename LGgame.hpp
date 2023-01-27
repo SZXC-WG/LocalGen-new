@@ -98,7 +98,11 @@ struct gameStatus {
 			printf("|");
 			resetattr();
 			printf("|");
-		}
+		}resetattr();
+		gotoxy(2+mapH+1,109); printf(" T u r n : %d",curTurn);
+		gotoxy(2+mapH+2,109); printf(" T i p s:\n");
+		gotoxy(2+mapH+3,109); printf(" ");gameAdvertisement();
+		resetattr();
 		fflush(stdout);
 	}
 	
@@ -176,20 +180,20 @@ struct gameStatus {
 				}
 			}
 		}
-		++gameMesC;
+//		++gameMesC;
 		int p2col=defTeams[p2].color;
 		addGameMessage(curTurn,p1,string("KILLED PLAYER \033[38;2;"+to_string(p2col/65536)+";"+to_string(p2col/256%256)+";"+to_string(p2col%256)+"m"+defTeams[p2].name));
-		gotoxy(mapH + 2 + gameMesC, 65);
-		setfcolor(0xffffff);
-		fputs("PLAYER ", stdout);
-		setfcolor(defTeams[p1].color);
-		printf("%-7s", defTeams[p1].name.c_str());
-		setfcolor(0xffffff);
-		fputs(" KILLED PLAYER ", stdout);
-		setfcolor(defTeams[p2].color);
-		printf("%-7s", defTeams[p2].name.c_str());
-		setfcolor(0xffffff);
-		printf(" AT TURN %d.", curTurn);
+//		gotoxy(mapH + 2 + gameMesC, 65);
+//		setfcolor(0xffffff);
+//		fputs("PLAYER ", stdout);
+//		setfcolor(defTeams[p1].color);
+//		printf("%-7s", defTeams[p1].name.c_str());
+//		setfcolor(0xffffff);
+//		fputs(" KILLED PLAYER ", stdout);
+//		setfcolor(defTeams[p2].color);
+//		printf("%-7s", defTeams[p2].name.c_str());
+//		setfcolor(0xffffff);
+//		printf(" AT TURN %d.", curTurn);
 		fflush(stdout);
 	}
 
@@ -503,7 +507,7 @@ struct gameStatus {
 				}
 				gotoxy(1, 1);
 				printMap(cheatCode, coordinate[1]);
-//				ranklist(coordinate);
+				ranklist(coordinate);
 				printGameMessage();
 				fflush(stdout);
 				lPT = std::chrono::steady_clock::now().time_since_epoch();

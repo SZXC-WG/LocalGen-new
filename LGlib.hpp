@@ -21,7 +21,7 @@
 
 #include "LGcons.hpp"
 
-const int advertisementCnt=3,advertisementChg=4000;
+const int advertisementCnt=7,advertisementChg=4000;
 char advertisementStr[advertisementCnt+5][205] = {
 	"Press 'E' can cancel your last un-processed move.",
 	"Press 'Q' can erase all your un-processed moves.",

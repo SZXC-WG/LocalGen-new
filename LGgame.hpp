@@ -99,9 +99,9 @@ struct gameStatus {
 			resetattr();
 			printf("|");
 		}resetattr();
-		gotoxy(2+mapH+1,109); printf(" T u r n : %d",curTurn);
-		gotoxy(2+mapH+2,109); printf(" T i p s:\n");
-		gotoxy(2+mapH+3,109); printf(" ");gameAdvertisement();
+		gotoxy(2+mapH+1,109); printf(" Turn: %d",curTurn);
+		gotoxy(2+mapH+2,109); printf(" Tips: ");
+		gotoxy(2+mapH+2,109+7); gameAdvertisement();
 		resetattr();
 		fflush(stdout);
 	}
@@ -181,7 +181,7 @@ struct gameStatus {
 			}
 		}
 		int p2col=defTeams[p2].color;
-		addGameMessage(curTurn,p1,string("KILLED PLAYER \033[38;2;"+to_string(p2col/65536)+";"+to_string(p2col/256%256)+";"+to_string(p2col%256)+"m"+defTeams[p2].name+"\033[0m."));
+		addGameMessage(curTurn,p1,string("KILLED PLAYER \033[38;2;"+to_string(p2col/65536)+";"+to_string(p2col/256%256)+";"+to_string(p2col%256)+"m"+defTeams[p2].name+"."));
 		fflush(stdout);
 	}
 

@@ -38,4 +38,16 @@ void gameAdvertisement(){
 	}return ;
 }
 
+/*
+44 :SIG1(MAP)
+45 :SIG2(START)
+46 :SIG3(CMD)
+47 :SIG4(END)
+48 :CHAR_AD
+36 $ :start and end of the text
+
+.lgmp :map file
+.lgrep :replay file
+*/
+
 #endif

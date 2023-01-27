@@ -34,7 +34,7 @@
 /* map zipping */
 #include "LGzipmap.hpp" // __LGZIPMAP_HPP__
 /* Internet base */
-#include "LGweb.hpp" // __LGWEB_HPP__
+//#include "LGweb.hpp" // __LGWEB_HPP__
 /* generals robot */
 #include "LGbot.hpp" //__LGBOT__
 /* game options */
@@ -50,6 +50,9 @@ signed main(signed argc, char** argv) {
 	SetConsoleTitle("Localized Generals.io v" FILE_VERSION " (Set your console window font size! Recommended:5-8)");
 	initattr();
 	initDefMap();
+	setbkcolor(0x00000000);
+	setbkcolor_f(0x0000000);
+	initgraph(1920,1080);
 	MainPage(); // start main page
 	exitExe();	// exit program
 }

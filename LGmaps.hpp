@@ -18,6 +18,7 @@
 #include <random>
 #include <chrono>
 #include <unistd.h>
+#include<graphics.h>
 using std::string;
 using std::to_string;
 #include "LGcons.hpp"
@@ -117,50 +118,58 @@ void printNum(bool visible, long long army, int team, char lchar, char rchar, ch
 	setbcolor(0x000000);
 }
 void printMap(int printCode, playerCoord coo) {
-	setbcolor(0x000000);
-	puts(string(mapW * 5 + 2, '_').c_str());
-	for(int i = 1; i <= mapH; ++i) {
-		putchar('|');
-		for(int j = 1; j <= mapW; ++j) {
-			setbcolor(0x000000);
-			setfcolor(0xffffff);
-			if(coo.x==i && coo.y==j) setbcolor(0x000080);
-			switch(gameMap[i][j].type) {
-				case 0: { /* plain */
-					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,' ',' ');
-					break;
-				}
-				case 1: { /* swamp */
-					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'=','=','=','=');
-					break;
-				}
-				case 2: { /* mountain */
-					fputs("#####", stdout);
-					break;
-				}
-				case 3: { /* general */
-					if(!gameMap[i][j].team) {
-						if(isVisible(i, j, printCode)) fputs("$GEN$", stdout);
-						else fputs("     ", stdout);
-					} else printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'$','$');
-					break;
-				}
-				case 4: { /* city */
-					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'[',']',' ','#');
-					break;
-				}
-			}
+//	puts(string(mapW * 5 + 2, '_').c_str());
+//	for(int i = 1; i <= mapH; ++i) {
+//		putchar('|');
+//		for(int j = 1; j <= mapW; ++j) {
+//			setbcolor(0x000000);
+//			setfcolor(0xffffff);
+//			if(coo.x==i && coo.y==j) setbcolor(0x000080);
+//			switch(gameMap[i][j].type) {
+//				case 0: { /* plain */
+//					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,' ',' ');
+//					break;
+//				}
+//				case 1: { /* swamp */
+//					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'=','=','=','=');
+//					break;
+//				}
+//				case 2: { /* mountain */
+//					fputs("#####", stdout);
+//					break;
+//				}
+//				case 3: { /* general */
+//					if(!gameMap[i][j].team) {
+//						if(isVisible(i, j, printCode)) fputs("$GEN$", stdout);
+//						else fputs("     ", stdout);
+//					} else printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'$','$');
+//					break;
+//				}
+//				case 4: { /* city */
+//					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'[',']',' ','#');
+//					break;
+//				}
+//			}
+//		}
+//		clearline();
+//		setfcolor(0xffffff);
+//		putchar('|');
+//		putchar('\n');
+//	}
+//	setfcolor(0xffffff);
+//	for(register int i = 1; i <= mapW * 5 + 1; i += 2)
+//		fputs("£þ", stdout);
+//	putchar('\n');
+//	fflush(stdout);
+	int widthPerBlock=1920/mapH,heightPerBlock=1080/mapW;
+	for(int curx=1;curx<=mapH;curx++)
+	{
+		for(int cury=1;cury<=mapW;cury++)
+		{
+			setfillcolor(defTeams[gameMap[curx][cury].team].color);
+			bar(widthPerBlock*(curx-1),heightPerBlock*(cury-1),widthPerBlock*curx,heightPerBlock*cury);
 		}
-		clearline();
-		setfcolor(0xffffff);
-		putchar('|');
-		putchar('\n');
 	}
-	setfcolor(0xffffff);
-	for(register int i = 1; i <= mapW * 5 + 1; i += 2)
-		fputs("£þ", stdout);
-	putchar('\n');
-	fflush(stdout);
 }
 
 void createRandomMap(int crtH = -1, int crtW = -1) {

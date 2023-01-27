@@ -22,7 +22,6 @@
 using std::string;
 using std::to_string;
 #include "LGcons.hpp"
-#include "coniofix.h"
 
 #define ll long long
 

@@ -269,7 +269,7 @@ signed main() {
 		Move(0, 0);
 		PrintMap();
 
-		if(kbhit_cons()) {
+		if(_kbhit()) {
 			c = _getch();
 			d = 0;
 

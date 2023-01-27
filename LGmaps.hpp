@@ -18,7 +18,7 @@
 #include <random>
 #include <chrono>
 #include <unistd.h>
-#include<graphics.h>
+#include <graphics.h>
 using std::string;
 using std::to_string;
 #include "LGcons.hpp"

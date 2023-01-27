@@ -51,6 +51,7 @@ signed main(signed argc, char** argv) {
 	initattr();
 	initDefMap();
 	setbkcolor(0x00000000);
+	setfont(-2, 0,"宋体");
 	setbkcolor_f(0x0000000);
 	initgraph(1920,1080);
 	MainPage(); // start main page

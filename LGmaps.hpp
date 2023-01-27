@@ -22,6 +22,7 @@
 using std::string;
 using std::to_string;
 #include "LGcons.hpp"
+#include "coniofix.h"
 
 #define ll long long
 
@@ -73,49 +74,45 @@ bool isVisible(int x, int y, int printCode) {
 				return true;
 	return false;
 }
-void printNum(bool visible, long long army, int team, char lchar, char rchar, char mchar=' ', char repchar=' ') {
+void printNum(bool visible, long long army, int team,int curx,int cury, char lchar, char rchar, char mchar=' ', char repchar=' ') {
+	char s[1005];
+	//settextjustify(CENTER_TEXT,CENTER_TEXT);
 	if(visible) {
-		setfcolor(defTeams[team].color);
-		putchar(lchar);
+		s[0]=lchar;
 		if(army < 0) {
 			register long long absd = -army;
 			if(absd < 10) {
-				putchar(mchar);
-				printf("%2lld", army);
+				sprintf(s+1,"%2lld", army);
 			} else if(absd < 100) {
-				printf("%3lld", army);
+				sprintf(s+1,"%3lld", army);
 			} else if(absd < (ll)(1e13)) {
 				string p = to_string(army);
-				printf("%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-			} else fputs("-MX",stdout);
+				sprintf(s+1,"%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+			} else{
+				s[1]='-';
+				s[2]='M';
+				s[3]='X';
+			}
 		} else if(army == 0) {
-			putchar(mchar);
-			putchar(mchar);
-			if(lchar=='['||lchar=='$') putchar('0');
-			else putchar(mchar);
+			if(lchar=='['||lchar=='$') s[1]='0';
+			else s[1]=mchar;
 		} else if(army < 10) {
-			putchar(mchar);
-			putchar(mchar);
-			printf("%1lld", army);
+			s[1]=s[2]=mchar;
+			sprintf(s+3,"%1lld", army);
 		} else if(army < 100) {
-			putchar(mchar);
-			printf("%2lld", army);
+			s[1]=mchar;
+			sprintf(s+2,"%2lld", army);
 		} else if(army < 1000) {
-			printf("%3lld", army);
+			sprintf(s+1,"%3lld", army);
 		} else if(army < (ll)(1e14)) {
 			string p = to_string(army);
-			printf("%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-		} else fputs("MAX",stdout);
-		putchar(rchar);
-	} else {
-		putchar(repchar);
-		putchar(repchar);
-		putchar(repchar);
-		putchar(repchar);
-		putchar(repchar);
+			sprintf(s+1,"%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+		} else {s[1]='M';s[2]='A';s[3]='X';}
+		int p=strlen(s);
+		s[p]=rchar;
+		int widthPerBlock=1920/mapH,heightPerBlock=1080/mapW;
+		outtextxy(widthPerBlock*(curx-1)+widthPerBlock/3,heightPerBlock*(cury-1)+heightPerBlock/3,s);
 	}
-	resetattr();
-	setbcolor(0x000000);
 }
 void printMap(int printCode, playerCoord coo) {
 //	puts(string(mapW * 5 + 2, '_').c_str());
@@ -161,6 +158,8 @@ void printMap(int printCode, playerCoord coo) {
 //		fputs("£þ", stdout);
 //	putchar('\n');
 //	fflush(stdout);
+	cleardevice();
+	setcolor(BLACK);
 	int widthPerBlock=1920/mapH,heightPerBlock=1080/mapW;
 	for(int curx=1;curx<=mapH;curx++)
 	{
@@ -168,6 +167,38 @@ void printMap(int printCode, playerCoord coo) {
 		{
 			setfillcolor(defTeams[gameMap[curx][cury].team].color);
 			bar(widthPerBlock*(curx-1),heightPerBlock*(cury-1),widthPerBlock*curx,heightPerBlock*cury);
+			switch(gameMap[curx][cury].type) {
+				case 0: { /* plain */
+					printNum(isVisible(curx,cury,printCode),gameMap[curx][cury].army,gameMap[curx][cury].team,curx,cury,' ',' ');
+					break;
+				}
+				case 1: { /* swamp */
+					printNum(isVisible(curx,cury,printCode),gameMap[curx][cury].army,gameMap[curx][cury].team,curx,cury,'=','=','=','=');
+					break;
+				}
+				case 2: { /* mountain */
+					char s[]="#####";
+					outtextxy(widthPerBlock*(curx-1)+widthPerBlock/3,heightPerBlock*(cury-1)+heightPerBlock/3,s);
+					break;
+				}
+				case 3: { /* general */
+					if(!gameMap[curx][cury].team) {
+						if(isVisible(curx, cury, printCode)){
+							char s[]="$GEN$";
+							outtextxy(widthPerBlock*(curx-1)+widthPerBlock/3,heightPerBlock*(cury-1)+heightPerBlock/3,s);
+						}
+						else {
+							char s[]="     ";
+							outtextxy(widthPerBlock*(curx-1)+widthPerBlock/3,heightPerBlock*(cury-1)+heightPerBlock/3,s);
+						}
+					} else printNum(isVisible(curx,cury,printCode),gameMap[curx][cury].army,gameMap[curx][cury].team,curx,cury,'$','$');
+					break;
+				}
+				case 4: { /* city */
+					printNum(isVisible(curx,cury,printCode),gameMap[curx][cury].army,gameMap[curx][cury].team,curx,cury,'[',']',' ','#');
+					break;
+				}
+			}
 		}
 	}
 }

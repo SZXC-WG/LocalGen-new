@@ -247,7 +247,7 @@ void Pack() {
 }
 
 signed main() {
-	puts("Çëµ÷Õû´°¿Ú×ÖÌåÖÁÊÊµ±´óÐ¡£¡");
+	puts("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½Ð¡ï¿½ï¿½");
 	puts("CreateMap(Size L/W Tip:at most 100):");
 	scanf("%d%d", &sL, &sW);
 	rL = sL;
@@ -269,7 +269,7 @@ signed main() {
 		Move(0, 0);
 		PrintMap();
 
-		if(_kbhit()) {
+		if(kbhit_cons()) {
 			c = _getch();
 			d = 0;
 

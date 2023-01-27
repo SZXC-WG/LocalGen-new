@@ -33,7 +33,8 @@ using namespace std::literals;
 #include "LGmaps.hpp"
 // Bot header
 #include "LGbot.hpp"
-
+//fix bug
+#include "coniofix.h"
 const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};
 
@@ -360,11 +361,11 @@ struct gameStatus {
 			bool gameEnd = 0;
 			std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
 			while(1) {
-				if(_kbhit()) {
-					int ch = _getch();
+				if(kbhit_cons()) {
+					int ch = getch_cons();
 					switch(ch = tolower(ch)) {
 						case int(' '):
-							while(_getch() != ' ')
+							while(getch_cons() != ' ')
 								;
 							break;
 						case int('c'):
@@ -383,7 +384,7 @@ struct gameStatus {
 							movement.emplace_back(4);
 							break;
 						case 224: { /**/
-							ch = _getch();
+							ch = getch_cons();
 							switch(ch) {
 								case 72: /*[UP]*/
 									movement.emplace_back(5);

@@ -269,8 +269,8 @@ signed main() {
 		Move(0, 0);
 		PrintMap();
 
-		if(_kbhit()) {
-			c = _getch();
+		if(kbhit()) {
+			c = getch();
 			d = 0;
 
 			switch(c) {

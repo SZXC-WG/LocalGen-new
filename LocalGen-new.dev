@@ -1,132 +1,175 @@
 [Project]
-FileName=LocalGen-new.dev
-Name=LocalGen-new
-Type=1
-Ver=2
-ObjFiles=
-Includes=
-Libs=
-PrivateResource=LocalGen-new_private.rc
-ResourceIncludes=
-MakeIncludes=
-Compiler=
-CppCompiler=-O2_@@_
-Linker=-lwsock32_@@_
-IsCpp=1
-Icon=LocalGen-new.ico
-ExeOutput=
-ObjectOutput=
-LogOutput=
-LogOutputEnabled=0
-OverrideOutput=1
-OverrideOutputName=LGen-new.exe
-HostApplication=
-UseCustomMakefile=0
-CustomMakefile=
-CommandLine=
-Folders=
-IncludeVersionInfo=1
-SupportXPThemes=0
-CompilerSet=0
-CompilerSettings=0000000000000000000000000
-UnitCount=8
+FileName = LocalGen-new.dev
+Name = LocalGen-new
+Type = 1
+Ver = 3
+ObjFiles = 
+Includes = 
+Libs = 
+PrivateResource = LocalGen-new_private.rc
+ResourceIncludes = 
+MakeIncludes = 
+Compiler = 
+CppCompiler = -O2_@@_
+Linker = -lwsock32_@@_
+IsCpp = 1
+Icon = LocalGen-new.ico
+ExeOutput = 
+ObjectOutput = 
+LogOutput = 
+LogOutputEnabled = 0
+OverrideOutput = 1
+OverrideOutputName = LGen-new.exe
+HostApplication = 
+UseCustomMakefile = 0
+CustomMakefile = 
+CommandLine = 
+Folders = 
+IncludeVersionInfo = 1
+SupportXPThemes = 0
+CompilerSet = 0
+UnitCount = 8
+Bins = 
+ResourceCommand = 
+UsePrecompiledHeader = 0
+PrecompiledHeader = 
+CompilerSetType = 0
+StaticLink = 1
+AddCharset = 1
+ExecEncoding = SYSTEM
+Encoding = SYSTEM
+ModelType = 1
+ClassBrowserType = 0
+AllowParallelBuilding = false
+ParellelBuildingJobs = 0
+UseUTF8 = 0
+
 
 [VersionInfo]
-Major=1
-Minor=0
-Release=1
-Build=185
-LanguageID=1033
-CharsetID=1252
-CompanyName=LocalGen-dev
-FileVersion=1.0.1.185
-FileDescription=Localized Generals.io (new ver.)
-InternalName=
-LegalCopyright=Copyright (c) 2023 LocalGen-dev
-LegalTrademarks=
-OriginalFilename=
-ProductName=Localized Generals.io (new ver.)
-ProductVersion=1.0.1.185
-AutoIncBuildNr=1
-SyncProduct=1
+Major = 1
+Minor = 0
+Release = 1
+Build = 185
+LanguageID = 1033
+CharsetID = 1252
+CompanyName = LocalGen-dev
+FileVersion = 1.0.1.185
+FileDescription = Localized Generals.io (new ver.)
+InternalName = 
+LegalCopyright = Copyright (c) 2023 LocalGen-dev
+LegalTrademarks = 
+OriginalFilename = 
+ProductName = Localized Generals.io (new ver.)
+ProductVersion = 1.0.1.185
+AutoIncBuildNr = 1
+SyncProduct = 1
+
 
 [Unit1]
-FileName=LGmain.cpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+FileName = LGzipmap.hpp
+CompileCpp = 1
+Folder = 
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = gbk
+
 
 [Unit2]
-FileName=LGcons.hpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+FileName = LGbot.hpp
+CompileCpp = 1
+Folder = 
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+
 
 [Unit3]
-FileName=LGmaps.hpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+FileName = LGcons.hpp
+CompileCpp = 1
+Folder = 
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+
 
 [Unit4]
-FileName=LGgame.hpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+FileName = LGgame.hpp
+CompileCpp = 1
+Folder = 
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+
 
 [Unit5]
-FileName=LGpages.hpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+FileName = LGpages.hpp
+CompileCpp = 1
+Folder = 
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+
 
 [Unit6]
-FileName=LGweb.hpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+FileName = LGweb.hpp
+CompileCpp = 1
+Folder = 
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+
 
 [Unit7]
-FileName=LGzipmap.hpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+FileName = LGmaps.hpp
+CompileCpp = 1
+Folder = 
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
+
 
 [Unit8]
-FileName=LGbot.hpp
-CompileCpp=1
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+FileName = LGmain.cpp
+CompileCpp = 1
+Folder = 
+Compile = 1
+Link = 1
+Priority = 1000
+OverrideBuildCmd = 0
+BuildCmd = 
+FileEncoding = PROJECT
+RealEncoding = ASCII
 
+
+[CompilerSettings]
+cc_cmd_opt_optimize = 2
+cc_cmd_opt_use_pipe = on
+link_cmd_opt_strip_exe = on

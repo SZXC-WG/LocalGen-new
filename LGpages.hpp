@@ -60,7 +60,7 @@ void MainPage() {
 	char chCmd = 0, fileName[105];
 	int chs = 0, plCnt, stDel, cht, cheatCode;
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-goto TEST;
+//goto TEST;
 	// L 2 2
 	gotoxy(2, 2);
 	CB(mtrd() % 16);
@@ -693,11 +693,11 @@ inputCheat:;
 		else cheatCode^=(1<<chs);
 		goto inputCheat;
 	}
-TEST:;
-createRandomMap(30,30);
-plCnt=16;
-stDel=0;
-cheatCode=1048575;
+//TEST:;
+//createRandomMap(30,30);
+//plCnt=16;
+//stDel=0;
+//cheatCode=1048575;
 	clearance();
 	GAME(0, cheatCode, plCnt, stDel);
 	return;

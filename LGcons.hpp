@@ -16,7 +16,7 @@
 
 #include <cstdio>
 #include <windows.h>
-//#include <conio.h>
+#include <conio.h>
 
 // clear the full window: too slow, don't use!
 inline void clearance() {

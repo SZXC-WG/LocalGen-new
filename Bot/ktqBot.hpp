@@ -51,7 +51,7 @@ namespace ktqBot
         //	fputs(defTeams[id].name.c_str(),stdout);
         //	printf(": ");
         //	for(int i=1; i<=cnt; ++i) printf("{%d %d %lld %lld %d} ",p[i].to,p[i].team,p[i].army,p[i].del,p[i].type);
-        //	fflush(stdout); getch();
+        //	fflush(stdout); _getch();
         for (int i = 1; i <= cnt; i++)
         {
             if (p[i].del < gameMap[coo.x][coo.y].army)

@@ -29,24 +29,24 @@ IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=8
+UnitCount=9
 
 [VersionInfo]
 Major=1
 Minor=0
 Release=2
-Build=195
+Build=200
 LanguageID=1033
 CharsetID=1252
 CompanyName=LocalGen-dev
-FileVersion=1.0.2.195
+FileVersion=1.0.2.200
 FileDescription=Localized Generals.io (new ver.)
 InternalName=
 LegalCopyright=Copyright (c) 2023 LocalGen-dev
 LegalTrademarks=
 OriginalFilename=
 ProductName=Localized Generals.io (new ver.)
-ProductVersion=1.0.2.195
+ProductVersion=1.0.2.200
 AutoIncBuildNr=1
 SyncProduct=1
 
@@ -122,6 +122,16 @@ BuildCmd=
 
 [Unit8]
 FileName=LGbot.hpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit9]
+FileName=LGlib.hpp
 CompileCpp=1
 Folder=
 Compile=1

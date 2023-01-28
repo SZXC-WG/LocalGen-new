@@ -78,6 +78,8 @@ bool isVisible(int x, int y, int printCode) {
 void printNum(bool visible, long long army, int team, int curx, int cury, char lchar, char rchar, char mchar = ' ', char repchar = ' ') {
 	char s[1005];
 	//settextjustify(CENTER_TEXT,CENTER_TEXT);
+	if(!visible)
+		return ;
 	if (visible) {
 		s[0] = lchar;
 		if (army < 0) {
@@ -115,7 +117,7 @@ void printNum(bool visible, long long army, int team, int curx, int cury, char l
 		}
 		int p = strlen(s);
 		s[p] = rchar;
-		int widthPerBlock = 1920 / mapH, heightPerBlock = 1080 / mapW;
+		int widthPerBlock = LGGraphics::mapDataStore.widthPerBlock, heightPerBlock =LGGraphics::mapDataStore.heightPerBlock;
 		outtextxy(widthPerBlock * (curx - 1) + widthPerBlock / 3, heightPerBlock * (cury - 1) + heightPerBlock / 3, s);
 	}
 }
@@ -176,22 +178,25 @@ void printMap(int printCode, playerCoord coo) {
 					break;
 				}
 				case 1: { /* swamp */
-					putimage_transparent(NULL, LGGraphics::pimg[4], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1),getpixel(0,0,LGGraphics::pimg[4]));
+					putimage_transparent(NULL, LGGraphics::pimg[4], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), getpixel(0, 0, LGGraphics::pimg[4]));
 					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, '=', '=', '=', '=');
 					break;
 				}
 				case 2: { /* mountain */
-					putimage_transparent(NULL, LGGraphics::pimg[3], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1),getpixel(0,0,LGGraphics::pimg[3]));
+					putimage_transparent(NULL, LGGraphics::pimg[3], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), getpixel(0, 0, LGGraphics::pimg[3]));
 					break;
 				}
 				case 3: { /* general */
-					putimage_transparent(NULL, LGGraphics::pimg[2], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1),getpixel(0,0,LGGraphics::pimg[2]));
-					if (!gameMap[curx][cury].team) {
-					} else printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, '$', '$');
+					if (isVisible(curx, cury, printCode))
+						putimage_transparent(NULL, LGGraphics::pimg[2], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), getpixel(0, 0, LGGraphics::pimg[2]));
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, '$', '$');
 					break;
 				}
 				case 4: { /* city */
-					putimage_transparent(NULL, LGGraphics::pimg[1], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1),getpixel(0,0,LGGraphics::pimg[1]));
+					if (isVisible(curx, cury, printCode))
+						putimage_transparent(NULL, LGGraphics::pimg[1], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), getpixel(0, 0, LGGraphics::pimg[1]));
+					else
+						putimage_transparent(NULL, LGGraphics::pimg[3], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), getpixel(0, 0, LGGraphics::pimg[3]));
 					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, '[', ']', ' ', '#');
 					break;
 				}

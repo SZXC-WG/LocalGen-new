@@ -18,10 +18,12 @@
 #include <random>
 #include <chrono>
 #include <unistd.h>
-#include<graphics.h>
 using std::string;
 using std::to_string;
 #include "LGcons.hpp"
+
+/* EGE */
+#include <graphics.h>
 
 #define ll long long
 

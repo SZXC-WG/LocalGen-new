@@ -328,7 +328,7 @@ void MainPage() {
 	clearline();
 
 	while(chCmd != 13) {
-		chCmd = _getch();
+		chCmd = getch();
 		gotoxy(17 + chs, 37);
 		printf("  ");
 		switch(tolower(chCmd)) {
@@ -358,7 +358,7 @@ void MainPage() {
 	clearline();
 
 	while(chCmd != 13) {
-		chCmd = _getch();
+		chCmd = getch();
 		gotoxy(17 + chs, 37);
 		printf("  ");
 		switch(tolower(chCmd)) {
@@ -421,7 +421,7 @@ void MainPage() {
 
 		chCmd = 0;
 		while(chCmd != 13) {
-			chCmd = _getch();
+			chCmd = getch();
 			chsFrame(x, y, 0);
 
 			switch(tolower(chCmd)) {
@@ -568,7 +568,7 @@ void MainPage() {
 	//		gotoxy(19,37); printf(">>");
 	//		int chsd=1;
 	//		do {
-	//			ch=_getch();
+	//			ch=getch();
 	//			hideCursor();
 	//			gotoxy(18+chsd,37); printf("  ");
 	//			switch(tolower(ch)){
@@ -623,7 +623,7 @@ inputstDel:;
 	chs = 1;
 	chCmd = 0;
 	while(chCmd != 13) {
-		chCmd = _getch();
+		chCmd = getch();
 		hideCursor();
 		gotoxy(2 + chs, 41 + frameW);
 		printf("  ");
@@ -678,7 +678,7 @@ inputCheat:;
 	printf(">>");
 	chCmd=0;
 	while(chCmd!=13) {
-		chCmd=_getch();
+		chCmd=getch();
 		gotoxy(3+chs,63+frameW);
 		printf("  ");
 		switch(tolower(chCmd)) {

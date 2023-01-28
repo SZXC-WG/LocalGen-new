@@ -81,7 +81,7 @@ bool isVisible(int x, int y, int printCode)
 }
 void printNum(bool visible, long long army, int team, int curx, int cury, char lchar, char rchar, char mchar = ' ', char repchar = ' ')
 {
-	// settextjustify(CENTER_TEXT,CENTER_TEXT);
+	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	if (!visible)
 		return;
 	int widthPerBlock = LGGraphics::mapDataStore.widthPerBlock, heightPerBlock = LGGraphics::mapDataStore.heightPerBlock;
@@ -92,94 +92,50 @@ void printNum(bool visible, long long army, int team, int curx, int cury, char l
 			register long long absd = -army;
 			if (absd < 10)
 			{
-				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), "%1lld", absd);
+				xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%1lld", absd);
 			}
 			else if (absd < 100)
 			{
-				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), "%2lld", absd);
+				xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%2lld", absd);
 			}
 			else if (absd < (ll)(1e13))
 			{
 				string p = to_string(army);
-				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+				xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 			}
 			else
 			{
-				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), "-MX");
+				xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "-MX");
 			}
 		}
 		else if (army == 0)
 		{
 			if (lchar == '[' || lchar == '$')
-				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), "0");
+				xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "0");
 		}
 		else if (army < 10)
 		{
-			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), "%1lld", army);
+			xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%1lld", army);
 		}
 		else if (army < 1000)
 		{
-			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), "%3lld", army);
+			xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%3lld", army);
 		}
 		else if (army < (ll)(1e14))
 		{
 			string p = to_string(army);
-			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+			xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 		}
 		else
 		{
-			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), "MAX");
+			xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "MAX");
 		}
 	}
 }
 void printMap(int printCode, playerCoord coo)
 {
-	//	puts(string(mapW * 5 + 2, '_').c_str());
-	//	for(int i = 1; i <= mapH; ++i) {
-	//		putchar('|');
-	//		for(int j = 1; j <= mapW; ++j) {
-	//			setbcolor(0x000000);
-	//			setfcolor(0xffffff);
-	//			if(coo.x==i && coo.y==j) setbcolor(0x000080);
-	//			switch(gameMap[i][j].type) {
-	//				case 0: { /* plain */
-	//					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,' ',' ');
-	//					break;
-	//				}
-	//				case 1: { /* swamp */
-	//					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'=','=','=','=');
-	//					break;
-	//				}
-	//				case 2: { /* mountain */
-	//					fputs("#####", stdout);
-	//					break;
-	//				}
-	//				case 3: { /* general */
-	//					if(!gameMap[i][j].team) {
-	//						if(isVisible(i, j, printCode)) fputs("$GEN$", stdout);
-	//						else fputs("     ", stdout);
-	//					} else printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'$','$');
-	//					break;
-	//				}
-	//				case 4: { /* city */
-	//					printNum(isVisible(i,j,printCode),gameMap[i][j].army,gameMap[i][j].team,'[',']',' ','#');
-	//					break;
-	//				}
-	//			}
-	//		}
-	//		clearline();
-	//		setfcolor(0xffffff);
-	//		putchar('|');
-	//		putchar('\n');
-	//	}
-	//	setfcolor(0xffffff);
-	//	for(register int i = 1; i <= mapW * 5 + 1; i += 2)
-	//		fputs("��", stdout);
-	//	putchar('\n');
-	//	fflush(stdout);
-	// cleardevice();
-	setcolor(BLACK);
-	setfont(8, 0, "宋体");
+	setcolor(DARKGRAY);
+	setfont(12, 0, "宋体");
 	int widthPerBlock = LGGraphics::mapDataStore.widthPerBlock, heightPerBlock = LGGraphics::mapDataStore.heightPerBlock;
 	for (int curx = 1; curx <= mapH; curx++)
 	{

@@ -25,6 +25,8 @@ using std::to_string;
 
 #define ll long long
 
+PIMAGE pimg[5];
+
 struct Block {
 	int team; /* the team who holds this block */
 	int type; /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
@@ -172,6 +174,7 @@ void printMap(int printCode, playerCoord coo) {
 					break;
 				}
 				case 1: { /* swamp */
+					
 					printNum(isVisible(curx,cury,printCode),gameMap[curx][cury].army,gameMap[curx][cury].team,curx,cury,'=','=','=','=');
 					break;
 				}
@@ -194,6 +197,7 @@ void printMap(int printCode, playerCoord coo) {
 					break;
 				}
 				case 4: { /* city */
+					putimage_withalpha(NULL,pimg[1],widthPerBlock*(curx-1),heightPerBlock*(cury-1));
 					printNum(isVisible(curx,cury,printCode),gameMap[curx][cury].army,gameMap[curx][cury].team,curx,cury,'[',']',' ','#');
 					break;
 				}

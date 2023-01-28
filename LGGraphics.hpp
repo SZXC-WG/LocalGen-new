@@ -20,7 +20,7 @@ namespace imageOperation
 
 namespace LGGraphics
 {
-	PIMAGE pimg[5];
+	PIMAGE pimg[6];
 
 	struct mapData
 	{
@@ -53,6 +53,9 @@ namespace LGGraphics
 		pimg[4] = newimage();
 		getimage(pimg[4], "img/swamp.png");
 		imageOperation::zoomImage(pimg[4], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		pimg[5] = newimage();
+		getimage(pimg[5], "img/currentOn.png");
+		imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		initgraph(mapDataStore.height * mapDataStore.heightPerBlock, mapDataStore.width * mapDataStore.widthPerBlock);
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);

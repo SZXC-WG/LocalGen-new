@@ -437,16 +437,16 @@ struct gameStatus
 					case int('c'):
 						clearance();
 						break;
-					case int('w'):
+					case int('a'):
 						movement.emplace_back(1);
 						break;
-					case int('a'):
+					case int('w'):
 						movement.emplace_back(2);
 						break;
-					case int('s'):
+					case int('d'):
 						movement.emplace_back(3);
 						break;
-					case int('d'):
+					case int('s'):
 						movement.emplace_back(4);
 						break;
 					case 224:

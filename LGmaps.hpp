@@ -224,6 +224,7 @@ void printMap(int printCode, playerCoord coo)
 			}
 		}
 	}
+	putimage_transparent(NULL, LGGraphics::pimg[5], widthPerBlock * (coo.x - 1), heightPerBlock * (coo.y - 1), getpixel(0, 0, LGGraphics::pimg[1]));
 }
 
 void createRandomMap(int crtH = -1, int crtW = -1)

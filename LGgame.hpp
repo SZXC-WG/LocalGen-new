@@ -27,12 +27,15 @@ using std::string;
 using namespace std::literals;
 // windows libraries
 #include <windows.h>
-#include <conio.h>
+//#include <conio.h>
+//#include<graphics.h>
 // project headers
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
 // Bot header
 #include "LGbot.hpp"
+//Graphics header
+//#include "LGGraphics.hpp"
 const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};
 
@@ -341,6 +344,8 @@ struct gameStatus {
 	// main
 	int operator()() {
 		if(played) return -1;
+		LGGraphics::inputMapData(20,20,mapH,mapW);
+		LGGraphics::init();
 		played = 1;
 		gameMesC = 0;
 		if(!isWeb) {

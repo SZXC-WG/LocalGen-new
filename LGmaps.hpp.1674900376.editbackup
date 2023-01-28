@@ -468,4 +468,15 @@ void exitExe() {
 
 #undef ll // long long
 
+#endif // __LGMAPS_HPP j = 1; j <= w; ++j)
+			gameMap[i][j].lit = mapG[mapid].light[(i - 1) * w + j - 1] - '0';
+}
+
+void exitExe() {
+	FreeLibrary(defMap);
+	exit(0);
+}
+
+#undef ll // long long
+
 #endif // __LGMAPS_HPP

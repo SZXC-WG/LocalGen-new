@@ -42,8 +42,6 @@
 /* pages */
 #include "LGpages.hpp" // __LGPAGES_HPP__
 
-#include<graphics.h>
-
 /*************** the main function ***************/
 HWND hwnd = GetConsoleWindow();
 signed main(signed argc, char** argv) {
@@ -51,18 +49,7 @@ signed main(signed argc, char** argv) {
 	SetConsoleTitle("Localized Generals.io v" FILE_VERSION " (Set your console window font size! Recommended:5-8)");
 	initattr();
 	initDefMap();
-	setbkcolor(0x00000000);
-	setfont(-2, 0,"ËÎÌו");
-	setbkcolor_f(0x0000000);	
-	pimg[1]=newimage();
-	getimage(pimg[1],"img/city.png",100,100);
-	pimg[2]=newimage();
-	getimage(pimg[2],"img/crown.png",100,100);
-	pimg[3]=newimage();
-	getimage(pimg[3],"img/mountain.png",100,100);
-	pimg[4]=newimage();
-	getimage(pimg[4],"img/swamp.png",100,100);
-	initgraph(1920,1080);
+	LGGraphics::init();
 	MainPage(); // start main page
 	exitExe();	// exit program
 }

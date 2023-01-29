@@ -21,11 +21,28 @@
 using std::string;
 using std::to_string;
 #include "LGcons.hpp"
-
-/* EGE */
-#include "LGGraphics.hpp"
+#include <graphics.h>
 
 #define ll long long
+
+PIMAGE pimg[6];
+struct MapInfoS
+{
+	int id;
+	string chiname;
+	string engname;
+	string auth;
+	int hei;
+	int wid;
+	int generalcnt;
+	int swampcnt;
+	int citycnt;
+	int mountaincnt;
+	int plaincnt;
+	MapInfoS() = default;
+	~MapInfoS() = default;
+};
+MapInfoS maps[205];
 
 struct Block
 {
@@ -36,7 +53,9 @@ struct Block
 };
 
 int mapH, mapW;
-Block gameMap[505][505]; /* maximum 500*500 */
+static Block gameMap[505][505]; /* maximum 500*500 */
+
+int widthPerBlock = 20, heightPerBlock = 20;
 
 struct teamS
 {
@@ -79,51 +98,43 @@ void printNum(bool visible, long long army, int team, int curx, int cury, char l
 {
 	if (!visible)
 		return;
-	int widthPerBlock = LGGraphics::mapDataStore.widthPerBlock, heightPerBlock = LGGraphics::mapDataStore.heightPerBlock;
+	// int widthPerBlock = LGGraphics::mapDataStore.widthPerBlock, heightPerBlock = LGGraphics::mapDataStore.heightPerBlock;
 	if (visible)
 	{
 		if (army < 0)
 		{
 			register long long absd = -army;
-			if (absd < 10)
+			if (absd < 100)
 			{
-				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%1lld", absd);
-			}
-			else if (absd < 100)
-			{
-				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%2lld", absd);
+				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%2lld", absd);
 			}
 			else if (absd < (ll)(1e13))
 			{
 				string p = to_string(army);
-				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 			}
 			else
 			{
-				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "-MX");
+				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "-MX");
 			}
 		}
 		else if (army == 0)
 		{
 			if (lchar == '[' || lchar == '$')
-				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "0");
-		}
-		else if (army < 10)
-		{
-			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%1lld", army);
+				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "0");
 		}
 		else if (army < 1000)
 		{
-			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%3lld", army);
+			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%3lld", army);
 		}
 		else if (army < (ll)(1e14))
 		{
 			string p = to_string(army);
-			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 		}
 		else
 		{
-			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "MAX");
+			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "MAX");
 		}
 	}
 }
@@ -132,7 +143,6 @@ void printMap(int printCode, playerCoord coo)
 	setcolor(WHITE);
 	setfont(12, 0, "宋体");
 	// settextjustify(CENTER_TEXT, CENTER_TEXT);
-	int widthPerBlock = LGGraphics::mapDataStore.widthPerBlock, heightPerBlock = LGGraphics::mapDataStore.heightPerBlock;
 	for (int curx = 1; curx <= mapH; curx++)
 	{
 		for (int cury = 1; cury <= mapW; cury++)
@@ -152,7 +162,7 @@ void printMap(int printCode, playerCoord coo)
 			}
 			else
 				setfillcolor(DARKGRAY);
-			bar(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), widthPerBlock * curx, heightPerBlock * cury);
+			bar(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock * cury, heightPerBlock * curx);
 			switch (gameMap[curx][cury].type)
 			{
 			case 0:
@@ -162,35 +172,35 @@ void printMap(int printCode, playerCoord coo)
 			}
 			case 1:
 			{ /* swamp */
-				putimage_transparent(NULL, LGGraphics::pimg[4], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), getpixel(0, 0, LGGraphics::pimg[4]));
+				putimage_transparent(NULL, pimg[4], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[4]));
 				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, '=', '=', '=', '=');
 				break;
 			}
 			case 2:
 			{ /* mountain */
-				putimage_transparent(NULL, LGGraphics::pimg[3], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), getpixel(0, 0, LGGraphics::pimg[3]));
+				putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
 				break;
 			}
 			case 3:
 			{ /* general */
 				if (isVisible(curx, cury, printCode))
-					putimage_transparent(NULL, LGGraphics::pimg[2], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), getpixel(0, 0, LGGraphics::pimg[2]));
+					putimage_transparent(NULL, pimg[2], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[2]));
 				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, '$', '$');
 				break;
 			}
 			case 4:
 			{ /* city */
 				if (isVisible(curx, cury, printCode))
-					putimage_transparent(NULL, LGGraphics::pimg[1], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), getpixel(0, 0, LGGraphics::pimg[1]));
+					putimage_transparent(NULL, pimg[1], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[1]));
 				else
-					putimage_transparent(NULL, LGGraphics::pimg[3], widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), getpixel(0, 0, LGGraphics::pimg[3]));
+					putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
 				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, '[', ']', ' ', '#');
 				break;
 			}
 			}
 		}
 	}
-	putimage_transparent(NULL, LGGraphics::pimg[5], widthPerBlock * (coo.x - 1), heightPerBlock * (coo.y - 1), getpixel(0, 0, LGGraphics::pimg[1]));
+	putimage_transparent(NULL, pimg[5], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1), getpixel(0, 0, pimg[1]));
 }
 
 void createRandomMap(int crtH = -1, int crtW = -1)
@@ -385,24 +395,6 @@ func1 statusCheck;
 func2 getMapInfoStr;
 func3 getMapInfoNum;
 
-struct MapInfoS
-{
-	int id;
-	string chiname;
-	string engname;
-	string auth;
-	int hei;
-	int wid;
-	int generalcnt;
-	int swampcnt;
-	int citycnt;
-	int mountaincnt;
-	int plaincnt;
-	MapInfoS() = default;
-	~MapInfoS() = default;
-};
-MapInfoS maps[205];
-
 struct MapGeoS
 {
 	int id;
@@ -506,6 +498,16 @@ void exitExe()
 {
 	FreeLibrary(defMap);
 	exit(0);
+}
+
+bool isdllOK()
+{
+	return dllExit;
+}
+
+int returnMapNum()
+{
+	return mapNum;
 }
 
 #undef ll // long long

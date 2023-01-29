@@ -35,7 +35,7 @@ using namespace std::literals;
 // Bot header
 #include "LGbot.hpp"
 // Graphics header
-//  #include "LGGraphics.hpp"
+#include "LGGraphics.hpp"
 
 const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};

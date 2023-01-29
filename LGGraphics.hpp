@@ -30,6 +30,7 @@ namespace LGGraphics
 {
 	string fileName;
 	int plCnt = 0;
+	int mapSelected;
 
 	struct mapData
 	{
@@ -160,6 +161,9 @@ namespace LGGraphics
 			msg = getmouse();
 			if (msg.is_left() && msg.is_down())
 			{
+				int x = (msg.x + 199) / 200, y = (msg.y + 199) / 200;
+				mapSelected = (x - 1) * 6 + y;
+				break;
 			}
 		}
 	}

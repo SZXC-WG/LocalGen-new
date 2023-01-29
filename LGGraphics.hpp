@@ -6,7 +6,6 @@ namespace imageOperation
 {
 	void zoomImage(PIMAGE &pimg, int zoomWidth, int zoomHeight)
 	{
-		// pimg为空，或目标图像大小和原图像一样，则不用缩放，直接返回
 		if ((pimg == NULL) || (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
 			return;
 
@@ -57,8 +56,8 @@ namespace LGGraphics
 		getimage(pimg[5], "img/currentOn.png");
 		imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		initgraph(mapDataStore.height * mapDataStore.heightPerBlock, mapDataStore.width * mapDataStore.widthPerBlock);
-		setbkcolor(WHITE);
-		setbkcolor_f(WHITE);
+		setbkcolor(LIGHTGRAY);
+		setbkcolor_f(LIGHTGRAY);
 		cleardevice();
 	}
 }

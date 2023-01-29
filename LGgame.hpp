@@ -405,6 +405,7 @@ struct gameStatus
 			return -1;
 		LGGraphics::inputMapData(20, 20, mapH, mapW);
 		LGGraphics::init();
+		printf("%f\n", getfps());
 		played = 1;
 		gameMesC = 0;
 		if (!isWeb)

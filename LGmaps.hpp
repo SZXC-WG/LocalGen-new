@@ -46,21 +46,17 @@ struct teamS
 teamS defTeams[64] = {
 	{"White", 0xffffff},
 	{"Red", 0xff0000},
-	{"Green", 0x00ff00},
+	{"Aqua", 0x4363d8},
+	{"Green", 0x008000},
+	{"Emerald", 0x008080},
+	{"Orange", 0xf58231},
+	{"Pink", 0xf032e6},
+	{"Purple", 0x800080},
+	{"Maroon", 0x800000},
+	{"Yellow", 0xb09f30},
+	{"Khaki", 0x9a6324},
 	{"Blue", 0x0000ff},
-	{"Yellow", 0xffff00},
-	{"Cyan", 0x00ffff},
-	{"Rose", 0xff00ff},
-	{"Orange", 0xff8000},
-	{"Lime", 0x80ff00},
-	{"Brown", 0x804000},
-	{"Grey", 0x808080},
-	{"Teal", 0x008080},
-	{"Purple", 0xc000c0},
-	{"Silver", 0xc0c0c0},
-	{"Maroon", 0xc00000},
-	{"Emerald", 0x00ce80},
-	{"Olive", 0x808000},
+	{"Purple", 0x483d8b},
 };
 
 struct playerCoord
@@ -81,7 +77,6 @@ bool isVisible(int x, int y, int printCode)
 }
 void printNum(bool visible, long long army, int team, int curx, int cury, char lchar, char rchar, char mchar = ' ', char repchar = ' ')
 {
-	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	if (!visible)
 		return;
 	int widthPerBlock = LGGraphics::mapDataStore.widthPerBlock, heightPerBlock = LGGraphics::mapDataStore.heightPerBlock;
@@ -92,56 +87,71 @@ void printNum(bool visible, long long army, int team, int curx, int cury, char l
 			register long long absd = -army;
 			if (absd < 10)
 			{
-				xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%1lld", absd);
+				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%1lld", absd);
 			}
 			else if (absd < 100)
 			{
-				xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%2lld", absd);
+				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%2lld", absd);
 			}
 			else if (absd < (ll)(1e13))
 			{
 				string p = to_string(army);
-				xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 			}
 			else
 			{
-				xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "-MX");
+				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "-MX");
 			}
 		}
 		else if (army == 0)
 		{
 			if (lchar == '[' || lchar == '$')
-				xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "0");
+				xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "0");
 		}
 		else if (army < 10)
 		{
-			xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%1lld", army);
+			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%1lld", army);
 		}
 		else if (army < 1000)
 		{
-			xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%3lld", army);
+			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%3lld", army);
 		}
 		else if (army < (ll)(1e14))
 		{
 			string p = to_string(army);
-			xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 		}
 		else
 		{
-			xyprintf(widthPerBlock * (curx - 1) + 2, heightPerBlock * (cury - 1) + 2, "MAX");
+			xyprintf(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1) + heightPerBlock / 2, "MAX");
 		}
 	}
 }
 void printMap(int printCode, playerCoord coo)
 {
-	setcolor(DARKGRAY);
+	setcolor(WHITE);
 	setfont(12, 0, "宋体");
+	// settextjustify(CENTER_TEXT, CENTER_TEXT);
 	int widthPerBlock = LGGraphics::mapDataStore.widthPerBlock, heightPerBlock = LGGraphics::mapDataStore.heightPerBlock;
 	for (int curx = 1; curx <= mapH; curx++)
 	{
 		for (int cury = 1; cury <= mapW; cury++)
 		{
-			setfillcolor(defTeams[gameMap[curx][cury].team].color);
+			if (isVisible(curx, cury, printCode))
+			{
+				if (gameMap[curx][cury].team == 0)
+				{
+					setfillcolor(LIGHTGRAY);
+					if (gameMap[curx][cury].type == 1)
+						setfillcolor(DARKGRAY);
+					if (gameMap[curx][cury].type == 4)
+						setfillcolor(DARKGRAY);
+				}
+				else
+					setfillcolor(defTeams[gameMap[curx][cury].team].color);
+			}
+			else
+				setfillcolor(DARKGRAY);
 			bar(widthPerBlock * (curx - 1), heightPerBlock * (cury - 1), widthPerBlock * curx, heightPerBlock * cury);
 			switch (gameMap[curx][cury].type)
 			{

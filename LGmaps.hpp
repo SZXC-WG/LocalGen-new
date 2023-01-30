@@ -425,7 +425,7 @@ void initDefMap()
 		getMapInfoNum = (func3)GetProcAddress(defMap, "getMapInfoNum");
 	}
 	mapNum = statusCheck();
-
+	// xyprintf(100, 100, "mapNumChecked");
 	for (int i = 0; i <= mapNum; i++)
 	{
 		maps[i].id = mapG[i].id = i;

@@ -31,8 +31,21 @@ using namespace std::literals;
 // project headers
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
+#include "LGlib.hpp"
 // Bot header
 #include "LGbot.hpp"
+
+struct movementS {
+	int id, op;
+	long long turn;
+	void clear() {
+		id=turn=op=0;
+	}
+};
+std::queue<movementS> movementPack;
+
+void Zip();
+void zipGame(long long totTurn);
 
 const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};
@@ -225,6 +238,7 @@ struct gameStatus {
 			default:
 				return -1;
 		}
+		movementPack.push(movementS{id,mv,curTurn});
 		return 0;
 	}
 	// flush existing movements
@@ -336,6 +350,7 @@ struct gameStatus {
 		if(played) return -1;
 		played = 1;
 		gameMesC = 0;
+		movementPack = decltype(movementPack)();
 		if(!isWeb) {
 			int robotId[64];
 			playerCoord coordinate[64];
@@ -350,6 +365,7 @@ struct gameStatus {
 			std::deque<int> movement;
 			curTurn = 0;
 			bool gameEnd = 0;
+			Zip();
 			std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
 			while(1) {
 				if(_kbhit()) {
@@ -461,6 +477,7 @@ struct gameStatus {
 						MessageBox(nullptr,"ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.","TIP",MB_OK);
 					}
 				}
+				if(curTurn%2000==0) Zip();
 				if(!gameEnd) {
 					int ed = 0;
 					for(int i = 1; i <= playerCnt; ++i)
@@ -475,6 +492,7 @@ struct gameStatus {
 						gameEnd = 1;
 						cheatCode = 1048575;
 						addGameMessage(curTurn,std::__lg(ed),"WON!");
+						zipGame(curTurn);
 					}
 				}
 				gotoxy(1, 1);

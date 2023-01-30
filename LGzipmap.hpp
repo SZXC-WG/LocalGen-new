@@ -23,6 +23,7 @@ char strdeZip[LEN_ZIP];
 char strZip[LEN_ZIP];
 char strGameZip[4 * LEN_ZIP];
 char strdeGameZip[4 * LEN_ZIP];
+int curLen=0;
 Block curMap[505][505];
 playerCoord mapCoord[17][30],curCoord[30];
 Block mapSet[17][505][505];
@@ -31,14 +32,6 @@ long long totTurn,curTurn,totMove;
 std::pair<long long,long long> curMoveS;
 std::queue<long long> signMap;
 std::queue<long long> signCmd;
-struct movementS {
-	int id, op;
-	long long turn;
-	void clear() {
-		id=turn=op=0;
-	}
-};
-std::queue<movementS> movementPack;
 movementS dezipedMovementS[4*LEN_ZIP];
 movementS tmp;
 
@@ -88,7 +81,7 @@ void Zip() {
 	strZip[p++] = PMod(k2) + CHAR_AD;
 
 	for(i = 1; i <= mapH; i++)
-		for(j = 1; j <= mapW; j++, p++) {
+		for(j = 1; j <= mapW; j++) {
 			strZip[p++] = gameMap[i][j].team + CHAR_AD;
 			strZip[p] = (gameMap[i][j].type << 2) + (gameMap[i][j].lit << 1);
 			k1 = gameMap[i][j].army;
@@ -103,6 +96,10 @@ void Zip() {
 				strZip[p++] = PMod(k1) + CHAR_AD;
 		}
 	strZip[p] = '\0';
+	strGameZip[curLen++]=44;
+	for(int i=0;i<p;i++){
+		strGameZip[curLen++]=strZip[i];
+	}
 }
 
 void deZip() {
@@ -133,7 +130,7 @@ void deZip() {
 }
 
 void zipGame(long long totTurn) {
-	int p = 0, curTurn = 0;
+	int p = curLen, curTurn = 0;
 
 	strGameZip[p++] = 45;
 	strGameZip[p++] = PMod(totTurn) + CHAR_AD;
@@ -154,6 +151,10 @@ void zipGame(long long totTurn) {
 
 	strGameZip[p++] = 47;
 	strGameZip[p] = '\0';
+	
+	FILE* f=fopen("replay.lgrep","w");
+	fputs(strGameZip,f);
+	fclose(f);
 }
 
 void mapReset(int c) {

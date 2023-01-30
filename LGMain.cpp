@@ -27,6 +27,8 @@
 /* dev project headers */
 #include "LocalGen-new_private.h"
 
+/* Internet base */
+#include "LGweb.hpp" // __LGWEB_HPP__
 /* test settings */
 #include "LGlib.hpp" // __LGLIB_HPP__ 
 /* console settings */
@@ -35,8 +37,6 @@
 #include "LGmaps.hpp" // __LGMAPS_HPP__
 /* map zipping */
 #include "LGzipmap.hpp" // __LGZIPMAP_HPP__
-/* Internet base */
-#include "LGweb.hpp" // __LGWEB_HPP__
 /* generals robot */
 #include "LGbot.hpp" //__LGBOT__
 /* game options */

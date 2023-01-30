@@ -228,7 +228,7 @@ void deZipGame() {
 	}
 }
 
-void initializeReplay(gameStatus curStatus) {
+void initializeReplay(gameStatus& curStatus) {
 	for(int i=1; i<=mapH; i++) {
 		for(int j=1; j<=mapW; j++) {
 			if(curMap[i][j].type==3) {
@@ -246,7 +246,7 @@ void initializeReplay(gameStatus curStatus) {
 	}
 }
 
-void Replay(int dir,long long curTurn,gameStatus curStatus) {
+void Replay(int dir,long long curTurn,gameStatus& curStatus) {
 	if(dir) {
 		curMoveS=bin_search(curTurn+1);
 		for(int i=curMoveS.first; i<curMoveS.second; i++)

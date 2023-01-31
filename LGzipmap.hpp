@@ -152,7 +152,7 @@ void zipGame(long long totTurn) {
 	strGameZip[p++] = 47;
 	strGameZip[p] = '\0';
 	
-	FILE* f=fopen("replay.lgrep","w");
+	FILE* f=fopen("zipgame.lgz","w");
 	fputs(strGameZip,f);
 	fclose(f);
 }
@@ -193,7 +193,7 @@ void deZipGame() {
 	p=0;
 	while(strdeGameZip[p]!=45) p++;
 
-	totTurn=(strdeGameZip[p+2]<<6)+strdeGameZip[p+1];
+	totTurn=(strdeGameZip[p+2]-CHAR_AD<<6)+strdeGameZip[p+1]-CHAR_AD;
 	p=p+3;
 
 	while(strdeGameZip[p]!='\0') {

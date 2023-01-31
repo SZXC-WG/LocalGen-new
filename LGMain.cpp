@@ -53,6 +53,13 @@ signed main(signed argc, char** argv) {
 	initattr();
 	initDefMap();
 	MainPage(); // start main page
+//FILE *f=fopen("zipgame.lgz","r");
+//fscanf(f,"%s",strdeGameZip);
+//fclose(f);
+//deZipGame();
+//printf("%d\n",totTurn);
+//int p=0;
+//printMap(1048575,playerCoord{1,1});
 	exitExe();	// exit program
 }
 

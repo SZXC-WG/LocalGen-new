@@ -37,11 +37,13 @@ using namespace std::literals;
 // Graphics header
 #include "LGGraphics.hpp"
 
-struct movementS {
+struct movementS
+{
 	int id, op;
 	long long turn;
-	void clear() {
-		id=turn=op=0;
+	void clear()
+	{
+		id = turn = op = 0;
 	}
 };
 std::queue<movementS> movementPack;

@@ -67,7 +67,7 @@ struct gameStatus
 	int cheatCode;
 	int playerCnt;
 	int isAlive[64];
-	int stepDelay; /* ms */
+	int stepDelay; /* fps */
 	bool played;
 	int winnerNum;
 
@@ -409,8 +409,7 @@ struct gameStatus
 			std::deque<int> movement;
 			curTurn = 0;
 			bool gameEnd = 0;
-			std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
-			for (; is_run(); delay_fps(60))
+			for (; is_run(); delay_fps(stepDelay))
 			{
 				while (mousemsg())
 				{
@@ -498,8 +497,6 @@ struct gameStatus
 					}
 					}
 				}
-				if (std::chrono::steady_clock::now().time_since_epoch() - lPT < std::chrono::milliseconds(stepDelay))
-					continue;
 				updateMap();
 				while (!movement.empty() && analyzeMove(1, movement.front(), coordinate[1]))
 					movement.pop_front();

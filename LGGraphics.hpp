@@ -582,8 +582,8 @@ namespace LGGraphics
 				{
 					endConfig = true;
 					cleardevice();
-					if (stDel != 0)
-						stDel = 1000 / stDel;
+					if (stDel == 0)
+						stDel = 60;
 					return;
 				}
 			}

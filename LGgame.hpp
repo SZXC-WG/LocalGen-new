@@ -37,6 +37,18 @@ using namespace std::literals;
 // Graphics header
 #include "LGGraphics.hpp"
 
+struct movementS {
+	int id, op;
+	long long turn;
+	void clear() {
+		id=turn=op=0;
+	}
+};
+std::queue<movementS> movementPack;
+
+void Zip();
+void zipGame(long long totTurn);
+
 const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};
 

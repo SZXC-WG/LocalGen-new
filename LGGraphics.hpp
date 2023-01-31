@@ -405,7 +405,7 @@ namespace LGGraphics
 				createStandardMap(height, width);
 				break;
 			case 3:
-				createFullCityMap(height, width, armyMax, armyMin, plCnt);
+				createFullCityMap(height, width, armyMin, armyMax, plCnt);
 				break;
 			case 4:
 				createFullSwampMap(height, width, plCnt);
@@ -523,9 +523,9 @@ namespace LGGraphics
 						setcolor(BLUE);
 					}
 				}
-				rectangle(900, 200, 1100, 275);
+				rectangle(900, 30, 1100, 105);
 				setfont(70, 0, "Freestyle Script");
-				rectprintf(900, 200, 200, 75, "Start Game!");
+				rectprintf(900, 30, 200, 75, "Start Game!");
 				setfont(20, 0, "Segue UI");
 				if (stDel != 0)
 					xyprintf(405, 975, "Speed Now: %d", stDel);
@@ -536,7 +536,7 @@ namespace LGGraphics
 			while (mousemsg())
 			{
 				mouse_msg msg = getmouse();
-				cout << msg.x << ' ' << msg.y << ' ' << msg.is_left() << ' ' << msg.is_down() << ' ' << msg.is_up() << ' ' << msg.is_move() << ' ' << mouseDownCount << ' ' << circlePos << endl;
+				// cout << msg.x << ' ' << msg.y << ' ' << msg.is_left() << ' ' << msg.is_down() << ' ' << msg.is_up() << ' ' << msg.is_move() << ' ' << mouseDownCount << ' ' << circlePos << endl;
 				if (50 <= msg.x && msg.x <= 350 && 550 <= msg.y && 950 >= msg.y)
 				{
 					if (msg.is_left() && msg.is_down())
@@ -556,7 +556,7 @@ namespace LGGraphics
 					if (mouseDownCount > 0)
 					{
 						circlePos = msg.y;
-						if (circlePos == 950)
+						if (circlePos >= 940)
 							stDel = 0;
 						else
 							stDel = ((circlePos - 550) / 20) + 1;
@@ -578,10 +578,12 @@ namespace LGGraphics
 						}
 					}
 				}
-				if (msg.x >= 900 && msg.x <= 1100 && msg.y >= 200 && msg.y <= 275 && msg.is_down() && msg.is_left())
+				if (msg.x >= 900 && msg.x <= 1100 && msg.y >= 30 && msg.y <= 105 && msg.is_down() && msg.is_left())
 				{
 					endConfig = true;
 					cleardevice();
+					if (stDel != 0)
+						stDel = 1000 / stDel;
 					return;
 				}
 			}
@@ -590,6 +592,9 @@ namespace LGGraphics
 
 	void init()
 	{
+		heightPerBlock = 900 / mapH;
+		widthPerBlock = 900 / mapW;
+		heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
 		setbkmode(TRANSPARENT);
 		pimg[1] = newimage();
 		getimage(pimg[1], "img/city.png");
@@ -606,9 +611,19 @@ namespace LGGraphics
 		pimg[5] = newimage();
 		getimage(pimg[5], "img/currentOn.png");
 		imageOperation::zoomImage(pimg[5], mapDataStore.widthPerBlock, mapDataStore.heightPerBlock);
-		initgraph(mapDataStore.width * mapDataStore.widthPerBlock, mapDataStore.height * mapDataStore.heightPerBlock);
-		setbkcolor(LIGHTGRAY);
-		setbkcolor_f(LIGHTGRAY);
+		initgraph(1700, 1000);
+		setbkcolor(WHITE);
+		setbkcolor_f(WHITE);
 		cleardevice();
 	}
+}
+
+int getHeightPerBlock()
+{
+	return LGGraphics::mapDataStore.heightPerBlock;
+}
+
+int getWidthPerBlock()
+{
+	return LGGraphics::mapDataStore.widthPerBlock;
 }

@@ -55,6 +55,7 @@ struct gameStatus
 	int isAlive[64];
 	int stepDelay; /* ms */
 	bool played;
+	int winnerNum;
 
 	// constructor
 	gameStatus() = default;
@@ -71,55 +72,51 @@ struct gameStatus
 	// destructor
 	~gameStatus() = default;
 
-	int curTurn;
-	struct gMes
+	struct gameMessageStore
 	{
-		int turn, plId;
-		string mes;
-	} mess[205];
+		int playerA, playerB;
+		int turnNumber;
+	};
+
+	vector<gameMessageStore> gameMessage;
+
+	int curTurn;
 	int gameMesC;
 
-	void addGameMessage(int turn, int plId, string mes)
-	{
-		++gameMesC;
-		mess[gameMesC].turn = turn;
-		mess[gameMesC].plId = plId;
-		mess[gameMesC].mes = mes;
-	}
 	void printGameMessage()
 	{
-		gotoxy(2 + mapH + 1, 63);
-		underline();
-		printf("| %-41s |", "G a m e   M e s s a g e");
-		resetattr();
-		putchar('|');
-		gotoxy(2 + mapH + 2, 63);
-		underline();
-		printf("| %6s | %7s | %-22s |", "TURN", "PLAYER", "MESSAGE");
-		resetattr();
-		putchar('|');
-		for (int i = 1; i <= gameMesC; ++i)
+		setcolor(BLACK);
+		setfont(30, 0, "Comics Sans MS");
+		xyprintf(1010, 330, "GameMessage");
+		setfont(20, 0, "Comics Sans MS");
+		int tmp = 0;
+		for (gameMessageStore now : gameMessage)
 		{
-			gotoxy(2 + mapH + 2 + i, 63);
-			underline();
-			printf("| %6d | ", mess[i].turn);
-			setfcolor(defTeams[mess[i].plId].color);
-			printf("%7s", defTeams[mess[i].plId].name.c_str());
-			setfcolor(0xffffff);
-			printf(" | ");
-			printf("%s", mess[i].mes.c_str());
-			setfcolor(0xffffff);
-			fflush(stdout);
-			int x = 0, y = 0;
-			getxy(x, y);
-			while (y < 106)
-				putchar(' '), ++y;
-			gotoxy(2 + mapH + 2 + i, 107);
-			printf("|");
-			resetattr();
-			printf("|");
+			if (now.playerA == -1 && now.playerB == -1)
+			{
+				setcolor(defTeams[winnerNum].color);
+				xyprintf(1010, 370 + 30 * tmp, "%7s", defTeams[winnerNum].name.c_str());
+				setcolor(RED);
+				xyprintf(1080, 370 + 30 * tmp, " won the game at Round #%d", now.turnNumber);
+				setcolor(BLACK);
+			}
+			else if (1 == now.playerB && now.playerA == 1)
+			{
+				xyprintf(1010, 370 + 30 * tmp, "You surrendered at Round #%d", now.turnNumber);
+			}
+			else
+			{
+				setcolor(defTeams[now.playerA].color);
+				xyprintf(1010, 370 + 30 * tmp, "%7s", defTeams[now.playerA].name.c_str());
+				setcolor(BLACK);
+				xyprintf(1080, 370 + 30 * tmp, " killed ", now.turnNumber);
+				setcolor(defTeams[now.playerB].color);
+				xyprintf(1160, 370 + 30 * tmp, "%7s", defTeams[now.playerB].name.c_str());
+				setcolor(BLACK);
+				xyprintf(1230, 370 + 30 * tmp, " at Round #%d", now.turnNumber);
+			}
+			tmp++;
 		}
-		fflush(stdout);
 	}
 
 	void updateMap()
@@ -201,7 +198,7 @@ struct gameStatus
 	void kill(int p1, int p2)
 	{
 		if (p2 == 1)
-			MessageBox(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK);
+			MessageBox(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
 		isAlive[p2] = 0;
 		for (int i = 1; i <= mapH; ++i)
 		{
@@ -214,21 +211,7 @@ struct gameStatus
 				}
 			}
 		}
-		//		++gameMesC;
-		int p2col = defTeams[p2].color;
-		addGameMessage(curTurn, p1, string("KILLED PLAYER \033[38;2;" + to_string(p2col / 65536) + ";" + to_string(p2col / 256 % 256) + ";" + to_string(p2col % 256) + "m" + defTeams[p2].name));
-		//		gotoxy(mapH + 2 + gameMesC, 65);
-		//		setfcolor(0xffffff);
-		//		fputs("PLAYER ", stdout);
-		//		setfcolor(defTeams[p1].color);
-		//		printf("%-7s", defTeams[p1].name.c_str());
-		//		setfcolor(0xffffff);
-		//		fputs(" KILLED PLAYER ", stdout);
-		//		setfcolor(defTeams[p2].color);
-		//		printf("%-7s", defTeams[p2].name.c_str());
-		//		setfcolor(0xffffff);
-		//		printf(" AT TURN %d.", curTurn);
-		//		fflush(stdout);
+		gameMessage.push_back({p1, p2, curTurn});
 	}
 
 	// struct for movement
@@ -358,44 +341,32 @@ struct gameStatus
 		}
 		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b)
 				  { return a.army > b.army; });
-		setfcolor(0xffffff);
-		underline();
-		printf("|     R      A      N      K      L      I      S      T     |");
-		resetattr();
-		//		setfcolor(0x000000);
-		putchar('|');
-		putchar('\n');
-		setfcolor(0xffffff);
-		underline();
-		printf("| %7s | %8s | %5s | %5s | %5s | %13s |", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
-		resetattr();
-		//		setfcolor(0x000000);
-		putchar('|');
-		putchar('\n');
-		for (int i = 1; i <= playerCnt; ++i)
+		setfillcolor(WHITE);
+		bar(50 + widthPerBlock * mapW, 0, 1700, 1000);
+		bar(0, 0, 1700, 50);
+		bar(0, 50 + heightPerBlock * mapH, 1700, 1000);
+		setfont(30, 0, "Segue UI");
+		setcolor(BLUE);
+		xyprintf(1010, 20, "Ranklist");
+		setcolor(BLACK);
+		setfont(20, 0, "Segue UI");
+		xyprintf(1010, 60, "%7s %8s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
+		for (int i = 1; i <= playerCnt; i++)
 		{
 			if (isAlive[rklst[i].id])
-				setfcolor(defTeams[rklst[i].id].color);
+				setcolor(defTeams[rklst[i].id].color);
 			else
-				setfcolor(defTeams[10].color);
-			underline();
-			printf("| %7s | ", defTeams[rklst[i].id].name.c_str());
-			if (rklst[i].army < 100000000)
-				printf("%8lld | ", rklst[i].army);
+				setcolor(BLACK);
+			if (rklst[i].army < 1000000000)
+			{
+				xyprintf(1010, 60 + i * 20, "%7s %8lld %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
+			}
 			else
 			{
 				register int p = std::to_string(rklst[i].army * 1.0L / 1e9L).find('.');
-				printf("%*.*LfG | ", 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L);
+				xyprintf(1010, 60 + i * 20, "%7s %*.*LfG %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
 			}
-			printf("%5d | %5d | %5d | %13lld |", rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
-			resetattr();
-			//			setfcolor(0x000000);
-			putchar('|');
-			putchar('\n');
 		}
-		resetattr();
-		setfcolor(0xffffff);
-		fflush(stdout);
 	}
 
 	// main
@@ -403,9 +374,10 @@ struct gameStatus
 	{
 		if (played)
 			return -1;
-		LGGraphics::inputMapData(20, 20, mapH, mapW);
+		cleardevice();
+		LGGraphics::inputMapData(min(900 / mapH, 900 / mapW), min(900 / mapH, 900 / mapW), mapH, mapW);
 		LGGraphics::init();
-		printf("%f\n", getfps());
+		// printf("%f\n", getfps());
 		played = 1;
 		gameMesC = 0;
 		if (!isWeb)
@@ -426,50 +398,54 @@ struct gameStatus
 			std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
 			for (; is_run(); delay_fps(60))
 			{
-				if (kbhit())
+				while (mousemsg())
 				{
-					int ch = getch();
-					switch (ch = tolower(ch))
+					mouse_msg msg = getmouse();
+					if (msg.is_down() && msg.is_left() && msg.x >= 50 && msg.y >= 50 && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH)
+					{
+						int lin = (msg.y - 50 + heightPerBlock - 1) / heightPerBlock;
+						int col = (msg.x - 50 + widthPerBlock - 1) / widthPerBlock;
+						coordinate[1] = {lin, col};
+						movement.clear();
+					}
+				}
+				while (kbmsg())
+				{
+					key_msg ch = getkey();
+					switch (ch.key)
 					{
 					case int(' '):
-						while (getch() != ' ')
+						while (!kbmsg() || (getkey().key != ' '))
 							;
-						break;
 					case int('c'):
 						clearance();
 						break;
-					case int('a'):
+					case int('w'):
 						movement.emplace_back(1);
 						break;
-					case int('w'):
+					case int('a'):
 						movement.emplace_back(2);
 						break;
-					case int('d'):
+					case int('s'):
 						movement.emplace_back(3);
 						break;
-					case int('s'):
+					case int('d'):
 						movement.emplace_back(4);
 						break;
-					case 224:
-					{ /**/
-						ch = getch();
-						switch (ch)
-						{
-						case 72: /*[UP]*/
-							movement.emplace_back(5);
-							break;
-						case 75: /*[LEFT]*/
-							movement.emplace_back(6);
-							break;
-						case 80: /*[RIGHT]*/
-							movement.emplace_back(7);
-							break;
-						case 77: /*[DOWN]*/
-							movement.emplace_back(8);
-							break;
-						}
+
+					case key_up: /*[UP]*/
+						movement.emplace_back(5);
 						break;
-					}
+					case key_left: /*[LEFT]*/
+						movement.emplace_back(6);
+						break;
+					case key_down: /*[DOWN]*/
+						movement.emplace_back(7);
+						break;
+					case key_right: /*[RIGHT]*/
+						movement.emplace_back(8);
+						break;
+
 					case int('g'):
 						movement.emplace_back(0);
 						break;
@@ -481,13 +457,13 @@ struct gameStatus
 						movement.clear();
 						break;
 					case 27:
-						MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK);
+						MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
 						return 0;
 					case int('\b'):
 					{
 						if (!isAlive[1])
 							break;
-						int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO);
+						int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
 						if (confirmSur == 7)
 							break;
 						isAlive[1] = 0;
@@ -503,15 +479,7 @@ struct gameStatus
 								}
 							}
 						}
-						++gameMesC;
-						gotoxy(mapH + 2 + gameMesC, 65);
-						setfcolor(0xffffff);
-						fputs("PLAYER ", stdout);
-						setfcolor(defTeams[1].color);
-						printf("%-7s", defTeams[1].name.c_str());
-						setfcolor(0xffffff);
-						printf(" SURRENDERED AT TURN %d.", curTurn);
-						fflush(stdout);
+						gameMessage.push_back({1, 1, curTurn});
 						break;
 					}
 					}
@@ -555,7 +523,7 @@ struct gameStatus
 					if (!alldead)
 					{
 						cheatCode = 1048575;
-						MessageBox(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK);
+						MessageBox(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
 					}
 				}
 				if (!gameEnd)
@@ -570,25 +538,18 @@ struct gameStatus
 									"THE GAME WILL CONTINUE." + "\n" +
 									"YOU CAN PRESS [ESC] TO EXIT.")
 									   .c_str(),
-								   "GAME END", MB_OK);
+								   "GAME END", MB_OK | MB_SYSTEMMODAL);
 						gameEnd = 1;
+						winnerNum = std::__lg(ed);
 						cheatCode = 1048575;
-						++gameMesC;
-						gotoxy(mapH + 2 + gameMesC, 65);
-						setfcolor(0xffffff);
-						fputs("PLAYER ", stdout);
-						setfcolor(defTeams[std::__lg(ed)].color);
-						printf("%-7s", defTeams[std::__lg(ed)].name.c_str());
-						setfcolor(0xffffff);
-						printf(" WON AT TURN %d!!!", curTurn);
-						fflush(stdout);
+						gameMessage.push_back({-1, -1, curTurn});
 					}
 				}
-				gotoxy(1, 1);
 				printMap(cheatCode, coordinate[1]);
 				ranklist(coordinate);
 				printGameMessage();
-				fflush(stdout);
+				setcolor(BLACK);
+				xyprintf(1600, 900, "FPS: %f", getfps());
 				lPT = std::chrono::steady_clock::now().time_since_epoch();
 			}
 		}
@@ -598,12 +559,12 @@ struct gameStatus
 
 int GAME(bool isWeb, int cheatCode, int plCnt, int stDel)
 {
-	setvbuf(stdout, nullptr, _IOFBF, 5000000);
-	hideCursor();
-	clearance();
-	gotoxy(1, 1);
+	// setvbuf(stdout, nullptr, _IOFBF, 5000000);
+	//  hideCursor();
+	//  clearance();
+	//  gotoxy(1, 1);
 	int ret = gameStatus(isWeb, cheatCode, plCnt, stDel)();
-	setvbuf(stdout, nullptr, _IONBF, 0);
+	// setvbuf(stdout, nullptr, _IONBF, 0);
 	return ret;
 }
 

@@ -80,6 +80,14 @@ struct gameStatus
 
 	vector<gameMessageStore> gameMessage;
 
+	struct gameMessageStore
+	{
+		int playerA, playerB;
+		int turnNumber;
+	};
+
+	vector<gameMessageStore> gameMessage;
+
 	int curTurn;
 	int gameMesC;
 
@@ -355,8 +363,8 @@ struct gameStatus
 		{
 			if (isAlive[rklst[i].id])
 				setcolor(defTeams[rklst[i].id].color);
-			else
-				setcolor(BLACK);
+			setcolor(defTeams[rklst[i].id].color);
+			else setcolor(BLACK);
 			if (rklst[i].army < 1000000000)
 			{
 				xyprintf(1010, 60 + i * 20, "%7s %8lld %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
@@ -377,6 +385,7 @@ struct gameStatus
 		cleardevice();
 		LGGraphics::inputMapData(min(900 / mapH, 900 / mapW), min(900 / mapH, 900 / mapW), mapH, mapW);
 		LGGraphics::init();
+		// printf("%f\n", getfps());
 		// printf("%f\n", getfps());
 		played = 1;
 		gameMesC = 0;
@@ -399,80 +408,101 @@ struct gameStatus
 			for (; is_run(); delay_fps(60))
 			{
 				while (kbmsg())
-				{
-					key_msg ch = getkey();
-					switch (ch.key)
+					while (kbmsg())
 					{
-					case int(' '):
-						while (!kbmsg() || (getkey().key != ' '))
-							;
-					case int('c'):
-						clearance();
-						break;
-					case int('w'):
-						movement.emplace_back(1);
-						break;
-					case int('a'):
-						movement.emplace_back(2);
-						break;
-					case int('s'):
-						movement.emplace_back(3);
-						break;
-					case int('d'):
-						movement.emplace_back(4);
-						break;
-
-					case key_up: /*[UP]*/
-						movement.emplace_back(5);
-						break;
-					case key_left: /*[LEFT]*/
-						movement.emplace_back(6);
-						break;
-					case key_down: /*[DOWN]*/
-						movement.emplace_back(7);
-						break;
-					case key_right: /*[RIGHT]*/
-						movement.emplace_back(8);
-						break;
-
-					case int('g'):
-						movement.emplace_back(0);
-						break;
-					case int('e'):
-						if (!movement.empty())
-							movement.pop_back();
-						break;
-					case int('q'):
-						movement.clear();
-						break;
-					case 27:
-						MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
-						return 0;
-					case int('\b'):
-					{
-						if (!isAlive[1])
-							break;
-						int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
-						if (confirmSur == 7)
-							break;
-						isAlive[1] = 0;
-						for (int i = 1; i <= mapH; ++i)
+						key_msg ch = getkey();
+						switch (ch.key)
+							key_msg ch = getkey();
+						switch (ch.key)
 						{
-							for (int j = 1; j <= mapW; ++j)
+						case int(' '):
+							while (!kbmsg() || (getkey().key != ' '))
+								while (!kbmsg() || (getkey().key != ' '))
+									;
+						case int('c'):
+							clearance();
+							break;
+						case int('w'):
+						case int('w'):
+							movement.emplace_back(1);
+							break;
+						case int('a'):
+						case int('a'):
+							movement.emplace_back(2);
+							break;
+						case int('s'):
+						case int('s'):
+							movement.emplace_back(3);
+							break;
+						case int('d'):
+						case int('d'):
+							movement.emplace_back(4);
+							break;
+
+						case key_up: /*[UP]*/
+							movement.emplace_back(5);
+							break;
+						case key_left: /*[LEFT]*/
+							movement.emplace_back(6);
+							break;
+						case key_down: /*[DOWN]*/
+							movement.emplace_back(7);
+							break;
+						case key_right: /*[RIGHT]*/
+							movement.emplace_back(8);
+							break;
+
+						case key_up: /*[UP]*/
+							movement.emplace_back(5);
+							break;
+						case key_left: /*[LEFT]*/
+							movement.emplace_back(6);
+							break;
+						case key_down: /*[DOWN]*/
+							movement.emplace_back(7);
+							break;
+						case key_right: /*[RIGHT]*/
+							movement.emplace_back(8);
+							break;
+
+						case int('g'):
+							movement.emplace_back(0);
+							break;
+						case int('e'):
+							if (!movement.empty())
+								movement.pop_back();
+							break;
+						case int('q'):
+							movement.clear();
+							break;
+						case 27:
+							MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
+							return 0;
+						case int('\b'):
+						{
+							if (!isAlive[1])
+								break;
+							int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
+							if (confirmSur == 7)
+								break;
+							isAlive[1] = 0;
+							for (int i = 1; i <= mapH; ++i)
 							{
-								if (gameMap[i][j].team == 1)
+								for (int j = 1; j <= mapW; ++j)
 								{
-									gameMap[i][j].team = 0;
-									if (gameMap[i][j].type == 3)
-										gameMap[i][j].type = 4;
+									if (gameMap[i][j].team == 1)
+									{
+										gameMap[i][j].team = 0;
+										if (gameMap[i][j].type == 3)
+											gameMap[i][j].type = 4;
+									}
 								}
 							}
+							gameMessage.push_back({1, 1, curTurn});
+							break;
 						}
-						gameMessage.push_back({1, 1, curTurn});
-						break;
+						}
 					}
-					}
-				}
 				if (std::chrono::steady_clock::now().time_since_epoch() - lPT < std::chrono::milliseconds(stepDelay))
 					continue;
 				updateMap();
@@ -527,11 +557,18 @@ struct gameStatus
 									"THE GAME WILL CONTINUE." + "\n" +
 									"YOU CAN PRESS [ESC] TO EXIT.")
 									   .c_str(),
-								   "GAME END", MB_OK | MB_SYSTEMMODAL);
+								   "GAME END", MB_OK);
 						gameEnd = 1;
-						winnerNum = std::__lg(ed);
 						cheatCode = 1048575;
-						gameMessage.push_back({-1, -1, curTurn});
+						++gameMesC;
+						gotoxy(mapH + 2 + gameMesC, 65);
+						setfcolor(0xffffff);
+						fputs("PLAYER ", stdout);
+						setfcolor(defTeams[std::__lg(ed)].color);
+						printf("%-7s", defTeams[std::__lg(ed)].name.c_str());
+						setfcolor(0xffffff);
+						printf(" WON AT TURN %d!!!", curTurn);
+						fflush(stdout);
 					}
 				}
 				gotoxy(1, 1);
@@ -552,7 +589,12 @@ int GAME(bool isWeb, int cheatCode, int plCnt, int stDel)
 	//  hideCursor();
 	//  clearance();
 	//  gotoxy(1, 1);
+	// setvbuf(stdout, nullptr, _IOFBF, 5000000);
+	//  hideCursor();
+	//  clearance();
+	//  gotoxy(1, 1);
 	int ret = gameStatus(isWeb, cheatCode, plCnt, stDel)();
+	// setvbuf(stdout, nullptr, _IONBF, 0);
 	// setvbuf(stdout, nullptr, _IONBF, 0);
 	return ret;
 }

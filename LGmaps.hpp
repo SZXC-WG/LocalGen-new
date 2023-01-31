@@ -106,7 +106,7 @@ void printNum(bool visible, long long army, int team, int curx, int cury)
 			register long long absd = -army;
 			if (absd < 100)
 			{
-				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%lld", absd);
+				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%2lld", absd);
 			}
 			else if (absd < (ll)(1e13))
 			{
@@ -120,12 +120,12 @@ void printNum(bool visible, long long army, int team, int curx, int cury)
 		}
 		else if (army == 0)
 		{
-			if (gameMap[curx][cury].type != 0 && gameMap[curx][cury].type != 1)
+			if (gameMap[curx][cury].type != 0)
 				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "0");
 		}
 		else if (army < 1000)
 		{
-			xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%lld", army);
+			xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%3lld", army);
 		}
 		else if (army < (ll)(1e14))
 		{
@@ -142,7 +142,7 @@ void printNum(bool visible, long long army, int team, int curx, int cury)
 void printMap(int printCode, playerCoord coo)
 {
 	setcolor(WHITE);
-	setfont((heightPerBlock + 2) / 3 * 2, 0, "Segue UI");
+	setfont(std::max(5, heightPerBlock - 8), 0, "Segue UI");
 	// settextjustify(CENTER_TEXT, CENTER_TEXT);
 	for (int curx = 1; curx <= mapH; curx++)
 	{

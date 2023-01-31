@@ -22,11 +22,7 @@
 const int SSN=205,SSL=100005;
 const int SKPORT=14514;
 
-int failSock,ky;
-std::mutex mLock;
-bool stopSock,usedStr[SSN],lisEnd;
-char *sockStr[SSN][SSL];
-std::queue<int> strSend,strRecv;
+int failSock;
 
 bool initSock() {
 	WORD w_req=MAKEWORD(2,2);
@@ -39,90 +35,6 @@ bool initSock() {
 		WSACleanup();
 		return true;
 	}return false;
-}
-
-void pushSendPack(){
-	std::lock_guard<std::mutex> mGuard(mLock);
-	strSend.push(ky);
-	usedStr[ky]=true;
-}
-
-void pushRecvPack(){
-	std::lock_guard<std::mutex> mGuard(mLock);
-	strRecv.push(ky);
-	usedStr[ky]=true;
-}
-
-int pullSendPack(){
-	std::lock_guard<std::mutex> mGuard(mLock);
-	int res=strSend.front();
-	strSend.pop();
-	usedStr[res]=false;
-	ky=ky>res?res:ky;
-	return res;
-}
-
-int pullRecvPack(){
-	std::lock_guard<std::mutex> mGuard(mLock);
-	int res=strRecv.front();
-	strRecv.pop();
-	usedStr[res]=false;
-	ky=ky>res?res:ky;
-	return res;
-}
-
-void serverThread(SOCKET* socketServer){
-	
-}
-
-void clientThread(SOCKET* socketClient){
-	
-}
-
-bool sockListen(){
-	if(initSock())
-	return true;
-	
-	SOCKET listenSocket=socket(AF_INET,SOCK_STREAM,0);
-	SOCKADDR_IN listenAddr;
-	listenAddr.sin_family=AF_INET;
-	listenAddr.sin_addr.S_un.S_addr=INADDR_ANY;
-	listenAddr.sin_port=htons(SKPORT);
-	int res=bind(listenSocket,(LPSOCKADDR)&listenAddr,sizeof(listenAddr));
-	
-	if(res==SOCKET_ERROR){
-		WSACleanup();
-		return true;
-	}
-	
-	int lis=listen(listenSocket,20);
-	
-	while(1){
-		{
-			std::lock_guard<std::mutex> mGuard(mLock);
-			
-			if(lisEnd)
-			break;
-		}
-		
-		SOCKET *clientSocket=new SOCKET;
-		int sockAddrLen=sizeof(sockaddr);
-		*clientSocket=accept(listenSocket,0,0);
-	//	thread th();
-		
-	}
-	
-	while(1){
-		Sleep(500);
-		std::lock_guard<std::mutex> mGuard(mLock);
-		
-		if(stopSock)
-		break;
-	}
-	
-	closesocket(listenSocket);
-	WSACleanup();
-	return false;
 }
 
 #endif

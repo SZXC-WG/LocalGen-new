@@ -71,55 +71,32 @@ struct gameStatus
 	// destructor
 	~gameStatus() = default;
 
-	int curTurn;
-	struct gMes
+	struct gameMessageStore
 	{
-		int turn, plId;
-		string mes;
-	} mess[205];
+		int playerA, playerB;
+		int turnNumber;
+	};
+
+	vector<gameMessageStore> gameMessage;
+
+	int curTurn;
 	int gameMesC;
 
-	void addGameMessage(int turn, int plId, string mes)
-	{
-		++gameMesC;
-		mess[gameMesC].turn = turn;
-		mess[gameMesC].plId = plId;
-		mess[gameMesC].mes = mes;
-	}
 	void printGameMessage()
 	{
-		gotoxy(2 + mapH + 1, 63);
-		underline();
-		printf("| %-41s |", "G a m e   M e s s a g e");
-		resetattr();
-		putchar('|');
-		gotoxy(2 + mapH + 2, 63);
-		underline();
-		printf("| %6s | %7s | %-22s |", "TURN", "PLAYER", "MESSAGE");
-		resetattr();
-		putchar('|');
-		for (int i = 1; i <= gameMesC; ++i)
-		{
-			gotoxy(2 + mapH + 2 + i, 63);
-			underline();
-			printf("| %6d | ", mess[i].turn);
-			setfcolor(defTeams[mess[i].plId].color);
-			printf("%7s", defTeams[mess[i].plId].name.c_str());
-			setfcolor(0xffffff);
-			printf(" | ");
-			printf("%s", mess[i].mes.c_str());
-			setfcolor(0xffffff);
-			fflush(stdout);
-			int x = 0, y = 0;
-			getxy(x, y);
-			while (y < 106)
-				putchar(' '), ++y;
-			gotoxy(2 + mapH + 2 + i, 107);
-			printf("|");
-			resetattr();
-			printf("|");
-		}
-		fflush(stdout);
+		return;
+		// int sidebarStartX = mapW * LGGraphics::mapDataStore.widthPerBlock, sideBarY = mapH * LGGraphics::mapDataStore.heightPerBlock;
+		// setfillcolor(WHITE);
+		// bar(sidebarStartX, 0, sidebarStartX + 500, sideBarY);
+		// // settextjustify(CENTER_TEXT, CENTER_TEXT);
+		// setfont(30, 0, "Comic Sans MS");
+		// setcolor(BLACK);
+		// rectprintf(sidebarStartX + 10, 10, 480, 40, "Game Message");
+		// setfont(20, 0, "Comic Sans MS");
+		// for (int i = 1; i <= gameMesC; i++)
+		// {
+		// 	//rectprintf(sidebarStartX + 10, 50 + (i - 1) * 40, 480, 40, "%6d %7s %s", mess[i].turn, defTeams[mess[i].plId].name.c_str(), mess[i].mes.c_str());
+		// }
 	}
 
 	void updateMap()
@@ -215,8 +192,8 @@ struct gameStatus
 			}
 		}
 		//		++gameMesC;
-		int p2col = defTeams[p2].color;
-		addGameMessage(curTurn, p1, string("KILLED PLAYER \033[38;2;" + to_string(p2col / 65536) + ";" + to_string(p2col / 256 % 256) + ";" + to_string(p2col % 256) + "m" + defTeams[p2].name));
+		// int p2col = defTeams[p2].color;
+		// addGameMessage(curTurn, p1, string("KILLED PLAYER \033[38;2;" + to_string(p2col / 65536) + ";" + to_string(p2col / 256 % 256) + ";" + to_string(p2col % 256) + "m" + defTeams[p2].name));
 		//		gotoxy(mapH + 2 + gameMesC, 65);
 		//		setfcolor(0xffffff);
 		//		fputs("PLAYER ", stdout);
@@ -358,44 +335,32 @@ struct gameStatus
 		}
 		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b)
 				  { return a.army > b.army; });
-		setfcolor(0xffffff);
-		underline();
-		printf("|     R      A      N      K      L      I      S      T     |");
-		resetattr();
-		//		setfcolor(0x000000);
-		putchar('|');
-		putchar('\n');
-		setfcolor(0xffffff);
-		underline();
-		printf("| %7s | %8s | %5s | %5s | %5s | %13s |", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
-		resetattr();
-		//		setfcolor(0x000000);
-		putchar('|');
-		putchar('\n');
-		for (int i = 1; i <= playerCnt; ++i)
+		setfillcolor(WHITE);
+		bar(50 + widthPerBlock * mapW, 0, 1700, 1000);
+		bar(0, 0, 1700, 50);
+		bar(0, 50 + heightPerBlock * mapH, 1700, 1000);
+		setfont(30, 0, "Segue UI");
+		setcolor(BLUE);
+		xyprintf(1010, 0, "Ranklist");
+		setcolor(BLACK);
+		setfont(20, 0, "Segue UI");
+		xyprintf(1010, 40, "%7s %8s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
+		for (int i = 1; i <= playerCnt; i++)
 		{
 			if (isAlive[rklst[i].id])
-				setfcolor(defTeams[rklst[i].id].color);
+				setcolor(defTeams[rklst[i].id].color);
 			else
-				setfcolor(defTeams[10].color);
-			underline();
-			printf("| %7s | ", defTeams[rklst[i].id].name.c_str());
-			if (rklst[i].army < 100000000)
-				printf("%8lld | ", rklst[i].army);
+				setcolor(BLACK);
+			if (rklst[i].army < 1000000000)
+			{
+				xyprintf(1010, 40 + i * 20, "%7s %8lld %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
+			}
 			else
 			{
 				register int p = std::to_string(rklst[i].army * 1.0L / 1e9L).find('.');
-				printf("%*.*LfG | ", 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L);
+				xyprintf(1010, 40 + i * 20, "%7s %*.*LfG %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
 			}
-			printf("%5d | %5d | %5d | %13lld |", rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
-			resetattr();
-			//			setfcolor(0x000000);
-			putchar('|');
-			putchar('\n');
 		}
-		resetattr();
-		setfcolor(0xffffff);
-		fflush(stdout);
 	}
 
 	// main
@@ -403,9 +368,10 @@ struct gameStatus
 	{
 		if (played)
 			return -1;
-		LGGraphics::inputMapData(20, 20, mapH, mapW);
+		closegraph();
+		LGGraphics::inputMapData(min(900 / mapH, 900 / mapW), min(900 / mapH, 900 / mapW), mapH, mapW);
 		LGGraphics::init();
-		printf("%f\n", getfps());
+		// printf("%f\n", getfps());
 		played = 1;
 		gameMesC = 0;
 		if (!isWeb)
@@ -426,50 +392,43 @@ struct gameStatus
 			std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
 			for (; is_run(); delay_fps(60))
 			{
-				if (kbhit())
+				while (kbmsg())
 				{
-					int ch = getch();
-					switch (ch = tolower(ch))
+					key_msg ch = getkey();
+					switch (ch.key)
 					{
 					case int(' '):
-						while (getch() != ' ')
+						while (!kbmsg() || (getkey().key != ' '))
 							;
-						break;
 					case int('c'):
 						clearance();
 						break;
-					case int('a'):
+					case int('w'):
 						movement.emplace_back(1);
 						break;
-					case int('w'):
+					case int('a'):
 						movement.emplace_back(2);
 						break;
-					case int('d'):
+					case int('s'):
 						movement.emplace_back(3);
 						break;
-					case int('s'):
+					case int('d'):
 						movement.emplace_back(4);
 						break;
-					case 224:
-					{ /**/
-						ch = getch();
-						switch (ch)
-						{
-						case 72: /*[UP]*/
-							movement.emplace_back(5);
-							break;
-						case 75: /*[LEFT]*/
-							movement.emplace_back(6);
-							break;
-						case 80: /*[RIGHT]*/
-							movement.emplace_back(7);
-							break;
-						case 77: /*[DOWN]*/
-							movement.emplace_back(8);
-							break;
-						}
+
+					case key_up: /*[UP]*/
+						movement.emplace_back(5);
 						break;
-					}
+					case key_left: /*[LEFT]*/
+						movement.emplace_back(6);
+						break;
+					case key_down: /*[DOWN]*/
+						movement.emplace_back(7);
+						break;
+					case key_right: /*[RIGHT]*/
+						movement.emplace_back(8);
+						break;
+
 					case int('g'):
 						movement.emplace_back(0);
 						break;
@@ -503,15 +462,15 @@ struct gameStatus
 								}
 							}
 						}
-						++gameMesC;
-						gotoxy(mapH + 2 + gameMesC, 65);
-						setfcolor(0xffffff);
-						fputs("PLAYER ", stdout);
-						setfcolor(defTeams[1].color);
-						printf("%-7s", defTeams[1].name.c_str());
-						setfcolor(0xffffff);
-						printf(" SURRENDERED AT TURN %d.", curTurn);
-						fflush(stdout);
+						// ++gameMesC;
+						// gotoxy(mapH + 2 + gameMesC, 65);
+						// setfcolor(0xffffff);
+						// fputs("PLAYER ", stdout);
+						// setfcolor(defTeams[1].color);
+						// printf("%-7s", defTeams[1].name.c_str());
+						// setfcolor(0xffffff);
+						// printf(" SURRENDERED AT TURN %d.", curTurn);
+						// fflush(stdout);
 						break;
 					}
 					}
@@ -571,17 +530,17 @@ struct gameStatus
 									"YOU CAN PRESS [ESC] TO EXIT.")
 									   .c_str(),
 								   "GAME END", MB_OK);
-						gameEnd = 1;
-						cheatCode = 1048575;
-						++gameMesC;
-						gotoxy(mapH + 2 + gameMesC, 65);
-						setfcolor(0xffffff);
-						fputs("PLAYER ", stdout);
-						setfcolor(defTeams[std::__lg(ed)].color);
-						printf("%-7s", defTeams[std::__lg(ed)].name.c_str());
-						setfcolor(0xffffff);
-						printf(" WON AT TURN %d!!!", curTurn);
-						fflush(stdout);
+						// gameEnd = 1;
+						// cheatCode = 1048575;
+						// ++gameMesC;
+						// gotoxy(mapH + 2 + gameMesC, 65);
+						// setfcolor(0xffffff);
+						// fputs("PLAYER ", stdout);
+						// setfcolor(defTeams[std::__lg(ed)].color);
+						// printf("%-7s", defTeams[std::__lg(ed)].name.c_str());
+						// setfcolor(0xffffff);
+						// printf(" WON AT TURN %d!!!", curTurn);
+						// fflush(stdout);
 					}
 				}
 				gotoxy(1, 1);
@@ -598,12 +557,12 @@ struct gameStatus
 
 int GAME(bool isWeb, int cheatCode, int plCnt, int stDel)
 {
-	setvbuf(stdout, nullptr, _IOFBF, 5000000);
-	hideCursor();
-	clearance();
-	gotoxy(1, 1);
+	// setvbuf(stdout, nullptr, _IOFBF, 5000000);
+	//  hideCursor();
+	//  clearance();
+	//  gotoxy(1, 1);
 	int ret = gameStatus(isWeb, cheatCode, plCnt, stDel)();
-	setvbuf(stdout, nullptr, _IONBF, 0);
+	// setvbuf(stdout, nullptr, _IONBF, 0);
 	return ret;
 }
 

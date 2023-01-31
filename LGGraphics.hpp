@@ -536,7 +536,7 @@ namespace LGGraphics
 			while (mousemsg())
 			{
 				mouse_msg msg = getmouse();
-				cout << msg.x << ' ' << msg.y << ' ' << msg.is_left() << ' ' << msg.is_down() << ' ' << msg.is_up() << ' ' << msg.is_move() << ' ' << mouseDownCount << ' ' << circlePos << endl;
+				// cout << msg.x << ' ' << msg.y << ' ' << msg.is_left() << ' ' << msg.is_down() << ' ' << msg.is_up() << ' ' << msg.is_move() << ' ' << mouseDownCount << ' ' << circlePos << endl;
 				if (50 <= msg.x && msg.x <= 350 && 550 <= msg.y && 950 >= msg.y)
 				{
 					if (msg.is_left() && msg.is_down())
@@ -556,7 +556,7 @@ namespace LGGraphics
 					if (mouseDownCount > 0)
 					{
 						circlePos = msg.y;
-						if (circlePos == 950)
+						if (circlePos >= 940)
 							stDel = 0;
 						else
 							stDel = ((circlePos - 550) / 20) + 1;
@@ -582,6 +582,8 @@ namespace LGGraphics
 				{
 					endConfig = true;
 					cleardevice();
+					if (stDel != 0)
+						stDel = 1000 / stDel;
 					return;
 				}
 			}
@@ -590,6 +592,9 @@ namespace LGGraphics
 
 	void init()
 	{
+		heightPerBlock = 900 / mapH;
+		widthPerBlock = 900 / mapW;
+		heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
 		setbkmode(TRANSPARENT);
 		pimg[1] = newimage();
 		getimage(pimg[1], "img/city.png");
@@ -606,9 +611,19 @@ namespace LGGraphics
 		pimg[5] = newimage();
 		getimage(pimg[5], "img/currentOn.png");
 		imageOperation::zoomImage(pimg[5], mapDataStore.widthPerBlock, mapDataStore.heightPerBlock);
-		initgraph(mapDataStore.width * mapDataStore.widthPerBlock, mapDataStore.height * mapDataStore.heightPerBlock);
-		setbkcolor(LIGHTGRAY);
-		setbkcolor_f(LIGHTGRAY);
+		initgraph(1700, 1000);
+		setbkcolor(WHITE);
+		setbkcolor_f(WHITE);
 		cleardevice();
 	}
+}
+
+int getHeightPerBlock()
+{
+	return LGGraphics::mapDataStore.heightPerBlock;
+}
+
+int getWidthPerBlock()
+{
+	return LGGraphics::mapDataStore.widthPerBlock;
 }

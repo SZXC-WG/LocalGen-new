@@ -18,6 +18,7 @@
 #include <random>
 #include <chrono>
 #include <unistd.h>
+#include <algorithm>
 using std::string;
 using std::to_string;
 #include "LGcons.hpp"
@@ -55,7 +56,7 @@ struct Block
 int mapH, mapW;
 static Block gameMap[505][505]; /* maximum 500*500 */
 
-int widthPerBlock = 20, heightPerBlock = 20;
+int widthPerBlock, heightPerBlock;
 
 struct teamS
 {
@@ -94,11 +95,10 @@ bool isVisible(int x, int y, int printCode)
 				return true;
 	return false;
 }
-void printNum(bool visible, long long army, int team, int curx, int cury, char lchar, char rchar, char mchar = ' ', char repchar = ' ')
+void printNum(bool visible, long long army, int team, int curx, int cury)
 {
 	if (!visible)
 		return;
-	// int widthPerBlock = LGGraphics::mapDataStore.widthPerBlock, heightPerBlock = LGGraphics::mapDataStore.heightPerBlock;
 	if (visible)
 	{
 		if (army < 0)
@@ -106,42 +106,43 @@ void printNum(bool visible, long long army, int team, int curx, int cury, char l
 			register long long absd = -army;
 			if (absd < 100)
 			{
-				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%2lld", absd);
+				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%2lld", absd);
 			}
 			else if (absd < (ll)(1e13))
 			{
 				string p = to_string(army);
-				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 			}
 			else
 			{
-				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "-MX");
+				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "-MX");
 			}
 		}
 		else if (army == 0)
 		{
-			if (lchar == '[' || lchar == '$')
-				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "0");
+			if (gameMap[curx][cury].type != 0)
+				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "0");
 		}
 		else if (army < 1000)
 		{
-			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%3lld", army);
+			xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%3lld", army);
 		}
 		else if (army < (ll)(1e14))
 		{
 			string p = to_string(army);
-			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+			xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 		}
 		else
 		{
-			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "MAX");
+			xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "MAX");
 		}
 	}
 }
+
 void printMap(int printCode, playerCoord coo)
 {
 	setcolor(WHITE);
-	setfont(12, 0, "宋体");
+	setfont(std::max(5, heightPerBlock - 8), 0, "Segue UI");
 	// settextjustify(CENTER_TEXT, CENTER_TEXT);
 	for (int curx = 1; curx <= mapH; curx++)
 	{
@@ -162,45 +163,46 @@ void printMap(int printCode, playerCoord coo)
 			}
 			else
 				setfillcolor(DARKGRAY);
-			bar(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock * cury, heightPerBlock * curx);
+			bar(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, widthPerBlock * cury + 50, heightPerBlock * curx + 50);
 			switch (gameMap[curx][cury].type)
 			{
 			case 0:
 			{ /* plain */
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, ' ', ' ');
+				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 				break;
 			}
 			case 1:
 			{ /* swamp */
-				putimage_transparent(NULL, pimg[4], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[4]));
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, '=', '=', '=', '=');
+				putimage_transparent(NULL, pimg[4], widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, getpixel(0, 0, pimg[4]));
+				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 				break;
 			}
 			case 2:
 			{ /* mountain */
-				putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
+				putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, getpixel(0, 0, pimg[3]));
 				break;
 			}
 			case 3:
 			{ /* general */
 				if (isVisible(curx, cury, printCode))
-					putimage_transparent(NULL, pimg[2], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[2]));
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, '$', '$');
+					putimage_transparent(NULL, pimg[2], widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, getpixel(0, 0, pimg[2]));
+				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 				break;
 			}
 			case 4:
 			{ /* city */
 				if (isVisible(curx, cury, printCode))
-					putimage_transparent(NULL, pimg[1], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[1]));
+					putimage_transparent(NULL, pimg[1], widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, getpixel(0, 0, pimg[1]));
 				else
-					putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury, '[', ']', ' ', '#');
+					putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, getpixel(0, 0, pimg[3]));
+				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 				break;
 			}
 			}
 		}
 	}
-	putimage_transparent(NULL, pimg[5], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1), getpixel(0, 0, pimg[1]));
+	if (gameMap[coo.x][coo.y].team == 1)
+		putimage_transparent(NULL, pimg[5], widthPerBlock * (coo.y - 1) + 50, heightPerBlock * (coo.x - 1) + 50, getpixel(0, 0, pimg[1]));
 }
 
 void createRandomMap(int crtH = -1, int crtW = -1)
@@ -474,6 +476,8 @@ void copyMap(int mapid)
 			case 'C':
 				gameMap[i][j].type = 4;
 				break;
+			default:
+				gameMap[i][j].type = -1;
 			}
 		}
 	}

@@ -9,4 +9,5 @@ LocalGen-new.layout
 *.o
 *.res
 *.lgmp
+.history
 *.lgrep

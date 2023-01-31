@@ -15,7 +15,7 @@
 #define __LGMAIN_CPP__
 
 #if __cplusplus < 201300L
-	#error This program should be compiled under the C++14\
+#error This program should be compiled under the C++14\
 	standard. If you use the C++ standard under it,\
 	please use a standard greater. In G++, you can\
 	compile with option -std=c++14 or -std=gnu++14 to\
@@ -27,16 +27,14 @@
 /* dev project headers */
 #include "LocalGen-new_private.h"
 
-/* Internet base */
-#include "LGweb.hpp" // __LGWEB_HPP__
-/* test settings */
-#include "LGlib.hpp" // __LGLIB_HPP__ 
 /* console settings */
 #include "LGcons.hpp" // __LGCONS_HPP__
 /* map structs */
 #include "LGmaps.hpp" // __LGMAPS_HPP__
 /* map zipping */
 #include "LGzipmap.hpp" // __LGZIPMAP_HPP__
+/* Internet base */
+// #include "LGweb.hpp" // __LGWEB_HPP__
 /* generals robot */
 #include "LGbot.hpp" //__LGBOT__
 /* game options */
@@ -45,21 +43,14 @@
 #include "LGpages.hpp" // __LGPAGES_HPP__
 
 /*************** the main function ***************/
-
 HWND hwnd = GetConsoleWindow();
-signed main(signed argc, char** argv) {
+signed main(signed argc, char **argv)
+{
 	ShowWindow(hwnd, SW_MAXIMIZE);
 	SetConsoleTitle("Localized Generals.io v" FILE_VERSION " (Set your console window font size! Recommended:5-8)");
 	initattr();
 	initDefMap();
 	MainPage(); // start main page
-//FILE *f=fopen("zipgame.lgz","r");
-//fscanf(f,"%s",strdeGameZip);
-//fclose(f);
-//deZipGame();
-//printf("%d\n",totTurn);
-//int p=0;
-//printMap(1048575,playerCoord{1,1});
 	exitExe();	// exit program
 }
 

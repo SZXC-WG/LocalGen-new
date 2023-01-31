@@ -247,7 +247,7 @@ void Pack() {
 }
 
 signed main() {
-	puts("Çëµ÷Õû´°¿Ú×ÖÌåÖÁÊÊµ±´óĞ¡£¡");
+	puts("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½");
 	puts("CreateMap(Size L/W Tip:at most 100):");
 	scanf("%d%d", &sL, &sW);
 	rL = sL;

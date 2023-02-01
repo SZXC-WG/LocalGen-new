@@ -321,7 +321,7 @@ struct gameStatus {
 		xyprintf(910, 20, "Ranklist");
 		setcolor(BLACK);
 		setfont(17, 0, "Courier New");
-		xyprintf(910, 60, "%7s %8s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
+		xyprintf(910, 60, "%7s %9s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
 		for(int i = 1; i <= playerCnt; i++) {
 			if(isAlive[rklst[i].id])
 				setcolor(defTeams[rklst[i].id].color);
@@ -331,7 +331,7 @@ struct gameStatus {
 				xyprintf(910, 60 + i * 20, "%7s %9lld %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
 			else {
 				register int p = std::to_string(rklst[i].army * 1.0L / 1e9L).find('.');
-				xyprintf(910, 60 + i * 20, "%7s %*.*LfG %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), 9, 9 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
+				xyprintf(910, 60 + i * 20, "%7s %*.*LfG %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), 8, 8 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
 			}
 		}
 	}

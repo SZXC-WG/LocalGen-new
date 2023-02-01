@@ -11,7 +11,11 @@ ResourceIncludes=
 MakeIncludes=
 Compiler=
 CppCompiler=-O2_@@_
+<<<<<<< Updated upstream
 Linker=-lwsock32 -lgraphics64  -lgdiplus -luuid -lmsimg32 -lgdi32 -limm32 -lole32 -loleaut32 -lwinmm -mwindows_@@_
+=======
+Linker=-lwsock32_@@_
+>>>>>>> Stashed changes
 IsCpp=1
 Icon=LocalGen-new.ico
 ExeOutput=
@@ -49,18 +53,30 @@ CompilerSettings=0000000000000000000000000
 Major=1
 Minor=0
 Release=1
+<<<<<<< Updated upstream
 Build=614
 LanguageID=1033
 CharsetID=1252
 CompanyName=LocalGen-dev
 FileVersion=1.0.1.614
+=======
+Build=185
+LanguageID=1033
+CharsetID=1252
+CompanyName=LocalGen-dev
+FileVersion=1.0.1.185
+>>>>>>> Stashed changes
 FileDescription=Localized Generals.io (new ver.)
 InternalName=
 LegalCopyright=Copyright (c) 2023 LocalGen-dev
 LegalTrademarks=
 OriginalFilename=
 ProductName=Localized Generals.io (new ver.)
+<<<<<<< Updated upstream
 ProductVersion=1.0.1.614
+=======
+ProductVersion=1.0.1.185
+>>>>>>> Stashed changes
 AutoIncBuildNr=1
 SyncProduct=1
 
@@ -125,7 +141,11 @@ FileEncoding=PROJECT
 RealEncoding=ASCII
 
 [Unit6]
+<<<<<<< Updated upstream
 FileName=LGzipmap.hpp
+=======
+FileName=LGweb.hpp
+>>>>>>> Stashed changes
 CompileCpp=1
 Folder=
 Compile=1
@@ -137,7 +157,11 @@ FileEncoding=PROJECT
 RealEncoding=ASCII
 
 [Unit7]
+<<<<<<< Updated upstream
 FileName=LGmain.cpp
+=======
+FileName=LGzipmap.hpp
+>>>>>>> Stashed changes
 CompileCpp=1
 Folder=
 Compile=1
@@ -150,6 +174,7 @@ RealEncoding=ASCII
 
 [Unit8]
 FileName=LGbot.hpp
+<<<<<<< Updated upstream
 CompileCpp=1
 Folder=
 Compile=1
@@ -167,6 +192,8 @@ link_cmd_opt_strip_exe=on
 
 [Unit9]
 FileName=LGGraphics.hpp
+=======
+>>>>>>> Stashed changes
 CompileCpp=1
 Folder=
 Compile=1

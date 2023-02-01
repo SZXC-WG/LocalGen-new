@@ -413,7 +413,7 @@ struct gameStatus
 			std::deque<int> movement;
 			curTurn = 0;
 			bool gameEnd = 0;
-			for (; is_run(); delay_fps(stepDelay))
+			for (; is_run(); delay_fps(std::min(stepDelay, 30)))
 			{
 				while (mousemsg())
 				{
@@ -564,7 +564,7 @@ struct gameStatus
 				ranklist(coordinate);
 				printGameMessage();
 				setcolor(BLACK);
-				xyprintf(1450, 800, "FPS: %f", getfps());
+				// xyprintf(1450, 800, "FPS: %f", getfps());
 			}
 		}
 		return 0;

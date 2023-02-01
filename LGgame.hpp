@@ -94,27 +94,27 @@ struct gameStatus {
 	void printGameMessage() {
 		setcolor(BLACK);
 		setfont(30, 0, "Segoe UI");
-		xyprintf(1010, 330, "GameMessage");
+		xyprintf(910, 330, "Game Messages");
 		setfont(20, 0, "Segoe UI");
 		int tmp = 0;
 		for(gameMessageStore now : gameMessage) {
 			if(now.playerA == -1 && now.playerB == -1) {
 				setcolor(defTeams[winnerNum].color);
-				xyprintf(1010, 370 + 30 * tmp, "%7s", defTeams[winnerNum].name.c_str());
+				xyprintf(910, 370 + 30 * tmp, "%7s", defTeams[winnerNum].name.c_str());
 				setcolor(RED);
-				xyprintf(1080, 370 + 30 * tmp, " won the game at Round #%d", now.turnNumber);
+				xyprintf(980, 370 + 30 * tmp, " won the game at Round #%d", now.turnNumber);
 				setcolor(BLACK);
 			} else if(1 == now.playerB && now.playerA == 1)
-				xyprintf(1010, 370 + 30 * tmp, "You surrendered at Round #%d", now.turnNumber);
+				xyprintf(910, 370 + 30 * tmp, "You surrendered at Round #%d", now.turnNumber);
 			else {
 				setcolor(defTeams[now.playerA].color);
-				xyprintf(1010, 370 + 30 * tmp, "%7s", defTeams[now.playerA].name.c_str());
+				xyprintf(910, 370 + 30 * tmp, "%7s", defTeams[now.playerA].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1080, 370 + 30 * tmp, " killed ", now.turnNumber);
+				xyprintf(980, 370 + 30 * tmp, " killed ", now.turnNumber);
 				setcolor(defTeams[now.playerB].color);
-				xyprintf(1160, 370 + 30 * tmp, "%7s", defTeams[now.playerB].name.c_str());
+				xyprintf(1060, 370 + 30 * tmp, "%7s", defTeams[now.playerB].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1230, 370 + 30 * tmp, " at Round #%d", now.turnNumber);
+				xyprintf(1130, 370 + 30 * tmp, " at Round #%d", now.turnNumber);
 			}
 			tmp++;
 		}
@@ -312,17 +312,15 @@ struct gameStatus {
 				continue;
 			rklst[i].armyInHand = gameMap[coos[i].x][coos[i].y].army;
 		}
-		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b)
-		{ return a.army > b.army; });
+		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b) { return a.army > b.army; });
 		setfillcolor(WHITE);
 		bar(widthPerBlock * mapW, 0, 1700, 1000);
-		bar(0, 0, 1700, 50);
 		bar(0, heightPerBlock * mapH, 1700, 1000);
 		setfont(30, 0, "Courier New");
 		setcolor(BLUE);
 		xyprintf(910, 20, "Ranklist");
 		setcolor(BLACK);
-		setfont(18, 0, "Courier New");
+		setfont(17, 0, "Courier New");
 		xyprintf(910, 60, "%7s %8s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
 		for(int i = 1; i <= playerCnt; i++) {
 			if(isAlive[rklst[i].id])
@@ -482,11 +480,11 @@ struct gameStatus {
 						ed |= (isAlive[i] << i);
 					if(__builtin_popcount(ed) == 1) {
 						MessageBoxA(nullptr,
-						           ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
-						            "THE GAME WILL CONTINUE." + "\n" +
-						            "YOU CAN PRESS [ESC] TO EXIT.")
-						           .c_str(),
-						           "GAME END", MB_OK | MB_SYSTEMMODAL);
+						            ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
+						             "THE GAME WILL CONTINUE." + "\n" +
+						             "YOU CAN PRESS [ESC] TO EXIT.")
+						            .c_str(),
+						            "GAME END", MB_OK | MB_SYSTEMMODAL);
 						gameEnd = 1;
 						winnerNum = std::__lg(ed);
 						cheatCode = 1048575;

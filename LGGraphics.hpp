@@ -120,7 +120,7 @@ namespace LGGraphics
 	finishSelect:
 		if (select == 6)
 		{
-			setinitmode(INIT_NOBORDER | RENDER_AUTO, 0, 0);
+			setinitmode((INIT_NOBORDER | RENDER_AUTO), 0, 0);
 			movewindow(0, 0, false);
 			resizewindow(-1, -1);
 			int w = getmaxx(), h = getmaxy();

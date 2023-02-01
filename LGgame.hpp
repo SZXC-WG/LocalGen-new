@@ -359,11 +359,11 @@ struct gameStatus
 		bar(50 + widthPerBlock * mapW, 0, 1700, 1000);
 		bar(0, 0, 1700, 50);
 		bar(0, 50 + heightPerBlock * mapH, 1700, 1000);
-		setfont(30, 0, "Segue UI");
+		setfont(30, 0, "Segoe UI");
 		setcolor(BLUE);
 		xyprintf(1010, 20, "Ranklist");
 		setcolor(BLACK);
-		setfont(20, 0, "Segue UI");
+		setfont(20, 0, "Segoe UI");
 		xyprintf(1010, 60, "%7s %8s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
 		for (int i = 1; i <= playerCnt; i++)
 		{

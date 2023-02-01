@@ -469,7 +469,7 @@ namespace LGGraphics
 		int circlePos = 550;
 		PIMAGE refreshCopy = newimage();
 		getimage(refreshCopy, 0, 0, 1200, 400);
-		setfont(20, 0, "Segue UI");
+		setfont(20, 0, "Segoe UI");
 		setcolor(BLUE);
 		bool changeMade = true;
 		int mouseDownCount = 0;
@@ -526,7 +526,7 @@ namespace LGGraphics
 				rectangle(900, 30, 1100, 105);
 				setfont(70, 0, "Freestyle Script");
 				rectprintf(900, 30, 200, 75, "Start Game!");
-				setfont(20, 0, "Segue UI");
+				setfont(20, 0, "Segoe UI");
 				if (stDel != 0)
 					xyprintf(405, 975, "Speed Now: %d", stDel);
 				else

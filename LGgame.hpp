@@ -37,12 +37,10 @@ using namespace std::literals;
 // Graphics header
 #include "LGGraphics.hpp"
 
-struct movementS
-{
+struct movementS {
 	int id, op;
 	long long turn;
-	void clear()
-	{
+	void clear() {
 		id = turn = op = 0;
 	}
 };
@@ -84,8 +82,7 @@ struct gameStatus {
 	// destructor
 	~gameStatus() = default;
 
-	struct gameMessageStore
-	{
+	struct gameMessageStore {
 		int playerA, playerB;
 		int turnNumber;
 	};
@@ -96,44 +93,40 @@ struct gameStatus {
 <<<<<<< Updated upstream
 	int gameMesC;
 
-	void printGameMessage()
-	{
+	void printGameMessage() {
 		setcolor(BLACK);
-		setfont(30, 0, "Comics Sans MS");
-		xyprintf(1010, 330, "GameMessage");
-		setfont(20, 0, "Comics Sans MS");
+		setfont(30, 0, "Segoe UI");
+		xyprintf(910, 330, "Game Messages");
+		setfont(20, 0, "Segoe UI");
 		int tmp = 0;
-		for (gameMessageStore now : gameMessage)
-		{
-			if (now.playerA == -1 && now.playerB == -1)
-			{
+		for(gameMessageStore now : gameMessage) {
+			if(now.playerA == -1 && now.playerB == -1) {
 				setcolor(defTeams[winnerNum].color);
-				xyprintf(1010, 370 + 30 * tmp, "%7s", defTeams[winnerNum].name.c_str());
+				xyprintf(910, 370 + 30 * tmp, "%7s", defTeams[winnerNum].name.c_str());
 				setcolor(RED);
-				xyprintf(1080, 370 + 30 * tmp, " won the game at Round #%d", now.turnNumber);
+				xyprintf(980, 370 + 30 * tmp, " won the game at Round #%d", now.turnNumber);
 				setcolor(BLACK);
-			}
-			else if (1 == now.playerB && now.playerA == 1)
-			{
-				xyprintf(1010, 370 + 30 * tmp, "You surrendered at Round #%d", now.turnNumber);
-			}
-			else
-			{
+			} else if(1 == now.playerB && now.playerA == 1)
+				xyprintf(910, 370 + 30 * tmp, "You surrendered at Round #%d", now.turnNumber);
+			else {
 				setcolor(defTeams[now.playerA].color);
-				xyprintf(1010, 370 + 30 * tmp, "%7s", defTeams[now.playerA].name.c_str());
+				xyprintf(910, 370 + 30 * tmp, "%7s", defTeams[now.playerA].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1080, 370 + 30 * tmp, " killed ", now.turnNumber);
+				xyprintf(980, 370 + 30 * tmp, " killed ", now.turnNumber);
 				setcolor(defTeams[now.playerB].color);
-				xyprintf(1160, 370 + 30 * tmp, "%7s", defTeams[now.playerB].name.c_str());
+				xyprintf(1060, 370 + 30 * tmp, "%7s", defTeams[now.playerB].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1230, 370 + 30 * tmp, " at Round #%d", now.turnNumber);
+				xyprintf(1130, 370 + 30 * tmp, " at Round #%d", now.turnNumber);
 			}
 			tmp++;
 		}
 	}
 
+<<<<<<< HEAD
 	void updateMap()
 	{
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 =======
 	struct gMes {
 		int turn,plId;
@@ -171,13 +164,19 @@ struct gameStatus {
 		fflush(stdout);
 	}
 	
+<<<<<<< HEAD
 	void updateMap() {
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+	void updateMap() {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 		++curTurn;
 		for(int i = 1; i <= mapH; ++i) {
 			for(int j = 1; j <= mapW; ++j) {
 				if(gameMap[i][j].team == 0)
 					continue;
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 				switch (gameMap[i][j].type)
 				{
@@ -221,15 +220,57 @@ struct gameStatus {
 					}
 					case 2:	   /* mountain */
 						break; /* ??? */
+=======
+				switch(gameMap[i][j].type) {
+<<<<<<< Updated upstream
+					case 0: {
+						/* plain */
+=======
+					case 0: { /* plain */
+>>>>>>> Stashed changes
+						if(curTurn % 25 == 0)
+							++gameMap[i][j].army;
+						break;
+					}
+<<<<<<< Updated upstream
+					case 1: {
+						/* swamp */
+=======
+					case 1: { /* swamp */
+>>>>>>> Stashed changes
+						if(gameMap[i][j].army > 0)
+							if(!(--gameMap[i][j].army))
+								gameMap[i][j].team = 0;
+						break;
+					}
+					case 2:	   /* mountain */
+						break; /* ??? */
+<<<<<<< Updated upstream
+					case 3: {
+						/* general */
+						++gameMap[i][j].army;
+						break;
+					}
+					case 4: {
+						/* city */
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 					case 3: {   /* general */
 						++gameMap[i][j].army;
 						break;
 					}
 					case 4: { /* city */
+<<<<<<< HEAD
 						++gameMap[i][j].army;
 						break;
 					}
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+						++gameMap[i][j].army;
+						break;
+					}
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 				}
 			}
 		}
@@ -246,13 +287,31 @@ struct gameStatus {
 		while(gens.size() < playerCnt) {
 			std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
 			int x, y;
+<<<<<<< HEAD
 			do x = p() % mapH + 1, y = p() % mapW + 1;
+=======
+<<<<<<< Updated upstream
+			do
+				x = p() % mapH + 1, y = p() % mapW + 1;
+=======
+			do x = p() % mapH + 1, y = p() % mapW + 1;
+>>>>>>> Stashed changes
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 			while(gameMap[x][y].type != 0);
 			gens.push_back(playerCoord{x, y});
 			gameMap[x][y].type = 3;
 			gameMap[x][y].army = 0;
 		}
+<<<<<<< HEAD
 		sort(gens.begin(), gens.end(), [](playerCoord a, playerCoord b){ return a.x == b.x ? a.y < b.y : a.x < b.x; });
+=======
+<<<<<<< Updated upstream
+		sort(gens.begin(), gens.end(), [](playerCoord a, playerCoord b)
+		{ return a.x == b.x ? a.y < b.y : a.x < b.x; });
+=======
+		sort(gens.begin(), gens.end(), [](playerCoord a, playerCoord b){ return a.x == b.x ? a.y < b.y : a.x < b.x; });
+>>>>>>> Stashed changes
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 		std::shuffle(gens.begin(), gens.end(), std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
 		for(int i = 1; i <= playerCnt; ++i) {
 			coos[i] = genCoo[i] = gens[i - 1];
@@ -265,6 +324,7 @@ struct gameStatus {
 					gameMap[i][j].type = 0;
 	}
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 	void kill(int p1, int p2)
 	{
@@ -272,6 +332,13 @@ struct gameStatus {
 			MessageBox(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
 =======
 	void kill(int p1, int p2) {
+=======
+	void kill(int p1, int p2) {
+<<<<<<< Updated upstream
+		if(p2 == 1)
+			MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 		if(p2 == 1) MessageBox(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK);
 >>>>>>> Stashed changes
 		isAlive[p2] = 0;
@@ -352,6 +419,7 @@ struct gameStatus {
 			moveS cur = inlineMove.front();
 			inlineMove.pop_front();
 			if(!isAlive[cur.id])
+<<<<<<< HEAD
 				continue;
 			if(gameMap[cur.from.x][cur.from.y].team != cur.id)
 				continue;
@@ -363,6 +431,18 @@ struct gameStatus {
 =======
 			if(gameMap[cur.to.x][cur.to.y].team == cur.id) {
 >>>>>>> Stashed changes
+=======
+<<<<<<< Updated upstream
+				continue;
+			if(gameMap[cur.from.x][cur.from.y].team != cur.id)
+				continue;
+=======
+				continue;
+			if(gameMap[cur.from.x][cur.from.y].team != cur.id)
+				continue;
+>>>>>>> Stashed changes
+			if(gameMap[cur.to.x][cur.to.y].team == cur.id) {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 				gameMap[cur.to.x][cur.to.y].army += gameMap[cur.from.x][cur.from.y].army - 1;
 				gameMap[cur.from.x][cur.from.y].army = 1;
 			} else {
@@ -373,8 +453,13 @@ struct gameStatus {
 					int p = gameMap[cur.to.x][cur.to.y].team;
 					gameMap[cur.to.x][cur.to.y].team = cur.id;
 <<<<<<< Updated upstream
+<<<<<<< HEAD
 					if (gameMap[cur.to.x][cur.to.y].type == 3)
 					{ /* general */
+=======
+					if(gameMap[cur.to.x][cur.to.y].type == 3) {
+						/* general */
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 =======
 					if(gameMap[cur.to.x][cur.to.y].type == 3) { /* general */
 >>>>>>> Stashed changes
@@ -424,29 +509,49 @@ struct gameStatus {
 			rklst[i].armyInHand = gameMap[coos[i].x][coos[i].y].army;
 		}
 <<<<<<< Updated upstream
+<<<<<<< HEAD
 		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b)
 				  { return a.army > b.army; });
+=======
+		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b) { return a.army > b.army; });
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 		setfillcolor(WHITE);
-		bar(50 + widthPerBlock * mapW, 0, 1700, 1000);
-		bar(0, 0, 1700, 50);
-		bar(0, 50 + heightPerBlock * mapH, 1700, 1000);
-		setfont(30, 0, "Segue UI");
+		bar(widthPerBlock * mapW, 0, 1700, 1000);
+		bar(0, heightPerBlock * mapH, 1700, 1000);
+		setfont(30, 0, "Courier New");
 		setcolor(BLUE);
-		xyprintf(1010, 20, "Ranklist");
+		xyprintf(910, 20, "Ranklist");
 		setcolor(BLACK);
-		setfont(20, 0, "Segue UI");
-		xyprintf(1010, 60, "%7s %8s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
-		for (int i = 1; i <= playerCnt; i++)
-		{
-			if (isAlive[rklst[i].id])
+		setfont(17, 0, "Courier New");
+		xyprintf(910, 60, "%7s %8s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
+		for(int i = 1; i <= playerCnt; i++) {
+			if(isAlive[rklst[i].id])
 				setcolor(defTeams[rklst[i].id].color);
 			else
 				setcolor(BLACK);
-			if (rklst[i].army < 1000000000)
-			{
-				xyprintf(1010, 60 + i * 20, "%7s %8lld %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
-			}
+			if(rklst[i].army < 1000000000)
+				xyprintf(910, 60 + i * 20, "%7s %8lld %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
+=======
+		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b){ return a.army > b.army; });
+		setfcolor(0xffffff);
+		underline();
+		printf("|     R      A      N      K      L      I      S      T     |");
+		resetattr();
+//		setfcolor(0x000000);
+		putchar('|');
+		putchar('\n');
+		setfcolor(0xffffff);
+		underline();
+		printf("| %7s | %8s | %5s | %5s | %5s | %13s |", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
+		resetattr();
+//		setfcolor(0x000000);
+		putchar('|');
+		putchar('\n');
+		for(int i = 1; i <= playerCnt; ++i) {
+			if(isAlive[rklst[i].id])
+				setfcolor(defTeams[rklst[i].id].color);
 			else
+<<<<<<< HEAD
 			{
 =======
 		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b){ return a.army > b.army; });
@@ -468,15 +573,22 @@ struct gameStatus {
 			if(isAlive[rklst[i].id])
 				setfcolor(defTeams[rklst[i].id].color);
 			else
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 				setfcolor(defTeams[10].color);
 			underline();
 			printf("| %7s | ", defTeams[rklst[i].id].name.c_str());
 			if(rklst[i].army < 100000000)
 				printf("%8lld | ", rklst[i].army);
+<<<<<<< HEAD
 			else {
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+			else {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 				register int p = std::to_string(rklst[i].army * 1.0L / 1e9L).find('.');
-				xyprintf(1010, 60 + i * 20, "%7s %*.*LfG %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
+				xyprintf(910, 60 + i * 20, "%7s %*.*LfG %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
 			}
 <<<<<<< Updated upstream
 =======
@@ -490,17 +602,27 @@ struct gameStatus {
 	}
 
 	// main
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 	int operator()()
 	{
 		if (played)
+=======
+	int operator()() {
+<<<<<<< Updated upstream
+		if(played)
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 			return -1;
 		cleardevice();
 		LGGraphics::inputMapData(min(900 / mapH, 900 / mapW), min(900 / mapH, 900 / mapW), mapH, mapW);
 		LGGraphics::init();
 		// printf("%f\n", getfps());
+=======
+		if(played) return -1;
+>>>>>>> Stashed changes
 		played = 1;
 		gameMesC = 0;
+<<<<<<< HEAD
 		if (!isWeb)
 		{
 =======
@@ -510,6 +632,9 @@ struct gameStatus {
 		gameMesC = 0;
 		if(!isWeb) {
 >>>>>>> Stashed changes
+=======
+		if(!isWeb) {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 			int robotId[64];
 			playerCoord coordinate[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
@@ -529,73 +654,40 @@ struct gameStatus {
 			curTurn = 0;
 			bool gameEnd = 0;
 <<<<<<< Updated upstream
+<<<<<<< HEAD
 			for (; is_run(); delay_fps(stepDelay))
 			{
 				while (mousemsg())
 				{
+=======
+			for(; is_run(); delay_fps(stepDelay)) {
+				while(mousemsg()) {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 					mouse_msg msg = getmouse();
-					if (msg.is_down() && msg.is_left() && msg.x >= 50 && msg.y >= 50 && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH)
-					{
+					if(msg.is_down() && msg.is_left() && msg.x >= 50 && msg.y >= 50 && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH) {
 						int lin = (msg.y - 50 + heightPerBlock - 1) / heightPerBlock;
 						int col = (msg.x - 50 + widthPerBlock - 1) / widthPerBlock;
 						coordinate[1] = {lin, col};
 						movement.clear();
 					}
 				}
-				while (kbmsg())
-				{
+				while(kbmsg()) {
 					key_msg ch = getkey();
-					switch (ch.key)
-					{
-					case int(' '):
-						while (!kbmsg() || (getkey().key != ' '))
-							;
-					case int('c'):
-						clearance();
-						break;
-					case int('w'):
-						movement.emplace_back(1);
-						break;
-					case int('a'):
-						movement.emplace_back(2);
-						break;
-					case int('s'):
-						movement.emplace_back(3);
-						break;
-					case int('d'):
-						movement.emplace_back(4);
-						break;
-
-					case key_up: /*[UP]*/
-						movement.emplace_back(5);
-						break;
-					case key_left: /*[LEFT]*/
-						movement.emplace_back(6);
-						break;
-					case key_down: /*[DOWN]*/
-						movement.emplace_back(7);
-						break;
-					case key_right: /*[RIGHT]*/
-						movement.emplace_back(8);
-						break;
-
-					case int('g'):
-						movement.emplace_back(0);
-						break;
-					case int('e'):
-						if (!movement.empty())
-							movement.pop_back();
-						break;
-					case int('q'):
-						movement.clear();
-						break;
-					case 27:
-						MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
-						return 0;
-					case int('\b'):
-					{
-						if (!isAlive[1])
+					switch(ch.key) {
+						case int(' '):
+							while(!kbmsg() || (getkey().key != ' '))
+								;
+=======
+			std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
+			while(1) {
+				if(_kbhit()) {
+					int ch = _getch();
+					switch(ch = tolower(ch)) {
+						case int(' '):
+							while(_getch() != ' ')
+								;
 							break;
+<<<<<<< HEAD
 						int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
 						if (confirmSur == 7)
 =======
@@ -613,6 +705,52 @@ struct gameStatus {
 							break;
 						case int('w'):
 							movement.emplace_back(1);
+=======
+>>>>>>> Stashed changes
+						case int('c'):
+							clearance();
+							break;
+						case int('w'):
+							movement.emplace_back(1);
+<<<<<<< Updated upstream
+							break;
+						case int('a'):
+							movement.emplace_back(2);
+							break;
+						case int('s'):
+							movement.emplace_back(3);
+							break;
+						case int('d'):
+							movement.emplace_back(4);
+							break;
+
+						case key_up: /*[UP]*/
+							movement.emplace_back(5);
+							break;
+						case key_left: /*[LEFT]*/
+							movement.emplace_back(6);
+							break;
+						case key_down: /*[DOWN]*/
+							movement.emplace_back(7);
+							break;
+						case key_right: /*[RIGHT]*/
+							movement.emplace_back(8);
+							break;
+
+						case int('g'):
+							movement.emplace_back(0);
+							break;
+						case int('e'):
+							if(!movement.empty())
+								movement.pop_back();
+							break;
+						case int('q'):
+							movement.clear();
+							break;
+						case 27:
+							MessageBoxA(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 							break;
 						case int('a'):
 							movement.emplace_back(2);
@@ -647,18 +785,33 @@ struct gameStatus {
 						case int('e'):
 							if(!movement.empty())
 								movement.pop_back();
+<<<<<<< HEAD
 >>>>>>> Stashed changes
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 							break;
 						case int('q'):
 							movement.clear();
 							break;
 						case 27:
 							MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK);
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 							return 0;
 						case int('\b'): {
 							if(!isAlive[1])
 								break;
+<<<<<<< HEAD
 							int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO);
+=======
+<<<<<<< Updated upstream
+							int confirmSur = MessageBoxA(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
+=======
+							int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO);
+>>>>>>> Stashed changes
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 							if(confirmSur == 7)
 								break;
 							isAlive[1] = 0;
@@ -671,6 +824,12 @@ struct gameStatus {
 									}
 								}
 							}
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+							gameMessage.push_back({1, 1, curTurn});
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 							++gameMesC;
 							gotoxy(mapH + 2 + gameMesC, 65);
 							setfcolor(0xffffff);
@@ -680,6 +839,7 @@ struct gameStatus {
 							setfcolor(0xffffff);
 							printf(" SURRENDERED AT TURN %d.", curTurn);
 							fflush(stdout);
+<<<<<<< HEAD
 							break;
 						}
 <<<<<<< Updated upstream
@@ -691,6 +851,15 @@ struct gameStatus {
 =======
 					}
 				}
+=======
+>>>>>>> Stashed changes
+							break;
+						}
+					}
+				}
+<<<<<<< Updated upstream
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 				if(std::chrono::steady_clock::now().time_since_epoch() - lPT < std::chrono::milliseconds(stepDelay))
 					continue;
 >>>>>>> Stashed changes
@@ -718,21 +887,34 @@ struct gameStatus {
 				}
 				flushMove();
 <<<<<<< Updated upstream
+<<<<<<< HEAD
 				if (cheatCode != 1048575)
 				{
+=======
+				if(cheatCode != 1048575) {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 					int alldead = 0;
-					for (int i = 1; i <= playerCnt && !alldead; ++i)
-					{
-						if (cheatCode & (1 << i))
-							if (isAlive[i])
+					for(int i = 1; i <= playerCnt && !alldead; ++i) {
+						if(cheatCode & (1 << i))
+							if(isAlive[i])
 								alldead = 1;
 					}
-					if (!alldead)
-					{
+					if(!alldead) {
 						cheatCode = 1048575;
-						MessageBox(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
+						MessageBoxA(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
+=======
+				if(cheatCode!=1048575) {
+					int alldead = 0;
+					for(int i=1; i<=playerCnt&&!alldead; ++i) {
+						if(cheatCode&(1<<i)) if(isAlive[i]) alldead=1;
+					}
+					if(!alldead) {
+						cheatCode=1048575;
+						MessageBox(nullptr,"ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.","TIP",MB_OK);
+>>>>>>> Stashed changes
 					}
 				}
+<<<<<<< HEAD
 				if (!gameEnd)
 				{
 =======
@@ -748,10 +930,14 @@ struct gameStatus {
 				}
 				if(!gameEnd) {
 >>>>>>> Stashed changes
+=======
+				if(!gameEnd) {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 					int ed = 0;
 					for(int i = 1; i <= playerCnt; ++i)
 						ed |= (isAlive[i] << i);
 					if(__builtin_popcount(ed) == 1) {
+<<<<<<< HEAD
 						MessageBox(nullptr,
 <<<<<<< Updated upstream
 								   ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
@@ -760,6 +946,17 @@ struct gameStatus {
 									   .c_str(),
 								   "GAME END", MB_OK | MB_SYSTEMMODAL);
 =======
+=======
+<<<<<<< Updated upstream
+						MessageBoxA(nullptr,
+						            ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
+						             "THE GAME WILL CONTINUE." + "\n" +
+						             "YOU CAN PRESS [ESC] TO EXIT.")
+						            .c_str(),
+						            "GAME END", MB_OK | MB_SYSTEMMODAL);
+=======
+						MessageBox(nullptr,
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 						           ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
 						            "THE GAME WILL CONTINUE." + "\n" +
 						            "YOU CAN PRESS [ESC] TO EXIT.")
@@ -788,15 +985,23 @@ struct gameStatus {
 	}
 };
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 int GAME(bool isWeb, int cheatCode, int plCnt, int stDel)
 {
+=======
+int GAME(bool isWeb, int cheatCode, int plCnt, int stDel) {
+<<<<<<< Updated upstream
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 	// setvbuf(stdout, nullptr, _IOFBF, 5000000);
 	//  hideCursor();
 	//  clearance();
 	//  gotoxy(1, 1);
 =======
+<<<<<<< HEAD
 int GAME(bool isWeb, int cheatCode, int plCnt, int stDel) {
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 	setvbuf(stdout, nullptr, _IOFBF, 5000000);
 	hideCursor();
 	clearance();

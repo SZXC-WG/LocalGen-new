@@ -12,7 +12,11 @@ MakeIncludes=
 Compiler=
 CppCompiler=-O2_@@_
 <<<<<<< Updated upstream
+<<<<<<< HEAD
 Linker=-lwsock32 -lgraphics64  -lgdiplus -luuid -lmsimg32 -lgdi32 -limm32 -lole32 -loleaut32 -lwinmm -mwindows_@@_
+=======
+Linker=-lwsock32 -lgraphics64  -lgdiplus -luuid -lmsimg32 -lgdi32 -limm32 -lole32 -loleaut32 -lwinmm_@@_
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 =======
 Linker=-lwsock32_@@_
 >>>>>>> Stashed changes
@@ -50,8 +54,9 @@ UseUTF8=0
 CompilerSettings=0000000000000000000000000
 
 [VersionInfo]
-Major=1
+Major=2
 Minor=0
+<<<<<<< HEAD
 Release=1
 <<<<<<< Updated upstream
 Build=614
@@ -60,6 +65,17 @@ CharsetID=1252
 CompanyName=LocalGen-dev
 FileVersion=1.0.1.614
 =======
+=======
+<<<<<<< Updated upstream
+Release=0
+Build=615
+LanguageID=1033
+CharsetID=1252
+CompanyName=LocalGen-dev
+FileVersion=2.0.0.615
+=======
+Release=1
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 Build=185
 LanguageID=1033
 CharsetID=1252
@@ -73,7 +89,11 @@ LegalTrademarks=
 OriginalFilename=
 ProductName=Localized Generals.io (new ver.)
 <<<<<<< Updated upstream
+<<<<<<< HEAD
 ProductVersion=1.0.1.614
+=======
+ProductVersion=2.0.0.615
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 =======
 ProductVersion=1.0.1.185
 >>>>>>> Stashed changes

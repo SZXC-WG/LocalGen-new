@@ -11,8 +11,13 @@ A ICON "LocalGen-new.ico"
 //
 1 VERSIONINFO
 <<<<<<< Updated upstream
+<<<<<<< HEAD
 FILEVERSION 1,0,1,614
 PRODUCTVERSION 1,0,1,614
+=======
+FILEVERSION 1,0,1,615
+PRODUCTVERSION 1,0,1,615
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 =======
 FILEVERSION 1,0,1,185
 PRODUCTVERSION 1,0,1,185
@@ -25,7 +30,11 @@ FILETYPE VFT_APP
     {
       VALUE "CompanyName", "LocalGen-dev"
 <<<<<<< Updated upstream
+<<<<<<< HEAD
       VALUE "FileVersion", "1.0.1.614"
+=======
+      VALUE "FileVersion", "1.0.1.615"
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 =======
       VALUE "FileVersion", "1.0.1.185"
 >>>>>>> Stashed changes
@@ -36,7 +45,11 @@ FILETYPE VFT_APP
       VALUE "OriginalFilename", ""
       VALUE "ProductName", "Localized Generals.io (new ver.)"
 <<<<<<< Updated upstream
+<<<<<<< HEAD
       VALUE "ProductVersion", "1.0.1.614"
+=======
+      VALUE "ProductVersion", "1.0.1.615"
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 =======
       VALUE "ProductVersion", "1.0.1.185"
 >>>>>>> Stashed changes

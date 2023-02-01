@@ -28,8 +28,7 @@ using std::to_string;
 
 <<<<<<< Updated upstream
 PIMAGE pimg[6];
-struct MapInfoS
-{
+struct MapInfoS {
 	int id;
 	string chiname;
 	string engname;
@@ -46,11 +45,17 @@ struct MapInfoS
 };
 MapInfoS maps[205];
 
+<<<<<<< HEAD
 struct Block
 {
 =======
 struct Block {
 >>>>>>> Stashed changes
+=======
+=======
+>>>>>>> Stashed changes
+struct Block {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 	int team; /* the team who holds this block */
 	int type; /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
 	ll army;  /* count of army on this block */
@@ -87,6 +92,7 @@ struct playerCoord {
 };
 
 const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 bool isVisible(int x, int y, int printCode)
 {
@@ -95,6 +101,10 @@ bool isVisible(int x, int y, int printCode)
 bool isVisible(int x, int y, int printCode) {
 	if(gameMap[x][y].lit)
 >>>>>>> Stashed changes
+=======
+bool isVisible(int x, int y, int printCode) {
+	if(gameMap[x][y].lit)
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 		return true;
 	for(int i = -1; i <= 1; ++i)
 		for(int j = -1; j <= 1; ++j)
@@ -103,113 +113,97 @@ bool isVisible(int x, int y, int printCode) {
 	return false;
 }
 <<<<<<< Updated upstream
+<<<<<<< HEAD
 void printNum(bool visible, long long army, int team, int curx, int cury)
 {
 	if (!visible)
+=======
+void printNum(bool visible, long long army, int team, int curx, int cury) {
+	if(!visible)
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 		return;
-	if (visible)
-	{
-		if (army < 0)
-		{
+	if(visible) {
+		if(army < 0) {
 			register long long absd = -army;
-			if (absd < 100)
-			{
-				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%lld", absd);
-			}
-			else if (absd < (ll)(1e13))
-			{
+			if(absd < 100)
+				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%lld", absd);
+			else if(absd < (ll)(1e13)) {
 				string p = to_string(army);
-				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-			}
-			else
-			{
-				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "-MX");
-			}
-		}
-		else if (army == 0)
-		{
-			if (gameMap[curx][cury].type != 0 && gameMap[curx][cury].type != 1)
-				xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "0");
-		}
-		else if (army < 1000)
-		{
-			xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%lld", army);
-		}
-		else if (army < (ll)(1e14))
-		{
+				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+			} else
+				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "-MX");
+		} else if(army == 0) {
+			if(gameMap[curx][cury].type != 0 && gameMap[curx][cury].type != 1)
+				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "0");
+		} else if(army < 1000)
+			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%lld", army);
+		else if(army < (ll)(1e14)) {
 			string p = to_string(army);
-			xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-		}
-		else
-		{
-			xyprintf(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, "MAX");
-		}
+			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+		} else
+			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "MAX");
 	}
 }
 
-void printMap(int printCode, playerCoord coo)
-{
+void printMap(int printCode, playerCoord coo) {
 	setcolor(WHITE);
-	setfont((heightPerBlock + 2) / 3 * 2 - 1, 0, "Segue UI");
+	setfont((heightPerBlock + 2) / 3 * 2 - 1, 0, "Segoe UI");
 	// settextjustify(CENTER_TEXT, CENTER_TEXT);
-	for (int curx = 1; curx <= mapH; curx++)
-	{
-		for (int cury = 1; cury <= mapW; cury++)
-		{
-			if (isVisible(curx, cury, printCode))
-			{
-				if (gameMap[curx][cury].team == 0)
-				{
+	for(int curx = 1; curx <= mapH; curx++) {
+		for(int cury = 1; cury <= mapW; cury++) {
+			if(isVisible(curx, cury, printCode)) {
+				if(gameMap[curx][cury].team == 0) {
 					setfillcolor(LIGHTGRAY);
-					if (gameMap[curx][cury].type == 1)
+					if(gameMap[curx][cury].type == 1)
 						setfillcolor(DARKGRAY);
-					if (gameMap[curx][cury].type == 4)
+					if(gameMap[curx][cury].type == 4)
 						setfillcolor(DARKGRAY);
-				}
-				else
+				} else
 					setfillcolor(defTeams[gameMap[curx][cury].team].color);
-			}
-			else
+			} else
 				setfillcolor(DARKGRAY);
-			bar(widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, widthPerBlock * cury + 50, heightPerBlock * curx + 50);
-			switch (gameMap[curx][cury].type)
-			{
-			case 0:
-			{ /* plain */
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
-				break;
-			}
-			case 1:
-			{ /* swamp */
-				putimage_transparent(NULL, pimg[4], widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, getpixel(0, 0, pimg[4]));
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
-				break;
-			}
-			case 2:
-			{ /* mountain */
-				putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, getpixel(0, 0, pimg[3]));
-				break;
-			}
-			case 3:
-			{ /* general */
-				if (isVisible(curx, cury, printCode))
-					putimage_transparent(NULL, pimg[2], widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, getpixel(0, 0, pimg[2]));
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
-				break;
-			}
-			case 4:
-			{ /* city */
-				if (isVisible(curx, cury, printCode))
-					putimage_transparent(NULL, pimg[1], widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, getpixel(0, 0, pimg[1]));
-				else
-					putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1) + 50, heightPerBlock * (curx - 1) + 50, getpixel(0, 0, pimg[3]));
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
-				break;
-			}
+			bar(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock * cury, heightPerBlock * curx);
+			switch(gameMap[curx][cury].type) {
+				case 0: {
+					/* plain */
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					break;
+				}
+				case 1: {
+					/* swamp */
+					putimage_transparent(NULL, pimg[4], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[4]));
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					break;
+				}
+				case 2: {
+					/* mountain */
+					putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
+					break;
+				}
+				case 3: {
+					/* general */
+					if(isVisible(curx, cury, printCode))
+						putimage_transparent(NULL, pimg[2], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[2]));
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					break;
+				}
+				case 4: {
+					/* city */
+					if(isVisible(curx, cury, printCode))
+						putimage_transparent(NULL, pimg[1], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[1]));
+					else
+						putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					break;
+				}
 			}
 		}
 	}
+<<<<<<< HEAD
 	putimage_transparent(NULL, pimg[5], widthPerBlock * (coo.y - 1) + 50, heightPerBlock * (coo.x - 1) + 50, getpixel(0, 0, pimg[1]));
+=======
+	putimage_transparent(NULL, pimg[5], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1), getpixel(0, 0, pimg[1]));
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 =======
 void printNum(bool visible, long long army, int team, char lchar, char rchar, char mchar=' ', char repchar=' ') {
 	if(visible) {
@@ -319,16 +313,22 @@ void createRandomMap(int crtH = -1, int crtW = -1) {
 	for(i = 1; i <= mapH; i++)
 		for(j = 1; j <= mapW; j++) {
 			int x = 0, f;
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 			if (i - 2 > 0 && gameMap[i - 2][j].type == 2)
+=======
+			if(i - 2 > 0 && gameMap[i - 2][j].type == 2)
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 				x = 1;
-			if (j - 2 > 0 && gameMap[i][j - 2].type == 2)
+			if(j - 2 > 0 && gameMap[i][j - 2].type == 2)
 				x = 1;
-			if (i - 2 > 0 && j + 2 <= mapW && gameMap[i - 2][j + 2].type == 2)
+			if(i - 2 > 0 && j + 2 <= mapW && gameMap[i - 2][j + 2].type == 2)
 				x = 1;
-			if (i - 2 > 0 && j - 2 > 0 && gameMap[i - 2][j - 2].type == 2)
+			if(i - 2 > 0 && j - 2 > 0 && gameMap[i - 2][j - 2].type == 2)
 				x = 1;
+<<<<<<< Updated upstream
 			gameMap[i][j].lit = (mtrd() % 114514 == 1);
+<<<<<<< HEAD
 			if (x)
 			{
 =======
@@ -343,6 +343,12 @@ void createRandomMap(int crtH = -1, int crtW = -1) {
 			gameMap[i][j].lit=(mtrd()%114514==1);
 			if(x) {
 >>>>>>> Stashed changes
+=======
+=======
+			gameMap[i][j].lit=(mtrd()%114514==1);
+>>>>>>> Stashed changes
+			if(x) {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 				f = mtrd() % 4;
 				if(f < 2) {
 					gameMap[i][j].type = f;
@@ -366,18 +372,28 @@ void createRandomMap(int crtH = -1, int crtW = -1) {
 			}
 		}
 }
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 void createStandardMap(int crtH = -1, int crtW = -1)
 {
+=======
+void createStandardMap(int crtH = -1, int crtW = -1) {
+<<<<<<< Updated upstream
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 	// 7/8 mountain 1/2 swamp 9 plain 1 city 1 general
 	// 1/2 swamp 16/17 plain 1 city 1 general
+=======
+	//7/8 mountain 1/2 swamp 9 plain 1 city 1 general
+	//1/2 swamp 16/17 plain 1 city 1 general
+>>>>>>> Stashed changes
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	register int i, j;
 
-	if (crtH < 0)
+	if(crtH < 0)
 		mapH = mtrd() % 50 + 1;
 	else
 		mapH = crtH;
+<<<<<<< HEAD
 	if (crtW < 0)
 =======
 void createStandardMap(int crtH = -1, int crtW = -1) {
@@ -392,58 +408,89 @@ void createStandardMap(int crtH = -1, int crtW = -1) {
 		mapH = crtH;
 	if(crtW < 0)
 >>>>>>> Stashed changes
+=======
+	if(crtW < 0)
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 		mapW = mtrd() % 50 + 1;
 	else
 		mapW = crtW;
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 	for (i = 1; i <= mapH; i++)
 		for (j = 1; j <= mapW; j++)
 		{
+=======
+	for(i = 1; i <= mapH; i++)
+		for(j = 1; j <= mapW; j++) {
+<<<<<<< Updated upstream
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 			int x1 = 0, x2 = 0, f;
-			if (i - 2 > 0 && gameMap[i - 2][j].type == 2)
+=======
+			int x1 = 0, x2=0, f;
+>>>>>>> Stashed changes
+			if(i - 2 > 0 && gameMap[i - 2][j].type == 2)
 				x1 = 1;
-			if (j - 2 > 0 && gameMap[i][j - 2].type == 2)
+			if(j - 2 > 0 && gameMap[i][j - 2].type == 2)
 				x1 = 1;
-			if (i - 2 > 0 && j + 2 <= mapW && gameMap[i - 2][j + 2].type == 2)
+			if(i - 2 > 0 && j + 2 <= mapW && gameMap[i - 2][j + 2].type == 2)
 				x1 = 1;
-			if (i - 2 > 0 && j - 2 > 0 && gameMap[i - 2][j - 2].type == 2)
+			if(i - 2 > 0 && j - 2 > 0 && gameMap[i - 2][j - 2].type == 2)
 				x1 = 1;
-			if (i - 1 > 0 && gameMap[i - 1][j].type == 1)
+<<<<<<< Updated upstream
+			if(i - 1 > 0 && gameMap[i - 1][j].type == 1)
 				x2 = 1;
-			if (j - 1 > 0 && gameMap[i][j - 1].type == 1)
+			if(j - 1 > 0 && gameMap[i][j - 1].type == 1)
 				x2 = 1;
 
 			gameMap[i][j].army = 0;
 			gameMap[i][j].lit = 0;
 			f = mtrd() % 20;
 
-			if (!x1)
-			{
-				if (f < 8 - x2)
+			if(!x1) {
+				if(f < 8 - x2)
 					gameMap[i][j].type = 2;
-				else if (f < 9)
+				else if(f < 9)
 					gameMap[i][j].type = 1;
-				else if (f < 18)
+				else if(f < 18)
 					gameMap[i][j].type = 0;
-				else if (f < 19)
+				else if(f < 19)
 					gameMap[i][j].type = 3;
 				else
 					gameMap[i][j].type = 4, gameMap[i][j].army = 40;
-			}
-			else
-			{
-				if (f < 1 + x2)
+			} else {
+				if(f < 1 + x2)
 					gameMap[i][j].type = 1;
-				else if (f < 18)
+				else if(f < 18)
 					gameMap[i][j].type = 0;
-				else if (f < 19)
+				else if(f < 19)
 					gameMap[i][j].type = 3;
 				else
 					gameMap[i][j].type = 4, gameMap[i][j].army = 40;
+=======
+			if(i-1>0&&gameMap[i-1][j].type==1) x2=1;
+			if(j-1>0&&gameMap[i][j-1].type==1) x2=1;
+			
+			gameMap[i][j].army=0;
+			gameMap[i][j].lit=0;
+			f=mtrd()%20;
+			
+			if(!x1){
+				if(f<8-x2) gameMap[i][j].type=2;
+				else if(f<9) gameMap[i][j].type=1;
+				else if(f<18) gameMap[i][j].type=0;
+				else if(f<19) gameMap[i][j].type=3;
+				else gameMap[i][j].type=4,gameMap[i][j].army=40;
+			}else{
+				if(f<1+x2) gameMap[i][j].type=1;
+				else if(f<18) gameMap[i][j].type=0;
+				else if(f<19) gameMap[i][j].type=3;
+				else gameMap[i][j].type=4,gameMap[i][j].army=40;
+>>>>>>> Stashed changes
 			}
 		}
 }
+<<<<<<< HEAD
 void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt)
 {
 =======
@@ -481,6 +528,9 @@ void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, i
 }
 void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt) {
 >>>>>>> Stashed changes
+=======
+void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt) {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	std::uniform_int_distribution<long long> rd(armyMN, armyMX);
 	mapH = crtH, mapW = crtW;
@@ -542,8 +592,11 @@ func2 getMapInfoStr;
 func3 getMapInfoNum;
 
 <<<<<<< Updated upstream
+<<<<<<< HEAD
 struct MapGeoS
 {
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 =======
 struct MapInfoS {
 	int id;
@@ -562,8 +615,13 @@ struct MapInfoS {
 };
 MapInfoS maps[205];
 
+<<<<<<< HEAD
 struct MapGeoS {
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+struct MapGeoS {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 	int id;
 	string geo;
 	int aBits;
@@ -590,12 +648,19 @@ void initDefMap() {
 	mapNum = statusCheck();
 <<<<<<< Updated upstream
 	// xyprintf(100, 100, "mapNumChecked");
+<<<<<<< HEAD
 	for (int i = 0; i <= mapNum; i++)
 	{
 =======
 
 	for(int i = 0; i <= mapNum; i++) {
 >>>>>>> Stashed changes
+=======
+=======
+
+>>>>>>> Stashed changes
+	for(int i = 0; i <= mapNum; i++) {
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 		maps[i].id = mapG[i].id = i;
 		maps[i].chiname = getMapInfoStr(i, 1);
 		maps[i].engname = getMapInfoStr(i, 2);
@@ -620,6 +685,7 @@ void copyMap(int mapid) {
 	for(int i = 1; i <= h; ++i)
 		for(int j = 1; j <= w; ++j)
 			gameMap[i][j].team = 0;
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 	for (int i = 1; i <= h; ++i)
 	{
@@ -645,6 +711,8 @@ void copyMap(int mapid) {
 			default:
 				gameMap[i][j].type = -1;
 =======
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 	for(int i = 1; i <= h; ++i) {
 		for(int j = 1; j <= w; ++j) {
 			switch(mapG[mapid].geo[(i - 1) * w + j - 1]) {
@@ -663,6 +731,13 @@ void copyMap(int mapid) {
 				case 'C':
 					gameMap[i][j].type = 4;
 					break;
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+				default:
+					gameMap[i][j].type = -1;
+=======
+>>>>>>> 7d3ec812bde7fc1037d9e75040ba234b432d359a
 >>>>>>> Stashed changes
 			}
 		}
@@ -687,13 +762,11 @@ void exitExe() {
 	exit(0);
 }
 
-bool isdllOK()
-{
+bool isdllOK() {
 	return dllExit;
 }
 
-int returnMapNum()
-{
+int returnMapNum() {
 	return mapNum;
 }
 

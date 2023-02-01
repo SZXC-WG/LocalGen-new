@@ -86,35 +86,35 @@ struct gameStatus {
 		int turnNumber;
 	};
 
-	vector<gameMessageStore> gameMessage;
+	std::vector<gameMessageStore> gameMessage;
 
 	int curTurn;
 	int gameMesC;
 
 	void printGameMessage() {
 		setcolor(BLACK);
-		setfont(30, 0, "Segoe UI");
+		setfont(30, 0, "Courier New");
 		xyprintf(910, 330, "Game Messages");
-		setfont(20, 0, "Segoe UI");
+		setfont(20, 0, "Courier New");
 		int tmp = 0;
 		for(gameMessageStore now : gameMessage) {
 			if(now.playerA == -1 && now.playerB == -1) {
 				setcolor(defTeams[winnerNum].color);
-				xyprintf(910, 370 + 30 * tmp, "%7s", defTeams[winnerNum].name.c_str());
+				xyprintf(910, 370 + 20 * tmp, "%7s", defTeams[winnerNum].name.c_str());
 				setcolor(RED);
-				xyprintf(980, 370 + 30 * tmp, " won the game at Round #%d", now.turnNumber);
+				xyprintf(980, 370 + 20 * tmp, " won the game at Turn #%d", now.turnNumber);
 				setcolor(BLACK);
 			} else if(1 == now.playerB && now.playerA == 1)
-				xyprintf(910, 370 + 30 * tmp, "You surrendered at Round #%d", now.turnNumber);
+				xyprintf(910, 370 + 20 * tmp, "You surrendered at Turn #%d", now.turnNumber);
 			else {
 				setcolor(defTeams[now.playerA].color);
-				xyprintf(910, 370 + 30 * tmp, "%7s", defTeams[now.playerA].name.c_str());
+				xyprintf(910, 370 + 20 * tmp, "%7s", defTeams[now.playerA].name.c_str());
 				setcolor(BLACK);
-				xyprintf(980, 370 + 30 * tmp, " killed ", now.turnNumber);
+				xyprintf(980, 370 + 20 * tmp, " killed ", now.turnNumber);
 				setcolor(defTeams[now.playerB].color);
-				xyprintf(1060, 370 + 30 * tmp, "%7s", defTeams[now.playerB].name.c_str());
+				xyprintf(1050, 370 + 20 * tmp, "%7s", defTeams[now.playerB].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1130, 370 + 30 * tmp, " at Round #%d", now.turnNumber);
+				xyprintf(1120, 370 + 20 * tmp, " at Turn #%d", now.turnNumber);
 			}
 			tmp++;
 		}
@@ -328,10 +328,10 @@ struct gameStatus {
 			else
 				setcolor(BLACK);
 			if(rklst[i].army < 1000000000)
-				xyprintf(910, 60 + i * 20, "%7s %8lld %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
+				xyprintf(910, 60 + i * 20, "%7s %9lld %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
 			else {
 				register int p = std::to_string(rklst[i].army * 1.0L / 1e9L).find('.');
-				xyprintf(910, 60 + i * 20, "%7s %*.*LfG %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
+				xyprintf(910, 60 + i * 20, "%7s %*.*LfG %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), 9, 9 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
 			}
 		}
 	}
@@ -341,7 +341,7 @@ struct gameStatus {
 		if(played)
 			return -1;
 		cleardevice();
-		LGGraphics::inputMapData(min(900 / mapH, 900 / mapW), min(900 / mapH, 900 / mapW), mapH, mapW);
+		LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
 		LGGraphics::init();
 		// printf("%f\n", getfps());
 		played = 1;

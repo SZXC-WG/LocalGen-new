@@ -49,7 +49,6 @@ struct movementS
 std::queue<movementS> movementPack;
 
 void Zip();
-void zipStatus();
 void zipGame(long long totTurn);
 
 const int dx[5] = {0, -1, 0, 1, 0};
@@ -93,7 +92,7 @@ struct gameStatus
 		int turnNumber;
 	};
 
-	vector<gameMessageStore> gameMessage;
+	std::vector<gameMessageStore> gameMessage;
 
 	int curTurn;
 	int gameMesC;
@@ -146,13 +145,15 @@ struct gameStatus
 				switch (gameMap[i][j].type)
 				{
 				case 0:
-				{ /* plain */
+				{
+					/* plain */
 					if (curTurn % 25 == 0)
 						++gameMap[i][j].army;
 					break;
 				}
 				case 1:
-				{ /* swamp */
+				{
+					/* swamp */
 					if (gameMap[i][j].army > 0)
 						if (!(--gameMap[i][j].army))
 							gameMap[i][j].team = 0;
@@ -161,12 +162,14 @@ struct gameStatus
 				case 2:	   /* mountain */
 					break; /* ??? */
 				case 3:
-				{ /* general */
+				{
+					/* general */
 					++gameMap[i][j].army;
 					break;
 				}
 				case 4:
-				{ /* city */
+				{
+					/* city */
 					++gameMap[i][j].army;
 					break;
 				}
@@ -213,7 +216,7 @@ struct gameStatus
 	void kill(int p1, int p2)
 	{
 		if (p2 == 1)
-			MessageBox(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
+			MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
 		isAlive[p2] = 0;
 		for (int i = 1; i <= mapH; ++i)
 		{
@@ -302,7 +305,8 @@ struct gameStatus
 					int p = gameMap[cur.to.x][cur.to.y].team;
 					gameMap[cur.to.x][cur.to.y].team = cur.id;
 					if (gameMap[cur.to.x][cur.to.y].type == 3)
-					{ /* general */
+					{
+						/* general */
 						kill(cur.id, p);
 						gameMap[cur.to.x][cur.to.y].type = 4;
 						for (auto &mv : inlineMove)
@@ -359,11 +363,11 @@ struct gameStatus
 		setfillcolor(WHITE);
 		bar(widthPerBlock * mapW, 0, 1600 * LGGraphics::mapDataStore.mapSize, 900 * LGGraphics::mapDataStore.mapSize);
 		bar(0, heightPerBlock * mapH, 1600 * LGGraphics::mapDataStore.mapSize, 900 * LGGraphics::mapDataStore.mapSize);
-		setfont(30 * LGGraphics::mapDataStore.mapSize, 0, "Segue UI");
+		setfont(30 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
 		setcolor(BLUE);
 		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 20 * LGGraphics::mapDataStore.mapSize, "Ranklist");
 		setcolor(BLACK);
-		setfont(20 * LGGraphics::mapDataStore.mapSize, 0, "Segue UI");
+		setfont(20 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
 		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 60 * LGGraphics::mapDataStore.mapSize, "%7s %8s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
 		for (int i = 1; i <= playerCnt; i++)
 		{
@@ -389,7 +393,7 @@ struct gameStatus
 		if (played)
 			return -1;
 		cleardevice();
-		LGGraphics::inputMapData(min(900 / mapH, 900 / mapW), min(900 / mapH, 900 / mapW), mapH, mapW);
+		LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
 		LGGraphics::init();
 		// printf("%f\n", getfps());
 		played = 1;
@@ -470,13 +474,13 @@ struct gameStatus
 						movement.clear();
 						break;
 					case 27:
-						MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
+						MessageBoxA(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
 						return 0;
 					case int('\b'):
 					{
 						if (!isAlive[1])
 							break;
-						int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
+						int confirmSur = MessageBoxA(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
 						if (confirmSur == 7)
 							break;
 						isAlive[1] = 0;
@@ -534,7 +538,7 @@ struct gameStatus
 					if (!alldead)
 					{
 						cheatCode = 1048575;
-						MessageBox(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
+						MessageBoxA(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
 					}
 				}
 				if (!gameEnd)
@@ -544,12 +548,12 @@ struct gameStatus
 						ed |= (isAlive[i] << i);
 					if (__builtin_popcount(ed) == 1)
 					{
-						MessageBox(nullptr,
-								   ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
-									"THE GAME WILL CONTINUE." + "\n" +
-									"YOU CAN PRESS [ESC] TO EXIT.")
-									   .c_str(),
-								   "GAME END", MB_OK | MB_SYSTEMMODAL);
+						MessageBoxA(nullptr,
+									("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
+									 "THE GAME WILL CONTINUE." + "\n" +
+									 "YOU CAN PRESS [ESC] TO EXIT.")
+										.c_str(),
+									"GAME END", MB_OK | MB_SYSTEMMODAL);
 						gameEnd = 1;
 						winnerNum = std::__lg(ed);
 						cheatCode = 1048575;

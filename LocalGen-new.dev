@@ -46,21 +46,24 @@ UseUTF8=0
 CompilerSettings=0000000000000000000000000
 
 [VersionInfo]
-Major=1
+Major=2
 Minor=0
 Release=1
 Build=615
+Release=0
+Build=625
 LanguageID=1033
 CharsetID=1252
 CompanyName=LocalGen-dev
 FileVersion=1.0.1.615
+FileVersion=2.0.0.625
 FileDescription=Localized Generals.io (new ver.)
 InternalName=
 LegalCopyright=Copyright (c) 2023 LocalGen-dev
 LegalTrademarks=
 OriginalFilename=
 ProductName=Localized Generals.io (new ver.)
-ProductVersion=1.0.1.615
+ProductVersion=2.0.0.625
 AutoIncBuildNr=1
 SyncProduct=1
 

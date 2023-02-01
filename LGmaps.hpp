@@ -513,6 +513,7 @@ int returnMapNum()
 	return mapNum;
 }
 
+
 #undef ll // long long
 
 #endif // __LGMAPS_HPP

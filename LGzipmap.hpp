@@ -19,7 +19,6 @@
 #include "LGgame.hpp"
 
 const int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
-char strZipStatus[LEN_ZIP];
 char strdeZip[LEN_ZIP];
 char strZip[LEN_ZIP];
 char strGameZip[4 * LEN_ZIP];
@@ -148,9 +147,6 @@ void deZip()
 			k += 11;
 			gameMap[i][j].army = f ? (-gameMap[i][j].army) : gameMap[i][j].army;
 		}
-}
-
-void zipStatus(){
 }
 
 void zipGame(long long totTurn)

@@ -561,7 +561,6 @@ struct gameStatus
 				printGameMessage();
 				setcolor(BLACK);
 				xyprintf(1600, 900, "FPS: %f", getfps());
-				lPT = std::chrono::steady_clock::now().time_since_epoch();
 			}
 		}
 		return 0;

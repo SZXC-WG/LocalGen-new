@@ -111,12 +111,12 @@ struct gameStatus
 				setcolor(defTeams[winnerNum].color);
 				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[winnerNum].name.c_str());
 				setcolor(RED);
-				xyprintf(1030 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " won the game at Round #%d", now.turnNumber);
+				xyprintf(1030 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " won the game at Turn #%d", now.turnNumber);
 				setcolor(BLACK);
 			}
 			else if (1 == now.playerB && now.playerA == 1)
 			{
-				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "You surrendered at Round #%d", now.turnNumber);
+				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "You surrendered at Turn #%d", now.turnNumber);
 			}
 			else
 			{
@@ -127,7 +127,7 @@ struct gameStatus
 				setcolor(defTeams[now.playerB].color);
 				xyprintf(1110 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[now.playerB].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1180 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " at Round #%d", now.turnNumber);
+				xyprintf(1180 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " at Turn #%d", now.turnNumber);
 			}
 			tmp++;
 		}

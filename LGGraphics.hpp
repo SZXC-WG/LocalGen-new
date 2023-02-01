@@ -1,18 +1,7 @@
-/* This is LGgraphics.hpp file of LocalGen.                                */
-/* Copyright (c) 2023 LocalGen-dev; All rights reserved.                 */
-/* Developers: http://github.com/LocalGen-dev                            */
-/* Project: http://github.com/LocalGen-dev/LocalGen-new                  */
-/*                                                                       */
-/* This project is licensed under the MIT license. That means you can    */
-/* download, use and share a copy of the product of this project. You    */
-/* may modify the source code and make contribution to it too. But, you  */
-/* must print the copyright information at the front of your product.    */
-/*                                                                       */
-/* The full MIT license this project uses can be found here:             */
-/* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
 #include <bits/stdc++.h>
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
+#include "LGzipmap.hpp"
 #include "LGgame.hpp"
 #include <graphics.h>
 using namespace std;
@@ -480,7 +469,7 @@ namespace LGGraphics
 		int circlePos = 550;
 		PIMAGE refreshCopy = newimage();
 		getimage(refreshCopy, 0, 0, 1200, 400);
-		setfont(20, 0, "Segue UI");
+		setfont(20, 0, "Segoe UI");
 		setcolor(BLUE);
 		bool changeMade = true;
 		int mouseDownCount = 0;
@@ -537,7 +526,7 @@ namespace LGGraphics
 				rectangle(900, 30, 1100, 105);
 				setfont(70, 0, "Freestyle Script");
 				rectprintf(900, 30, 200, 75, "Start Game!");
-				setfont(20, 0, "Segue UI");
+				setfont(20, 0, "Segoe UI");
 				if (stDel != 0)
 					xyprintf(405, 975, "Speed Now: %d", stDel);
 				else

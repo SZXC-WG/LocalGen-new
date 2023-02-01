@@ -28,7 +28,7 @@ char advertisementStr[advertisementCnt+5][205] = {
 	"Press WASD to move your aim!",
 	"Press [ESC] can make you exit the game.",
 	"Press [BACKSPACE] to surrender.",
-	"Thanks to ZLY, CHR, XRZ and KTQ for devoting their hair to this game!",
+	"Thanks to ZLY, CHR, XRZ and JYL for devoting their hair to this game!",
 	"This game is going to have web function, but CHR is a bit confused...",
 };
 

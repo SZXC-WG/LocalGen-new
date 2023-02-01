@@ -49,6 +49,7 @@ struct movementS
 std::queue<movementS> movementPack;
 
 void Zip();
+void zipStatus();
 void zipGame(long long totTurn);
 
 const int dx[5] = {0, -1, 0, 1, 0};
@@ -561,7 +562,6 @@ struct gameStatus
 				printGameMessage();
 				setcolor(BLACK);
 				xyprintf(1600, 900, "FPS: %f", getfps());
-				lPT = std::chrono::steady_clock::now().time_since_epoch();
 			}
 		}
 		return 0;

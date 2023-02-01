@@ -1,7 +1,6 @@
 #include <bits/stdc++.h>
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
-#include "LGzipmap.hpp"
 #include "LGgame.hpp"
 #include <graphics.h>
 using namespace std;

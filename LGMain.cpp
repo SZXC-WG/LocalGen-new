@@ -47,7 +47,7 @@ HWND hwnd = GetConsoleWindow();
 signed main(signed argc, char **argv)
 {
 	ShowWindow(hwnd, SW_MAXIMIZE);
-	SetConsoleTitle("Localized Generals.io v" FILE_VERSION " (Set your console window font size! Recommended:5-8)");
+	SetConsoleTitleA("Localized Generals.io v" FILE_VERSION " (Set your console window font size! Recommended:5-8)");
 	initattr();
 	initDefMap();
 	MainPage(); // start main page

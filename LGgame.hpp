@@ -101,34 +101,34 @@ struct gameStatus
 	void printGameMessage()
 	{
 		setcolor(BLACK);
-		setfont(30, 0, "Comics Sans MS");
-		xyprintf(1010, 330, "GameMessage");
-		setfont(20, 0, "Comics Sans MS");
+		setfont(30 * LGGraphics::mapDataStore.mapSize, 0, "Comics Sans MS");
+		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 330 * LGGraphics::mapDataStore.mapSize, "GameMessage");
+		setfont(20 * LGGraphics::mapDataStore.mapSize, 0, "Comics Sans MS");
 		int tmp = 0;
 		for (gameMessageStore now : gameMessage)
 		{
 			if (now.playerA == -1 && now.playerB == -1)
 			{
 				setcolor(defTeams[winnerNum].color);
-				xyprintf(1010, 370 + 30 * tmp, "%7s", defTeams[winnerNum].name.c_str());
+				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[winnerNum].name.c_str());
 				setcolor(RED);
-				xyprintf(1080, 370 + 30 * tmp, " won the game at Round #%d", now.turnNumber);
+				xyprintf(1030 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " won the game at Round #%d", now.turnNumber);
 				setcolor(BLACK);
 			}
 			else if (1 == now.playerB && now.playerA == 1)
 			{
-				xyprintf(1010, 370 + 30 * tmp, "You surrendered at Round #%d", now.turnNumber);
+				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "You surrendered at Round #%d", now.turnNumber);
 			}
 			else
 			{
 				setcolor(defTeams[now.playerA].color);
-				xyprintf(1010, 370 + 30 * tmp, "%7s", defTeams[now.playerA].name.c_str());
+				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[now.playerA].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1080, 370 + 30 * tmp, " killed ", now.turnNumber);
+				xyprintf(1030 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " killed ", now.turnNumber);
 				setcolor(defTeams[now.playerB].color);
-				xyprintf(1160, 370 + 30 * tmp, "%7s", defTeams[now.playerB].name.c_str());
+				xyprintf(1110 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[now.playerB].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1230, 370 + 30 * tmp, " at Round #%d", now.turnNumber);
+				xyprintf(1180 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " at Round #%d", now.turnNumber);
 			}
 			tmp++;
 		}
@@ -357,15 +357,14 @@ struct gameStatus
 		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b)
 				  { return a.army > b.army; });
 		setfillcolor(WHITE);
-		bar(50 + widthPerBlock * mapW, 0, 1700, 1000);
-		bar(0, 0, 1700, 50);
-		bar(0, 50 + heightPerBlock * mapH, 1700, 1000);
-		setfont(30, 0, "Segue UI");
+		bar(widthPerBlock * mapW, 0, 1600 * LGGraphics::mapDataStore.mapSize, 900 * LGGraphics::mapDataStore.mapSize);
+		bar(0, heightPerBlock * mapH, 1600 * LGGraphics::mapDataStore.mapSize, 900 * LGGraphics::mapDataStore.mapSize);
+		setfont(30 * LGGraphics::mapDataStore.mapSize, 0, "Segue UI");
 		setcolor(BLUE);
-		xyprintf(1010, 20, "Ranklist");
+		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 20 * LGGraphics::mapDataStore.mapSize, "Ranklist");
 		setcolor(BLACK);
-		setfont(20, 0, "Segue UI");
-		xyprintf(1010, 60, "%7s %8s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
+		setfont(20 * LGGraphics::mapDataStore.mapSize, 0, "Segue UI");
+		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 60 * LGGraphics::mapDataStore.mapSize, "%7s %8s %5s %5s %5s %13s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND");
 		for (int i = 1; i <= playerCnt; i++)
 		{
 			if (isAlive[rklst[i].id])
@@ -374,12 +373,12 @@ struct gameStatus
 				setcolor(BLACK);
 			if (rklst[i].army < 1000000000)
 			{
-				xyprintf(1010, 60 + i * 20, "%7s %8lld %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
+				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (60 + i * 20) * LGGraphics::mapDataStore.mapSize, "%7s %8lld %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
 			}
 			else
 			{
 				register int p = std::to_string(rklst[i].army * 1.0L / 1e9L).find('.');
-				xyprintf(1010, 60 + i * 20, "%7s %*.*LfG %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
+				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (60 + i * 20) * LGGraphics::mapDataStore.mapSize, "%7s %*.*LfG %5d %5d %5d %13lld", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand);
 			}
 		}
 	}
@@ -417,8 +416,8 @@ struct gameStatus
 					mouse_msg msg = getmouse();
 					if (msg.is_down() && msg.is_left() && msg.x >= 50 && msg.y >= 50 && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH)
 					{
-						int lin = (msg.y - 50 + heightPerBlock - 1) / heightPerBlock;
-						int col = (msg.x - 50 + widthPerBlock - 1) / widthPerBlock;
+						int lin = (msg.y + heightPerBlock - 1) / heightPerBlock;
+						int col = (msg.x + widthPerBlock - 1) / widthPerBlock;
 						coordinate[1] = {lin, col};
 						movement.clear();
 					}
@@ -561,7 +560,7 @@ struct gameStatus
 				ranklist(coordinate);
 				printGameMessage();
 				setcolor(BLACK);
-				xyprintf(1600, 900, "FPS: %f", getfps());
+				xyprintf(1450, 800, "FPS: %f", getfps());
 			}
 		}
 		return 0;

@@ -32,6 +32,16 @@ namespace imageOperation
 
 		pimg = zoomImage;
 	}
+	void setWindowTransparent(bool enable, int alpha = 0xFF)
+	{
+		HWND egeHwnd = getHWnd();
+		LONG nRet = ::GetWindowLong(egeHwnd, GWL_EXSTYLE);
+		nRet |= WS_EX_LAYERED;
+		::SetWindowLong(egeHwnd, GWL_EXSTYLE, nRet);
+		if (!enable)
+			alpha = 0xFF;
+		SetLayeredWindowAttributes(egeHwnd, 0, alpha, LWA_ALPHA);
+	}
 }
 
 bool isdllOK();
@@ -45,12 +55,12 @@ namespace LGGraphics
 	int plCnt = 0;
 	int mapSelected = 0;
 	int cheatCode = 0;
-
 	struct mapData
 	{
 		int heightPerBlock;
 		int widthPerBlock;
 		int height, width;
+		double mapSize;
 	} mapDataStore;
 	void selectOrImportMap();
 	void doMapImport();
@@ -65,35 +75,94 @@ namespace LGGraphics
 		mapDataStore.width = d;
 		return;
 	}
+	int select = 0;
+	void initWindowSize()
+	{
+		initgraph(800, 600);
+		setcaption("LocalGen Windows Size Selection");
+		setbkcolor(WHITE);
+		setbkcolor_f(WHITE);
+		bool changeMade = true;
+		for (; is_run(); delay_fps(60))
+		{
+			if (changeMade)
+			{
+				cleardevice();
+				setfont(100, 0, "Freestyle Script");
+				setcolor(BLUE);
+				xyprintf(10, 10, "LocalGen");
+				setfont(50, 0, "Freestyle Script");
+				xyprintf(10, 130, "Please Select Window Size:");
+				setfont(40, 0, "Freestyle Script");
+				for (int i = 200; i <= 500; i += 100)
+					xyprintf(200, 180 + i / 5 * 2, "%d * %d", i * 4, i * 3);
+				xyprintf(200, 420, "Max Window Size");
+				if (select > 1)
+				{
+					rectangle(0, 180 + select * 40, 800, 220 + select * 40);
+				}
+			}
+			while (mousemsg())
+			{
+				mouse_msg msg = getmouse();
+				if (msg.y >= 220 && msg.y < 460)
+				{
+					if ((msg.y - 220) / 40 + 1 != select)
+					{
+						select = (msg.y - 220) / 40 + 1;
+						changeMade = true;
+					}
+					if (msg.is_left() && msg.is_down())
+						goto finishSelect;
+				}
+			}
+		}
+	finishSelect:
+		if (select == 6)
+		{
+			setinitmode(INIT_NOBORDER | RENDER_AUTO, 0, 0);
+			movewindow(0, 0, false);
+			resizewindow(-1, -1);
+			int w = getmaxx(), h = getmaxy();
+			mapDataStore.mapSize = (double)min((double)(1.0 * (double)h / 900.0), (double)(1.0 * (double)w / 1600.0));
+		}
+		else
+			mapDataStore.mapSize = (double)select / 4.0;
+	}
 
 	void WelcomePage()
 	{
-		initgraph(1200, 1000);
+		initWindowSize();
+		setcaption("LocalGen");
+		if (select != 6)
+			initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, RENDER_AUTO);
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
-		setfont(500, 0, "Freestyle Script");
+		cleardevice();
+		// xyprintf(100, 100, "%f", mapDataStore.mapSize);
+		setfont(500 * mapDataStore.mapSize, 0, "Freestyle Script");
 		setcolor(BLUE);
-		xyprintf(150, 0, "LocalGen");
+		xyprintf(380 * mapDataStore.mapSize, 0, "LocalGen");
 		setfillcolor(GREEN);
-		bar(100, 600, 500, 800);
+		bar(300 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 700 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
 		setbkmode(TRANSPARENT);
 		setcolor(WHITE);
-		setfont(100, 0, "Freestyle Script");
-		xyprintf(150, 650, "Single Player");
+		setfont(100 * mapDataStore.mapSize, 0, "Freestyle Script");
+		xyprintf(350 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "Single Player");
 		setfillcolor(RED);
-		bar(700, 600, 1100, 800);
-		xyprintf(750, 650, "MultiPlayer");
+		bar(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 1300 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
+		xyprintf(950 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "MultiPlayer");
 		mouse_msg msg;
 		while (1)
 		{
 			msg = getmouse();
 			// xyprintf(750, 650, "Mouse!");
 			// cout << msg.x << ' ' << msg.y << endl;
-			if (msg.is_left() && msg.is_down() && msg.x >= 100 && msg.x <= 500 && msg.y >= 600 && msg.y <= 800)
+			if (msg.is_left() && msg.is_down() && msg.x >= 300 * mapDataStore.mapSize && msg.x <= 700 * mapDataStore.mapSize && msg.y >= 600 * mapDataStore.mapSize && msg.y <= 800 * mapDataStore.mapSize)
 				break;
-			if (msg.is_left() && msg.is_down() && msg.x >= 700 && msg.x <= 1100 && msg.y >= 600 && msg.y <= 800)
+			if (msg.is_left() && msg.is_down() && msg.x >= 900 * mapDataStore.mapSize && msg.x <= 1300 * mapDataStore.mapSize && msg.y >= 600 * mapDataStore.mapSize && msg.y <= 800 * mapDataStore.mapSize)
 			{
-				xyprintf(400, 900, "Sorry! Multiplayer Mode is still developping.");
+				xyprintf(400 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, "Sorry! Multiplayer Mode is still developping.");
 				Sleep(4000);
 				exitExe();
 			}
@@ -103,14 +172,14 @@ namespace LGGraphics
 	void selectOrImportMap()
 	{
 		setfillcolor(BROWN);
-		bar(100, 600, 500, 800);
+		bar(300 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 700 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
 		setbkmode(TRANSPARENT);
 		setcolor(WHITE);
-		setfont(100, 0, "Freestyle Script");
-		xyprintf(150, 650, "Choose a Map");
+		setfont(100 * mapDataStore.mapSize, 0, "Freestyle Script");
+		xyprintf(350 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "Choose a Map");
 		setfillcolor(BROWN);
-		bar(700, 600, 1100, 800);
-		xyprintf(750, 650, "Import Map");
+		bar(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 1300 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
+		xyprintf(950 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "Import Map");
 		mouse_msg msg;
 		bool select;
 		while (1)
@@ -118,12 +187,12 @@ namespace LGGraphics
 			msg = getmouse();
 			// xyprintf(750, 650, "Mouse!");
 			// cout << msg.x << ' ' << msg.y << endl;
-			if (msg.is_left() && msg.is_down() && msg.x >= 100 && msg.x <= 500 && msg.y >= 600 && msg.y <= 800)
+			if (msg.is_left() && msg.is_down() && msg.x >= 300 * mapDataStore.mapSize && msg.x <= 700 * mapDataStore.mapSize && msg.y >= 600 * mapDataStore.mapSize && msg.y <= 800 * mapDataStore.mapSize)
 			{
 				select = true;
 				break;
 			}
-			if (msg.is_left() && msg.is_down() && msg.x >= 700 && msg.x <= 1100 && msg.y >= 600 && msg.y <= 800)
+			if (msg.is_left() && msg.is_down() && msg.x >= 900 * mapDataStore.mapSize && msg.x <= 1300 * mapDataStore.mapSize && msg.y >= 600 * mapDataStore.mapSize && msg.y <= 800 * mapDataStore.mapSize)
 			{
 				select = false;
 				break;
@@ -143,7 +212,7 @@ namespace LGGraphics
 		cleardevice();
 		if (!isdllOK())
 		{
-			xyprintf(10, 10, "Oops, it seems that your 'defMap.dll' is missing!\n You can download it on github. ");
+			xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "Oops, it seems that your 'defMap.dll' is missing!\n You can download it on github. ");
 			Sleep(4000);
 			exitExe();
 		}
@@ -153,22 +222,22 @@ namespace LGGraphics
 		{
 			x = (i + 5) / 6;
 			y = ((i % 6 == 0) ? 6 : i % 6);
-			left = (y - 1) * 200;
-			right = y * 200;
-			up = (x - 1) * 200;
-			down = x * 200;
+			left = ((y - 1) * 180 + 300) * mapDataStore.mapSize;
+			right = (y * 180 + 300) * mapDataStore.mapSize;
+			up = ((x - 1) * 180) * mapDataStore.mapSize;
+			down = (x * 180) * mapDataStore.mapSize;
 			// imageOperation::zoomImage(pimg[5], 200, 200);
 			// putimage_transparent(NULL, pimg[5], left, up, getpixel(0, 0, pimg[1]));
 			setcolor(BLUE);
-			setfont(20, 0, "Segoe UI");
-			rectprintf(left, up + 1, 150, 40, "id:%02d %s", maps[i].id, maps[i].chiname.c_str());
-			setfont(18, 0, "Segoe UI");
-			rectprintf(left, up + 40, 180, 20, "%s", maps[i].engname.c_str());
-			rectprintf(left, up + 60, 180, 20, "GeneralCount: %d", maps[i].generalcnt);
-			rectprintf(left, up + 80, 180, 20, "SwampCount: %d", maps[i].swampcnt);
-			rectprintf(left, up + 100, 180, 20, "MountainCount: %d", maps[i].mountaincnt);
-			rectprintf(left, up + 120, 180, 20, "CityCount: %d", maps[i].citycnt);
-			rectprintf(left, up + 150, 180, 20, "Size: %d * %d", maps[i].hei, maps[i].wid);
+			setfont(18 * mapDataStore.mapSize, 0, "Segoe UI");
+			rectprintf(left, (up + 1 * mapDataStore.mapSize), 135 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "id:%02d %s", maps[i].id, maps[i].chiname.c_str());
+			setfont(16 * mapDataStore.mapSize, 0, "Segoe UI");
+			rectprintf(left, (up + 40 * mapDataStore.mapSize), 162 * mapDataStore.mapSize, 18 * mapDataStore.mapSize, "%s", maps[i].engname.c_str());
+			rectprintf(left, (up + 60 * mapDataStore.mapSize), 162 * mapDataStore.mapSize, 18 * mapDataStore.mapSize, "GeneralCount: %d", maps[i].generalcnt);
+			rectprintf(left, (up + 80 * mapDataStore.mapSize), 162 * mapDataStore.mapSize, 18 * mapDataStore.mapSize, "SwampCount: %d", maps[i].swampcnt);
+			rectprintf(left, (up + 100 * mapDataStore.mapSize), 162 * mapDataStore.mapSize, 18 * mapDataStore.mapSize, "MountainCount: %d", maps[i].mountaincnt);
+			rectprintf(left, (up + 120 * mapDataStore.mapSize), 162 * mapDataStore.mapSize, 18 * mapDataStore.mapSize, "CityCount: %d", maps[i].citycnt);
+			rectprintf(left, (up + 140 * mapDataStore.mapSize), 162 * mapDataStore.mapSize, 18 * mapDataStore.mapSize, "Size: %d * %d", maps[i].hei, maps[i].wid);
 		}
 		mouse_msg msg;
 		while (1)
@@ -176,29 +245,29 @@ namespace LGGraphics
 			msg = getmouse();
 			if (msg.is_left() && msg.is_down())
 			{
-				int x = (msg.y + 199) / 200, y = (msg.x + 199) / 200;
+				int x = (msg.y + (179 * mapDataStore.mapSize)) / (180 * mapDataStore.mapSize), y = (msg.x + (179 - 300) * mapDataStore.mapSize) / (180 * mapDataStore.mapSize);
 				mapSelected = (x - 1) * 6 + y;
 				break;
 			}
 		}
 		cleardevice();
 		setcolor(GREEN);
-		setfont(40, 0, "Segoe UI");
-		xyprintf(10, 10, "id: %02d", maps[mapSelected].id);
-		xyprintf(10, 40, "%s", maps[mapSelected].chiname.c_str());
-		setfont(30, 0, "Segoe UI");
-		xyprintf(300, 40, "%s", maps[mapSelected].engname.c_str());
-		xyprintf(10, 70, "Author of the Map: %s", maps[mapSelected].auth.c_str());
-		xyprintf(10, 100, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-		xyprintf(10, 130, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-		xyprintf(10, 160, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
+		setfont(40 * mapDataStore.mapSize, 0, "Segoe UI");
+		xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "id: %02d", maps[mapSelected].id);
+		xyprintf(10 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].chiname.c_str());
+		setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+		xyprintf(300 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].engname.c_str());
+		xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+		xyprintf(10 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
+		xyprintf(10 * mapDataStore.mapSize, 130 * mapDataStore.mapSize, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
+		xyprintf(10 * mapDataStore.mapSize, 160 * mapDataStore.mapSize, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 		if (mapSelected < 6)
 		{
-			setfont(30, 0, "Segoe UI");
+			setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
 			setcolor(MAGENTA);
 			int height = 0;
 			key_msg msg;
-			xyprintf(10, 200, "Please Input the Height of the Map (<=500)");
+			xyprintf(10 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Height of the Map (<=500)");
 			while (1)
 			{
 				msg = getkey();
@@ -214,36 +283,36 @@ namespace LGGraphics
 					}
 					cleardevice();
 					setcolor(GREEN);
-					setfont(40, 0, "Segoe UI");
-					xyprintf(10, 10, "id: %02d", maps[mapSelected].id);
-					xyprintf(10, 40, "%s", maps[mapSelected].chiname.c_str());
-					setfont(30, 0, "Segoe UI");
-					xyprintf(300, 40, "%s", maps[mapSelected].engname.c_str());
-					xyprintf(10, 70, "Author of the Map: %s", maps[mapSelected].auth.c_str());
-					xyprintf(10, 100, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-					xyprintf(10, 130, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-					xyprintf(10, 160, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
+					setfont(40 * mapDataStore.mapSize, 0, "Segoe UI");
+					xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "id: %02d", maps[mapSelected].id);
+					xyprintf(10 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].chiname.c_str());
+					setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+					xyprintf(300 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].engname.c_str());
+					xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+					xyprintf(10 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
+					xyprintf(10 * mapDataStore.mapSize, 130 * mapDataStore.mapSize, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
+					xyprintf(10 * mapDataStore.mapSize, 160 * mapDataStore.mapSize, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 					setcolor(MAGENTA);
-					xyprintf(10, 200, "Please Input the Height of the Map (<=500)");
-					xyprintf(10, 230, "%d", height);
+					xyprintf(10 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Height of the Map (<=500)");
+					xyprintf(10 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", height);
 				}
 			}
 			cleardevice();
 			setcolor(GREEN);
-			setfont(40, 0, "Segoe UI");
-			xyprintf(10, 10, "id: %02d", maps[mapSelected].id);
-			xyprintf(10, 40, "%s", maps[mapSelected].chiname.c_str());
-			setfont(30, 0, "Segoe UI");
-			xyprintf(300, 40, "%s", maps[mapSelected].engname.c_str());
-			xyprintf(10, 70, "Author of the Map: %s", maps[mapSelected].auth.c_str());
-			xyprintf(10, 100, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-			xyprintf(10, 130, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-			xyprintf(10, 160, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
+			setfont(40 * mapDataStore.mapSize, 0, "Segoe UI");
+			xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "id: %02d", maps[mapSelected].id);
+			xyprintf(10 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].chiname.c_str());
+			setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+			xyprintf(300 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].engname.c_str());
+			xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+			xyprintf(10 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
+			xyprintf(10 * mapDataStore.mapSize, 130 * mapDataStore.mapSize, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
+			xyprintf(10 * mapDataStore.mapSize, 160 * mapDataStore.mapSize, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 			setcolor(MAGENTA);
-			xyprintf(10, 200, "Please Input the Height of the Map (<=500)");
-			xyprintf(10, 230, "%d", height);
+			xyprintf(10 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Height of the Map (<=500)");
+			xyprintf(10 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", height);
 			int width = 0;
-			xyprintf(600, 200, "Please Input the Width of the Map (<=500)");
+			xyprintf(810 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Width of the Map (<=500)");
 			while (1)
 			{
 				msg = getkey();
@@ -259,29 +328,29 @@ namespace LGGraphics
 					}
 					cleardevice();
 					setcolor(GREEN);
-					setfont(40, 0, "Segoe UI");
-					xyprintf(10, 10, "id: %02d", maps[mapSelected].id);
-					xyprintf(10, 40, "%s", maps[mapSelected].chiname.c_str());
-					setfont(30, 0, "Segoe UI");
-					xyprintf(300, 40, "%s", maps[mapSelected].engname.c_str());
-					xyprintf(10, 70, "Author of the Map: %s", maps[mapSelected].auth.c_str());
-					xyprintf(10, 100, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-					xyprintf(10, 130, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-					xyprintf(10, 160, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
+					setfont(40 * mapDataStore.mapSize, 0, "Segoe UI");
+					xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "id: %02d", maps[mapSelected].id);
+					xyprintf(10 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].chiname.c_str());
+					setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+					xyprintf(300 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].engname.c_str());
+					xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+					xyprintf(10 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
+					xyprintf(10 * mapDataStore.mapSize, 130 * mapDataStore.mapSize, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
+					xyprintf(10 * mapDataStore.mapSize, 160 * mapDataStore.mapSize, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 					setcolor(MAGENTA);
-					xyprintf(10, 200, "Please Input the Height of the Map (<=500)");
-					xyprintf(10, 230, "%d", height);
-					xyprintf(600, 200, "Please Input the Width of the Map (<=500)");
-					xyprintf(600, 230, "%d", width);
+					xyprintf(10 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Height of the Map (<=500)");
+					xyprintf(10 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", height);
+					xyprintf(810 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Width of the Map (<=500)");
+					xyprintf(810 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", width);
 				}
 			}
 			long long armyMin = 0, armyMax = 0;
 			if (mapSelected == 3)
 			{
-				setfont(30, 0, "Segoe UI");
+				setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
 				setcolor(MAGENTA);
 				key_msg msg;
-				xyprintf(10, 300, "Please Input the Minimum Number of Army on each Block");
+				xyprintf(10 * mapDataStore.mapSize, 270 * mapDataStore.mapSize, "Please Input the Minimum Number of Army on each Block");
 				bool isPositive = true;
 				while (1)
 				{
@@ -300,48 +369,48 @@ namespace LGGraphics
 							isPositive = !isPositive;
 						cleardevice();
 						setcolor(GREEN);
-						setfont(40, 0, "Segoe UI");
-						xyprintf(10, 10, "id: %02d", maps[mapSelected].id);
-						xyprintf(10, 40, "%s", maps[mapSelected].chiname.c_str());
-						setfont(30, 0, "Segoe UI");
-						xyprintf(300, 40, "%s", maps[mapSelected].engname.c_str());
-						xyprintf(10, 70, "Author of the Map: %s", maps[mapSelected].auth.c_str());
-						xyprintf(10, 100, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-						xyprintf(10, 130, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-						xyprintf(10, 160, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
+						setfont(40 * mapDataStore.mapSize, 0, "Segoe UI");
+						xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "id: %02d", maps[mapSelected].id);
+						xyprintf(10 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].chiname.c_str());
+						setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+						xyprintf(300 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].engname.c_str());
+						xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+						xyprintf(10 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
+						xyprintf(10 * mapDataStore.mapSize, 130 * mapDataStore.mapSize, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
+						xyprintf(10 * mapDataStore.mapSize, 160 * mapDataStore.mapSize, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 						setcolor(MAGENTA);
-						xyprintf(10, 200, "Please Input the Height of the Map (<=500)");
-						xyprintf(10, 230, "%d", height);
-						xyprintf(600, 200, "Please Input the Width of the Map (<=500)");
-						xyprintf(600, 230, "%d", width);
-						xyprintf(10, 300, "Please Input the Minimum Number of Army on each Block");
+						xyprintf(10 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Height of the Map (<=500)");
+						xyprintf(10 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", height);
+						xyprintf(810 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Width of the Map (<=500)");
+						xyprintf(810 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", width);
+						xyprintf(10 * mapDataStore.mapSize, 270 * mapDataStore.mapSize, "Please Input the Minimum Number of Army on each Block");
 						long long realarmy = armyMin;
 						if (!isPositive)
 							realarmy = -realarmy;
-						xyprintf(10, 330, "%lld", realarmy);
+						xyprintf(10 * mapDataStore.mapSize, 300 * mapDataStore.mapSize, "%lld", realarmy);
 					}
 				}
 				if (!isPositive)
 					armyMin = -armyMin;
 				cleardevice();
 				setcolor(GREEN);
-				setfont(40, 0, "Segoe UI");
-				xyprintf(10, 10, "id: %02d", maps[mapSelected].id);
-				xyprintf(10, 40, "%s", maps[mapSelected].chiname.c_str());
-				setfont(30, 0, "Segoe UI");
-				xyprintf(300, 40, "%s", maps[mapSelected].engname.c_str());
-				xyprintf(10, 70, "Author of the Map: %s", maps[mapSelected].auth.c_str());
-				xyprintf(10, 100, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-				xyprintf(10, 130, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-				xyprintf(10, 160, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
+				setfont(40 * mapDataStore.mapSize, 0, "Segoe UI");
+				xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "id: %02d", maps[mapSelected].id);
+				xyprintf(10 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].chiname.c_str());
+				setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+				xyprintf(300 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].engname.c_str());
+				xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+				xyprintf(10 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
+				xyprintf(10 * mapDataStore.mapSize, 130 * mapDataStore.mapSize, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
+				xyprintf(10 * mapDataStore.mapSize, 160 * mapDataStore.mapSize, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 				setcolor(MAGENTA);
-				xyprintf(10, 200, "Please Input the Height of the Map (<=500)");
-				xyprintf(10, 230, "%d", height);
-				xyprintf(600, 200, "Please Input the Width of the Map (<=500)");
-				xyprintf(600, 230, "%d", width);
-				xyprintf(10, 300, "Please Input the Minimum Number of Army on each Block");
-				xyprintf(10, 330, "%lld", armyMin);
-				xyprintf(600, 300, "Please Input the Maximum Number of Army on each Block");
+				xyprintf(10 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Height of the Map (<=500)");
+				xyprintf(10 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", height);
+				xyprintf(810 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Width of the Map (<=500)");
+				xyprintf(810 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", width);
+				xyprintf(10 * mapDataStore.mapSize, 270 * mapDataStore.mapSize, "Please Input the Minimum Number of Army on each Block");
+				xyprintf(10 * mapDataStore.mapSize, 300 * mapDataStore.mapSize, "%lld", armyMin);
+				xyprintf(810 * mapDataStore.mapSize, 270 * mapDataStore.mapSize, "Please Input the Maximum Number of Army on each Block");
 				isPositive = true;
 				while (1)
 				{
@@ -360,51 +429,51 @@ namespace LGGraphics
 							isPositive = !isPositive;
 						cleardevice();
 						setcolor(GREEN);
-						setfont(40, 0, "Segoe UI");
-						xyprintf(10, 10, "id: %02d", maps[mapSelected].id);
-						xyprintf(10, 40, "%s", maps[mapSelected].chiname.c_str());
-						setfont(30, 0, "Segoe UI");
-						xyprintf(300, 40, "%s", maps[mapSelected].engname.c_str());
-						xyprintf(10, 70, "Author of the Map: %s", maps[mapSelected].auth.c_str());
-						xyprintf(10, 100, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-						xyprintf(10, 130, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-						xyprintf(10, 160, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
+						setfont(40 * mapDataStore.mapSize, 0, "Segoe UI");
+						xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "id: %02d", maps[mapSelected].id);
+						xyprintf(10 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].chiname.c_str());
+						setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+						xyprintf(300 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].engname.c_str());
+						xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+						xyprintf(10 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
+						xyprintf(10 * mapDataStore.mapSize, 130 * mapDataStore.mapSize, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
+						xyprintf(10 * mapDataStore.mapSize, 160 * mapDataStore.mapSize, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 						setcolor(MAGENTA);
-						xyprintf(10, 200, "Please Input the Height of the Map (<=500)");
-						xyprintf(10, 230, "%d", height);
-						xyprintf(600, 200, "Please Input the Width of the Map (<=500)");
-						xyprintf(600, 230, "%d", width);
-						xyprintf(10, 300, "Please Input the Minimum Number of Army on each Block");
-						xyprintf(10, 330, "%lld", armyMin);
-						xyprintf(600, 300, "Please Input the Maximum Number of Army on each Block");
+						xyprintf(10 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Height of the Map (<=500)");
+						xyprintf(10 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", height);
+						xyprintf(810 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Width of the Map (<=500)");
+						xyprintf(810 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", width);
+						xyprintf(10 * mapDataStore.mapSize, 270 * mapDataStore.mapSize, "Please Input the Minimum Number of Army on each Block");
+						xyprintf(10 * mapDataStore.mapSize, 300 * mapDataStore.mapSize, "%lld", armyMin);
+						xyprintf(810 * mapDataStore.mapSize, 270 * mapDataStore.mapSize, "Please Input the Maximum Number of Army on each Block");
 						long long realarmy = armyMax;
 						if (!isPositive)
 							realarmy = -realarmy;
-						xyprintf(600, 330, "%lld", realarmy);
+						xyprintf(810 * mapDataStore.mapSize, 300 * mapDataStore.mapSize, "%lld", realarmy);
 					}
 				}
 				if (!isPositive)
 					armyMax = -armyMax;
 				cleardevice();
 				setcolor(GREEN);
-				setfont(40, 0, "Segoe UI");
-				xyprintf(10, 10, "id: %02d", maps[mapSelected].id);
-				xyprintf(10, 40, "%s", maps[mapSelected].chiname.c_str());
-				setfont(30, 0, "Segoe UI");
-				xyprintf(300, 40, "%s", maps[mapSelected].engname.c_str());
-				xyprintf(10, 70, "Author of the Map: %s", maps[mapSelected].auth.c_str());
-				xyprintf(10, 100, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-				xyprintf(10, 130, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-				xyprintf(10, 160, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
+				setfont(40 * mapDataStore.mapSize, 0, "Segoe UI");
+				xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "id: %02d", maps[mapSelected].id);
+				xyprintf(10 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].chiname.c_str());
+				setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+				xyprintf(300 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].engname.c_str());
+				xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+				xyprintf(10 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
+				xyprintf(10 * mapDataStore.mapSize, 130 * mapDataStore.mapSize, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
+				xyprintf(10 * mapDataStore.mapSize, 160 * mapDataStore.mapSize, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 				setcolor(MAGENTA);
-				xyprintf(10, 200, "Please Input the Height of the Map (<=500)");
-				xyprintf(10, 230, "%d", height);
-				xyprintf(600, 200, "Please Input the Width of the Map (<=500)");
-				xyprintf(600, 230, "%d", width);
-				xyprintf(10, 300, "Please Input the Minimum Number of Army on each Block");
-				xyprintf(10, 330, "%lld", armyMin);
-				xyprintf(600, 300, "Please Input the Maximum Number of Army on each Block");
-				xyprintf(600, 330, "%lld", armyMax);
+				xyprintf(10 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Height of the Map (<=500)");
+				xyprintf(10 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", height);
+				xyprintf(810 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, "Please Input the Width of the Map (<=500)");
+				xyprintf(810 * mapDataStore.mapSize, 230 * mapDataStore.mapSize, "%d", width);
+				xyprintf(10 * mapDataStore.mapSize, 270 * mapDataStore.mapSize, "Please Input the Minimum Number of Army on each Block");
+				xyprintf(10 * mapDataStore.mapSize, 300 * mapDataStore.mapSize, "%lld", armyMin);
+				xyprintf(810 * mapDataStore.mapSize, 270 * mapDataStore.mapSize, "Please Input the Maximum Number of Army on each Block");
+				xyprintf(810 * mapDataStore.mapSize, 300 * mapDataStore.mapSize, "%lld", armyMax);
 			}
 			importGameSettings();
 			switch (mapSelected)
@@ -430,15 +499,15 @@ namespace LGGraphics
 		{
 			cleardevice();
 			setcolor(GREEN);
-			setfont(40, 0, "Segoe UI");
-			xyprintf(10, 10, "id: %02d", maps[mapSelected].id);
-			xyprintf(10, 40, "%s", maps[mapSelected].chiname.c_str());
-			setfont(30, 0, "Segoe UI");
-			xyprintf(300, 40, "%s", maps[mapSelected].engname.c_str());
-			xyprintf(10, 70, "Author of the Map: %s", maps[mapSelected].auth.c_str());
-			xyprintf(10, 100, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-			xyprintf(10, 130, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-			xyprintf(10, 160, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
+			setfont(40 * mapDataStore.mapSize, 0, "Segoe UI");
+			xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "id: %02d", maps[mapSelected].id);
+			xyprintf(10 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].chiname.c_str());
+			setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+			xyprintf(300 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].engname.c_str());
+			xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+			xyprintf(10 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
+			xyprintf(10 * mapDataStore.mapSize, 130 * mapDataStore.mapSize, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
+			xyprintf(10 * mapDataStore.mapSize, 160 * mapDataStore.mapSize, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 			importGameSettings();
 			copyMap(mapSelected);
 		}
@@ -449,8 +518,8 @@ namespace LGGraphics
 	{
 		cleardevice();
 		setcolor(BLUE);
-		setfont(30, 0, "Segoe UI");
-		xyprintf(10, 10, "Please Input Filename with suffix (end with enter)");
+		setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+		xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "Please Input Filename with suffix (end with enter)");
 		key_msg msg;
 		while (1)
 		{
@@ -465,10 +534,12 @@ namespace LGGraphics
 					fileName += (char)(msg.key);
 				cleardevice();
 				setcolor(BLUE);
-				setfont(30, 0, "Segoe UI");
-				xyprintf(10, 10, "Please Input Filename with suffix (end with enter)");
-				xyprintf(10, 110, "%s", fileName.c_str());
+				setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
+				xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "Please Input Filename with suffix (end with enter)");
+				xyprintf(10 * mapDataStore.mapSize, 110 * mapDataStore.mapSize, "%s", fileName.c_str());
 			}
+			if (msg.msg == key_enter)
+				break;
 		}
 		toAvoidCEBugInGraphicsImportMap(fileName);
 	}
@@ -477,10 +548,10 @@ namespace LGGraphics
 
 	void importGameSettings()
 	{
-		int circlePos = 550;
+		int circlePos = 450 * mapDataStore.mapSize;
 		PIMAGE refreshCopy = newimage();
-		getimage(refreshCopy, 0, 0, 1200, 400);
-		setfont(20, 0, "Segue UI");
+		getimage(refreshCopy, 0, 0, 1600 * mapDataStore.mapSize, 340 * mapDataStore.mapSize);
+		setfont(20 * mapDataStore.mapSize, 0, "Segue UI");
 		setcolor(BLUE);
 		bool changeMade = true;
 		int mouseDownCount = 0;
@@ -494,7 +565,7 @@ namespace LGGraphics
 				cleardevice();
 				putimage(0, 0, refreshCopy);
 				setcolor(BLUE);
-				rectprintf(10, 450, 380, 100, "Please Select The Number of Players");
+				rectprintf(60 * mapDataStore.mapSize, 350 * mapDataStore.mapSize, 430 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Please Select The Number of Players");
 				for (int i = 1; i <= 12; i++)
 				{
 					int lineNumber = (i + 2) / 3;
@@ -502,58 +573,58 @@ namespace LGGraphics
 					if (i == plCnt)
 					{
 						setcolor(RED);
-						circle(100 * columnNumber, 600 + 100 * (lineNumber - 1), 50);
+						circle((100 * columnNumber + 50) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, 50 * mapDataStore.mapSize);
 						setcolor(BLUE);
 					}
-					xyprintf(100 * columnNumber, 600 + 100 * (lineNumber - 1), "%d", i);
-					rectangle((columnNumber - 1) * 100 + 50, (lineNumber - 1) * 100 + 550, columnNumber * 100 + 50, lineNumber * 100 + 550);
+					xyprintf((100 * columnNumber + 50) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, "%d", i);
+					rectangle(((columnNumber - 1) * 100 + 100) * mapDataStore.mapSize, ((lineNumber - 1) * 100 + 450) * mapDataStore.mapSize, (columnNumber * 100 + 100) * mapDataStore.mapSize, (lineNumber * 100 + 450) * mapDataStore.mapSize);
 				}
-				rectprintf(410, 450, 380, 100, "Drag to Select the Speed of the Game");
+				rectprintf(560 * mapDataStore.mapSize, 350 * mapDataStore.mapSize, 380, 100, "Drag to Select the Speed of the Game");
 				setfillcolor(LIGHTGRAY);
-				bar(575, 550, 625, 950);
+				bar(725 * mapDataStore.mapSize, 450 * mapDataStore.mapSize, 775 * mapDataStore.mapSize, 850 * mapDataStore.mapSize);
 				setfillcolor(BLUE);
-				fillellipsef(600, circlePos, 30, 30);
-				rectprintf(810, 450, 380, 100, "Select the Players you want to watch Directly");
+				fillellipsef(750 * mapDataStore.mapSize, circlePos, 30 * mapDataStore.mapSize, 30 * mapDataStore.mapSize);
+				rectprintf(1060 * mapDataStore.mapSize, 350 * mapDataStore.mapSize, 380 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Select the Players you want to watch Directly");
 				for (int i = 1; i <= 12; i++)
 				{
 					int lineNumber = (i + 2) / 3;
 					int columnNumber = i - (lineNumber - 1) * 3;
 					setcolor(BLUE);
-					rectangle((columnNumber - 1) * 100 + 850, (lineNumber - 1) * 100 + 550, columnNumber * 100 + 850, lineNumber * 100 + 550);
+					rectangle(((columnNumber - 1) * 100 + 1100) * mapDataStore.mapSize, ((lineNumber - 1) * 100 + 450) * mapDataStore.mapSize, (columnNumber * 100 + 1100) * mapDataStore.mapSize, (lineNumber * 100 + 450) * mapDataStore.mapSize);
 				}
 				for (int i = 1; i <= plCnt; i++)
 				{
 					int lineNumber = (i + 2) / 3;
 					int columnNumber = i - (lineNumber - 1) * 3;
 					setcolor(defTeams[i].color);
-					rectprintf((columnNumber - 1) * 100 + 850, (lineNumber - 1) * 100 + 550, 100, 100, "%s", defTeams[i].name.c_str());
+					rectprintf(((columnNumber - 1) * 100 + 1100) * mapDataStore.mapSize, ((lineNumber - 1) * 100 + 450) * mapDataStore.mapSize, 100 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "%s", defTeams[i].name.c_str());
 					if (cheatCodeSelected[i])
 					{
 						setcolor(RED);
-						circle(800 + 100 * columnNumber, 600 + 100 * (lineNumber - 1), 50);
+						circle((1050 + 100 * columnNumber) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, 50 * mapDataStore.mapSize);
 						setcolor(BLUE);
 					}
 				}
-				rectangle(900, 30, 1100, 105);
-				setfont(70, 0, "Freestyle Script");
-				rectprintf(900, 30, 200, 75, "Start Game!");
-				setfont(20, 0, "Segue UI");
+				rectangle(900 * mapDataStore.mapSize, 30 * mapDataStore.mapSize, 1100 * mapDataStore.mapSize, 105 * mapDataStore.mapSize);
+				setfont(70 * mapDataStore.mapSize, 0, "Freestyle Script");
+				rectprintf(900 * mapDataStore.mapSize, 30 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, 75 * mapDataStore.mapSize, "Start Game!");
+				setfont(20 * mapDataStore.mapSize, 0, "Segue UI");
 				if (stDel != 0)
-					xyprintf(405, 975, "Speed Now: %d", stDel);
+					xyprintf(560 * mapDataStore.mapSize, 875 * mapDataStore.mapSize, "Speed Now: %d", stDel);
 				else
-					xyprintf(405, 975, "Speed Now: MAXSPEED");
+					xyprintf(560 * mapDataStore.mapSize, 875 * mapDataStore.mapSize, "Speed Now: MAXSPEED");
 				changeMade = false;
 			}
 			while (mousemsg())
 			{
 				mouse_msg msg = getmouse();
 				// cout << msg.x << ' ' << msg.y << ' ' << msg.is_left() << ' ' << msg.is_down() << ' ' << msg.is_up() << ' ' << msg.is_move() << ' ' << mouseDownCount << ' ' << circlePos << endl;
-				if (50 <= msg.x && msg.x <= 350 && 550 <= msg.y && 950 >= msg.y)
+				if (100 * mapDataStore.mapSize <= msg.x && msg.x <= 400 * mapDataStore.mapSize && 450 * mapDataStore.mapSize <= msg.y && 850 * mapDataStore.mapSize >= msg.y)
 				{
 					if (msg.is_left() && msg.is_down())
 					{
-						int col = (msg.x + 49) / 100;
-						int lin = (msg.y - 550 + 99) / 100;
+						int col = (msg.x + 49 - 50 * mapDataStore.mapSize) / (100 * mapDataStore.mapSize);
+						int lin = (msg.y - 450 * mapDataStore.mapSize + 99) / (100 * mapDataStore.mapSize);
 						plCnt = (lin - 1) * 3 + col;
 						changeMade = true;
 					}
@@ -562,24 +633,24 @@ namespace LGGraphics
 					mouseDownCount++;
 				if (msg.is_left() && msg.is_up() && mouseDownCount > 0)
 					mouseDownCount--;
-				if (msg.x >= 570 && msg.x <= 630 && msg.y >= 550 && msg.y <= 950)
+				if (msg.x >= 720 * mapDataStore.mapSize && msg.x <= 780 * mapDataStore.mapSize && msg.y >= 450 * mapDataStore.mapSize && msg.y <= 850 * mapDataStore.mapSize)
 				{
 					if (mouseDownCount > 0)
 					{
 						circlePos = msg.y;
-						if (circlePos >= 940)
+						if (circlePos >= 840 * mapDataStore.mapSize)
 							stDel = 0;
 						else
-							stDel = ((circlePos - 550) / 20) + 1;
+							stDel = ((circlePos - 450 * mapDataStore.mapSize) / (20 * mapDataStore.mapSize)) + 1;
 						changeMade = true;
 					}
 				}
-				if (850 <= msg.x && 1150 >= msg.x && 550 <= msg.y && msg.y <= 950)
+				if (1100 * mapDataStore.mapSize <= msg.x && 1400 * mapDataStore.mapSize >= msg.x && 450 * mapDataStore.mapSize <= msg.y && msg.y <= 850 * mapDataStore.mapSize)
 				{
 					if (msg.is_left() && msg.is_down())
 					{
-						int col = (msg.x - 850 + 99) / 100;
-						int lin = (msg.y - 550 + 99) / 100;
+						int col = (msg.x + 99 - 1100 * mapDataStore.mapSize) / (100 * mapDataStore.mapSize);
+						int lin = (msg.y + 99 - 450 * mapDataStore.mapSize) / (100 * mapDataStore.mapSize);
 						int num = (lin - 1) * 3 + col;
 						if (num <= plCnt && num > 0)
 						{
@@ -589,7 +660,7 @@ namespace LGGraphics
 						}
 					}
 				}
-				if (msg.x >= 900 && msg.x <= 1100 && msg.y >= 30 && msg.y <= 105 && msg.is_down() && msg.is_left())
+				if (msg.x >= 900 * mapDataStore.mapSize && msg.x <= 1100 * mapDataStore.mapSize && msg.y >= 30 * mapDataStore.mapSize && msg.y <= 105 * mapDataStore.mapSize && msg.is_down() && msg.is_left())
 				{
 					endConfig = true;
 					cleardevice();
@@ -603,9 +674,11 @@ namespace LGGraphics
 
 	void init()
 	{
-		heightPerBlock = 900 / mapH;
-		widthPerBlock = 900 / mapW;
+		heightPerBlock = (900.0 * mapDataStore.mapSize / (double)mapH);
+		widthPerBlock = (900.0 * mapDataStore.mapSize / (double)mapW);
 		heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
+		mapDataStore.widthPerBlock = widthPerBlock;
+		mapDataStore.heightPerBlock = heightPerBlock;
 		setbkmode(TRANSPARENT);
 		pimg[1] = newimage();
 		getimage(pimg[1], "img/city.png");
@@ -621,8 +694,8 @@ namespace LGGraphics
 		imageOperation::zoomImage(pimg[4], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[5] = newimage();
 		getimage(pimg[5], "img/currentOn.png");
-		imageOperation::zoomImage(pimg[5], mapDataStore.widthPerBlock, mapDataStore.heightPerBlock);
-		initgraph(1700, 1000);
+		imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, INIT_RENDERMANUAL);
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
 		cleardevice();

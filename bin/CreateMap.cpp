@@ -247,7 +247,11 @@ void Pack() {
 }
 
 signed main() {
+<<<<<<< Updated upstream
 	puts("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½Ð¡ï¿½ï¿½");
+=======
+	puts("Çëµ÷Õû´°¿Ú×ÖÌåÖÁÊÊµ±´óÐ¡£¡");
+>>>>>>> Stashed changes
 	puts("CreateMap(Size L/W Tip:at most 100):");
 	scanf("%d%d", &sL, &sW);
 	rL = sL;

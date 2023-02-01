@@ -8,6 +8,14 @@ Makefile.win
 LocalGen-new.layout
 *.o
 *.res
+<<<<<<< Updated upstream
 *.lgmp
 .history
 *.lgrep
+=======
+<<<<<<< HEAD
+.vscode/settings.json
+=======
+*.lgmp
+>>>>>>> d6038b449494c66d68f43b914050a90fb1f6fe08
+>>>>>>> Stashed changes

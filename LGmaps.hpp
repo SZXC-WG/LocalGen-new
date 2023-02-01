@@ -142,7 +142,7 @@ void printNum(bool visible, long long army, int team, int curx, int cury)
 void printMap(int printCode, playerCoord coo)
 {
 	setcolor(WHITE);
-	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segue UI");
+	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
 	// settextjustify(CENTER_TEXT, CENTER_TEXT);
 	for (int curx = 1; curx <= mapH; curx++)
 	{

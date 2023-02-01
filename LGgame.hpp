@@ -100,9 +100,9 @@ struct gameStatus
 	void printGameMessage()
 	{
 		setcolor(BLACK);
-		setfont(30 * LGGraphics::mapDataStore.mapSize, 0, "Comics Sans MS");
+		setfont(30 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
 		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 330 * LGGraphics::mapDataStore.mapSize, "GameMessage");
-		setfont(20 * LGGraphics::mapDataStore.mapSize, 0, "Comics Sans MS");
+		setfont(24 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
 		int tmp = 0;
 		for (gameMessageStore now : gameMessage)
 		{
@@ -111,7 +111,7 @@ struct gameStatus
 				setcolor(defTeams[winnerNum].color);
 				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[winnerNum].name.c_str());
 				setcolor(RED);
-				xyprintf(1030 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " won the game at Turn #%d", now.turnNumber);
+				xyprintf(1040 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " won the game at Turn #%d", now.turnNumber);
 				setcolor(BLACK);
 			}
 			else if (1 == now.playerB && now.playerA == 1)
@@ -123,11 +123,11 @@ struct gameStatus
 				setcolor(defTeams[now.playerA].color);
 				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[now.playerA].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1030 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " killed ", now.turnNumber);
+				xyprintf(1040 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " killed ", now.turnNumber);
 				setcolor(defTeams[now.playerB].color);
-				xyprintf(1110 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[now.playerB].name.c_str());
+				xyprintf(1120 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[now.playerB].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1180 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " at Turn #%d", now.turnNumber);
+				xyprintf(1200 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " at Turn #%d", now.turnNumber);
 			}
 			tmp++;
 		}

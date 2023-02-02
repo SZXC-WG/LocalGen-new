@@ -78,7 +78,7 @@ namespace LGGraphics
 	int select = 0;
 	void initWindowSize()
 	{
-		initgraph(800, 600);
+		initgraph(800, 600, INIT_NOBORDER);
 		setcaption("LocalGen Windows Size Selection");
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
@@ -96,7 +96,7 @@ namespace LGGraphics
 				setfont(40, 0, "Freestyle Script");
 				for (int i = 200; i <= 500; i += 100)
 					xyprintf(200, 180 + i / 5 * 2, "%d * %d", i * 4, i * 3);
-				xyprintf(200, 420, "Max Window Size");
+				xyprintf(200, 420, "Auto Fit");
 				if (select > 1)
 				{
 					rectangle(0, 180 + select * 40, 800, 220 + select * 40);
@@ -120,7 +120,6 @@ namespace LGGraphics
 	finishSelect:
 		if (select == 6)
 		{
-			setinitmode((INIT_NOBORDER | RENDER_AUTO), 0, 0);
 			movewindow(0, 0, false);
 			resizewindow(-1, -1);
 			int w = getmaxx(), h = getmaxy();
@@ -133,9 +132,15 @@ namespace LGGraphics
 	void WelcomePage()
 	{
 		initWindowSize();
-		setcaption("LocalGen");
 		if (select != 6)
+		{
+			int nScreenWidth, nScreenHeight;
+			nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 			initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, RENDER_AUTO);
+			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
+			setcaption("LocalGen");
+		}
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
 		cleardevice();
@@ -649,8 +654,8 @@ namespace LGGraphics
 				{
 					if (msg.is_left() && msg.is_down())
 					{
-						int col = (msg.x + 99 - 1100 * mapDataStore.mapSize) / (100 * mapDataStore.mapSize);
-						int lin = (msg.y + 99 - 450 * mapDataStore.mapSize) / (100 * mapDataStore.mapSize);
+						int col = (msg.x + (99 - 1100) * mapDataStore.mapSize) / (100 * mapDataStore.mapSize);
+						int lin = (msg.y + (99 - 450) * mapDataStore.mapSize) / (100 * mapDataStore.mapSize);
 						int num = (lin - 1) * 3 + col;
 						if (num <= plCnt && num > 0)
 						{

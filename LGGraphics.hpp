@@ -19,7 +19,7 @@ using namespace std;
 
 void exitExe();
 
-bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60)
+bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32)
 {
 	DEVMODE fullscreenSettings;
 	bool isChangeSuccessful;
@@ -29,7 +29,6 @@ bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), 
 	fullscreenSettings.dmPelsWidth = fullscreenWidth;
 	fullscreenSettings.dmPelsHeight = fullscreenHeight;
 	fullscreenSettings.dmBitsPerPel = colourBits;
-	fullscreenSettings.dmDisplayFrequency = refreshRate;
 	fullscreenSettings.dmFields = DM_PELSWIDTH |
 								  DM_PELSHEIGHT |
 								  DM_BITSPERPEL |
@@ -73,6 +72,12 @@ bool isdllOK();
 void toAvoidCEBugInGraphicsImportMap(string fileName);
 int returnMapNum();
 int GAME(bool isWeb, int cheatCode, int plCnt, int stDel);
+
+void ege_circle(int x, int y, int r)
+{
+	ege_ellipse(x - r, y - r, r << 1, r << 1);
+}
+
 namespace LGGraphics
 {
 	string fileName;
@@ -104,6 +109,7 @@ namespace LGGraphics
 	void initWindowSize()
 	{
 		initgraph(800, 600);
+		ege_enable_aa(true, NULL);
 		setcaption("LocalGen Windows Size Selection");
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
@@ -605,7 +611,7 @@ namespace LGGraphics
 					if (i == plCnt)
 					{
 						setcolor(RED);
-						circle((100 * columnNumber + 50) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, 50 * mapDataStore.mapSize);
+						ege_circle((100 * columnNumber + 50) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, 50 * mapDataStore.mapSize);
 						setcolor(BLUE);
 					}
 					xyprintf((100 * columnNumber + 50) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, "%d", i);
@@ -633,7 +639,7 @@ namespace LGGraphics
 					if (cheatCodeSelected[i])
 					{
 						setcolor(RED);
-						circle((1050 + 100 * columnNumber) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, 50 * mapDataStore.mapSize);
+						ege_circle((1050 + 100 * columnNumber) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, 50 * mapDataStore.mapSize);
 						setcolor(BLUE);
 					}
 				}

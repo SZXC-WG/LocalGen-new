@@ -167,7 +167,7 @@ namespace LGGraphics
 				break;
 			if (msg.is_left() && msg.is_down() && msg.x >= 900 * mapDataStore.mapSize && msg.x <= 1300 * mapDataStore.mapSize && msg.y >= 600 * mapDataStore.mapSize && msg.y <= 800 * mapDataStore.mapSize)
 			{
-				xyprintf(400 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, "Sorry! Multiplayer Mode is still developping.");
+				xyprintf(400 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, "Sorry! Multiplayer Mode is still developing.");
 				Sleep(4000);
 				exitExe();
 			}
@@ -556,7 +556,7 @@ namespace LGGraphics
 		int circlePos = 450 * mapDataStore.mapSize;
 		PIMAGE refreshCopy = newimage();
 		getimage(refreshCopy, 0, 0, 1600 * mapDataStore.mapSize, 340 * mapDataStore.mapSize);
-		setfont(20 * mapDataStore.mapSize, 0, "Segue UI");
+		setfont(20 * mapDataStore.mapSize, 0, "Segoe UI");
 		setcolor(BLUE);
 		bool changeMade = true;
 		int mouseDownCount = 0;
@@ -613,7 +613,7 @@ namespace LGGraphics
 				rectangle(900 * mapDataStore.mapSize, 30 * mapDataStore.mapSize, 1100 * mapDataStore.mapSize, 105 * mapDataStore.mapSize);
 				setfont(70 * mapDataStore.mapSize, 0, "Freestyle Script");
 				rectprintf(900 * mapDataStore.mapSize, 30 * mapDataStore.mapSize, 200 * mapDataStore.mapSize, 75 * mapDataStore.mapSize, "Start Game!");
-				setfont(20 * mapDataStore.mapSize, 0, "Segue UI");
+				setfont(20 * mapDataStore.mapSize, 0, "Segoe UI");
 				if (stDel != 0)
 					xyprintf(560 * mapDataStore.mapSize, 875 * mapDataStore.mapSize, "Speed Now: %d", stDel);
 				else

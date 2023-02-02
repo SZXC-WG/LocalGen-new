@@ -182,7 +182,7 @@ void printMap(int printCode, playerCoord coo)
 				if (isVisible(curx, cury, printCode))
 					putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
 				else
-					putimage_transparent(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
+					putimage_transparent(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[5]));
 				break;
 			}
 			case 3:

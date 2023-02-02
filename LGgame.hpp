@@ -436,9 +436,6 @@ struct gameStatus
 					case int(' '):
 						while (!kbmsg() || (getkey().key != ' '))
 							;
-					case int('c'):
-						clearance();
-						break;
 					case int('w'):
 						movement.emplace_back(1);
 						break;

@@ -49,6 +49,7 @@ struct movementS
 std::queue<movementS> movementPack;
 
 void Zip();
+void zipStatus(int playerCnt);
 void zipGame(long long totTurn);
 
 const int dx[5] = {0, -1, 0, 1, 0};
@@ -203,7 +204,7 @@ struct gameStatus
 		std::shuffle(gens.begin(), gens.end(), std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
 		for (int i = 1; i <= playerCnt; ++i)
 		{
-			coos[i] = genCoo[i] = gens[i - 1];
+			coos[i] = lastTurn[i] = genCoo[i] = gens[i - 1];
 			gameMap[genCoo[i].x][genCoo[i].y].team = i;
 			gameMap[genCoo[i].x][genCoo[i].y].army = 0;
 		}
@@ -230,6 +231,7 @@ struct gameStatus
 			}
 		}
 		gameMessage.push_back({p1, p2, curTurn});
+		lastTurn[p2]=playerCoord{-1,-1};
 	}
 
 	// struct for movement
@@ -251,6 +253,7 @@ struct gameStatus
 			break;
 		case 0:
 			coo = genCoo[id];
+			lastTurn[id]=coo;
 			break;
 		case 1 ... 4:
 		{
@@ -264,6 +267,7 @@ struct gameStatus
 			};
 			inlineMove.push_back(insMv);
 			coo = newCoo;
+			lastTurn[id]=coo;
 			break;
 		}
 		case 5 ... 8:
@@ -272,6 +276,7 @@ struct gameStatus
 			if (newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW)
 				return 1;
 			coo = newCoo;
+			lastTurn[id]=coo;
 			break;
 		}
 		default:
@@ -409,6 +414,8 @@ struct gameStatus
 			//			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
 			initGenerals(coordinate);
 			updateMap();
+			Zip();
+			zipStatus(playerCnt);
 			printMap(cheatCode, coordinate[1]);
 			std::deque<int> movement;
 			curTurn = 0;
@@ -502,12 +509,14 @@ struct gameStatus
 							}
 						}
 						gameMessage.push_back({1, 1, curTurn});
+						lastTurn[1]=playerCoord{-1,-1};
 						break;
 					}
 					}
 				}
 				updateMap();
 				while (!movement.empty() && analyzeMove(1, movement.front(), coordinate[1]))
+//					movementPack.push(movementS{1,movement.front(),curTurn});
 					movement.pop_front();
 				if (!movement.empty())
 					movement.pop_front();
@@ -519,17 +528,22 @@ struct gameStatus
 					{
 					case 1 ... 100:
 						analyzeMove(i, smartRandomBot::smartRandomBot(i, coordinate[i]), coordinate[i]);
+						movementPack.push(movementS{i,smartRandomBot::smartRandomBot(i, coordinate[i]),curTurn});
 						break;
 					case 101 ... 200:
 						analyzeMove(i, xrzBot::xrzBot(i, coordinate[i]), coordinate[i]);
+						movementPack.push(movementS{i,xrzBot::xrzBot(i, coordinate[i]),curTurn});
 						break;
 					case 201 ... 300:
 						analyzeMove(i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i]);
+						movementPack.push(movementS{i,xiaruizeBot::xiaruizeBot(i, coordinate[i]),curTurn});
 						break;
 					default:
 						analyzeMove(i, 0, coordinate[i]);
+						movementPack.push(movementS{i,0,curTurn});
 					}
 				}
+				if(curTurn%2000==0) Zip(),zipStatus(playerCnt);
 				flushMove();
 				if (cheatCode != 1048575)
 				{
@@ -559,6 +573,7 @@ struct gameStatus
 									 "YOU CAN PRESS [ESC] TO EXIT.")
 										.c_str(),
 									"GAME END", MB_OK | MB_SYSTEMMODAL);
+						zipGame(curTurn);
 						gameEnd = 1;
 						winnerNum = std::__lg(ed);
 						cheatCode = 1048575;

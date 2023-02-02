@@ -103,7 +103,7 @@ namespace LGGraphics
 	int select = 0;
 	void initWindowSize()
 	{
-		initgraph(800, 600, INIT_NOBORDER);
+		initgraph(800, 600);
 		setcaption("LocalGen Windows Size Selection");
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);

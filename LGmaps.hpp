@@ -26,7 +26,7 @@ using std::to_string;
 
 #define ll long long
 
-PIMAGE pimg[6];
+PIMAGE pimg[7];
 struct MapInfoS
 {
 	int id;
@@ -106,7 +106,7 @@ void printNum(bool visible, long long army, int team, int curx, int cury)
 			register long long absd = -army;
 			if (absd < 100)
 			{
-				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%lld", absd);
+				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%lld", army);
 			}
 			else if (absd < (ll)(1e13))
 			{
@@ -179,7 +179,10 @@ void printMap(int printCode, playerCoord coo)
 			}
 			case 2:
 			{ /* mountain */
-				putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
+				if (isVisible(curx, cury, printCode))
+					putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
+				else
+					putimage_transparent(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
 				break;
 			}
 			case 3:
@@ -194,14 +197,14 @@ void printMap(int printCode, playerCoord coo)
 				if (isVisible(curx, cury, printCode))
 					putimage_transparent(NULL, pimg[1], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[1]));
 				else
-					putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
+					putimage_transparent(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
 				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 				break;
 			}
 			}
 		}
 	}
-	putimage_transparent(NULL, pimg[5], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1), getpixel(0, 0, pimg[1]));
+	putimage_transparent(NULL, pimg[6], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1), getpixel(0, 0, pimg[1]));
 }
 
 void createRandomMap(int crtH = -1, int crtW = -1)

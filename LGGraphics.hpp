@@ -19,28 +19,29 @@ using namespace std;
 
 void exitExe();
 
-bool FullScreen(HWND hwnd, int fullscreenWidth=GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight=GetSystemMetrics(SM_CYSCREEN), int colourBits=32, int refreshRate=60) {
-    DEVMODE fullscreenSettings;
-    bool isChangeSuccessful;
-    RECT windowBoundary;
+bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60)
+{
+	DEVMODE fullscreenSettings;
+	bool isChangeSuccessful;
+	RECT windowBoundary;
 
-    EnumDisplaySettings(NULL, 0, &fullscreenSettings);
-    fullscreenSettings.dmPelsWidth        = fullscreenWidth;
-    fullscreenSettings.dmPelsHeight       = fullscreenHeight;
-    fullscreenSettings.dmBitsPerPel       = colourBits;
-    fullscreenSettings.dmDisplayFrequency = refreshRate;
-    fullscreenSettings.dmFields           = DM_PELSWIDTH |
-                                            DM_PELSHEIGHT |
-                                            DM_BITSPERPEL |
-                                            DM_DISPLAYFREQUENCY;
+	EnumDisplaySettings(NULL, 0, &fullscreenSettings);
+	fullscreenSettings.dmPelsWidth = fullscreenWidth;
+	fullscreenSettings.dmPelsHeight = fullscreenHeight;
+	fullscreenSettings.dmBitsPerPel = colourBits;
+	fullscreenSettings.dmDisplayFrequency = refreshRate;
+	fullscreenSettings.dmFields = DM_PELSWIDTH |
+								  DM_PELSHEIGHT |
+								  DM_BITSPERPEL |
+								  DM_DISPLAYFREQUENCY;
 
-    SetWindowLongPtr(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_TOPMOST);
-    SetWindowLongPtr(hwnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
-    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, fullscreenWidth, fullscreenHeight, SWP_SHOWWINDOW);
-    isChangeSuccessful = ChangeDisplaySettings(&fullscreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
-    ShowWindow(hwnd, SW_MAXIMIZE);
+	SetWindowLongPtr(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_TOPMOST);
+	SetWindowLongPtr(hwnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+	SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, fullscreenWidth, fullscreenHeight, SWP_SHOWWINDOW);
+	isChangeSuccessful = ChangeDisplaySettings(&fullscreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
+	ShowWindow(hwnd, SW_MAXIMIZE);
 
-    return isChangeSuccessful;
+	return isChangeSuccessful;
 }
 
 namespace imageOperation
@@ -542,6 +543,7 @@ namespace LGGraphics
 			copyMap(mapSelected);
 		}
 		GAME(0, cheatCode, plCnt, stDel);
+		exit(0);
 	}
 
 	void doMapImport()
@@ -725,7 +727,7 @@ namespace LGGraphics
 		pimg[5] = newimage();
 		getimage(pimg[5], "img/currentOn.png");
 		imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
-//		initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, INIT_RENDERMANUAL);
+		//		initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, INIT_RENDERMANUAL);
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
 		cleardevice();

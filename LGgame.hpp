@@ -102,7 +102,7 @@ struct gameStatus
 		setcolor(BLACK);
 		setfont(30 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
 		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 330 * LGGraphics::mapDataStore.mapSize, "GameMessage");
-		setfont(24 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
+		setfont(20 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
 		int tmp = 0;
 		for (gameMessageStore now : gameMessage)
 		{
@@ -413,7 +413,7 @@ struct gameStatus
 			std::deque<int> movement;
 			curTurn = 0;
 			bool gameEnd = 0;
-			for (; is_run(); delay_fps(std::min(stepDelay, 30)))
+			for (; is_run(); delay_fps(std::min(stepDelay, 40)))
 			{
 				while (mousemsg())
 				{
@@ -474,8 +474,11 @@ struct gameStatus
 						movement.clear();
 						break;
 					case 27:
+					{
 						MessageBoxA(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
+						closegraph();
 						return 0;
+					}
 					case int('\b'):
 					{
 						if (!isAlive[1])
@@ -561,8 +564,11 @@ struct gameStatus
 					}
 				}
 				printMap(cheatCode, coordinate[1]);
-				ranklist(coordinate);
-				printGameMessage();
+				if (curTurn % max(stepDelay / 10, 1) == 0)
+				{
+					ranklist(coordinate);
+					printGameMessage();
+				}
 				setcolor(BLACK);
 				// xyprintf(1450, 800, "FPS: %f", getfps());
 			}

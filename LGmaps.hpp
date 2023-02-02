@@ -64,19 +64,19 @@ struct teamS
 	int color;	 /* team color */
 };
 teamS defTeams[64] = {
-	{"White", 0xffffff},
-	{"Red", 0xff0000},
-	{"Aqua", 0x4363d8},
-	{"Green", 0x008000},
-	{"Emerald", 0x008080},
-	{"Orange", 0xf58231},
-	{"Pink", 0xf032e6},
-	{"Purple", 0x800080},
-	{"Maroon", 0x800000},
-	{"Yellow", 0xb09f30},
-	{"Khaki", 0x9a6324},
-	{"Blue", 0x0000ff},
-	{"Purple", 0x483d8b},
+	{"White", 0xffffffff},
+	{"Red", 0xffff0000},
+	{"Aqua", 0xff4363d8},
+	{"Green", 0xff008000},
+	{"Emerald", 0xff008080},
+	{"Orange", 0xfff58231},
+	{"Pink", 0xfff032e6},
+	{"Purple", 0xff800080},
+	{"Maroon", 0xff800000},
+	{"Yellow", 0xffb09f30},
+	{"Khaki", 0xff9a6324},
+	{"Blue", 0xff0000ff},
+	{"Purple", 0xff483d8b},
 };
 
 struct playerCoord
@@ -141,6 +141,10 @@ void printNum(bool visible, long long army, int team, int curx, int cury)
 
 void printMap(int printCode, playerCoord coo)
 {
+	static const color_t cscol = 0xff808080,
+	                     plcol = 0xffdcdcdc,
+	                     mtcol = 0xffbbbbbb,
+						 unseen = 0x1affffff;
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
 	// settextjustify(CENTER_TEXT, CENTER_TEXT);
@@ -152,17 +156,16 @@ void printMap(int printCode, playerCoord coo)
 			{
 				if (gameMap[curx][cury].team == 0)
 				{
-					setfillcolor(LIGHTGRAY);
-					if (gameMap[curx][cury].type == 1)
-						setfillcolor(DARKGRAY);
-					if (gameMap[curx][cury].type == 4)
-						setfillcolor(DARKGRAY);
+					if (gameMap[curx][cury].type == 0) setfillcolor(plcol);
+					else if (gameMap[curx][cury].type == 1) setfillcolor(cscol);
+					else if (gameMap[curx][cury].type == 2) setfillcolor(mtcol);
+					else if (gameMap[curx][cury].type == 4) setfillcolor(cscol);
 				}
 				else
 					setfillcolor(defTeams[gameMap[curx][cury].team].color);
 			}
 			else
-				setfillcolor(DARKGRAY);
+				setfillcolor(unseen);
 			bar(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock * cury, heightPerBlock * curx);
 			switch (gameMap[curx][cury].type)
 			{

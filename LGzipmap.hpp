@@ -24,6 +24,7 @@ char strdeZip[LEN_ZIP];
 char strZip[LEN_ZIP];
 char strGameZip[4 * LEN_ZIP];
 char strdeGameZip[4 * LEN_ZIP];
+char strStatusZip[4*LEN_ZIP];
 int curLen = 0;
 Block curMap[505][505];
 playerCoord mapCoord[17][30], curCoord[30];
@@ -150,7 +151,37 @@ void deZip()
 		}
 }
 
-void zipStatus(){
+void zipStatus(int playerCnt){
+	int p=0;
+	for(int i=1;i<=playerCnt;i++){
+		long long xx=lastTurn[i].x;
+		long long yy=lastTurn[i].y;
+		if(xx==yy&&xx==-1) goto specialPlug;
+		strStatusZip[p++] = PMod(xx) + CHAR_AD;
+		strStatusZip[p++] = PMod(xx) + CHAR_AD;
+		strStatusZip[p++] = PMod(yy) + CHAR_AD;
+		strStatusZip[p++] = PMod(yy) + CHAR_AD;
+		specialPlug:;
+		strStatusZip[p++] = 64 + CHAR_AD;
+		strStatusZip[p++] = 0 + CHAR_AD;
+		strStatusZip[p++] = 64 + CHAR_AD;
+		strStatusZip[p++] = 0 + CHAR_AD;
+	}
+	for (int i = 0; i < p; i++)
+	{
+		strGameZip[curLen++] = strStatusZip[i];
+	}
+}
+
+void deZipStatus(int st,int en,int cur){
+	for(int i=st,j=1;i<en;i+=4,j++){
+		if(strdeGameZip[i]==64+CHAR_AD){
+			mapCoord[cur][j]=playerCoord{-1,-1};
+		}else{
+			mapCoord[cur][j].x=(strdeGameZip[i]-CHAR_AD)<<6+strdeGameZip[i+1]-CHAR_AD;
+			mapCoord[cur][j].y=(strdeGameZip[i+2]-CHAR_AD)<<6+strdeGameZip[i+3]-CHAR_AD;
+		}
+	}
 }
 
 void zipGame(long long totTurn)
@@ -185,16 +216,7 @@ void zipGame(long long totTurn)
 	fclose(f);
 }
 
-void mapReset(int c)
-{
-	for (int i = 1; i <= mapH; i++)
-	{
-		for (int j = 1; j <= mapW; j++)
-			curMap[i][j] = mapSet[c][i][j];
-	}
-}
-
-void deZipGame()
+void deZipGame(int playerCnt)
 {
 	long long cur = 0, p = 0;
 	long long beg, fin;
@@ -213,9 +235,10 @@ void deZipGame()
 
 	while (1)
 	{
-		trans(beg, fin);
+		trans(beg, fin-playerCnt*4);
 		deZip();
 		retrans(++cur);
+		deZipStatus(fin-playerCnt*4,fin,cur);
 		if (signMap.empty())
 			break;
 		beg = fin;
@@ -223,7 +246,11 @@ void deZipGame()
 		signMap.pop();
 	}
 
-	mapReset(1);
+	for (int i = 1; i <= mapH; i++)
+	{
+		for (int j = 1; j <= mapW; j++)
+			curMap[i][j] = mapSet[1][i][j];
+	}
 
 	p = 0;
 	while (strdeGameZip[p] != 45)
@@ -267,30 +294,6 @@ void deZipGame()
 		beg = fin;
 		fin = signCmd.front();
 		signCmd.pop();
-	}
-}
-
-void initializeReplay(gameStatus &curStatus)
-{
-	for (int i = 1; i <= mapH; i++)
-	{
-		for (int j = 1; j <= mapW; j++)
-		{
-			if (curMap[i][j].type == 3)
-			{
-				mapCoord[1][curMap[i][j].team].x = curCoord[curMap[i][j].team].x = i;
-				mapCoord[1][curMap[i][j].team].y = curCoord[curMap[i][j].team].y = j;
-			}
-		}
-	}
-	for (int i = 1; i <= totMove; i++)
-	{
-		curStatus.analyzeMove(dezipedMovementS[i].id, dezipedMovementS[i].op, curCoord[dezipedMovementS[i].id]);
-		if (dezipedMovementS[i].turn % replaySorter == 0)
-		{
-			mapCoord[dezipedMovementS[i].turn / replaySorter + 1][dezipedMovementS[i].id].x = curCoord[dezipedMovementS[i].id].x;
-			mapCoord[dezipedMovementS[i].turn / replaySorter + 1][dezipedMovementS[i].id].y = curCoord[dezipedMovementS[i].id].y;
-		}
 	}
 }
 

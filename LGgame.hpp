@@ -429,6 +429,8 @@ struct gameStatus
 				while (kbmsg())
 				{
 					key_msg ch = getkey();
+					if (ch.msg == key_msg_up)
+						continue;
 					switch (ch.key)
 					{
 					case int(' '):

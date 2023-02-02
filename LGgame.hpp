@@ -361,8 +361,8 @@ struct gameStatus
 		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b)
 				  { return a.army > b.army; });
 		setfillcolor(WHITE);
-		bar(widthPerBlock * mapW, 0, 1600 * LGGraphics::mapDataStore.mapSize, 900 * LGGraphics::mapDataStore.mapSize);
-		bar(0, heightPerBlock * mapH, 1600 * LGGraphics::mapDataStore.mapSize, 900 * LGGraphics::mapDataStore.mapSize);
+		ege_fillrect(widthPerBlock * mapW, 0, 1600 * LGGraphics::mapDataStore.mapSize - widthPerBlock * mapW, 900 * LGGraphics::mapDataStore.mapSize);
+		ege_fillrect(0, heightPerBlock * mapH, 1600 * LGGraphics::mapDataStore.mapSize, 900 * LGGraphics::mapDataStore.mapSize - heightPerBlock * mapH);
 		setfont(30 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
 		setcolor(BLUE);
 		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 20 * LGGraphics::mapDataStore.mapSize, "Ranklist");

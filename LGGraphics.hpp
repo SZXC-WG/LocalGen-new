@@ -182,13 +182,13 @@ namespace LGGraphics
 		setcolor(BLUE);
 		xyprintf(380 * mapDataStore.mapSize, 0, "LocalGen");
 		setfillcolor(GREEN);
-		bar(300 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 700 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
+		ege_fillrect(300 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 400 * mapDataStore.mapSize, 200 * mapDataStore.mapSize);
 		setbkmode(TRANSPARENT);
 		setcolor(WHITE);
 		setfont(100 * mapDataStore.mapSize, 0, "Freestyle Script");
 		xyprintf(350 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "Single Player");
 		setfillcolor(RED);
-		bar(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 1300 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
+		ege_fillrect(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 400 * mapDataStore.mapSize, 200 * mapDataStore.mapSize);
 		xyprintf(950 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "MultiPlayer");
 		mouse_msg msg;
 		while (1)
@@ -210,13 +210,13 @@ namespace LGGraphics
 	void selectOrImportMap()
 	{
 		setfillcolor(BROWN);
-		bar(300 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 700 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
+		ege_fillrect(300 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 400 * mapDataStore.mapSize, 200 * mapDataStore.mapSize);
 		setbkmode(TRANSPARENT);
 		setcolor(WHITE);
 		setfont(100 * mapDataStore.mapSize, 0, "Freestyle Script");
 		xyprintf(350 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "Choose a Map");
 		setfillcolor(BROWN);
-		bar(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 1300 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
+		ege_fillrect(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 400 * mapDataStore.mapSize, 200 * mapDataStore.mapSize);
 		xyprintf(950 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "Import Map");
 		mouse_msg msg;
 		bool select;
@@ -620,7 +620,7 @@ namespace LGGraphics
 				}
 				rectprintf(560 * mapDataStore.mapSize, 350 * mapDataStore.mapSize, 380, 100, "Drag to Select the Speed of the Game");
 				setfillcolor(LIGHTGRAY);
-				bar(725 * mapDataStore.mapSize, 450 * mapDataStore.mapSize, 775 * mapDataStore.mapSize, 850 * mapDataStore.mapSize);
+				ege_fillrect(725 * mapDataStore.mapSize, 450 * mapDataStore.mapSize, 50 * mapDataStore.mapSize, 400 * mapDataStore.mapSize);
 				setfillcolor(BLUE);
 				fillellipsef(750 * mapDataStore.mapSize, circlePos, 30 * mapDataStore.mapSize, 30 * mapDataStore.mapSize);
 				rectprintf(1060 * mapDataStore.mapSize, 350 * mapDataStore.mapSize, 380 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Select the Players you want to watch Directly");

@@ -142,8 +142,8 @@ void printNum(bool visible, long long army, int team, int curx, int cury)
 void printMap(int printCode, playerCoord coo)
 {
 	static const color_t cscol = 0xff808080,
-	                     plcol = 0xffdcdcdc,
-	                     mtcol = 0xffbbbbbb,
+						 plcol = 0xffdcdcdc,
+						 mtcol = 0xffbbbbbb,
 						 unseen = 0x1affffff;
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
@@ -156,17 +156,21 @@ void printMap(int printCode, playerCoord coo)
 			{
 				if (gameMap[curx][cury].team == 0)
 				{
-					if (gameMap[curx][cury].type == 0) setfillcolor(plcol);
-					else if (gameMap[curx][cury].type == 1) setfillcolor(cscol);
-					else if (gameMap[curx][cury].type == 2) setfillcolor(mtcol);
-					else if (gameMap[curx][cury].type == 4) setfillcolor(cscol);
+					if (gameMap[curx][cury].type == 0)
+						setfillcolor(plcol);
+					else if (gameMap[curx][cury].type == 1)
+						setfillcolor(cscol);
+					else if (gameMap[curx][cury].type == 2)
+						setfillcolor(mtcol);
+					else if (gameMap[curx][cury].type == 4)
+						setfillcolor(cscol);
 				}
 				else
 					setfillcolor(defTeams[gameMap[curx][cury].team].color);
 			}
 			else
 				setfillcolor(unseen);
-			bar(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock * cury, heightPerBlock * curx);
+			ege_fillrect(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock, heightPerBlock);
 			switch (gameMap[curx][cury].type)
 			{
 			case 0:

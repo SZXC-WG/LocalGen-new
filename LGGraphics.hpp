@@ -726,10 +726,10 @@ namespace LGGraphics
 		imageOperation::zoomImage(pimg[4], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[5] = newimage();
 		getimage(pimg[5], "img/obstacle.png");
-		imageOperation::zoomImage(pimg[4], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[6] = newimage();
 		getimage(pimg[6], "img/currentOn.png");
-		imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		imageOperation::zoomImage(pimg[6], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		//		initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, INIT_RENDERMANUAL);
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);

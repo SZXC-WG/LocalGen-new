@@ -170,7 +170,7 @@ namespace LGGraphics
 			int nScreenWidth, nScreenHeight;
 			nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-			initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize);
+			initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, RENDER_AUTO);
 			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
 			setcaption("LocalGen");
 		}

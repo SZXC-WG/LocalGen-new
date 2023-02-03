@@ -394,7 +394,7 @@ struct gameStatus
 	}
 
 	// main
-	int operator()()
+	int playGame()
 	{
 		if (played)
 			return -1;
@@ -596,7 +596,8 @@ int GAME(bool isWeb, int cheatCode, int plCnt, int stDel)
 	//  hideCursor();
 	//  clearance();
 	//  gotoxy(1, 1);
-	int ret = gameStatus(isWeb, cheatCode, plCnt, stDel)();
+	gameStatus GAME(isWeb, cheatCode, plCnt, stDel);
+	int ret = GAME.playGame();
 	// setvbuf(stdout, nullptr, _IONBF, 0);
 	return ret;
 }

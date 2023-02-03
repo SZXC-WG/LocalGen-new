@@ -247,6 +247,7 @@ struct gameStatus
 	// movement analyzer
 	int analyzeMove(int id, int mv, playerCoord &coo)
 	{
+		movementPack.push(movementS{id,mv,curTurn});
 		switch (mv)
 		{
 		case -1:
@@ -513,7 +514,6 @@ struct gameStatus
 				}
 				updateMap();
 				while (!movement.empty() && analyzeMove(1, movement.front(), coordinate[1]))
-//					movementPack.push(movementS{1,movement.front(),curTurn});
 					movement.pop_front();
 				if (!movement.empty())
 					movement.pop_front();
@@ -525,19 +525,15 @@ struct gameStatus
 					{
 					case 1 ... 100:
 						analyzeMove(i, smartRandomBot::smartRandomBot(i, coordinate[i]), coordinate[i]);
-						movementPack.push(movementS{i,smartRandomBot::smartRandomBot(i, coordinate[i]),curTurn});
 						break;
 					case 101 ... 200:
 						analyzeMove(i, xrzBot::xrzBot(i, coordinate[i]), coordinate[i]);
-						movementPack.push(movementS{i,xrzBot::xrzBot(i, coordinate[i]),curTurn});
 						break;
 					case 201 ... 300:
 						analyzeMove(i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i]);
-						movementPack.push(movementS{i,xiaruizeBot::xiaruizeBot(i, coordinate[i]),curTurn});
 						break;
 					default:
 						analyzeMove(i, 0, coordinate[i]);
-						movementPack.push(movementS{i,0,curTurn});
 					}
 				}
 				if(curTurn%2000==0) Zip(),zipStatus(playerCnt);

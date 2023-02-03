@@ -144,7 +144,7 @@ void printMap(int printCode, playerCoord coo)
 	static const color_t cscol = 0xff808080,
 						 plcol = 0xffdcdcdc,
 						 mtcol = 0xffbbbbbb,
-						 unseen = 0xff2e2e2e;
+						 unseen = 0xff1a1a1a;
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
 	// settextjustify(CENTER_TEXT, CENTER_TEXT);

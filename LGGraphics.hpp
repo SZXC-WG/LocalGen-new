@@ -73,6 +73,12 @@ bool isdllOK();
 void toAvoidCEBugInGraphicsImportMap(string fileName);
 int returnMapNum();
 int GAME(bool isWeb, int cheatCode, int plCnt, int stDel);
+
+void ege_circle(int x, int y, int r)
+{
+	ege_ellipse(x - r, y - r, r << 1, r << 1);
+}
+
 namespace LGGraphics
 {
 	string fileName;
@@ -104,6 +110,7 @@ namespace LGGraphics
 	void initWindowSize()
 	{
 		initgraph(800, 600);
+		ege_enable_aa(true, NULL);
 		setcaption("LocalGen Windows Size Selection");
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
@@ -175,13 +182,13 @@ namespace LGGraphics
 		setcolor(BLUE);
 		xyprintf(380 * mapDataStore.mapSize, 0, "LocalGen");
 		setfillcolor(GREEN);
-		bar(300 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 700 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
+		ege_fillrect(300 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 400 * mapDataStore.mapSize, 200 * mapDataStore.mapSize);
 		setbkmode(TRANSPARENT);
 		setcolor(WHITE);
 		setfont(100 * mapDataStore.mapSize, 0, "Freestyle Script");
 		xyprintf(350 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "Single Player");
 		setfillcolor(RED);
-		bar(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 1300 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
+		ege_fillrect(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 400 * mapDataStore.mapSize, 200 * mapDataStore.mapSize);
 		xyprintf(950 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "MultiPlayer");
 		mouse_msg msg;
 		while (1)
@@ -203,13 +210,13 @@ namespace LGGraphics
 	void selectOrImportMap()
 	{
 		setfillcolor(BROWN);
-		bar(300 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 700 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
+		ege_fillrect(300 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 400 * mapDataStore.mapSize, 200 * mapDataStore.mapSize);
 		setbkmode(TRANSPARENT);
 		setcolor(WHITE);
 		setfont(100 * mapDataStore.mapSize, 0, "Freestyle Script");
 		xyprintf(350 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "Choose a Map");
 		setfillcolor(BROWN);
-		bar(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 1300 * mapDataStore.mapSize, 800 * mapDataStore.mapSize);
+		ege_fillrect(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 400 * mapDataStore.mapSize, 200 * mapDataStore.mapSize);
 		xyprintf(950 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "Import Map");
 		mouse_msg msg;
 		bool select;
@@ -605,7 +612,7 @@ namespace LGGraphics
 					if (i == plCnt)
 					{
 						setcolor(RED);
-						circle((100 * columnNumber + 50) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, 50 * mapDataStore.mapSize);
+						ege_circle((100 * columnNumber + 50) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, 50 * mapDataStore.mapSize);
 						setcolor(BLUE);
 					}
 					xyprintf((100 * columnNumber + 50) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, "%d", i);
@@ -613,7 +620,7 @@ namespace LGGraphics
 				}
 				rectprintf(560 * mapDataStore.mapSize, 350 * mapDataStore.mapSize, 380, 100, "Drag to Select the Speed of the Game");
 				setfillcolor(LIGHTGRAY);
-				bar(725 * mapDataStore.mapSize, 450 * mapDataStore.mapSize, 775 * mapDataStore.mapSize, 850 * mapDataStore.mapSize);
+				ege_fillrect(725 * mapDataStore.mapSize, 450 * mapDataStore.mapSize, 50 * mapDataStore.mapSize, 400 * mapDataStore.mapSize);
 				setfillcolor(BLUE);
 				fillellipsef(750 * mapDataStore.mapSize, circlePos, 30 * mapDataStore.mapSize, 30 * mapDataStore.mapSize);
 				rectprintf(1060 * mapDataStore.mapSize, 350 * mapDataStore.mapSize, 380 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Select the Players you want to watch Directly");
@@ -633,7 +640,7 @@ namespace LGGraphics
 					if (cheatCodeSelected[i])
 					{
 						setcolor(RED);
-						circle((1050 + 100 * columnNumber) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, 50 * mapDataStore.mapSize);
+						ege_circle((1050 + 100 * columnNumber) * mapDataStore.mapSize, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSize, 50 * mapDataStore.mapSize);
 						setcolor(BLUE);
 					}
 				}

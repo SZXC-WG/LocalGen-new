@@ -61,7 +61,7 @@ int widthPerBlock, heightPerBlock;
 struct teamS
 {
 	string name; /* team name */
-	int color;	 /* team color */
+	unsigned int color;	 /* team color */
 };
 teamS defTeams[64] = {
 	{"White", 0xffffffff},

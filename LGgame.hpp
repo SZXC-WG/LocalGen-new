@@ -231,7 +231,7 @@ struct gameStatus
 			}
 		}
 		gameMessage.push_back({p1, p2, curTurn});
-		lastTurn[p2]=playerCoord{-1,-1};
+		lastTurn[p2] = playerCoord{-1, -1};
 	}
 
 	// struct for movement
@@ -247,14 +247,14 @@ struct gameStatus
 	// movement analyzer
 	int analyzeMove(int id, int mv, playerCoord &coo)
 	{
-		movementPack.push(movementS{id,mv,curTurn});
+		movementPack.push(movementS{id, mv, curTurn});
 		switch (mv)
 		{
 		case -1:
 			break;
 		case 0:
 			coo = genCoo[id];
-			lastTurn[id]=coo;
+			lastTurn[id] = coo;
 			break;
 		case 1 ... 4:
 		{
@@ -268,7 +268,7 @@ struct gameStatus
 			};
 			inlineMove.push_back(insMv);
 			coo = newCoo;
-			lastTurn[id]=coo;
+			lastTurn[id] = coo;
 			break;
 		}
 		case 5 ... 8:
@@ -277,7 +277,7 @@ struct gameStatus
 			if (newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW)
 				return 1;
 			coo = newCoo;
-			lastTurn[id]=coo;
+			lastTurn[id] = coo;
 			break;
 		}
 		default:
@@ -437,13 +437,15 @@ struct gameStatus
 				while (kbmsg())
 				{
 					key_msg ch = getkey();
+					if (ch.key == key_space)
+					{
+						while ((!kbmsg) || (getkey().key != key_space))
+							;
+					}
 					if (ch.msg == key_msg_up)
 						continue;
 					switch (ch.key)
 					{
-					case int(' '):
-						while (!kbmsg() || (getkey().key != ' '))
-							;
 					case int('w'):
 						movement.emplace_back(1);
 						break;
@@ -507,7 +509,7 @@ struct gameStatus
 							}
 						}
 						gameMessage.push_back({1, 1, curTurn});
-						lastTurn[1]=playerCoord{-1,-1};
+						lastTurn[1] = playerCoord{-1, -1};
 						break;
 					}
 					}
@@ -536,7 +538,8 @@ struct gameStatus
 						analyzeMove(i, 0, coordinate[i]);
 					}
 				}
-				if(curTurn%2000==0) Zip(),zipStatus(playerCnt);
+				if (curTurn % 2000 == 0)
+					Zip(), zipStatus(playerCnt);
 				flushMove();
 				if (cheatCode != 1048575)
 				{

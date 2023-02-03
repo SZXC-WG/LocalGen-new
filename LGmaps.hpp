@@ -60,8 +60,8 @@ int widthPerBlock, heightPerBlock;
 
 struct teamS
 {
-	string name; /* team name */
-	unsigned int color;	 /* team color */
+	string name;		/* team name */
+	unsigned int color; /* team color */
 };
 teamS defTeams[64] = {
 	{"White", 0xffffffff},
@@ -180,31 +180,31 @@ void printMap(int printCode, playerCoord coo)
 			}
 			case 1:
 			{ /* swamp */
-				putimage_transparent(NULL, pimg[4], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[4]));
+				putimage_withalpha(NULL, pimg[4], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
 				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 				break;
 			}
 			case 2:
 			{ /* mountain */
 				if (isVisible(curx, cury, printCode))
-					putimage_transparent(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
+					putimage_withalpha(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
 				else
-					putimage_transparent(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[5]));
+					putimage_withalpha(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
 				break;
 			}
 			case 3:
 			{ /* general */
 				if (isVisible(curx, cury, printCode))
-					putimage_transparent(NULL, pimg[2], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[2]));
+					putimage_withalpha(NULL, pimg[2], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
 				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 				break;
 			}
 			case 4:
 			{ /* city */
 				if (isVisible(curx, cury, printCode))
-					putimage_transparent(NULL, pimg[1], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[1]));
+					putimage_withalpha(NULL, pimg[1], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
 				else
-					putimage_transparent(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), getpixel(0, 0, pimg[3]));
+					putimage_withalpha(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
 				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 				break;
 			}

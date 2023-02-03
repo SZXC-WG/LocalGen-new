@@ -62,7 +62,7 @@ void sockListen(){
 }
 
 void procMessage(){
-	
+	if()
 }
 
 void sockBroadcast(){

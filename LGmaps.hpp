@@ -211,7 +211,7 @@ void printMap(int printCode, playerCoord coo)
 			}
 		}
 	}
-	putimage_transparent(NULL, pimg[6], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1), getpixel(0, 0, pimg[1]));
+	putimage_withalpha(NULL, pimg[6], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1));
 }
 
 void createRandomMap(int crtH = -1, int crtW = -1)

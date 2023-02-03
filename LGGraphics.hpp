@@ -109,7 +109,7 @@ namespace LGGraphics
 	int select = 0;
 	void initWindowSize()
 	{
-		initgraph(800, 600);
+		initgraph(800, 600, RENDER_MANUAL);
 		ege_enable_aa(true, NULL);
 		setcaption("LocalGen Windows Size Selection");
 		setbkcolor(WHITE);
@@ -127,7 +127,7 @@ namespace LGGraphics
 				xyprintf(10, 130, "Please Select Window Size:");
 				setfont(40, 0, "Freestyle Script");
 				for (int i = 200; i <= 500; i += 100)
-					xyprintf(200, 180 + i / 5 * 2, "%d * %d", i * 4, i * 3);
+					xyprintf(200, 180 + i / 5 * 2, "%d * %d", i * 4, i * 9 / 4);
 				xyprintf(200, 420, "Auto Fit");
 				if (select > 1)
 				{
@@ -170,7 +170,7 @@ namespace LGGraphics
 			int nScreenWidth, nScreenHeight;
 			nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-			initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, RENDER_AUTO);
+			initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, RENDER_MANUAL);
 			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
 			setcaption("LocalGen");
 		}
@@ -190,8 +190,9 @@ namespace LGGraphics
 		setfillcolor(RED);
 		ege_fillrect(900 * mapDataStore.mapSize, 600 * mapDataStore.mapSize, 400 * mapDataStore.mapSize, 200 * mapDataStore.mapSize);
 		xyprintf(950 * mapDataStore.mapSize, 650 * mapDataStore.mapSize, "MultiPlayer");
+		delay_ms(0);
 		mouse_msg msg;
-		while (1)
+		for (; is_run(); delay_fps(120))
 		{
 			msg = getmouse();
 			// xyprintf(750, 650, "Mouse!");
@@ -622,7 +623,7 @@ namespace LGGraphics
 				setfillcolor(LIGHTGRAY);
 				ege_fillrect(725 * mapDataStore.mapSize, 450 * mapDataStore.mapSize, 50 * mapDataStore.mapSize, 400 * mapDataStore.mapSize);
 				setfillcolor(BLUE);
-				fillellipsef(750 * mapDataStore.mapSize, circlePos, 30 * mapDataStore.mapSize, 30 * mapDataStore.mapSize);
+				ege_fillellipse(720 * mapDataStore.mapSize, circlePos - 30 * mapDataStore.mapSize, 60 * mapDataStore.mapSize, 60 * mapDataStore.mapSize);
 				rectprintf(1060 * mapDataStore.mapSize, 350 * mapDataStore.mapSize, 380 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Select the Players you want to watch Directly");
 				for (int i = 1; i <= 12; i++)
 				{

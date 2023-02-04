@@ -399,6 +399,44 @@ struct gameStatus
 	char sendBuf[SSL],recvBuf[SSL];
 	SOCKET clientSocket;
 	
+	void sockConnect(){
+		if(initSock())
+		return ;
+		
+		clientSocket=socket(AF_INET,SOCK_STREAM,0);
+		SOCKADDR_IN connectAddr;
+		connectAddr.sin_family=AF_INET;
+		connectAddr.sin_addr.S_un.S_addr=inet_addr("192.168.32.35");
+		connectAddr.sin_port=htons(SKPORT);
+		int res=connect(clientSocket,(LPSOCKADDR)&connectAddr,sizeof(connectAddr));
+		u_long iMode=1;
+		ioctlsocket(clientSocket,FIONBIO,&iMode);
+		
+		if(res==SOCKET_ERROR){
+			failSock|=4;
+			WSACleanup();
+			return ;
+		}return ;
+	}
+	
+	void procMessage(){
+		
+	}
+	
+	void sockMessage(){
+		std::lock_guard<std::mutex> mGuard(mLock);
+		send(clientSocket,sendBuf,sizeof(sendBuf),0);
+		memset(sendBuf,0,sizeof(sendBuf));
+	}
+	
+	void sockCollect(){
+		std::lock_guard<std::mutex> mGuard(mLock);
+		int res=recv(clientSocket,recvBuf,sizeof(recvBuf),0);
+		
+		if(res>0){
+		}memset(recvBuf,0,sizeof(recvBuf));
+	}
+	
 	// main
 	int playGame()
 	{
@@ -590,16 +628,7 @@ struct gameStatus
 				// xyprintf(1450, 800, "FPS: %f", getfps());
 			}
 		}else{
-			int robotId[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-			for (int i = 2; i <= playerCnt; ++i)
-				robotId[i] = mtrd() % 300 + 1;
-			//			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
-			//			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
-			initGenerals(coordinate);
-			updateMap();
-			Zip();
-			zipStatus(playerCnt);
 			printMap(cheatCode, coordinate[1]);
 			curTurn = 0;
 			bool gameEnd = 0;
@@ -696,11 +725,15 @@ struct gameStatus
 					}
 					}
 				}
-				updateMap();
+				
 				while (!movement.empty() && analyzeMove(1, movement.front(), coordinate[1]))
 					movement.pop_front();
 				if (!movement.empty())
 					movement.pop_front();
+				
+				sockCollect();
+				dezipStatus();
+				
 				for (int i = 2; i <= playerCnt; ++i)
 				{
 					if (!isAlive[i])
@@ -765,7 +798,6 @@ struct gameStatus
 					printGameMessage();
 				}
 				setcolor(BLACK);
-				// xyprintf(1450, 800, "FPS: %f", getfps());
 			}
 		}
 		return 0;

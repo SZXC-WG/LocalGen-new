@@ -19,5 +19,6 @@
 #include "Bot/xiaruizeBot.hpp"
 #include "Bot/xrzBot.hpp"
 #include "Bot/smartRandomBot.hpp"
+#include "Bot/lcwBot.hpp"
 
 #endif

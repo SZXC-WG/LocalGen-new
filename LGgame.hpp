@@ -453,7 +453,7 @@ struct gameStatus
 			int robotId[64];
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 			for (int i = 2; i <= playerCnt; ++i)
-				robotId[i] = mtrd() % 300 + 1;
+				robotId[i] = mtrd() % 400 + 1;
 			//			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
 			//			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
 			initGenerals(coordinate);
@@ -575,6 +575,9 @@ struct gameStatus
 						break;
 					case 201 ... 300:
 						analyzeMove(i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i]);
+						break;
+					case 301 ... 400:
+						analyzeMove(i, lcwBot::lcwBot(i, coordinate[i]), coordinate[i]);
 						break;
 					default:
 						analyzeMove(i, 0, coordinate[i]);

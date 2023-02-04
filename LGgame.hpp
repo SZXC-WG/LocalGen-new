@@ -30,7 +30,7 @@ using namespace std::literals;
 // #include <conio.h>
 // #include<graphics.h>
 //  project headers
-#include "LGweb.hpp" 
+#include "LGweb.hpp"
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
 // Bot header
@@ -149,14 +149,14 @@ struct gameStatus
 				case 0:
 				{
 					/* plain */
-					if (curTurn % 25 == 0)
+					if (curTurn % 50 == 0)
 						++gameMap[i][j].army;
 					break;
 				}
 				case 1:
 				{
 					/* swamp */
-					if (gameMap[i][j].army > 0)
+					if (curTurn % 2 == 0 && gameMap[i][j].army > 0)
 						if (!(--gameMap[i][j].army))
 							gameMap[i][j].team = 0;
 					break;
@@ -166,13 +166,15 @@ struct gameStatus
 				case 3:
 				{
 					/* general */
-					++gameMap[i][j].army;
+					if (curTurn % 2 == 0)
+						++gameMap[i][j].army;
 					break;
 				}
 				case 4:
 				{
 					/* city */
-					++gameMap[i][j].army;
+					if (curTurn % 2 == 0)
+						++gameMap[i][j].army;
 					break;
 				}
 				}
@@ -218,7 +220,7 @@ struct gameStatus
 	void kill(int p1, int p2)
 	{
 		if (p2 == 1)
-			MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
+			MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn / 2) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
 		isAlive[p2] = 0;
 		for (int i = 1; i <= mapH; ++i)
 		{
@@ -231,7 +233,7 @@ struct gameStatus
 				}
 			}
 		}
-		gameMessage.push_back({p1, p2, curTurn});
+		gameMessage.push_back({p1, p2, curTurn / 2});
 		lastTurn[p2] = playerCoord{-1, -1};
 	}
 
@@ -393,50 +395,57 @@ struct gameStatus
 			}
 		}
 	}
-	
+
 	playerCoord coordinate[64];
 	std::deque<int> movement;
-	char sendBuf[SSL],recvBuf[SSL];
+	char sendBuf[SSL], recvBuf[SSL];
 	SOCKET clientSocket;
-	
-	void sockConnect(){
-		if(initSock())
-		return ;
-		
-		clientSocket=socket(AF_INET,SOCK_STREAM,0);
+
+	void sockConnect()
+	{
+		if (initSock())
+			return;
+
+		clientSocket = socket(AF_INET, SOCK_STREAM, 0);
 		SOCKADDR_IN connectAddr;
-		connectAddr.sin_family=AF_INET;
-		connectAddr.sin_addr.S_un.S_addr=inet_addr("192.168.32.35");
-		connectAddr.sin_port=htons(SKPORT);
-		int res=connect(clientSocket,(LPSOCKADDR)&connectAddr,sizeof(connectAddr));
-		u_long iMode=1;
-		ioctlsocket(clientSocket,FIONBIO,&iMode);
-		
-		if(res==SOCKET_ERROR){
-			failSock|=4;
+		connectAddr.sin_family = AF_INET;
+		connectAddr.sin_addr.S_un.S_addr = inet_addr("192.168.32.35");
+		connectAddr.sin_port = htons(SKPORT);
+		int res = connect(clientSocket, (LPSOCKADDR)&connectAddr, sizeof(connectAddr));
+		u_long iMode = 1;
+		ioctlsocket(clientSocket, FIONBIO, &iMode);
+
+		if (res == SOCKET_ERROR)
+		{
+			failSock |= 4;
 			WSACleanup();
-			return ;
-		}return ;
+			return;
+		}
+		return;
 	}
-	
-	void procMessage(){
-		
+
+	void procMessage()
+	{
 	}
-	
-	void sockMessage(){
+
+	void sockMessage()
+	{
 		std::lock_guard<std::mutex> mGuard(mLock);
-		send(clientSocket,sendBuf,sizeof(sendBuf),0);
-		memset(sendBuf,0,sizeof(sendBuf));
+		send(clientSocket, sendBuf, sizeof(sendBuf), 0);
+		memset(sendBuf, 0, sizeof(sendBuf));
 	}
-	
-	void sockCollect(){
+
+	void sockCollect()
+	{
 		std::lock_guard<std::mutex> mGuard(mLock);
-		int res=recv(clientSocket,recvBuf,sizeof(recvBuf),0);
-		
-		if(res>0){
-		}memset(recvBuf,0,sizeof(recvBuf));
+		int res = recv(clientSocket, recvBuf, sizeof(recvBuf), 0);
+
+		if (res > 0)
+		{
+		}
+		memset(recvBuf, 0, sizeof(recvBuf));
 	}
-	
+
 	// main
 	int playGame()
 	{
@@ -550,7 +559,7 @@ struct gameStatus
 								}
 							}
 						}
-						gameMessage.push_back({1, 1, curTurn});
+						gameMessage.push_back({1, 1, curTurn / 2});
 						lastTurn[1] = playerCoord{-1, -1};
 						break;
 					}
@@ -618,7 +627,7 @@ struct gameStatus
 						gameEnd = 1;
 						winnerNum = std::__lg(ed);
 						cheatCode = 1048575;
-						gameMessage.push_back({-1, -1, curTurn});
+						gameMessage.push_back({-1, -1, curTurn / 2});
 					}
 				}
 				printMap(cheatCode, coordinate[1]);
@@ -630,7 +639,9 @@ struct gameStatus
 				setcolor(BLACK);
 				// xyprintf(1450, 800, "FPS: %f", getfps());
 			}
-		}else{
+		}
+		else
+		{
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 			printMap(cheatCode, coordinate[1]);
 			curTurn = 0;
@@ -722,21 +733,21 @@ struct gameStatus
 								}
 							}
 						}
-						gameMessage.push_back({1, 1, curTurn});
+						gameMessage.push_back({1, 1, curTurn / 2});
 						lastTurn[1] = playerCoord{-1, -1};
 						break;
 					}
 					}
 				}
-				
+
 				while (!movement.empty() && analyzeMove(1, movement.front(), coordinate[1]))
 					movement.pop_front();
 				if (!movement.empty())
 					movement.pop_front();
-				
+
 				sockCollect();
 				dezipStatus();
-				
+
 				for (int i = 2; i <= playerCnt; ++i)
 				{
 					if (!isAlive[i])
@@ -791,7 +802,7 @@ struct gameStatus
 						gameEnd = 1;
 						winnerNum = std::__lg(ed);
 						cheatCode = 1048575;
-						gameMessage.push_back({-1, -1, curTurn});
+						gameMessage.push_back({-1, -1, curTurn / 2});
 					}
 				}
 				printMap(cheatCode, coordinate[1]);

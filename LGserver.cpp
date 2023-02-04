@@ -234,7 +234,7 @@ int serverGame(){
 
 //Main
 signed main(){
-	initattr();
+//	initattr();
 	puts("This is the server of LocalGenerals.");
 	puts("Press any buttom to start the server.");
 	char ch;

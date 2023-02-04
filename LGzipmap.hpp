@@ -25,6 +25,7 @@ char strZip[LEN_ZIP];
 char strGameZip[4 * LEN_ZIP];
 char strdeGameZip[4 * LEN_ZIP];
 char strStatusZip[4*LEN_ZIP];
+char strdeStatusZip[4*LEN_ZIP];
 int curLen = 0;
 Block curMap[505][505];
 playerCoord mapCoord[17][30], curCoord[30];
@@ -175,7 +176,7 @@ void zipStatus(int playerCnt){
 
 void deZipStatus(int st,int en,int cur){
 	for(int i=st,j=1;i<en;i+=4,j++){
-		if(strdeGameZip[i]==64+CHAR_AD){
+		if(strdeStatusZip[i]==64+CHAR_AD){
 			mapCoord[cur][j]=playerCoord{-1,-1};
 		}else{
 			mapCoord[cur][j].x=(strdeGameZip[i]-CHAR_AD)<<6+strdeGameZip[i+1]-CHAR_AD;

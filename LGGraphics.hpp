@@ -152,7 +152,7 @@ namespace LGGraphics
 	finishSelect:
 		if (select == 6)
 		{
-			movewindow(0, 0, false);
+//			movewindow(0, 0, false);
 			resizewindow(-1, -1);
 			FullScreen(getHWnd());
 			int w = getmaxx(), h = getmaxy();
@@ -171,7 +171,7 @@ namespace LGGraphics
 			nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 			initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, RENDER_AUTO);
-			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
+//			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
 			setcaption("LocalGen");
 		}
 		setbkcolor(WHITE);

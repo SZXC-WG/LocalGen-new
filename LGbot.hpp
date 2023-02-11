@@ -19,7 +19,7 @@
 #include "Bot/xiaruizeBot.hpp"
 #include "Bot/xrzBot.hpp"
 #include "Bot/smartRandomBot.hpp"
-#include "Bot/lcwBot.hpp"
+//#include "Bot/lcwBot.hpp"
 
 string botName[] = {
 	"HUMAN",

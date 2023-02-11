@@ -385,12 +385,12 @@ struct gameStatus
 				setcolor(BLACK);
 			if (rklst[i].army < 1000000000)
 			{
-				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (60 + i * 20) * LGGraphics::mapDataStore.mapSize, "%7s %8lld %5d %5d %5d %13lld %-15s", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand, botName[robotId[i]/100+1].c_str());
+				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (60 + i * 20) * LGGraphics::mapDataStore.mapSize, "%7s %8lld %5d %5d %5d %13lld %-15s", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand, botName[robotId[rklst[i].id]/100+1].c_str());
 			}
 			else
 			{
 				register int p = std::to_string(rklst[i].army * 1.0L / 1e9L).find('.');
-				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (60 + i * 20) * LGGraphics::mapDataStore.mapSize, "%7s %*.*LfG %5d %5d %5d %13lld %-15s", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand, botName[robotId[i]/100+1].c_str());
+				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (60 + i * 20) * LGGraphics::mapDataStore.mapSize, "%7s %*.*LfG %5d %5d %5d %13lld %-15s", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand, botName[robotId[rklst[i].id]/100+1].c_str());
 			}
 		}
 	}
@@ -452,8 +452,9 @@ struct gameStatus
 		if (!isWeb)
 		{
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+			robotId[1] = -100;
 			for (int i = 2; i <= playerCnt; ++i)
-				robotId[i] = mtrd() % 400 + 1;
+				robotId[i] = mtrd() % 400;
 			//			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
 			//			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
 			initGenerals(coordinate);
@@ -567,16 +568,16 @@ struct gameStatus
 						continue;
 					switch (robotId[i])
 					{
-					case 1 ... 100:
+					case 0 ... 99:
 						analyzeMove(i, smartRandomBot::smartRandomBot(i, coordinate[i]), coordinate[i]);
 						break;
-					case 101 ... 200:
+					case 100 ... 199:
 						analyzeMove(i, xrzBot::xrzBot(i, coordinate[i]), coordinate[i]);
 						break;
-					case 201 ... 300:
+					case 200 ... 299:
 						analyzeMove(i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i]);
 						break;
-					case 301 ... 400:
+					case 300 ... 399:
 						analyzeMove(i, lcwBot::lcwBot(i, coordinate[i]), coordinate[i]);
 						break;
 					default:

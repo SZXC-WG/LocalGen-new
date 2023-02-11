@@ -227,7 +227,7 @@ namespace lcwBot
             cnt[i] += getCnt(nextPos, i);
             isEx = 0;
             
-            if (mtrd() % cnt[i] == 0)
+            if (mtrd() % cnt == 0)
             {
                 previousPos[id] = player;
                 return i;

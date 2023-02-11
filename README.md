@@ -1,8 +1,6 @@
 # Local Generals.io (new version)
 
-> We're developing a new version of LocalGen here!  
-> It will be totally different from the previous versions (except the game rules).
-> The new version will be tagged from `v1.0.0`.
+> Warning: This project is going to be deprecated. We will still maintain this project until [the new project](http://github.com/LocalGen-dev/LocalGen-vs)'s development is complete.
 
 Welcome to the project of Local Generals.io!
 

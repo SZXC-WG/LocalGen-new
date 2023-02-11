@@ -464,7 +464,7 @@ struct gameStatus
 			printMap(cheatCode, coordinate[1]);
 			curTurn = 0;
 			bool gameEnd = 0;
-			for (; is_run(); delay_fps(std::min(stepDelay, 40)))
+			for (; is_run(); delay_fps(std::min(stepDelay, 60)))
 			{
 				while (mousemsg())
 				{

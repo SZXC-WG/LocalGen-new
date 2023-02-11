@@ -21,4 +21,12 @@
 #include "Bot/smartRandomBot.hpp"
 #include "Bot/lcwBot.hpp"
 
+string botName[] = {
+	"HUMAN",
+	"smartRandomBot",
+	"xrzBot",
+	"xiaruizeBot",
+	"lcwBot",
+}; 
+
 #endif

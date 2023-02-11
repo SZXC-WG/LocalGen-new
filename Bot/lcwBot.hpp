@@ -53,7 +53,6 @@ namespace lcwBot
     {
     	if(isEx){
     		int checkOrder[5] = {0, 1, 2, 3, 4};
-	        srand(time(0));
 	        static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 //	        armyNow = gameMap[player.x][player.y].army;
 //	        id = ind;
@@ -228,7 +227,7 @@ namespace lcwBot
             cnt[i] += getCnt(nextPos, i);
             isEx = 0;
             
-            if (mtrd() % cnt == 0)
+            if (mtrd() % cnt[i] == 0)
             {
                 previousPos[id] = player;
                 return i;

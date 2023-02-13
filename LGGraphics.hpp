@@ -19,6 +19,45 @@ using namespace std;
 
 void exitExe();
 
+struct GBUTTON {
+	PIMAGE button;
+	int hei, wid;
+	color_t bgcol;
+	color_t txtcol;
+	string text;
+	
+	explicit GBUTTON() = default;
+	~GBUTTON() = default;
+	GBUTTON(int h, int w) {
+		hei = h, wid = w;
+		button = newimage(h, w);
+	}
+	GBUTTON(GBUTTON&& but) {
+		delimage(button);
+		button = but.button;
+		hei = but.hei, wid = but.wid;
+		bgcol = but.bgcol, txtcol = but.txtcol;
+		text = but.text;
+	}
+	GBUTTON(const GBUTTON& but) {
+		delimage(button);
+		button = but.button;
+		hei = but.hei, wid = but.wid;
+		bgcol = but.bgcol, txtcol = but.txtcol;
+		text = but.text;
+	}
+	inline void draw() {
+		setcolor(bgcol,button);
+		ege_rectangle(0.0f,0.0f,hei,wid,button);
+		setcolor(txtcol,button);
+		settextjustify(CENTER_TEXT,CENTER_TEXT,button);
+		outtextxy(hei/2,wid/2,text.c_str(),button);
+	}
+	inline void setbgcol(color_t col) { bgcol=col; draw(); }
+	inline void settxtcol(color_t col) { txtcol=col; draw(); }
+	inline void settext(string txt) { text=txt; draw(); }
+};
+
 bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60)
 {
 	DEVMODE fullscreenSettings;

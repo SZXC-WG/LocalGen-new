@@ -10,6 +10,7 @@ namespace smartRandomBot
     int smartRandomBot(int id, playerCoord coo)
     {
         static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+        static playerCoord lastCoord[20]; 
         if (gameMap[coo.x][coo.y].team != id || gameMap[coo.x][coo.y].army == 0)
             return 0;
         struct node
@@ -17,18 +18,22 @@ namespace smartRandomBot
             int type, team;
             long long army;
             int dir;
+			bool isLast;
         };
         node p[5];
         int pl = 0;
         for (int i = 1; i <= 4; ++i)
         {
-            if (coo.x + dx[i] < 1 || coo.x + dx[i] > mapH || coo.y + dy[i] < 1 || coo.y + dy[i] > mapW || gameMap[coo.x + dx[i]][coo.y + dy[i]].type == 2)
+        	register int nx = coo.x + dx[i], ny = coo.y + dy[i]; 
+            if (nx < 1 || nx > mapH || ny < 1 || ny > mapW || gameMap[nx][ny].type == 2)
                 continue;
-            p[++pl] = {gameMap[coo.x + dx[i]][coo.y + dy[i]].type, gameMap[coo.x + dx[i]][coo.y + dy[i]].team, gameMap[coo.x + dx[i]][coo.y + dy[i]].army, i};
+            p[++pl] = {gameMap[nx][ny].type, gameMap[nx][ny].team, gameMap[nx][ny].army, i, lastCoord[id] == playerCoord{nx, ny}};
         }
         bool rdret = mtrd() % 2;
         auto cmp = [&](node a, node b) -> bool
         {
+        	if (a.isLast) return false;
+        	if (b.isLast) return true;
             if (a.type == 3 && a.team != id)
                 return true;
             if (b.type == 3 && b.team != id)
@@ -46,6 +51,7 @@ namespace smartRandomBot
             return a.army < b.army;
         };
         std::sort(p + 1, p + pl + 1, cmp);
+        lastCoord[id] = coo;
         return p[1].dir;
     }
 }

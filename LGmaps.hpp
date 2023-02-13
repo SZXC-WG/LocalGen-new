@@ -83,6 +83,9 @@ struct playerCoord
 {
 	int x, y;
 };
+bool operator== (playerCoord a,playerCoord b) {
+	return a.x==b.x&&a.y==b.y;
+}
 
 const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
 bool isVisible(int x, int y, int printCode)

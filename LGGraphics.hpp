@@ -19,15 +19,22 @@ using namespace std;
 
 void exitExe();
 
+// struct for buttons
 struct GBUTTON {
-	PIMAGE button;
-	int hei, wid;
-	color_t bgcol;
-	color_t txtcol;
-	string text;
+	PIMAGE button; // image info
+	int hei, wid; // height & width
+	color_t bgcol; // background color
+	color_t txtcol; // text color
+	string text; // text
+	string font; // font face name
+	int fonthei, fontwid; // font height & width
+	int halign, walign; // align method
+	int hloc, wloc; // location on screen
+	std::function<void()> clickEvent; // event when clicked
+	int status; // button status: free(0) / cursor-on(1) / clicked(2)
 	
-	explicit GBUTTON() = default;
-	~GBUTTON() = default;
+	explicit GBUTTON() = default; // default constructor
+	~GBUTTON() = default; // default destructor
 	GBUTTON(int h, int w) {
 		hei = h, wid = w;
 		button = newimage(h, w);
@@ -47,15 +54,46 @@ struct GBUTTON {
 		text = but.text;
 	}
 	inline void draw() {
-		setcolor(bgcol,button);
-		ege_rectangle(0.0f,0.0f,hei,wid,button);
-		setcolor(txtcol,button);
-		settextjustify(CENTER_TEXT,CENTER_TEXT,button);
-		outtextxy(hei/2,wid/2,text.c_str(),button);
+		delimage(button);
+		button = newimage(hei, wid);
+		setbkmode(TRANSPARENT, button);
+		setfillcolor(bgcol, button);
+		ege_fillrect(0, 0, hei, wid, button);
+		setcolor(txtcol, button);
+		setfont(fonthei, fontwid, font.c_str(), button);
+		settextjustify(walign, halign, button);
+		register int ox, oy;
+		if(walign == LEFT_TEXT) ox = 0;
+		else if(walign == CENTER_TEXT) ox = wid/2;
+		else ox = wid;
+		if(halign == TOP_TEXT) oy = 0;
+		else if(halign == CENTER_TEXT) oy = hei/2;
+		else oy = wid;
+		outtextxy(ox, oy, text.c_str(), button);
 	}
-	inline void setbgcol(color_t col) { bgcol=col; draw(); }
-	inline void settxtcol(color_t col) { txtcol=col; draw(); }
-	inline void settext(string txt) { text=txt; draw(); }
+	inline void display() {
+		draw();
+		putimage_withalpha(NULL, button, wloc, hloc);
+	}
+	inline void seth(int h) { hei = h; }
+	inline void setw(int w) { wid = w; }
+	inline void sethw(int h, int w) { hei = h; wid = w; }
+	inline void setbgcol(color_t col) { bgcol = col; }
+	inline void settxtcol(color_t col) { txtcol = col; }
+	inline void settext(string txt) { text = txt; }
+	inline void setfontname(string ft) { font = ft; }
+	inline void setfonth(int fh) { fonthei = fh; }
+	inline void setfontw(int fw) { fontwid = fw; }
+	inline void setfonthw(int fh, int fw) { fonthei = fh; fontwid = fw; }
+	inline void setlocation(int h, int w) { hloc = h, wloc = w; }
+	inline void setalign(int ha = -1, int wa = -1) {
+		if(~ha) halign = ha;
+		if(~wa) walign = wa;
+	}
+	inline void setevent(std::function<void()> event) { clickEvent = event; }
+	inline int detect() {
+		/* todo */
+	}
 };
 
 bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60)

@@ -33,11 +33,18 @@ struct GBUTTON {
 	std::function<void()> clickEvent; // event when clicked
 	int status; // button status: free(0) / cursor-on(1) / clicked(2)
 	
-	explicit GBUTTON() = default; // default constructor
-	~GBUTTON() = default; // default destructor
+	explicit GBUTTON() {
+		button = newimage();
+		halign = TOP_TEXT, walign = LEFT_TEXT;
+		bgcol = txtcol = 0;
+		hei = wid = 1;
+		status = 0;
+	}
+	~GBUTTON() {
+		delimage(button);
+	}
 	GBUTTON(int h, int w) {
 		hei = h, wid = w;
-		button = newimage(h, w);
 	}
 	GBUTTON(GBUTTON&& but) {
 		delimage(button);
@@ -70,6 +77,12 @@ struct GBUTTON {
 		else if(halign == CENTER_TEXT) oy = hei/2;
 		else oy = wid;
 		outtextxy(ox, oy, text.c_str(), button);
+		setcolor(0xff000000 | ~bgcol, button);
+		if(status == 1) {
+			ege_rectangle(1, 1, wid-1, hei-1, button);
+		} else if(status == 2) {
+			ege_rectangle(1, 1, wid-1, hei-1, button);
+		}
 	}
 	inline void display() {
 		draw();
@@ -92,7 +105,17 @@ struct GBUTTON {
 	}
 	inline void setevent(std::function<void()> event) { clickEvent = event; }
 	inline int detect() {
-		/* todo */
+		POINT mousePos;
+		GetCursorPos(&mousePos);
+		ScreenToClient(getHWnd(), &mousePos);
+		if(mousePos.x < wloc || mousePos.x > min(wloc + wid - 1, getwidth()) || mousePos.y < hloc || mousePos.y > min(hloc + hei - 1, getheight())) 
+			return status = 0;
+		if(mousemsg()) {
+			mouse_msg msg = getmouse();
+			if(msg.is_left() && msg.is_down()) return status = 2;
+			else return status = 1;
+		}
+		return status = 1;
 	}
 };
 
@@ -202,10 +225,44 @@ namespace LGGraphics
 				xyprintf(10, 10, "LocalGen");
 				setfont(50, 0, "Freestyle Script");
 				xyprintf(10, 130, "Please Select Window Size:");
-				setfont(40, 0, "Freestyle Script");
-				for (int i = 200; i <= 500; i += 100)
-					xyprintf(200, 180 + i / 5 * 2, "%d * %d", i * 4, i * 9 / 4);
-				xyprintf(200, 420, "Auto Fit");
+				GBUTTON scrsz[10];
+				for (int i = 200; i <= 500; i += 100) {
+					register int p = i / 100 - 2;
+					scrsz[p].sethw(50, 200);
+					scrsz[p].setbgcol(0xffffffff);
+					scrsz[p].settxtcol(BLUE);
+					scrsz[p].setfontname("Freestyle Script");
+					scrsz[p].setfonthw(40, 0);
+					scrsz[p].setlocation(180 + i / 5 * 2, 200);
+					scrsz[p].settext(to_string(i * 4) + " * " + to_string(i * 9 / 4));
+					scrsz[p].clickEvent = [&]()->void { select = i / 100; };
+					scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
+					scrsz[p].display();
+				} {
+					int i = 600;
+					register int p = i / 100 - 2;
+					scrsz[p].sethw(50, 500);
+					scrsz[p].setbgcol(0xffffffff);
+					scrsz[p].settxtcol(BLUE);
+					scrsz[p].setfontname("Freestyle Script");
+					scrsz[p].setfonthw(40, 0);
+					scrsz[p].setlocation(420, 200);
+					scrsz[p].settext("Auto Fit (Full Screen)");
+					scrsz[p].clickEvent = [&]()->void { select = i / 100; };
+					scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
+					scrsz[p].display();
+				}
+				while(1) {
+					bool f = 0;
+					for(int i = 200; i <= 600; i += 100) {
+						register int p = i / 100 - 2;
+						register int k = scrsz[p].status;
+						scrsz[p].detect();
+						if(scrsz[p].status != k) scrsz[p].display();
+						if(scrsz[p].status == 2) scrsz[p].clickEvent(), f = 1;
+					}
+					if(f) break;
+				}
 				if (select > 1)
 				{
 					rectangle(0, 180 + select * 40, 800, 220 + select * 40);

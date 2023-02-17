@@ -66,7 +66,7 @@ std::pair<long long, long long> bin_search(long long curTurn)
 	std::pair<long long, long long> ans = std::make_pair(0ll, 0ll);
 	while (l <= r)
 	{
-		long long mid = l + r >> 1;
+		long long mid = (l + r) >> 1;
 		if (dezipedMovementS[mid].turn == curTurn)
 			ans.first = mid;
 		if (dezipedMovementS[mid].turn >= curTurn)
@@ -77,7 +77,7 @@ std::pair<long long, long long> bin_search(long long curTurn)
 	l = 1, r = totMove;
 	while (l <= r)
 	{
-		long long mid = l + r >> 1;
+		long long mid = (l + r) >> 1;
 		if (dezipedMovementS[mid].turn == curTurn + 1)
 			ans.second = mid;
 		if (dezipedMovementS[mid].turn >= curTurn + 1)

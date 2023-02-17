@@ -482,8 +482,7 @@ struct gameStatus
 					key_msg ch = getkey();
 					if (ch.key == key_space)
 					{
-						while ((!kbmsg) || (getkey().key != key_space))
-							;
+						while ((!kbmsg()) || (getkey().key != key_space)) ;
 					}
 					if (ch.msg == key_msg_up)
 						continue;

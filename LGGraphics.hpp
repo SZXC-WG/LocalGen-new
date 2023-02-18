@@ -272,13 +272,8 @@ namespace LGGraphics {
 			int w = getmaxx(), h = getmaxy();
 			mapDataStore.mapSizeX = (double)(1.0 * (double)w / 1600.0);
 			mapDataStore.mapSizeY = (double)(1.0 * (double)h / 900.0);
-		} else
+		} else {
 			mapDataStore.mapSizeX = mapDataStore.mapSizeY = (double)select / 4.0;
-	}
-
-	void WelcomePage() {
-		initWindowSize();
-		if (select != 6) {
 			int nScreenWidth, nScreenHeight;
 			nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -286,6 +281,10 @@ namespace LGGraphics {
 //			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
 			setcaption("LocalGen v" VER_STRING " - Developed by LocalGen-dev");
 		}
+	}
+
+	void WelcomePage() {
+		initWindowSize();
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
 		cleardevice();

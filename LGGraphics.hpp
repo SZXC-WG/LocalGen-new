@@ -136,7 +136,7 @@ struct GBUTTON {
 		ScreenToClient(getHWnd(), &mousePos);
 		if(mousePos.x < wloc || mousePos.x > min(wloc + wid - 1, getwidth()) || mousePos.y < hloc || mousePos.y > min(hloc + hei - 1, getheight()))
 			return status = 0;
-		if(mousemsg()) {
+		while(mousemsg()) {
 			mouse_msg msg = getmouse();
 			if(!(msg.x < wloc || msg.x > min(wloc + wid - 1, getwidth()) || msg.y < hloc || msg.y > min(hloc + hei - 1, getheight()))
 			        && msg.is_left() && msg.is_down()) return status = 2;

@@ -473,7 +473,7 @@ struct gameStatus
 			fpsbut.setfonthw(20 * LGGraphics::mapDataStore.mapSizeY, 0);
 			fpsbut.setbgcol(WHITE);
 			fpsbut.settxtcol(BLACK);
-			for (; is_run(); delay_fps(std::min(stepDelay+0.1, 120.1)))
+			for (; is_run(); delay_fps(std::min(stepDelay + 0.5, 120.5)))
 			{
 				while (mousemsg())
 				{

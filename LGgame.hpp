@@ -103,34 +103,34 @@ struct gameStatus
 	void printGameMessage()
 	{
 		setcolor(BLACK);
-		setfont(30 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
-		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 330 * LGGraphics::mapDataStore.mapSize, "GameMessage");
-		setfont(20 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
+		setfont(30 * LGGraphics::mapDataStore.mapSizeY, 0, "Courier New");
+		xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, 330 * LGGraphics::mapDataStore.mapSizeY, "GameMessage");
+		setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Courier New");
 		int tmp = 0;
 		for (gameMessageStore now : gameMessage)
 		{
 			if (now.playerA == -1 && now.playerB == -1)
 			{
 				setcolor(defTeams[winnerNum].color);
-				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[winnerNum].name.c_str());
+				xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, "%7s", defTeams[winnerNum].name.c_str());
 				setcolor(RED);
-				xyprintf(1040 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " won the game at Turn #%d", now.turnNumber);
+				xyprintf(1040 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, " won the game at Turn #%d", now.turnNumber);
 				setcolor(BLACK);
 			}
 			else if (1 == now.playerB && now.playerA == 1)
 			{
-				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "You surrendered at Turn #%d", now.turnNumber);
+				xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, "You surrendered at Turn #%d", now.turnNumber);
 			}
 			else
 			{
 				setcolor(defTeams[now.playerA].color);
-				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[now.playerA].name.c_str());
+				xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, "%7s", defTeams[now.playerA].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1040 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " killed ", now.turnNumber);
+				xyprintf(1040 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, " killed ", now.turnNumber);
 				setcolor(defTeams[now.playerB].color);
-				xyprintf(1120 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, "%7s", defTeams[now.playerB].name.c_str());
+				xyprintf(1120 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, "%7s", defTeams[now.playerB].name.c_str());
 				setcolor(BLACK);
-				xyprintf(1200 * LGGraphics::mapDataStore.mapSize, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSize, " at Turn #%d", now.turnNumber);
+				xyprintf(1200 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, " at Turn #%d", now.turnNumber);
 			}
 			tmp++;
 		}
@@ -369,14 +369,14 @@ struct gameStatus
 		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b)
 				  { return a.army > b.army; });
 		setfillcolor(WHITE);
-		ege_fillrect(widthPerBlock * mapW, 0, 1600 * LGGraphics::mapDataStore.mapSize - widthPerBlock * mapW, 900 * LGGraphics::mapDataStore.mapSize);
-		ege_fillrect(0, heightPerBlock * mapH, 1600 * LGGraphics::mapDataStore.mapSize, 900 * LGGraphics::mapDataStore.mapSize - heightPerBlock * mapH);
-		setfont(30 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
+		ege_fillrect(widthPerBlock * mapW, 0, 1600 * LGGraphics::mapDataStore.mapSizeX - widthPerBlock * mapW, 900 * LGGraphics::mapDataStore.mapSizeY);
+		ege_fillrect(0, heightPerBlock * mapH, 1600 * LGGraphics::mapDataStore.mapSizeX, 900 * LGGraphics::mapDataStore.mapSizeY - heightPerBlock * mapH);
+		setfont(30 * LGGraphics::mapDataStore.mapSizeY, 0, "Courier New");
 		setcolor(BLUE);
-		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 20 * LGGraphics::mapDataStore.mapSize, "Ranklist");
+		xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY, "Ranklist");
 		setcolor(BLACK);
-		setfont(20 * LGGraphics::mapDataStore.mapSize, 0, "Courier New");
-		xyprintf(960 * LGGraphics::mapDataStore.mapSize, 60 * LGGraphics::mapDataStore.mapSize, "%7s %8s %5s %5s %5s %13s %-15s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND", "WHICH BOT?");
+		setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Courier New");
+		xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, 60 * LGGraphics::mapDataStore.mapSizeY, "%7s %8s %5s %5s %5s %13s %-15s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND", "WHICH BOT?");
 		for (int i = 1; i <= playerCnt; i++)
 		{
 			if (isAlive[rklst[i].id])
@@ -385,12 +385,12 @@ struct gameStatus
 				setcolor(BLACK);
 			if (rklst[i].army < 1000000000)
 			{
-				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (60 + i * 20) * LGGraphics::mapDataStore.mapSize, "%7s %8lld %5d %5d %5d %13lld %-15s", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand, botName[robotId[rklst[i].id]/100+1].c_str());
+				xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, (60 + i * 20) * LGGraphics::mapDataStore.mapSizeY, "%7s %8lld %5d %5d %5d %13lld %-15s", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand, botName[robotId[rklst[i].id]/100+1].c_str());
 			}
 			else
 			{
 				register int p = std::to_string(rklst[i].army * 1.0L / 1e9L).find('.');
-				xyprintf(960 * LGGraphics::mapDataStore.mapSize, (60 + i * 20) * LGGraphics::mapDataStore.mapSize, "%7s %*.*LfG %5d %5d %5d %13lld %-15s", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand, botName[robotId[rklst[i].id]/100+1].c_str());
+				xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, (60 + i * 20) * LGGraphics::mapDataStore.mapSizeY, "%7s %*.*LfG %5d %5d %5d %13lld %-15s", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand, botName[robotId[rklst[i].id]/100+1].c_str());
 			}
 		}
 	}

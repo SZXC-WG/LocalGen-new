@@ -285,36 +285,51 @@ namespace LGGraphics {
 
 	void WelcomePage() {
 		initWindowSize();
+		setbkmode(TRANSPARENT);
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
 		cleardevice();
 		// xyprintf(100, 100, "%f", mapDataStore.mapSize);
+		settextjustify(CENTER_TEXT, TOP_TEXT);
 		setfont(500 * mapDataStore.mapSizeY, 0, "Freestyle Script");
 		setcolor(BLUE);
-		xyprintf(380 * mapDataStore.mapSizeY, 0, "LocalGen");
-		setfillcolor(GREEN);
-		ege_fillrect(300 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
-		setbkmode(TRANSPARENT);
-		setcolor(WHITE);
-		setfont(100 * mapDataStore.mapSizeY, 0, "Freestyle Script");
-		xyprintf(350 * mapDataStore.mapSizeX, 650 * mapDataStore.mapSizeY, "Single Player");
-		setfillcolor(RED);
-		ege_fillrect(900 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
-		xyprintf(950 * mapDataStore.mapSizeX, 650 * mapDataStore.mapSizeY, "MultiPlayer");
+		xyprintf(800 * mapDataStore.mapSizeY, 0, "LocalGen");
+		GBUTTON singbut;
+		singbut.setbgcol(GREEN);
+		singbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
+		singbut.setlocation(600 * mapDataStore.mapSizeY, 300 * mapDataStore.mapSizeX);
+		singbut.settxtcol(WHITE);
+		singbut.setfontname("Freestyle Script");
+		singbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
+		singbut.setalign(CENTER_TEXT, CENTER_TEXT);
+		singbut.addtext("Single Player");
+		singbut.display(); 
+		GBUTTON multibut;
+		multibut.setbgcol(RED);
+		multibut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
+		multibut.setlocation(600 * mapDataStore.mapSizeY, 900 * mapDataStore.mapSizeX);
+		multibut.settxtcol(WHITE);
+		multibut.setfontname("Freestyle Script");
+		multibut.setfonthw(100 * mapDataStore.mapSizeY, 0);
+		multibut.setalign(CENTER_TEXT, CENTER_TEXT); 
+		multibut.addtext("Multiplayer");
+		multibut.display();
 		delay_ms(0);
-		mouse_msg msg;
 		for (; is_run(); delay_fps(120)) {
-			msg = getmouse();
-			// xyprintf(750, 650, "Mouse!");
-			// cout << msg.x << ' ' << msg.y << endl;
-			if (msg.is_left() && msg.is_down() && msg.x >= 300 * mapDataStore.mapSizeX && msg.x <= 700 * mapDataStore.mapSizeX && msg.y >= 600 * mapDataStore.mapSizeY && msg.y <= 800 * mapDataStore.mapSizeY)
-				break;
-			if (msg.is_left() && msg.is_down() && msg.x >= 900 * mapDataStore.mapSizeX && msg.x <= 1300 * mapDataStore.mapSizeX && msg.y >= 600 * mapDataStore.mapSizeY && msg.y <= 800 * mapDataStore.mapSizeY) {
-				xyprintf(400 * mapDataStore.mapSizeX, 900 * mapDataStore.mapSizeY, "Sorry! Multiplayer Mode is still developing.");
+			singbut.detect();
+			singbut.display();
+			if(singbut.status == 2) break;
+			multibut.detect();
+			multibut.display();
+			if(multibut.status == 2) {
+				settextjustify(CENTER_TEXT, CENTER_TEXT);
+				setfont(100 * mapDataStore.mapSizeY, 0, "Freestyle Script");
+				xyprintf(800 * mapDataStore.mapSizeX, 500 * mapDataStore.mapSizeY, "Sorry! Multiplayer Mode is still developing.");
 				Sleep(4000);
 				exitExe();
 			}
 		}
+		settextjustify(LEFT_TEXT, TOP_TEXT);
 	}
 
 	void selectOrImportMap() {

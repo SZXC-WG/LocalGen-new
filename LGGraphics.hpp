@@ -11,6 +11,7 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
 #include <bits/stdc++.h>
+#include "LocalGen-new_private.h"
 #include "LGcons.hpp"
 #include "LGmaps.hpp"
 #include "LGgame.hpp"
@@ -333,46 +334,48 @@ namespace LGGraphics {
 	}
 
 	void selectOrImportMap() {
-		setfillcolor(BROWN);
-		ege_fillrect(300 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
 		setbkmode(TRANSPARENT);
-		setcolor(WHITE);
-		setfont(100 * mapDataStore.mapSizeY, 0, "Freestyle Script");
-		xyprintf(350 * mapDataStore.mapSizeX, 650 * mapDataStore.mapSizeY, "Choose a Map");
-		setfillcolor(BROWN);
-		ege_fillrect(900 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
-		xyprintf(950 * mapDataStore.mapSizeX, 650 * mapDataStore.mapSizeY, "Import Map");
-		mouse_msg msg;
-		bool select;
-		while (1) {
-			msg = getmouse();
-			// xyprintf(750, 650, "Mouse!");
-			// cout << msg.x << ' ' << msg.y << endl;
-			if (msg.is_left() && msg.is_down() && msg.x >= 300 * mapDataStore.mapSizeX && msg.x <= 700 * mapDataStore.mapSizeX && msg.y >= 600 * mapDataStore.mapSizeY && msg.y <= 800 * mapDataStore.mapSizeY) {
-				select = true;
-				break;
-			}
-			if (msg.is_left() && msg.is_down() && msg.x >= 900 * mapDataStore.mapSizeX && msg.x <= 1300 * mapDataStore.mapSizeX && msg.y >= 600 * mapDataStore.mapSizeY && msg.y <= 800 * mapDataStore.mapSizeY) {
-				select = false;
-				break;
-			}
+		GBUTTON selbut;
+		selbut.setbgcol(BROWN);
+		selbut.setlocation(600 * mapDataStore.mapSizeY, 300 * mapDataStore.mapSizeX);
+		selbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
+		selbut.settxtcol(WHITE);
+		selbut.setfontname("Freestyle Script");
+		selbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
+		selbut.addtext("Choose a Map");
+		selbut.setalign(CENTER_TEXT, CENTER_TEXT);
+		GBUTTON impbut;
+		impbut.setbgcol(BROWN);
+		impbut.setlocation(600 * mapDataStore.mapSizeY, 900 * mapDataStore.mapSizeX);
+		impbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
+		impbut.settxtcol(WHITE);
+		impbut.setfontname("Freestyle Script");
+		impbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
+		impbut.addtext("Import a Map");
+		impbut.setalign(CENTER_TEXT, CENTER_TEXT);
+		int select = -1;
+		while (select == -1) {
+			selbut.detect();
+			selbut.display();
+			if(selbut.status == 2) select = true;
+			impbut.detect();
+			impbut.display();
+			if(impbut.status == 2) select = false;
 		}
 		cleardevice();
-		if (!select)
-			doMapImport();
-		else
-			doMapSelect();
+		if (!select) doMapImport();
+		else doMapSelect();
 		importGameSettings();
 	}
 
 	void doMapSelect() {
-		int mapNum = returnMapNum();
+//		int mapNum = returnMapNum();
 		cleardevice();
-		if (!isdllOK()) {
-			xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "Oops, it seems that your 'defMap.dll' is missing!\n You can download it on GitHub. ");
-			Sleep(4000);
-			exitExe();
-		}
+//		if (!isdllOK()) {
+//			xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "Oops, it seems that your 'defMap.dll' is missing!\n You can download it on GitHub. ");
+//			Sleep(4000);
+//			exitExe();
+//		}
 		int left, right, up, down;
 		int x, y;
 		GBUTTON mapbut[50];
@@ -660,7 +663,7 @@ namespace LGGraphics {
 			xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
 			xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 			importGameSettings();
-			copyMap(mapSelected);
+			readMap(mapSelected);
 		}
 		GAME(0, cheatCode, plCnt, stDel);
 		exit(0);

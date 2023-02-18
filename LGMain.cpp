@@ -35,7 +35,7 @@ signed main(signed argc, char **argv)
 {
 	ShowWindow(hwnd, SW_MAXIMIZE);
 	SetConsoleTitle("Localized Generals.io v" FILE_VERSION " (Set your console window font size! Recommended:5-8)");
-	initDefMap();
+	initMaps();
 	MainPage(); // start main page
 	exitExe();	// exit program
 }

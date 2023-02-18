@@ -14,16 +14,22 @@
 #ifndef __LGMAPS_HPP__
 #define __LGMAPS_HPP__
 
+#include <iostream>
+#include <fstream>
 #include <string>
 #include <random>
 #include <chrono>
 #include <unistd.h>
 #include <algorithm>
-#include <graphics.h> 
+#include <graphics.h>
 using std::string;
 using std::to_string;
 
 #define ll long long
+
+extern const int LEN_ZIP = 100005;
+extern void deZip();
+extern char strdeZip[LEN_ZIP];
 
 PIMAGE pimg[7];
 struct MapInfoS
@@ -39,10 +45,11 @@ struct MapInfoS
 	int citycnt;
 	int mountaincnt;
 	int plaincnt;
+	string filename;
 	MapInfoS() = default;
 	~MapInfoS() = default;
 };
-MapInfoS maps[205];
+MapInfoS maps[5005];
 
 struct Block
 {
@@ -67,13 +74,13 @@ teamS defTeams[64] = {
 	{"Red", 0xffff0000},
 	{"Aqua", 0xff4363d8},
 	{"Green", 0xff008000},
-	{"Emerald", 0xff008080},
+	{"Teal", 0xff008080},
 	{"Orange", 0xfff58231},
 	{"Pink", 0xfff032e6},
 	{"Purple", 0xff800080},
 	{"Maroon", 0xff800000},
 	{"Yellow", 0xffb09f30},
-	{"Khaki", 0xff9a6324},
+	{"Brown", 0xff9a6324},
 	{"Blue", 0xff0000ff},
 	{"Indigo", 0xff483d8b},
 };
@@ -403,6 +410,65 @@ void createFullPlainMap(int crtH, int crtW, int plCnt)
 	}
 }
 
+void getAllFiles(string path, std::vector<string>& files, string fileType)  {
+	long hFile = 0; // 文件句柄
+	struct _finddata_t fileinfo; // 文件信息
+	string p;
+	if((hFile = _findfirst(p.assign(path).append("\\*" + fileType).c_str(), &fileinfo)) != -1) {
+		do files.push_back(p.assign(path).append("\\").append(fileinfo.name)); // 保存文件的全路径
+		while (_findnext(hFile, &fileinfo) == 0);  // 寻找下一个，成功返回0，否则-1
+		_findclose(hFile);
+	}
+}
+
+int mapNum;
+/* 
+struct MapInfoS { int id; string chiname; string engname; string auth; int hei; int wid; int generalcnt; int swampcnt; int citycnt; int mountaincnt; int plaincnt; MapInfoS() = default; ~MapInfoS() = default; };
+*/
+void initMaps() {
+	mapNum = 5;
+	maps[1] = MapInfoS {1, "随机地图", "Random", "LocalGen", -1, -1, -1, -1, -1, -1, -1, string()};
+	maps[2] = MapInfoS {2, "标准地图", "Standard", "LocalGen", -1, -1, -1, -1, -1, -1, -1, string()};
+	maps[3] = MapInfoS {3, "完全塔", "Full Tower/City", "LocalGen", -1, -1, -1, 0, -1, 0, 0, string()};
+	maps[4] = MapInfoS {4, "完全沼泽", "Full Swamp", "LocalGen", -1, -1, -1, -1, 0, 0, 0, string()};
+	maps[5] = MapInfoS {5, "大平原", "Plain", "LocalGen", -1, -1, -1, 0, 0, 0, -1, string()};
+	std::vector<string> files;
+	getAllFiles("maps", files, ".ini");
+	for(auto x : files) {
+		string s = x.substr(0, x.size() - 4);
+		string chin, engn;
+		std::ifstream inif(x);
+		std::getline(inif, chin);
+		std::getline(inif, engn);
+		inif.close();
+		++mapNum;
+		maps[mapNum].id = mapNum;
+		maps[mapNum].chiname = chin;
+		maps[mapNum].engname = engn;
+		maps[mapNum].filename = s + ".lg";
+		std::ifstream lgf(maps[mapNum].filename);
+		lgf.getline(strdeZip, sizeof strdeZip);
+		deZip();
+		maps[mapNum].hei = mapH, maps[mapNum].wid = mapW;
+		for(int i=1; i<=mapH; ++i) {
+			for(int j=1; j<=mapW; ++j) {
+				switch(gameMap[i][j].type) {
+					case 0: ++maps[mapNum].plaincnt; break;
+					case 1: ++maps[mapNum].swampcnt; break;
+					case 2: ++maps[mapNum].mountaincnt; break;
+					case 3: ++maps[mapNum].generalcnt; break;
+					case 4: ++maps[mapNum].citycnt; break;
+				}
+			}
+		}
+	}
+}
+void readMap(int mid) {
+	FILE* file = fopen(maps[mid].filename.c_str(), "r");
+	fscanf(file, "%s", strdeZip);
+	deZip();
+}
+
 HINSTANCE defMap;
 typedef int (*func1)();
 typedef string (*func2)(int, int);
@@ -422,8 +488,6 @@ struct MapGeoS
 MapGeoS mapG[205];
 
 bool dllExit;
-
-int mapNum;
 
 void initDefMap()
 {

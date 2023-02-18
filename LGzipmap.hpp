@@ -18,10 +18,10 @@
 #include "LGmaps.hpp"
 #include "LGgame.hpp"
 
-const int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
+const int /*LEN_ZIP = 100005 (defined in LGmaps), */CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
 char strZipStatus[LEN_ZIP];
-char strdeZip[LEN_ZIP];
 char strZip[LEN_ZIP];
+char strdeZip[LEN_ZIP];
 char strGameZip[4 * LEN_ZIP];
 char strdeGameZip[4 * LEN_ZIP];
 char strStatusZip[4*LEN_ZIP];

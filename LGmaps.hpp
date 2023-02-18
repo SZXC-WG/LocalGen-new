@@ -108,35 +108,35 @@ void printNum(bool visible, long long army, int team, int curx, int cury)
 			register long long absd = -army;
 			if (absd < 100)
 			{
-				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%lld", army);
+				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%lld", army);
 			}
 			else if (absd < (ll)(1e13))
 			{
 				string p = to_string(army);
-				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 			}
 			else
 			{
-				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "-MX");
+				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "-MX");
 			}
 		}
 		else if (army == 0)
 		{
 			if (gameMap[curx][cury].type != 0 && gameMap[curx][cury].type != 1)
-				xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "0");
+				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "0");
 		}
 		else if (army < 1000)
 		{
-			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%lld", army);
+			xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%lld", army);
 		}
 		else if (army < (ll)(1e14))
 		{
 			string p = to_string(army);
-			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+			xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 		}
 		else
 		{
-			xyprintf(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), "MAX");
+			xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "MAX");
 		}
 	}
 }
@@ -149,7 +149,7 @@ void printMap(int printCode, playerCoord coo)
 						 unseen = 0xff1a1a1a;
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
-	// settextjustify(CENTER_TEXT, CENTER_TEXT);
+	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	for (int curx = 1; curx <= mapH; curx++)
 	{
 		for (int cury = 1; cury <= mapW; cury++)
@@ -158,8 +158,10 @@ void printMap(int printCode, playerCoord coo)
 			{
 				if (gameMap[curx][cury].team == 0)
 				{
-					if (gameMap[curx][cury].type == 0)
+					if (gameMap[curx][cury].type == 0 && gameMap[curx][cury].army == 0)
 						setfillcolor(plcol);
+					else if(gameMap[curx][cury].type == 0)
+						setfillcolor(cscol);
 					else if (gameMap[curx][cury].type == 1)
 						setfillcolor(cscol);
 					else if (gameMap[curx][cury].type == 2)
@@ -214,6 +216,7 @@ void printMap(int printCode, playerCoord coo)
 		}
 	}
 	putimage_withalpha(NULL, pimg[6], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1));
+	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 
 void createRandomMap(int crtH = -1, int crtW = -1)

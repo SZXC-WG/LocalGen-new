@@ -473,12 +473,12 @@ struct gameStatus
 			fpsbut.setfonthw(20 * LGGraphics::mapDataStore.mapSizeY, 0);
 			fpsbut.setbgcol(WHITE);
 			fpsbut.settxtcol(BLACK);
-			for (; is_run(); delay_fps(std::min(stepDelay, 120)))
+			for (; is_run(); delay_fps(std::min(stepDelay+0.1, 120.1)))
 			{
 				while (mousemsg())
 				{
 					mouse_msg msg = getmouse();
-					if (msg.is_down() && msg.is_left() && msg.x >= 50 && msg.y >= 50 && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH)
+					if (msg.is_down() && msg.is_left() && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH)
 					{
 						int lin = (msg.y + heightPerBlock - 1) / heightPerBlock;
 						int col = (msg.x + widthPerBlock - 1) / widthPerBlock;

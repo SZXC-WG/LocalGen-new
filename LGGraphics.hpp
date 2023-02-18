@@ -87,48 +87,22 @@ struct GBUTTON {
 		draw();
 		putimage(NULL, wloc, hloc, wid, hei, button, 0, 0);
 	}
-	inline void seth(int h) {
-		hei = h;
-	}
-	inline void setw(int w) {
-		wid = w;
-	}
-	inline void sethw(int h, int w) {
-		hei = h;
-		wid = w;
-	}
-	inline void setbgcol(color_t col) {
-		bgcol = col;
-	}
-	inline void settxtcol(color_t col) {
-		txtcol = col;
-	}
-	inline void settext(string txt) {
-		text = txt;
-	}
-	inline void setfontname(string ft) {
-		font = ft;
-	}
-	inline void setfonth(int fh) {
-		fonthei = fh;
-	}
-	inline void setfontw(int fw) {
-		fontwid = fw;
-	}
-	inline void setfonthw(int fh, int fw) {
-		fonthei = fh;
-		fontwid = fw;
-	}
-	inline void setlocation(int h, int w) {
-		hloc = h, wloc = w;
-	}
+	inline void seth(int h) { hei = h; }
+	inline void setw(int w) { wid = w; }
+	inline void sethw(int h, int w) { hei = h; wid = w; }
+	inline void setbgcol(color_t col) { bgcol = col; }
+	inline void settxtcol(color_t col) { txtcol = col; }
+	inline void settext(string txt) { text = txt; }
+	inline void setfontname(string ft) { font = ft; }
+	inline void setfonth(int fh) { fonthei = fh; }
+	inline void setfontw(int fw) { fontwid = fw; }
+	inline void setfonthw(int fh, int fw) { fonthei = fh; fontwid = fw; }
+	inline void setlocation(int h, int w) { hloc = h, wloc = w; }
 	inline void setalign(int ha = -1, int wa = -1) {
 		if(~ha) halign = ha;
 		if(~wa) walign = wa;
 	}
-	inline void setevent(std::function<void()> event) {
-		clickEvent = event;
-	}
+	inline void setevent(std::function<void()> event) { clickEvent = event; }
 	inline int detect() {
 		/* todo */
 		POINT mousePos;
@@ -365,12 +339,13 @@ namespace LGGraphics {
 		int mapNum = returnMapNum();
 		cleardevice();
 		if (!isdllOK()) {
-			xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "Oops, it seems that your 'defMap.dll' is missing!\n You can download it on github. ");
+			xyprintf(10 * mapDataStore.mapSize, 10 * mapDataStore.mapSize, "Oops, it seems that your 'defMap.dll' is missing!\n You can download it on GitHub. ");
 			Sleep(4000);
 			exitExe();
 		}
 		int left, right, up, down;
 		int x, y;
+		GBUTTON mapbut[50];
 		for (int i = 1; i <= mapNum; i++) {
 			x = (i + 5) / 6;
 			y = ((i % 6 == 0) ? 6 : i % 6);
@@ -378,6 +353,14 @@ namespace LGGraphics {
 			right = (y * 180 + 300) * mapDataStore.mapSize;
 			up = ((x - 1) * 180) * mapDataStore.mapSize;
 			down = (x * 180) * mapDataStore.mapSize;
+			mapbut[i].sethw(down - up, right - left);
+			mapbut[i].setlocation(up, left);
+			mapbut[i].setfontname("Segoe UI");
+			mapbut[i].setfonthw(16 * mapDataStore.mapSize, 0);
+			mapbut[i].settxtcol(BLUE);
+			mapbut[i].setbgcol(WHITE);
+			std::string s;
+			std::ostringstream
 			// imageOperation::zoomImage(pimg[5], 200, 200);
 			// putimage_transparent(NULL, pimg[5], left, up, getpixel(0, 0, pimg[1]));
 			setcolor(BLUE);
@@ -407,7 +390,7 @@ namespace LGGraphics {
 		xyprintf(10 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].chiname.c_str());
 		setfont(30 * mapDataStore.mapSize, 0, "Segoe UI");
 		xyprintf(300 * mapDataStore.mapSize, 40 * mapDataStore.mapSize, "%s", maps[mapSelected].engname.c_str());
-		xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+		xyprintf(10 * mapDataStore.mapSize, 70 * mapDataStore.mapSize, "Author: %s", maps[mapSelected].auth.c_str());
 		xyprintf(10 * mapDataStore.mapSize, 100 * mapDataStore.mapSize, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
 		xyprintf(10 * mapDataStore.mapSize, 130 * mapDataStore.mapSize, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
 		xyprintf(10 * mapDataStore.mapSize, 160 * mapDataStore.mapSize, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);

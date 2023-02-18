@@ -209,7 +209,7 @@ namespace LGGraphics {
 		ege_enable_aa(true, NULL);
 		PIMAGE favi = newimage();
 		getimage_pngfile(favi, "img/favicon.png");
-		setcaption("LocalGen v" FILE_VERSION " Window Size Selection");
+		setcaption("LocalGen v" VER_STRING " Window Size Selection");
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
 		bool changeMade = true;
@@ -219,33 +219,38 @@ namespace LGGraphics {
 		setcolor(BLUE);
 		xyprintf(250, 125, "LocalGen");
 		putimage_withalpha(NULL, favi, 500, 10, 0, 0, getwidth(favi), getheight(favi));
+		delimage(favi);
+		setfont(20, 0, "Lucida Fax");
+		xyprintf(500 + getwidth(favi) / 2, 10 + getheight(favi) + 20 / 2 + 10,
+		         ("version " + to_string(VER_MAJOR) + "." + to_string(VER_MINOR)
+				  + "." + to_string(VER_RELEASE) + " (build " + to_string(VER_BUILD) + ")").c_str());
 		setfont(50, 0, "Freestyle Script");
 		xyprintf(250, 250, "Please Select Window Size:");
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 		GBUTTON scrsz[10];
 		for (int i = 200; i <= 500; i += 100) {
 			register int p = i / 100 - 2;
-			scrsz[p].sethw(50, 500);
+			scrsz[p].sethw(50, 400);
 			scrsz[p].setbgcol(0xffffffff);
 			scrsz[p].settxtcol(BLUE);
 			scrsz[p].setfontname("Freestyle Script");
 			scrsz[p].setfonth(40);
-			scrsz[p].setlocation(180 + i / 4 * 2, 10);
-			scrsz[p].addtext(to_string(i * 4) + " * " + to_string(i * 9 / 4));
-			scrsz[p].clickEvent = [&]()->void { select = i / 100; };
+			scrsz[p].setlocation(180 + i / 4 * 2, 50);
+			scrsz[p].addtext(to_string(i * 4) + " ¡Á " + to_string(i * 9 / 4));
+			scrsz[p].clickEvent = [&select, i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
 		} {
 			int i = 600;
 			register int p = i / 100 - 2;
-			scrsz[p].sethw(50, 500);
+			scrsz[p].sethw(50, 400);
 			scrsz[p].setbgcol(0xffffffff);
 			scrsz[p].settxtcol(BLUE);
 			scrsz[p].setfontname("Freestyle Script");
 			scrsz[p].setfonth(40);
-			scrsz[p].setlocation(180 + i / 4 * 2, 10);
+			scrsz[p].setlocation(180 + i / 4 * 2, 50);
 			scrsz[p].addtext("Auto Fit (Full Screen)");
-			scrsz[p].clickEvent = [&]()->void { select = i / 100; };
+			scrsz[p].clickEvent = [&select, i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
 		}
@@ -279,7 +284,7 @@ namespace LGGraphics {
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 			initgraph(1600 * mapDataStore.mapSizeX, 900 * mapDataStore.mapSizeY, RENDER_AUTO);
 //			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
-			setcaption("LocalGen v" FILE_VERSION " - Developed by LocalGen-dev");
+			setcaption("LocalGen v" VER_STRING " - Developed by LocalGen-dev");
 		}
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);

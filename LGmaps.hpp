@@ -76,7 +76,7 @@ teamS defTeams[64] = {
 	{"Yellow", 0xffb09f30},
 	{"Khaki", 0xff9a6324},
 	{"Blue", 0xff0000ff},
-	{"Purple", 0xff483d8b},
+	{"Indigo", 0xff483d8b},
 };
 
 struct playerCoord

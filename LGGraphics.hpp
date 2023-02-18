@@ -207,16 +207,21 @@ namespace LGGraphics {
 	void initWindowSize() {
 		initgraph(800, 600);
 		ege_enable_aa(true, NULL);
+		PIMAGE favi = newimage();
+		getimage_pngfile(favi, "img/favicon.png");
 		setcaption("LocalGen v" FILE_VERSION " Window Size Selection");
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
 		bool changeMade = true;
 		cleardevice();
-		setfont(100, 0, "Freestyle Script");
+		settextjustify(CENTER_TEXT, CENTER_TEXT);
+		setfont(200, 0, "Freestyle Script");
 		setcolor(BLUE);
-		xyprintf(10, 10, "LocalGen");
+		xyprintf(250, 125, "LocalGen");
+		putimage_withalpha(NULL, favi, 500, 10, 0, 0, getwidth(favi), getheight(favi));
 		setfont(50, 0, "Freestyle Script");
-		xyprintf(10, 130, "Please Select Window Size:");
+		xyprintf(250, 250, "Please Select Window Size:");
+		settextjustify(LEFT_TEXT, TOP_TEXT);
 		GBUTTON scrsz[10];
 		for (int i = 200; i <= 500; i += 100) {
 			register int p = i / 100 - 2;

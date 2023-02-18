@@ -16,7 +16,7 @@
 
 #include <random>
 #include <chrono>
-#include "LGcons.hpp"
+//#include "LGcons.hpp"
 #include "LGmaps.hpp"
 #include "LGzipmap.hpp"
 #include "LGgame.hpp"

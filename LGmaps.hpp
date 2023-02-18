@@ -19,10 +19,9 @@
 #include <chrono>
 #include <unistd.h>
 #include <algorithm>
+#include <graphics.h> 
 using std::string;
 using std::to_string;
-#include "LGcons.hpp"
-#include <graphics.h>
 
 #define ll long long
 

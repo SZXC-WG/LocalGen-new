@@ -26,19 +26,6 @@
 
 /* dev project headers */
 #include "LocalGen-new_private.h"
-
-/* console settings */
-#include "LGcons.hpp" // __LGCONS_HPP__
-/* map structs */
-#include "LGmaps.hpp" // __LGMAPS_HPP__
-/* map zipping */
-#include "LGzipmap.hpp" // __LGZIPMAP_HPP__
-/* Internet base */
-// #include "LGweb.hpp" // __LGWEB_HPP__
-/* generals robot */
-#include "LGbot.hpp" //__LGBOT__
-/* game options */
-#include "LGgame.hpp" // __LGGAME_HPP__
 /* pages */
 #include "LGpages.hpp" // __LGPAGES_HPP__
 
@@ -48,7 +35,6 @@ signed main(signed argc, char **argv)
 {
 	ShowWindow(hwnd, SW_MAXIMIZE);
 	SetConsoleTitle("Localized Generals.io v" FILE_VERSION " (Set your console window font size! Recommended:5-8)");
-	initattr();
 	initDefMap();
 	MainPage(); // start main page
 	exitExe();	// exit program

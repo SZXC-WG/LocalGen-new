@@ -444,6 +444,7 @@ struct gameStatus
 		if (played)
 			return -1;
 		cleardevice();
+		setrendermode(RENDER_MANUAL);
 		LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
 		LGGraphics::init();
 		// printf("%f\n", getfps());
@@ -464,7 +465,15 @@ struct gameStatus
 			printMap(cheatCode, coordinate[1]);
 			curTurn = 0;
 			bool gameEnd = 0;
-			for (; is_run(); delay_fps(std::min(stepDelay, 60)))
+			GBUTTON fpsbut;
+			fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
+			fpsbut.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
+			fpsbut.setalign(RIGHT_TEXT, CENTER_TEXT);
+			fpsbut.setfontname("Courier New");
+			fpsbut.setfonthw(20 * LGGraphics::mapDataStore.mapSizeY, 0);
+			fpsbut.setbgcol(WHITE);
+			fpsbut.settxtcol(BLACK);
+			for (; is_run(); delay_fps(std::min(stepDelay, 120)))
 			{
 				while (mousemsg())
 				{
@@ -627,8 +636,9 @@ struct gameStatus
 					ranklist(coordinate);
 					printGameMessage();
 				}
-				setcolor(BLACK);
-				// xyprintf(1450, 800, "FPS: %f", getfps());
+				fpsbut.poptext();
+				fpsbut.addtext("FPS: " + to_string(getfps()));
+				fpsbut.display();
 			}
 		}
 //		else{

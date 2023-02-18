@@ -207,7 +207,7 @@ namespace LGGraphics {
 	void initWindowSize() {
 		initgraph(800, 600);
 		ege_enable_aa(true, NULL);
-		setcaption("LocalGen Windows Size Selection");
+		setcaption("LocalGen v" FILE_VERSION " Window Size Selection");
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);
 		bool changeMade = true;
@@ -274,7 +274,7 @@ namespace LGGraphics {
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 			initgraph(1600 * mapDataStore.mapSizeX, 900 * mapDataStore.mapSizeY, RENDER_AUTO);
 //			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
-			setcaption("LocalGen");
+			setcaption("LocalGen v" FILE_VERSION " - Developed by LocalGen-dev");
 		}
 		setbkcolor(WHITE);
 		setbkcolor_f(WHITE);

@@ -701,7 +701,7 @@ namespace LGGraphics {
 					endConfig = true;
 					cleardevice();
 					if(stDel == 0)
-						stDel = 60;
+						stDel = 120;
 					return;
 				}
 			}
@@ -709,9 +709,9 @@ namespace LGGraphics {
 	}
 
 	void init() {
-		heightPerBlock = (900.0 * mapDataStore.mapSizeX / (double)mapH);
-		widthPerBlock = (900.0 * mapDataStore.mapSizeY / (double)mapW);
-		heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
+		heightPerBlock = (900.0 * mapDataStore.mapSizeY / (double)mapH);
+		widthPerBlock = (900.0 * mapDataStore.mapSizeX / (double)mapW);
+		// heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
 		mapDataStore.widthPerBlock = widthPerBlock;
 		mapDataStore.heightPerBlock = heightPerBlock;
 		setbkmode(TRANSPARENT);
@@ -735,9 +735,10 @@ namespace LGGraphics {
 		imageOperation::zoomImage(pimg[6], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		for(int i = 1; i <= 6; i++)
 			ege_enable_aa(true, pimg[i]);
+		ege_enable_aa(true);
 		//		initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, INIT_RENDERMANUAL);
-		setbkcolor(WHITE);
-		setbkcolor_f(WHITE);
+		setbkcolor(BLACK);
+		setbkcolor_f(BLACK);
 		cleardevice();
 	}
 }

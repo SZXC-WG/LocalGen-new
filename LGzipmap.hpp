@@ -35,8 +35,10 @@ long long totTurn, curTurn, totMove;
 std::pair<long long, long long> curMoveS;
 std::queue<long long> signMap;
 std::queue<long long> signCmd;
+struct movementS;
 movementS dezipedMovementS[4 * LEN_ZIP];
 movementS tmp;
+std::queue<movementS> movementPack;
 
 inline long long PMod(long long &x)
 {
@@ -298,26 +300,26 @@ void deZipGame(int playerCnt)
 	}
 }
 
-void Replay(int dir, long long curTurn, gameStatus &curStatus)
-{
-	if (dir)
-	{
-		curMoveS = bin_search(curTurn + 1);
-		for (int i = curMoveS.first; i < curMoveS.second; i++)
-			curStatus.analyzeMove(dezipedMovementS[i].id, dezipedMovementS[i].op, curCoord[dezipedMovementS[i].id]);
-	}
-	else
-	{
-		for (int i = 1; i <= 20; i++)
-			curCoord[i] = mapCoord[curTurn / replaySorter + 1][i];
-		curMoveS = bin_search(curTurn / replaySorter * replaySorter);
-		while (dezipedMovementS[curMoveS.first].turn < curTurn)
-		{
-			curStatus.analyzeMove(dezipedMovementS[curMoveS.first].id, dezipedMovementS[curMoveS.first].op, curCoord[dezipedMovementS[curMoveS.first].id]);
-			curMoveS.first++;
-		}
-	}
-}
+// void Replay(int dir, long long curTurn, gameStatus &curStatus)
+// {
+// 	if (dir)
+// 	{
+// 		curMoveS = bin_search(curTurn + 1);
+// 		for (int i = curMoveS.first; i < curMoveS.second; i++)
+// 			curStatus.analyzeMove(dezipedMovementS[i].id, dezipedMovementS[i].op, curCoord[dezipedMovementS[i].id]);
+// 	}
+// 	else
+// 	{
+// 		for (int i = 1; i <= 20; i++)
+// 			curCoord[i] = mapCoord[curTurn / replaySorter + 1][i];
+// 		curMoveS = bin_search(curTurn / replaySorter * replaySorter);
+// 		while (dezipedMovementS[curMoveS.first].turn < curTurn)
+// 		{
+// 			curStatus.analyzeMove(dezipedMovementS[curMoveS.first].id, dezipedMovementS[curMoveS.first].op, curCoord[dezipedMovementS[curMoveS.first].id]);
+// 			curMoveS.first++;
+// 		}
+// 	}
+// }
 
 void toAvoidCEBugInGraphicsImportMap(string fileName)
 {

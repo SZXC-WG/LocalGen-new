@@ -35,7 +35,8 @@ class rectBUTTON {
 	vector<string> text; // text
 	string font; // font face name
 	int fonthei, fontwid; // font height & width
-	int lnwid;
+	int lnwid; 
+	bool autortcol; color_t rtcol;
 	int halign, walign; // align method
 	int hloc, wloc; // location on screen
 
@@ -48,6 +49,7 @@ class rectBUTTON {
 		halign = TOP_TEXT, walign = LEFT_TEXT;
 		lnwid = 1;
 		status = 0;
+		autortcol = true;
 	}
 	~rectBUTTON() {
 		delimage(button);
@@ -82,15 +84,16 @@ class rectBUTTON {
 		register int ox, oy;
 		if(walign == LEFT_TEXT) ox = 0;
 		else if(walign == CENTER_TEXT) ox = wid / 2;
-		else ox = wid;
+		else ox = wid - 1;
 		if(halign == TOP_TEXT) oy = 0;
 		else if(halign == CENTER_TEXT) oy = (hei - fonthei * (text.size() - 1)) / 2;
-		else oy = hei - fonthei * (text.size() - 1);
+		else oy = hei - fonthei * (text.size() - 1) -1;
 		for(auto s:text) {
 			outtextxy(ox, oy, s.c_str(), button);
 			oy += fonthei;
 		}
-		setcolor(0xff000000 | ~bgcol, button);
+		if(autortcol) setcolor(0xff000000 | ~bgcol, button);
+		else setcolor(rtcol, button);
 		setlinewidth(lnwid, button);
 		if(status == 1)
 			ege_rectangle(1, 1, wid - 1, hei - 1, button);
@@ -121,6 +124,7 @@ class rectBUTTON {
 	}
 	inline rectBUTTON& setevent(std::function<void()> event) { clickEvent = event; return *this; }
 	inline rectBUTTON& setlnwid(int w) { lnwid = w; return *this; }
+	inline rectBUTTON& setrtcol(bool automated = 1, color_t col = 0xffffffff) { autortcol = automated, rtcol = col; return *this; }
 	inline rectBUTTON& detect() {
 		/* todo */
 		POINT mousePos;

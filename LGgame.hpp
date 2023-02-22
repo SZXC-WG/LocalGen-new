@@ -38,7 +38,13 @@ using namespace std::literals;
 // Graphics header
 #include "LGGraphics.hpp"
 
-struct movementS;
+struct movementS {
+	int id, op;
+	long long turn;
+	void clear() {
+		id = turn = op = 0;
+	}
+};
 extern std::queue<movementS> movementPack;
 
 extern void Zip();
@@ -54,141 +60,45 @@ struct passS {
 std::vector<passS> passId[505][505];
 playerCoord lastTurn[20];
 
-struct gameStatus {
-	bool isWeb;
-	int cheatCode;
-	int playerCnt;
-	int isAlive[64];
-	int stepDelay; /* fps */
-	bool played;
-	int winnerNum;
-	int robotId[64];
-
-	// constructor
-	gameStatus() = default;
-	gameStatus(bool iW, int chtC, int pC, int sD) {
-		isWeb = iW;
-		cheatCode = chtC;
-		playerCnt = pC;
-		stepDelay = sD;
-		for(register int i = 1; i <= pC; ++i)
-			isAlive[i] = 1;
-		played = 0;
-	}
-	// destructor
-	~gameStatus() = default;
+namespace gameOperation {
 
 	struct gameMessageStore {
 		int playerA, playerB;
 		int turnNumber;
 	};
 
-	std::vector<gameMessageStore> gameMessage;
-
-	int curTurn;
-	int gameMesC;
-
-	void printGameMessage() {
-		setcolor(BLACK);
-		setfont(30 * LGGraphics::mapDataStore.mapSizeY, 0, "Courier New");
-		xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, 330 * LGGraphics::mapDataStore.mapSizeY, "GameMessage");
+	void printGameMessage(gameMessageStore now, int playerCnt) {
+		static int gameMesC = 0;
+		++gameMesC;
+		setcolor(WHITE);
+		// setfont(40 * LGGraphics::mapDataStore.mapSizeY, 0, "Lucida Fax");
+		// xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, 330 * LGGraphics::mapDataStore.mapSizeY, "GameMessage");
 		setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Courier New");
+		settextjustify(RIGHT_TEXT, TOP_TEXT);
 		int tmp = 0;
-		for(gameMessageStore now : gameMessage) {
-			if(now.playerA == -1 && now.playerB == -1) {
-				setcolor(defTeams[winnerNum].color);
-				xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, "%7s", defTeams[winnerNum].name.c_str());
-				setcolor(RED);
-				xyprintf(1040 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, " won the game at Turn #%d", now.turnNumber);
-				setcolor(BLACK);
-			} else if(1 == now.playerB && now.playerA == 1)
-				xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, "You surrendered at Turn #%d", now.turnNumber);
-			else {
-				setcolor(defTeams[now.playerA].color);
-				xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, "%7s", defTeams[now.playerA].name.c_str());
-				setcolor(BLACK);
-				xyprintf(1040 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, " killed ", now.turnNumber);
-				setcolor(defTeams[now.playerB].color);
-				xyprintf(1120 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, "%7s", defTeams[now.playerB].name.c_str());
-				setcolor(BLACK);
-				xyprintf(1200 * LGGraphics::mapDataStore.mapSizeX, (370 + 30 * tmp) * LGGraphics::mapDataStore.mapSizeY, " at Turn #%d", now.turnNumber);
-			}
-			tmp++;
+		if(now.playerB == -1) {
+			setcolor(defTeams[now.playerA].color);
+			xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" won the game at Turn #" + to_string(now.turnNumber)).c_str()), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%7s", defTeams[now.playerA].name.c_str());
+			setcolor(RED);
+			xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, " won the game at Turn #%d", now.turnNumber);
+			setcolor(WHITE);
+		} else if(1 == now.playerB && now.playerA == 1)
+			xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "You surrendered at Turn #%d", now.turnNumber);
+		else {
+			setcolor(defTeams[now.playerA].color);
+			xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()) - textwidth((" " + defTeams[now.playerB].name).c_str()) - textwidth(" killed "), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%7s", defTeams[now.playerA].name.c_str());
+			setcolor(WHITE);
+			xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()) - textwidth((" " + defTeams[now.playerB].name).c_str()), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, " killed ", now.turnNumber);
+			setcolor(defTeams[now.playerB].color);
+			xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%s", defTeams[now.playerB].name.c_str());
+			setcolor(WHITE);
+			xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, " at Turn #%d", now.turnNumber);
 		}
+		settextjustify(LEFT_TEXT, TOP_TEXT);
 	}
 
-	void updateMap() {
-		++curTurn;
-		for(int i = 1; i <= mapH; ++i) {
-			for(int j = 1; j <= mapW; ++j) {
-				if(gameMap[i][j].team == 0)
-					continue;
-				switch(gameMap[i][j].type) {
-					case 0: {
-						/* plain */
-						if(curTurn % 25 == 0)
-							++gameMap[i][j].army;
-						break;
-					}
-					case 1: {
-						/* swamp */
-						if(gameMap[i][j].army > 0)
-							if(!(--gameMap[i][j].army))
-								gameMap[i][j].team = 0;
-						break;
-					}
-					case 2:	   /* mountain */
-						break; /* ??? */
-					case 3: {
-						/* general */
-						++gameMap[i][j].army;
-						break;
-					}
-					case 4: {
-						/* city */
-						++gameMap[i][j].army;
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	playerCoord genCoo[64];
-	// general init
-	void initGenerals(playerCoord coos[]) {
-		std::deque<playerCoord> gens;
-		for(int i = 1; i <= mapH; ++i)
-			for(int j = 1; j <= mapW; ++j)
-				if(gameMap[i][j].type == 3)
-					gens.push_back(playerCoord{i, j});
-		while(gens.size() < playerCnt) {
-			std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
-			int x, y;
-			do
-				x = p() % mapH + 1, y = p() % mapW + 1;
-			while(gameMap[x][y].type != 0);
-			gens.push_back(playerCoord{x, y});
-			gameMap[x][y].type = 3;
-			gameMap[x][y].army = 0;
-		}
-		sort(gens.begin(), gens.end(), [](playerCoord a, playerCoord b)
-		{ return a.x == b.x ? a.y < b.y : a.x < b.x; });
-		std::shuffle(gens.begin(), gens.end(), std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
-		for(int i = 1; i <= playerCnt; ++i) {
-			coos[i] = lastTurn[i] = genCoo[i] = gens[i - 1];
-			gameMap[genCoo[i].x][genCoo[i].y].team = i;
-			gameMap[genCoo[i].x][genCoo[i].y].army = 0;
-		}
-		for(int i = 1; i <= mapH; ++i)
-			for(int j = 1; j <= mapW; ++j)
-				if(gameMap[i][j].type == 3 && gameMap[i][j].team == 0)
-					gameMap[i][j].type = 0;
-	}
-
-	void kill(int p1, int p2) {
-		if(p2 == 1)
-			MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
+	void kill(int p1, int p2, int isAlive[], int curTurn) {
+		if(p2 == 1) MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
 		isAlive[p2] = 0;
 		for(int i = 1; i <= mapH; ++i) {
 			for(int j = 1; j <= mapW; ++j) {
@@ -198,7 +108,7 @@ struct gameStatus {
 				}
 			}
 		}
-		gameMessage.push_back({p1, p2, curTurn});
+		printGameMessage({p1, p2, curTurn}, 12);
 		lastTurn[p2] = playerCoord{-1, -1};
 	}
 
@@ -208,11 +118,8 @@ struct gameStatus {
 		playerCoord from;
 		playerCoord to;
 	};
-	// vector for inline movements
-	std::deque<moveS> inlineMove;
-
 	// movement analyzer
-	int analyzeMove(int id, int mv, playerCoord& coo) {
+	int analyzeMove(deque<moveS>& inlineMove, int id, int mv, playerCoord& coo, playerCoord genCoo[], int curTurn) {
 		movementPack.push(movementS{id, mv, curTurn});
 		switch(mv) {
 			case -1:
@@ -249,7 +156,7 @@ struct gameStatus {
 		return 0;
 	}
 	// flush existing movements
-	void flushMove() {
+	void flushMove(deque<moveS>& inlineMove, int isAlive[], int curTurn) {
 		while(!inlineMove.empty()) {
 			moveS cur = inlineMove.front();
 			inlineMove.pop_front();
@@ -269,7 +176,7 @@ struct gameStatus {
 					gameMap[cur.to.x][cur.to.y].team = cur.id;
 					if(gameMap[cur.to.x][cur.to.y].type == 3) {
 						/* general */
-						kill(cur.id, p);
+						kill(cur.id, p, isAlive, curTurn);
 						gameMap[cur.to.x][cur.to.y].type = 4;
 						for(auto& mv : inlineMove)
 							if(mv.id == p)
@@ -279,9 +186,70 @@ struct gameStatus {
 			}
 		}
 	}
+	// general init
+	void initGenerals(int playerCnt, playerCoord coos[]) {
+		std::deque<playerCoord> gens;
+		for(int i = 1; i <= mapH; ++i)
+			for(int j = 1; j <= mapW; ++j)
+				if(gameMap[i][j].type == 3)
+					gens.push_back(playerCoord{i, j});
+		while(gens.size() < playerCnt) {
+			std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
+			int x, y;
+			do
+				x = p() % mapH + 1, y = p() % mapW + 1;
+			while(gameMap[x][y].type != 0);
+			gens.push_back(playerCoord{x, y});
+			gameMap[x][y].type = 3;
+			gameMap[x][y].army = 0;
+		}
+		sort(gens.begin(), gens.end(), [](playerCoord a, playerCoord b) { return a.x == b.x ? a.y < b.y : a.x < b.x; });
+		std::shuffle(gens.begin(), gens.end(), std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
+		for(int i = 1; i <= playerCnt; ++i) {
+			coos[i] = lastTurn[i] = coos[i] = gens[i - 1];
+			gameMap[coos[i].x][coos[i].y].team = i;
+			gameMap[coos[i].x][coos[i].y].army = 0;
+		}
+		for(int i = 1; i <= mapH; ++i)
+			for(int j = 1; j <= mapW; ++j)
+				if(gameMap[i][j].type == 3 && gameMap[i][j].team == 0)
+					gameMap[i][j].type = 0;
+	}
+	void updateMap(int& curTurn) {
+		++curTurn;
+		for(int i = 1; i <= mapH; ++i) {
+			for(int j = 1; j <= mapW; ++j) {
+				if(gameMap[i][j].team == 0) continue;
+				switch(gameMap[i][j].type) {
+					case 0: {
+						/* plain */
+						if(curTurn % 25 == 0) ++gameMap[i][j].army;
+						break;
+					}
+					case 1: {
+						/* swamp */
+						if(gameMap[i][j].army > 0) if(!(--gameMap[i][j].army)) gameMap[i][j].team = 0;
+						break;
+					}
+					case 2:	   /* mountain */
+						break; /* ??? */
+					case 3: {
+						/* general */
+						++gameMap[i][j].army;
+						break;
+					}
+					case 4: {
+						/* city */
+						++gameMap[i][j].army;
+						break;
+					}
+				}
+			}
+		}
+	}
 
 	// ranklist printings
-	void ranklist(playerCoord coos[]) {
+	void ranklist(int playerCnt, playerCoord coos[], int isAlive[], int robotId[]) {
 		struct node {
 			int id;
 			long long army;
@@ -314,30 +282,130 @@ struct gameStatus {
 				continue;
 			rklst[i].armyInHand = gameMap[coos[i].x][coos[i].y].army;
 		}
-		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b)
-		{ return a.army > b.army; });
-		setfillcolor(WHITE);
-		ege_fillrect(widthPerBlock * mapW, 0, 1600 * LGGraphics::mapDataStore.mapSizeX - widthPerBlock * mapW, 900 * LGGraphics::mapDataStore.mapSizeY);
-		ege_fillrect(0, heightPerBlock * mapH, 1600 * LGGraphics::mapDataStore.mapSizeX, 900 * LGGraphics::mapDataStore.mapSizeY - heightPerBlock * mapH);
-		setfont(30 * LGGraphics::mapDataStore.mapSizeY, 0, "Courier New");
-		setcolor(BLUE);
-		xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY, "Ranklist");
-		setcolor(BLACK);
-		setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Courier New");
-		xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, 60 * LGGraphics::mapDataStore.mapSizeY, "%7s %8s %5s %5s %5s %13s %-15s", "PLAYER", "ARMY", "PLAIN", "CITY", "TOT", "ARMY IN HAND", "WHICH BOT?");
+		std::sort(rklst + 1, rklst + playerCnt + 1, [](node a, node b) { return a.army > b.army; });
+		// setfillcolor(WHITE);
+		// ege_fillrect(widthPerBlock * mapW, 0, 1600 * LGGraphics::mapDataStore.mapSizeX - widthPerBlock * mapW, 900 * LGGraphics::mapDataStore.mapSizeY);
+		// ege_fillrect(0, heightPerBlock * mapH, 1600 * LGGraphics::mapDataStore.mapSizeX, 900 * LGGraphics::mapDataStore.mapSizeY - heightPerBlock * mapH);
+		rectBUTTON rkbut;
+		rkbut
+		.settxtcol(WHITE)
+		.setfontname("Courier New")
+		.setfonthw(20 * LGGraphics::mapDataStore.mapSizeY, 0)
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setrtcol(false, WHITE)
+		.status = 1;
+		rkbut.setbgcol(BLACK);
+		rkbut
+		.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 975 * LGGraphics::mapDataStore.mapSizeX)
+		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 75 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.poptext().addtext("PLAYER")
+		.display();
+		rkbut
+		.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1050 * LGGraphics::mapDataStore.mapSizeX)
+		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 125 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.poptext().addtext("ARMY")
+		.display();
+		rkbut
+		.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1175 * LGGraphics::mapDataStore.mapSizeX)
+		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.poptext().addtext("PLAIN")
+		.display();
+		rkbut
+		.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1225 * LGGraphics::mapDataStore.mapSizeX)
+		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.poptext().addtext("CITY")
+		.display();
+		rkbut
+		.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1275 * LGGraphics::mapDataStore.mapSizeX)
+		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.poptext().addtext("TOT")
+		.display();
+		rkbut
+		.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1325 * LGGraphics::mapDataStore.mapSizeX)
+		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 125 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.poptext().addtext("ARMY IN HAND")
+		.display();
+		rkbut
+		.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1450 * LGGraphics::mapDataStore.mapSizeX)
+		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.poptext().addtext("WHICH BOT?")
+		.display();
 		for(int i = 1; i <= playerCnt; i++) {
-			if(isAlive[rklst[i].id])
-				setcolor(defTeams[rklst[i].id].color);
-			else
-				setcolor(BLACK);
-			if(rklst[i].army < 1000000000)
-				xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, (60 + i * 20) * LGGraphics::mapDataStore.mapSizeY, "%7s %8lld %5d %5d %5d %13lld %-15s", defTeams[rklst[i].id].name.c_str(), rklst[i].army, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand, botName[robotId[rklst[i].id]/100+1].c_str());
+			rkbut.setbgcol(defTeams[rklst[i].id].color);
+			rkbut
+			.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 975 * LGGraphics::mapDataStore.mapSizeX)
+			.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 75 * LGGraphics::mapDataStore.mapSizeX + 1)
+			.poptext().addtext(defTeams[rklst[i].id].name)
+			.display();
+			char s[1005];
+			if(rklst[i].army < 1000000000) sprintf(s, "%lld", rklst[i].army);
 			else {
 				register int p = std::to_string(rklst[i].army * 1.0L / 1e9L).find('.');
-				xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, (60 + i * 20) * LGGraphics::mapDataStore.mapSizeY, "%7s %*.*LfG %5d %5d %5d %13lld %-15s", defTeams[rklst[i].id].name.c_str(), 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L, rklst[i].plain, rklst[i].city, rklst[i].tot, rklst[i].armyInHand, botName[robotId[rklst[i].id]/100+1].c_str());
+				sprintf(s, "%.*.*LfG", 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L);
 			}
+			rkbut
+			.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1050 * LGGraphics::mapDataStore.mapSizeX)
+			.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 125 * LGGraphics::mapDataStore.mapSizeX + 1)
+			.poptext().addtext(s)
+			.display();
+			rkbut
+			.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1175 * LGGraphics::mapDataStore.mapSizeX)
+			.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+			.poptext().addtext(to_string(rklst[i].plain))
+			.display();
+			rkbut
+			.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1225 * LGGraphics::mapDataStore.mapSizeX)
+			.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+			.poptext().addtext(to_string(rklst[i].city))
+			.display();
+			rkbut
+			.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1275 * LGGraphics::mapDataStore.mapSizeX)
+			.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+			.poptext().addtext(to_string(rklst[i].tot))
+			.display();
+			rkbut
+			.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1325 * LGGraphics::mapDataStore.mapSizeX)
+			.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 125 * LGGraphics::mapDataStore.mapSizeX + 1)
+			.poptext().addtext(to_string(rklst[i].armyInHand))
+			.display();
+			rkbut
+			.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1450 * LGGraphics::mapDataStore.mapSizeX)
+			.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX + 1)
+			.poptext().addtext(botName[robotId[rklst[i].id]/100+1])
+			.display();
 		}
 	}
+}
+
+struct gameStatus {
+	bool isWeb;
+	int cheatCode;
+	int playerCnt;
+	int isAlive[64];
+	int stepDelay; /* fps */
+	bool played;
+	int winnerNum;
+	int robotId[64];
+
+	// constructor
+	gameStatus() = default;
+	gameStatus(bool iW, int chtC, int pC, int sD) {
+		isWeb = iW;
+		cheatCode = chtC;
+		playerCnt = pC;
+		stepDelay = sD;
+		for(register int i = 1; i <= pC; ++i) isAlive[i] = 1;
+		played = 0;
+	}
+	// destructor
+	~gameStatus() = default;
+
+	int curTurn;
+
+	playerCoord genCoo[64];
+
+	// vector for inline movements
+	std::deque<gameOperation::moveS> inlineMove;
 
 	playerCoord coordinate[64];
 	std::deque<int> movement;
@@ -392,7 +460,6 @@ struct gameStatus {
 		LGGraphics::init();
 		// printf("%f\n", getfps());
 		played = 1;
-		gameMesC = 0;
 		if(!isWeb) {
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 			robotId[1] = -100;
@@ -400,8 +467,9 @@ struct gameStatus {
 				robotId[i] = mtrd() % 300;
 			//			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
 			//			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
-			initGenerals(coordinate);
-			updateMap();
+			gameOperation::initGenerals(playerCnt, genCoo);
+			for(int i = 1; i <= playerCnt; ++i) coordinate[i] = genCoo[i];
+			gameOperation::updateMap(curTurn);
 			Zip();
 			zipStatus(playerCnt);
 			printMap(cheatCode, coordinate[1]);
@@ -410,11 +478,20 @@ struct gameStatus {
 			rectBUTTON fpsbut;
 			fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
 			fpsbut.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
-			fpsbut.setalign(RIGHT_TEXT, CENTER_TEXT);
+			fpsbut.setalign(CENTER_TEXT, CENTER_TEXT);
 			fpsbut.setfontname("Courier New");
 			fpsbut.setfonthw(20 * LGGraphics::mapDataStore.mapSizeY, 0);
-			fpsbut.setbgcol(WHITE);
-			fpsbut.settxtcol(BLACK);
+			fpsbut.setbgcol(RED);
+			fpsbut.settxtcol(WHITE);
+			rectBUTTON turnbut;
+			turnbut
+			.setlocation(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
+			.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
+			.setalign(CENTER_TEXT, CENTER_TEXT)
+			.setfontname("Courier New")
+			.setfonthw(20 * LGGraphics::mapDataStore.mapSizeY, 0)
+			.setbgcol(BLUE)
+			.settxtcol(WHITE);
 			for(; is_run(); delay_fps(std::min(stepDelay + 0.5, 120.5))) {
 				while(mousemsg()) {
 					mouse_msg msg = getmouse();
@@ -490,14 +567,14 @@ struct gameStatus {
 									}
 								}
 							}
-							gameMessage.push_back({1, 1, curTurn});
+							gameOperation::printGameMessage({1, 1, curTurn}, 12);
 							lastTurn[1] = playerCoord{-1, -1};
 							break;
 						}
 					}
 				}
-				updateMap();
-				while(!movement.empty() && analyzeMove(1, movement.front(), coordinate[1]))
+				gameOperation::updateMap(curTurn);
+				while(!movement.empty() && gameOperation::analyzeMove(inlineMove, 1, movement.front(), coordinate[1], genCoo, curTurn))
 					movement.pop_front();
 				if(!movement.empty())
 					movement.pop_front();
@@ -506,24 +583,24 @@ struct gameStatus {
 						continue;
 					switch(robotId[i]) {
 						case 0 ... 99:
-							analyzeMove(i, smartRandomBot::smartRandomBot(i, coordinate[i]), coordinate[i]);
+							gameOperation::analyzeMove(inlineMove, i, smartRandomBot::smartRandomBot(i, coordinate[i]), coordinate[i], genCoo, curTurn);
 							break;
 						case 100 ... 199:
-							analyzeMove(i, xrzBot::xrzBot(i, coordinate[i]), coordinate[i]);
+							gameOperation::analyzeMove(inlineMove, i, xrzBot::xrzBot(i, coordinate[i]), coordinate[i], genCoo, curTurn);
 							break;
 						case 200 ... 299:
-							analyzeMove(i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i]);
+							gameOperation::analyzeMove(inlineMove, i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i], genCoo, curTurn);
 							break;
 //					case 300 ... 399:
 //						analyzeMove(i, lcwBot::lcwBot(i, coordinate[i]), coordinate[i]);
 //						break;
 						default:
-							analyzeMove(i, 0, coordinate[i]);
+							gameOperation::analyzeMove(inlineMove, i, 0, coordinate[i], genCoo, curTurn);
 					}
 				}
 				if(curTurn % 2000 == 0)
 					Zip(), zipStatus(playerCnt);
-				flushMove();
+				gameOperation::flushMove(inlineMove, isAlive, curTurn);
 				if(cheatCode != 1048575) {
 					int alldead = 0;
 					for(int i = 1; i <= playerCnt && !alldead; ++i) {
@@ -551,17 +628,18 @@ struct gameStatus {
 						gameEnd = 1;
 						winnerNum = std::__lg(ed);
 						cheatCode = 1048575;
-						gameMessage.push_back({-1, -1, curTurn});
+						gameOperation::printGameMessage({winnerNum, -1, curTurn}, 12);
 					}
 				}
 				printMap(cheatCode, coordinate[1]);
-				if(curTurn % max(stepDelay / 10, 1) == 0) {
-					ranklist(coordinate);
-					printGameMessage();
-				}
+				if(curTurn % max(stepDelay / 10, 1) == 0)
+					gameOperation::ranklist(playerCnt, coordinate, isAlive, robotId);
 				fpsbut.poptext();
 				fpsbut.addtext("FPS: " + to_string(getfps()));
 				fpsbut.display();
+				turnbut.poptext();
+				turnbut.addtext("Turn " + to_string(curTurn) + ".");
+				turnbut.display();
 			}
 		}
 //		else{

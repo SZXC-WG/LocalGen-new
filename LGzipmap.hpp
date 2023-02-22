@@ -14,31 +14,7 @@
 #ifndef __LGZIPMAP_HPP__
 #define __LGZIPMAP_HPP__
 
-#include <queue>
-#include "LGmaps.hpp"
-#include "LGgame.hpp"
-
-const int /*LEN_ZIP = 100005 (defined in LGmaps), */CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
-char strZipStatus[LEN_ZIP];
-char strZip[LEN_ZIP];
-char strdeZip[LEN_ZIP];
-char strGameZip[4 * LEN_ZIP];
-char strdeGameZip[4 * LEN_ZIP];
-char strStatusZip[4*LEN_ZIP];
-char strdeStatusZip[4*LEN_ZIP];
-int curLen = 0;
-Block curMap[505][505];
-playerCoord mapCoord[17][30], curCoord[30];
-Block mapSet[17][505][505];
-
-long long totTurn, curTurn, totMove;
-std::pair<long long, long long> curMoveS;
-std::queue<long long> signMap;
-std::queue<long long> signCmd;
-struct movementS;
-movementS dezipedMovementS[4 * LEN_ZIP];
-movementS tmp;
-std::queue<movementS> movementPack;
+#include "LGdef.hpp"
 
 inline long long PMod(long long& x) {
 	long long res = x & 63;

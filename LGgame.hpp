@@ -465,7 +465,7 @@ struct gameStatus
 			printMap(cheatCode, coordinate[1]);
 			curTurn = 0;
 			bool gameEnd = 0;
-			GBUTTON fpsbut;
+			rectBUTTON fpsbut;
 			fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
 			fpsbut.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
 			fpsbut.setalign(RIGHT_TEXT, CENTER_TEXT);

@@ -10,6 +10,7 @@
 /*                                                                       */
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
+
 #include <bits/stdc++.h>
 #include "LocalGen-new_private.h"
 #include "LGcons.hpp"
@@ -18,112 +19,9 @@
 #include <graphics.h>
 using namespace std;
 
-void exitExe();
+#include "graphics/LGGrectbut.hpp"
 
-// struct for buttons
-struct GBUTTON {
-	PIMAGE button; // image info
-	int hei, wid; // height & width
-	color_t bgcol; // background color
-	color_t txtcol; // text color
-	vector<string> text; // text
-	string font; // font face name
-	int fonthei, fontwid; // font height & width
-	int halign, walign; // align method
-	int hloc, wloc; // location on screen
-	std::function<void()> clickEvent; // event when clicked
-	int status; // button status: free(0) / cursor-on(1) / clicked(2)
-
-	explicit GBUTTON() {
-		button = newimage();
-		hei = wid = 1;
-		halign = TOP_TEXT, walign = LEFT_TEXT;
-	}
-	~GBUTTON() {
-		delimage(button);
-	}
-	GBUTTON(int h, int w) {
-		hei = h, wid = w;
-		button = newimage(h, w);
-	}
-	GBUTTON(GBUTTON&& but) {
-		delimage(button);
-		button = but.button;
-		hei = but.hei, wid = but.wid;
-		bgcol = but.bgcol, txtcol = but.txtcol;
-		text = but.text;
-	}
-	GBUTTON(const GBUTTON& but) {
-		delimage(button);
-		button = but.button;
-		hei = but.hei, wid = but.wid;
-		bgcol = but.bgcol, txtcol = but.txtcol;
-		text = but.text;
-	}
-	inline void draw() {
-		delimage(button);
-		button = newimage(wid, hei);
-		setbkmode(TRANSPARENT, button);
-		setfillcolor(bgcol, button);
-		ege_fillrect(0, 0, wid, hei, button);
-		setcolor(txtcol, button);
-		setfont(fonthei, fontwid, font.c_str(), button);
-		settextjustify(walign, halign, button);
-		register int ox, oy;
-		if(walign == LEFT_TEXT) ox = 0;
-		else if(walign == CENTER_TEXT) ox = wid / 2;
-		else ox = wid;
-		if(halign == TOP_TEXT) oy = 0;
-		else if(halign == CENTER_TEXT) oy = (hei - fonthei * (text.size() - 1)) / 2;
-		else oy = hei - fonthei * (text.size() - 1);
-		for(auto s:text) {
-			outtextxy(ox, oy, s.c_str(), button);
-			oy += fonthei;
-		}
-		setcolor(0xff000000 | ~bgcol, button);
-		if(status == 1) {
-			ege_rectangle(1, 1, wid - 1, hei - 1, button);
-		} else if(status == 2) {
-			ege_rectangle(1, 1, wid - 1, hei - 1, button);
-		}
-	}
-	inline void display() {
-		draw();
-		putimage(NULL, wloc, hloc, wid, hei, button, 0, 0);
-	}
-	inline void seth(int h) { hei = h; }
-	inline void setw(int w) { wid = w; }
-	inline void sethw(int h, int w) { hei = h; wid = w; }
-	inline void setbgcol(color_t col) { bgcol = col; }
-	inline void settxtcol(color_t col) { txtcol = col; }
-	inline void addtext(string txt) { text.push_back(txt); }
-	inline void poptext() { if(!text.empty()) text.pop_back(); }
-	inline void cleartext() { text.clear(); }
-	inline void setfontname(string ft) { font = ft; }
-	inline void setfonth(int fh) { fonthei = fh; }
-	inline void setfontw(int fw) { fontwid = fw; }
-	inline void setfonthw(int fh, int fw) { fonthei = fh; fontwid = fw; }
-	inline void setlocation(int h, int w) { hloc = h, wloc = w; }
-	inline void setalign(int ha = -1, int wa = -1) {
-		if(~ha) halign = ha;
-		if(~wa) walign = wa;
-	}
-	inline void setevent(std::function<void()> event) { clickEvent = event; }
-	inline int detect() {
-		/* todo */
-		POINT mousePos;
-		GetCursorPos(&mousePos);
-		ScreenToClient(getHWnd(), &mousePos);
-		if(mousePos.x < wloc || mousePos.x > min(wloc + wid - 1, getwidth()) || mousePos.y < hloc || mousePos.y > min(hloc + hei - 1, getheight()))
-			return status = 0;
-		while(mousemsg()) {
-			mouse_msg msg = getmouse();
-			if(!(msg.x < wloc || msg.x > min(wloc + wid - 1, getwidth()) || msg.y < hloc || msg.y > min(hloc + hei - 1, getheight()))
-			        && msg.is_left() && msg.is_down()) return status = 2;
-		}
-		return status = 1;
-	}
-};
+extern void exitExe();
 
 bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60) {
 	DEVMODE fullscreenSettings;
@@ -228,7 +126,7 @@ namespace LGGraphics {
 		setfont(50, 0, "Freestyle Script");
 		xyprintf(250, 250, "Please Select Window Size:");
 		settextjustify(LEFT_TEXT, TOP_TEXT);
-		GBUTTON scrsz[10];
+		rectBUTTON scrsz[10];
 		for (int i = 200; i <= 500; i += 100) {
 			register int p = i / 100 - 2;
 			scrsz[p].sethw(50, 400);
@@ -295,7 +193,7 @@ namespace LGGraphics {
 		setfont(500 * mapDataStore.mapSizeY, 0, "Freestyle Script");
 		setcolor(BLUE);
 		xyprintf(800 * mapDataStore.mapSizeY, 0, "LocalGen");
-		GBUTTON singbut;
+		rectBUTTON singbut;
 		singbut.setbgcol(GREEN);
 		singbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
 		singbut.setlocation(600 * mapDataStore.mapSizeY, 300 * mapDataStore.mapSizeX);
@@ -305,7 +203,7 @@ namespace LGGraphics {
 		singbut.setalign(CENTER_TEXT, CENTER_TEXT);
 		singbut.addtext("Single Player");
 		singbut.display(); 
-		GBUTTON multibut;
+		rectBUTTON multibut;
 		multibut.setbgcol(RED);
 		multibut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
 		multibut.setlocation(600 * mapDataStore.mapSizeY, 900 * mapDataStore.mapSizeX);
@@ -335,7 +233,7 @@ namespace LGGraphics {
 
 	void selectOrImportMap() {
 		setbkmode(TRANSPARENT);
-		GBUTTON selbut;
+		rectBUTTON selbut;
 		selbut.setbgcol(BROWN);
 		selbut.setlocation(600 * mapDataStore.mapSizeY, 300 * mapDataStore.mapSizeX);
 		selbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
@@ -344,7 +242,7 @@ namespace LGGraphics {
 		selbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
 		selbut.addtext("Choose a Map");
 		selbut.setalign(CENTER_TEXT, CENTER_TEXT);
-		GBUTTON impbut;
+		rectBUTTON impbut;
 		impbut.setbgcol(BROWN);
 		impbut.setlocation(600 * mapDataStore.mapSizeY, 900 * mapDataStore.mapSizeX);
 		impbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
@@ -378,7 +276,7 @@ namespace LGGraphics {
 //		}
 		int left, right, up, down;
 		int x, y;
-		GBUTTON mapbut[50];
+		rectBUTTON mapbut[50];
 		for (int i = 1; i <= mapNum; i++) {
 			x = (i + 5) / 6;
 			y = ((i % 6 == 0) ? 6 : i % 6);
@@ -395,9 +293,10 @@ namespace LGGraphics {
 			mapbut[i].addtext("id: " + to_string(maps[i].id) + " " + maps[i].chiname);
 			mapbut[i].addtext(maps[i].engname);
 			mapbut[i].addtext("General Count: " + to_string(maps[i].generalcnt));
-			mapbut[i].addtext("Swamp Count: " + to_string(maps[i].swampcnt));
-			mapbut[i].addtext("Mountain Count: " + to_string(maps[i].mountaincnt));
+			mapbut[i].addtext("Plain Count: " + to_string(maps[i].plaincnt));
 			mapbut[i].addtext("City Count: " + to_string(maps[i].citycnt));
+			mapbut[i].addtext("Mountain Count: " + to_string(maps[i].mountaincnt));
+			mapbut[i].addtext("Swamp Count: " + to_string(maps[i].swampcnt));
 			mapbut[i].addtext("Size: " + to_string(maps[i].hei) + " * " + to_string(maps[i].wid));
 			mapbut[i].setalign(CENTER_TEXT, CENTER_TEXT);
 			mapbut[i].clickEvent = [&mapSelected, i]()->void { mapSelected = i; };
@@ -425,17 +324,17 @@ namespace LGGraphics {
 		}
 		cleardevice();
 		setcolor(GREEN);
-		setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+		setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 		xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 		xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-		setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+		setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 		xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 		xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 		xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
 		xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
 		xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 		if (mapSelected < 6) {
-			setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+			setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 			setcolor(MAGENTA);
 			int height = 0;
 			key_msg msg;
@@ -452,10 +351,10 @@ namespace LGGraphics {
 					}
 					cleardevice();
 					setcolor(GREEN);
-					setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+					setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 					xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 					xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-					setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+					setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 					xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 					xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author of the Map: %s", maps[mapSelected].auth.c_str());
 					xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -468,10 +367,10 @@ namespace LGGraphics {
 			}
 			cleardevice();
 			setcolor(GREEN);
-			setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+			setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 			xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 			xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-			setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+			setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 			xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 			xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author of the Map: %s", maps[mapSelected].auth.c_str());
 			xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -494,10 +393,10 @@ namespace LGGraphics {
 					}
 					cleardevice();
 					setcolor(GREEN);
-					setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+					setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 					xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 					xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-					setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+					setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 					xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 					xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author of the Map: %s", maps[mapSelected].auth.c_str());
 					xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -512,7 +411,7 @@ namespace LGGraphics {
 			}
 			long long armyMin = 0, armyMax = 0;
 			if (mapSelected == 3) {
-				setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 				setcolor(MAGENTA);
 				key_msg msg;
 				xyprintf(10 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Minimum Number of Army on each Block");
@@ -530,10 +429,10 @@ namespace LGGraphics {
 							isPositive = !isPositive;
 						cleardevice();
 						setcolor(GREEN);
-						setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+						setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 						xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 						xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-						setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+						setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 						xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 						xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author of the Map: %s", maps[mapSelected].auth.c_str());
 						xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -555,10 +454,10 @@ namespace LGGraphics {
 					armyMin = -armyMin;
 				cleardevice();
 				setcolor(GREEN);
-				setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 				xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 				xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-				setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 				xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 				xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author of the Map: %s", maps[mapSelected].auth.c_str());
 				xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -586,10 +485,10 @@ namespace LGGraphics {
 							isPositive = !isPositive;
 						cleardevice();
 						setcolor(GREEN);
-						setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+						setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 						xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 						xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-						setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+						setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 						xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 						xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author of the Map: %s", maps[mapSelected].auth.c_str());
 						xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -613,10 +512,10 @@ namespace LGGraphics {
 					armyMax = -armyMax;
 				cleardevice();
 				setcolor(GREEN);
-				setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 				xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 				xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-				setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 				xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 				xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author of the Map: %s", maps[mapSelected].auth.c_str());
 				xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -653,10 +552,10 @@ namespace LGGraphics {
 		} else {
 			cleardevice();
 			setcolor(GREEN);
-			setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+			setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 			xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 			xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-			setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+			setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 			xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 			xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author of the Map: %s", maps[mapSelected].auth.c_str());
 			xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -672,7 +571,7 @@ namespace LGGraphics {
 	void doMapImport() {
 		cleardevice();
 		setcolor(BLUE);
-		setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+		setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 		xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "Please Input Filename with suffix (end with enter)");
 		key_msg msg;
 		while (1) {
@@ -686,7 +585,7 @@ namespace LGGraphics {
 					fileName += (char)(msg.key);
 				cleardevice();
 				setcolor(BLUE);
-				setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 				xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "Please Input Filename with suffix (end with enter)");
 				xyprintf(10 * mapDataStore.mapSizeX, 110 * mapDataStore.mapSizeY, "%s", fileName.c_str());
 			}
@@ -702,7 +601,7 @@ namespace LGGraphics {
 		int circlePos = 450 * mapDataStore.mapSizeX;
 		PIMAGE refreshCopy = newimage();
 		getimage(refreshCopy, 0, 0, 1600 * mapDataStore.mapSizeX, 340 * mapDataStore.mapSizeY);
-		setfont(20 * mapDataStore.mapSizeY, 0, "Segoe UI");
+		setfont(20 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 		setcolor(BLUE);
 		bool changeMade = true;
 		int mouseDownCount = 0;
@@ -752,7 +651,7 @@ namespace LGGraphics {
 				rectangle(900 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY, 1100 * mapDataStore.mapSizeX, 105 * mapDataStore.mapSizeY);
 				setfont(70 * mapDataStore.mapSizeY, 0, "Freestyle Script");
 				rectprintf(900 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY, 200 * mapDataStore.mapSizeX, 75 * mapDataStore.mapSizeY, "Start Game!");
-				setfont(20 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(20 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 				if (stDel != 0)
 					xyprintf(560 * mapDataStore.mapSizeX, 875 * mapDataStore.mapSizeY, "Speed Now: %d", stDel);
 				else

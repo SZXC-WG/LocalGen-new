@@ -178,7 +178,7 @@ namespace LGGraphics {
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 			initgraph(1600 * mapDataStore.mapSizeX, 900 * mapDataStore.mapSizeY, RENDER_AUTO);
 //			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
-			setcaption("LocalGen v" VER_STRING " - Developed by LocalGen-dev");
+			setcaption("LocalGen v" VER_STRING " developed by LocalGen-dev");
 		}
 	}
 

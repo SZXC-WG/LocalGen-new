@@ -32,6 +32,7 @@
 /*************** the main function ***************/
 HWND hwnd = GetConsoleWindow();
 signed main(signed argc, char** argv) {
+//	FreeConsole();
 	ShowWindow(hwnd, SW_MAXIMIZE);
 	SetConsoleTitle("Localized Generals.io v" FILE_VERSION " (Set your console window font size! Recommended:5-8)");
 	initMaps();

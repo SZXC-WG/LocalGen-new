@@ -21,8 +21,7 @@
 #include "LGzipmap.hpp"
 #include "LGgame.hpp"
 
-void MainPage()
-{
+void MainPage() {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	LGGraphics::WelcomePage();
 	LGGraphics::selectOrImportMap();

@@ -34,7 +34,7 @@ bool initSock() {
 		failSock|=2;
 		WSACleanup();
 		return true;
-	}return false;
+	} return false;
 }
 
 #endif

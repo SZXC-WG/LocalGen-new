@@ -47,6 +47,7 @@ class rectBUTTON {
 		hei = wid = 1;
 		halign = TOP_TEXT, walign = LEFT_TEXT;
 		lnwid = 1;
+		status = 0;
 	}
 	~rectBUTTON() {
 		delimage(button);

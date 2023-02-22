@@ -32,8 +32,7 @@ extern void deZip();
 extern char strdeZip[LEN_ZIP];
 
 PIMAGE pimg[7];
-struct MapInfoS
-{
+struct MapInfoS {
 	int id;
 	string chiname;
 	string engname;
@@ -51,8 +50,7 @@ struct MapInfoS
 };
 MapInfoS maps[5005];
 
-struct Block
-{
+struct Block {
 	int team; /* the team who holds this block */
 	int type; /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
 	ll army;  /* count of army on this block */
@@ -64,8 +62,7 @@ static Block gameMap[505][505]; /* maximum 500*500 */
 
 int widthPerBlock, heightPerBlock;
 
-struct teamS
-{
+struct teamS {
 	string name;		/* team name */
 	unsigned int color; /* team color */
 };
@@ -85,8 +82,7 @@ teamS defTeams[64] = {
 	{"Indigo", 0xff483d8b},
 };
 
-struct playerCoord
-{
+struct playerCoord {
 	int x, y;
 };
 bool operator== (playerCoord a,playerCoord b) {
@@ -94,131 +90,104 @@ bool operator== (playerCoord a,playerCoord b) {
 }
 
 const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
-bool isVisible(int x, int y, int printCode)
-{
-	if (gameMap[x][y].lit)
+bool isVisible(int x, int y, int printCode) {
+	if(gameMap[x][y].lit)
 		return true;
-	for (int i = -1; i <= 1; ++i)
-		for (int j = -1; j <= 1; ++j)
-			if (printCode & (1 << gameMap[x + i][y + j].team))
+	for(int i = -1; i <= 1; ++i)
+		for(int j = -1; j <= 1; ++j)
+			if(printCode & (1 << gameMap[x + i][y + j].team))
 				return true;
 	return false;
 }
-void printNum(bool visible, long long army, int team, int curx, int cury)
-{
-	if (!visible)
+void printNum(bool visible, long long army, int team, int curx, int cury) {
+	if(!visible)
 		return;
-	if (visible)
-	{
-		if (army < 0)
-		{
+	if(visible) {
+		if(army < 0) {
 			register long long absd = -army;
-			if (absd < 100)
-			{
+			if(absd < 100)
 				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%lld", army);
-			}
-			else if (absd < (ll)(1e13))
-			{
+			else if(absd < (ll)(1e13)) {
 				string p = to_string(army);
 				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-			}
-			else
-			{
+			} else
 				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "-MX");
-			}
-		}
-		else if (army == 0)
-		{
-			if (gameMap[curx][cury].type != 0 && gameMap[curx][cury].type != 1)
+		} else if(army == 0) {
+			if(gameMap[curx][cury].type != 0 && gameMap[curx][cury].type != 1)
 				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "0");
-		}
-		else if (army < 1000)
-		{
+		} else if(army < 1000)
 			xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%lld", army);
-		}
-		else if (army < (ll)(1e14))
-		{
+		else if(army < (ll)(1e14)) {
 			string p = to_string(army);
 			xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-		}
-		else
-		{
+		} else
 			xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "MAX");
-		}
 	}
 }
 
-void printMap(int printCode, playerCoord coo)
-{
+void printMap(int printCode, playerCoord coo) {
 	static const color_t cscol = 0xff808080,
-						 plcol = 0xffdcdcdc,
-						 mtcol = 0xffbbbbbb,
-						 unseen = 0xff1a1a1a;
+	                     plcol = 0xffdcdcdc,
+	                     mtcol = 0xffbbbbbb,
+	                     unseen = 0xff1a1a1a;
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
-	for (int curx = 1; curx <= mapH; curx++)
-	{
-		for (int cury = 1; cury <= mapW; cury++)
-		{
-			if (isVisible(curx, cury, printCode))
-			{
-				if (gameMap[curx][cury].team == 0)
-				{
-					if (gameMap[curx][cury].type == 0 && gameMap[curx][cury].army == 0)
+	for(int curx = 1; curx <= mapH; curx++) {
+		for(int cury = 1; cury <= mapW; cury++) {
+			if(isVisible(curx, cury, printCode)) {
+				if(gameMap[curx][cury].team == 0) {
+					if(gameMap[curx][cury].type == 0 && gameMap[curx][cury].army == 0)
 						setfillcolor(plcol);
 					else if(gameMap[curx][cury].type == 0)
 						setfillcolor(cscol);
-					else if (gameMap[curx][cury].type == 1)
+					else if(gameMap[curx][cury].type == 1)
 						setfillcolor(cscol);
-					else if (gameMap[curx][cury].type == 2)
+					else if(gameMap[curx][cury].type == 2)
 						setfillcolor(mtcol);
-					else if (gameMap[curx][cury].type == 4)
+					else if(gameMap[curx][cury].type == 4)
 						setfillcolor(cscol);
-				}
-				else
+				} else
 					setfillcolor(defTeams[gameMap[curx][cury].team].color);
-			}
-			else
+			} else
 				setfillcolor(unseen);
 			ege_fillrect(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock, heightPerBlock);
-			switch (gameMap[curx][cury].type)
-			{
-			case 0:
-			{ /* plain */
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
-				break;
-			}
-			case 1:
-			{ /* swamp */
-				putimage_withalpha(NULL, pimg[4], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
-				break;
-			}
-			case 2:
-			{ /* mountain */
-				if (isVisible(curx, cury, printCode))
-					putimage_withalpha(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
-				else
-					putimage_withalpha(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
-				break;
-			}
-			case 3:
-			{ /* general */
-				if (isVisible(curx, cury, printCode))
-					putimage_withalpha(NULL, pimg[2], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
-				break;
-			}
-			case 4:
-			{ /* city */
-				if (isVisible(curx, cury, printCode))
-					putimage_withalpha(NULL, pimg[1], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
-				else
-					putimage_withalpha(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
-				printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
-				break;
-			}
+			switch(gameMap[curx][cury].type) {
+				case 0: {
+					/* plain */
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					break;
+				}
+				case 1: {
+					/* swamp */
+					putimage_withalpha(NULL, pimg[4], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					break;
+				}
+				case 2: {
+					/* mountain */
+					if(isVisible(curx, cury, printCode))
+						putimage_withalpha(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+					else
+						putimage_withalpha(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+					break;
+				}
+				case 3: {
+					/* general */
+					if(isVisible(curx, cury, printCode))
+						putimage_withalpha(NULL, pimg[2], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					break;
+				}
+				case 4: {
+					/* city */
+					if(isVisible(curx, cury, printCode))
+						putimage_withalpha(NULL, pimg[1], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+					else
+						putimage_withalpha(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					break;
+				}
 			}
 		}
 	}
@@ -226,182 +195,158 @@ void printMap(int printCode, playerCoord coo)
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 
-void createRandomMap(int crtH = -1, int crtW = -1)
-{
+void createRandomMap(int crtH = -1, int crtW = -1) {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	register int i, j;
 
-	if (crtH < 0)
+	if(crtH < 0)
 		mapH = mtrd() % 50 + 1;
 	else
 		mapH = crtH;
-	if (crtW < 0)
+	if(crtW < 0)
 		mapW = mtrd() % 50 + 1;
 	else
 		mapW = crtW;
 
-	for (i = 1; i <= mapH; i++)
-		for (j = 1; j <= mapW; j++)
-		{
+	for(i = 1; i <= mapH; i++)
+		for(j = 1; j <= mapW; j++) {
 			int x = 0, f;
-			if (i - 2 > 0 && gameMap[i - 2][j].type == 2)
+			if(i - 2 > 0 && gameMap[i - 2][j].type == 2)
 				x = 1;
-			if (j - 2 > 0 && gameMap[i][j - 2].type == 2)
+			if(j - 2 > 0 && gameMap[i][j - 2].type == 2)
 				x = 1;
-			if (i - 2 > 0 && j + 2 <= mapW && gameMap[i - 2][j + 2].type == 2)
+			if(i - 2 > 0 && j + 2 <= mapW && gameMap[i - 2][j + 2].type == 2)
 				x = 1;
-			if (i - 2 > 0 && j - 2 > 0 && gameMap[i - 2][j - 2].type == 2)
+			if(i - 2 > 0 && j - 2 > 0 && gameMap[i - 2][j - 2].type == 2)
 				x = 1;
 			gameMap[i][j].lit = (mtrd() % 114514 == 1);
-			if (x)
-			{
+			if(x) {
 				f = mtrd() % 4;
-				if (f < 2)
-				{
+				if(f < 2) {
 					gameMap[i][j].type = f;
 					gameMap[i][j].army = mtrd() % 2;
 
-					if (gameMap[i][j].army)
+					if(gameMap[i][j].army)
 						gameMap[i][j].army = mtrd() % 100 + 1;
-				}
-				else
-				{
+				} else {
 					gameMap[i][j].type = f + 1;
 					gameMap[i][j].army = mtrd() % 2;
 
-					if (gameMap[i][j].army)
+					if(gameMap[i][j].army)
 						gameMap[i][j].army = mtrd() % 100 + 1;
 				}
-			}
-			else
-			{
+			} else {
 				gameMap[i][j].type = mtrd() % 5;
 				gameMap[i][j].army = mtrd() % 2;
 
-				if (gameMap[i][j].army)
+				if(gameMap[i][j].army)
 					gameMap[i][j].army = mtrd() % 100 + 1;
 			}
 		}
 }
-void createStandardMap(int crtH = -1, int crtW = -1)
-{
+void createStandardMap(int crtH = -1, int crtW = -1) {
 	// 7/8 mountain 1/2 swamp 9 plain 1 city 1 general
 	// 1/2 swamp 16/17 plain 1 city 1 general
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	register int i, j;
 
-	if (crtH < 0)
+	if(crtH < 0)
 		mapH = mtrd() % 50 + 1;
 	else
 		mapH = crtH;
-	if (crtW < 0)
+	if(crtW < 0)
 		mapW = mtrd() % 50 + 1;
 	else
 		mapW = crtW;
 
-	for (i = 1; i <= mapH; i++)
-		for (j = 1; j <= mapW; j++)
-		{
+	for(i = 1; i <= mapH; i++)
+		for(j = 1; j <= mapW; j++) {
 			int x1 = 0, x2 = 0, f;
-			if (i - 2 > 0 && gameMap[i - 2][j].type == 2)
+			if(i - 2 > 0 && gameMap[i - 2][j].type == 2)
 				x1 = 1;
-			if (j - 2 > 0 && gameMap[i][j - 2].type == 2)
+			if(j - 2 > 0 && gameMap[i][j - 2].type == 2)
 				x1 = 1;
-			if (i - 2 > 0 && j + 2 <= mapW && gameMap[i - 2][j + 2].type == 2)
+			if(i - 2 > 0 && j + 2 <= mapW && gameMap[i - 2][j + 2].type == 2)
 				x1 = 1;
-			if (i - 2 > 0 && j - 2 > 0 && gameMap[i - 2][j - 2].type == 2)
+			if(i - 2 > 0 && j - 2 > 0 && gameMap[i - 2][j - 2].type == 2)
 				x1 = 1;
-			if (i - 1 > 0 && gameMap[i - 1][j].type == 1)
+			if(i - 1 > 0 && gameMap[i - 1][j].type == 1)
 				x2 = 1;
-			if (j - 1 > 0 && gameMap[i][j - 1].type == 1)
+			if(j - 1 > 0 && gameMap[i][j - 1].type == 1)
 				x2 = 1;
 
 			gameMap[i][j].army = 0;
 			gameMap[i][j].lit = 0;
 			f = mtrd() % 20;
 
-			if (!x1)
-			{
-				if (f < 8 - x2)
+			if(!x1) {
+				if(f < 8 - x2)
 					gameMap[i][j].type = 2;
-				else if (f < 9)
+				else if(f < 9)
 					gameMap[i][j].type = 1;
-				else if (f < 18)
+				else if(f < 18)
 					gameMap[i][j].type = 0;
-				else if (f < 19)
+				else if(f < 19)
 					gameMap[i][j].type = 3;
 				else
 					gameMap[i][j].type = 4, gameMap[i][j].army = 40;
-			}
-			else
-			{
-				if (f < 1 + x2)
+			} else {
+				if(f < 1 + x2)
 					gameMap[i][j].type = 1;
-				else if (f < 18)
+				else if(f < 18)
 					gameMap[i][j].type = 0;
-				else if (f < 19)
+				else if(f < 19)
 					gameMap[i][j].type = 3;
 				else
 					gameMap[i][j].type = 4, gameMap[i][j].army = 40;
 			}
 		}
 }
-void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt)
-{
+void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt) {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	std::uniform_int_distribution<long long> rd(armyMN, armyMX);
 	mapH = crtH, mapW = crtW;
-	for (int i = 1; i <= mapH; ++i)
-	{
-		for (int j = 1; j <= mapW; ++j)
-		{
+	for(int i = 1; i <= mapH; ++i) {
+		for(int j = 1; j <= mapW; ++j) {
 			gameMap[i][j].type = 4;
 			gameMap[i][j].army = rd(mtrd);
 			gameMap[i][j].team = 0;
 			gameMap[i][j].lit = 0;
 		}
 	}
-	for (int i = 1; i <= plCnt; ++i)
-	{
+	for(int i = 1; i <= plCnt; ++i) {
 		int x, y;
 		do
 			x = mtrd() % mapH + 1, y = mtrd() % mapW + 1;
-		while (gameMap[x][y].type != 4);
+		while(gameMap[x][y].type != 4);
 		gameMap[x][y].type = 3;
 		gameMap[x][y].army = 0;
 	}
 }
-void createFullSwampMap(int crtH, int crtW, int plCnt)
-{
+void createFullSwampMap(int crtH, int crtW, int plCnt) {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	mapH = crtH, mapW = crtW;
-	for (int i = 1; i <= mapH; ++i)
-	{
-		for (int j = 1; j <= mapW; ++j)
-		{
+	for(int i = 1; i <= mapH; ++i) {
+		for(int j = 1; j <= mapW; ++j) {
 			gameMap[i][j].type = 1;
 			gameMap[i][j].team = 0;
 			gameMap[i][j].army = 0;
 			gameMap[i][j].lit = 0;
 		}
 	}
-	for (int i = 1; i <= plCnt; ++i)
-	{
+	for(int i = 1; i <= plCnt; ++i) {
 		int x, y;
 		do
 			x = mtrd() % mapH + 1, y = mtrd() % mapW + 1;
-		while (gameMap[x][y].type != 1);
+		while(gameMap[x][y].type != 1);
 		gameMap[x][y].type = 3;
 		gameMap[x][y].army = 0;
 	}
 }
-void createFullPlainMap(int crtH, int crtW, int plCnt)
-{
+void createFullPlainMap(int crtH, int crtW, int plCnt) {
 	mapH = crtH, mapW = crtW;
-	for (int i = 1; i <= mapH; ++i)
-	{
-		for (int j = 1; j <= mapW; ++j)
-		{
+	for(int i = 1; i <= mapH; ++i) {
+		for(int j = 1; j <= mapW; ++j) {
 			gameMap[i][j].type = 0;
 			gameMap[i][j].team = 0;
 			gameMap[i][j].army = 0;
@@ -416,13 +361,13 @@ void getAllFiles(string path, std::vector<string>& files, string fileType)  {
 	string p;
 	if((hFile = _findfirst(p.assign(path).append("\\*" + fileType).c_str(), &fileinfo)) != -1) {
 		do files.push_back(p.assign(path).append("\\").append(fileinfo.name)); // 保存文件的全路径
-		while (_findnext(hFile, &fileinfo) == 0);  // 寻找下一个，成功返回0，否则-1
+		while(_findnext(hFile, &fileinfo) == 0);   // 寻找下一个，成功返回0，否则-1
 		_findclose(hFile);
 	}
 }
 
 int mapNum;
-/* 
+/*
 struct MapInfoS { int id; string chiname; string engname; string auth; int hei; int wid; int generalcnt; int swampcnt; int citycnt; int mountaincnt; int plaincnt; MapInfoS() = default; ~MapInfoS() = default; };
 */
 void initMaps() {
@@ -471,14 +416,13 @@ void readMap(int mid) {
 
 HINSTANCE defMap;
 typedef int (*func1)();
-typedef string (*func2)(int, int);
+typedef string(*func2)(int, int);
 typedef int (*func3)(int, int);
 func1 statusCheck;
 func2 getMapInfoStr;
 func3 getMapInfoNum;
 
-struct MapGeoS
-{
+struct MapGeoS {
 	int id;
 	string geo;
 	int aBits;
@@ -489,15 +433,11 @@ MapGeoS mapG[205];
 
 bool dllExit;
 
-void initDefMap()
-{
-	if (access("defMap.dll", F_OK) == -1)
-	{
+void initDefMap() {
+	if(access("defMap.dll", F_OK) == -1) {
 		dllExit = 0;
 		return;
-	}
-	else
-	{
+	} else {
 		dllExit = 1;
 		defMap = LoadLibrary("defMap.dll");
 		statusCheck = (func1)GetProcAddress(defMap, "statusCheck");
@@ -506,8 +446,7 @@ void initDefMap()
 	}
 	mapNum = statusCheck();
 	// xyprintf(100, 100, "mapNumChecked");
-	for (int i = 0; i <= mapNum; i++)
-	{
+	for(int i = 0; i <= mapNum; i++) {
 		maps[i].id = mapG[i].id = i;
 		maps[i].chiname = getMapInfoStr(i, 1);
 		maps[i].engname = getMapInfoStr(i, 2);
@@ -526,69 +465,60 @@ void initDefMap()
 	}
 }
 
-void copyMap(int mapid)
-{
+void copyMap(int mapid) {
 	int h = maps[mapid].hei, w = maps[mapid].wid;
 	mapH = h, mapW = w;
-	for (int i = 1; i <= h; ++i)
-		for (int j = 1; j <= w; ++j)
+	for(int i = 1; i <= h; ++i)
+		for(int j = 1; j <= w; ++j)
 			gameMap[i][j].team = 0;
-	for (int i = 1; i <= h; ++i)
-	{
-		for (int j = 1; j <= w; ++j)
-		{
-			switch (mapG[mapid].geo[(i - 1) * w + j - 1])
-			{
-			case 'S':
-				gameMap[i][j].type = 1;
-				break;
-			case 'G':
-				gameMap[i][j].type = 3;
-				break;
-			case 'P':
-				gameMap[i][j].type = 0;
-				break;
-			case 'M':
-				gameMap[i][j].type = 2;
-				break;
-			case 'C':
-				gameMap[i][j].type = 4;
-				break;
-			default:
-				gameMap[i][j].type = -1;
+	for(int i = 1; i <= h; ++i) {
+		for(int j = 1; j <= w; ++j) {
+			switch(mapG[mapid].geo[(i - 1) * w + j - 1]) {
+				case 'S':
+					gameMap[i][j].type = 1;
+					break;
+				case 'G':
+					gameMap[i][j].type = 3;
+					break;
+				case 'P':
+					gameMap[i][j].type = 0;
+					break;
+				case 'M':
+					gameMap[i][j].type = 2;
+					break;
+				case 'C':
+					gameMap[i][j].type = 4;
+					break;
+				default:
+					gameMap[i][j].type = -1;
 			}
 		}
 	}
-	for (int i = 1; i <= h; ++i)
-	{
-		for (int j = 1; j <= w; ++j)
-		{
+	for(int i = 1; i <= h; ++i) {
+		for(int j = 1; j <= w; ++j) {
 			int p = 0, q = ((i - 1) * w + j - 1) * mapG[mapid].aBits;
-			for (int k = q; k < q + mapG[mapid].aBits; ++k)
+			for(int k = q; k < q + mapG[mapid].aBits; ++k)
 				p = p * 26 + tolower(mapG[mapid].army[k]) - 'a';
-			if (isupper(mapG[mapid].army[q]))
+			if(isupper(mapG[mapid].army[q]))
 				p = -p;
 			gameMap[i][j].army = p;
 		}
 	}
-	for (int i = 1; i <= h; ++i)
-		for (int j = 1; j <= w; ++j)
+	for(int i = 1; i <= h; ++i)
+		for(int j = 1; j <= w; ++j)
 			gameMap[i][j].lit = mapG[mapid].light[(i - 1) * w + j - 1] - '0';
 }
 
-void exitExe()
-{
+void exitExe() {
 	FreeLibrary(defMap);
 	exit(0);
 }
 
-bool isdllOK()
-{
+bool isdllOK() {
 	return dllExit;
 }
 
-int returnMapNum()
-{
+int returnMapNum() {
 	return mapNum;
 }
 

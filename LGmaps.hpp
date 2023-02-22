@@ -14,82 +14,11 @@
 #ifndef __LGMAPS_HPP__
 #define __LGMAPS_HPP__
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <random>
-#include <chrono>
-#include <unistd.h>
-#include <algorithm>
-#include <graphics.h>
-using std::string;
-using std::to_string;
-
 #define ll long long
 
-extern const int LEN_ZIP = 100005;
 extern void deZip();
 extern char strdeZip[LEN_ZIP];
 
-PIMAGE pimg[7];
-struct MapInfoS {
-	int id;
-	string chiname;
-	string engname;
-	string auth;
-	int hei;
-	int wid;
-	int generalcnt;
-	int swampcnt;
-	int citycnt;
-	int mountaincnt;
-	int plaincnt;
-	string filename;
-	MapInfoS() = default;
-	~MapInfoS() = default;
-};
-MapInfoS maps[5005];
-
-struct Block {
-	int team; /* the team who holds this block */
-	int type; /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
-	ll army;  /* count of army on this block */
-	bool lit; /* whether the block is lighted(lit) */
-};
-
-int mapH, mapW;
-static Block gameMap[505][505]; /* maximum 500*500 */
-
-int widthPerBlock, heightPerBlock;
-
-struct teamS {
-	string name;		/* team name */
-	unsigned int color; /* team color */
-};
-teamS defTeams[64] = {
-	{"White", 0xffffffff},
-	{"Red", 0xffff0000},
-	{"Aqua", 0xff4363d8},
-	{"Green", 0xff008000},
-	{"Teal", 0xff008080},
-	{"Orange", 0xfff58231},
-	{"Pink", 0xfff032e6},
-	{"Purple", 0xff800080},
-	{"Maroon", 0xff800000},
-	{"Yellow", 0xffb09f30},
-	{"Brown", 0xff9a6324},
-	{"Blue", 0xff0000ff},
-	{"Indigo", 0xff483d8b},
-};
-
-struct playerCoord {
-	int x, y;
-};
-bool operator== (playerCoord a,playerCoord b) {
-	return a.x==b.x&&a.y==b.y;
-}
-
-const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
 bool isVisible(int x, int y, int printCode) {
 	if(gameMap[x][y].lit)
 		return true;
@@ -510,12 +439,7 @@ void copyMap(int mapid) {
 }
 
 void exitExe() {
-	FreeLibrary(defMap);
 	exit(0);
-}
-
-bool isdllOK() {
-	return dllExit;
 }
 
 int returnMapNum() {

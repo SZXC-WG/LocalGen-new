@@ -35,16 +35,18 @@ class rectBUTTON {
 	vector<string> text; // text
 	string font; // font face name
 	int fonthei, fontwid; // font height & width
+	int lnwid;
 	int halign, walign; // align method
 	int hloc, wloc; // location on screen
-	int status; // button status: free(0) / cursor-on(1) / clicked(2)
 
   public:
+	int status; // button status: free(0) / cursor-on(1) / clicked(2)
 	std::function<void()> clickEvent; // event when clicked
 	explicit rectBUTTON() {
 		button = newimage();
 		hei = wid = 1;
 		halign = TOP_TEXT, walign = LEFT_TEXT;
+		lnwid = 1;
 	}
 	~rectBUTTON() {
 		delimage(button);
@@ -88,6 +90,7 @@ class rectBUTTON {
 			oy += fonthei;
 		}
 		setcolor(0xff000000 | ~bgcol, button);
+		setlinewidth(lnwid, button);
 		if(status == 1)
 			ege_rectangle(1, 1, wid - 1, hei - 1, button);
 		else if(status == 2)
@@ -97,24 +100,26 @@ class rectBUTTON {
 		draw();
 		putimage(NULL, wloc, hloc, wid, hei, button, 0, 0);
 	}
-	inline rectBUTTON& seth(int h) { hei = h; }
-	inline rectBUTTON& setw(int w) { wid = w; }
-	inline rectBUTTON& sethw(int h, int w) { hei = h; wid = w; }
-	inline rectBUTTON& setbgcol(color_t col) { bgcol = col; }
-	inline rectBUTTON& settxtcol(color_t col) { txtcol = col; }
-	inline rectBUTTON& addtext(string txt) { text.push_back(txt); }
-	inline rectBUTTON& poptext() { if(!text.empty()) text.pop_back(); }
-	inline rectBUTTON& cleartext() { text.clear(); }
-	inline rectBUTTON& setfontname(string ft) { font = ft; }
-	inline rectBUTTON& setfonth(int fh) { fonthei = fh; }
-	inline rectBUTTON& setfontw(int fw) { fontwid = fw; }
-	inline rectBUTTON& setfonthw(int fh, int fw) { fonthei = fh; fontwid = fw; }
-	inline rectBUTTON& setlocation(int h, int w) { hloc = h, wloc = w; }
+	inline rectBUTTON& seth(int h) { hei = h; return *this; }
+	inline rectBUTTON& setw(int w) { wid = w; return *this; }
+	inline rectBUTTON& sethw(int h, int w) { hei = h; wid = w; return *this; }
+	inline rectBUTTON& setbgcol(color_t col) { bgcol = col; return *this; }
+	inline rectBUTTON& settxtcol(color_t col) { txtcol = col; return *this; }
+	inline rectBUTTON& addtext(string txt) { text.push_back(txt); return *this; }
+	inline rectBUTTON& poptext() { if(!text.empty()) text.pop_back(); return *this; }
+	inline rectBUTTON& cleartext() { text.clear(); return *this; }
+	inline rectBUTTON& setfontname(string ft) { font = ft; return *this; }
+	inline rectBUTTON& setfonth(int fh) { fonthei = fh; return *this; }
+	inline rectBUTTON& setfontw(int fw) { fontwid = fw; return *this; }
+	inline rectBUTTON& setfonthw(int fh, int fw) { fonthei = fh; fontwid = fw; return *this; }
+	inline rectBUTTON& setlocation(int h, int w) { hloc = h, wloc = w; return *this; }
 	inline rectBUTTON& setalign(int ha = -1, int wa = -1) {
 		if(~ha) halign = ha;
 		if(~wa) walign = wa;
+		return *this;
 	}
-	inline rectBUTTON& setevent(std::function<void()> event) { clickEvent = event; }
+	inline rectBUTTON& setevent(std::function<void()> event) { clickEvent = event; return *this; }
+	inline rectBUTTON& setlnwid(int w) { lnwid = w; return *this; }
 	inline rectBUTTON& detect() {
 		/* todo */
 		POINT mousePos;

@@ -136,7 +136,7 @@ namespace LGGraphics {
 			scrsz[p].setfonth(40);
 			scrsz[p].setlocation(180 + i / 4 * 2, 50);
 			scrsz[p].addtext(to_string(i * 4) + " ¡Á " + to_string(i * 9 / 4));
-			scrsz[p].clickEvent = [&select, i]()->void { select = i / 100; };
+			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
 		} {
@@ -149,7 +149,7 @@ namespace LGGraphics {
 			scrsz[p].setfonth(40);
 			scrsz[p].setlocation(180 + i / 4 * 2, 50);
 			scrsz[p].addtext("Auto Fit (Full Screen)");
-			scrsz[p].clickEvent = [&select, i]()->void { select = i / 100; };
+			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
 		}
@@ -202,6 +202,7 @@ namespace LGGraphics {
 		singbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
 		singbut.setalign(CENTER_TEXT, CENTER_TEXT);
 		singbut.addtext("Single Player");
+		singbut.setlnwid(10 * mapDataStore.mapSizeY);
 		singbut.display(); 
 		rectBUTTON multibut;
 		multibut.setbgcol(RED);
@@ -212,6 +213,7 @@ namespace LGGraphics {
 		multibut.setfonthw(100 * mapDataStore.mapSizeY, 0);
 		multibut.setalign(CENTER_TEXT, CENTER_TEXT); 
 		multibut.addtext("Multiplayer");
+		multibut.setlnwid(10 * mapDataStore.mapSizeY);
 		multibut.display();
 		delay_ms(0);
 		for (; is_run(); delay_fps(120)) {
@@ -242,6 +244,7 @@ namespace LGGraphics {
 		selbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
 		selbut.addtext("Choose a Map");
 		selbut.setalign(CENTER_TEXT, CENTER_TEXT);
+		selbut.setlnwid(10 * mapDataStore.mapSizeY);
 		rectBUTTON impbut;
 		impbut.setbgcol(BROWN);
 		impbut.setlocation(600 * mapDataStore.mapSizeY, 900 * mapDataStore.mapSizeX);
@@ -251,6 +254,7 @@ namespace LGGraphics {
 		impbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
 		impbut.addtext("Import a Map");
 		impbut.setalign(CENTER_TEXT, CENTER_TEXT);
+		impbut.setlnwid(10 * mapDataStore.mapSizeY);
 		int select = -1;
 		while (select == -1) {
 			selbut.detect();
@@ -299,7 +303,7 @@ namespace LGGraphics {
 			mapbut[i].addtext("Swamp Count: " + to_string(maps[i].swampcnt));
 			mapbut[i].addtext("Size: " + to_string(maps[i].hei) + " * " + to_string(maps[i].wid));
 			mapbut[i].setalign(CENTER_TEXT, CENTER_TEXT);
-			mapbut[i].clickEvent = [&mapSelected, i]()->void { mapSelected = i; };
+			mapbut[i].clickEvent = [i]()->void { mapSelected = i; };
 			// imageOperation::zoomImage(pimg[5], 200, 200);
 			// putimage_transparent(NULL, pimg[5], left, up, getpixel(0, 0, pimg[1]));
 //			setcolor(BLUE);

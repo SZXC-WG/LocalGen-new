@@ -10,8 +10,8 @@ A ICON "LocalGen-new.ico"
 // TO CHANGE VERSION INFORMATION, EDIT PROJECT OPTIONS...
 //
 1 VERSIONINFO
-FILEVERSION 2,1,0,997
-PRODUCTVERSION 2,1,0,997
+FILEVERSION 2,1,0,1008
+PRODUCTVERSION 2,1,0,1008
 FILETYPE VFT_APP
 {
   BLOCK "StringFileInfo"
@@ -19,14 +19,14 @@ FILETYPE VFT_APP
     BLOCK "040904E4"
     {
       VALUE "CompanyName", "LocalGen-dev"
-      VALUE "FileVersion", "2.1.0.997"
+      VALUE "FileVersion", "2.1.0.1008"
       VALUE "FileDescription", "Localized Generals.io (new ver.)"
       VALUE "InternalName", ""
       VALUE "LegalCopyright", "Copyright (c) 2023 LocalGen-dev"
       VALUE "LegalTrademarks", ""
       VALUE "OriginalFilename", ""
       VALUE "ProductName", "Localized Generals.io (new ver.)"
-      VALUE "ProductVersion", "2.1.0.997"
+      VALUE "ProductVersion", "2.1.0.1008"
     }
   }
   BLOCK "VarFileInfo"

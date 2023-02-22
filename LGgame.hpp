@@ -38,14 +38,8 @@ using namespace std::literals;
 // Graphics header
 #include "LGGraphics.hpp"
 
-struct movementS {
-	int id, op;
-	long long turn;
-	void clear() {
-		id = turn = op = 0;
-	}
-};
-std::queue<movementS> movementPack;
+struct movementS;
+extern std::queue<movementS> movementPack;
 
 extern void Zip();
 extern void zipStatus(int playerCnt);

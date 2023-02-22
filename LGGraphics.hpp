@@ -48,8 +48,8 @@ bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), 
 }
 
 namespace imageOperation {
-	void zoomImage(PIMAGE &pimg, int zoomWidth, int zoomHeight) {
-		if ((pimg == NULL) || (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
+	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
+		if((pimg == NULL) || (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
 			return;
 
 		PIMAGE zoomImage = newimage(zoomWidth, zoomHeight);
@@ -63,7 +63,7 @@ namespace imageOperation {
 		LONG nRet = ::GetWindowLong(egeHwnd, GWL_EXSTYLE);
 		nRet |= WS_EX_LAYERED;
 		::SetWindowLong(egeHwnd, GWL_EXSTYLE, nRet);
-		if (!enable)
+		if(!enable)
 			alpha = 0xFF;
 		SetLayeredWindowAttributes(egeHwnd, 0, alpha, LWA_ALPHA);
 	}
@@ -122,12 +122,12 @@ namespace LGGraphics {
 		setfont(20, 0, "Lucida Fax");
 		xyprintf(500 + getwidth(favi) / 2, 10 + getheight(favi) + 20 / 2 + 10,
 		         ("version " + to_string(VER_MAJOR) + "." + to_string(VER_MINOR)
-				  + "." + to_string(VER_RELEASE) + " (build " + to_string(VER_BUILD) + ")").c_str());
+		          + "." + to_string(VER_RELEASE) + " (build " + to_string(VER_BUILD) + ")").c_str());
 		setfont(50, 0, "Freestyle Script");
 		xyprintf(250, 250, "Please Select Window Size:");
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 		rectBUTTON scrsz[10];
-		for (int i = 200; i <= 500; i += 100) {
+		for(int i = 200; i <= 500; i += 100) {
 			register int p = i / 100 - 2;
 			scrsz[p].sethw(50, 400);
 			scrsz[p].setbgcol(0xffffffff);
@@ -153,7 +153,7 @@ namespace LGGraphics {
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
 		}
-		for (; is_run(); delay_fps(60)) {
+		for(; is_run(); delay_fps(60)) {
 			for(int i = 200; i <= 600; i += 100) {
 				register int p = i / 100 - 2;
 				register int k = scrsz[p].status;
@@ -164,7 +164,8 @@ namespace LGGraphics {
 			if(!changeMade) break;
 		}
 	finishSelect:
-		if (select == 6) {
+		setcaption("LocalGen v" VER_STRING " developed by LocalGen-dev");
+		if(select == 6) {
 //			movewindow(0, 0, false);
 			resizewindow(-1, -1);
 			FullScreen(getHWnd());
@@ -178,7 +179,6 @@ namespace LGGraphics {
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 			initgraph(1600 * mapDataStore.mapSizeX, 900 * mapDataStore.mapSizeY, RENDER_AUTO);
 //			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
-			setcaption("LocalGen v" VER_STRING " developed by LocalGen-dev");
 		}
 	}
 
@@ -203,7 +203,7 @@ namespace LGGraphics {
 		singbut.setalign(CENTER_TEXT, CENTER_TEXT);
 		singbut.addtext("Single Player");
 		singbut.setlnwid(10 * mapDataStore.mapSizeY);
-		singbut.display(); 
+		singbut.display();
 		rectBUTTON multibut;
 		multibut.setbgcol(RED);
 		multibut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
@@ -211,12 +211,12 @@ namespace LGGraphics {
 		multibut.settxtcol(WHITE);
 		multibut.setfontname("Freestyle Script");
 		multibut.setfonthw(100 * mapDataStore.mapSizeY, 0);
-		multibut.setalign(CENTER_TEXT, CENTER_TEXT); 
+		multibut.setalign(CENTER_TEXT, CENTER_TEXT);
 		multibut.addtext("Multiplayer");
 		multibut.setlnwid(10 * mapDataStore.mapSizeY);
 		multibut.display();
 		delay_ms(0);
-		for (; is_run(); delay_fps(120)) {
+		for(; is_run(); delay_fps(120)) {
 			singbut.detect();
 			singbut.display();
 			if(singbut.status == 2) break;
@@ -256,7 +256,7 @@ namespace LGGraphics {
 		impbut.setalign(CENTER_TEXT, CENTER_TEXT);
 		impbut.setlnwid(10 * mapDataStore.mapSizeY);
 		int select = -1;
-		while (select == -1) {
+		while(select == -1) {
 			selbut.detect();
 			selbut.display();
 			if(selbut.status == 2) select = true;
@@ -265,7 +265,7 @@ namespace LGGraphics {
 			if(impbut.status == 2) select = false;
 		}
 		cleardevice();
-		if (!select) doMapImport();
+		if(!select) doMapImport();
 		else doMapSelect();
 		importGameSettings();
 	}
@@ -281,7 +281,7 @@ namespace LGGraphics {
 		int left, right, up, down;
 		int x, y;
 		rectBUTTON mapbut[50];
-		for (int i = 1; i <= mapNum; i++) {
+		for(int i = 1; i <= mapNum; i++) {
 			x = (i + 5) / 6;
 			y = ((i % 6 == 0) ? 6 : i % 6);
 			left = ((y - 1) * 260) * mapDataStore.mapSizeX;
@@ -337,22 +337,21 @@ namespace LGGraphics {
 		xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
 		xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
 		xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
-		if (mapSelected < 6) {
+		if(mapSelected < 6) {
 			setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 			setcolor(MAGENTA);
 			int height = 0;
 			key_msg msg;
 			xyprintf(10 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Height of the Map (<=500)");
-			while (1) {
+			while(1) {
 				msg = getkey();
-				if (msg.msg == key_msg_char) {
-					if (msg.key == 13 && height <= 500 && height >= 1)
+				if(msg.msg == key_msg_char) {
+					if(msg.key == 13 && height <= 500 && height >= 1)
 						break;
-					if (msg.key == 8)
+					if(msg.key == 8)
 						height /= 10;
-					else if (msg.key >= '0' && msg.key <= '9') {
+					else if(msg.key >= '0' && msg.key <= '9')
 						height = height * 10 + msg.key - '0';
-					}
 					cleardevice();
 					setcolor(GREEN);
 					setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
@@ -385,16 +384,15 @@ namespace LGGraphics {
 			xyprintf(10 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", height);
 			int width = 0;
 			xyprintf(810 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Width of the Map (<=500)");
-			while (1) {
+			while(1) {
 				msg = getkey();
-				if (msg.msg == key_msg_char) {
-					if (msg.key == 13 && width <= 500 && width >= 1)
+				if(msg.msg == key_msg_char) {
+					if(msg.key == 13 && width <= 500 && width >= 1)
 						break;
-					if (msg.key == 8)
+					if(msg.key == 8)
 						width /= 10;
-					else if (msg.key >= '0' && msg.key <= '9') {
+					else if(msg.key >= '0' && msg.key <= '9')
 						width = width * 10 + msg.key - '0';
-					}
 					cleardevice();
 					setcolor(GREEN);
 					setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
@@ -414,22 +412,22 @@ namespace LGGraphics {
 				}
 			}
 			long long armyMin = 0, armyMax = 0;
-			if (mapSelected == 3) {
+			if(mapSelected == 3) {
 				setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 				setcolor(MAGENTA);
 				key_msg msg;
 				xyprintf(10 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Minimum Number of Army on each Block");
 				bool isPositive = true;
-				while (1) {
+				while(1) {
 					msg = getkey();
-					if (msg.msg == key_msg_char) {
-						if (msg.key == 13)
+					if(msg.msg == key_msg_char) {
+						if(msg.key == 13)
 							break;
-						if (msg.key == 8)
+						if(msg.key == 8)
 							armyMin /= 10;
-						else if (msg.key >= '0' && msg.key <= '9') {
+						else if(msg.key >= '0' && msg.key <= '9')
 							armyMin = armyMin * 10 + msg.key - '0';
-						} else if (msg.key == '-')
+						else if(msg.key == '-')
 							isPositive = !isPositive;
 						cleardevice();
 						setcolor(GREEN);
@@ -449,12 +447,12 @@ namespace LGGraphics {
 						xyprintf(810 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", width);
 						xyprintf(10 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Minimum Number of Army on each Block");
 						long long realarmy = armyMin;
-						if (!isPositive)
+						if(!isPositive)
 							realarmy = -realarmy;
 						xyprintf(10 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", realarmy);
 					}
 				}
-				if (!isPositive)
+				if(!isPositive)
 					armyMin = -armyMin;
 				cleardevice();
 				setcolor(GREEN);
@@ -476,16 +474,16 @@ namespace LGGraphics {
 				xyprintf(10 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", armyMin);
 				xyprintf(810 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Maximum Number of Army on each Block");
 				isPositive = true;
-				while (1) {
+				while(1) {
 					msg = getkey();
-					if (msg.msg == key_msg_char) {
-						if (msg.key == 13 && armyMax * (isPositive ? 1 : (-1)) >= armyMin)
+					if(msg.msg == key_msg_char) {
+						if(msg.key == 13 && armyMax * (isPositive ? 1 : (-1)) >= armyMin)
 							break;
-						if (msg.key == 8)
+						if(msg.key == 8)
 							armyMax /= 10;
-						else if (msg.key >= '0' && msg.key <= '9') {
+						else if(msg.key >= '0' && msg.key <= '9')
 							armyMax = armyMax * 10 + msg.key - '0';
-						} else if (msg.key == '-')
+						else if(msg.key == '-')
 							isPositive = !isPositive;
 						cleardevice();
 						setcolor(GREEN);
@@ -507,12 +505,12 @@ namespace LGGraphics {
 						xyprintf(10 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", armyMin);
 						xyprintf(810 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Maximum Number of Army on each Block");
 						long long realarmy = armyMax;
-						if (!isPositive)
+						if(!isPositive)
 							realarmy = -realarmy;
 						xyprintf(810 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", realarmy);
 					}
 				}
-				if (!isPositive)
+				if(!isPositive)
 					armyMax = -armyMax;
 				cleardevice();
 				setcolor(GREEN);
@@ -536,7 +534,7 @@ namespace LGGraphics {
 				xyprintf(810 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", armyMax);
 			}
 			importGameSettings();
-			switch (mapSelected) {
+			switch(mapSelected) {
 				case 1:
 					createRandomMap(height, width);
 					break;
@@ -578,12 +576,12 @@ namespace LGGraphics {
 		setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 		xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "Please Input Filename with suffix (end with enter)");
 		key_msg msg;
-		while (1) {
+		while(1) {
 			msg = getkey();
-			if (msg.msg == key_msg_char) {
-				if (msg.key == 13)
+			if(msg.msg == key_msg_char) {
+				if(msg.key == 13)
 					break;
-				if (msg.key == 8)
+				if(msg.key == 8)
 					fileName.pop_back();
 				else
 					fileName += (char)(msg.key);
@@ -593,7 +591,7 @@ namespace LGGraphics {
 				xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "Please Input Filename with suffix (end with enter)");
 				xyprintf(10 * mapDataStore.mapSizeX, 110 * mapDataStore.mapSizeY, "%s", fileName.c_str());
 			}
-			if (msg.msg == key_enter)
+			if(msg.msg == key_enter)
 				break;
 		}
 		toAvoidCEBugInGraphicsImportMap(fileName);
@@ -612,16 +610,16 @@ namespace LGGraphics {
 		bool endConfig = false;
 		cheatCode = 2;
 		cheatCodeSelected[1] = true;
-		for (; is_run(); delay_fps(120)) {
-			if (changeMade) {
+		for(; is_run(); delay_fps(120)) {
+			if(changeMade) {
 				cleardevice();
 				putimage(0, 0, refreshCopy);
 				setcolor(BLUE);
 				rectprintf(60 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY, 430 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Please Select The Number of Players");
-				for (int i = 1; i <= 12; i++) {
+				for(int i = 1; i <= 12; i++) {
 					int lineNumber = (i + 2) / 3;
 					int columnNumber = i - (lineNumber - 1) * 3;
-					if (i == plCnt) {
+					if(i == plCnt) {
 						setcolor(RED);
 						ege_circle((100 * columnNumber + 50) * mapDataStore.mapSizeX, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSizeY, 50 * mapDataStore.mapSizeX);
 						setcolor(BLUE);
@@ -635,18 +633,18 @@ namespace LGGraphics {
 				setfillcolor(BLUE);
 				ege_fillellipse(720 * mapDataStore.mapSizeX, circlePos - 30 * mapDataStore.mapSizeY, 60 * mapDataStore.mapSizeX, 60 * mapDataStore.mapSizeY);
 				rectprintf(1060 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY, 380 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Select the Players you want to watch Directly");
-				for (int i = 1; i <= 12; i++) {
+				for(int i = 1; i <= 12; i++) {
 					int lineNumber = (i + 2) / 3;
 					int columnNumber = i - (lineNumber - 1) * 3;
 					setcolor(BLUE);
 					rectangle(((columnNumber - 1) * 100 + 1100) * mapDataStore.mapSizeX, ((lineNumber - 1) * 100 + 450) * mapDataStore.mapSizeY, (columnNumber * 100 + 1100) * mapDataStore.mapSizeX, (lineNumber * 100 + 450) * mapDataStore.mapSizeY);
 				}
-				for (int i = 1; i <= plCnt; i++) {
+				for(int i = 1; i <= plCnt; i++) {
 					int lineNumber = (i + 2) / 3;
 					int columnNumber = i - (lineNumber - 1) * 3;
 					setcolor(defTeams[i].color);
 					rectprintf(((columnNumber - 1) * 100 + 1100) * mapDataStore.mapSizeX, ((lineNumber - 1) * 100 + 450) * mapDataStore.mapSizeY, 100 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "%s", defTeams[i].name.c_str());
-					if (cheatCodeSelected[i]) {
+					if(cheatCodeSelected[i]) {
 						setcolor(RED);
 						ege_circle((1050 + 100 * columnNumber) * mapDataStore.mapSizeX, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSizeY, 50 * mapDataStore.mapSizeX);
 						setcolor(BLUE);
@@ -656,53 +654,53 @@ namespace LGGraphics {
 				setfont(70 * mapDataStore.mapSizeY, 0, "Freestyle Script");
 				rectprintf(900 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY, 200 * mapDataStore.mapSizeX, 75 * mapDataStore.mapSizeY, "Start Game!");
 				setfont(20 * mapDataStore.mapSizeY, 0, "Lucida Fax");
-				if (stDel != 0)
+				if(stDel != 0)
 					xyprintf(560 * mapDataStore.mapSizeX, 875 * mapDataStore.mapSizeY, "Speed Now: %d", stDel);
 				else
 					xyprintf(560 * mapDataStore.mapSizeX, 875 * mapDataStore.mapSizeY, "Speed Now: MAXSPEED");
 				changeMade = false;
 			}
-			while (mousemsg()) {
+			while(mousemsg()) {
 				mouse_msg msg = getmouse();
 				// cout << msg.x << ' ' << msg.y << ' ' << msg.is_left() << ' ' << msg.is_down() << ' ' << msg.is_up() << ' ' << msg.is_move() << ' ' << mouseDownCount << ' ' << circlePos << endl;
-				if (100 * mapDataStore.mapSizeX <= msg.x && msg.x <= 400 * mapDataStore.mapSizeX && 450 * mapDataStore.mapSizeY <= msg.y && 850 * mapDataStore.mapSizeY >= msg.y) {
-					if (msg.is_left() && msg.is_down()) {
+				if(100 * mapDataStore.mapSizeX <= msg.x && msg.x <= 400 * mapDataStore.mapSizeX && 450 * mapDataStore.mapSizeY <= msg.y && 850 * mapDataStore.mapSizeY >= msg.y) {
+					if(msg.is_left() && msg.is_down()) {
 						int col = (msg.x + 49 - 50 * mapDataStore.mapSizeX) / (100 * mapDataStore.mapSizeX);
 						int lin = (msg.y - 450 * mapDataStore.mapSizeY + 99) / (100 * mapDataStore.mapSizeY);
 						plCnt = (lin - 1) * 3 + col;
 						changeMade = true;
 					}
 				}
-				if (msg.is_left() && msg.is_down())
+				if(msg.is_left() && msg.is_down())
 					mouseDownCount++;
-				if (msg.is_left() && msg.is_up() && mouseDownCount > 0)
+				if(msg.is_left() && msg.is_up() && mouseDownCount > 0)
 					mouseDownCount--;
-				if (msg.x >= 720 * mapDataStore.mapSizeX && msg.x <= 780 * mapDataStore.mapSizeX && msg.y >= 450 * mapDataStore.mapSizeY && msg.y <= 850 * mapDataStore.mapSizeY) {
-					if (mouseDownCount > 0) {
+				if(msg.x >= 720 * mapDataStore.mapSizeX && msg.x <= 780 * mapDataStore.mapSizeX && msg.y >= 450 * mapDataStore.mapSizeY && msg.y <= 850 * mapDataStore.mapSizeY) {
+					if(mouseDownCount > 0) {
 						circlePos = msg.y;
-						if (circlePos >= 840 * mapDataStore.mapSizeY)
+						if(circlePos >= 840 * mapDataStore.mapSizeY)
 							stDel = 0;
 						else
 							stDel = ((circlePos - 450 * mapDataStore.mapSizeX) / (20 * mapDataStore.mapSizeX)) + 1;
 						changeMade = true;
 					}
 				}
-				if (1100 * mapDataStore.mapSizeX <= msg.x && 1400 * mapDataStore.mapSizeX >= msg.x && 450 * mapDataStore.mapSizeY <= msg.y && msg.y <= 850 * mapDataStore.mapSizeY) {
-					if (msg.is_left() && msg.is_down()) {
+				if(1100 * mapDataStore.mapSizeX <= msg.x && 1400 * mapDataStore.mapSizeX >= msg.x && 450 * mapDataStore.mapSizeY <= msg.y && msg.y <= 850 * mapDataStore.mapSizeY) {
+					if(msg.is_left() && msg.is_down()) {
 						int col = (msg.x + (99 - 1100) * mapDataStore.mapSizeX) / (100 * mapDataStore.mapSizeX);
 						int lin = (msg.y + (99 - 450) * mapDataStore.mapSizeY) / (100 * mapDataStore.mapSizeY);
 						int num = (lin - 1) * 3 + col;
-						if (num <= plCnt && num > 0) {
+						if(num <= plCnt && num > 0) {
 							cheatCode ^= (1 << (num));
 							cheatCodeSelected[num] ^= 1;
 							changeMade = true;
 						}
 					}
 				}
-				if (msg.x >= 900 * mapDataStore.mapSizeX && msg.x <= 1100 * mapDataStore.mapSizeX && msg.y >= 30 * mapDataStore.mapSizeY && msg.y <= 105 * mapDataStore.mapSizeY && msg.is_down() && msg.is_left()) {
+				if(msg.x >= 900 * mapDataStore.mapSizeX && msg.x <= 1100 * mapDataStore.mapSizeX && msg.y >= 30 * mapDataStore.mapSizeY && msg.y <= 105 * mapDataStore.mapSizeY && msg.is_down() && msg.is_left()) {
 					endConfig = true;
 					cleardevice();
-					if (stDel == 0)
+					if(stDel == 0)
 						stDel = 60;
 					return;
 				}
@@ -735,7 +733,7 @@ namespace LGGraphics {
 		pimg[6] = newimage();
 		getimage(pimg[6], "img/currentOn.png");
 		imageOperation::zoomImage(pimg[6], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
-		for (int i = 1; i <= 6; i++)
+		for(int i = 1; i <= 6; i++)
 			ege_enable_aa(true, pimg[i]);
 		//		initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, INIT_RENDERMANUAL);
 		setbkcolor(WHITE);

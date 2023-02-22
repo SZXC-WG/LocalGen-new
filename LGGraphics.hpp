@@ -711,7 +711,7 @@ namespace LGGraphics {
 	void init() {
 		heightPerBlock = (900.0 * mapDataStore.mapSizeY / (double)mapH);
 		widthPerBlock = (900.0 * mapDataStore.mapSizeX / (double)mapW);
-		// heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
+		heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
 		mapDataStore.widthPerBlock = widthPerBlock;
 		mapDataStore.heightPerBlock = heightPerBlock;
 		setbkmode(TRANSPARENT);

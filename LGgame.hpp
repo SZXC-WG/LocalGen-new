@@ -47,9 +47,9 @@ struct movementS {
 };
 std::queue<movementS> movementPack;
 
-void Zip();
-void zipStatus(int playerCnt);
-void zipGame(long long totTurn);
+extern void Zip();
+extern void zipStatus(int playerCnt);
+extern void zipGame(long long totTurn);
 
 const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};

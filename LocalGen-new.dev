@@ -28,7 +28,7 @@ Folders=
 IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
-UnitCount=8
+UnitCount=10
 Bins=
 ResourceCommand=
 UsePrecompiledHeader=0
@@ -49,18 +49,18 @@ CompilerSettings=0000000000000000000000000
 Major=2
 Minor=1
 Release=0
-Build=1048
+Build=1071
 LanguageID=1033
 CharsetID=1252
 CompanyName=LocalGen-dev
-FileVersion=2.1.0.1048
+FileVersion=2.1.0.1071
 FileDescription=Localized Generals.io (new ver.)
 InternalName=
 LegalCopyright=Copyright (c) 2023 LocalGen-dev
 LegalTrademarks=
 OriginalFilename=
 ProductName=Localized Generals.io (new ver.)
-ProductVersion=2.1.0.1048
+ProductVersion=2.1.0.1071
 AutoIncBuildNr=1
 SyncProduct=1
 
@@ -130,7 +130,7 @@ cc_cmd_opt_use_pipe=on
 link_cmd_opt_strip_exe=on
 
 [Unit10]
-FileName=LGbot.hpp
+FileName=LGincludeall.hpp
 CompileCpp=1
 Folder=
 Compile=1
@@ -160,7 +160,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit7]
-FileName=LGGraphics.hpp
+FileName=LGgraphics.hpp
 CompileCpp=1
 Folder=
 Compile=1
@@ -171,6 +171,16 @@ BuildCmd=
 
 [Unit8]
 FileName=LGbot.hpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit9]
+FileName=LGdef.hpp
 CompileCpp=1
 Folder=
 Compile=1

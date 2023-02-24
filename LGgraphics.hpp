@@ -101,7 +101,7 @@ namespace LGGraphics {
 			scrsz[p].setfontname("Freestyle Script");
 			scrsz[p].setfonth(40);
 			scrsz[p].setlocation(180 + i / 4 * 2, 50);
-			scrsz[p].addtext(to_string(i * 4) + " Â¡Ã " + to_string(i * 9 / 4));
+			scrsz[p].addtext(to_string(i * 4) + " ¡Á " + to_string(i * 9 / 4));
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();

@@ -15,6 +15,7 @@
 #define __LGGAME_HPP__
 
 #include "LGdef.hpp"
+#include "LGbot.hpp"
 
 struct movementS;
 extern std::queue<movementS> movementPack;
@@ -357,7 +358,7 @@ struct gameStatus {
 	playerCoord genCoo[64];
 
 	// vector for inline movements
-	std::deque<gameOperation::moveS> inlineMove;
+	std::deque<LGgame::moveS> inlineMove;
 
 	playerCoord coordinate[64];
 	std::deque<int> movement;
@@ -419,9 +420,9 @@ struct gameStatus {
 				robotId[i] = mtrd() % 300;
 			//			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
 			//			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
-			gameOperation::initGenerals(playerCnt, genCoo);
+			LGgame::initGenerals(playerCnt, genCoo);
 			for(int i = 1; i <= playerCnt; ++i) coordinate[i] = genCoo[i];
-			gameOperation::updateMap(curTurn);
+			LGgame::updateMap(curTurn);
 			Zip();
 			zipStatus(playerCnt);
 			printMap(cheatCode, coordinate[1]);
@@ -519,14 +520,14 @@ struct gameStatus {
 									}
 								}
 							}
-							gameOperation::printGameMessage({1, 1, curTurn}, 12);
-							lastTurn[1] = playerCoord{-1, -1};
+							LGgame::printGameMessage({1, 1, curTurn}, 12);
+							LGgame::lastTurn[1] = playerCoord{-1, -1};
 							break;
 						}
 					}
 				}
-				gameOperation::updateMap(curTurn);
-				while(!movement.empty() && gameOperation::analyzeMove(inlineMove, 1, movement.front(), coordinate[1], genCoo, curTurn))
+				LGgame::updateMap(curTurn);
+				while(!movement.empty() && LGgame::analyzeMove(inlineMove, 1, movement.front(), coordinate[1], genCoo, curTurn))
 					movement.pop_front();
 				if(!movement.empty())
 					movement.pop_front();
@@ -535,24 +536,24 @@ struct gameStatus {
 						continue;
 					switch(robotId[i]) {
 						case 0 ... 99:
-							gameOperation::analyzeMove(inlineMove, i, smartRandomBot::smartRandomBot(i, coordinate[i]), coordinate[i], genCoo, curTurn);
+							LGgame::analyzeMove(inlineMove, i, smartRandomBot::smartRandomBot(i, coordinate[i]), coordinate[i], genCoo, curTurn);
 							break;
 						case 100 ... 199:
-							gameOperation::analyzeMove(inlineMove, i, xrzBot::xrzBot(i, coordinate[i]), coordinate[i], genCoo, curTurn);
+							LGgame::analyzeMove(inlineMove, i, xrzBot::xrzBot(i, coordinate[i]), coordinate[i], genCoo, curTurn);
 							break;
 						case 200 ... 299:
-							gameOperation::analyzeMove(inlineMove, i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i], genCoo, curTurn);
+							LGgame::analyzeMove(inlineMove, i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i], genCoo, curTurn);
 							break;
 //					case 300 ... 399:
 //						analyzeMove(i, lcwBot::lcwBot(i, coordinate[i]), coordinate[i]);
 //						break;
 						default:
-							gameOperation::analyzeMove(inlineMove, i, 0, coordinate[i], genCoo, curTurn);
+							LGgame::analyzeMove(inlineMove, i, 0, coordinate[i], genCoo, curTurn);
 					}
 				}
 				if(curTurn % 2000 == 0)
 					Zip(), zipStatus(playerCnt);
-				gameOperation::flushMove(inlineMove, isAlive, curTurn);
+				LGgame::flushMove(inlineMove, isAlive, curTurn);
 				if(cheatCode != 1048575) {
 					int alldead = 0;
 					for(int i = 1; i <= playerCnt && !alldead; ++i) {
@@ -580,12 +581,12 @@ struct gameStatus {
 						gameEnd = 1;
 						winnerNum = std::__lg(ed);
 						cheatCode = 1048575;
-						gameOperation::printGameMessage({winnerNum, -1, curTurn}, 12);
+						LGgame::printGameMessage({winnerNum, -1, curTurn}, 12);
 					}
 				}
 				printMap(cheatCode, coordinate[1]);
 				if(curTurn % max(stepDelay / 10, 1) == 0)
-					gameOperation::ranklist(playerCnt, coordinate, isAlive, robotId);
+					LGgame::ranklist(playerCnt, coordinate, isAlive, robotId);
 				fpsbut.poptext();
 				fpsbut.addtext("FPS: " + to_string(getfps()));
 				fpsbut.display();

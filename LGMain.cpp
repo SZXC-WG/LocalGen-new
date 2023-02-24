@@ -27,7 +27,7 @@
 /* dev project headers */
 #include "LocalGen-new_private.h"
 /* pages */
-#include "LGdef.hpp" // __LGPAGES_HPP__
+#include "LGincludeall.hpp" // __LGPAGES_HPP__
 
 /*************** the main function ***************/
 HWND hwnd = GetConsoleWindow();

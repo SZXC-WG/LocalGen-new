@@ -118,8 +118,8 @@ void deZip() {
 void zipStatus(int playerCnt) {
 	int p=0;
 	for(int i=1; i<=playerCnt; i++) {
-		long long xx=lastTurn[i].x;
-		long long yy=lastTurn[i].y;
+		long long xx=LGgame::lastTurn[i].x;
+		long long yy=LGgame::lastTurn[i].y;
 		if(xx==yy&&xx==-1) goto specialPlug;
 		strStatusZip[p++] = PMod(xx) + CHAR_AD;
 		strStatusZip[p++] = PMod(xx) + CHAR_AD;
@@ -274,7 +274,6 @@ void toAvoidCEBugInGraphicsImportMap(string fileName) {
 	fscanf(fileP, "%s", strdeZip);
 	fclose(fileP);
 	deZip();
-	hideCursor();
 }
 
 #endif

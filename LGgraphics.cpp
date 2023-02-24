@@ -24,7 +24,7 @@ namespace imageOperation {
 
 		pimg = zoomImage;
 	}
-	void setWindowTransparent(bool enable, int alpha = 0xFF) {
+	void setWindowTransparent(bool enable, int alpha) {
 		HWND egeHwnd = getHWnd();
 		LONG nRet = ::GetWindowLong(egeHwnd, GWL_EXSTYLE);
 		nRet |= WS_EX_LAYERED;
@@ -35,7 +35,7 @@ namespace imageOperation {
 	}
 }
 
-bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60) {
+bool FullScreen(HWND hwnd, int fullscreenWidth, int fullscreenHeight, int colourBits, int refreshRate) {
 	DEVMODE fullscreenSettings;
 	bool isChangeSuccessful;
 	RECT windowBoundary;

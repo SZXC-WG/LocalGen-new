@@ -16,6 +16,8 @@
 
 #define ll long long
 
+#include "LGdef.hpp"
+
 extern void deZip();
 extern char strdeZip[LEN_ZIP];
 
@@ -295,7 +297,7 @@ void getAllFiles(string path, std::vector<string>& files, string fileType)  {
 	}
 }
 
-int mapNum;
+extern int mapNum;
 /*
 struct MapInfoS { int id; string chiname; string engname; string auth; int hei; int wid; int generalcnt; int swampcnt; int citycnt; int mountaincnt; int plaincnt; MapInfoS() = default; ~MapInfoS() = default; };
 */
@@ -438,9 +440,7 @@ void copyMap(int mapid) {
 			gameMap[i][j].lit = mapG[mapid].light[(i - 1) * w + j - 1] - '0';
 }
 
-void exitExe() {
-	exit(0);
-}
+void exitExe();
 
 int returnMapNum() {
 	return mapNum;

@@ -24,6 +24,8 @@
 #include <vector>
 #include <deque>
 #include <queue>
+#include <windows.h>
+#include <io.h>
 #include <graphics.h>
 #include "LocalGen-new_private.h"
 #include "graphics/LGGrectbut.hpp"
@@ -31,7 +33,6 @@
 using std::string;
 using std::to_string;
 
-const int LEN_ZIP=200005;
 const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
 
 PIMAGE pimg[7];
@@ -97,8 +98,8 @@ inline void exitExe() { exit(0); }
 bool isVisible(int,int,int);
 void printNum(bool visible, long long army, int team, int curx, int cury);
 
-void createRandomMap(int crtH = -1, int crtW = -1);
-void createStandardMap(int crtH = -1, int crtW = -1);
+void createRandomMap(int crtH, int crtW);
+void createStandardMap(int crtH, int crtW);
 void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt);
 void createFullSwampMap(int crtH, int crtW, int plCnt);
 void createFullPlainMap(int crtH, int crtW, int plCnt);
@@ -127,7 +128,13 @@ long long totTurn, curTurn, totMove;
 std::pair<long long, long long> curMoveS;
 std::queue<long long> signMap;
 std::queue<long long> signCmd;
-struct movementS;
+struct movementS {
+	int id, op;
+	long long turn;
+	void clear() {
+		id = turn = op = 0;
+	}
+};;
 movementS dezipedMovementS[4 * LEN_ZIP];
 movementS tmp;
 std::queue<movementS> movementPack;
@@ -144,6 +151,50 @@ void zipGame(long long totTurn);
 void deZipGame(int playerCnt);
 
 void toAvoidCEBugInGraphicsImportMap(string fileName);
+
+/***** game *****/
+
+namespace LGgame {
+	using std::deque;
+
+	const int dx[5] = {0, -1, 0, 1, 0};
+	const int dy[5] = {0, 0, -1, 0, 1};
+
+	struct passS {
+		int id, turn;
+	};
+	std::vector<passS> passId[505][505];
+	playerCoord lastTurn[20];
+
+	struct gameMessageStore {
+		int playerA, playerB;
+		int turnNumber;
+	};
+
+	void printGameMessage(gameMessageStore now, int playerCnt);
+	
+	void kill(int p1, int p2, int isAlive[], int curTurn);
+
+	// struct for movement
+	struct moveS {
+		int id;
+		playerCoord from;
+		playerCoord to;
+	};
+	// movement analyzer
+	int analyzeMove(deque<moveS>& inlineMove, int id, int mv, playerCoord& coo, playerCoord genCoo[], int curTurn);
+	// flush existing movements
+	void flushMove(deque<moveS>& inlineMove, int isAlive[], int curTurn);
+	
+	// general init
+	void initGenerals(int playerCnt, playerCoord coos[]);
+	void updateMap(int& curTurn);
+
+	// ranklist printings
+	void ranklist(int playerCnt, playerCoord coos[], int isAlive[], int robotId[]);
+}
+
+int GAME(bool isWeb, int cheatCode, int plCnt, int stDel);
 
 /***** graphics *****/
 
@@ -189,5 +240,12 @@ namespace LGclient {
 
 namespace LGserver {
 };
+
+void MainPage() {
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	LGGraphics::WelcomePage();
+	LGGraphics::selectOrImportMap();
+	return;
+}
 
 #endif // __LGDEF_HPP__

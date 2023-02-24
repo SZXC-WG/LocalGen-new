@@ -14,58 +14,16 @@
 #ifndef __LGGAME_HPP__
 #define __LGGAME_HPP__
 
-// standard libraries
-#include <functional>
-#include <algorithm>
-#include <deque>
-#include <vector>
-#include <string>
-#include <chrono>
-#include <random>
-#include <thread>
-using std::string;
-using namespace std::literals;
-// windows libraries
-#include <windows.h>
-// #include <conio.h>
-// #include<graphics.h>
-//  project headers
-#include "LGweb.hpp"
-#include "LGcons.hpp"
-#include "LGmaps.hpp"
-// Bot header
-#include "LGbot.hpp"
-// Graphics header
-#include "LGGraphics.hpp"
+#include "LGdef.hpp"
 
-struct movementS {
-	int id, op;
-	long long turn;
-	void clear() {
-		id = turn = op = 0;
-	}
-};
+struct movementS;
 extern std::queue<movementS> movementPack;
 
 extern void Zip();
 extern void zipStatus(int playerCnt);
 extern void zipGame(long long totTurn);
 
-const int dx[5] = {0, -1, 0, 1, 0};
-const int dy[5] = {0, 0, -1, 0, 1};
-
-struct passS {
-	int id, turn;
-};
-std::vector<passS> passId[505][505];
-playerCoord lastTurn[20];
-
-namespace gameOperation {
-
-	struct gameMessageStore {
-		int playerA, playerB;
-		int turnNumber;
-	};
+namespace LGgame {
 
 	void printGameMessage(gameMessageStore now, int playerCnt) {
 		static int gameMesC = 0;
@@ -112,12 +70,6 @@ namespace gameOperation {
 		lastTurn[p2] = playerCoord{-1, -1};
 	}
 
-	// struct for movement
-	struct moveS {
-		int id;
-		playerCoord from;
-		playerCoord to;
-	};
 	// movement analyzer
 	int analyzeMove(deque<moveS>& inlineMove, int id, int mv, playerCoord& coo, playerCoord genCoo[], int curTurn) {
 		movementPack.push(movementS{id, mv, curTurn});

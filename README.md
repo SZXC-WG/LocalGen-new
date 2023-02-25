@@ -1,6 +1,6 @@
 # Local Generals.io (new version)
 
-> Warning: This project is going to be deprecated. We will still maintain this project until [the new project](http://github.com/LocalGen-dev/LocalGen-vs)'s development is complete.
+> This project is not going to be deprecated any more.
 
 Welcome to the project of Local Generals.io!
 

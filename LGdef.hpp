@@ -14,6 +14,8 @@
 #ifndef __LGDEF_HPP__
 #define __LGDEF_HPP__
 
+//====def====//
+
 #include <cstdio>
 #include <iostream>
 #include <fstream>
@@ -30,12 +32,18 @@
 #include "LocalGen-new_private.h"
 #include "graphics/LGGrectbut.hpp"
 
+using std::deque;
 using std::string;
 using std::to_string;
 
-const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
+//====const====//
 
-PIMAGE pimg[7];
+const int dx[5] = {0, -1, 0, 1, 0};
+const int dy[5] = {0, 0, -1, 0, 1};
+const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
+const int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
+
+//====struct====//
 
 struct MapInfoS {
 	int id;
@@ -53,7 +61,27 @@ struct MapInfoS {
 	MapInfoS() = default;
 	~MapInfoS() = default;
 };
-MapInfoS maps[5005];
+
+struct movementS {
+	int id, op;
+	long long turn;
+	void clear() {
+		id = turn = op = 0;
+	}
+};
+
+struct playerCoord {
+	int x, y;
+};
+
+struct passS {
+	int id, turn;
+};
+
+struct teamS {
+	string name;		/* team name */
+	unsigned int color; /* team color */
+};
 
 struct Block {
 	int team; /* the team who holds this block */
@@ -62,14 +90,22 @@ struct Block {
 	bool lit; /* whether the block is lighted(lit) */
 };
 
-int mapH, mapW;
-int widthPerBlock, heightPerBlock;
-Block gameMap[505][505]; /* maximum 500*500 */
-
-struct teamS {
-	string name;		/* team name */
-	unsigned int color; /* team color */
+struct gameMessageStore {
+	int playerA, playerB;
+	int turnNumber;
 };
+
+struct moveS {
+	int id;
+	playerCoord from;
+	playerCoord to;
+};
+
+//====value====//
+
+PIMAGE pimg[7];
+MapInfoS maps[5005];
+Block gameMap[505][505]; /* maximum 500*500 */
 teamS defTeams[64] = {
 	{"White", 0xffffffff},
 	{"Red", 0xffff0000},
@@ -86,9 +122,35 @@ teamS defTeams[64] = {
 	{"Indigo", 0xff483d8b},
 };
 
-struct playerCoord {
-	int x, y;
-};
+int mapH, mapW;
+int widthPerBlock, heightPerBlock;
+int mapNum;
+
+char strZipStatus[LEN_ZIP];
+char strZip[LEN_ZIP];
+char strdeZip[LEN_ZIP];
+char strGameZip[4 * LEN_ZIP];
+char strdeGameZip[4 * LEN_ZIP];
+char strStatusZip[4*LEN_ZIP];
+char strdeStatusZip[4*LEN_ZIP];
+
+int curLen = 0;
+Block curMap[505][505];
+playerCoord mapCoord[17][30], curCoord[30];
+Block mapSet[17][505][505];
+long long totTurn, curTurn, totMove;
+std::pair<long long, long long> curMoveS;
+std::queue<long long> signMap;
+std::queue<long long> signCmd;
+movementS dezipedMovementS[4 * LEN_ZIP];
+movementS tmp;
+std::queue<movementS> movementPack;
+
+std::vector<passS> passId[505][505];
+playerCoord lastTurn[20];
+
+//====function====//
+
 bool operator== (playerCoord a,playerCoord b) {
 	return a.x==b.x&&a.y==b.y;
 }
@@ -104,40 +166,9 @@ void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, i
 void createFullSwampMap(int crtH, int crtW, int plCnt);
 void createFullPlainMap(int crtH, int crtW, int plCnt);
 
-int mapNum;
 void getAllFiles(string path, std::vector<string>& files, string fileType);
 void initMaps();
 void readMap(int mid);
-
-/***** zipmap *****/
-
-const int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
-char strZipStatus[LEN_ZIP];
-char strZip[LEN_ZIP];
-char strdeZip[LEN_ZIP];
-char strGameZip[4 * LEN_ZIP];
-char strdeGameZip[4 * LEN_ZIP];
-char strStatusZip[4*LEN_ZIP];
-char strdeStatusZip[4*LEN_ZIP];
-int curLen = 0;
-Block curMap[505][505];
-playerCoord mapCoord[17][30], curCoord[30];
-Block mapSet[17][505][505];
-
-long long totTurn, curTurn, totMove;
-std::pair<long long, long long> curMoveS;
-std::queue<long long> signMap;
-std::queue<long long> signCmd;
-struct movementS {
-	int id, op;
-	long long turn;
-	void clear() {
-		id = turn = op = 0;
-	}
-};;
-movementS dezipedMovementS[4 * LEN_ZIP];
-movementS tmp;
-std::queue<movementS> movementPack;
 
 inline long long PMod(long long& x);
 void trans(int st, int en);
@@ -152,47 +183,13 @@ void deZipGame(int playerCnt);
 
 void toAvoidCEBugInGraphicsImportMap(string fileName);
 
-/***** game *****/
-
-namespace LGgame {
-	using std::deque;
-
-	const int dx[5] = {0, -1, 0, 1, 0};
-	const int dy[5] = {0, 0, -1, 0, 1};
-
-	struct passS {
-		int id, turn;
-	};
-	std::vector<passS> passId[505][505];
-	playerCoord lastTurn[20];
-
-	struct gameMessageStore {
-		int playerA, playerB;
-		int turnNumber;
-	};
-
-	void printGameMessage(gameMessageStore now, int playerCnt);
-	
-	void kill(int p1, int p2, int isAlive[], int curTurn);
-
-	// struct for movement
-	struct moveS {
-		int id;
-		playerCoord from;
-		playerCoord to;
-	};
-	// movement analyzer
-	int analyzeMove(deque<moveS>& inlineMove, int id, int mv, playerCoord& coo, playerCoord genCoo[], int curTurn);
-	// flush existing movements
-	void flushMove(deque<moveS>& inlineMove, int isAlive[], int curTurn);
-	
-	// general init
-	void initGenerals(int playerCnt, playerCoord coos[]);
-	void updateMap(int& curTurn);
-
-	// ranklist printings
-	void ranklist(int playerCnt, playerCoord coos[], int isAlive[], int robotId[]);
-}
+void printGameMessage(gameMessageStore now, int playerCnt);
+void kill(int p1, int p2, int isAlive[], int curTurn);
+int analyzeMove(deque<moveS>& inlineMove, int id, int mv, playerCoord& coo, playerCoord genCoo[], int curTurn);
+void flushMove(deque<moveS>& inlineMove, int isAlive[], int curTurn);
+void initGenerals(int playerCnt, playerCoord coos[]);
+void updateMap(int& curTurn);
+void ranklist(int playerCnt, playerCoord coos[], int isAlive[], int robotId[]); 
 
 int GAME(bool isWeb, int cheatCode, int plCnt, int stDel);
 

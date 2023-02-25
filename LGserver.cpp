@@ -209,7 +209,7 @@ int serverGame() {
 					ed |= (game.isAlive[i] << i);
 				if(__builtin_popcount(ed) == 1) {
 					MessageBox(nullptr,
-					           ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
+					           ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
 					            "THE game WILL CONTINUE." + "\n" +
 					            "YOU CAN PRESS [ESC] TO EXIT.")
 					           .c_str(),

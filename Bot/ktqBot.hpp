@@ -51,7 +51,7 @@ namespace ktqBot
         }
         std::sort(p + 1, p + cnt + 1);
         //	gotoxy(mapH+2+16+1+id,1); clearline();
-        //	fputs(defTeams[id].name.c_str(),stdout);
+        //	fputs(playerInfo[id].name.c_str(),stdout);
         //	printf(": ");
         //	for(int i=1; i<=cnt; ++i) printf("{%d %d %lld %lld %d} ",p[i].to,p[i].team,p[i].army,p[i].del,p[i].type);
         //	fflush(stdout); _getch();

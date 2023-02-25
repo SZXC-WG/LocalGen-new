@@ -588,8 +588,8 @@ namespace LGGraphics {
 				for(int i = 1; i <= plCnt; i++) {
 					int lineNumber = (i + 2) / 3;
 					int columnNumber = i - (lineNumber - 1) * 3;
-					setcolor(defTeams[i].color);
-					rectprintf(((columnNumber - 1) * 100 + 1100) * mapDataStore.mapSizeX, ((lineNumber - 1) * 100 + 450) * mapDataStore.mapSizeY, 100 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "%s", defTeams[i].name.c_str());
+					setcolor(playerInfo[i].color);
+					rectprintf(((columnNumber - 1) * 100 + 1100) * mapDataStore.mapSizeX, ((lineNumber - 1) * 100 + 450) * mapDataStore.mapSizeY, 100 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "%s", playerInfo[i].name.c_str());
 					if(cheatCodeSelected[i]) {
 						setcolor(RED);
 						ege_circle((1050 + 100 * columnNumber) * mapDataStore.mapSizeX, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSizeY, 50 * mapDataStore.mapSizeX);

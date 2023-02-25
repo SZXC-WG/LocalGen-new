@@ -79,7 +79,7 @@ void printMap(int printCode, playerCoord coo) {
 					else if(gameMap[curx][cury].type == 4)
 						setfillcolor(cscol);
 				} else
-					setfillcolor(defTeams[gameMap[curx][cury].team].color);
+					setfillcolor(playerInfo[gameMap[curx][cury].team].color);
 			} else
 				setfillcolor(unseen);
 			ege_fillrect(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock, heightPerBlock);

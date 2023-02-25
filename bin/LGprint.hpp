@@ -209,7 +209,7 @@ void writeMap()
 				}
 				else
 					gameMap[i][j].army = 0;
-				fillCf(i, j * 5 - 4, i, j * 5, defTeams[gameMap[i][j].team].color);
+				fillCf(i, j * 5 - 4, i, j * 5, playerInfo[gameMap[i][j].team].color);
 			}
 			else
 			{
@@ -245,8 +245,8 @@ void printMap(int printCode)
 			{
 				if (nptMap[i][j].colorFront != ncolorFront || nptMap[i][j].colorBack != ncolorBack)
 				{
-					setfcolor(defTeams[ncolorFront = nptMap[i][j].colorFront].color);
-					setbcolor(defTeams[ncolorBack = nptMap[i][j].colorBack].color);
+					setfcolor(playerInfo[ncolorFront = nptMap[i][j].colorFront].color);
+					setbcolor(playerInfo[ncolorBack = nptMap[i][j].colorBack].color);
 				}
 				if (ptMap[i][j].Chr != nptMap[i][j].Chr)
 				{

@@ -34,20 +34,20 @@ void printGameMessage(gameMessageStore now, int playerCnt) {
 	settextjustify(RIGHT_TEXT, TOP_TEXT);
 	int tmp = 0;
 	if(now.playerB == -1) {
-		setcolor(defTeams[now.playerA].color);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" won the game at Turn #" + to_string(now.turnNumber)).c_str()), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%7s", defTeams[now.playerA].name.c_str());
+		setcolor(playerInfo[now.playerA].color);
+		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" won the game at Turn #" + to_string(now.turnNumber)).c_str()), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%7s", playerInfo[now.playerA].name.c_str());
 		setcolor(RED);
 		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, " won the game at Turn #%d", now.turnNumber);
 		setcolor(WHITE);
 	} else if(1 == now.playerB && now.playerA == 1)
 		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "You surrendered at Turn #%d", now.turnNumber);
 	else {
-		setcolor(defTeams[now.playerA].color);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()) - textwidth((" " + defTeams[now.playerB].name).c_str()) - textwidth(" killed "), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%7s", defTeams[now.playerA].name.c_str());
+		setcolor(playerInfo[now.playerA].color);
+		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()) - textwidth((" " + playerInfo[now.playerB].name).c_str()) - textwidth(" killed "), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%7s", playerInfo[now.playerA].name.c_str());
 		setcolor(WHITE);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()) - textwidth((" " + defTeams[now.playerB].name).c_str()), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, " killed ", now.turnNumber);
-		setcolor(defTeams[now.playerB].color);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%s", defTeams[now.playerB].name.c_str());
+		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()) - textwidth((" " + playerInfo[now.playerB].name).c_str()), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, " killed ", now.turnNumber);
+		setcolor(playerInfo[now.playerB].color);
+		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()), 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%s", playerInfo[now.playerB].name.c_str());
 		setcolor(WHITE);
 		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (playerCnt + 2 + gameMesC) * LGGraphics::mapDataStore.mapSizeY, " at Turn #%d", now.turnNumber);
 	}
@@ -55,7 +55,7 @@ void printGameMessage(gameMessageStore now, int playerCnt) {
 }
 
 void kill(int p1, int p2, int isAlive[], int curTurn) {
-	if(p2 == 1) MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + defTeams[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
+	if(p2 == 1) MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + playerInfo[p1].name + " AT TURN " + to_string(curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
 	isAlive[p2] = 0;
 	for(int i = 1; i <= mapH; ++i) {
 		for(int j = 1; j <= mapW; ++j) {
@@ -282,11 +282,11 @@ void ranklist(int playerCnt, playerCoord coos[], int isAlive[], int robotId[]) {
 	.poptext().addtext("WHICH BOT?")
 	.display();
 	for(int i = 1; i <= playerCnt; i++) {
-		rkbut.setbgcol(defTeams[rklst[i].id].color);
+		rkbut.setbgcol(playerInfo[rklst[i].id].color);
 		rkbut
 		.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 975 * LGGraphics::mapDataStore.mapSizeX)
 		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 75 * LGGraphics::mapDataStore.mapSizeX + 1)
-		.poptext().addtext(defTeams[rklst[i].id].name)
+		.poptext().addtext(playerInfo[rklst[i].id].name)
 		.display();
 		char s[1005];
 		if(rklst[i].army < 1000000000) sprintf(s, "%lld", rklst[i].army);
@@ -523,7 +523,7 @@ struct gameStatus {
 						ed |= (isAlive[i] << i);
 					if(__builtin_popcount(ed) == 1) {
 						MessageBoxA(nullptr,
-						            ("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
+						            ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
 						             "THE GAME WILL CONTINUE." + "\n" +
 						             "YOU CAN PRESS [ESC] TO EXIT.")
 						            .c_str(),

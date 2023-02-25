@@ -78,7 +78,7 @@ struct passS {
 	int id, turn;
 };
 
-struct teamS {
+struct playerS {
 	string name;		/* team name */
 	unsigned int color; /* team color */
 };
@@ -106,7 +106,7 @@ struct moveS {
 PIMAGE pimg[7];
 MapInfoS maps[5005];
 Block gameMap[505][505]; /* maximum 500*500 */
-teamS defTeams[64] = {
+playerS playerInfo[64] = {
 	{"White", 0xffffffff},
 	{"Red", 0xffff0000},
 	{"Aqua", 0xff4363d8},

@@ -2,6 +2,9 @@
 #include <vector>
 #include "../LGmaps.hpp"
 
+#ifndef __BOT_KTQ__
+#define __BOT_KTQ__
+
 namespace ktqBot
 {
     const int dx[5] = {0, -1, 0, 1, 0};
@@ -60,3 +63,5 @@ namespace ktqBot
         return -1;
     }
 }
+
+#endif // __BOT_KTQ__

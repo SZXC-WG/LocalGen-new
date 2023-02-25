@@ -2,6 +2,9 @@
 #include <vector>
 #include "../LGmaps.hpp"
 
+#ifndef __BOT_XRZ__
+#define __BOT_XRZ__
+
 namespace xrzBot
 {
     const int dx[5] = {0, -1, 0, 1, 0};
@@ -106,3 +109,5 @@ namespace xrzBot
         return okDir;
     }
 }
+
+#endif // __BOT_XRZ__

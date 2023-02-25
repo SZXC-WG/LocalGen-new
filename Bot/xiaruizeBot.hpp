@@ -2,6 +2,9 @@
 #include <vector>
 #include "../LGmaps.hpp"
 
+#ifndef __BOT_XIARUIZE__
+#define __BOT_XIARUIZE__
+
 namespace xiaruizeBot
 {
     const int dx[5] = {0, -1, 0, 1, 0};
@@ -154,3 +157,5 @@ namespace xiaruizeBot
         }
     }
 }
+
+#endif // __BOT_XIARUIZE__

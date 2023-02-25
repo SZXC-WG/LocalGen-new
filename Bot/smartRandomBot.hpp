@@ -18,7 +18,7 @@ namespace smartRandomBot {
 			int type, team;
 			long long army;
 			int dir;
-			bool isLast;
+			std::ptrdiff_t lastCount;
 		};
 		node p[5];
 		int pl = 0;
@@ -28,13 +28,13 @@ namespace smartRandomBot {
 				continue;
 			p[++pl] = {
 				gameMap[nx][ny].type, gameMap[nx][ny].team, gameMap[nx][ny].army, i,
-				std::find(lastCoord[id].begin(), lastCoord[id].end(), playerCoord{nx, ny})!=lastCoord[id].end()
+				std::find(lastCoord[id].begin(), lastCoord[id].end(), playerCoord{nx, ny}) - lastCoord[id].begin()
 			};
 		}
 		bool rdret = mtrd() % 2;
 		auto cmp = [&](node a, node b) -> bool {
-			if(a.isLast) return false;
-			if(b.isLast) return true;
+			if(a.lastCount != b.lastCount)
+				return a.lastCount > b.lastCount;
 			if(a.type == 3 && a.team != id)
 				return true;
 			if(b.type == 3 && b.team != id)

@@ -11,6 +11,11 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
 
+#ifndef __LGGRAPHICS_HPP__
+#define __LGGRAPHICS_HPP__
+
+#include "LGdef.hpp"
+
 namespace imageOperation {
 	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
 		if((pimg == NULL) || (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
@@ -94,7 +99,7 @@ namespace LGGraphics {
 		for(int i = 200; i <= 500; i += 100) {
 			register int p = i / 100 - 2;
 			scrsz[p].sethw(50, 400);
-			scrsz[p].setbgcol(0xffffffff);
+			scrsz[p].setbgcol(WHITE);
 			scrsz[p].settxtcol(BLUE);
 			scrsz[p].setfontname("Freestyle Script");
 			scrsz[p].setfonth(40);
@@ -107,7 +112,7 @@ namespace LGGraphics {
 			int i = 600;
 			register int p = i / 100 - 2;
 			scrsz[p].sethw(50, 400);
-			scrsz[p].setbgcol(0xffffffff);
+			scrsz[p].setbgcol(WHITE);
 			scrsz[p].settxtcol(BLUE);
 			scrsz[p].setfontname("Freestyle Script");
 			scrsz[p].setfonth(40);
@@ -197,11 +202,13 @@ namespace LGGraphics {
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 	}
 
-	void selectOrImportMap() {
+	void mainOptions() {
 		setbkmode(TRANSPARENT);
+		setfillcolor(WHITE);
+		ege_fillrect(100 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, 1400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
 		rectBUTTON selbut;
 		selbut.setbgcol(BROWN);
-		selbut.setlocation(600 * mapDataStore.mapSizeY, 300 * mapDataStore.mapSizeX);
+		selbut.setlocation(600 * mapDataStore.mapSizeY, 100 * mapDataStore.mapSizeX);
 		selbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
 		selbut.settxtcol(WHITE);
 		selbut.setfontname("Freestyle Script");
@@ -209,9 +216,19 @@ namespace LGGraphics {
 		selbut.addtext("Choose a Map");
 		selbut.setalign(CENTER_TEXT, CENTER_TEXT);
 		selbut.setlnwid(10 * mapDataStore.mapSizeY);
+		rectBUTTON repbut;
+		repbut.setbgcol(BROWN);
+		repbut.setlocation(600 * mapDataStore.mapSizeY, 600 * mapDataStore.mapSizeX);
+		repbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
+		repbut.settxtcol(WHITE);
+		repbut.setfontname("Freestyle Script");
+		repbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
+		repbut.addtext("Load Replay");
+		repbut.setalign(CENTER_TEXT, CENTER_TEXT);
+		repbut.setlnwid(10 * mapDataStore.mapSizeY);
 		rectBUTTON impbut;
 		impbut.setbgcol(BROWN);
-		impbut.setlocation(600 * mapDataStore.mapSizeY, 900 * mapDataStore.mapSizeX);
+		impbut.setlocation(600 * mapDataStore.mapSizeY, 1100 * mapDataStore.mapSizeX);
 		impbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
 		impbut.settxtcol(WHITE);
 		impbut.setfontname("Freestyle Script");
@@ -223,14 +240,20 @@ namespace LGGraphics {
 		while(select == -1) {
 			selbut.detect();
 			selbut.display();
-			if(selbut.status == 2) select = true;
+			if(selbut.status == 2) select = 0;
+			repbut.detect();
+			repbut.display();
+			if(repbut.status == 2) select = 1;
 			impbut.detect();
 			impbut.display();
-			if(impbut.status == 2) select = false;
+			if(impbut.status == 2) select = 2;
 		}
 		cleardevice();
-		if(!select) doMapImport();
-		else doMapSelect();
+		switch(select) {
+			case 0: doMapSelect(); break;
+			case 1: break;
+			case 2: doMapImport(); break;
+		}
 		importGameSettings();
 	}
 
@@ -274,17 +297,17 @@ namespace LGGraphics {
 		}
 		cleardevice();
 		setcolor(GREEN);
-		setfont(40 * mapDataStore.mapSizeY, 0, "Lucida Fax");
+		setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
 		xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 		xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-		setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
+		setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
 		xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 		xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 		xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
 		xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
 		xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 		if(mapSelected < 6) {
-			setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
+			setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
 			setcolor(MAGENTA);
 			int height = 0;
 			key_msg msg;
@@ -305,7 +328,7 @@ namespace LGGraphics {
 					xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
 					setfont(30 * mapDataStore.mapSizeY, 0, "Lucida Fax");
 					xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
-					xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author of the Map: %s", maps[mapSelected].auth.c_str());
+					xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 					xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
 					xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
 					xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
@@ -512,7 +535,7 @@ namespace LGGraphics {
 			importGameSettings();
 			readMap(mapSelected);
 		}
-		GAME(0, cheatCode, plCnt, stDel);
+		localGame(0, cheatCode, plCnt, stDel);
 		exit(0);
 	}
 
@@ -690,3 +713,5 @@ namespace LGGraphics {
 inline int getHeightPerBlock() { return LGGraphics::mapDataStore.heightPerBlock; }
 
 inline int getWidthPerBlock() { return LGGraphics::mapDataStore.widthPerBlock; }
+
+#endif // __LGGRAPHICS_HPP__

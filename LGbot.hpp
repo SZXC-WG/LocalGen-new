@@ -27,6 +27,6 @@ string botName[] = {
 	"xrzBot",
 	"xiaruizeBot",
 	"lcwBot",
-}; 
+};
 
 #endif

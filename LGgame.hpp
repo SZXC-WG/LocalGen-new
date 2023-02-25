@@ -63,7 +63,7 @@ void kill(int p1, int p2) {
 
 // movement analyzer
 int analyzeMove(int id, int mv, playerCoord& coo) {
-	movementPack.push(movementS{id, mv, curTurn});
+	LGreplay::movementPack.push(movementS{id, mv, LGgame::curTurn});
 	switch(mv) {
 		case -1:
 			break;
@@ -343,9 +343,9 @@ namespace LGlocal {
 		std::deque<int> movement;
 		updateMap();
 		Zip();
-		zipStatus(LGgame::playerCnt);
+		LGreplay::zipStatus(LGgame::playerCnt);
 		printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
-		curTurn = 0;
+		LGgame::curTurn = 0;
 		bool gameEnd = 0;
 		rectBUTTON fpsbut;
 		fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
@@ -448,7 +448,7 @@ namespace LGlocal {
 				}
 			}
 			if(LGgame::curTurn % 2000 == 0)
-				Zip(), zipStatus(LGgame::playerCnt);
+				Zip(true), LGreplay::zipStatus(LGgame::playerCnt);
 			flushMove();
 			if(LGgame::cheatCode != 1048575) {
 				int alldead = 0;
@@ -473,7 +473,7 @@ namespace LGlocal {
 					             "YOU CAN PRESS [ESC] TO EXIT.")
 					            .c_str(),
 					            "GAME END", MB_OK | MB_SYSTEMMODAL);
-					zipGame(curTurn);
+					LGreplay::zipGame(LGgame::curTurn);
 					gameEnd = 1;
 					register int winnerNum = std::__lg(ed);
 					LGgame::cheatCode = 1048575;

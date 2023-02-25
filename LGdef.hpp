@@ -138,18 +138,6 @@ char strdeGameZip[4 * LEN_ZIP];
 char strStatusZip[4*LEN_ZIP];
 char strdeStatusZip[4*LEN_ZIP];
 
-int curLen = 0;
-Block curMap[505][505];
-playerCoord mapCoord[17][30], curCoord[30];
-Block mapSet[17][505][505];
-long long totTurn, curTurn, totMove;
-std::pair<long long, long long> curMoveS;
-std::queue<long long> signMap;
-std::queue<long long> signCmd;
-movementS dezipedMovementS[4 * LEN_ZIP];
-movementS tmp;
-std::queue<movementS> movementPack;
-
 std::vector<passS> passId[505][505];
 playerCoord lastTurn[20];
 
@@ -176,15 +164,9 @@ void readMap(int mid);
 void printMap(int printCode, playerCoord coo);
 
 inline long long PMod(long long& x);
-void trans(int st, int en);
-void retrans(int cur);
 std::pair<long long, long long> bin_search(long long curTurn);
-void Zip();
+void Zip(bool rep = false);
 void deZip();
-void zipStatus(int playerCnt);
-void deZipStatus(int st,int en,int cur);
-void zipGame(long long totTurn);
-void deZipGame(int playerCnt);
 
 void toAvoidCEBugInGraphicsImportMap(string fileName);
 int localGame(bool isWeb, int cheatCode, int plCnt, int stDel);
@@ -247,6 +229,28 @@ namespace LGgame {
 	void initGenerals(playerCoord coos[]);
 	void updateMap();
 	void ranklist();
+}
+
+namespace LGreplay {
+	int curLen = 0;
+	Block curMap[505][505];
+	playerCoord mapCoord[17][30], curCoord[30];
+	Block mapSet[17][505][505];
+	long long totTurn, curTurn, totMove;
+	std::pair<long long, long long> curMoveS;
+	std::queue<long long> signMap;
+	std::queue<long long> signCmd;
+	movementS dezipedMovementS[4 * LEN_ZIP];
+	movementS tmp;
+	std::queue<movementS> movementPack;
+
+	void trans(int st, int en);
+	void retrans(int cur);
+	void zipStatus(int playerCnt);
+	void deZipStatus(int st,int en,int cur);
+	void zipGame(long long totTurn);
+	void deZipGame(int playerCnt);
+	void Replay(int dir, long long curTurn);
 }
 
 namespace LGlocal {

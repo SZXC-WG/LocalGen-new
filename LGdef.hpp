@@ -186,15 +186,6 @@ void zipGame(long long totTurn);
 void deZipGame(int playerCnt);
 
 void toAvoidCEBugInGraphicsImportMap(string fileName);
-
-void printGameMessage(gameMessageStore now);
-void kill(int p1, int p2);
-int analyzeMove(int id, int mv, playerCoord& coo);
-void flushMove();
-void initGenerals(playerCoord coos[]);
-void updateMap();
-void ranklist();
-
 int localGame(bool isWeb, int cheatCode, int plCnt, int stDel);
 
 /***** graphics *****/
@@ -248,16 +239,25 @@ namespace LGgame {
 	playerCoord playerCoo[64];
 
 	void init(int chtC, int pC, int sD);
-	int localGame();
+	void printGameMessage(gameMessageStore now);
+	void kill(int p1, int p2);
+	int analyzeMove(int id, int mv, playerCoord& coo);
+	void flushMove();
+	void initGenerals(playerCoord coos[]);
+	void updateMap();
+	void ranklist();
 }
 
 namespace LGlocal {
+	int GAME();
 };
 
 namespace LGclient {
+	int GAME();
 };
 
 namespace LGserver {
+	int GAME();
 };
 
 void MainPage() {

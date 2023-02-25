@@ -249,10 +249,16 @@ namespace LGGraphics {
 		cleardevice();
 		switch(select) {
 			case 0: doMapSelect(); importGameSettings(); break;
-			case 1: break;
+			case 1: /*doRepImport();*/ break;
 			case 2: doMapImport(); importGameSettings(); break;
 		}
 	}
+
+//	void doRepImport() {
+//		sys_edit inpimp;
+//		inpimp.create();
+//		inpimp.size(1200 * mapDataStore.mapSizeX);
+//	}
 
 	void doMapSelect() {
 		cleardevice();

@@ -201,6 +201,7 @@ namespace LGGraphics {
 	void doMapImport();
 	void WelcomePage();
 	void doMapSelect();
+	// void doRepImport();
 	void importGameSettings();
 	void inputMapData(int a, int b, int c, int d);
 	int select = 0;

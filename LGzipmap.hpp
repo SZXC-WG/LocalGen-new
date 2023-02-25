@@ -14,6 +14,8 @@
 #ifndef __LGZIPMAP_HPP__
 #define __LGZIPMAP_HPP__
 
+#include "LGdef.hpp"
+
 inline long long PMod(long long& x) {
 	long long res = x & 63;
 	x >>= 6;

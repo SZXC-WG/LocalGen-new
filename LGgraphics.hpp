@@ -158,7 +158,7 @@ namespace LGGraphics {
 		// xyprintf(100, 100, "%f", mapDataStore.mapSize);
 		settextjustify(CENTER_TEXT, TOP_TEXT);
 		setfont(500 * mapDataStore.mapSizeY, 0, "Freestyle Script");
-		setcolor(BLUE);
+		setcolor(WHITE);
 		xyprintf(800 * mapDataStore.mapSizeY, 0, "LocalGen");
 		rectBUTTON singbut;
 		singbut.setbgcol(GREEN);
@@ -202,7 +202,7 @@ namespace LGGraphics {
 
 	void mainOptions() {
 		setbkmode(TRANSPARENT);
-		setfillcolor(WHITE);
+		setfillcolor(0xff222222);
 		ege_fillrect(100 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, 1400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
 		rectBUTTON selbut;
 		selbut.setbgcol(BROWN);
@@ -271,7 +271,7 @@ namespace LGGraphics {
 			mapbut[i].setfontname("Segoe UI");
 			mapbut[i].setfonthw(20 * mapDataStore.mapSizeY, 0);
 			mapbut[i].settxtcol(BLUE);
-			mapbut[i].setbgcol(WHITE);
+			mapbut[i].setbgcol(0xff222222);
 			mapbut[i].addtext("id: " + to_string(maps[i].id) + " " + maps[i].chiname);
 			mapbut[i].addtext(maps[i].engname);
 			mapbut[i].addtext("General Count: " + to_string(maps[i].generalcnt));

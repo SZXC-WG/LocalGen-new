@@ -240,7 +240,7 @@ void Pack() {
 			} else
 				P_s[p++] += CHAR_AD;
 
-			for(k2 = 1; k2 <= 11; k2++)
+			for(k2 = 1; k2 <= 8; k2++)
 				P_s[p++] = PMod(k1) + CHAR_AD;
 		}
 	P_s[p] = '\0';

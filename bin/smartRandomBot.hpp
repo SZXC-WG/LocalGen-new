@@ -1,6 +1,8 @@
 #ifndef __BOT_SMARTRANDOM__
 #define __BOT_SMARTRANDOM__
 
+#include "../LGdef.hpp"
+
 namespace smartRandomBot {
 	const int dx[5] = {0, -1, 0, 1, 0};
 	const int dy[5] = {0, 0, -1, 0, 1};
@@ -49,7 +51,7 @@ namespace smartRandomBot {
 		};
 		std::sort(p + 1, p + pl + 1, cmp);
 		lastCoord[id].push_back(coo);
-		if(lastCoord[id].size() > 500) lastCoord[id].pop_front();
+		if(lastCoord[id].size() > 100) lastCoord[id].pop_front();
 		return p[1].dir;
 	}
 }

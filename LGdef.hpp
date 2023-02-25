@@ -46,6 +46,8 @@ const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};
 const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
 const int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
+const int SSN=205,SSL=100005;
+const int SKPORT=14514;
 
 //====struct====//
 
@@ -141,6 +143,8 @@ char strdeStatusZip[4*LEN_ZIP];
 std::vector<passS> passId[505][505];
 playerCoord lastTurn[20];
 
+int failSock;
+
 //====function====//
 
 bool operator== (playerCoord a,playerCoord b) {
@@ -168,6 +172,7 @@ std::pair<long long, long long> bin_search(long long curTurn);
 void Zip(bool rep = false);
 void deZip();
 
+bool initSock(); 
 void toAvoidCEBugInGraphicsImportMap(string fileName);
 int localGame(bool isWeb, int cheatCode, int plCnt, int stDel);
 
@@ -257,11 +262,22 @@ namespace LGlocal {
 	int GAME();
 };
 
-namespace LGclient {
+namespace LGserver {
+	std::mutex mLock;
+	int totSock;
+	bool sockCon[SSN],lisEnd;
+	SOCKET serverSocket[SSN];
+	char sendBuf[SSL],recvBuf[SSL];
+	
+	void zipSendBuf();
+	void sockListen();
+	void procMessage(int sockID);
+	void sockBroadcast();
+	void sockCollect();
 	int GAME();
 };
 
-namespace LGserver {
+namespace LGclient {
 	int GAME();
 };
 

@@ -14,12 +14,8 @@
 #ifndef __LGGAME_HPP__
 #define __LGGAME_HPP__
 
-struct movementS;
-extern std::queue<movementS> movementPack;
-
-extern void Zip();
-extern void zipStatus(int playerCnt);
-extern void zipGame(long long totTurn);
+#include "LGdef.hpp"
+#include "LGbot.hpp"
 
 void printGameMessage(gameMessageStore now, int playerCnt) {
 	static int gameMesC = 0;
@@ -414,51 +410,31 @@ struct gameStatus {
 					if(ch.msg == key_msg_up)
 						continue;
 					switch(ch.key) {
-						case int('w'):
-							movement.emplace_back(1);
-							break;
-						case int('a'):
-							movement.emplace_back(2);
-							break;
-						case int('s'):
-							movement.emplace_back(3);
-							break;
-						case int('d'):
-							movement.emplace_back(4);
-							break;
+						case int('w'): movement.emplace_back(1); break;
+						case int('a'): movement.emplace_back(2); break;
+						case int('s'): movement.emplace_back(3); break;
+						case int('d'): movement.emplace_back(4); break;
 
-						case key_up: /*[UP]*/
-							movement.emplace_back(5);
-							break;
-						case key_left: /*[LEFT]*/
-							movement.emplace_back(6);
-							break;
-						case key_down: /*[DOWN]*/
-							movement.emplace_back(7);
-							break;
-						case key_right: /*[RIGHT]*/
-							movement.emplace_back(8);
-							break;
+						case key_up: /*[UP]*/ movement.emplace_back(5); break;
+						case key_left: /*[LEFT]*/ movement.emplace_back(6); break;
+						case key_down: /*[DOWN]*/ movement.emplace_back(7); break;
+						case key_right: /*[RIGHT]*/ movement.emplace_back(8); break;
 
-						case int('g'):
-							movement.emplace_back(0);
-							break;
+						case int('g'): movement.emplace_back(0); break;
 						case int('e'):
 							if(!movement.empty())
 								movement.pop_back();
 							break;
-						case int('q'):
-							movement.clear();
-							break;
+						case int('q'): movement.clear(); break;
 						case 27: {
-							MessageBoxA(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
+							MessageBoxA(getHWnd(), string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
 							closegraph();
 							return 0;
 						}
 						case int('\b'): {
 							if(!isAlive[1])
 								break;
-							int confirmSur = MessageBoxA(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
+							int confirmSur = MessageBoxA(getHWnd(), string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
 							if(confirmSur == 7)
 								break;
 							isAlive[1] = 0;

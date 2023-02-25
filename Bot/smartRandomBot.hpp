@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <vector>
-#include "../LGmaps.hpp"
+#include "../LGdef.hpp"
 
 #ifndef __BOT_SMARTRANDOM__
 #define __BOT_SMARTRANDOM__

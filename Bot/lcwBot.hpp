@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <vector>
-#include "../LGmaps.hpp"
+#include "../LGdef.hpp"
 
 namespace lcwBot
 {

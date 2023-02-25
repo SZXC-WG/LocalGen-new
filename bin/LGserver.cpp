@@ -93,10 +93,10 @@ signed main() {
 	char ch;
 
 	while(1)
-		if(kbhit()) {
-			char ch=getch();
-			break;
-		}
+	if(kbhit()) {
+		char ch=getch();
+		break;
+	}
 
 	clearance();
 	std::thread th(sockListen);

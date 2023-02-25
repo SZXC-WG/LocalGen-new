@@ -136,7 +136,6 @@ namespace LGreplay {
 		for(int i = 0; i < p; i++)
 			strGameZip[curLen++] = strStatusZip[i];
 	}
-
 	void deZipStatus(int st,int en,int cur) {
 		for(int i=st,j=1; i<en; i+=4,j++) {
 			if(strdeStatusZip[i]==64+CHAR_AD) {

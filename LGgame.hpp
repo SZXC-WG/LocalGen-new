@@ -326,23 +326,25 @@ namespace LGgame {
 		stepDelay = sD;
 		for(register int i = 1; i <= pC; ++i) isAlive[i] = 1;
 	}
+};
 
-	int localGame() {
+namespace LGlocal {
+	int GAME() {
 		cleardevice();
 		setrendermode(RENDER_MANUAL);
 		LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
 		LGGraphics::init();
 		std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-		robotId[1] = -100;
-		for(int i = 2; i <= playerCnt; ++i)
-			robotId[i] = mtrd() % 300;
+		LGgame::robotId[1] = -100;
+		for(int i = 2; i <= LGgame::playerCnt; ++i)
+			LGgame::robotId[i] = mtrd() % 300;
 		initGenerals(LGgame::playerCoo);
-		for(int i = 1; i <= playerCnt; ++i) playerCoo[i] = genCoo[i];
+		for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::playerCoo[i] = LGgame::genCoo[i];
 		std::deque<int> movement;
 		updateMap();
 		Zip();
-		zipStatus(playerCnt);
-		printMap(cheatCode, playerCoo[1]);
+		zipStatus(LGgame::playerCnt);
+		printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 		curTurn = 0;
 		bool gameEnd = 0;
 		rectBUTTON fpsbut;
@@ -362,13 +364,13 @@ namespace LGgame {
 		.setfonthw(20 * LGGraphics::mapDataStore.mapSizeY, 0)
 		.setbgcol(BLUE)
 		.settxtcol(WHITE);
-		for(; is_run(); delay_fps(std::min(stepDelay + 0.5, 120.5))) {
+		for(; is_run(); delay_fps(std::min(LGgame::stepDelay + 0.5, 120.5))) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
 				if(msg.is_down() && msg.is_left() && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH) {
 					int lin = (msg.y + heightPerBlock - 1) / heightPerBlock;
 					int col = (msg.x + widthPerBlock - 1) / widthPerBlock;
-					playerCoo[1] = {lin, col};
+					LGgame::playerCoo[1] = {lin, col};
 					movement.clear();
 				}
 			}
@@ -402,12 +404,12 @@ namespace LGgame {
 						return 0;
 					}
 					case int('\b'): {
-						if(!isAlive[1])
+						if(!LGgame::isAlive[1])
 							break;
 						int confirmSur = MessageBoxA(getHWnd(), string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
 						if(confirmSur == 7)
 							break;
-						isAlive[1] = 0;
+						LGgame::isAlive[1] = 0;
 						for(int i = 1; i <= mapH; ++i) {
 							for(int j = 1; j <= mapW; ++j) {
 								if(gameMap[i][j].team == 1) {
@@ -417,53 +419,53 @@ namespace LGgame {
 								}
 							}
 						}
-						printGameMessage({1, 1, curTurn});
+						printGameMessage({1, 1, LGgame::curTurn});
 						lastTurn[1] = playerCoord{-1, -1};
 						break;
 					}
 				}
 			}
 			updateMap();
-			while(!movement.empty() && analyzeMove(1, movement.front(), playerCoo[1]))
+			while(!movement.empty() && analyzeMove(1, movement.front(), LGgame::playerCoo[1]))
 				movement.pop_front();
 			if(!movement.empty())
 				movement.pop_front();
-			for(int i = 2; i <= playerCnt; ++i) {
-				if(!isAlive[i])
+			for(int i = 2; i <= LGgame::playerCnt; ++i) {
+				if(!LGgame::isAlive[i])
 					continue;
-				switch(robotId[i]) {
+				switch(LGgame::robotId[i]) {
 					case 0 ... 99:
-						analyzeMove(i, smartRandomBot::smartRandomBot(i, playerCoo[i]), playerCoo[i]);
+						analyzeMove(i, smartRandomBot::smartRandomBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
 						break;
 					case 100 ... 199:
-						analyzeMove(i, xrzBot::xrzBot(i, playerCoo[i]), playerCoo[i]);
+						analyzeMove(i, xrzBot::xrzBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
 						break;
 					case 200 ... 299:
-						analyzeMove(i, xiaruizeBot::xiaruizeBot(i, playerCoo[i]), playerCoo[i]);
+						analyzeMove(i, xiaruizeBot::xiaruizeBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
 						break;
 					default:
-						analyzeMove(i, 0, playerCoo[i]);
+						analyzeMove(i, 0, LGgame::playerCoo[i]);
 				}
 			}
 			if(curTurn % 2000 == 0)
-				Zip(), zipStatus(playerCnt);
+				Zip(), zipStatus(LGgame::playerCnt);
 			flushMove();
-			if(cheatCode != 1048575) {
+			if(LGgame::cheatCode != 1048575) {
 				int alldead = 0;
-				for(int i = 1; i <= playerCnt && !alldead; ++i) {
-					if(cheatCode & (1 << i))
-						if(isAlive[i])
+				for(int i = 1; i <= LGgame::playerCnt && !alldead; ++i) {
+					if(LGgame::cheatCode & (1 << i))
+						if(LGgame::isAlive[i])
 							alldead = 1;
 				}
 				if(!alldead) {
-					cheatCode = 1048575;
+					LGgame::cheatCode = 1048575;
 					MessageBoxA(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
 				}
 			}
 			if(!gameEnd) {
 				int ed = 0;
-				for(int i = 1; i <= playerCnt; ++i)
-					ed |= (isAlive[i] << i);
+				for(int i = 1; i <= LGgame::playerCnt; ++i)
+					ed |= (LGgame::isAlive[i] << i);
 				if(__builtin_popcount(ed) == 1) {
 					MessageBoxA(nullptr,
 					            ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
@@ -474,12 +476,12 @@ namespace LGgame {
 					zipGame(curTurn);
 					gameEnd = 1;
 					register int winnerNum = std::__lg(ed);
-					cheatCode = 1048575;
-					printGameMessage({winnerNum, -1, curTurn});
+					LGgame::cheatCode = 1048575;
+					printGameMessage({winnerNum, -1, LGgame::curTurn});
 				}
 			}
-			printMap(cheatCode, playerCoo[1]);
-			if(curTurn % max(stepDelay / 10, 1) == 0)
+			printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
+			if(curTurn % std::max(LGgame::stepDelay / 10, 1) == 0)
 				ranklist();
 			fpsbut.poptext();
 			fpsbut.addtext("FPS: " + to_string(getfps()));
@@ -490,11 +492,11 @@ namespace LGgame {
 		}
 		return 0;
 	}
-};
+}
 
 int localGame(bool isWeb, int cheatCode, int plCnt, int stDel) {
 	LGgame::init(cheatCode, plCnt, stDel);
-	int ret = LGgame::localGame();
+	int ret = LGlocal::GAME();
 	return ret;
 }
 

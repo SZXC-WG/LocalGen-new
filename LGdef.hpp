@@ -189,7 +189,7 @@ int analyzeMove(deque<moveS>& inlineMove, int id, int mv, playerCoord& coo, play
 void flushMove(deque<moveS>& inlineMove, int isAlive[], int curTurn);
 void initGenerals(int playerCnt, playerCoord coos[]);
 void updateMap(int& curTurn);
-void ranklist(int playerCnt, playerCoord coos[], int isAlive[], int robotId[]); 
+void ranklist(int playerCnt, playerCoord coos[], int isAlive[], int robotId[]);
 
 int GAME(bool isWeb, int cheatCode, int plCnt, int stDel);
 

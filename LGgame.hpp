@@ -359,46 +359,6 @@ struct gameStatus {
 
 	playerCoord coordinate[64];
 	std::deque<int> movement;
-//	char sendBuf[SSL],recvBuf[SSL];
-//	SOCKET clientSocket;
-//
-//	void sockConnect(){
-//		if(initSock())
-//		return ;
-//
-//		clientSocket=socket(AF_INET,SOCK_STREAM,0);
-//		SOCKADDR_IN connectAddr;
-//		connectAddr.sin_family=AF_INET;
-//		connectAddr.sin_addr.S_un.S_addr=inet_addr("192.168.32.35");
-//		connectAddr.sin_port=htons(SKPORT);
-//		int res=connect(clientSocket,(LPSOCKADDR)&connectAddr,sizeof(connectAddr));
-//		u_long iMode=1;
-//		ioctlsocket(clientSocket,FIONBIO,&iMode);
-//
-//		if(res==SOCKET_ERROR){
-//			failSock|=4;
-//			WSACleanup();
-//			return ;
-//		}return ;
-//	}
-//
-//	void procMessage(){
-//
-//	}
-//
-//	void sockMessage(){
-//		std::lock_guard<std::mutex> mGuard(mLock);
-//		send(clientSocket,sendBuf,sizeof(sendBuf),0);
-//		memset(sendBuf,0,sizeof(sendBuf));
-//	}
-//
-//	void sockCollect(){
-//		std::lock_guard<std::mutex> mGuard(mLock);
-//		int res=recv(clientSocket,recvBuf,sizeof(recvBuf),0);
-//
-//		if(res>0){
-//		}memset(recvBuf,0,sizeof(recvBuf));
-//	}
 
 	// main
 	int playGame() {
@@ -408,15 +368,12 @@ struct gameStatus {
 		setrendermode(RENDER_MANUAL);
 		LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
 		LGGraphics::init();
-		// printf("%f\n", getfps());
 		played = 1;
 		if(!isWeb) {
 			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 			robotId[1] = -100;
 			for(int i = 2; i <= playerCnt; ++i)
 				robotId[i] = mtrd() % 300;
-			//			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
-			//			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
 			initGenerals(playerCnt, genCoo);
 			for(int i = 1; i <= playerCnt; ++i) coordinate[i] = genCoo[i];
 			updateMap(curTurn);
@@ -541,9 +498,6 @@ struct gameStatus {
 						case 200 ... 299:
 							analyzeMove(inlineMove, i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i], genCoo, curTurn);
 							break;
-//					case 300 ... 399:
-//						analyzeMove(i, lcwBot::lcwBot(i, coordinate[i]), coordinate[i]);
-//						break;
 						default:
 							analyzeMove(inlineMove, i, 0, coordinate[i], genCoo, curTurn);
 					}
@@ -592,179 +546,6 @@ struct gameStatus {
 				turnbut.display();
 			}
 		}
-//		else{
-//			std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-//			printMap(cheatCode, coordinate[1]);
-//			curTurn = 0;
-//			bool gameEnd = 0;
-//			for (; is_run(); delay_fps(std::min(stepDelay, 40)))
-//			{
-//				while (mousemsg())
-//				{
-//					mouse_msg msg = getmouse();
-//					if (msg.is_down() && msg.is_left() && msg.x >= 50 && msg.y >= 50 && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH)
-//					{
-//						int lin = (msg.y + heightPerBlock - 1) / heightPerBlock;
-//						int col = (msg.x + widthPerBlock - 1) / widthPerBlock;
-//						coordinate[1] = {lin, col};
-//						movement.clear();
-//					}
-//				}
-//				while (kbmsg())
-//				{
-//					key_msg ch = getkey();
-//					if (ch.key == key_space)
-//					{
-//						while ((!kbmsg) || (getkey().key != key_space))
-//							;
-//					}
-//					if (ch.msg == key_msg_up)
-//						continue;
-//					switch (ch.key)
-//					{
-//					case int('w'):
-//						movement.emplace_back(1);
-//						break;
-//					case int('a'):
-//						movement.emplace_back(2);
-//						break;
-//					case int('s'):
-//						movement.emplace_back(3);
-//						break;
-//					case int('d'):
-//						movement.emplace_back(4);
-//						break;
-//
-//					case key_up: /*[UP]*/
-//						movement.emplace_back(5);
-//						break;
-//					case key_left: /*[LEFT]*/
-//						movement.emplace_back(6);
-//						break;
-//					case key_down: /*[DOWN]*/
-//						movement.emplace_back(7);
-//						break;
-//					case key_right: /*[RIGHT]*/
-//						movement.emplace_back(8);
-//						break;
-//
-//					case int('g'):
-//						movement.emplace_back(0);
-//						break;
-//					case int('e'):
-//						if (!movement.empty())
-//							movement.pop_back();
-//						break;
-//					case int('q'):
-//						movement.clear();
-//						break;
-//					case 27:
-//					{
-//						MessageBoxA(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
-//						closegraph();
-//						return 0;
-//					}
-//					case int('\b'):
-//					{
-//						if (!isAlive[1])
-//							break;
-//						int confirmSur = MessageBoxA(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
-//						if (confirmSur == 7)
-//							break;
-//						isAlive[1] = 0;
-//						for (int i = 1; i <= mapH; ++i)
-//						{
-//							for (int j = 1; j <= mapW; ++j)
-//							{
-//								if (gameMap[i][j].team == 1)
-//								{
-//									gameMap[i][j].team = 0;
-//									if (gameMap[i][j].type == 3)
-//										gameMap[i][j].type = 4;
-//								}
-//							}
-//						}
-//						gameMessage.push_back({1, 1, curTurn});
-//						lastTurn[1] = playerCoord{-1, -1};
-//						break;
-//					}
-//					}
-//				}
-//
-//				while (!movement.empty() && analyzeMove(1, movement.front(), coordinate[1]))
-//					movement.pop_front();
-//				if (!movement.empty())
-//					movement.pop_front();
-//
-//				sockCollect();
-//				dezipStatus();
-//
-//				for (int i = 2; i <= playerCnt; ++i)
-//				{
-//					if (!isAlive[i])
-//						continue;
-//					switch (robotId[i])
-//					{
-//					case 1 ... 100:
-//						analyzeMove(i, smartRandomBot::smartRandomBot(i, coordinate[i]), coordinate[i]);
-//						break;
-//					case 101 ... 200:
-//						analyzeMove(i, xrzBot::xrzBot(i, coordinate[i]), coordinate[i]);
-//						break;
-//					case 201 ... 300:
-//						analyzeMove(i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i]);
-//						break;
-//					default:
-//						analyzeMove(i, 0, coordinate[i]);
-//					}
-//				}
-//				if (curTurn % 2000 == 0)
-//					Zip(), zipStatus(playerCnt);
-//				flushMove();
-//				if (cheatCode != 1048575)
-//				{
-//					int alldead = 0;
-//					for (int i = 1; i <= playerCnt && !alldead; ++i)
-//					{
-//						if (cheatCode & (1 << i))
-//							if (isAlive[i])
-//								alldead = 1;
-//					}
-//					if (!alldead)
-//					{
-//						cheatCode = 1048575;
-//						MessageBoxA(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
-//					}
-//				}
-//				if (!gameEnd)
-//				{
-//					int ed = 0;
-//					for (int i = 1; i <= playerCnt; ++i)
-//						ed |= (isAlive[i] << i);
-//					if (__builtin_popcount(ed) == 1)
-//					{
-//						MessageBoxA(nullptr,
-//									("PLAYER " + defTeams[std::__lg(ed)].name + " WON!" + "\n" +
-//									 "THE GAME WILL CONTINUE." + "\n" +
-//									 "YOU CAN PRESS [ESC] TO EXIT.")
-//										.c_str(),
-//									"GAME END", MB_OK | MB_SYSTEMMODAL);
-//						zipGame(curTurn);
-//						gameEnd = 1;
-//						winnerNum = std::__lg(ed);
-//						cheatCode = 1048575;
-//						gameMessage.push_back({-1, -1, curTurn});
-//					}
-//				}
-//				printMap(cheatCode, coordinate[1]);
-//				if (curTurn % max(stepDelay / 10, 1) == 0)
-//				{
-//					ranklist(coordinate);
-//					printGameMessage();
-//				}
-//				setcolor(BLACK);
-//			}
-//		}
 		return 0;
 	}
 };

@@ -78,13 +78,13 @@ namespace LGGraphics {
 		PIMAGE favi = newimage();
 		getimage_pngfile(favi, "img/favicon.png");
 		setcaption("LocalGen v" VER_STRING " Window Size Selection");
-		setbkcolor(WHITE);
-		setbkcolor_f(WHITE);
+		setbkcolor(0xff222222);
+		setbkcolor_f(0xff222222);
 		bool changeMade = true;
 		cleardevice();
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setfont(200, 0, "Freestyle Script");
-		setcolor(BLUE);
+		setcolor(WHITE);
 		xyprintf(250, 125, "LocalGen");
 		putimage_withalpha(NULL, favi, 500, 10, 0, 0, getwidth(favi), getheight(favi));
 		delimage(favi);
@@ -99,8 +99,8 @@ namespace LGGraphics {
 		for(int i = 200; i <= 500; i += 100) {
 			register int p = i / 100 - 2;
 			scrsz[p].sethw(50, 400);
-			scrsz[p].setbgcol(WHITE);
-			scrsz[p].settxtcol(BLUE);
+			scrsz[p].setbgcol(0xff222222);
+			scrsz[p].settxtcol(WHITE);
 			scrsz[p].setfontname("Freestyle Script");
 			scrsz[p].setfonth(40);
 			scrsz[p].setlocation(180 + i / 4 * 2, 50);
@@ -112,8 +112,8 @@ namespace LGGraphics {
 			int i = 600;
 			register int p = i / 100 - 2;
 			scrsz[p].sethw(50, 400);
-			scrsz[p].setbgcol(WHITE);
-			scrsz[p].settxtcol(BLUE);
+			scrsz[p].setbgcol(0xff222222);
+			scrsz[p].settxtcol(WHITE);
 			scrsz[p].setfontname("Freestyle Script");
 			scrsz[p].setfonth(40);
 			scrsz[p].setlocation(180 + i / 4 * 2, 50);
@@ -135,7 +135,6 @@ namespace LGGraphics {
 	finishSelect:
 		setcaption("LocalGen v" VER_STRING " developed by LocalGen-dev");
 		if(select == 6) {
-//			movewindow(0, 0, false);
 			resizewindow(-1, -1);
 			FullScreen(getHWnd());
 			int w = getmaxx(), h = getmaxy();
@@ -147,15 +146,14 @@ namespace LGGraphics {
 			nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 			initgraph(1600 * mapDataStore.mapSizeX, 900 * mapDataStore.mapSizeY, RENDER_AUTO);
-//			movewindow((nScreenWidth - 1600 * mapDataStore.mapSize) / 2, (nScreenHeight - 900 * mapDataStore.mapSize) / 2, true);
 		}
 	}
 
 	void WelcomePage() {
 		initWindowSize();
 		setbkmode(TRANSPARENT);
-		setbkcolor(WHITE);
-		setbkcolor_f(WHITE);
+		setbkcolor(0xff222222);
+		setbkcolor_f(0xff222222);
 		cleardevice();
 		// xyprintf(100, 100, "%f", mapDataStore.mapSize);
 		settextjustify(CENTER_TEXT, TOP_TEXT);
@@ -250,11 +248,10 @@ namespace LGGraphics {
 		}
 		cleardevice();
 		switch(select) {
-			case 0: doMapSelect(); break;
+			case 0: doMapSelect(); importGameSettings(); break;
 			case 1: break;
-			case 2: doMapImport(); break;
+			case 2: doMapImport(); importGameSettings(); break;
 		}
-		importGameSettings();
 	}
 
 	void doMapSelect() {
@@ -704,8 +701,8 @@ namespace LGGraphics {
 			ege_enable_aa(true, pimg[i]);
 		ege_enable_aa(true);
 		//		initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, INIT_RENDERMANUAL);
-		setbkcolor(BLACK);
-		setbkcolor_f(BLACK);
+		setbkcolor(0x222222);
+		setbkcolor_f(0x222222);
 		cleardevice();
 	}
 }

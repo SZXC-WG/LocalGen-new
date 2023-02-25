@@ -77,7 +77,7 @@ void Zip() {
 			} else
 				strZip[p++] += CHAR_AD;
 
-			for(k2 = 1; k2 <= 11; k2++)
+			for(k2 = 1; k2 <= 8; k2++)
 				strZip[p++] = PMod(k1) + CHAR_AD;
 		}
 	strZip[p] = '\0';
@@ -106,9 +106,9 @@ void deZip() {
 			gameMap[i][j].type = strdeZip[k++];
 			gameMap[i][j].army = 0;
 
-			for(p = 10; p >= 0; p--)
+			for(p = 7; p >= 0; p--)
 				gameMap[i][j].army = (gameMap[i][j].army << 6) + strdeZip[k + p];
-			k += 11;
+			k += 8;
 			gameMap[i][j].army = f ? (-gameMap[i][j].army) : gameMap[i][j].army;
 		}
 }

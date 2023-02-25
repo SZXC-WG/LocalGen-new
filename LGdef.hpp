@@ -32,6 +32,7 @@
 #include <windows.h>
 #include <io.h>
 #include <graphics.h>
+#include <ege/sys_edit.h>
 #include "LocalGen_private.h"
 #include "bin/LGGrectbut.hpp"
 

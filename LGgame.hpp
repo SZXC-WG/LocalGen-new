@@ -158,14 +158,14 @@ void initGenerals(playerCoord coos[]) {
 				gameMap[i][j].type = 0;
 }
 void updateMap() {
-	++curTurn;
+	++LGgame::curTurn;
 	for(int i = 1; i <= mapH; ++i) {
 		for(int j = 1; j <= mapW; ++j) {
 			if(gameMap[i][j].team == 0) continue;
 			switch(gameMap[i][j].type) {
 				case 0: {
 					/* plain */
-					if(curTurn % 25 == 0) ++gameMap[i][j].army;
+					if(LGgame::curTurn % 25 == 0) ++gameMap[i][j].army;
 					break;
 				}
 				case 1: {

@@ -14,6 +14,8 @@
 #ifndef __LGMAPS_HPP__
 #define __LGMAPS_HPP__
 
+#include "LGdef.hpp"
+
 #define ll long long
 
 bool isVisible(int x, int y, int printCode) {
@@ -55,7 +57,7 @@ void printMap(int printCode, playerCoord coo) {
 	static const color_t cscol = 0xff808080,
 	                     plcol = 0xffdcdcdc,
 	                     mtcol = 0xffbbbbbb,
-	                     unseen = 0xff1a1a1a;
+	                     unseen = 0xff3c3c3c;
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
@@ -319,6 +321,7 @@ void initMaps() {
 		maps[mapNum].filename = s + ".lg";
 		std::ifstream lgf(maps[mapNum].filename);
 		lgf.getline(strdeZip, sizeof strdeZip);
+		lgf.close();
 		deZip();
 		maps[mapNum].hei = mapH, maps[mapNum].wid = mapW;
 		for(int i=1; i<=mapH; ++i) {

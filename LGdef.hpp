@@ -187,15 +187,15 @@ void deZipGame(int playerCnt);
 
 void toAvoidCEBugInGraphicsImportMap(string fileName);
 
-void printGameMessage(gameMessageStore now, int playerCnt);
-void kill(int p1, int p2, int isAlive[], int curTurn);
-int analyzeMove(deque<moveS>& inlineMove, int id, int mv, playerCoord& coo, playerCoord genCoo[], int curTurn);
-void flushMove(deque<moveS>& inlineMove, int isAlive[], int curTurn);
-void initGenerals(int playerCnt, playerCoord coos[]);
-void updateMap(int& curTurn);
-void ranklist(int playerCnt, playerCoord coos[], int isAlive[], int robotId[]);
+void printGameMessage(gameMessageStore now);
+void kill(int p1, int p2);
+int analyzeMove(int id, int mv, playerCoord& coo);
+void flushMove();
+void initGenerals(playerCoord coos[]);
+void updateMap();
+void ranklist();
 
-int GAME(bool isWeb, int cheatCode, int plCnt, int stDel);
+int localGame(bool isWeb, int cheatCode, int plCnt, int stDel);
 
 /***** graphics *****/
 
@@ -218,7 +218,7 @@ namespace LGGraphics {
 		int height, width;
 		double mapSizeX, mapSizeY;
 	} mapDataStore;
-	void selectOrImportMap();
+	void mainOptions();
 	void doMapImport();
 	void WelcomePage();
 	void doMapSelect();
@@ -233,6 +233,24 @@ namespace LGGraphics {
 inline int getHeightPerBlock();
 inline int getWidthPerBlock();
 
+/***** others *****/
+
+namespace LGgame {
+	int curTurn;
+	int cheatCode;
+	int playerCnt;
+	int isAlive[64];
+	int robotId[64];
+	int stepDelay; /* fps */
+	int gameMesC;
+	playerCoord genCoo[64];
+	std::deque<moveS> inlineMove;
+	playerCoord playerCoo[64];
+
+	void init(int chtC, int pC, int sD);
+	int localGame();
+}
+
 namespace LGlocal {
 };
 
@@ -245,7 +263,7 @@ namespace LGserver {
 void MainPage() {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	LGGraphics::WelcomePage();
-	LGGraphics::selectOrImportMap();
+	LGGraphics::mainOptions();
 	return;
 }
 

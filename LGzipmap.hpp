@@ -245,21 +245,21 @@ void deZipGame(int playerCnt) {
 	}
 }
 
-void Replay(int dir, long long curTurn, gameStatus& curStatus) {
-	if(dir) {
-		curMoveS = bin_search(curTurn + 1);
-		for(int i = curMoveS.first; i < curMoveS.second; i++)
-			analyzeMove(curStatus.inlineMove, dezipedMovementS[i].id, dezipedMovementS[i].op, curCoord[dezipedMovementS[i].id], curStatus.genCoo, curTurn);
-	} else {
-		for(int i = 1; i <= 20; i++)
-			curCoord[i] = mapCoord[curTurn / replaySorter + 1][i];
-		curMoveS = bin_search(curTurn / replaySorter * replaySorter);
-		while(dezipedMovementS[curMoveS.first].turn < curTurn) {
-			analyzeMove(curStatus.inlineMove, dezipedMovementS[curMoveS.first].id, dezipedMovementS[curMoveS.first].op, curCoord[dezipedMovementS[curMoveS.first].id], curStatus.genCoo, curTurn);
-			curMoveS.first++;
-		}
-	}
-}
+// void Replay(int dir, long long curTurn, gameStatus& curStatus) {
+// 	if(dir) {
+// 		curMoveS = bin_search(curTurn + 1);
+// 		for(int i = curMoveS.first; i < curMoveS.second; i++)
+// 			analyzeMove(curStatus.inlineMove, dezipedMovementS[i].id, dezipedMovementS[i].op, curCoord[dezipedMovementS[i].id], curStatus.genCoo, curTurn);
+// 	} else {
+// 		for(int i = 1; i <= 20; i++)
+// 			curCoord[i] = mapCoord[curTurn / replaySorter + 1][i];
+// 		curMoveS = bin_search(curTurn / replaySorter * replaySorter);
+// 		while(dezipedMovementS[curMoveS.first].turn < curTurn) {
+// 			analyzeMove(curStatus.inlineMove, dezipedMovementS[curMoveS.first].id, dezipedMovementS[curMoveS.first].op, curCoord[dezipedMovementS[curMoveS.first].id], curStatus.genCoo, curTurn);
+// 			curMoveS.first++;
+// 		}
+// 	}
+// }
 
 void toAvoidCEBugInGraphicsImportMap(string fileName) {
 	FILE* fileP;

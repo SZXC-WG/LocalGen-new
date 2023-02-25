@@ -25,7 +25,7 @@
 /*************** header files ***************/
 
 /* dev project headers */
-#include "LocalGen-new_private.h"
+#include "LocalGen_private.h"
 /* pages */
 #include "LGincludeall.hpp" // __LGPAGES_HPP__
 

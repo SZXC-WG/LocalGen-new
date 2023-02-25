@@ -29,7 +29,7 @@
 #include <windows.h>
 #include <io.h>
 #include <graphics.h>
-#include "LocalGen-new_private.h"
+#include "LocalGen_private.h"
 #include "graphics/LGGrectbut.hpp"
 
 using std::deque;

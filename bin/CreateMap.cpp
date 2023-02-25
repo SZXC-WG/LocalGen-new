@@ -247,7 +247,6 @@ void Pack() {
 }
 
 signed main() {
-	puts("����������������ʵ���С��");
 	puts("CreateMap(Size L/W Tip:at most 100):");
 	scanf("%d%d", &sL, &sW);
 	rL = sL;

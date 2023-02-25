@@ -24,7 +24,7 @@ namespace smartRandomBot {
 				continue;
 			p[++pl] = {
 				gameMap[nx][ny].type, gameMap[nx][ny].team, gameMap[nx][ny].army, i,
-				std::find(lastCoord[id].begin(), lastCoord[id].end(), playerCoord{nx, ny}) - lastCoord[id].begin()
+				std::find(lastCoord[id].rbegin(), lastCoord[id].rend(), playerCoord{nx, ny}) - lastCoord[id].rbegin()
 			};
 		}
 		bool rdret = mtrd() % 2;
@@ -49,7 +49,7 @@ namespace smartRandomBot {
 		};
 		std::sort(p + 1, p + pl + 1, cmp);
 		lastCoord[id].push_back(coo);
-		if(lastCoord[id].size() > 5) lastCoord[id].pop_front();
+		if(lastCoord[id].size() > 500) lastCoord[id].pop_front();
 		return p[1].dir;
 	}
 }

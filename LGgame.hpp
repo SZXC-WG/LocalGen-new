@@ -447,7 +447,7 @@ namespace LGlocal {
 						analyzeMove(i, 0, LGgame::playerCoo[i]);
 				}
 			}
-			if(curTurn % 2000 == 0)
+			if(LGgame::curTurn % 2000 == 0)
 				Zip(), zipStatus(LGgame::playerCnt);
 			flushMove();
 			if(LGgame::cheatCode != 1048575) {
@@ -481,13 +481,13 @@ namespace LGlocal {
 				}
 			}
 			printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
-			if(curTurn % std::max(LGgame::stepDelay / 10, 1) == 0)
+			if(LGgame::curTurn % std::max(LGgame::stepDelay / 10, 1) == 0)
 				ranklist();
 			fpsbut.poptext();
 			fpsbut.addtext("FPS: " + to_string(getfps()));
 			fpsbut.display();
 			turnbut.poptext();
-			turnbut.addtext("Turn " + to_string(curTurn) + ".");
+			turnbut.addtext("Turn " + to_string(LGgame::curTurn) + ".");
 			turnbut.display();
 		}
 		return 0;

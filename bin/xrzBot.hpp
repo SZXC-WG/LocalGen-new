@@ -1,7 +1,3 @@
-#include <algorithm>
-#include <vector>
-#include "../LGdef.hpp"
-
 #ifndef __BOT_XRZ__
 #define __BOT_XRZ__
 

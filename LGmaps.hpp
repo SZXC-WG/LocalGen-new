@@ -16,11 +16,6 @@
 
 #define ll long long
 
-#include "LGdef.hpp"
-
-extern void deZip();
-extern char strdeZip[LEN_ZIP];
-
 bool isVisible(int x, int y, int printCode) {
 	if(gameMap[x][y].lit)
 		return true;

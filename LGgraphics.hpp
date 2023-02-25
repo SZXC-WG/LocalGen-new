@@ -11,8 +11,6 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
 
-#include "LGdef.hpp"
-
 namespace imageOperation {
 	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
 		if((pimg == NULL) || (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))

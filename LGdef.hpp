@@ -26,11 +26,14 @@
 #include <vector>
 #include <deque>
 #include <queue>
+#include <mutex>
+#include <thread>
+#include <winsock2.h>
 #include <windows.h>
 #include <io.h>
 #include <graphics.h>
 #include "LocalGen_private.h"
-#include "graphics/LGGrectbut.hpp"
+#include "bin/LGGrectbut.hpp"
 
 using std::deque;
 using std::string;
@@ -169,6 +172,7 @@ void createFullPlainMap(int crtH, int crtW, int plCnt);
 void getAllFiles(string path, std::vector<string>& files, string fileType);
 void initMaps();
 void readMap(int mid);
+void printMap(int printCode, playerCoord coo);
 
 inline long long PMod(long long& x);
 void trans(int st, int en);

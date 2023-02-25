@@ -26,8 +26,14 @@
 
 /* dev project headers */
 #include "LocalGen_private.h"
-/* pages */
-#include "LGincludeall.hpp" // __LGPAGES_HPP__
+
+#include "LGdef.hpp"
+#include "LGmaps.hpp" 
+#include "LGgraphics.hpp"
+#include "LGbot.hpp"
+#include "LGzipmap.hpp"
+#include "LGgame.hpp"
+#include "LGweb.hpp"
 
 /*************** the main function ***************/
 HWND hwnd = GetConsoleWindow();

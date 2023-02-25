@@ -15,10 +15,10 @@
 #define __LGBOT_HPP__
 
 // Bots
-#include "Bot/ktqBot.hpp"
-#include "Bot/xiaruizeBot.hpp"
-#include "Bot/xrzBot.hpp"
-#include "Bot/smartRandomBot.hpp"
+#include "bin/ktqBot.hpp"
+#include "bin/xiaruizeBot.hpp"
+#include "bin/xrzBot.hpp"
+#include "bin/smartRandomBot.hpp"
 //#include "Bot/lcwBot.hpp"
 
 string botName[] = {

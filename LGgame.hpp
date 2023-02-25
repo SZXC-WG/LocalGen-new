@@ -14,9 +14,6 @@
 #ifndef __LGGAME_HPP__
 #define __LGGAME_HPP__
 
-#include "LGdef.hpp"
-#include "LGbot.hpp"
-
 struct movementS;
 extern std::queue<movementS> movementPack;
 

@@ -274,7 +274,7 @@ namespace LGGraphics {
 			down = (x * 180) * mapDataStore.mapSizeY;
 			mapbut[i].sethw(down - up, right - left);
 			mapbut[i].setlocation(up, left);
-			mapbut[i].setfontname("Segoe UI");
+			mapbut[i].setfontname("Quicksand");
 			mapbut[i].setfonthw(20 * mapDataStore.mapSizeY, 0);
 			mapbut[i].settxtcol(WHITE);
 			mapbut[i].setbgcol(0xff222222);
@@ -300,17 +300,17 @@ namespace LGGraphics {
 		}
 		cleardevice();
 		setcolor(WHITE);
-		setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+		setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
 		xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 		xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-		setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+		setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 		xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 		xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 		xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
 		xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
 		xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
 		if(mapSelected < 6) {
-			setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+			setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 			setcolor(WHITE);
 			int height = 0;
 			key_msg msg;
@@ -326,10 +326,10 @@ namespace LGGraphics {
 						height = height * 10 + msg.key - '0';
 					cleardevice();
 					setcolor(WHITE);
-					setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+					setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
 					xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 					xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-					setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+					setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 					xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 					xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 					xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -342,10 +342,10 @@ namespace LGGraphics {
 			}
 			cleardevice();
 			setcolor(WHITE);
-			setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+			setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
 			xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 			xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-			setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+			setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 			xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 			xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 			xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -367,10 +367,10 @@ namespace LGGraphics {
 						width = width * 10 + msg.key - '0';
 					cleardevice();
 					setcolor(WHITE);
-					setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+					setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
 					xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 					xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-					setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+					setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 					xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 					xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 					xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -385,7 +385,7 @@ namespace LGGraphics {
 			}
 			long long armyMin = 0, armyMax = 0;
 			if(mapSelected == 3) {
-				setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 				setcolor(WHITE);
 				key_msg msg;
 				xyprintf(10 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Minimum Number of Army on each Block");
@@ -403,10 +403,10 @@ namespace LGGraphics {
 							isPositive = !isPositive;
 						cleardevice();
 						setcolor(WHITE);
-						setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+						setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
 						xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 						xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-						setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+						setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 						xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 						xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 						xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -428,10 +428,10 @@ namespace LGGraphics {
 					armyMin = -armyMin;
 				cleardevice();
 				setcolor(WHITE);
-				setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
 				xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 				xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-				setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 				xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 				xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 				xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -459,10 +459,10 @@ namespace LGGraphics {
 							isPositive = !isPositive;
 						cleardevice();
 						setcolor(WHITE);
-						setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+						setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
 						xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 						xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-						setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+						setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 						xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 						xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 						xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -486,10 +486,10 @@ namespace LGGraphics {
 					armyMax = -armyMax;
 				cleardevice();
 				setcolor(WHITE);
-				setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
 				xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 				xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-				setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 				xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 				xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 				xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -526,10 +526,10 @@ namespace LGGraphics {
 		} else {
 			cleardevice();
 			setcolor(WHITE);
-			setfont(40 * mapDataStore.mapSizeY, 0, "Segoe UI");
+			setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
 			xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 			xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-			setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+			setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 			xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
 			xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
 			xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
@@ -545,7 +545,7 @@ namespace LGGraphics {
 	void doMapImport() {
 		cleardevice();
 		setcolor(WHITE);
-		setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+		setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 		xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "Please Input Filename with suffix (end with enter)");
 		key_msg msg;
 		while(1) {
@@ -559,7 +559,7 @@ namespace LGGraphics {
 					fileName += (char)(msg.key);
 				cleardevice();
 				setcolor(WHITE);
-				setfont(30 * mapDataStore.mapSizeY, 0, "Segoe UI");
+				setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 				xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "Please Input Filename with suffix (end with enter)");
 				xyprintf(10 * mapDataStore.mapSizeX, 110 * mapDataStore.mapSizeY, "%s", fileName.c_str());
 			}

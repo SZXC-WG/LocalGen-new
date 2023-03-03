@@ -75,35 +75,43 @@ namespace LGGraphics {
 	void initWindowSize() {
 		initgraph(800, 600);
 		ege_enable_aa(true, NULL);
-		PIMAGE favi = newimage();
-		getimage_pngfile(favi, "img/favicon.png");
 		setcaption("LocalGen v" VER_STRING " Window Size Selection");
-		setbkcolor(0xff222222);
-		setbkcolor_f(0xff222222);
+		setbkcolor(bgColor);
+		setbkcolor_f(bgColor);
 		bool changeMade = true;
 		cleardevice();
+		setbkmode(TRANSPARENT);
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
-		setfont(200, 0, "Freestyle Script");
+		setfont(100, 0, "QuickSand", 0, 0, FW_BOLD, 0, 0, 0);
+		setcolor(mainColor);
+		xyprintf(252, 82, "Local");
 		setcolor(WHITE);
-		xyprintf(250, 125, "LocalGen");
+		xyprintf(250, 80, "Local");
+		setcolor(mainColor);
+		xyprintf(252, 152, "generals.io");
+		setcolor(WHITE);
+		xyprintf(250, 150, "generals.io");
 		putimage_withalpha(NULL, favi, 500, 10, 0, 0, getwidth(favi), getheight(favi));
 		delimage(favi);
 		setfont(20, 0, "Lucida Fax");
 		xyprintf(500 + getwidth(favi) / 2, 10 + getheight(favi) + 20 / 2 + 10,
 		         ("version " + to_string(VER_MAJOR) + "." + to_string(VER_MINOR)
 		          + "." + to_string(VER_RELEASE) + " (build " + to_string(VER_BUILD) + ")").c_str());
-		setfont(50, 0, "Freestyle Script");
+		setfont(50, 0, "Quicksand");
+		setcolor(mainColor);
+		xyprintf(251, 251, "Please Select Window Size:");
+		setcolor(WHITE);
 		xyprintf(250, 250, "Please Select Window Size:");
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 		rectBUTTON scrsz[10];
 		for(int i = 200; i <= 500; i += 100) {
 			register int p = i / 100 - 2;
-			scrsz[p].sethw(50, 400);
-			scrsz[p].setbgcol(0xff222222);
+			scrsz[p].setsize(400, 50);
+			scrsz[p].setbgcol(bgColor);
 			scrsz[p].settxtcol(WHITE);
-			scrsz[p].setfontname("Freestyle Script");
-			scrsz[p].setfonth(40);
-			scrsz[p].setlocation(180 + i / 4 * 2, 50);
+			scrsz[p].setfontname("Quicksand");
+			scrsz[p].setfontsz(40, 0);
+			scrsz[p].setlocation(50, 180 + i / 4 * 2);
 			scrsz[p].addtext(to_string(i * 4) + " ¡Á " + to_string(i * 9 / 4));
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
@@ -111,13 +119,13 @@ namespace LGGraphics {
 		} {
 			int i = 600;
 			register int p = i / 100 - 2;
-			scrsz[p].sethw(50, 400);
-			scrsz[p].setbgcol(0xff222222);
+			scrsz[p].setsize(400, 50);
+			scrsz[p].setbgcol(bgColor);
 			scrsz[p].settxtcol(WHITE);
-			scrsz[p].setfontname("Freestyle Script");
-			scrsz[p].setfonth(40);
-			scrsz[p].setlocation(180 + i / 4 * 2, 50);
-			scrsz[p].addtext("Auto Fit (Full Screen)");
+			scrsz[p].setfontname("Quicksand");
+			scrsz[p].setfontsz(40, 0);
+			scrsz[p].setlocation(50, 180 + i / 4 * 2);
+			scrsz[p].addtext("Full Screen ("+to_string(GetSystemMetrics(SM_CXSCREEN))+" ¡Á "+to_string(GetSystemMetrics(SM_CYSCREEN))+")");
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
@@ -152,85 +160,67 @@ namespace LGGraphics {
 	void WelcomePage() {
 		initWindowSize();
 		setbkmode(TRANSPARENT);
-		setbkcolor(0xff222222);
-		setbkcolor_f(0xff222222);
+		setbkcolor(bgColor);
+		setbkcolor_f(bgColor);
 		cleardevice();
-		// xyprintf(100, 100, "%f", mapDataStore.mapSize);
+		PIMAGE zfavi = newimage();
+		getimage_pngfile(zfavi, "img/favicon.png");
+		imageOperation::zoomImage(zfavi, getwidth(zfavi) * 1.8 * mapDataStore.mapSizeX, getheight(zfavi) * 1.8 * mapDataStore.mapSizeY);
+		putimage_withalpha(NULL, zfavi, 100 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY,
+		                   0, 0, getwidth(zfavi), getheight(zfavi));
 		settextjustify(CENTER_TEXT, TOP_TEXT);
-		setfont(500 * mapDataStore.mapSizeY, 0, "Freestyle Script");
+		setfont(150 * mapDataStore.mapSizeY, 0, "Quicksand", 0, 0, FW_BOLD, 0, 0, 0);
 		setcolor(WHITE);
-		xyprintf(800 * mapDataStore.mapSizeY, 0, "LocalGen");
-		rectBUTTON singbut;
-		singbut.setbgcol(GREEN);
-		singbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
-		singbut.setlocation(600 * mapDataStore.mapSizeY, 300 * mapDataStore.mapSizeX);
-		singbut.settxtcol(WHITE);
-		singbut.setfontname("Freestyle Script");
-		singbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
-		singbut.setalign(CENTER_TEXT, CENTER_TEXT);
-		singbut.addtext("Single Player");
-		singbut.setlnwid(10 * mapDataStore.mapSizeY);
-		singbut.display();
-		rectBUTTON multibut;
-		multibut.setbgcol(RED);
-		multibut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
-		multibut.setlocation(600 * mapDataStore.mapSizeY, 900 * mapDataStore.mapSizeX);
-		multibut.settxtcol(WHITE);
-		multibut.setfontname("Freestyle Script");
-		multibut.setfonthw(100 * mapDataStore.mapSizeY, 0);
-		multibut.setalign(CENTER_TEXT, CENTER_TEXT);
-		multibut.addtext("Multiplayer");
-		multibut.setlnwid(10 * mapDataStore.mapSizeY);
-		multibut.display();
-		delay_ms(0);
+		xyprintf(330 * mapDataStore.mapSizeX, 500 * mapDataStore.mapSizeY, "Local");
+		xyprintf(330 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, "generals.io");
+		rectBUTTON local, web, replay, donate; 
+		local
+		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
+		.setlocation(700 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.addtext("local game")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setfontname("Quicksand")
+		.setfontsz(100 * mapDataStore.mapSizeY, 0);
 		for(; is_run(); delay_fps(120)) {
-			singbut.detect();
-			singbut.display();
-			if(singbut.status == 2) break;
-			multibut.detect();
-			multibut.display();
-			if(multibut.status == 2) {
-				settextjustify(CENTER_TEXT, CENTER_TEXT);
-				setfont(100 * mapDataStore.mapSizeY, 0, "Freestyle Script");
-				xyprintf(800 * mapDataStore.mapSizeX, 500 * mapDataStore.mapSizeY, "Sorry! Multiplayer Mode is still developing.");
-				Sleep(4000);
-				exitExe();
-			}
+			local.detect();
+			local.display();
 		}
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 	}
 
 	void mainOptions() {
 		setbkmode(TRANSPARENT);
-		setfillcolor(0xff222222);
+		setfillcolor(bgColor);
 		ege_fillrect(100 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, 1400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
 		rectBUTTON selbut;
 		selbut.setbgcol(BROWN);
-		selbut.setlocation(600 * mapDataStore.mapSizeY, 100 * mapDataStore.mapSizeX);
-		selbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
+		selbut.setlocation(100 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY);
+		selbut.setsize(400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
 		selbut.settxtcol(WHITE);
 		selbut.setfontname("Freestyle Script");
-		selbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
+		selbut.setfontsz(100 * mapDataStore.mapSizeY, 0);
 		selbut.addtext("Choose a Map");
 		selbut.setalign(CENTER_TEXT, CENTER_TEXT);
 		selbut.setlnwid(10 * mapDataStore.mapSizeY);
 		rectBUTTON repbut;
 		repbut.setbgcol(BROWN);
-		repbut.setlocation(600 * mapDataStore.mapSizeY, 600 * mapDataStore.mapSizeX);
-		repbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
+		repbut.setlocation(600 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY);
+		repbut.setsize(400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
 		repbut.settxtcol(WHITE);
 		repbut.setfontname("Freestyle Script");
-		repbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
+		repbut.setfontsz(100 * mapDataStore.mapSizeY, 0);
 		repbut.addtext("Load Replay");
 		repbut.setalign(CENTER_TEXT, CENTER_TEXT);
 		repbut.setlnwid(10 * mapDataStore.mapSizeY);
 		rectBUTTON impbut;
 		impbut.setbgcol(BROWN);
-		impbut.setlocation(600 * mapDataStore.mapSizeY, 1100 * mapDataStore.mapSizeX);
-		impbut.sethw(200 * mapDataStore.mapSizeY, 400 * mapDataStore.mapSizeX);
+		impbut.setlocation(1100 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY);
+		impbut.setsize(400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
 		impbut.settxtcol(WHITE);
 		impbut.setfontname("Freestyle Script");
-		impbut.setfonthw(100 * mapDataStore.mapSizeY, 0);
+		impbut.setfontsz(100 * mapDataStore.mapSizeY, 0);
 		impbut.addtext("Import a Map");
 		impbut.setalign(CENTER_TEXT, CENTER_TEXT);
 		impbut.setlnwid(10 * mapDataStore.mapSizeY);
@@ -272,12 +262,12 @@ namespace LGGraphics {
 			right = (y * 260) * mapDataStore.mapSizeX;
 			up = ((x - 1) * 180) * mapDataStore.mapSizeY;
 			down = (x * 180) * mapDataStore.mapSizeY;
-			mapbut[i].sethw(down - up, right - left);
-			mapbut[i].setlocation(up, left);
+			mapbut[i].setsize(right - left, down - up);
+			mapbut[i].setlocation(left, up);
 			mapbut[i].setfontname("Quicksand");
-			mapbut[i].setfonthw(20 * mapDataStore.mapSizeY, 0);
+			mapbut[i].setfontsz(20 * mapDataStore.mapSizeY, 0);
 			mapbut[i].settxtcol(WHITE);
-			mapbut[i].setbgcol(0xff222222);
+			mapbut[i].setbgcol(bgColor);
 			mapbut[i].addtext("id: " + to_string(maps[i].id) + " " + maps[i].chiname);
 			mapbut[i].addtext(maps[i].engname);
 			mapbut[i].addtext("General Count: " + to_string(maps[i].generalcnt));

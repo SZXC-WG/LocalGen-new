@@ -186,6 +186,8 @@ namespace imageOperation {
 }
 
 namespace LGGraphics {
+	const color_t bgColor = 0xff222222;
+	const color_t mainColor = 0xff008080;
 	PIMAGE favi;
 	string fileName;
 	int stDel = 1;

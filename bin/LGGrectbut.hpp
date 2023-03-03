@@ -29,7 +29,7 @@ using std::min; using std::max;
 class rectBUTTON {
   private:
 	PIMAGE button; // image info
-	int hei, wid; // height & width
+	int wid, hei; // width & height
 	color_t bgcol; // background color
 	color_t txtcol; // text color
 	vector<string> text; // text
@@ -37,8 +37,8 @@ class rectBUTTON {
 	int fonthei, fontwid; // font height & width
 	int lnwid;
 	bool autortcol; color_t rtcol;
-	int halign, walign; // align method
-	int hloc, wloc; // location on screen
+	int walign, halign; // align method
+	int wloc, hloc; // location on screen
 	bool shadow; int shadowwei;
 
   public:
@@ -46,8 +46,8 @@ class rectBUTTON {
 	std::function<void()> clickEvent; // event when clicked
 	explicit rectBUTTON() {
 		button = newimage();
-		hei = wid = 1;
-		halign = TOP_TEXT, walign = LEFT_TEXT;
+		wid = hei = 1;
+		walign = LEFT_TEXT, halign = TOP_TEXT;
 		lnwid = 1;
 		status = 0;
 		autortcol = true;
@@ -56,7 +56,7 @@ class rectBUTTON {
 	~rectBUTTON() {
 		delimage(button);
 	}
-	rectBUTTON(int h, int w) {
+	rectBUTTON(int w, int h) {
 		rectBUTTON();
 		hei = h, wid = w;
 	}
@@ -110,20 +110,16 @@ class rectBUTTON {
 		draw();
 		putimage(NULL, wloc, hloc, wid, hei, button, 0, 0);
 	}
-	inline rectBUTTON& seth(int h) { hei = h; return *this; }
-	inline rectBUTTON& setw(int w) { wid = w; return *this; }
-	inline rectBUTTON& sethw(int h, int w) { hei = h; wid = w; return *this; }
+	inline rectBUTTON& setsize(int w, int h) { hei = h; wid = w; return *this; }
 	inline rectBUTTON& setbgcol(color_t col) { bgcol = col; return *this; }
 	inline rectBUTTON& settxtcol(color_t col) { txtcol = col; return *this; }
 	inline rectBUTTON& addtext(string txt) { text.push_back(txt); return *this; }
 	inline rectBUTTON& poptext() { if(!text.empty()) text.pop_back(); return *this; }
 	inline rectBUTTON& cleartext() { text.clear(); return *this; }
 	inline rectBUTTON& setfontname(string ft) { font = ft; return *this; }
-	inline rectBUTTON& setfonth(int fh) { fonthei = fh; return *this; }
-	inline rectBUTTON& setfontw(int fw) { fontwid = fw; return *this; }
-	inline rectBUTTON& setfonthw(int fh, int fw) { fonthei = fh; fontwid = fw; return *this; }
-	inline rectBUTTON& setlocation(int h, int w) { hloc = h, wloc = w; return *this; }
-	inline rectBUTTON& setalign(int ha = -1, int wa = -1) {
+	inline rectBUTTON& setfontsz(int fh, int fw) { fonthei = fh; fontwid = fw; return *this; }
+	inline rectBUTTON& setlocation(int w, int h) { hloc = h, wloc = w; return *this; }
+	inline rectBUTTON& setalign(int wa = -1, int ha = -1) {
 		if(~ha) halign = ha;
 		if(~wa) walign = wa;
 		return *this;

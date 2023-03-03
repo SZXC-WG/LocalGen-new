@@ -232,51 +232,51 @@ void LGgame::ranklist() {
 	rkbut
 	.settxtcol(WHITE)
 	.setfontname("Courier New")
-	.setfonthw(20 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
 	.setalign(CENTER_TEXT, CENTER_TEXT)
 	.setrtcol(false, WHITE)
 	.status = 1;
 	rkbut.setbgcol(BLACK);
 	rkbut
-	.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 975 * LGGraphics::mapDataStore.mapSizeX)
-	.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 75 * LGGraphics::mapDataStore.mapSizeX + 1)
+	.setlocation(975 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY)
+	.setsize(75 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 	.poptext().addtext("PLAYER")
 	.display();
 	rkbut
-	.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1050 * LGGraphics::mapDataStore.mapSizeX)
-	.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 125 * LGGraphics::mapDataStore.mapSizeX + 1)
+	.setlocation(1050 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY)
+	.setsize(125 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 	.poptext().addtext("ARMY")
 	.display();
 	rkbut
-	.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1175 * LGGraphics::mapDataStore.mapSizeX)
-	.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+	.setlocation(1175 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY)
+	.setsize(50 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 	.poptext().addtext("PLAIN")
 	.display();
 	rkbut
-	.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1225 * LGGraphics::mapDataStore.mapSizeX)
-	.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+	.setlocation(1225 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY)
+	.setsize(50 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 	.poptext().addtext("CITY")
 	.display();
 	rkbut
-	.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1275 * LGGraphics::mapDataStore.mapSizeX)
-	.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+	.setlocation(1275 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY)
+	.setsize(50 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 	.poptext().addtext("TOT")
 	.display();
 	rkbut
-	.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1325 * LGGraphics::mapDataStore.mapSizeX)
-	.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 125 * LGGraphics::mapDataStore.mapSizeX + 1)
+	.setlocation(1325 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY)
+	.setsize(125 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 	.poptext().addtext("ARMY IN HAND")
 	.display();
 	rkbut
-	.setlocation(20 * LGGraphics::mapDataStore.mapSizeY, 1450 * LGGraphics::mapDataStore.mapSizeX)
-	.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX + 1)
+	.setlocation(1450 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY)
+	.setsize(150 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 	.poptext().addtext("WHICH BOT?")
 	.display();
 	for(int i = 1; i <= LGgame::playerCnt; i++) {
 		rkbut.setbgcol(playerInfo[rklst[i].id].color);
 		rkbut
-		.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 975 * LGGraphics::mapDataStore.mapSizeX)
-		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 75 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.setlocation(975 * LGGraphics::mapDataStore.mapSizeX, 20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY)
+		.setsize(75 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 		.poptext().addtext(playerInfo[rklst[i].id].name)
 		.display();
 		char s[1005];
@@ -286,33 +286,33 @@ void LGgame::ranklist() {
 			sprintf(s, "%.*.*LfG", 7, 7 - 1 - p, rklst[i].army * 1.0L / 1e9L);
 		}
 		rkbut
-		.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1050 * LGGraphics::mapDataStore.mapSizeX)
-		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 125 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.setlocation(1050 * LGGraphics::mapDataStore.mapSizeX, 20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY)
+		.setsize(125 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 		.poptext().addtext(s)
 		.display();
 		rkbut
-		.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1175 * LGGraphics::mapDataStore.mapSizeX)
-		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.setlocation(1175 * LGGraphics::mapDataStore.mapSizeX, 20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY)
+		.setsize(50 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 		.poptext().addtext(to_string(rklst[i].plain))
 		.display();
 		rkbut
-		.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1225 * LGGraphics::mapDataStore.mapSizeX)
-		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.setlocation(1225 * LGGraphics::mapDataStore.mapSizeX, 20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY)
+		.setsize(50 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 		.poptext().addtext(to_string(rklst[i].city))
 		.display();
 		rkbut
-		.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1275 * LGGraphics::mapDataStore.mapSizeX)
-		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 50 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.setlocation(1275 * LGGraphics::mapDataStore.mapSizeX, 20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY)
+		.setsize(50 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 		.poptext().addtext(to_string(rklst[i].tot))
 		.display();
 		rkbut
-		.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1325 * LGGraphics::mapDataStore.mapSizeX)
-		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 125 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.setlocation(1325 * LGGraphics::mapDataStore.mapSizeX, 20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY)
+		.setsize(125 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 		.poptext().addtext(to_string(rklst[i].armyInHand))
 		.display();
 		rkbut
-		.setlocation(20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY, 1450 * LGGraphics::mapDataStore.mapSizeX)
-		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX + 1)
+		.setlocation(1450 * LGGraphics::mapDataStore.mapSizeX, 20 * (i + 1) * LGGraphics::mapDataStore.mapSizeY)
+		.setsize(150 * LGGraphics::mapDataStore.mapSizeX + 1, 20 * LGGraphics::mapDataStore.mapSizeY)
 		.poptext().addtext(botName[LGgame::robotId[rklst[i].id]/100+1])
 		.display();
 	}
@@ -349,19 +349,19 @@ namespace LGlocal {
 		bool gameEnd = 0;
 		rectBUTTON fpsbut;
 		fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
-		fpsbut.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
+		fpsbut.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
 		fpsbut.setalign(CENTER_TEXT, CENTER_TEXT);
 		fpsbut.setfontname("Courier New");
-		fpsbut.setfonthw(20 * LGGraphics::mapDataStore.mapSizeY, 0);
+		fpsbut.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0);
 		fpsbut.setbgcol(RED);
 		fpsbut.settxtcol(WHITE);
 		rectBUTTON turnbut;
 		turnbut
 		.setlocation(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
-		.sethw(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
+		.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
 		.setalign(CENTER_TEXT, CENTER_TEXT)
 		.setfontname("Courier New")
-		.setfonthw(20 * LGGraphics::mapDataStore.mapSizeY, 0)
+		.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
 		.setbgcol(BLUE)
 		.settxtcol(WHITE);
 		for(; is_run(); delay_fps(std::min(LGgame::stepDelay + 0.5, 120.5))) {

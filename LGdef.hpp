@@ -186,6 +186,7 @@ namespace imageOperation {
 }
 
 namespace LGGraphics {
+	PIMAGE favi;
 	string fileName;
 	int stDel = 1;
 	int plCnt = 0;
@@ -284,6 +285,8 @@ namespace LGclient {
 
 void MainPage() {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	LGGraphics::favi = newimage();
+	getimage_pngfile(LGGraphics::favi, "img/favicon.png");
 	LGGraphics::WelcomePage();
 	LGGraphics::mainOptions();
 	return;

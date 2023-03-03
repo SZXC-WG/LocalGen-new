@@ -35,10 +35,11 @@ class rectBUTTON {
 	vector<string> text; // text
 	string font; // font face name
 	int fonthei, fontwid; // font height & width
-	int lnwid; 
+	int lnwid;
 	bool autortcol; color_t rtcol;
 	int halign, walign; // align method
 	int hloc, wloc; // location on screen
+	bool shadow; int shadowwei;
 
   public:
 	int status; // button status: free(0) / cursor-on(1) / clicked(2)
@@ -50,6 +51,7 @@ class rectBUTTON {
 		lnwid = 1;
 		status = 0;
 		autortcol = true;
+		shadow = true; shadowwei = 1;
 	}
 	~rectBUTTON() {
 		delimage(button);
@@ -78,7 +80,6 @@ class rectBUTTON {
 		setbkmode(TRANSPARENT, button);
 		setfillcolor(bgcol, button);
 		ege_fillrect(0, 0, wid, hei, button);
-		setcolor(txtcol, button);
 		setfont(fonthei, fontwid, font.c_str(), button);
 		settextjustify(walign, halign, button);
 		register int ox, oy;
@@ -87,8 +88,13 @@ class rectBUTTON {
 		else ox = wid - 1;
 		if(halign == TOP_TEXT) oy = 0;
 		else if(halign == CENTER_TEXT) oy = (hei - fonthei * (text.size() - 1)) / 2;
-		else oy = hei - fonthei * (text.size() - 1) -1;
+		else oy = hei - fonthei * (text.size() - 1) - 1;
 		for(auto s:text) {
+			if(shadow) {
+				setcolor(0xff008080, button);
+				outtextxy(ox+shadowwei, oy+shadowwei, s.c_str(), button);
+			}
+			setcolor(txtcol, button);
 			outtextxy(ox, oy, s.c_str(), button);
 			oy += fonthei;
 		}

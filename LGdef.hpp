@@ -151,7 +151,7 @@ bool operator== (playerCoord a,playerCoord b) {
 	return a.x==b.x&&a.y==b.y;
 }
 
-inline void exitExe() { exit(0); }
+inline void exitExe() { WSACleanup();exit(0); }
 
 bool isVisible(int,int,int);
 void printNum(bool visible, long long army, int team, int curx, int cury);
@@ -280,6 +280,15 @@ namespace LGserver {
 };
 
 namespace LGclient {
+	std::mutex mLock;
+	char sendBuf[SSL],recvBuf[SSL];
+	int playerNumber;
+	SOCKET clientSocket;
+	
+	void sockConnect();
+	void procMessage();
+	void sockMessage();
+	void sockCollect();
 	int GAME();
 };
 

@@ -145,6 +145,152 @@ void LGserver::sockCollect() {
 	}
 }
 
+int LGserver::GAME(){
+	std::thread th(sockListen);
+	th.detach();
+	int plCnt,rbCnt,stDel;
+	
+	{
+		std::lock_guard<std::mutex> mGuard(mLock);
+		plCnt=totSock-1;
+	}
+	
+	LGgame::cheatCode=1048575;
+	LGgame::playerCnt=plCnt+rbCnt;
+	LGgame::stepDelay=stDel;
+	LGgame::gameMesC = 0;
+	
+	int robotId[64];
+	std::deque<int> movement;
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 
+	for(int i = plCnt+1; i <= plCnt+rbCnt; ++i)
+		robotId[i] = mtrd() % 300 + 1;
+
+	LGgame::initGenerals(LGgame::playerCoo);
+	LGgame::updateMap();
+	LGgame::curTurn = 0;
+	bool gameEnd = 0;
+
+	for(; is_run(); delay_fps(LGgame::stepDelay)) {
+		LGgame::updateMap();
+		sockCollect();
+		
+		if(!movement.empty())
+		movement.pop_front();
+
+		for(int i = plCnt+1; i <= plCnt+rbCnt; ++i) {
+			if(!LGgame::isAlive[i])
+				continue;
+			switch(robotId[i]) {
+				case 1 ... 100:
+					LGgame::analyzeMove(i, smartRandomBot::smartRandomBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
+					break;
+				case 101 ... 200:
+					LGgame::analyzeMove(i, xrzBot::xrzBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
+					break;
+				case 201 ... 300:
+					LGgame::analyzeMove(i, xiaruizeBot::xiaruizeBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
+					break;
+				default:
+					LGgame::analyzeMove(i, 0, LGgame::playerCoo[i]);
+			}
+		}
+
+		LGgame::flushMove();
+		zipSendBuf();
+		sockBroadcast();
+
+		if(LGgame::cheatCode != 1048575) {
+			int alldead = 0;
+			for(int i = 1; i <= LGgame::playerCnt && !alldead; ++i) {
+				if(LGgame::cheatCode & (1 << i))
+					if(LGgame::isAlive[i])
+						alldead = 1;
+			}
+			if(!alldead) {
+				LGgame::cheatCode = 1048575;
+				MessageBox(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
+			}
+		}
+		if(!gameEnd) {
+			int ed = 0;
+			for(int i = 1; i <= LGgame::playerCnt; ++i)
+				ed |= (LGgame::isAlive[i] << i);
+			if(__builtin_popcount(ed) == 1) {
+				MessageBox(nullptr,
+				           ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
+				            "THE game WILL CONTINUE." + "\n" +
+				            "YOU CAN PRESS [ESC] TO EXIT.")
+				           .c_str(),
+				           "game END", MB_OK | MB_SYSTEMMODAL);
+				gameEnd = 1;
+				LGgame::cheatCode = 1048575;
+				zipSendBuf();
+				sockBroadcast();
+			}
+		}
+	}
+	
+	sendBuf[0]=43;
+	sendBuf[1]=48;
+	sendBuf[2]='\0';
+	sockBroadcast();
+	std::lock_guard<std::mutex> mGuard(mLock);
+	
+	for(int i=1;i<totSock;i++)
+	closesocket(serverSocket[i]);
+	
+	return 0;
+}
+
+void LGclient::sockConnect(){
+	if(initSock())
+	return ;
+	
+	clientSocket=socket(AF_INET,SOCK_STREAM,0);
+	SOCKADDR_IN connectAddr;
+	connectAddr.sin_family=AF_INET;
+	connectAddr.sin_addr.S_un.S_addr=inet_addr("192.168.32.35");
+	connectAddr.sin_port=htons(SKPORT);
+	int res=connect(clientSocket,(LPSOCKADDR)&connectAddr,sizeof(connectAddr));
+	u_long iMode=1;
+	ioctlsocket(clientSocket,FIONBIO,&iMode);
+	
+	if(res==SOCKET_ERROR){
+		failSock|=4;
+		WSACleanup();
+		return ;
+	}return ;
+}
+
+void LGclient::sockMessage(){
+	std::lock_guard<std::mutex> mGuard(mLock);
+	send(clientSocket,sendBuf,sizeof(sendBuf),0);
+	memset(sendBuf,0,sizeof(sendBuf));
+}
+
+void LGclient::procMessage() {
+	if(recvBuf[0]==43) {
+		if(recvBuf[1]==CHAR_AD){
+			failSock=5;
+			exitExe();
+		}else playerNumber=recvBuf[1]-CHAR_AD;
+	} else {
+
+	}
+}
+
+void LGclient::sockCollect(){
+	std::lock_guard<std::mutex> mGuard(mLock);
+	int res=recv(clientSocket,recvBuf,sizeof(recvBuf),0);
+	
+	if(res>0) procMessage();
+		
+	memset(recvBuf,0,sizeof(recvBuf));
+}
+
+int LGclient::GAME(){
+}
 
 #endif

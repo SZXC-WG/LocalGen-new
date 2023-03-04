@@ -32,21 +32,21 @@ CompilerSettings=0000000000000000000000000
 UnitCount=8
 
 [VersionInfo]
-Major=2
-Minor=2
+Major=3
+Minor=0
 Release=0
-Build=1184
+Build=1202
 LanguageID=1033
 CharsetID=1252
 CompanyName=LocalGen-dev
-FileVersion=2.2.0.1184
+FileVersion=3.0.0.1202
 FileDescription=Local Generals.io (new ver.)
 InternalName=
 LegalCopyright=Copyright (c) 2023 LocalGen-dev
 LegalTrademarks=
 OriginalFilename=
 ProductName=Local Generals.io (new ver.)
-ProductVersion=2.2.0.1184
+ProductVersion=3.0.0.1202
 AutoIncBuildNr=1
 SyncProduct=1
 

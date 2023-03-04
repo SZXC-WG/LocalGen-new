@@ -95,8 +95,7 @@ namespace LGGraphics {
 		delimage(favi);
 		setfont(20, 0, "Lucida Fax");
 		xyprintf(500 + getwidth(favi) / 2, 10 + getheight(favi) + 20 / 2 + 10,
-		         ("version " + to_string(VER_MAJOR) + "." + to_string(VER_MINOR)
-		          + "." + to_string(VER_RELEASE) + " (build " + to_string(VER_BUILD) + ")").c_str());
+				 "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
 		setfont(50, 0, "Quicksand");
 		setcolor(mainColor);
 		xyprintf(251, 251, "Please Select Window Size:");
@@ -111,7 +110,7 @@ namespace LGGraphics {
 			scrsz[p].settxtcol(WHITE);
 			scrsz[p].setfontname("Quicksand");
 			scrsz[p].setfontsz(40, 0);
-			scrsz[p].setlocation(50, 180 + i / 4 * 2);
+			scrsz[p].setlocation(50, 180 + i / 4 * 2 + p * 3);
 			scrsz[p].addtext(to_string(i * 4) + " ¡Á " + to_string(i * 9 / 4));
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
@@ -124,7 +123,7 @@ namespace LGGraphics {
 			scrsz[p].settxtcol(WHITE);
 			scrsz[p].setfontname("Quicksand");
 			scrsz[p].setfontsz(40, 0);
-			scrsz[p].setlocation(50, 180 + i / 4 * 2);
+			scrsz[p].setlocation(50, 180 + i / 4 * 2 + p * 3);
 			scrsz[p].addtext("Full Screen ("+to_string(GetSystemMetrics(SM_CXSCREEN))+" ¡Á "+to_string(GetSystemMetrics(SM_CYSCREEN))+")");
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
@@ -173,8 +172,10 @@ namespace LGGraphics {
 		setcolor(WHITE);
 		xyprintf(330 * mapDataStore.mapSizeX, 500 * mapDataStore.mapSizeY, "Local");
 		xyprintf(330 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, "generals.io");
+		setfont(30, 0, "Lucida Fax");
+		xyprintf(330 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY, "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
 		rectBUTTON local, web, replay, donate; 
-		local
+		local.status = 1; local
 		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
 		.setlocation(700 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
 		.addtext("local game")
@@ -182,10 +183,26 @@ namespace LGGraphics {
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
 		.setfontname("Quicksand")
-		.setfontsz(100 * mapDataStore.mapSizeY, 0);
+		.setfontsz(100 * mapDataStore.mapSizeY, 0)
+		.setrtcol(false, mainColor)
+		.setlnwid(10 * mapDataStore.mapSizeY)
+		.display();
+		web.status = 1; web
+		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
+		.setlocation(1125 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.addtext("web game")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setfontname("Quicksand")
+		.setfontsz(100 * mapDataStore.mapSizeY, 0)
+		.setrtcol(false, mainColor)
+		.setlnwid(10 * mapDataStore.mapSizeY)
+		.display();
+		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {
-			local.detect();
-			local.display();
+			local.detect().display();
+			web.detect().display();
 		}
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 	}

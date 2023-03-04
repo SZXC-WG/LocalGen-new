@@ -42,6 +42,7 @@ class rectBUTTON {
 	bool shadow; int shadowwei;
 
   public:
+	bool floating;
 	int status; // button status: free(0) / cursor-on(1) / clicked(2)
 	std::function<void()> clickEvent; // event when clicked
 	explicit rectBUTTON() {
@@ -52,6 +53,7 @@ class rectBUTTON {
 		status = 0;
 		autortcol = true;
 		shadow = true; shadowwei = 1;
+		floating = 1;
 	}
 	~rectBUTTON() {
 		delimage(button);
@@ -76,8 +78,14 @@ class rectBUTTON {
 	}
 	inline rectBUTTON& draw() {
 		delimage(button);
-		button = newimage(wid, hei);
+		button = newimage(wid+3, hei+3);
+		setbkcolor(0xff222222, button);
+		setbkcolor_f(0xff222222, button);
 		setbkmode(TRANSPARENT, button);
+		if((status == 1 || status == 2) && floating) {
+			setfillcolor(0xff008080, button);
+			ege_fillrect(3, 3, wid, hei, button);
+		}
 		setfillcolor(bgcol, button);
 		ege_fillrect(0, 0, wid, hei, button);
 		setfont(fonthei, fontwid, font.c_str(), button);
@@ -98,17 +106,22 @@ class rectBUTTON {
 			outtextxy(ox, oy, s.c_str(), button);
 			oy += fonthei;
 		}
-		if(autortcol) setcolor(0xff000000 | ~bgcol, button);
-		else setcolor(rtcol, button);
-		setlinewidth(lnwid, button);
-		if(status == 1)
-			ege_rectangle(1, 1, wid - 1, hei - 1, button);
-		else if(status == 2)
-			ege_rectangle(1, 1, wid - 1, hei - 1, button);
+		if(!floating) {
+			if(autortcol) setcolor(0xff000000 | ~bgcol, button);
+			else setcolor(rtcol, button);
+			setlinewidth(lnwid, button);
+			if(status == 1 || status == 2)
+				ege_rectangle(1, 1, wid - 1, hei - 1, button);
+		} else {
+			if(status == 1 || status == 2) {
+				setfillcolor(0x80808080, button);
+				ege_fillrect(0, 0, wid, hei, button);
+			}
+		}
 	}
 	inline rectBUTTON& display() {
 		draw();
-		putimage(NULL, wloc, hloc, wid, hei, button, 0, 0);
+		putimage_withalpha(NULL, button, wloc, hloc, 0, 0, getwidth(button), getheight(button));
 	}
 	inline rectBUTTON& setsize(int w, int h) { hei = h; wid = w; return *this; }
 	inline rectBUTTON& setbgcol(color_t col) { bgcol = col; return *this; }

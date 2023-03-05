@@ -175,7 +175,8 @@ namespace LGGraphics {
 		xyprintf(330 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, "generals.io");
 		setfont(30, 0, "Lucida Fax");
 		xyprintf(330 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY, "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
-		rectBUTTON local, web, replay, donate;
+		rectBUTTON local, web, replay, createmap;
+		rectBUTTON donate;
 		local
 		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
 		.setlocation(700 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
@@ -204,6 +205,18 @@ namespace LGGraphics {
 		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
 		.setlocation(700 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY)
 		.addtext("load replay")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setfontname("Quicksand")
+		.setfontsz(75 * mapDataStore.mapSizeY, 0)
+		.setrtcol(false, mainColor)
+		.setlnwid(10 * mapDataStore.mapSizeY)
+		.display();
+		createmap
+		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
+		.setlocation(1125 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY)
+		.addtext("create map")
 		.setalign(CENTER_TEXT, CENTER_TEXT)
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
@@ -241,9 +254,10 @@ namespace LGGraphics {
 			local.detect().display();
 			web.detect().display();
 			replay.detect().display();
+			createmap.detect().display();
 			donate.detect().display();
 			if(local.status == 2) {
-				mainOptions(); break;
+				localOptions(); break;
 			}
 			if(donate.status == 2) {
 				donate.clickEvent(); goto WelcomePageStartLabel;
@@ -252,7 +266,7 @@ namespace LGGraphics {
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 	}
 
-	void mainOptions() {
+	void localOptions() {
 		setbkmode(TRANSPARENT);
 		setfillcolor(bgColor);
 		ege_fillrect(100 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, 1400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);

@@ -201,7 +201,7 @@ namespace LGGraphics {
 		int height, width;
 		double mapSizeX, mapSizeY;
 	} mapDataStore;
-	void mainOptions();
+	void localOptions();
 	void doMapImport();
 	void WelcomePage();
 	void doMapSelect();
@@ -300,7 +300,7 @@ void MainPage() {
 	LGGraphics::favi = newimage();
 	getimage_pngfile(LGGraphics::favi, "img/favicon.png");
 	LGGraphics::WelcomePage();
-	LGGraphics::mainOptions();
+	LGGraphics::localOptions();
 	return;
 }
 

@@ -242,6 +242,9 @@ namespace LGGraphics {
 			web.detect().display();
 			replay.detect().display();
 			donate.detect().display();
+			if(local.status == 2) {
+				mainOptions(); break;
+			}
 			if(donate.status == 2) {
 				donate.clickEvent(); goto WelcomePageStartLabel;
 			}

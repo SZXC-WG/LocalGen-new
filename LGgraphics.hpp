@@ -174,8 +174,9 @@ namespace LGGraphics {
 		xyprintf(330 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, "generals.io");
 		setfont(30, 0, "Lucida Fax");
 		xyprintf(330 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY, "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
-		rectBUTTON local, web, replay, donate; 
-		local.status = 1; local
+		rectBUTTON local, web, replay;
+		circBUTTON donate; 
+		local
 		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
 		.setlocation(700 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
 		.addtext("local game")
@@ -183,11 +184,11 @@ namespace LGGraphics {
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
 		.setfontname("Quicksand")
-		.setfontsz(100 * mapDataStore.mapSizeY, 0)
+		.setfontsz(75 * mapDataStore.mapSizeY, 0)
 		.setrtcol(false, mainColor)
 		.setlnwid(10 * mapDataStore.mapSizeY)
 		.display();
-		web.status = 1; web
+		web
 		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
 		.setlocation(1125 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
 		.addtext("web game")
@@ -195,7 +196,31 @@ namespace LGGraphics {
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
 		.setfontname("Quicksand")
-		.setfontsz(100 * mapDataStore.mapSizeY, 0)
+		.setfontsz(75 * mapDataStore.mapSizeY, 0)
+		.setrtcol(false, mainColor)
+		.setlnwid(10 * mapDataStore.mapSizeY)
+		.display();
+		replay
+		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
+		.setlocation(700 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY)
+		.addtext("load replay")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setfontname("Quicksand")
+		.setfontsz(75 * mapDataStore.mapSizeY, 0)
+		.setrtcol(false, mainColor)
+		.setlnwid(10 * mapDataStore.mapSizeY)
+		.display();
+		donate
+		.setrad(200 * mapDataStore.mapSizeX)
+		.setlocation(1325 * mapDataStore.mapSizeX, 500 * mapDataStore.mapSizeY)
+		.addtext("donate")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setfontname("Quicksand")
+		.setfontsz(75 * mapDataStore.mapSizeY, 0)
 		.setrtcol(false, mainColor)
 		.setlnwid(10 * mapDataStore.mapSizeY)
 		.display();
@@ -203,6 +228,8 @@ namespace LGGraphics {
 		for(; is_run(); delay_fps(120)) {
 			local.detect().display();
 			web.detect().display();
+			replay.detect().display();
+			donate.detect().display();
 		}
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 	}

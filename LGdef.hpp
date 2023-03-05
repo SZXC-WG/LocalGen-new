@@ -35,6 +35,7 @@
 #include <ege/sys_edit.h>
 #include "LocalGen_private.h"
 #include "bin/LGGrectbut.hpp"
+#include "bin/LGGcircbut.hpp"
 
 using std::deque;
 using std::string;

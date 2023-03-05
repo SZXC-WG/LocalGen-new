@@ -25,7 +25,7 @@ using std::to_string;
 using std::vector;
 using std::min; using std::max;
 
-// class for buttons
+// class for rect buttons
 class rectBUTTON {
   private:
 	PIMAGE button; // image info
@@ -118,10 +118,12 @@ class rectBUTTON {
 				ege_fillrect(0, 0, wid, hei, button);
 			}
 		}
+		return *this;
 	}
 	inline rectBUTTON& display() {
 		draw();
-		putimage_withalpha(NULL, button, wloc, hloc, 0, 0, getwidth(button), getheight(button));
+		putimage(wloc, hloc, button);
+		return *this;
 	}
 	inline rectBUTTON& setsize(int w, int h) { hei = h; wid = w; return *this; }
 	inline rectBUTTON& setbgcol(color_t col) { bgcol = col; return *this; }

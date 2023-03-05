@@ -95,7 +95,7 @@ namespace LGGraphics {
 		delimage(favi);
 		setfont(20, 0, "Lucida Fax");
 		xyprintf(500 + getwidth(favi) / 2, 10 + getheight(favi) + 20 / 2 + 10,
-				 "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
+		         "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
 		setfont(50, 0, "Quicksand");
 		setcolor(mainColor);
 		xyprintf(251, 251, "Please Select Window Size:");
@@ -158,6 +158,7 @@ namespace LGGraphics {
 
 	void WelcomePage() {
 		initWindowSize();
+	WelcomePageStartLabel:;
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);
 		setbkcolor_f(bgColor);
@@ -174,8 +175,7 @@ namespace LGGraphics {
 		xyprintf(330 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, "generals.io");
 		setfont(30, 0, "Lucida Fax");
 		xyprintf(330 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY, "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
-		rectBUTTON local, web, replay;
-		circBUTTON donate; 
+		rectBUTTON local, web, replay, donate;
 		local
 		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
 		.setlocation(700 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
@@ -213,16 +213,28 @@ namespace LGGraphics {
 		.setlnwid(10 * mapDataStore.mapSizeY)
 		.display();
 		donate
-		.setrad(200 * mapDataStore.mapSizeX)
-		.setlocation(1325 * mapDataStore.mapSizeX, 500 * mapDataStore.mapSizeY)
-		.addtext("donate")
+		.setsize(400 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY)
+		.setlocation(1150 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY)
+		.addtext("Please donate to support us!")
 		.setalign(CENTER_TEXT, CENTER_TEXT)
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
 		.setfontname("Quicksand")
-		.setfontsz(75 * mapDataStore.mapSizeY, 0)
+		.setfontsz(40 * mapDataStore.mapSizeY, 0)
 		.setrtcol(false, mainColor)
 		.setlnwid(10 * mapDataStore.mapSizeY)
+		.setevent([]() {
+			cleardevice();
+			PIMAGE donate_wc = newimage(), donate_ap = newimage();
+			getimage_pngfile(donate_wc, "img/donate_wechat.png");
+			getimage_pngfile(donate_ap, "img/donate_alipay.png");
+			imageOperation::zoomImage(donate_wc, 600 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
+			imageOperation::zoomImage(donate_ap, 600 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
+			putimage(100 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_wc);
+			putimage((100 + 800) * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_ap);
+			xyprintf(800 * mapDataStore.mapSizeX, 830 * mapDataStore.mapSizeY, "press any key to close...");
+			getkey();
+		})
 		.display();
 		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {
@@ -230,6 +242,9 @@ namespace LGGraphics {
 			web.detect().display();
 			replay.detect().display();
 			donate.detect().display();
+			if(donate.status == 2) {
+				donate.clickEvent(); goto WelcomePageStartLabel;
+			}
 		}
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 	}

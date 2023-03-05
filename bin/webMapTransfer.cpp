@@ -59,8 +59,12 @@ signed main() {
 	ifs>>mapH>>mapW;
 	for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) ifs>>gameMap[i][j].type;
 	for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) ifs>>gameMap[i][j].army;
-	for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) ifs>>gameMap[i][j].lit;
+	for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) {
+		int t; ifs>>t;
+		gameMap[i][j].lit = t;
+	}
 	ifs.close();
+	cout<<mapH<<" "<<mapW<<endl;
 	Zip();
 	ofstream ofs("output.lg");
 	ofs<<strZip<<endl;

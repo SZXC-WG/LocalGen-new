@@ -26,7 +26,6 @@
 
 /* dev project headers */
 #include "LocalGen_private.h"
-
 #include "LGdef.hpp"
 #include "LGmaps.hpp" 
 #include "LGgraphics.hpp"

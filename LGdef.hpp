@@ -288,6 +288,7 @@ namespace LGclient {
 	int playerNumber;
 	SOCKET clientSocket;
 	
+	void dezipRecvBuf();
 	void sockConnect();
 	void procMessage();
 	void sockMessage();

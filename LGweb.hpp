@@ -122,7 +122,9 @@ void LGserver::procMessage(int sockID) {
 			send(serverSocket[sockID],sendBuf,sizeof(sendBuf),0);
 		}
 	} else {
-
+		if(recvBuf[1]==CHAR_AD-1)
+		LGgame::analyzeMove(sockID,recvBuf[3]-CHAR_AD,LGgame::playerCoo[sockID]);
+		else LGgame::playerCoo[sockID]={recvBuf[1]-CHAR_AD,recvBuf[2]-CHAR_AD};
 	}
 }
 
@@ -245,6 +247,35 @@ int LGserver::GAME(){
 	return 0;
 }
 
+void LGclient::dezipRecvBuf() {
+	register int p=1,i,j,k;
+	LGgame::playerCnt=recvBuf[p++];
+
+	for(i=1; i<=LGgame::playerCnt; i++) {
+		LGgame::playerCoo[i].x=recvBuf[p++];
+		LGgame::playerCoo[i].y=recvBuf[p++];
+	}
+	
+	mapH=recvBuf[p++]-CHAR_AD;
+	mapH+=((recvBuf[p++]-CHAR_AD)<<6);
+	mapW=recvBuf[p++]-CHAR_AD;
+	mapW+=((recvBuf[p++]-CHAR_AD)<<6);
+
+	for(i=1; i<=mapH; i++)
+	for(j=1; j<=mapW; j++) {
+		gameMap[i][j].team=recvBuf[p++]-CHAR_AD;
+		bool f=recvBuf[p]&1; recvBuf[p]>>=1;
+		gameMap[i][j].lit=recvBuf[p]&1; recvBuf[p]>>=1;
+		gameMap[i][j].type=sendBuf[p++];
+
+		for(k=7; k>=0; k++)
+		gameMap[i][j].army=(gameMap[i][j].army<<6)+recvBuf[p+k];
+		
+		gameMap[i][j].army=f?(-gameMap[i][j].army):gameMap[i][j].army;
+		p+=8;
+	}
+}
+
 void LGclient::sockConnect(){
 	if(initSock())
 	return ;
@@ -277,9 +308,7 @@ void LGclient::procMessage() {
 			failSock=5;
 			exitExe();
 		}else playerNumber=recvBuf[1]-CHAR_AD;
-	} else {
-
-	}
+	} else dezipRecvBuf();
 }
 
 void LGclient::sockCollect(){
@@ -292,6 +321,138 @@ void LGclient::sockCollect(){
 }
 
 int LGclient::GAME(){
+	cleardevice();
+	setrendermode(RENDER_MANUAL);
+	LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
+	LGGraphics::init();
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	
+	std::deque<int> movement;
+	printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
+	LGgame::curTurn = 0;
+	bool gameEnd = 0;
+	rectBUTTON fpsbut;
+	fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
+	fpsbut.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
+	fpsbut.setalign(CENTER_TEXT, CENTER_TEXT);
+	fpsbut.setfontname("Courier New");
+	fpsbut.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0);
+	fpsbut.setbgcol(RED);
+	fpsbut.settxtcol(WHITE);
+	rectBUTTON turnbut;
+	turnbut
+	.setlocation(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
+	.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
+	.setalign(CENTER_TEXT, CENTER_TEXT)
+	.setfontname("Courier New")
+	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.setbgcol(BLUE)
+	.settxtcol(WHITE);
+	for(; is_run(); delay_fps(std::min(LGgame::stepDelay + 0.5, 120.5))) {
+		while(mousemsg()) {
+			mouse_msg msg = getmouse();
+			if(msg.is_down() && msg.is_left() && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH) {
+				int lin = (msg.y + heightPerBlock - 1) / heightPerBlock;
+				int col = (msg.x + widthPerBlock - 1) / widthPerBlock;
+				LGgame::playerCoo[1] = {lin, col};
+				movement.clear();
+			}
+		}
+		while(kbmsg()) {
+			key_msg ch = getkey();
+			if(ch.key == key_space) {
+				while((!kbmsg()) || (getkey().key != key_space)) ;
+			}
+			if(ch.msg == key_msg_up)
+				continue;
+			switch(ch.key) {
+				case int('w'): movement.emplace_back(1); break;
+				case int('a'): movement.emplace_back(2); break;
+				case int('s'): movement.emplace_back(3); break;
+				case int('d'): movement.emplace_back(4); break;
+
+				case key_up: /*[UP]*/ movement.emplace_back(5); break;
+				case key_left: /*[LEFT]*/ movement.emplace_back(6); break;
+				case key_down: /*[DOWN]*/ movement.emplace_back(7); break;
+				case key_right: /*[RIGHT]*/ movement.emplace_back(8); break;
+
+				case int('g'): movement.emplace_back(0); break;
+				case int('e'):
+					if(!movement.empty())
+						movement.pop_back();
+					break;
+				case int('q'): movement.clear(); break;
+				case 27: {
+					MessageBoxA(getHWnd(), string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
+					closegraph();
+					return 0;
+				}
+				case int('\b'): {
+					if(!LGgame::isAlive[1])
+						break;
+					int confirmSur = MessageBoxA(getHWnd(), string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
+					if(confirmSur == 7)
+						break;
+					LGgame::isAlive[1] = 0;
+					for(int i = 1; i <= mapH; ++i) {
+						for(int j = 1; j <= mapW; ++j) {
+							if(gameMap[i][j].team == 1) {
+								gameMap[i][j].team = 0;
+								if(gameMap[i][j].type == 3)
+									gameMap[i][j].type = 4;
+							}
+						}
+					}
+					LGgame::printGameMessage({1, 1, LGgame::curTurn});
+					lastTurn[1] = playerCoord{-1, -1};
+					break;
+				}
+			}
+		}
+		while(!movement.empty() && LGgame::analyzeMove(1, movement.front(), LGgame::playerCoo[1]))
+			movement.pop_front();
+		if(!movement.empty())
+			movement.pop_front();
+		if(LGgame::cheatCode != 1048575) {
+			int alldead = 0;
+			for(int i = 1; i <= LGgame::playerCnt && !alldead; ++i) {
+				if(LGgame::cheatCode & (1 << i))
+					if(LGgame::isAlive[i])
+						alldead = 1;
+			}
+			if(!alldead) {
+				LGgame::cheatCode = 1048575;
+				MessageBoxA(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
+			}
+		}
+		if(!gameEnd) {
+			int ed = 0;
+			for(int i = 1; i <= LGgame::playerCnt; ++i)
+				ed |= (LGgame::isAlive[i] << i);
+			if(__builtin_popcount(ed) == 1) {
+				MessageBoxA(nullptr,
+				            ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
+				             "THE GAME WILL CONTINUE." + "\n" +
+				             "YOU CAN PRESS [ESC] TO EXIT.")
+				            .c_str(),
+				            "GAME END", MB_OK | MB_SYSTEMMODAL);
+				LGreplay::zipGame(LGgame::curTurn);
+				gameEnd = 1;
+				register int winnerNum = std::__lg(ed);
+				LGgame::cheatCode = 1048575;
+				LGgame::printGameMessage({winnerNum, -1, LGgame::curTurn});
+			}
+		}
+		printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
+		if(LGgame::curTurn % std::max(LGgame::stepDelay / 10, 1) == 0)
+		LGgame::ranklist();
+		fpsbut.poptext();
+		fpsbut.addtext("FPS: " + to_string(getfps()));
+		fpsbut.display();
+		turnbut.poptext();
+		turnbut.addtext("Turn " + to_string(LGgame::curTurn) + ".");
+		turnbut.display();
+	}return 0;
 }
 
 #endif

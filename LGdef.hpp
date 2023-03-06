@@ -201,9 +201,12 @@ namespace LGGraphics {
 		int height, width;
 		double mapSizeX, mapSizeY;
 	} mapDataStore;
-	void localOptions();
-	void doMapImport();
 	void WelcomePage();
+	void localOptions();
+	void webOptions();
+	void createMapPage();
+	void replayPage();
+	void doMapImport();
 	void doMapSelect();
 	// void doRepImport();
 	void importGameSettings();

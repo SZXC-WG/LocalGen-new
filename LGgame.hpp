@@ -236,6 +236,7 @@ void LGgame::ranklist() {
 	.setalign(CENTER_TEXT, CENTER_TEXT)
 	.setrtcol(false, WHITE)
 	.status = 1;
+	rkbut.floating = false;
 	rkbut.setbgcol(BLACK);
 	rkbut
 	.setlocation(975 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY)
@@ -348,22 +349,30 @@ namespace LGlocal {
 		LGgame::curTurn = 0;
 		bool gameEnd = 0;
 		rectBUTTON fpsbut;
-		fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
-		fpsbut.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
+		fpsbut.setlocation(1400 * LGGraphics::mapDataStore.mapSizeX, 0);
+		fpsbut.setsize(200 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY);
 		fpsbut.setalign(CENTER_TEXT, CENTER_TEXT);
 		fpsbut.setfontname("Courier New");
 		fpsbut.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0);
 		fpsbut.setbgcol(RED);
 		fpsbut.settxtcol(WHITE);
+		fpsbut.setlnwid(2);
+		fpsbut.setrtcol(false, WHITE);
+		fpsbut.status = 1;
+		fpsbut.floating = false;
 		rectBUTTON turnbut;
 		turnbut
-		.setlocation(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
-		.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
+		.setlocation(1250 * LGGraphics::mapDataStore.mapSizeX, 0)
+		.setsize(150 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY)
 		.setalign(CENTER_TEXT, CENTER_TEXT)
 		.setfontname("Courier New")
 		.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
 		.setbgcol(BLUE)
-		.settxtcol(WHITE);
+		.settxtcol(WHITE)
+		.setlnwid(2)
+		.setrtcol(false, WHITE);
+		turnbut.status = 1;
+		turnbut.floating = false;
 		for(; is_run(); delay_fps(std::min(LGgame::stepDelay + 0.5, 120.5))) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
@@ -482,7 +491,7 @@ namespace LGlocal {
 			}
 			printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 			if(LGgame::curTurn % std::max(LGgame::stepDelay / 10, 1) == 0)
-			LGgame::ranklist();
+				LGgame::ranklist();
 			fpsbut.poptext();
 			fpsbut.addtext("FPS: " + to_string(getfps()));
 			fpsbut.display();

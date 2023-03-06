@@ -63,6 +63,7 @@ bool FullScreen(HWND hwnd, int fullscreenWidth, int fullscreenHeight, int colour
 }
 
 inline void ege_circle(int x, int y, int r) { ege_ellipse(x - r, y - r, r << 1, r << 1); }
+inline void ege_fillcircle(int x, int y, int r) { ege_fillellipse(x - r, y - r, r << 1, r << 1); }
 
 namespace LGGraphics {
 	void inputMapData(int a, int b, int c, int d) {
@@ -246,9 +247,9 @@ namespace LGGraphics {
 			putimage(100 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_wc);
 			putimage((100 + 800) * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_ap);
 			xyprintf(800 * mapDataStore.mapSizeX, 830 * mapDataStore.mapSizeY, "press any key to close...");
+			flushkey();
 			getkey();
-		})
-		.display();
+		}).display();
 		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {
 			local.detect().display();
@@ -259,6 +260,15 @@ namespace LGGraphics {
 			if(local.status == 2) {
 				localOptions(); break;
 			}
+			if(web.status == 2) {
+				webOptions(); break;
+			}
+			if(replay.status == 2) {
+				replayPage(); break;
+			}
+			if(createmap.status == 2) {
+				createMapPage(); break;
+			}
 			if(donate.status == 2) {
 				donate.clickEvent(); goto WelcomePageStartLabel;
 			}
@@ -267,105 +277,130 @@ namespace LGGraphics {
 	}
 
 	void localOptions() {
+		cleardevice();
 		setbkmode(TRANSPARENT);
-		setfillcolor(bgColor);
-		ege_fillrect(100 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, 1400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
-		rectBUTTON selbut;
-		selbut.setbgcol(BROWN);
-		selbut.setlocation(100 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY);
-		selbut.setsize(400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
-		selbut.settxtcol(WHITE);
-		selbut.setfontname("Freestyle Script");
-		selbut.setfontsz(100 * mapDataStore.mapSizeY, 0);
-		selbut.addtext("Choose a Map");
-		selbut.setalign(CENTER_TEXT, CENTER_TEXT);
-		selbut.setlnwid(10 * mapDataStore.mapSizeY);
-		rectBUTTON repbut;
-		repbut.setbgcol(BROWN);
-		repbut.setlocation(600 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY);
-		repbut.setsize(400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
-		repbut.settxtcol(WHITE);
-		repbut.setfontname("Freestyle Script");
-		repbut.setfontsz(100 * mapDataStore.mapSizeY, 0);
-		repbut.addtext("Load Replay");
-		repbut.setalign(CENTER_TEXT, CENTER_TEXT);
-		repbut.setlnwid(10 * mapDataStore.mapSizeY);
-		rectBUTTON impbut;
-		impbut.setbgcol(BROWN);
-		impbut.setlocation(1100 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY);
-		impbut.setsize(400 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY);
-		impbut.settxtcol(WHITE);
-		impbut.setfontname("Freestyle Script");
-		impbut.setfontsz(100 * mapDataStore.mapSizeY, 0);
-		impbut.addtext("Import a Map");
-		impbut.setalign(CENTER_TEXT, CENTER_TEXT);
-		impbut.setlnwid(10 * mapDataStore.mapSizeY);
-		int select = -1;
-		while(select == -1) {
-			selbut.detect();
-			selbut.display();
-			if(selbut.status == 2) select = 0;
-			repbut.detect();
-			repbut.display();
-			if(repbut.status == 2) select = 1;
-			impbut.detect();
-			impbut.display();
-			if(impbut.status == 2) select = 2;
-		}
-		cleardevice();
-		switch(select) {
-			case 0: doMapSelect(); importGameSettings(); break;
-			case 1: /*doRepImport();*/ break;
-			case 2: doMapImport(); importGameSettings(); break;
-		}
-	}
+		setbkcolor(bgColor);
+		setbkcolor_f(bgColor);
+		
+		/** select/import map **/
 
-//	void doRepImport() {
-//		sys_edit inpimp;
-//		inpimp.create();
-//		inpimp.size(1200 * mapDataStore.mapSizeX);
-//	}
-
-	void doMapSelect() {
-		cleardevice();
-		int left, right, up, down;
-		int x, y;
-		rectBUTTON mapbut[50];
-		for(int i = 1; i <= mapNum; i++) {
-			x = (i + 5) / 6;
-			y = ((i % 6 == 0) ? 6 : i % 6);
-			left = ((y - 1) * 260) * mapDataStore.mapSizeX;
-			right = (y * 260) * mapDataStore.mapSizeX;
-			up = ((x - 1) * 180) * mapDataStore.mapSizeY;
-			down = (x * 180) * mapDataStore.mapSizeY;
-			mapbut[i].setsize(right - left, down - up);
-			mapbut[i].setlocation(left, up);
-			mapbut[i].setfontname("Quicksand");
-			mapbut[i].setfontsz(20 * mapDataStore.mapSizeY, 0);
-			mapbut[i].settxtcol(WHITE);
-			mapbut[i].setbgcol(bgColor);
-			mapbut[i].addtext("id: " + to_string(maps[i].id) + " " + maps[i].chiname);
-			mapbut[i].addtext(maps[i].engname);
-			mapbut[i].addtext("General Count: " + to_string(maps[i].generalcnt));
-			mapbut[i].addtext("Plain Count: " + to_string(maps[i].plaincnt));
-			mapbut[i].addtext("City Count: " + to_string(maps[i].citycnt));
-			mapbut[i].addtext("Mountain Count: " + to_string(maps[i].mountaincnt));
-			mapbut[i].addtext("Swamp Count: " + to_string(maps[i].swampcnt));
-			mapbut[i].addtext("Size: " + to_string(maps[i].hei) + " * " + to_string(maps[i].wid));
-			mapbut[i].setalign(CENTER_TEXT, CENTER_TEXT);
-			mapbut[i].clickEvent = [i]()->void { mapSelected = i; };
+		rectBUTTON mapbut[505];
+		int shiftval = 0;
+		for(int i = 1; i <= mapNum; ++i) {
+			mapbut[i]
+			.setsize(300 * mapDataStore.mapSizeX - 3, 200 * mapDataStore.mapSizeY - 3)
+			.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
+			.setbgcol(bgColor)
+			.settxtcol(WHITE)
+			.setalign(CENTER_TEXT,CENTER_TEXT)
+			.setfontname("Quicksand")
+			.setfontsz(22 * mapDataStore.mapSizeY, 0)
+			.addtext(maps[i].chiname)
+			.addtext(maps[i].engname)
+			.addtext("General Count: " + to_string(maps[i].generalcnt))
+			.addtext("Plain Count: " + to_string(maps[i].plaincnt))
+			.addtext("City Count: " + to_string(maps[i].citycnt))
+			.addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
+			.addtext("Swamp Count: " + to_string(maps[i].swampcnt))
+			.addtext("Size: " + to_string(maps[i].hei) + " * " + to_string(maps[i].wid))
+			.display();
 		}
+		delay_ms(100);
+		flushmouse();
+		mapSelected = 0;
 		mouse_msg msg;
-		for(; is_run(); delay_fps(60)) {
+		for(; is_run(); delay_fps(120)) {
+			while(mousemsg()) {
+				int id = int((msg.y - shiftval * mapDataStore.mapSizeX) / (200 * mapDataStore.mapSizeY)) * 4 + int(msg.x / (300 * mapDataStore.mapSizeX)) + 1;
+				mapbut[id].status = 0;
+				msg = getmouse();
+				shiftval += msg.wheel;
+				if(shiftval > 0) shiftval = 0;
+				if(shiftval < -(mapNum - 1) / 4 * 200) shiftval = -(mapNum - 1) / 4 * 200;
+				if(msg.x < 0 || msg.x > 1200 * mapDataStore.mapSizeX || msg.y < 0 || msg.y > 900 * mapDataStore.mapSizeY) continue;
+				id = int((msg.y - shiftval * mapDataStore.mapSizeX) / (200 * mapDataStore.mapSizeY)) * 4 + int(msg.x / (300 * mapDataStore.mapSizeX)) + 1;
+				if(msg.is_left()) mapbut[id].status = 2;
+				else mapbut[id].status = 1;
+			}
 			for(int i = 1; i <= mapNum; ++i) {
-				mapbut[i].detect();
-				mapbut[i].display();
-				if(mapbut[i].status == 2) mapbut[i].clickEvent();
+				int presta = mapbut[i].status;
+				mapbut[i].status = 0;
+				mapbut[i].cleartext().display();
+				mapbut[i].status = presta;
+			}
+			for(int i = 1; i <= mapNum; ++i) {
+				mapbut[i]
+				.addtext(maps[i].chiname)
+				.addtext(maps[i].engname)
+				.addtext("General Count: " + to_string(maps[i].generalcnt))
+				.addtext("Plain Count: " + to_string(maps[i].plaincnt))
+				.addtext("City Count: " + to_string(maps[i].citycnt))
+				.addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
+				.addtext("Swamp Count: " + to_string(maps[i].swampcnt))
+				.addtext("Size: " + to_string(maps[i].hei) + " * " + to_string(maps[i].wid))
+				.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
+				.display();
+				if(mapbut[i].status == 2) mapSelected = i;
 			}
 			if(mapSelected) break;
 		}
+
+		/** game options **/
+
+		doMapSelect(); // temporary
+	}
+
+	void webOptions() {
+	}
+
+	void replayPage() {
+	}
+
+	void createMapPage() {
+	}
+
+
+	void doMapSelect() {
+		// cleardevice();
+		// int left, right, up, down;
+		// int x, y;
+		// rectBUTTON mapbut[50];
+		// for(int i = 1; i <= mapNum; i++) {
+		// 	x = (i + 5) / 6;
+		// 	y = ((i % 6 == 0) ? 6 : i % 6);
+		// 	left = ((y - 1) * 260) * mapDataStore.mapSizeX;
+		// 	right = (y * 260) * mapDataStore.mapSizeX;
+		// 	up = ((x - 1) * 180) * mapDataStore.mapSizeY;
+		// 	down = (x * 180) * mapDataStore.mapSizeY;
+		// 	mapbut[i].setsize(right - left, down - up);
+		// 	mapbut[i].setlocation(left, up);
+		// 	mapbut[i].setfontname("Quicksand");
+		// 	mapbut[i].setfontsz(20 * mapDataStore.mapSizeY, 0);
+		// 	mapbut[i].settxtcol(WHITE);
+		// 	mapbut[i].setbgcol(bgColor);
+		// 	mapbut[i].addtext("id: " + to_string(maps[i].id) + " " + maps[i].chiname);
+		// 	mapbut[i].addtext(maps[i].engname);
+		// 	mapbut[i].addtext("General Count: " + to_string(maps[i].generalcnt));
+		// 	mapbut[i].addtext("Plain Count: " + to_string(maps[i].plaincnt));
+		// 	mapbut[i].addtext("City Count: " + to_string(maps[i].citycnt));
+		// 	mapbut[i].addtext("Mountain Count: " + to_string(maps[i].mountaincnt));
+		// 	mapbut[i].addtext("Swamp Count: " + to_string(maps[i].swampcnt));
+		// 	mapbut[i].addtext("Size: " + to_string(maps[i].hei) + " * " + to_string(maps[i].wid));
+		// 	mapbut[i].setalign(CENTER_TEXT, CENTER_TEXT);
+		// 	mapbut[i].clickEvent = [i]()->void { mapSelected = i; };
+		// }
+		// mouse_msg msg;
+		// for(; is_run(); delay_fps(60)) {
+		// 	for(int i = 1; i <= mapNum; ++i) {
+		// 		mapbut[i].detect();
+		// 		mapbut[i].display();
+		// 		if(mapbut[i].status == 2) mapbut[i].clickEvent();
+		// 	}
+		// 	if(mapSelected) break;
+		// }
 		cleardevice();
 		setcolor(WHITE);
+		settextjustify(LEFT_TEXT, TOP_TEXT);
 		setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
 		xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
 		xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());

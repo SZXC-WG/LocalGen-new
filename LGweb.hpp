@@ -153,6 +153,7 @@ int LGserver::GAME(){
 	{
 		std::lock_guard<std::mutex> mGuard(mLock);
 		plCnt=totSock-1;
+		lisEnd=true; 
 	}
 	
 	LGgame::cheatCode=1048575;

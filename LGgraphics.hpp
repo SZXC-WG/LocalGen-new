@@ -772,7 +772,7 @@ namespace LGGraphics {
 					endConfig = true;
 					cleardevice();
 					if(stDel == 0)
-						stDel = 120;
+						stDel = -1;
 					return;
 				}
 			}

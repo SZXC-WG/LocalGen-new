@@ -230,22 +230,13 @@ void LGgame::ranklist() {
 		rklst[i].armyInHand = gameMap[LGgame::playerCoo[i].x][LGgame::playerCoo[i].y].army;
 	}
 	std::sort(rklst + 1, rklst + LGgame::playerCnt + 1, [](node a, node b) { return a.army > b.army; });
-	nlen = textwidth("PLAYER");
-	alen = textwidth("ARMY");
-	plen = textwidth("PLAIN");
-	clen = textwidth("CITY");
-	tlen = textwidth("TOT");
-	aihlen = textwidth("ARMY IN HAND");
-	botlen = textwidth("BOT NAME");
-	for(int i = 1; i <= LGgame::playerCnt; ++i) {
-		nlen = max(nlen, (float)textwidth(playerInfo[rklst[i].id].name.c_str()));
-		alen = max(alen, (float)textwidth(to_string(rklst[i].army).c_str()));
-		plen = max(plen, (float)textwidth(to_string(rklst[i].plain).c_str()));
-		clen = max(clen, (float)textwidth(to_string(rklst[i].city).c_str()));
-		tlen = max(tlen, (float)textwidth(to_string(rklst[i].tot).c_str()));
-		aihlen = max(aihlen, (float)textwidth(to_string(rklst[i].armyInHand).c_str()));
-		botlen = max(botlen, (float)textwidth(botName[LGgame::robotId[rklst[i].id]/100+1].c_str()));
-	}
+	nlen = 60;
+	alen = 100;
+	plen = 60;
+	clen = 60;
+	tlen = 60;
+	aihlen = 90;
+	botlen = 120;
 	float ed = 1600 * LGGraphics::mapDataStore.mapSizeX;
 	float s7 = ed - botlen - 5;
 	float s6 = s7 - aihlen - 5;
@@ -462,7 +453,8 @@ namespace LGlocal {
 				}
 			}
 			printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
-			LGgame::ranklist();
+			if((LGgame::stepDelay==-1&&LGgame::curTurn%10==1)||(LGgame::stepDelay!=-1&&LGgame::curTurn%(2000/LGgame::stepDelay)==0))
+				LGgame::ranklist();
 			fpsbut.poptext();
 			fpsbut.addtext("FPS: " + to_string(getfps()));
 			fpsbut.display();

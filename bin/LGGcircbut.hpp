@@ -86,10 +86,10 @@ class circBUTTON {
 		setbkmode(TRANSPARENT, button);
 		if((status == 1 || status == 2) && floating) {
 			setfillcolor(0xff008080, button);
-			ege_fillellipse(3, 3, radius * 2, radius * 2, button);
+			fillellipse(radius + 3, radius + 3, radius, radius, button);
 		}
 		setfillcolor(bgcol, button);
-		ege_fillellipse(0, 0, radius * 2, radius * 2, button);
+		fillellipse(radius, radius, radius, radius, button);
 		setfont(fonthei, fontwid, font.c_str(), button);
 		settextjustify(walign, halign, button);
 		register int ox, oy;
@@ -113,7 +113,7 @@ class circBUTTON {
 			else setcolor(rtcol, button);
 			setlinewidth(lnwid, button);
 			if(status == 1 || status == 2)
-				ege_ellipse(1, 1, radius * 2 - 1, radius * 2 - 1, button);
+				ellipse(radius, radius, 0, 360, radius, radius, button);
 		} else {
 			if(status == 1 || status == 2) {
 				setfillcolor(0x80808080, button);

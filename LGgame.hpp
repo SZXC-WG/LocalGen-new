@@ -319,31 +319,6 @@ namespace LGlocal {
 		printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 		LGgame::curTurn = 0;
 		bool gameEnd = 0;
-		rectBUTTON fpsbut;
-		fpsbut.setlocation(1400 * LGGraphics::mapDataStore.mapSizeX, 0);
-		fpsbut.setsize(200 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY);
-		fpsbut.setalign(CENTER_TEXT, CENTER_TEXT);
-		fpsbut.setfontname("Courier New");
-		fpsbut.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0);
-		fpsbut.setbgcol(RED);
-		fpsbut.settxtcol(WHITE);
-		fpsbut.setlnwid(2);
-		fpsbut.setrtcol(false, WHITE);
-		fpsbut.status = 1;
-		fpsbut.floating = false;
-		rectBUTTON turnbut;
-		turnbut
-		.setlocation(1250 * LGGraphics::mapDataStore.mapSizeX, 0)
-		.setsize(150 * LGGraphics::mapDataStore.mapSizeX, 20 * LGGraphics::mapDataStore.mapSizeY)
-		.setalign(CENTER_TEXT, CENTER_TEXT)
-		.setfontname("Courier New")
-		.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
-		.setbgcol(BLUE)
-		.settxtcol(WHITE)
-		.setlnwid(2)
-		.setrtcol(false, WHITE);
-		turnbut.status = 1;
-		turnbut.floating = false;
 		for(; is_run(); (LGgame::stepDelay != -1 ? delay_fps(LGgame::stepDelay) : void())) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
@@ -461,14 +436,24 @@ namespace LGlocal {
 				}
 			}
 			printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
-			if((LGgame::stepDelay==-1&&LGgame::curTurn%10==1)||(LGgame::stepDelay!=-1&&LGgame::curTurn%(2000/LGgame::stepDelay)==0))
-				LGgame::ranklist();
-			fpsbut.poptext();
-			fpsbut.addtext("FPS: " + to_string(getfps()));
-			fpsbut.display();
-			turnbut.poptext();
-			turnbut.addtext("Turn " + to_string(LGgame::curTurn) + ".");
-			turnbut.display();
+			LGgame::ranklist();
+			int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
+			static int fpslen;
+			static int turnlen;
+			setfillcolor(LGGraphics::bgColor);
+			bar(screenszr - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+			setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+			fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
+			turnlen = textwidth(("Turn " + to_string(LGgame::curTurn) + ".").c_str());
+			setfillcolor(RED);
+			bar(screenszr - fpslen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+			rectangle(screenszr - fpslen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+			setfillcolor(BLUE);
+			bar(screenszr - fpslen - 10 - turnlen - 10, 0, screenszr - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+			rectangle(screenszr - fpslen - 10 - turnlen - 10, 0, screenszr - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+			settextjustify(CENTER_TEXT, TOP_TEXT);
+			xyprintf(screenszr - fpslen / 2 - 5, 0, "FPS: %f", getfps());
+			xyprintf(screenszr - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGgame::curTurn);
 			if(LGgame::stepDelay == -1) delay_ms(0);
 		}
 		return 0;

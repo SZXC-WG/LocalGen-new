@@ -84,10 +84,10 @@ class rectBUTTON {
 		setbkmode(TRANSPARENT, button);
 		if((status == 1 || status == 2) && floating) {
 			setfillcolor(0xff008080, button);
-			ege_fillrect(3, 3, wid, hei, button);
+			bar(3, 3, wid+3, hei+3, button);
 		}
 		setfillcolor(bgcol, button);
-		ege_fillrect(0, 0, wid, hei, button);
+		bar(0, 0, wid, hei, button);
 		setfont(fonthei, fontwid, font.c_str(), button);
 		settextjustify(walign, halign, button);
 		register int ox, oy;
@@ -111,7 +111,7 @@ class rectBUTTON {
 			else setcolor(rtcol, button);
 			setlinewidth(lnwid, button);
 			if(status == 1 || status == 2)
-				ege_rectangle(1, 1, wid - 1, hei - 1, button);
+				rectangle(1, 1, wid, hei, button);
 		} else {
 			if(status == 1 || status == 2) {
 				setfillcolor(0x80808080, button);

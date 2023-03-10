@@ -79,7 +79,8 @@ void printMap(int printCode, playerCoord coo) {
 					setfillcolor(playerInfo[gameMap[curx][cury].team].color);
 			} else
 				setfillcolor(unseen);
-			ege_fillrect(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock, heightPerBlock);
+			bar(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock * cury, heightPerBlock * curx);
+			// ege_fillrect(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock, heightPerBlock);
 			switch(gameMap[curx][cury].type) {
 				case 0: {
 					/* plain */
@@ -119,7 +120,7 @@ void printMap(int printCode, playerCoord coo) {
 			}
 		}
 	}
-	putimage_withalpha(NULL, pimg[6], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1));
+	// putimage_withalpha(NULL, pimg[6], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1));
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 

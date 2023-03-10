@@ -193,7 +193,7 @@ void LGgame::updateMap() {
 // ranklist printings
 void LGgame::ranklist() {
 	setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
-	static float nlen, alen, plen, clen, tlen, aihlen, botlen;
+	static int nlen, alen, plen, clen, tlen, aihlen, botlen;
 	setfillcolor(LGGraphics::bgColor);
 	ege_fillrect(1600 * LGGraphics::mapDataStore.mapSizeX - nlen - alen - plen - clen - tlen - aihlen - botlen - 35 - 5, 20 * LGGraphics::mapDataStore.mapSizeY - 5,
 	             nlen + alen + plen + clen + tlen + aihlen + botlen + 35 + 5, (LGgame::playerCnt + 1) * 20 * LGGraphics::mapDataStore.mapSizeY + 5 + 5);
@@ -230,31 +230,40 @@ void LGgame::ranklist() {
 		rklst[i].armyInHand = gameMap[LGgame::playerCoo[i].x][LGgame::playerCoo[i].y].army;
 	}
 	std::sort(rklst + 1, rklst + LGgame::playerCnt + 1, [](node a, node b) { return a.army > b.army; });
-	nlen = 60;
-	alen = 100;
-	plen = 60;
-	clen = 60;
-	tlen = 60;
-	aihlen = 90;
-	botlen = 120;
-	float ed = 1600 * LGGraphics::mapDataStore.mapSizeX;
-	float s7 = ed - botlen - 5;
-	float s6 = s7 - aihlen - 5;
-	float s5 = s6 - tlen - 5;
-	float s4 = s5 - clen - 5;
-	float s3 = s4 - plen - 5;
-	float s2 = s3 - alen - 5;
-	float s1 = s2 - nlen - 5;
-	float prhei = 20 * LGGraphics::mapDataStore.mapSizeY;
+	nlen = textwidth("PLAYER");
+	alen = textwidth("ARMY");
+	plen = textwidth("PLAIN");
+	clen = textwidth("CITY");
+	tlen = textwidth("TOT");
+	aihlen = textwidth("ARMY IN HAND");
+	botlen = textwidth("BOT NAME");
+	for(int i = 1; i <= LGgame::playerCnt; ++i) {
+		nlen = max(nlen, textwidth(playerInfo[rklst[i].id].name.c_str()));
+		alen = max(alen, textwidth(to_string(rklst[i].army).c_str()));
+		plen = max(plen, textwidth(to_string(rklst[i].plain).c_str()));
+		clen = max(clen, textwidth(to_string(rklst[i].city).c_str()));
+		tlen = max(tlen, textwidth(to_string(rklst[i].tot).c_str()));
+		aihlen = max(aihlen, textwidth(to_string(rklst[i].armyInHand).c_str()));
+		botlen = max(botlen, textwidth(botName[LGgame::robotId[rklst[i].id]/100+1].c_str()));
+	}
+	int ed = 1600 * LGGraphics::mapDataStore.mapSizeX;
+	int s7 = ed - botlen - 5;
+	int s6 = s7 - aihlen - 5;
+	int s5 = s6 - tlen - 5;
+	int s4 = s5 - clen - 5;
+	int s3 = s4 - plen - 5;
+	int s2 = s3 - alen - 5;
+	int s1 = s2 - nlen - 5;
+	int prhei = 20 * LGGraphics::mapDataStore.mapSizeY;
 	setcolor(WHITE);
 	settextjustify(CENTER_TEXT, TOP_TEXT);
-	ege_rectangle(s1, prhei, s2 - s1, prhei);
-	ege_rectangle(s2, prhei, s3 - s2, prhei);
-	ege_rectangle(s3, prhei, s4 - s3, prhei);
-	ege_rectangle(s4, prhei, s5 - s4, prhei);
-	ege_rectangle(s5, prhei, s6 - s5, prhei);
-	ege_rectangle(s6, prhei, s7 - s6, prhei);
-	ege_rectangle(s7, prhei, ed - s7, prhei);
+	rectangle(s1, prhei, s2, prhei + prhei);
+	rectangle(s2, prhei, s3, prhei + prhei);
+	rectangle(s3, prhei, s4, prhei + prhei);
+	rectangle(s4, prhei, s5, prhei + prhei);
+	rectangle(s5, prhei, s6, prhei + prhei);
+	rectangle(s6, prhei, s7, prhei + prhei);
+	rectangle(s7, prhei, ed, prhei + prhei);
 	xyprintf((s1+s2)/2, prhei, "PLAYER");
 	xyprintf((s2+s3)/2, prhei, "ARMY");
 	xyprintf((s3+s4)/2, prhei, "PLAIN");
@@ -264,14 +273,14 @@ void LGgame::ranklist() {
 	xyprintf((s7+ed)/2, prhei, "BOT NAME");
 	for(int i = 1; i <= LGgame::playerCnt; i++) {
 		setfillcolor(playerInfo[rklst[i].id].color);
-		ege_fillrect(s1, prhei * (i + 1), ed - s1, prhei);
-		ege_rectangle(s1, prhei * (i + 1), s2 - s1, prhei);
-		ege_rectangle(s2, prhei * (i + 1), s3 - s2, prhei);
-		ege_rectangle(s3, prhei * (i + 1), s4 - s3, prhei);
-		ege_rectangle(s4, prhei * (i + 1), s5 - s4, prhei);
-		ege_rectangle(s5, prhei * (i + 1), s6 - s5, prhei);
-		ege_rectangle(s6, prhei * (i + 1), s7 - s6, prhei);
-		ege_rectangle(s7, prhei * (i + 1), ed - s7, prhei);
+		bar(s1, prhei * (i + 1), ed, prhei * (i + 2));
+		rectangle(s1, prhei * (i + 1), s2, prhei * (i + 2));
+		rectangle(s2, prhei * (i + 1), s3, prhei * (i + 2));
+		rectangle(s3, prhei * (i + 1), s4, prhei * (i + 2));
+		rectangle(s4, prhei * (i + 1), s5, prhei * (i + 2));
+		rectangle(s5, prhei * (i + 1), s6, prhei * (i + 2));
+		rectangle(s6, prhei * (i + 1), s7, prhei * (i + 2));
+		rectangle(s7, prhei * (i + 1), ed, prhei * (i + 2));
 		xyprintf((s1+s2)/2, prhei * (i + 1), playerInfo[rklst[i].id].name.c_str());
 		xyprintf((s2+s3)/2, prhei * (i + 1), to_string(rklst[i].army).c_str());
 		xyprintf((s3+s4)/2, prhei * (i + 1), to_string(rklst[i].plain).c_str());

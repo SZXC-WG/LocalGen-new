@@ -53,11 +53,10 @@ bool FullScreen(HWND hwnd, int fullscreenWidth, int fullscreenHeight, int colour
 	                              DM_BITSPERPEL |
 	                              DM_DISPLAYFREQUENCY;
 
-	SetWindowLongPtr(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW | WS_EX_TOPMOST);
-	SetWindowLongPtr(hwnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
-	SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, fullscreenWidth, fullscreenHeight, SWP_SHOWWINDOW);
+	SetWindowLongPtr(hwnd, GWL_EXSTYLE, WS_EX_APPWINDOW);
+	SetWindowLongPtr(hwnd, GWL_STYLE, GetWindowLongPtr(hwnd, GWL_STYLE) ^ WS_CAPTION);
+	SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, fullscreenWidth, fullscreenHeight, SWP_SHOWWINDOW);
 	isChangeSuccessful = ChangeDisplaySettings(&fullscreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
-	ShowWindow(hwnd, SW_MAXIMIZE);
 
 	return isChangeSuccessful;
 }
@@ -141,8 +140,8 @@ namespace LGGraphics {
 			if(!changeMade) break;
 		}
 	finishSelect:
-		setcaption("LocalGen v" VER_STRING " developed by LocalGen-dev");
 		if(select == 6) {
+			movewindow(0, 0, false);
 			resizewindow(-1, -1);
 			FullScreen(getHWnd());
 			int w = getmaxx(), h = getmaxy();
@@ -155,6 +154,7 @@ namespace LGGraphics {
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 			initgraph(1600 * mapDataStore.mapSizeX, 900 * mapDataStore.mapSizeY, RENDER_AUTO);
 		}
+		setcaption("LocalGen v" VER_STRING " developed by LocalGen-dev");
 	}
 
 	void WelcomePage() {
@@ -281,7 +281,7 @@ namespace LGGraphics {
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);
 		setbkcolor_f(bgColor);
-		
+
 		/** select/import map **/
 
 		rectBUTTON mapbut[505];
@@ -305,6 +305,28 @@ namespace LGGraphics {
 			.addtext("Size: " + to_string(maps[i].hei) + " * " + to_string(maps[i].wid))
 			.display();
 		}
+		sys_edit impbox;
+		impbox.create(true);
+		impbox.move(1250 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY);
+		impbox.size(300 * mapDataStore.mapSizeX, 700 * mapDataStore.mapSizeY);
+		impbox.setbgcolor(WHITE);
+		impbox.setcolor(mainColor);
+		impbox.setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
+		impbox.visible(true);
+		rectBUTTON impfin;
+		impfin
+		.setalign(CENTER_TEXT,CENTER_TEXT)
+		.setlocation(1250 * mapDataStore.mapSizeX, 825 * mapDataStore.mapSizeY)
+		.setsize(300 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setfontname("Quicksand")
+		.setfontsz(40 * mapDataStore.mapSizeY, 0)
+		.addtext("confirm and submit")
+		.display();
+		settextjustify(CENTER_TEXT, TOP_TEXT);
+		setfont(90 * mapDataStore.mapSizeY, 0, "Quicksand");
+		xyprintf(1400 * mapDataStore.mapSizeX, 0, "or import a map...");
 		delay_ms(100);
 		flushmouse();
 		mapSelected = 0;
@@ -317,6 +339,12 @@ namespace LGGraphics {
 				shiftval += msg.wheel;
 				if(shiftval > 0) shiftval = 0;
 				if(shiftval < -(mapNum - 1) / 4 * 200) shiftval = -(mapNum - 1) / 4 * 200;
+				if(msg.x >= 1250 * mapDataStore.mapSizeX && msg.x <= 1550 * mapDataStore.mapSizeY
+				   && msg.y >= 825 * mapDataStore.mapSizeY && msg.y <= 875 * mapDataStore.mapSizeY) {
+					impfin.status = 1;
+					if(msg.is_left()) impfin.status = 2;
+					continue;
+				}
 				if(msg.x < 0 || msg.x > 1200 * mapDataStore.mapSizeX || msg.y < 0 || msg.y > 900 * mapDataStore.mapSizeY) continue;
 				id = int((msg.y - shiftval * mapDataStore.mapSizeX) / (200 * mapDataStore.mapSizeY)) * 4 + int(msg.x / (300 * mapDataStore.mapSizeX)) + 1;
 				if(msg.is_left()) mapbut[id].status = 2;
@@ -342,12 +370,32 @@ namespace LGGraphics {
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
 			}
+			impfin.display();
+			if(impfin.status == 2) {
+				std::array<char,1000> s;
+				impbox.gettext(1000, s.data());
+				std::ifstream fin(s.data());
+				if(!fin) continue;
+				else {
+					fin>>strdeZip;
+					deZip();
+					impbox.visible(false);
+					mapSelected = 0;
+					break;
+				}
+			}
 			if(mapSelected) break;
 		}
 
 		/** game options **/
 
-		doMapSelect(); // temporary
+		if(mapSelected) doMapSelect(); // temporary
+		else {
+			importGameSettings();
+			localGame(cheatCode, plCnt, stDel);
+			exit(0);
+			// temporary
+		}
 	}
 
 	void webOptions() {

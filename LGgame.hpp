@@ -195,8 +195,8 @@ void LGgame::ranklist() {
 	setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
 	static int nlen, alen, plen, clen, tlen, aihlen, botlen;
 	setfillcolor(LGGraphics::bgColor);
-	ege_fillrect(1600 * LGGraphics::mapDataStore.mapSizeX - nlen - alen - plen - clen - tlen - aihlen - botlen - 35 - 5, 20 * LGGraphics::mapDataStore.mapSizeY - 5,
-	             nlen + alen + plen + clen + tlen + aihlen + botlen + 35 + 5, (LGgame::playerCnt + 1) * 20 * LGGraphics::mapDataStore.mapSizeY + 5 + 5);
+	bar(1600 * LGGraphics::mapDataStore.mapSizeX - nlen - alen - plen - clen - tlen - aihlen - botlen - 35 - 5, 20 * LGGraphics::mapDataStore.mapSizeY - 5,
+	    1600 * LGGraphics::mapDataStore.mapSizeX, (LGgame::playerCnt + 2) * 20 * LGGraphics::mapDataStore.mapSizeY + 5 + 5);
 	struct node {
 		int id;
 		long long army;
@@ -292,7 +292,6 @@ void LGgame::ranklist() {
 }
 
 namespace LGgame {
-
 	void init(int chtC, int pC, int sD) {
 		cheatCode = chtC;
 		playerCnt = pC;
@@ -476,7 +475,7 @@ namespace LGlocal {
 	}
 }
 
-int localGame(bool isWeb, int cheatCode, int plCnt, int stDel) {
+int localGame(int cheatCode, int plCnt, int stDel) {
 	LGgame::init(cheatCode, plCnt, stDel);
 	int ret = LGlocal::GAME();
 	return ret;

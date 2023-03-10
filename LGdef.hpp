@@ -175,7 +175,7 @@ void deZip();
 
 bool initSock(); 
 void toAvoidCEBugInGraphicsImportMap(string fileName);
-int localGame(bool isWeb, int cheatCode, int plCnt, int stDel);
+int localGame(int cheatCode, int plCnt, int stDel);
 
 /***** graphics *****/
 

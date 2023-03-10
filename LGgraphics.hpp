@@ -639,7 +639,7 @@ namespace LGGraphics {
 			importGameSettings();
 			readMap(mapSelected);
 		}
-		localGame(0, cheatCode, plCnt, stDel);
+		localGame(cheatCode, plCnt, stDel);
 		exit(0);
 	}
 

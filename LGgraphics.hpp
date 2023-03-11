@@ -324,10 +324,13 @@ namespace LGGraphics {
 		.setfontsz(40 * mapDataStore.mapSizeY, 0)
 		.addtext("confirm and submit")
 		.display();
-		settextjustify(CENTER_TEXT, TOP_TEXT);
-		setfont(90 * mapDataStore.mapSizeY, 0, "Quicksand");
-		xyprintf(1400 * mapDataStore.mapSizeX, 0, "or import a map...");
-		delay_ms(100);
+		settextjustify(CENTER_TEXT, CENTER_TEXT);
+		setcolor(WHITE);
+		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		delay_ms(50);
+		xyprintf(1400 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY, "or import a map...");
+		delay_ms(0);
+		delay_ms(50);
 		flushmouse();
 		mapSelected = 0;
 		mouse_msg msg;
@@ -384,7 +387,10 @@ namespace LGGraphics {
 					break;
 				}
 			}
-			if(mapSelected) break;
+			if(mapSelected) {
+				impbox.visible(false);
+				break;
+			}
 		}
 
 		/** game options **/

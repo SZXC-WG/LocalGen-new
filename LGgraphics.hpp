@@ -338,6 +338,7 @@ namespace LGGraphics {
 			while(mousemsg()) {
 				int id = int((msg.y - shiftval * mapDataStore.mapSizeX) / (200 * mapDataStore.mapSizeY)) * 4 + int(msg.x / (300 * mapDataStore.mapSizeX)) + 1;
 				mapbut[id].status = 0;
+				impfin.status = 0;
 				msg = getmouse();
 				shiftval += msg.wheel;
 				if(shiftval > 0) shiftval = 0;
@@ -378,8 +379,13 @@ namespace LGGraphics {
 				std::array<char,1000> s;
 				impbox.gettext(1000, s.data());
 				std::ifstream fin(s.data());
-				if(!fin) continue;
-				else {
+				if(!fin) {
+					impfin.poptext().addtext("map not found").display();
+					delay_ms(100);
+					impfin.poptext().addtext("confirm and submit").display();
+					impfin.status = 1;
+					continue;
+				} else {
 					fin>>strdeZip;
 					deZip();
 					impbox.visible(false);

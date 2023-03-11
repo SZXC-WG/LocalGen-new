@@ -398,6 +398,7 @@ namespace LGGraphics {
 				break;
 			}
 		}
+		flushkey();
 
 		/** game options **/
 
@@ -459,6 +460,7 @@ namespace LGGraphics {
 		// 	if(mapSelected) break;
 		// }
 		cleardevice();
+		setrendermode(RENDER_AUTO);
 		setcolor(WHITE);
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 		setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");

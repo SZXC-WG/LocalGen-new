@@ -229,13 +229,15 @@ namespace LGgame {
 	int playerCnt;
 	int isAlive[64];
 	int robotId[64];
-	int stepDelay; /* fps */
+	int gameSpeed; /* fps */
+	int flushSpeed; /* turn/frame */
 	int gameMesC;
 	playerCoord genCoo[64];
 	std::deque<moveS> inlineMove;
 	playerCoord playerCoo[64];
+	std::chrono::nanoseconds beginTime;
 
-	void init(int chtC, int pC, int sD);
+	void init(int chtC, int pC, int gS);
 	void printGameMessage(gameMessageStore now);
 	void kill(int p1, int p2);
 	int analyzeMove(int id, int mv, playerCoord& coo);

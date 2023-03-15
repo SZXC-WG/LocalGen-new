@@ -160,7 +160,7 @@ int LGserver::GAME(){
 	
 	LGgame::cheatCode=1048575;
 	LGgame::playerCnt=plCnt+rbCnt;
-	LGgame::stepDelay=stDel;
+	LGgame::gameSpeed=stDel;
 	LGgame::gameMesC = 0;
 	
 	int robotId[64];
@@ -175,7 +175,7 @@ int LGserver::GAME(){
 	LGgame::curTurn = 0;
 	bool gameEnd = 0;
 
-	for(; is_run(); delay_fps(LGgame::stepDelay)) {
+	for(; is_run(); delay_fps(LGgame::gameSpeed)) {
 		LGgame::updateMap();
 		sockCollect();
 		
@@ -348,7 +348,7 @@ int LGclient::GAME(){
 	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
 	.setbgcol(BLUE)
 	.settxtcol(WHITE);
-	for(; is_run(); delay_fps(std::min(LGgame::stepDelay + 0.5, 120.5))) {
+	for(; is_run(); delay_fps(std::min(LGgame::gameSpeed + 0.5, 120.5))) {
 		while(mousemsg()) {
 			mouse_msg msg = getmouse();
 			if(msg.is_down() && msg.is_left() && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH) {
@@ -444,7 +444,7 @@ int LGclient::GAME(){
 			}
 		}
 		printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
-		if(LGgame::curTurn % std::max(LGgame::stepDelay / 10, 1) == 0)
+		if(LGgame::curTurn % std::max(LGgame::gameSpeed / 10, 1) == 0)
 		LGgame::ranklist();
 		fpsbut.poptext();
 		fpsbut.addtext("FPS: " + to_string(getfps()));

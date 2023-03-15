@@ -869,7 +869,6 @@ namespace LGGraphics {
 		for(int i = 1; i <= 6; i++)
 			ege_enable_aa(true, pimg[i]);
 		ege_enable_aa(true);
-		//		initgraph(1600 * mapDataStore.mapSize, 900 * mapDataStore.mapSize, INIT_RENDERMANUAL);
 		setbkcolor(0x222222);
 		setbkcolor_f(0x222222);
 		cleardevice();

@@ -31,11 +31,14 @@ void LGserver::zipSendBuf() {
 	register int p=0,i,j;
 	long long k1=mapH,k2=mapW;
 	sendBuf[p++]=44;
-	sendBuf[p++]=LGgame::playerCnt;
+	sendBuf[p++]=LGgame::playerCnt+CHAR_AD;
+	sendBuf[p++]=LGgame::gameSpeed+CHAR_AD;
+	sendBuf[p++]=LGgame::curTurn+CHAR_AD;
 
 	for(i=1; i<=LGgame::playerCnt; i++) {
-		sendBuf[p++]=LGgame::playerCoo[i].x;
-		sendBuf[p++]=LGgame::playerCoo[i].y;
+		sendBuf[p++]=LGgame::isAlive[i]+CHAR_AD;
+		sendBuf[p++]=LGgame::playerCoo[i].x+CHAR_AD;
+		sendBuf[p++]=LGgame::playerCoo[i].y+CHAR_AD;
 	}
 
 	sendBuf[p++]=PMod(k1)+CHAR_AD;
@@ -122,9 +125,9 @@ void LGserver::procMessage(int sockID) {
 			send(serverSocket[sockID],sendBuf,sizeof(sendBuf),0);
 		}
 	} else {
-		if(recvBuf[1]==CHAR_AD-1)
-		LGgame::analyzeMove(sockID,recvBuf[3]-CHAR_AD,LGgame::playerCoo[sockID]);
-		else LGgame::playerCoo[sockID]={recvBuf[1]-CHAR_AD,recvBuf[2]-CHAR_AD};
+		if(recvBuf[1]!=CHAR_AD)
+		LGgame::analyzeMove(sockID,recvBuf[1]-CHAR_AD,LGgame::playerCoo[sockID]);
+		else LGgame::playerCoo[sockID]={recvBuf[2]-CHAR_AD,recvBuf[3]-CHAR_AD};
 	}
 }
 
@@ -148,6 +151,11 @@ void LGserver::sockCollect() {
 }
 
 int LGserver::GAME(){
+	cleardevice();
+	setrendermode(RENDER_MANUAL);
+	LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
+	LGGraphics::init();
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	std::thread th(sockListen);
 	th.detach();
 	int plCnt,rbCnt,stDel;
@@ -165,15 +173,32 @@ int LGserver::GAME(){
 	
 	int robotId[64];
 	std::deque<int> movement;
-	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 
 	for(int i = plCnt+1; i <= plCnt+rbCnt; ++i)
 		robotId[i] = mtrd() % 300 + 1;
 
 	LGgame::initGenerals(LGgame::playerCoo);
 	LGgame::updateMap();
+	printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 	LGgame::curTurn = 0;
 	bool gameEnd = 0;
+	rectBUTTON fpsbut;
+	fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
+	fpsbut.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
+	fpsbut.setalign(CENTER_TEXT, CENTER_TEXT);
+	fpsbut.setfontname("Courier New");
+	fpsbut.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0);
+	fpsbut.setbgcol(RED);
+	fpsbut.settxtcol(WHITE);
+	rectBUTTON turnbut;
+	turnbut
+	.setlocation(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
+	.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
+	.setalign(CENTER_TEXT, CENTER_TEXT)
+	.setfontname("Courier New")
+	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.setbgcol(BLUE)
+	.settxtcol(WHITE);
 
 	for(; is_run(); delay_fps(LGgame::gameSpeed)) {
 		LGgame::updateMap();
@@ -233,6 +258,15 @@ int LGserver::GAME(){
 				sockBroadcast();
 			}
 		}
+		printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
+		if(LGgame::curTurn % std::max(LGgame::gameSpeed / 10, 1) == 0)
+		LGgame::ranklist();
+		fpsbut.poptext();
+		fpsbut.addtext("FPS: " + to_string(getfps()));
+		fpsbut.display();
+		turnbut.poptext();
+		turnbut.addtext("Turn " + to_string(LGgame::curTurn) + ".");
+		turnbut.display();
 	}
 	
 	sendBuf[0]=43;
@@ -249,11 +283,14 @@ int LGserver::GAME(){
 
 void LGclient::dezipRecvBuf() {
 	register int p=1,i,j,k;
-	LGgame::playerCnt=recvBuf[p++];
+	LGgame::playerCnt=recvBuf[p++]-CHAR_AD;
+	LGgame::gameSpeed=recvBuf[p++]-CHAR_AD;
+	LGgame::curTurn=recvBuf[p++]-CHAR_AD;
 
 	for(i=1; i<=LGgame::playerCnt; i++) {
-		LGgame::playerCoo[i].x=recvBuf[p++];
-		LGgame::playerCoo[i].y=recvBuf[p++];
+		LGgame::isAlive[i]=recvBuf[p++]-CHAR_AD;
+		LGgame::playerCoo[i].x=recvBuf[p++]-CHAR_AD;
+		LGgame::playerCoo[i].y=recvBuf[p++]-CHAR_AD;
 	}
 	
 	mapH=recvBuf[p++]-CHAR_AD;
@@ -327,8 +364,9 @@ int LGclient::GAME(){
 	LGGraphics::init();
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	
+	LGgame::cheatCode=(1<<playerNumber);
 	std::deque<int> movement;
-	printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
+	printMap(LGgame::cheatCode, LGgame::playerCoo[playerNumber]);
 	LGgame::curTurn = 0;
 	bool gameEnd = 0;
 	rectBUTTON fpsbut;

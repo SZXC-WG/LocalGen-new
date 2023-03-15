@@ -5,13 +5,13 @@
 #define LOCALGEN_PRIVATE_H
 
 /* VERSION DEFINITIONS */
-#define VER_STRING	"3.0.0.1398"
+#define VER_STRING	"3.0.1.1400"
 #define VER_MAJOR	3
 #define VER_MINOR	0
-#define VER_RELEASE	0
-#define VER_BUILD	1398
+#define VER_RELEASE	1
+#define VER_BUILD	1400
 #define COMPANY_NAME	"LocalGen-dev"
-#define FILE_VERSION	"3.0.0.1398"
+#define FILE_VERSION	"3.0.1.1400"
 #define FILE_DESCRIPTION	"Local Generals.io (new ver.)"
 #define INTERNAL_NAME	""
 #define LEGAL_COPYRIGHT	"Copyright (c) 2023 LocalGen-dev"

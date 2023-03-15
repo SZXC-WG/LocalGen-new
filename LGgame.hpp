@@ -485,7 +485,8 @@ namespace LGlocal {
 				else delay_fps(LGgame::gameSpeed);
 				// avefps = (avefps * avefpsc + getfps()) / (avefpsc + 1);
 				// ++avefpsc;
-				LGgame::flushSpeed = ceil((timePassed.count() / 1'000'000'000.0L) * 300 - LGgame::curTurn);
+				if(LGgame::gameSpeed != -1) LGgame::flushSpeed = 1;
+				else LGgame::flushSpeed = ceil((timePassed.count() / 1'000'000'000.0L) * 300 - LGgame::curTurn);
 				lastFlushTurn = LGgame::curTurn;
 			}
 		}

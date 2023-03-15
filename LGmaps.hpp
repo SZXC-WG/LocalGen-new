@@ -120,7 +120,7 @@ void printMap(int printCode, playerCoord coo) {
 			}
 		}
 	}
-	// putimage_withalpha(NULL, pimg[6], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1));
+	putimage_withalpha(NULL, pimg[6], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1));
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 

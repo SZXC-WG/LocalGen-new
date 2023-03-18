@@ -342,7 +342,10 @@ namespace LGlocal {
 			while(kbmsg()) {
 				key_msg ch = getkey();
 				if(ch.key == key_space) {
-					while((!kbmsg()) || (getkey().key != key_space)) ;
+					std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
+					while((!kbmsg()) || (getkey().key != key_space));
+					std::chrono::nanoseconds ed = std::chrono::steady_clock::now().time_since_epoch();
+					LGgame::beginTime += ed - bg;
 				}
 				if(ch.msg == key_msg_up)
 					continue;
@@ -494,8 +497,8 @@ namespace LGlocal {
 	}
 }
 
-int localGame(int cheatCode, int plCnt, int stDel) {
-	LGgame::init(cheatCode, plCnt, stDel);
+int localGame(int cheatCode, int plCnt, int gSpeed) {
+	LGgame::init(cheatCode, plCnt, gSpeed);
 	int ret = LGlocal::GAME();
 	return ret;
 }

@@ -295,14 +295,14 @@ namespace LGGraphics {
 			.setalign(CENTER_TEXT,CENTER_TEXT)
 			.setfontname("Quicksand")
 			.setfontsz(22 * mapDataStore.mapSizeY, 0)
-			.addtext(maps[i].chiname)
-			.addtext(maps[i].engname)
-			.addtext("General Count: " + to_string(maps[i].generalcnt))
-			.addtext("Plain Count: " + to_string(maps[i].plaincnt))
-			.addtext("City Count: " + to_string(maps[i].citycnt))
-			.addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
-			.addtext("Swamp Count: " + to_string(maps[i].swampcnt))
-			.addtext("Size: " + to_string(maps[i].hei) + " * " + to_string(maps[i].wid))
+			// .addtext(maps[i].chiname)
+			// .addtext(maps[i].engname)
+			// .addtext("General Count: " + to_string(maps[i].generalcnt))
+			// .addtext("Plain Count: " + to_string(maps[i].plaincnt))
+			// .addtext("City Count: " + to_string(maps[i].citycnt))
+			// .addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
+			// .addtext("Swamp Count: " + to_string(maps[i].swampcnt))
+			// .addtext("Size: " + to_string(maps[i].hei) + " ¡Á " + to_string(maps[i].wid))
 			.display();
 		}
 		sys_edit impbox;
@@ -364,12 +364,12 @@ namespace LGGraphics {
 				mapbut[i]
 				.addtext(maps[i].chiname)
 				.addtext(maps[i].engname)
-				.addtext("General Count: " + to_string(maps[i].generalcnt))
-				.addtext("Plain Count: " + to_string(maps[i].plaincnt))
-				.addtext("City Count: " + to_string(maps[i].citycnt))
-				.addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
-				.addtext("Swamp Count: " + to_string(maps[i].swampcnt))
-				.addtext("Size: " + to_string(maps[i].hei) + " * " + to_string(maps[i].wid))
+				.addtext("General Count: " + (~maps[i].generalcnt?to_string(maps[i].generalcnt):"2~12"))
+				.addtext("Plain Count: " + (~maps[i].plaincnt?to_string(maps[i].plaincnt):"undetermined"))
+				.addtext("City Count: " + (~maps[i].citycnt?to_string(maps[i].citycnt):"undetermined"))
+				.addtext("Mountain Count: " + (~maps[i].mountaincnt?to_string(maps[i].mountaincnt):"undetermined"))
+				.addtext("Swamp Count: " + (~maps[i].swampcnt?to_string(maps[i].swampcnt):"undetermined"))
+				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " ¡Á " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
 				.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
@@ -422,314 +422,222 @@ namespace LGGraphics {
 
 
 	void doMapSelect() {
-		// cleardevice();
-		// int left, right, up, down;
-		// int x, y;
-		// rectBUTTON mapbut[50];
-		// for(int i = 1; i <= mapNum; i++) {
-		// 	x = (i + 5) / 6;
-		// 	y = ((i % 6 == 0) ? 6 : i % 6);
-		// 	left = ((y - 1) * 260) * mapDataStore.mapSizeX;
-		// 	right = (y * 260) * mapDataStore.mapSizeX;
-		// 	up = ((x - 1) * 180) * mapDataStore.mapSizeY;
-		// 	down = (x * 180) * mapDataStore.mapSizeY;
-		// 	mapbut[i].setsize(right - left, down - up);
-		// 	mapbut[i].setlocation(left, up);
-		// 	mapbut[i].setfontname("Quicksand");
-		// 	mapbut[i].setfontsz(20 * mapDataStore.mapSizeY, 0);
-		// 	mapbut[i].settxtcol(WHITE);
-		// 	mapbut[i].setbgcol(bgColor);
-		// 	mapbut[i].addtext("id: " + to_string(maps[i].id) + " " + maps[i].chiname);
-		// 	mapbut[i].addtext(maps[i].engname);
-		// 	mapbut[i].addtext("General Count: " + to_string(maps[i].generalcnt));
-		// 	mapbut[i].addtext("Plain Count: " + to_string(maps[i].plaincnt));
-		// 	mapbut[i].addtext("City Count: " + to_string(maps[i].citycnt));
-		// 	mapbut[i].addtext("Mountain Count: " + to_string(maps[i].mountaincnt));
-		// 	mapbut[i].addtext("Swamp Count: " + to_string(maps[i].swampcnt));
-		// 	mapbut[i].addtext("Size: " + to_string(maps[i].hei) + " * " + to_string(maps[i].wid));
-		// 	mapbut[i].setalign(CENTER_TEXT, CENTER_TEXT);
-		// 	mapbut[i].clickEvent = [i]()->void { mapSelected = i; };
-		// }
-		// mouse_msg msg;
-		// for(; is_run(); delay_fps(60)) {
-		// 	for(int i = 1; i <= mapNum; ++i) {
-		// 		mapbut[i].detect();
-		// 		mapbut[i].display();
-		// 		if(mapbut[i].status == 2) mapbut[i].clickEvent();
-		// 	}
-		// 	if(mapSelected) break;
-		// }
 		cleardevice();
 		setrendermode(RENDER_AUTO);
+		// setfillcolor(WHITE);
+		// bar(5 * mapDataStore.mapSizeX, 5 * mapDataStore.mapSizeY,
+		//     505 * mapDataStore.mapSizeX, 305 * mapDataStore.mapSizeY);
 		setcolor(WHITE);
-		settextjustify(LEFT_TEXT, TOP_TEXT);
-		setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
-		xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
-		xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
+		setlinewidth(5 * mapDataStore.mapSizeY);
+		rectangle(5 * mapDataStore.mapSizeX, 5 * mapDataStore.mapSizeY,
+		          505 * mapDataStore.mapSizeX, 305 * mapDataStore.mapSizeY);
+		setlinewidth(1);
+		setcolor(mainColor);
+		setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand", 0, 0, FW_BOLD, false, false, false);
+		settextjustify(CENTER_TEXT,TOP_TEXT);
+		xyprintf(255 * mapDataStore.mapSizeX, 5 * mapDataStore.mapSizeY,
+		         "%s", maps[mapSelected].chiname.c_str());
+		xyprintf(255 * mapDataStore.mapSizeX, 45 * mapDataStore.mapSizeY,
+		         "%s", maps[mapSelected].engname.c_str());
+		setcolor(WHITE);
 		setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-		xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
-		xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
-		xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-		xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-		xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
+		xyprintf(255 * mapDataStore.mapSizeX, 85 * mapDataStore.mapSizeY,
+		         "Author: %s", maps[mapSelected].auth.c_str());
+		xyprintf(255 * mapDataStore.mapSizeX, 115 * mapDataStore.mapSizeY,
+		         "Size: %d ¡Á %d", maps[mapSelected].hei, maps[mapSelected].wid);
+		xyprintf(255 * mapDataStore.mapSizeX, 145 * mapDataStore.mapSizeY,
+		         "General Count: %d", maps[mapSelected].generalcnt);
+		xyprintf(255 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY,
+		         "Plain Count: %d", maps[mapSelected].plaincnt);
+		xyprintf(255 * mapDataStore.mapSizeX, 205 * mapDataStore.mapSizeY,
+		         "City Count: %d", maps[mapSelected].citycnt);
+		xyprintf(255 * mapDataStore.mapSizeX, 235 * mapDataStore.mapSizeY,
+		         "Mountain Count: %d", maps[mapSelected].mountaincnt);
+		xyprintf(255 * mapDataStore.mapSizeX, 265 * mapDataStore.mapSizeY,
+		         "Swamp Count: %d", maps[mapSelected].swampcnt);
+		sys_edit heiinput,widinput,amninput,amxinput;
+		int height,width,armymin,armymax;
+		heiinput.create();
+		widinput.create();
+		amninput.create();
+		amxinput.create();
 		if(mapSelected < 6) {
-			setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-			setcolor(WHITE);
-			int height = 0;
-			key_msg msg;
-			xyprintf(10 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Height of the Map (<=500)");
-			while(1) {
-				msg = getkey();
-				if(msg.msg == key_msg_char) {
-					if(msg.key == 13 && height <= 500 && height >= 1)
-						break;
-					if(msg.key == 8)
-						height /= 10;
-					else if(msg.key >= '0' && msg.key <= '9')
-						height = height * 10 + msg.key - '0';
-					cleardevice();
-					setcolor(WHITE);
-					setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
-					xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
-					xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-					setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-					xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
-					xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
-					xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-					xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-					xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
-					setcolor(WHITE);
-					xyprintf(10 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Height of the Map (<=500)");
-					xyprintf(10 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", height);
-				}
-			}
-			cleardevice();
 			setcolor(WHITE);
 			setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
-			xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
-			xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-			setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-			xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
-			xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
-			xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-			xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-			xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
-			setcolor(WHITE);
-			xyprintf(10 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Height of the Map (<=500)");
-			xyprintf(10 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", height);
-			int width = 0;
-			xyprintf(810 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Width of the Map (<=500)");
-			while(1) {
-				msg = getkey();
-				if(msg.msg == key_msg_char) {
-					if(msg.key == 13 && width <= 500 && width >= 1)
-						break;
-					if(msg.key == 8)
-						width /= 10;
-					else if(msg.key >= '0' && msg.key <= '9')
-						width = width * 10 + msg.key - '0';
-					cleardevice();
-					setcolor(WHITE);
-					setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
-					xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
-					xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-					setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-					xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
-					xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
-					xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-					xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-					xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
-					setcolor(WHITE);
-					xyprintf(10 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Height of the Map (<=500)");
-					xyprintf(10 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", height);
-					xyprintf(810 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Width of the Map (<=500)");
-					xyprintf(810 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", width);
-				}
-			}
-			long long armyMin = 0, armyMax = 0;
+			settextjustify(RIGHT_TEXT,TOP_TEXT);
+			xyprintf(800 * mapDataStore.mapSizeX, 5 * mapDataStore.mapSizeY, "Input Height (<=100):");
+			xyprintf(800 * mapDataStore.mapSizeX, 45 * mapDataStore.mapSizeY, "Input Width (<=100):");
 			if(mapSelected == 3) {
-				setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-				setcolor(WHITE);
-				key_msg msg;
-				xyprintf(10 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Minimum Number of Army on each Block");
-				bool isPositive = true;
-				while(1) {
-					msg = getkey();
-					if(msg.msg == key_msg_char) {
-						if(msg.key == 13)
-							break;
-						if(msg.key == 8)
-							armyMin /= 10;
-						else if(msg.key >= '0' && msg.key <= '9')
-							armyMin = armyMin * 10 + msg.key - '0';
-						else if(msg.key == '-')
-							isPositive = !isPositive;
-						cleardevice();
-						setcolor(WHITE);
-						setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
-						xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
-						xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-						setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-						xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
-						xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
-						xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-						xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-						xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
-						setcolor(WHITE);
-						xyprintf(10 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Height of the Map (<=500)");
-						xyprintf(10 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", height);
-						xyprintf(810 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Width of the Map (<=500)");
-						xyprintf(810 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", width);
-						xyprintf(10 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Minimum Number of Army on each Block");
-						long long realarmy = armyMin;
-						if(!isPositive)
-							realarmy = -realarmy;
-						xyprintf(10 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", realarmy);
+				xyprintf(800 * mapDataStore.mapSizeX, 85 * mapDataStore.mapSizeY, "Input MINIMUM Army:");
+				xyprintf(800 * mapDataStore.mapSizeX, 125 * mapDataStore.mapSizeY, "Input MAXIMUM Army:");
+			}
+			heiinput.move(810 * mapDataStore.mapSizeX, 6 * mapDataStore.mapSizeY);
+			heiinput.size(200 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY);
+			heiinput.setbgcolor(WHITE);
+			heiinput.setcolor(mainColor);
+			heiinput.setfont(35 * mapDataStore.mapSizeY, 0, "Quicksand");
+			widinput.move(810 * mapDataStore.mapSizeX, 46 * mapDataStore.mapSizeY);
+			widinput.size(200 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY);
+			widinput.setbgcolor(WHITE);
+			widinput.setcolor(mainColor);
+			widinput.setfont(35 * mapDataStore.mapSizeY, 0, "Quicksand");
+			if(mapSelected == 3) {
+				amninput.move(810 * mapDataStore.mapSizeX, 86 * mapDataStore.mapSizeY);
+				amninput.size(200 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY);
+				amninput.setbgcolor(WHITE);
+				amninput.setcolor(mainColor);
+				amninput.setfont(35 * mapDataStore.mapSizeY, 0, "Quicksand");
+				amxinput.move(810 * mapDataStore.mapSizeX, 126 * mapDataStore.mapSizeY);
+				amxinput.size(200 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY);
+				amxinput.setbgcolor(WHITE);
+				amxinput.setcolor(mainColor);
+				amxinput.setfont(35 * mapDataStore.mapSizeY, 0, "Quicksand");
+			}
+			heiinput.visible(true);
+			widinput.visible(true);
+			if(mapSelected == 3) {
+				amninput.visible(true);
+				amxinput.visible(true);
+			}
+			rectBUTTON heib,widb,amnb,amxb,endb;
+			heib
+			.setlocation(1020 * mapDataStore.mapSizeX, 6 * mapDataStore.mapSizeY)
+			.setsize(100 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY)
+			.setbgcol(WHITE)
+			.settxtcol(mainColor)
+			.setalign(CENTER_TEXT,CENTER_TEXT)
+			.setfontsz(35 * mapDataStore.mapSizeY, 0)
+			.setfontname("Quicksand")
+			.addtext("confirm");
+			widb
+			.setlocation(1020 * mapDataStore.mapSizeX, 46 * mapDataStore.mapSizeY)
+			.setsize(100 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY)
+			.setbgcol(WHITE)
+			.settxtcol(mainColor)
+			.setalign(CENTER_TEXT,CENTER_TEXT)
+			.setfontsz(35 * mapDataStore.mapSizeY, 0)
+			.setfontname("Quicksand")
+			.addtext("confirm");
+			if(mapSelected == 3) {
+				amnb
+				.setlocation(1020 * mapDataStore.mapSizeX, 86 * mapDataStore.mapSizeY)
+				.setsize(100 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY)
+				.setbgcol(WHITE)
+				.settxtcol(mainColor)
+				.setalign(CENTER_TEXT,CENTER_TEXT)
+				.setfontsz(35 * mapDataStore.mapSizeY, 0)
+				.setfontname("Quicksand")
+				.addtext("confirm");
+				amxb
+				.setlocation(1020 * mapDataStore.mapSizeX, 126 * mapDataStore.mapSizeY)
+				.setsize(100 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY)
+				.setbgcol(WHITE)
+				.settxtcol(mainColor)
+				.setalign(CENTER_TEXT,CENTER_TEXT)
+				.setfontsz(35 * mapDataStore.mapSizeY, 0)
+				.setfontname("Quicksand")
+				.addtext("confirm");
+			}
+			endb
+			.setlocation(810 * mapDataStore.mapSizeX, 166 * mapDataStore.mapSizeY)
+			.setsize(310 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY)
+			.setbgcol(WHITE)
+			.settxtcol(mainColor)
+			.setalign(CENTER_TEXT,CENTER_TEXT)
+			.setfontsz(35 * mapDataStore.mapSizeY, 0)
+			.setfontname("Quicksand")
+			.addtext("end input");
+			heib.display();
+			widb.display();
+			if(mapSelected == 3) {
+				amnb.display();
+				amxb.display();
+			}
+			endb.display();
+			bool hb,wb,nb,xb;
+			hb=wb=nb=xb=false;
+			for(; is_run(); delay_fps(60)) {
+				heib.detect().display();
+				widb.detect().display();
+				if(mapSelected == 3) {
+					amnb.detect().display();
+					amxb.detect().display();
+				}
+				endb.detect().display();
+				if(heib.status == 2) {
+					char s[55];
+					heiinput.gettext(sizeof(s), s);
+					int p = sscanf(s, "%d", &height);
+					if(p!=1) {
+						heib.poptext().addtext("invalid").display();
+						delay_ms(100);
+						heib.poptext().addtext("confirm").display();
+					} else hb=true;
+				}
+				if(widb.status == 2) {
+					char s[55];
+					widinput.gettext(sizeof(s), s);
+					int p = sscanf(s, "%d", &width);
+					if(p!=1) {
+						widb.poptext().addtext("invalid").display();
+						delay_ms(100);
+						widb.poptext().addtext("confirm").display();
+					} else wb=true;
+				}
+				if(amnb.status == 2) {
+					char s[55];
+					amninput.gettext(sizeof(s), s);
+					int p = sscanf(s, "%d", &armymin);
+					if(p!=1) {
+						amnb.poptext().addtext("invalid").display();
+						delay_ms(100);
+						amnb.poptext().addtext("confirm").display();
+					} else nb=true;
+				}
+				if(amxb.status == 2) {
+					char s[55];
+					amxinput.gettext(sizeof(s), s);
+					int p = sscanf(s, "%d", &armymax);
+					if(p!=1) {
+						amxb.poptext().addtext("invalid").display();
+						delay_ms(100);
+						amxb.poptext().addtext("confirm").display();
+					} else xb=true;
+				}
+				if(endb.status == 2) {
+					if(hb&&wb&&nb&&xb) {
+						endb.status = 0;
+						endb.display();
+						break;
+					} else {
+						endb.poptext().addtext("not finished").display();
+						delay_ms(100);
+						endb.poptext().addtext("end input").display();
 					}
 				}
-				if(!isPositive)
-					armyMin = -armyMin;
-				cleardevice();
-				setcolor(WHITE);
-				setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
-				xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
-				xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-				setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-				xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
-				xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
-				xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-				xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-				xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
-				setcolor(WHITE);
-				xyprintf(10 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Height of the Map (<=500)");
-				xyprintf(10 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", height);
-				xyprintf(810 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Width of the Map (<=500)");
-				xyprintf(810 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", width);
-				xyprintf(10 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Minimum Number of Army on each Block");
-				xyprintf(10 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", armyMin);
-				xyprintf(810 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Maximum Number of Army on each Block");
-				isPositive = true;
-				while(1) {
-					msg = getkey();
-					if(msg.msg == key_msg_char) {
-						if(msg.key == 13 && armyMax * (isPositive ? 1 : (-1)) >= armyMin)
-							break;
-						if(msg.key == 8)
-							armyMax /= 10;
-						else if(msg.key >= '0' && msg.key <= '9')
-							armyMax = armyMax * 10 + msg.key - '0';
-						else if(msg.key == '-')
-							isPositive = !isPositive;
-						cleardevice();
-						setcolor(WHITE);
-						setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
-						xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
-						xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-						setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-						xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
-						xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
-						xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-						xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-						xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
-						setcolor(WHITE);
-						xyprintf(10 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Height of the Map (<=500)");
-						xyprintf(10 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", height);
-						xyprintf(810 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Width of the Map (<=500)");
-						xyprintf(810 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", width);
-						xyprintf(10 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Minimum Number of Army on each Block");
-						xyprintf(10 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", armyMin);
-						xyprintf(810 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Maximum Number of Army on each Block");
-						long long realarmy = armyMax;
-						if(!isPositive)
-							realarmy = -realarmy;
-						xyprintf(810 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", realarmy);
-					}
-				}
-				if(!isPositive)
-					armyMax = -armyMax;
-				cleardevice();
-				setcolor(WHITE);
-				setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
-				xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
-				xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-				setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-				xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
-				xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
-				xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-				xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-				xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
-				setcolor(WHITE);
-				xyprintf(10 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Height of the Map (<=500)");
-				xyprintf(10 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", height);
-				xyprintf(810 * mapDataStore.mapSizeX, 200 * mapDataStore.mapSizeY, "Please Input the Width of the Map (<=500)");
-				xyprintf(810 * mapDataStore.mapSizeX, 230 * mapDataStore.mapSizeY, "%d", width);
-				xyprintf(10 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Minimum Number of Army on each Block");
-				xyprintf(10 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", armyMin);
-				xyprintf(810 * mapDataStore.mapSizeX, 270 * mapDataStore.mapSizeY, "Please Input the Maximum Number of Army on each Block");
-				xyprintf(810 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY, "%lld", armyMax);
 			}
-			importGameSettings();
-			switch(mapSelected) {
-				case 1:
-					createRandomMap(height, width);
-					break;
-				case 2:
-					createStandardMap(height, width);
-					break;
-				case 3:
-					createFullCityMap(height, width, armyMin, armyMax, plCnt);
-					break;
-				case 4:
-					createFullSwampMap(height, width, plCnt);
-					break;
-				case 5:
-					createFullPlainMap(height, width, plCnt);
-					break;
-			}
-		} else {
-			cleardevice();
-			setcolor(WHITE);
-			setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
-			xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "id: %02d", maps[mapSelected].id);
-			xyprintf(10 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].chiname.c_str());
-			setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-			xyprintf(300 * mapDataStore.mapSizeX, 40 * mapDataStore.mapSizeY, "%s", maps[mapSelected].engname.c_str());
-			xyprintf(10 * mapDataStore.mapSizeX, 70 * mapDataStore.mapSizeY, "Author: %s", maps[mapSelected].auth.c_str());
-			xyprintf(10 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Size of the Map: %d * %d", maps[mapSelected].hei, maps[mapSelected].wid);
-			xyprintf(10 * mapDataStore.mapSizeX, 130 * mapDataStore.mapSizeY, "GeneralCount : %d          PlainCount: %d", maps[mapSelected].generalcnt, maps[mapSelected].plaincnt);
-			xyprintf(10 * mapDataStore.mapSizeX, 160 * mapDataStore.mapSizeY, "MountainCount: %d          CityCount : %d", maps[mapSelected].mountaincnt, maps[mapSelected].citycnt);
-			importGameSettings();
-			readMap(mapSelected);
 		}
+		heiinput.setreadonly(true);
+		widinput.setreadonly(true);
+		amninput.setreadonly(true);
+		amxinput.setreadonly(true);
+		settextjustify(LEFT_TEXT,TOP_TEXT);
+		importGameSettings();
+		if(mapSelected < 6) {
+			switch(mapSelected) {
+				case 1: createRandomMap(height,width); break;
+				case 2: createStandardMap(height,width); break;
+				case 3: createFullCityMap(height,width,armymin,armymax,plCnt); break;
+				case 4: createFullSwampMap(height,width,plCnt); break;
+				case 5: createFullPlainMap(height,width,plCnt); break;
+			}
+		} else readMap(mapSelected);
+		heiinput.visible(false);
+		widinput.visible(false);
+		amninput.visible(false);
+		amxinput.visible(false);
 		localGame(cheatCode, plCnt, stDel);
 		exit(0);
-	}
-
-	void doMapImport() {
-		cleardevice();
-		setcolor(WHITE);
-		setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-		xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "Please Input Filename with suffix (end with enter)");
-		key_msg msg;
-		while(1) {
-			msg = getkey();
-			if(msg.msg == key_msg_char) {
-				if(msg.key == 13)
-					break;
-				if(msg.key == 8)
-					fileName.pop_back();
-				else
-					fileName += (char)(msg.key);
-				cleardevice();
-				setcolor(WHITE);
-				setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-				xyprintf(10 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, "Please Input Filename with suffix (end with enter)");
-				xyprintf(10 * mapDataStore.mapSizeX, 110 * mapDataStore.mapSizeY, "%s", fileName.c_str());
-			}
-			if(msg.msg == key_enter)
-				break;
-		}
-		toAvoidCEBugInGraphicsImportMap(fileName);
 	}
 
 	void importGameSettings() {

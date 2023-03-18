@@ -137,10 +137,10 @@ int mapNum;
 char strZipStatus[LEN_ZIP];
 char strZip[LEN_ZIP];
 char strdeZip[LEN_ZIP];
-char strGameZip[4 * LEN_ZIP];
-char strdeGameZip[4 * LEN_ZIP];
-char strStatusZip[4*LEN_ZIP];
-char strdeStatusZip[4*LEN_ZIP];
+char strGameZip[LEN_ZIP<<2];
+char strdeGameZip[LEN_ZIP<<2];
+char strStatusZip[LEN_ZIP<<2];
+char strdeStatusZip[LEN_ZIP<<2];
 
 std::vector<passS> passId[505][505];
 playerCoord lastTurn[20];

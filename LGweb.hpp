@@ -357,6 +357,13 @@ void LGclient::sockCollect(){
 	memset(recvBuf,0,sizeof(recvBuf));
 }
 
+void LGclient::quitGame(){
+	sendBuf[0]=43;
+	sendBuf[1]=CHAR_AD;
+	sendBuf[2]='\0';
+	sockMessage();
+}
+
 int LGclient::GAME(){
 	cleardevice();
 	setrendermode(RENDER_MANUAL);
@@ -369,6 +376,7 @@ int LGclient::GAME(){
 	printMap(LGgame::cheatCode, LGgame::playerCoo[playerNumber]);
 	LGgame::curTurn = 0;
 	bool gameEnd = 0;
+	int movLin,movCol;
 	rectBUTTON fpsbut;
 	fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
 	fpsbut.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
@@ -387,20 +395,20 @@ int LGclient::GAME(){
 	.setbgcol(BLUE)
 	.settxtcol(WHITE);
 	for(; is_run(); delay_fps(std::min(LGgame::gameSpeed + 0.5, 120.5))) {
+		movLin=playerCoo[playerNumber].x;
+		movCol=playerCoo[playerNumber].y;
+		
 		while(mousemsg()) {
 			mouse_msg msg = getmouse();
 			if(msg.is_down() && msg.is_left() && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH) {
-				int lin = (msg.y + heightPerBlock - 1) / heightPerBlock;
-				int col = (msg.x + widthPerBlock - 1) / widthPerBlock;
-				LGgame::playerCoo[1] = {lin, col};
+				movLin = (msg.y + heightPerBlock - 1) / heightPerBlock;
+				movCol = (msg.x + widthPerBlock - 1) / widthPerBlock;
 				movement.clear();
+				movement.emplace_back(0);
 			}
 		}
 		while(kbmsg()) {
 			key_msg ch = getkey();
-			if(ch.key == key_space) {
-				while((!kbmsg()) || (getkey().key != key_space)) ;
-			}
 			if(ch.msg == key_msg_up)
 				continue;
 			switch(ch.key) {
@@ -422,6 +430,7 @@ int LGclient::GAME(){
 				case int('q'): movement.clear(); break;
 				case 27: {
 					MessageBoxA(getHWnd(), string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
+					quitGame();
 					closegraph();
 					return 0;
 				}
@@ -442,7 +451,9 @@ int LGclient::GAME(){
 						}
 					}
 					LGgame::printGameMessage({1, 1, LGgame::curTurn});
-					lastTurn[1] = playerCoord{-1, -1};
+						quitGame();
+						closegraph();
+						return 0;
 					break;
 				}
 			}

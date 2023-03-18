@@ -329,6 +329,7 @@ namespace LGlocal {
 		int avefpsc = 0;
 		int lastFlushTurn = 0;
 		LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
+		flushkey();
 		for(; is_run();) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();

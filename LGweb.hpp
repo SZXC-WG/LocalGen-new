@@ -270,7 +270,7 @@ int LGserver::GAME(){
 	}
 	
 	sendBuf[0]=43;
-	sendBuf[1]=48;
+	sendBuf[1]=CHAR_AD;
 	sendBuf[2]='\0';
 	sockBroadcast();
 	std::lock_guard<std::mutex> mGuard(mLock);
@@ -458,9 +458,15 @@ int LGclient::GAME(){
 				}
 			}
 		}
-		while(!movement.empty() && LGgame::analyzeMove(1, movement.front(), LGgame::playerCoo[1]))
+		if(!movement.empty()){
+			sendBuf[0]=44;
+			sendBuf[1]=movement.front()+CHAR_AD;
+			sendBuf[2]=movLin+CHAR_AD;
+			sendBuf[3]=movCol+CHAR_AD;
+			sendBuf[4]='\0';
+			sockMessage();
 			movement.pop_front();
-		if(!movement.empty())
+		}while(!movement.empty())
 			movement.pop_front();
 		if(LGgame::cheatCode != 1048575) {
 			int alldead = 0;
@@ -485,7 +491,6 @@ int LGclient::GAME(){
 				             "YOU CAN PRESS [ESC] TO EXIT.")
 				            .c_str(),
 				            "GAME END", MB_OK | MB_SYSTEMMODAL);
-				LGreplay::zipGame(LGgame::curTurn);
 				gameEnd = 1;
 				register int winnerNum = std::__lg(ed);
 				LGgame::cheatCode = 1048575;

@@ -256,7 +256,7 @@ namespace LGreplay {
 	std::pair<long long, long long> curMoveS;
 	std::queue<long long> signMap;
 	std::queue<long long> signCmd;
-	movementS dezipedMovementS[4 * LEN_ZIP];
+	movementS dezipedMovementS[LEN_ZIP<<2];
 	movementS tmp;
 	std::queue<movementS> movementPack;
 

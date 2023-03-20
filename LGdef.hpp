@@ -299,6 +299,7 @@ namespace LGclient {
 	void procMessage();
 	void sockMessage();
 	void sockCollect();
+	void quitGame();
 	int GAME();
 };
 

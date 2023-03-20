@@ -395,8 +395,8 @@ int LGclient::GAME(){
 	.setbgcol(BLUE)
 	.settxtcol(WHITE);
 	for(; is_run(); delay_fps(std::min(LGgame::gameSpeed + 0.5, 120.5))) {
-		movLin=playerCoo[playerNumber].x;
-		movCol=playerCoo[playerNumber].y;
+		movLin=LGgame::playerCoo[playerNumber].x;
+		movCol=LGgame::playerCoo[playerNumber].y;
 		
 		while(mousemsg()) {
 			mouse_msg msg = getmouse();

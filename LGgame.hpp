@@ -301,7 +301,6 @@ namespace LGgame {
 		cheatCode = chtC;
 		playerCnt = pC;
 		gameSpeed = gS;
-		flushSpeed = 1;
 		for(register int i = 1; i <= pC; ++i) isAlive[i] = 1;
 	}
 };
@@ -458,40 +457,45 @@ namespace LGlocal {
 					LGgame::printGameMessage({winnerNum, -1, LGgame::curTurn});
 				}
 			}
-			if(LGgame::curTurn - lastFlushTurn == LGgame::flushSpeed) {
-				printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
-				LGgame::ranklist();
-				int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
-				static int fpslen;
-				static int turnlen;
-				static int rspeedlen;
-				setfillcolor(LGGraphics::bgColor);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-				setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
-				const std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
-				fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
-				turnlen = textwidth(("Turn " + to_string(LGgame::curTurn) + ".").c_str());
-				rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());				setfillcolor(RED);
-				setfillcolor(GREEN);
-				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-				setfillcolor(RED);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-				setfillcolor(BLUE);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-				settextjustify(CENTER_TEXT, TOP_TEXT);
-				xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
-				xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, "FPS: %f", getfps());
-				xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGgame::curTurn);
-				if(LGgame::gameSpeed == -1) delay_ms(0);
-				else delay_fps(LGgame::gameSpeed);
-				// avefps = (avefps * avefpsc + getfps()) / (avefpsc + 1);
-				// ++avefpsc;
-				if(LGgame::gameSpeed != -1) LGgame::flushSpeed = 1;
-				else LGgame::flushSpeed = ceil((timePassed.count() / 1'000'000'000.0L) * 300 - LGgame::curTurn);
-				lastFlushTurn = LGgame::curTurn;
+			if(1) {
+				std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
+				int needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
+				int lackTurn = LGgame::curTurn - needFlushToTurn;
+				if(lackTurn < 0);
+				else {
+					while(lackTurn > 0) {
+						timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
+						needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
+						lackTurn = LGgame::curTurn - needFlushToTurn;
+					}
+					printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
+					LGgame::ranklist();
+					int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
+					static int fpslen;
+					static int turnlen;
+					static int rspeedlen;
+					setfillcolor(LGGraphics::bgColor);
+					bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+					setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+					timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
+					fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
+					turnlen = textwidth(("Turn " + to_string(LGgame::curTurn) + ".").c_str());
+					rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());				setfillcolor(RED);
+					setfillcolor(GREEN);
+					bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+					rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+					setfillcolor(RED);
+					bar(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+					rectangle(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+					setfillcolor(BLUE);
+					bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+					rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+					settextjustify(CENTER_TEXT, TOP_TEXT);
+					xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
+					xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, "FPS: %f", getfps());
+					xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGgame::curTurn);
+					delay_ms(0);
+				}
 			}
 		}
 		return 0;

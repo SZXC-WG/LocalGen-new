@@ -605,7 +605,7 @@ namespace LGGraphics {
 					} else xb=true;
 				}
 				if(endb.status == 2) {
-					if(hb&&wb&&nb&&xb) {
+					if(hb&&wb&&(mapSelected==3?(nb&&xb):1)) {
 						endb.status = 0;
 						endb.display();
 						break;
@@ -742,7 +742,7 @@ namespace LGGraphics {
 					endConfig = true;
 					cleardevice();
 					if(stDel == 0)
-						stDel = -1;
+						stDel = 300;
 					return;
 				}
 			}

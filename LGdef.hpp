@@ -230,7 +230,6 @@ namespace LGgame {
 	int isAlive[64];
 	int robotId[64];
 	int gameSpeed; /* fps */
-	int flushSpeed; /* turn/frame */
 	int gameMesC;
 	playerCoord genCoo[64];
 	std::deque<moveS> inlineMove;

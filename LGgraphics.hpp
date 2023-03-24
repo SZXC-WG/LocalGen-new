@@ -641,111 +641,48 @@ namespace LGGraphics {
 	}
 
 	void importGameSettings() {
-		int circlePos = 450 * mapDataStore.mapSizeX;
-		PIMAGE refreshCopy = newimage();
-		getimage(refreshCopy, 0, 0, 1600 * mapDataStore.mapSizeX, 340 * mapDataStore.mapSizeY);
-		setfont(20 * mapDataStore.mapSizeY, 0, "Lucida Fax");
-		setcolor(WHITE);
-		bool changeMade = true;
-		int mouseDownCount = 0;
-		bool endConfig = false;
-		cheatCode = 2;
-		cheatCodeSelected[1] = true;
+		sys_edit speedBox;
+		rectBUTTON speedSubmit;
+		rectBUTTON plCntBox[15]; /* 2~12 */
+		rectBUTTON checkBox[15]; /* 2~12 */
+		plCnt = 2;
+		settextjustify(CENTER_TEXT, CENTER_TEXT);
+		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		xyprintf(250 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
+		         "Choose Player Count");
+		setlinewidth(1);
+		for(int i=2; i<=12; ++i) {
+			int rowNum = (i - 2) / 4;
+			int colNum = (i - 2) % 4;
+			rectangle(55 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum,
+			          400 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum,
+			          155 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum,
+			          500 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum);
+			plCntBox[i]
+			.setsize(100 * mapDataStore.mapSizeX - 1*2, 100 * mapDataStore.mapSizeY - 1*2)
+			.setlocation(55 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum + 1,
+			             400 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum + 1)
+			.setalign(CENTER_TEXT, CENTER_TEXT)
+			.setfontname("Quicksand")
+			.setfontsz(50 * mapDataStore.mapSizeY, 0)
+			.setbgcol(bgColor)
+			.settxtcol(WHITE)
+			.addtext(to_string(i));
+			plCntBox[i].floatshadow = false;
+			plCntBox[i].display();
+		}
+		xyprintf(250 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY,
+		         "Current Count: %d", plCnt);
 		for(; is_run(); delay_fps(120)) {
-			if(changeMade) {
-				cleardevice();
-				putimage(0, 0, refreshCopy);
-				setcolor(WHITE);
-				rectprintf(60 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY, 430 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Please Select The Number of Players");
-				for(int i = 1; i <= 12; i++) {
-					int lineNumber = (i + 2) / 3;
-					int columnNumber = i - (lineNumber - 1) * 3;
-					if(i == plCnt) {
-						setcolor(RED);
-						ege_circle((100 * columnNumber + 50) * mapDataStore.mapSizeX, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSizeY, 50 * mapDataStore.mapSizeX);
-						setcolor(WHITE);
-					}
-					xyprintf((100 * columnNumber + 50) * mapDataStore.mapSizeX, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSizeY, "%d", i);
-					rectangle(((columnNumber - 1) * 100 + 100) * mapDataStore.mapSizeX, ((lineNumber - 1) * 100 + 450) * mapDataStore.mapSizeY, (columnNumber * 100 + 100) * mapDataStore.mapSizeX, (lineNumber * 100 + 450) * mapDataStore.mapSizeY);
-				}
-				rectprintf(560 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY, 380, 100, "Drag to Select the Speed of the Game");
-				setfillcolor(LIGHTGRAY);
-				ege_fillrect(725 * mapDataStore.mapSizeX, 450 * mapDataStore.mapSizeY, 50 * mapDataStore.mapSizeX, 400 * mapDataStore.mapSizeY);
-				setfillcolor(WHITE);
-				ege_fillellipse(720 * mapDataStore.mapSizeX, circlePos - 30 * mapDataStore.mapSizeY, 60 * mapDataStore.mapSizeX, 60 * mapDataStore.mapSizeY);
-				rectprintf(1060 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY, 380 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "Select the Players you want to watch Directly");
-				for(int i = 1; i <= 12; i++) {
-					int lineNumber = (i + 2) / 3;
-					int columnNumber = i - (lineNumber - 1) * 3;
-					setcolor(WHITE);
-					rectangle(((columnNumber - 1) * 100 + 1100) * mapDataStore.mapSizeX, ((lineNumber - 1) * 100 + 450) * mapDataStore.mapSizeY, (columnNumber * 100 + 1100) * mapDataStore.mapSizeX, (lineNumber * 100 + 450) * mapDataStore.mapSizeY);
-				}
-				for(int i = 1; i <= plCnt; i++) {
-					int lineNumber = (i + 2) / 3;
-					int columnNumber = i - (lineNumber - 1) * 3;
-					setcolor(playerInfo[i].color);
-					rectprintf(((columnNumber - 1) * 100 + 1100) * mapDataStore.mapSizeX, ((lineNumber - 1) * 100 + 450) * mapDataStore.mapSizeY, 100 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY, "%s", playerInfo[i].name.c_str());
-					if(cheatCodeSelected[i]) {
-						setcolor(RED);
-						ege_circle((1050 + 100 * columnNumber) * mapDataStore.mapSizeX, (500 + 100 * (lineNumber - 1)) * mapDataStore.mapSizeY, 50 * mapDataStore.mapSizeX);
-						setcolor(WHITE);
-					}
-				}
-				rectangle(900 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY, 1100 * mapDataStore.mapSizeX, 105 * mapDataStore.mapSizeY);
-				setfont(70 * mapDataStore.mapSizeY, 0, "Freestyle Script");
-				rectprintf(900 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY, 200 * mapDataStore.mapSizeX, 75 * mapDataStore.mapSizeY, "Start Game!");
-				setfont(20 * mapDataStore.mapSizeY, 0, "Lucida Fax");
-				if(stDel != 0)
-					xyprintf(560 * mapDataStore.mapSizeX, 875 * mapDataStore.mapSizeY, "Speed Now: %d", stDel);
-				else
-					xyprintf(560 * mapDataStore.mapSizeX, 875 * mapDataStore.mapSizeY, "Speed Now: MAXSPEED");
-				changeMade = false;
+			for(int i=2; i<=12; ++i) {
+				plCntBox[i].detect().display();
+				if(plCntBox[i].status == 2) plCnt = i;
 			}
-			while(mousemsg()) {
-				mouse_msg msg = getmouse();
-				// cout << msg.x << ' ' << msg.y << ' ' << msg.is_left() << ' ' << msg.is_down() << ' ' << msg.is_up() << ' ' << msg.is_move() << ' ' << mouseDownCount << ' ' << circlePos << endl;
-				if(100 * mapDataStore.mapSizeX <= msg.x && msg.x <= 400 * mapDataStore.mapSizeX && 450 * mapDataStore.mapSizeY <= msg.y && 850 * mapDataStore.mapSizeY >= msg.y) {
-					if(msg.is_left() && msg.is_down()) {
-						int col = (msg.x + 49 - 50 * mapDataStore.mapSizeX) / (100 * mapDataStore.mapSizeX);
-						int lin = (msg.y - 450 * mapDataStore.mapSizeY + 99) / (100 * mapDataStore.mapSizeY);
-						plCnt = (lin - 1) * 3 + col;
-						changeMade = true;
-					}
-				}
-				if(msg.is_left() && msg.is_down())
-					mouseDownCount++;
-				if(msg.is_left() && msg.is_up() && mouseDownCount > 0)
-					mouseDownCount--;
-				if(msg.x >= 720 * mapDataStore.mapSizeX && msg.x <= 780 * mapDataStore.mapSizeX && msg.y >= 450 * mapDataStore.mapSizeY && msg.y <= 850 * mapDataStore.mapSizeY) {
-					if(mouseDownCount > 0) {
-						circlePos = msg.y;
-						if(circlePos >= 840 * mapDataStore.mapSizeY)
-							stDel = 0;
-						else
-							stDel = ((circlePos - 450 * mapDataStore.mapSizeX) / (20 * mapDataStore.mapSizeX)) + 1;
-						changeMade = true;
-					}
-				}
-				if(1100 * mapDataStore.mapSizeX <= msg.x && 1400 * mapDataStore.mapSizeX >= msg.x && 450 * mapDataStore.mapSizeY <= msg.y && msg.y <= 850 * mapDataStore.mapSizeY) {
-					if(msg.is_left() && msg.is_down()) {
-						int col = (msg.x + (99 - 1100) * mapDataStore.mapSizeX) / (100 * mapDataStore.mapSizeX);
-						int lin = (msg.y + (99 - 450) * mapDataStore.mapSizeY) / (100 * mapDataStore.mapSizeY);
-						int num = (lin - 1) * 3 + col;
-						if(num <= plCnt && num > 0) {
-							cheatCode ^= (1 << (num));
-							cheatCodeSelected[num] ^= 1;
-							changeMade = true;
-						}
-					}
-				}
-				if(msg.x >= 900 * mapDataStore.mapSizeX && msg.x <= 1100 * mapDataStore.mapSizeX && msg.y >= 30 * mapDataStore.mapSizeY && msg.y <= 105 * mapDataStore.mapSizeY && msg.is_down() && msg.is_left()) {
-					endConfig = true;
-					cleardevice();
-					if(stDel == 0)
-						stDel = 300;
-					return;
-				}
-			}
+			setfillcolor(bgColor);
+			bar(55 * mapDataStore.mapSizeX, 701 * mapDataStore.mapSizeY,
+			    455 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
+			xyprintf(250 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY,
+			         "Current Count: %d", plCnt);
 		}
 	}
 

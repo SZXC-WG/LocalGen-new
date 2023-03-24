@@ -41,10 +41,11 @@ class circBUTTON {
 	bool autortcol; color_t rtcol;
 	int walign, halign; // align method
 	int wloc, hloc; // location on screen
-	bool shadow; int shadowwei;
 
   public:
+	bool txtshadow; int txtshadowwei;
 	bool floating;
+	bool floatshadow;
 	int status; // button status: free(0) / cursor-on(1) / clicked(2)
 	std::function<void()> clickEvent; // event when clicked
 	explicit circBUTTON() {
@@ -54,8 +55,8 @@ class circBUTTON {
 		lnwid = 1;
 		status = 0;
 		autortcol = true;
-		shadow = true; shadowwei = 1;
-		floating = 1;
+		txtshadow = true; txtshadowwei = 1;
+		floating = 1; floatshadow = 1;
 	}
 	~circBUTTON() {
 		delimage(button);
@@ -80,11 +81,12 @@ class circBUTTON {
 	}
 	inline circBUTTON& draw() {
 		delimage(button);
-		button = newimage(radius * 2 + 3, radius * 2 + 3);
+		if(floating && floatshadow) button = newimage(radius * 2 + 3, radius * 2 + 3);
+		else button = newimage(radius * 2, radius * 2);
 		setbkcolor(0xff222222, button);
 		setbkcolor_f(0xff222222, button);
 		setbkmode(TRANSPARENT, button);
-		if((status == 1 || status == 2) && floating) {
+		if((status == 1 || status == 2) && floating && floatshadow) {
 			setfillcolor(0xff008080, button);
 			fillellipse(radius + 3, radius + 3, radius, radius, button);
 		}
@@ -100,9 +102,9 @@ class circBUTTON {
 		else if(halign == CENTER_TEXT) oy = (radius * 2 - fonthei * (text.size() - 1)) / 2;
 		else oy = radius * 2 - fonthei * (text.size() - 1) - 1;
 		for(auto s:text) {
-			if(shadow) {
+			if(txtshadow) {
 				setcolor(0xff008080, button);
-				outtextxy(ox+shadowwei, oy+shadowwei, s.c_str(), button);
+				outtextxy(ox+txtshadowwei, oy+txtshadowwei, s.c_str(), button);
 			}
 			setcolor(txtcol, button);
 			outtextxy(ox, oy, s.c_str(), button);

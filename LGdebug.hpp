@@ -14,6 +14,8 @@
 // clear the full window: too slow, don't use!
 
 namespace LGdebug{
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	
 	inline void clearance() {
 		HANDLE hdout = GetStdHandle(STD_OUTPUT_HANDLE);
 		CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -64,6 +66,10 @@ namespace LGdebug{
 		return 0;
 	}
 	
+	inline void Color(int x){
+		SetConsoleTextAttribute(hOut, x);
+	}
+	
 	// foreground color
 	inline void setfcolor(int RGB) { printf("\033[38;2;%d;%d;%dm", RGB / 65536, RGB / 256 % 256, RGB % 256); }
 	inline void setfcolor(int R, int G, int B) { printf("\033[38;2;%d;%d;%dm", R, G, B); }
@@ -90,6 +96,7 @@ namespace LGdebug{
 	char numS[15];
 	Picxel nptMap[505][505], ptMap[505][505];
 	int ptH, ptW;
+	int COLOR[20]={7,1,2,3,4,5,6,8,9,10,11,12,13,14,15};
 	
 	void initMap(){
 		ptH = mapH;
@@ -97,27 +104,24 @@ namespace LGdebug{
 	}
 	
 	void printFrame(){
-		gotoxy(0, 1);
-		for (int i = 1; i <= ptW; i++)
-			printf("-");
-		gotoxy(ptH + 1, 1);
-		for (int i = 1; i <= ptW; i++)
-			printf("-");
-		for (int i = 1; i <= ptH; i++)
-		{
-			gotoxy(i, 0);
+		gotoxy(1, 2);
+		for (int i = 1; i <= ptW; i++) printf("-");
+		gotoxy(ptH + 2, 2);
+		for (int i = 1; i <= ptW; i++) printf("-");
+		for (int i = 1; i <= ptH; i++){
+			gotoxy(i+1, 1);
 			printf("|");
-			gotoxy(i, ptW + 1);
+			gotoxy(i+1, ptW + 2);
 			printf("|");
 		}
 	
-		gotoxy(0, ptW + 1);
+		gotoxy(1, ptW + 2);
 		printf("+");
-		gotoxy(0, 0);
+		gotoxy(1, 1);
 		printf("+");
-		gotoxy(ptH + 1, 0);
+		gotoxy(ptH + 2, 1);
 		printf("+");
-		gotoxy(ptH + 1, ptW + 1);
+		gotoxy(ptH + 2, ptW + 2);
 		printf("+");
 	}
 	
@@ -250,7 +254,7 @@ namespace LGdebug{
 				fillNs(i, j * 5 - 3, j * 5 - 1);
 			}else gameMap[i][j].army = 0;
 			
-			fillCf(i, j * 5 - 4, i, j * 5, gameMap[i][j].team);
+			fillCf(i, j * 5 - 4, i, j * 5, COLOR[gameMap[i][j].team]);
 		}else{
 			switch (gameMap[i][j].type){
 				case 0:
@@ -272,22 +276,30 @@ namespace LGdebug{
 	
 	void printMap(int PTC){
 		writeMap(PTC);
-		setfcolor(playerInfo[0].color);
-		setbcolor(playerInfo[1].color);
-		puts("f");
-		register int i, j, ncolorFront = 0, ncolorBack = 0;
+		Color(7);
+		register int i, j, ncolorFront = 7, ncolorBack = 0;
 		
-//		for (i = 1; i <= ptH; i++)
-//		for (j = 1; j <= ptW; j++)
-//		if (!(nptMap[i][j] == ptMap[i][j])){
-//			if (nptMap[i][j].colorFront != ncolorFront || nptMap[i][j].colorBack != ncolorBack){
-//				setfcolor(playerInfo[ncolorFront = nptMap[i][j].colorFront].color);
-//				setbcolor(playerInfo[ncolorBack = nptMap[i][j].colorBack].color);
-//			}
-//			
-//			gotoxy(i, j);
-//			putchar(nptMap[i][j].Chr);
-//			ptMap[i][j] = nptMap[i][j];
-//		}
+		for (i = 1; i <= ptH; i++)
+		for (j = 1; j <= ptW; j++)
+		if (!(nptMap[i][j] == ptMap[i][j])){
+			if (nptMap[i][j].colorFront != ncolorFront || nptMap[i][j].colorBack != ncolorBack)
+			Color((ncolorFront = nptMap[i][j].colorFront)+(ncolorBack = nptMap[i][j].colorBack));
+			
+			gotoxy(i+1, j+1);
+			putchar(nptMap[i][j].Chr);
+			ptMap[i][j] = nptMap[i][j];
+		}
+	}
+	
+	void debugBegin(){
+		initattr();
+		int mapNum,plCnt,stDel,PTC;
+		
+		puts("DEBUG! DEBUG! DEBUG!");
+		scanf("%d%d%d%d",&mapNum,&plCnt,&stDel,&PTC);
+		readMap(mapNum);
+		initMap();
+		
+		
 	}
 }

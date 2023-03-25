@@ -34,11 +34,24 @@
 #include "LGgame.hpp"
 #include "LGweb.hpp"
 
+/* DEBUG */
+#include "LGdebug.hpp"
+
 /*************** the main function ***************/
 signed main(signed argc, char** argv) {
-	FreeConsole();
+//	FreeConsole();
+	LGdebug::initattr();
 	initMaps();
-	MainPage(); // start main page
+	readMap(6);
+	LGdebug::initMap();
+//	LGdebug::writeMap(1);
+//	for(int i=1;i<=mapH;i++) for(int j=1;j<=mapW;j++)
+//	printf("%d %d %d %d\n",i,j,gameMap[i][j].type,gameMap[i][j].team);
+//	for(int i=1;i<=LGdebug::ptH;i++) for(int j=1;j<=LGdebug::ptW;j++)
+//	printf("%d %d %c %d %d\n",i,j,LGdebug::nptMap[i][j].Chr,\
+//	LGdebug::nptMap[i][j].colorBack,LGdebug::nptMap[i][j].colorFront);
+	LGdebug::printMap(1);
+//	MainPage(); // start main page
 	exitExe();	// exit program
 }
 

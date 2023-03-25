@@ -673,6 +673,15 @@ namespace LGGraphics {
 		}
 		xyprintf(250 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY,
 		         "Current Count: %d", plCnt);
+		xyprintf(800 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
+		         "Input Game Speed");
+		xyprintf(800 * mapDataStore.mapSizeX, 400 * mapDataStore.mapSizeY,
+		         "(integer between 1 and 10000)");
+		speedBox.create();
+		speedBox.move(500 * mapDataStore.mapSizeX, 450 * mapDataStore.mapSizeY);
+		speedBox.size(300 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY);
+		speedBox.setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		speedBox.visible(true);
 		for(; is_run(); delay_fps(120)) {
 			for(int i=2; i<=12; ++i) {
 				plCntBox[i].detect().display();

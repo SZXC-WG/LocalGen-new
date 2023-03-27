@@ -645,7 +645,7 @@ namespace LGGraphics {
 		rectBUTTON speedSubmit;
 		rectBUTTON plCntBox[15]; /* 2~12 */
 		rectBUTTON checkBox[15]; /* 2~12 */
-		plCnt = 2;
+		plCnt = 2; stDel = 1;
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
 		xyprintf(250 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
@@ -678,10 +678,24 @@ namespace LGGraphics {
 		xyprintf(800 * mapDataStore.mapSizeX, 400 * mapDataStore.mapSizeY,
 		         "(integer between 1 and 10000)");
 		speedBox.create();
-		speedBox.move(500 * mapDataStore.mapSizeX, 450 * mapDataStore.mapSizeY);
+		speedBox.move(575 * mapDataStore.mapSizeX, 450 * mapDataStore.mapSizeY);
 		speedBox.size(300 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY);
 		speedBox.setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		speedBox.setcolor(mainColor);
 		speedBox.visible(true);
+		speedSubmit
+		.setsize(150 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY)
+		.setlocation(900 * mapDataStore.mapSizeX, 450 * mapDataStore.mapSizeY)
+		.setfontname("Quicksand")
+		.setfontsz(50 * mapDataStore.mapSizeY, 0)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setalign(CENTER_TEXT,CENTER_TEXT)
+		.addtext("submit");
+		speedSubmit.display();
+		xyprintf(800 * mapDataStore.mapSizeX, 550 * mapDataStore.mapSizeY,
+		         "Current Speed: %d", stDel);
+		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {
 			for(int i=2; i<=12; ++i) {
 				plCntBox[i].detect().display();
@@ -690,8 +704,21 @@ namespace LGGraphics {
 			setfillcolor(bgColor);
 			bar(55 * mapDataStore.mapSizeX, 701 * mapDataStore.mapSizeY,
 			    455 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
-			xyprintf(250 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY,
+			xyprintf(250 * mapDataStore.mapSizeX, 775 * mapDataStore.mapSizeY,
 			         "Current Count: %d", plCnt);
+			speedSubmit.detect().display();
+			if(speedSubmit.status == 2) {
+				char s[105];
+				speedBox.gettext(sizeof(s),s);
+				int t=stDel;
+				int f=sscanf(s,"%d",&stDel);
+				if(f!=1) stDel=t;
+				if(stDel<=0||stDel>10000) stDel=t;
+			}
+			bar(600 * mapDataStore.mapSizeX, 501 * mapDataStore.mapSizeY,
+			    1050 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY);
+			xyprintf(800 * mapDataStore.mapSizeX, 550 * mapDataStore.mapSizeY,
+			         "Current Speed: %d", stDel);
 		}
 	}
 

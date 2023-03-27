@@ -310,16 +310,18 @@ void initMaps() {
 	getAllFiles("maps", files, ".ini");
 	for(auto x : files) {
 		string s = x.substr(0, x.size() - 4);
-		string chin, engn;
+		string chin, engn, auth;
 		std::ifstream inif(x);
 		std::getline(inif, chin);
 		std::getline(inif, engn);
+		std::getline(inif, auth);
 		inif.close();
 		++mapNum;
 		maps[mapNum].id = mapNum;
 		maps[mapNum].chiname = chin;
 		maps[mapNum].engname = engn;
 		maps[mapNum].filename = s + ".lg";
+		maps[mapNum].auth = auth;
 		std::ifstream lgf(maps[mapNum].filename);
 		lgf.getline(strdeZip, sizeof strdeZip);
 		lgf.close();

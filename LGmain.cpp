@@ -39,12 +39,12 @@
 
 /*************** the main function ***************/
 signed main(signed argc, char** argv) {
-//	FreeConsole();
+	FreeConsole();
 	initMaps();
-//	MainPage(); // start main page
-//	exitExe();	// exit program
+	MainPage(); // start main page
+	exitExe();	// exit program
 	
-	LGdebug::debugBegin();
+//	LGdebug::debugBegin();
 }
 
 #endif // __LGMAIN_CPP__

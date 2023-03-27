@@ -13,6 +13,8 @@
 
 // clear the full window: too slow, don't use!
 
+#include<conio.h>
+
 namespace LGdebug{
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	
@@ -291,15 +293,173 @@ namespace LGdebug{
 		}
 	}
 	
-	void debugBegin(){
+	int debugBegin(){
 		initattr();
 		int mapNum,plCnt,stDel,PTC;
 		
 		puts("DEBUG! DEBUG! DEBUG!");
 		scanf("%d%d%d%d",&mapNum,&plCnt,&stDel,&PTC);
-		readMap(mapNum);
+		
+		if(mapNum < 6) {
+			int ht,wt;
+			scanf("%d%d",&ht,&wt);
+			
+			switch(mapNum) {
+				case 1: createRandomMap(ht,wt); break;
+				case 2: createStandardMap(ht,wt); break;
+				case 3: puts("BUG!");return 1;
+				case 4: createFullSwampMap(ht,wt,plCnt); break;
+				case 5: createFullPlainMap(ht,wt,plCnt); break;
+			}
+		} else readMap(mapNum);
+		
 		initMap();
+		clearance();
+		int robotId[64];
+		playerCoord coordinate[64];
+		std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+		for(int i = 2; i <= plCnt; ++i)
+			robotId[i] = mtrd() % 300 + 1;
+//			for(int i=2; i<=playerCnt/2+1; ++i) robotId[i] = 1;
+//			for(int i=playerCnt/2+2; i<=playerCnt; ++i) robotId[i] = 51; // for robot debug
+		LGgame::initGenerals(coordinate);
+		LGgame::updateMap();
+		printMap(PTC);
+		std::deque<int> movement;
+		LGgame::curTurn = 0;
+		bool gameEnd = 0;
+		std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
 		
-		
+		while(1) {gotoxy(20,1);puts("fuck?");
+			if(_kbhit()) {
+//				int ch = getch();
+//				switch(ch = tolower(ch)) {
+//					case int(' '):
+//						while(getch() != ' ')
+//							;
+//						break;
+//					case int('c'):
+//						clearance();
+//						break;
+//					case int('w'):
+//						movement.emplace_back(1);
+//						break;
+//					case int('a'):
+//						movement.emplace_back(2);
+//						break;
+//					case int('s'):
+//						movement.emplace_back(3);
+//						break;
+//					case int('d'):
+//						movement.emplace_back(4);
+//						break;
+//					case 224: { /**/
+//						ch = getch();
+//						switch(ch) {
+//							case 72: /*[UP]*/
+//								movement.emplace_back(5);
+//								break;
+//							case 75: /*[LEFT]*/
+//								movement.emplace_back(6);
+//								break;
+//							case 80: /*[RIGHT]*/
+//								movement.emplace_back(7);
+//								break;
+//							case 77: /*[DOWN]*/
+//								movement.emplace_back(8);
+//								break;
+//						}
+//						break;
+//					}
+//					case int('g'):
+//						movement.emplace_back(0);
+//						break;
+//					case int('e'):
+//						if(!movement.empty())
+//							movement.pop_back();
+//						break;
+//					case int('q'):
+//						movement.clear();
+//						break;
+//					case 27:
+//						MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK);
+//						return 0;
+//					case int('\b'): {
+//						if(!LGgame::isAlive[1])
+//							break;
+//						int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO);
+//						if(confirmSur == 7)
+//							break;
+//						LGgame::isAlive[1] = 0;
+//						for(int i = 1; i <= mapH; ++i) {
+//							for(int j = 1; j <= mapW; ++j) {
+//								if(gameMap[i][j].team == 1) {
+//									gameMap[i][j].team = 0;
+//									if(gameMap[i][j].type == 3)
+//										gameMap[i][j].type = 4;
+//								}
+//							}
+//						}
+//						break;
+//					}
+//				}
+			}
+			gotoxy(21,1);puts("fuck!");
+			if(std::chrono::steady_clock::now().time_since_epoch() - lPT < std::chrono::milliseconds(stDel))
+				continue;
+			LGgame::updateMap();
+			while(!movement.empty() && LGgame::analyzeMove(1, movement.front(), coordinate[1]))
+				movement.pop_front();
+			if(!movement.empty())
+				movement.pop_front();
+			for(int i = 2; i <= LGgame::playerCnt; ++i) {
+				if(!LGgame::isAlive[i])
+					continue;
+				switch(robotId[i]) {
+					case 1 ... 100:
+						LGgame::analyzeMove(i, smartRandomBot::smartRandomBot(i, coordinate[i]), coordinate[i]);
+						break;
+					case 101 ... 200:
+						LGgame::analyzeMove(i, xrzBot::xrzBot(i, coordinate[i]), coordinate[i]);
+						break;
+					case 201 ... 300:
+						LGgame::analyzeMove(i, xiaruizeBot::xiaruizeBot(i, coordinate[i]), coordinate[i]);
+						break;
+					default:
+						LGgame::analyzeMove(i, 0, coordinate[i]);
+				}
+			}
+			LGgame::flushMove();
+			if(PTC!=1048575) {
+				int alldead = 0;
+				for(int i=1; i<=plCnt&&!alldead; ++i) {
+					if(PTC&(1<<i)) if(LGgame::isAlive[i]) alldead=1;
+				}
+				if(!alldead) {
+					PTC=1048575;
+					MessageBox(nullptr,"ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.","TIP",MB_OK);
+				}
+			}
+			if(!gameEnd) {
+				int ed = 0;
+				for(int i = 1; i <= plCnt; ++i)
+					ed |= (LGgame::isAlive[i] << i);
+				if(__builtin_popcount(ed) == 1) {
+					MessageBox(nullptr,
+					           ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
+					            "THE GAME WILL CONTINUE." + "\n" +
+					            "YOU CAN PRESS [ESC] TO EXIT.")
+					           .c_str(),
+					           "GAME END", MB_OK);
+					gameEnd = 1;
+					PTC = 1048575;
+				}
+			}
+			gotoxy(1, 1);
+			printMap(PTC, coordinate[1]);
+			fflush(stdout);
+			lPT = std::chrono::steady_clock::now().time_since_epoch();
+		}
+		return 0;
 	}
 }

@@ -645,6 +645,7 @@ namespace LGGraphics {
 		rectBUTTON speedSubmit;
 		rectBUTTON plCntBox[15]; /* 2~12 */
 		rectBUTTON checkBox[15]; /* 2~12 */
+		rectBUTTON checkOA;
 		plCnt = 2; stDel = 1;
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
@@ -695,6 +696,23 @@ namespace LGGraphics {
 		speedSubmit.display();
 		xyprintf(800 * mapDataStore.mapSizeX, 550 * mapDataStore.mapSizeY,
 		         "Current Speed: %d", stDel);
+		xyprintf(1350 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
+		         "Choose Visible Players:");
+		for(int i=1; i<=12; ++i) {
+			int rowNum = (i - 1) / 4;
+			int colNum = (i - 1) % 4;
+			checkBox[i]
+			.addtext(playerInfo[i].name)
+			.setalign(CENTER_TEXT, CENTER_TEXT)
+			.setfontname("Quicksand")
+			.setfontsz(40 * mapDataStore.mapSizeY, 0)
+			.setsize(100 * mapDataStore.mapSizeX - 1*2, 100 * mapDataStore.mapSizeY - 1*2)
+			.setlocation(1150 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum + 1,
+			             400 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum + 1);
+			checkBox[i].floatshadow = false;
+			checkBox[i].txtshadow = false;
+		}
+		cheatCode = 0b0000000000010;
 		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {
 			for(int i=2; i<=12; ++i) {
@@ -704,7 +722,7 @@ namespace LGGraphics {
 			setfillcolor(bgColor);
 			bar(55 * mapDataStore.mapSizeX, 701 * mapDataStore.mapSizeY,
 			    455 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
-			xyprintf(250 * mapDataStore.mapSizeX, 775 * mapDataStore.mapSizeY,
+			xyprintf(250 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY,
 			         "Current Count: %d", plCnt);
 			speedSubmit.detect().display();
 			if(speedSubmit.status == 2) {
@@ -719,6 +737,35 @@ namespace LGGraphics {
 			    1050 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY);
 			xyprintf(800 * mapDataStore.mapSizeX, 550 * mapDataStore.mapSizeY,
 			         "Current Speed: %d", stDel);
+			setfillcolor(bgColor);
+			bar(1150 * mapDataStore.mapSizeX, 400 * mapDataStore.mapSizeY,
+			    1550 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
+			xyprintf(1350 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
+			         "Choose Visible Players:");
+			for(int i=1; i<=plCnt; ++i) {
+				if(cheatCode>>i&1) {
+					checkBox[i]
+					.setbgcol(playerInfo[i].color)
+					.settxtcol(WHITE);;
+				} else {
+					checkBox[i]
+					.setbgcol(bgColor)
+					.settxtcol(playerInfo[i].color);;
+				}
+				int rowNum = (i - 1) / 4;
+				int colNum = (i - 1) % 4;
+				rectangle(1150 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum,
+				          400 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum,
+				          1250 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum,
+				          500 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum);
+				checkBox[i].detect().display();
+				if(checkBox[i].status == 2) {
+					cheatCode &= (((1<<plCnt)-1)<<1);
+					cheatCode ^= (1<<i);
+				}
+				// checkOA.detect().display();
+				// if(checkOA.status == 2) checkCode = 1048575;
+			}
 		}
 	}
 

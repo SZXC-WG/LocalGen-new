@@ -34,22 +34,35 @@ void printNum(bool visible, long long army, int team, int curx, int cury) {
 		if(army < 0) {
 			register long long absd = -army;
 			if(absd < 100)
-				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%lld", army);
+				xyprintf(LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1) + widthPerBlock / 2,
+				         LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1) + heightPerBlock / 2,
+				         "%lld", army);
 			else if(absd < (ll)(1e13)) {
 				string p = to_string(army);
-				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+				xyprintf(LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1) + widthPerBlock / 2,
+				         LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1) + heightPerBlock / 2,
+				         "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 			} else
-				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "-MX");
+				xyprintf(LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1) + widthPerBlock / 2,
+				         LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1) + heightPerBlock / 2,
+				         "-MX");
 		} else if(army == 0) {
 			if(gameMap[curx][cury].type != 0 && gameMap[curx][cury].type != 1)
-				xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "0");
+				xyprintf(LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1) + widthPerBlock / 2,
+				         LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1) + heightPerBlock / 2,
+				         "0");
 		} else if(army < 1000)
-			xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%lld", army);
+			xyprintf(LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1) + widthPerBlock / 2,
+			         LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1) + heightPerBlock / 2,
+			         "%lld", army);
 		else if(army < (ll)(1e14)) {
 			string p = to_string(army);
-			xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
+			xyprintf(LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1) + widthPerBlock / 2,
+			         LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1) + heightPerBlock / 2,
+			         "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
 		} else
-			xyprintf(widthPerBlock * (cury - 1) + widthPerBlock / 2, heightPerBlock * (curx - 1) + heightPerBlock / 2, "MAX");
+			xyprintf(LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1) + widthPerBlock / 2,
+			         LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1) + heightPerBlock / 2, "MAX");
 	}
 }
 
@@ -61,6 +74,12 @@ void printMap(int printCode, playerCoord coo) {
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
+	PIMAGE npimg[7];
+	for(int i=1; i<=6; ++i) {
+		npimg[i] = newimage();
+		imageOperation::copyImage(npimg[i],pimg[i]);
+		imageOperation::zoomImage(npimg[i],widthPerBlock,heightPerBlock);
+	}
 	for(int curx = 1; curx <= mapH; curx++) {
 		for(int cury = 1; cury <= mapW; cury++) {
 			if(isVisible(curx, cury, printCode)) {
@@ -79,7 +98,10 @@ void printMap(int printCode, playerCoord coo) {
 					setfillcolor(playerInfo[gameMap[curx][cury].team].color);
 			} else
 				setfillcolor(unseen);
-			bar(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock * cury, heightPerBlock * curx);
+			bar(LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+			    LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1),
+			    LGGraphics::mapDataStore.maplocX + widthPerBlock * cury,
+			    LGGraphics::mapDataStore.maplocY + heightPerBlock * curx);
 			// ege_fillrect(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock, heightPerBlock);
 			switch(gameMap[curx][cury].type) {
 				case 0: {
@@ -89,38 +111,53 @@ void printMap(int printCode, playerCoord coo) {
 				}
 				case 1: {
 					/* swamp */
-					putimage_withalpha(NULL, pimg[4], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+					putimage_withalpha(NULL, npimg[4],
+					                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+					                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 					break;
 				}
 				case 2: {
 					/* mountain */
 					if(isVisible(curx, cury, printCode))
-						putimage_withalpha(NULL, pimg[3], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+						putimage_withalpha(NULL, npimg[3],
+						                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+						                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					else
-						putimage_withalpha(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+						putimage_withalpha(NULL, npimg[5],
+						                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+						                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					break;
 				}
 				case 3: {
 					/* general */
 					if(isVisible(curx, cury, printCode))
-						putimage_withalpha(NULL, pimg[2], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+						putimage_withalpha(NULL, npimg[2],
+						                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+						                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 					break;
 				}
 				case 4: {
 					/* city */
 					if(isVisible(curx, cury, printCode))
-						putimage_withalpha(NULL, pimg[1], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+						putimage_withalpha(NULL, npimg[1],
+						                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+						                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					else
-						putimage_withalpha(NULL, pimg[5], widthPerBlock * (cury - 1), heightPerBlock * (curx - 1));
+						putimage_withalpha(NULL, npimg[5],
+						                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+						                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
 					break;
 				}
 			}
 		}
 	}
-	putimage_withalpha(NULL, pimg[6], widthPerBlock * (coo.y - 1), heightPerBlock * (coo.x - 1));
+	putimage_withalpha(NULL, npimg[6],
+	                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
+	                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
+	for(int i=1; i<=6; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 

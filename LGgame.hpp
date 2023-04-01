@@ -329,12 +329,32 @@ namespace LGlocal {
 		int lastFlushTurn = 0;
 		LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
 		flushkey();
+		int midact = 0;
+		int smsx = 0, smsy = 0;
 		for(; is_run();) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
-				if(msg.is_down() && msg.is_left() && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH) {
-					int lin = (msg.y + heightPerBlock - 1) / heightPerBlock;
-					int col = (msg.x + widthPerBlock - 1) / widthPerBlock;
+				if(msg.is_wheel()) {
+					widthPerBlock += msg.wheel / 60;
+					heightPerBlock += msg.wheel / 60;
+				}
+				if(msg.is_move()) {
+					if(midact == 1) {
+						LGGraphics::mapDataStore.maplocX += msg.x - smsx;
+						LGGraphics::mapDataStore.maplocY += msg.y - smsy;
+						smsx = msg.x, smsy = msg.y;
+					}
+				} else if(msg.is_mid()) {
+					if(msg.is_down()) midact = 1, smsx = msg.x, smsy = msg.y;
+					else midact = 0;
+				}
+				if(msg.is_down() && msg.is_left() &&
+				   msg.x >= LGGraphics::mapDataStore.maplocX &&
+				   msg.y >= LGGraphics::mapDataStore.maplocY &&
+				   msg.x <= LGGraphics::mapDataStore.maplocX + widthPerBlock * mapW &&
+				   msg.y <= LGGraphics::mapDataStore.maplocY + heightPerBlock * mapH) {
+					int lin = (msg.y + heightPerBlock - 1 - LGGraphics::mapDataStore.maplocY) / heightPerBlock;
+					int col = (msg.x + widthPerBlock - 1 - LGGraphics::mapDataStore.maplocX) / widthPerBlock;
 					LGgame::playerCoo[1] = {lin, col};
 					movement.clear();
 				}
@@ -457,6 +477,7 @@ namespace LGlocal {
 					LGgame::printGameMessage({winnerNum, -1, LGgame::curTurn});
 				}
 			}
+			cleardevice();
 			if(1) {
 				std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				int needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);

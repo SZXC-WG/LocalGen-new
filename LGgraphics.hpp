@@ -17,6 +17,10 @@
 #include "LGdef.hpp"
 
 namespace imageOperation {
+	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
+		if(dstimg == NULL || srcimg == NULL) return;
+		getimage(dstimg,srcimg,0,0,getwidth(srcimg),getheight(srcimg));
+	}
 	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
 		if((pimg == NULL) || (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
 			return;
@@ -807,32 +811,31 @@ namespace LGGraphics {
 	}
 
 	void init() {
-		heightPerBlock = (900.0 * mapDataStore.mapSizeY / (double)mapH);
-		widthPerBlock = (900.0 * mapDataStore.mapSizeX / (double)mapW);
+		heightPerBlock = 24 * mapDataStore.mapSizeY;
+		widthPerBlock = 24 * mapDataStore.mapSizeX;
 		heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
 		mapDataStore.widthPerBlock = widthPerBlock;
 		mapDataStore.heightPerBlock = heightPerBlock;
 		setbkmode(TRANSPARENT);
 		pimg[1] = newimage();
 		getimage(pimg[1], "img/city.png");
-		imageOperation::zoomImage(pimg[1], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[1], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[2] = newimage();
 		getimage(pimg[2], "img/crown.png");
-		imageOperation::zoomImage(pimg[2], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[2], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[3] = newimage();
 		getimage(pimg[3], "img/mountain.png");
-		imageOperation::zoomImage(pimg[3], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[3], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[4] = newimage();
 		getimage(pimg[4], "img/swamp.png");
-		imageOperation::zoomImage(pimg[4], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[4], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[5] = newimage();
 		getimage(pimg[5], "img/obstacle.png");
-		imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[6] = newimage();
 		getimage(pimg[6], "img/currentOn.png");
-		imageOperation::zoomImage(pimg[6], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
-		for(int i = 1; i <= 6; i++)
-			ege_enable_aa(true, pimg[i]);
+		// imageOperation::zoomImage(pimg[6], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		for(int i = 1; i <= 6; i++) ege_enable_aa(true, pimg[i]);
 		ege_enable_aa(true);
 		setbkcolor(0x222222);
 		setbkcolor_f(0x222222);

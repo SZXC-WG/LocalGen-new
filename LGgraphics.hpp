@@ -744,6 +744,7 @@ namespace LGGraphics {
 				plCntBox[i].detect().display();
 				if(plCntBox[i].status == 2) plCnt = i;
 			}
+			plCnt = min(plCnt, maps[mapSelected].generalcnt + maps[mapSelected].plaincnt);
 			setfillcolor(bgColor);
 			bar(55 * mapDataStore.mapSizeX, 701 * mapDataStore.mapSizeY,
 			    455 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);

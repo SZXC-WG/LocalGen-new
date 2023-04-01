@@ -336,6 +336,8 @@ namespace LGlocal {
 				if(msg.is_wheel()) {
 					widthPerBlock += msg.wheel / 60;
 					heightPerBlock += msg.wheel / 60;
+					widthPerBlock = max(widthPerBlock, 2);
+					heightPerBlock = max(heightPerBlock, 2);
 				}
 				if(msg.is_move()) {
 					if(midact == 1) {

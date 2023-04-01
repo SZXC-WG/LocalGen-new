@@ -17,6 +17,10 @@
 #include "LGdef.hpp"
 
 namespace imageOperation {
+	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
+		if(dstimg == NULL || srcimg == NULL) return;
+		getimage(dstimg,srcimg,0,0,getwidth(srcimg),getheight(srcimg));
+	}
 	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
 		if((pimg == NULL) || (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
 			return;
@@ -247,6 +251,7 @@ namespace LGGraphics {
 			putimage(100 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_wc);
 			putimage((100 + 800) * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_ap);
 			xyprintf(800 * mapDataStore.mapSizeX, 830 * mapDataStore.mapSizeY, "press any key to close...");
+			delimage(donate_wc); delimage(donate_ap);
 			flushkey();
 			getkey();
 		}).display();
@@ -260,15 +265,15 @@ namespace LGGraphics {
 			if(local.status == 2) {
 				localOptions(); break;
 			}
-			if(web.status == 2) {
-				webOptions(); break;
-			}
-			if(replay.status == 2) {
-				replayPage(); break;
-			}
-			if(createmap.status == 2) {
-				createMapPage(); break;
-			}
+			// if(web.status == 2) {
+			// 	webOptions(); break;
+			// }
+			// if(replay.status == 2) {
+			// 	replayPage(); break;
+			// }
+			// if(createmap.status == 2) {
+			// 	createMapPage(); break;
+			// }
 			if(donate.status == 2) {
 				donate.clickEvent(); goto WelcomePageStartLabel;
 			}
@@ -645,7 +650,9 @@ namespace LGGraphics {
 		rectBUTTON speedSubmit;
 		rectBUTTON plCntBox[15]; /* 2~12 */
 		rectBUTTON checkBox[15]; /* 2~12 */
-		plCnt = 2;
+		rectBUTTON checkOA;
+		rectBUTTON gameBox;
+		plCnt = 2; stDel = 1;
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
 		xyprintf(250 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
@@ -678,53 +685,161 @@ namespace LGGraphics {
 		xyprintf(800 * mapDataStore.mapSizeX, 400 * mapDataStore.mapSizeY,
 		         "(integer between 1 and 10000)");
 		speedBox.create();
-		speedBox.move(500 * mapDataStore.mapSizeX, 450 * mapDataStore.mapSizeY);
+		speedBox.move(575 * mapDataStore.mapSizeX, 450 * mapDataStore.mapSizeY);
 		speedBox.size(300 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY);
 		speedBox.setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		speedBox.setcolor(mainColor);
 		speedBox.visible(true);
+		speedSubmit
+		.setsize(150 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY)
+		.setlocation(900 * mapDataStore.mapSizeX, 450 * mapDataStore.mapSizeY)
+		.setfontname("Quicksand")
+		.setfontsz(50 * mapDataStore.mapSizeY, 0)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setalign(CENTER_TEXT,CENTER_TEXT)
+		.addtext("submit");
+		speedSubmit.display();
+		xyprintf(800 * mapDataStore.mapSizeX, 550 * mapDataStore.mapSizeY,
+		         "Current Speed: %d", stDel);
+		xyprintf(1350 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
+		         "Choose Visible Players:");
+		cheatCode = 0b0000000000010;
+		for(int i=1; i<=12; ++i) {
+			int rowNum = (i - 1) / 4;
+			int colNum = (i - 1) % 4;
+			checkBox[i]
+			.addtext(playerInfo[i].name)
+			.setalign(CENTER_TEXT, CENTER_TEXT)
+			.setfontname("Quicksand")
+			.setfontsz(40 * mapDataStore.mapSizeY, 0)
+			.setsize(100 * mapDataStore.mapSizeX - 1*2, 100 * mapDataStore.mapSizeY - 1*2)
+			.setlocation(1150 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum + 1,
+			             400 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum + 1);
+			checkBox[i].floatshadow = false;
+			checkBox[i].txtshadow = false;
+		}
+		checkOA
+		.setsize(400 * mapDataStore.mapSizeX - 1*2, 100 * mapDataStore.mapSizeY - 1*2)
+		.setlocation(1150 * mapDataStore.mapSizeX + 1, 700 * mapDataStore.mapSizeY + 1)
+		.addtext("Overall Select")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setfontname("Quicksand")
+		.setfontsz(50 * mapDataStore.mapSizeY, 0);
+		checkOA.floatshadow = false;
+		checkOA.txtshadow = false;
+		checkOA.display();
+		gameBox
+		.setsize(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.setlocation(1150 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.addtext("START")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setfontname("Quicksand")
+		.setfontsz(50 * mapDataStore.mapSizeY, 0)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor);
+		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {
 			for(int i=2; i<=12; ++i) {
 				plCntBox[i].detect().display();
 				if(plCntBox[i].status == 2) plCnt = i;
 			}
+			plCnt = min(plCnt, maps[mapSelected].generalcnt + maps[mapSelected].plaincnt);
 			setfillcolor(bgColor);
 			bar(55 * mapDataStore.mapSizeX, 701 * mapDataStore.mapSizeY,
 			    455 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
 			xyprintf(250 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY,
 			         "Current Count: %d", plCnt);
+			speedSubmit.detect().display();
+			if(speedSubmit.status == 2) {
+				char s[105];
+				speedBox.gettext(sizeof(s),s);
+				int t=stDel;
+				int f=sscanf(s,"%d",&stDel);
+				if(f!=1) stDel=t;
+				if(stDel<=0||stDel>10000) stDel=t;
+			}
+			bar(600 * mapDataStore.mapSizeX, 501 * mapDataStore.mapSizeY,
+			    1050 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY);
+			xyprintf(800 * mapDataStore.mapSizeX, 550 * mapDataStore.mapSizeY,
+			         "Current Speed: %d", stDel);
+			setfillcolor(bgColor);
+			bar(1150 * mapDataStore.mapSizeX, 400 * mapDataStore.mapSizeY,
+			    1550 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
+			xyprintf(1350 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
+			         "Choose Visible Players:");
+			for(int i=1; i<=plCnt; ++i) {
+				if(cheatCode>>i&1) {
+					checkBox[i]
+					.setbgcol(playerInfo[i].color)
+					.settxtcol(WHITE);;
+				} else {
+					checkBox[i]
+					.setbgcol(bgColor)
+					.settxtcol(playerInfo[i].color);;
+				}
+				int rowNum = (i - 1) / 4;
+				int colNum = (i - 1) % 4;
+				rectangle(1150 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum,
+				          400 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum,
+				          1250 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum,
+				          500 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum);
+				checkBox[i].detect().display();
+				if(checkBox[i].status == 2) {
+					cheatCode &= (((1<<plCnt)-1)<<1);
+					cheatCode ^= (1<<i);
+				}
+			}
+			if(cheatCode == 1048575) {
+				checkOA
+				.setbgcol(mainColor)
+				.settxtcol(WHITE);
+			} else {
+				checkOA
+				.setbgcol(bgColor)
+				.settxtcol(mainColor);
+			}
+			rectangle(1150 * mapDataStore.mapSizeX, 700 * mapDataStore.mapSizeY,
+			          1550 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
+			checkOA.detect().display();
+			if(checkOA.status == 2) {
+				if(cheatCode != 1048575) cheatCode = 1048575;
+				else cheatCode = 0b0000000000010;
+			}
+			gameBox.detect().display();
+			if(gameBox.status == 2) return;
 		}
 	}
 
 	void init() {
-		heightPerBlock = (900.0 * mapDataStore.mapSizeY / (double)mapH);
-		widthPerBlock = (900.0 * mapDataStore.mapSizeX / (double)mapW);
+		heightPerBlock = 28 * mapDataStore.mapSizeY;
+		widthPerBlock = 28 * mapDataStore.mapSizeX;
 		heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
 		mapDataStore.widthPerBlock = widthPerBlock;
 		mapDataStore.heightPerBlock = heightPerBlock;
 		setbkmode(TRANSPARENT);
 		pimg[1] = newimage();
 		getimage(pimg[1], "img/city.png");
-		imageOperation::zoomImage(pimg[1], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[1], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[2] = newimage();
 		getimage(pimg[2], "img/crown.png");
-		imageOperation::zoomImage(pimg[2], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[2], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[3] = newimage();
 		getimage(pimg[3], "img/mountain.png");
-		imageOperation::zoomImage(pimg[3], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[3], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[4] = newimage();
 		getimage(pimg[4], "img/swamp.png");
-		imageOperation::zoomImage(pimg[4], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[4], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[5] = newimage();
 		getimage(pimg[5], "img/obstacle.png");
-		imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		pimg[6] = newimage();
 		getimage(pimg[6], "img/currentOn.png");
-		imageOperation::zoomImage(pimg[6], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
-		for(int i = 1; i <= 6; i++)
-			ege_enable_aa(true, pimg[i]);
+		// imageOperation::zoomImage(pimg[6], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		for(int i = 1; i <= 6; i++) ege_enable_aa(true, pimg[i]);
 		ege_enable_aa(true);
-		setbkcolor(0x222222);
-		setbkcolor_f(0x222222);
+		setbkcolor(0xff222222);
+		setbkcolor_f(0xff222222);
 		cleardevice();
 	}
 }

@@ -153,7 +153,7 @@ bool operator== (playerCoord a,playerCoord b) {
 	return a.x==b.x&&a.y==b.y;
 }
 
-inline void exitExe() { WSACleanup();exit(0); }
+inline void exitExe() { WSACleanup(); exit(0); }
 
 bool isVisible(int,int,int);
 void printNum(bool visible, long long army, int team, int curx, int cury);
@@ -174,7 +174,7 @@ std::pair<long long, long long> bin_search(long long curTurn);
 void Zip(bool rep = false);
 void deZip();
 
-bool initSock(); 
+bool initSock();
 void toAvoidCEBugInGraphicsImportMap(string fileName);
 int localGame(int cheatCode, int plCnt, int stDel);
 
@@ -183,6 +183,7 @@ int localGame(int cheatCode, int plCnt, int stDel);
 bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60);
 
 namespace imageOperation {
+	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg);
 	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight);
 	void setWindowTransparent(bool enable, int alpha = 0xFF);
 }
@@ -201,6 +202,7 @@ namespace LGGraphics {
 		int widthPerBlock;
 		int height, width;
 		double mapSizeX, mapSizeY;
+		int maplocX, maplocY;
 	} mapDataStore;
 	void WelcomePage();
 	void localOptions();
@@ -278,7 +280,7 @@ namespace LGserver {
 	bool sockCon[SSN],lisEnd;
 	SOCKET serverSocket[SSN];
 	char sendBuf[SSL],recvBuf[SSL];
-	
+
 	void zipSendBuf();
 	void sockListen();
 	void procMessage(int sockID);
@@ -292,7 +294,7 @@ namespace LGclient {
 	char sendBuf[SSL],recvBuf[SSL];
 	int playerNumber;
 	SOCKET clientSocket;
-	
+
 	void dezipRecvBuf();
 	void sockConnect();
 	void procMessage();

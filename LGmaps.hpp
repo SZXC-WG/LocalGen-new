@@ -338,11 +338,11 @@ struct MapInfoS { int id; string chiname; string engname; string auth; int hei; 
 */
 void initMaps() {
 	mapNum = 5;
-	maps[1] = MapInfoS {1, "随机地图", "Random", "LocalGen", -1, -1, -1, -1, -1, -1, -1, string()};
-	maps[2] = MapInfoS {2, "标准地图", "Standard", "LocalGen", -1, -1, -1, -1, -1, -1, -1, string()};
-	maps[3] = MapInfoS {3, "完全塔", "Full Tower/City", "LocalGen", -1, -1, -1, 0, -1, 0, 0, string()};
-	maps[4] = MapInfoS {4, "大沼泽", "Great Swamp", "LocalGen", -1, -1, -1, -1, 0, 0, 0, string()};
-	maps[5] = MapInfoS {5, "大平原", "Great Plain", "LocalGen", -1, -1, -1, 0, 0, 0, -1, string()};
+	maps[1] = MapInfoS {1, "随机地图", "Random", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	maps[2] = MapInfoS {2, "标准地图", "Standard", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	maps[3] = MapInfoS {3, "完全塔", "Full Tower/City", "LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
+	maps[4] = MapInfoS {4, "大沼泽", "Great Swamp", "LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
+	maps[5] = MapInfoS {5, "大平原", "Great Plain", "LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
 	std::vector<string> files;
 	getAllFiles("maps", files, ".ini");
 	for(auto x : files) {

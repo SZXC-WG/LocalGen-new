@@ -247,6 +247,7 @@ namespace LGGraphics {
 			putimage(100 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_wc);
 			putimage((100 + 800) * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_ap);
 			xyprintf(800 * mapDataStore.mapSizeX, 830 * mapDataStore.mapSizeY, "press any key to close...");
+			delimage(donate_wc); delimage(donate_ap);
 			flushkey();
 			getkey();
 		}).display();

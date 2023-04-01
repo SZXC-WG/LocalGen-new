@@ -260,15 +260,15 @@ namespace LGGraphics {
 			if(local.status == 2) {
 				localOptions(); break;
 			}
-			if(web.status == 2) {
-				webOptions(); break;
-			}
-			if(replay.status == 2) {
-				replayPage(); break;
-			}
-			if(createmap.status == 2) {
-				createMapPage(); break;
-			}
+			// if(web.status == 2) {
+			// 	webOptions(); break;
+			// }
+			// if(replay.status == 2) {
+			// 	replayPage(); break;
+			// }
+			// if(createmap.status == 2) {
+			// 	createMapPage(); break;
+			// }
 			if(donate.status == 2) {
 				donate.clickEvent(); goto WelcomePageStartLabel;
 			}

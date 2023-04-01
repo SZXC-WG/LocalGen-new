@@ -200,8 +200,8 @@ void LGgame::ranklist() {
 	setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
 	static int nlen, alen, plen, clen, tlen, aihlen, botlen;
 	setfillcolor(LGGraphics::bgColor);
-	bar(1600 * LGGraphics::mapDataStore.mapSizeX - nlen - alen - plen - clen - tlen - aihlen - botlen - 35 - 5, 20 * LGGraphics::mapDataStore.mapSizeY - 5,
-	    1600 * LGGraphics::mapDataStore.mapSizeX, (LGgame::playerCnt + 2) * 20 * LGGraphics::mapDataStore.mapSizeY + 5 + 5);
+	// bar(1600 * LGGraphics::mapDataStore.mapSizeX - nlen - alen - plen - clen - tlen - aihlen - botlen - 35, 20 * LGGraphics::mapDataStore.mapSizeY,
+	//     1600 * LGGraphics::mapDataStore.mapSizeX, (LGgame::playerCnt + 2) * 20 * LGGraphics::mapDataStore.mapSizeY + 5 + 5);
 	struct node {
 		int id;
 		long long army;
@@ -324,12 +324,11 @@ namespace LGlocal {
 		printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 		LGgame::curTurn = 0;
 		bool gameEnd = 0;
-		double avefps = getfps();
-		int avefpsc = 0;
-		int lastFlushTurn = 0;
 		LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
 		flushkey();
 		int midact = 0;
+		LGGraphics::mapDataStore.maplocX = - (LGgame::genCoo[1].y) * widthPerBlock + 800 * LGGraphics::mapDataStore.mapSizeX;
+		LGGraphics::mapDataStore.maplocY = - (LGgame::genCoo[1].x) * heightPerBlock + 450 * LGGraphics::mapDataStore.mapSizeY;
 		int smsx = 0, smsy = 0;
 		for(; is_run();) {
 			while(mousemsg()) {

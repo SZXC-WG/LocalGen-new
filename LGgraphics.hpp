@@ -811,8 +811,8 @@ namespace LGGraphics {
 	}
 
 	void init() {
-		heightPerBlock = 24 * mapDataStore.mapSizeY;
-		widthPerBlock = 24 * mapDataStore.mapSizeX;
+		heightPerBlock = 28 * mapDataStore.mapSizeY;
+		widthPerBlock = 28 * mapDataStore.mapSizeX;
 		heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
 		mapDataStore.widthPerBlock = widthPerBlock;
 		mapDataStore.heightPerBlock = heightPerBlock;
@@ -837,8 +837,8 @@ namespace LGGraphics {
 		// imageOperation::zoomImage(pimg[6], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
 		for(int i = 1; i <= 6; i++) ege_enable_aa(true, pimg[i]);
 		ege_enable_aa(true);
-		setbkcolor(0x222222);
-		setbkcolor_f(0x222222);
+		setbkcolor(0xff222222);
+		setbkcolor_f(0xff222222);
 		cleardevice();
 	}
 }

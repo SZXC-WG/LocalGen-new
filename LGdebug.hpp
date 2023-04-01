@@ -331,7 +331,7 @@ namespace LGdebug{
 		std::chrono::nanoseconds lPT = std::chrono::steady_clock::now().time_since_epoch();
 		
 		while(1) {gotoxy(20,1);puts("fuck?");
-			if(_kbhit()) {
+			if(kbhit()) {
 //				int ch = getch();
 //				switch(ch = tolower(ch)) {
 //					case int(' '):

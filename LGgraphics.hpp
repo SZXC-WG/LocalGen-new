@@ -646,6 +646,7 @@ namespace LGGraphics {
 		rectBUTTON plCntBox[15]; /* 2~12 */
 		rectBUTTON checkBox[15]; /* 2~12 */
 		rectBUTTON checkOA;
+		rectBUTTON gameBox;
 		plCnt = 2; stDel = 1;
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
@@ -698,6 +699,7 @@ namespace LGGraphics {
 		         "Current Speed: %d", stDel);
 		xyprintf(1350 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
 		         "Choose Visible Players:");
+		cheatCode = 0b0000000000010;
 		for(int i=1; i<=12; ++i) {
 			int rowNum = (i - 1) / 4;
 			int colNum = (i - 1) % 4;
@@ -712,7 +714,25 @@ namespace LGGraphics {
 			checkBox[i].floatshadow = false;
 			checkBox[i].txtshadow = false;
 		}
-		cheatCode = 0b0000000000010;
+		checkOA
+		.setsize(400 * mapDataStore.mapSizeX - 1*2, 100 * mapDataStore.mapSizeY - 1*2)
+		.setlocation(1150 * mapDataStore.mapSizeX + 1, 700 * mapDataStore.mapSizeY + 1)
+		.addtext("Overall Select")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setfontname("Quicksand")
+		.setfontsz(50 * mapDataStore.mapSizeY, 0);
+		checkOA.floatshadow = false;
+		checkOA.txtshadow = false;
+		checkOA.display();
+		gameBox
+		.setsize(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.setlocation(1150 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.addtext("START")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setfontname("Quicksand")
+		.setfontsz(50 * mapDataStore.mapSizeY, 0)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor);
 		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {
 			for(int i=2; i<=12; ++i) {
@@ -763,9 +783,25 @@ namespace LGGraphics {
 					cheatCode &= (((1<<plCnt)-1)<<1);
 					cheatCode ^= (1<<i);
 				}
-				// checkOA.detect().display();
-				// if(checkOA.status == 2) checkCode = 1048575;
 			}
+			if(cheatCode == 1048575) {
+				checkOA
+				.setbgcol(mainColor)
+				.settxtcol(WHITE);
+			} else {
+				checkOA
+				.setbgcol(bgColor)
+				.settxtcol(mainColor);
+			}
+			rectangle(1150 * mapDataStore.mapSizeX, 700 * mapDataStore.mapSizeY,
+			          1550 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
+			checkOA.detect().display();
+			if(checkOA.status == 2) {
+				if(cheatCode != 1048575) cheatCode = 1048575;
+				else cheatCode = 0b0000000000010;
+			}
+			gameBox.detect().display();
+			if(gameBox.status == 2) return;
 		}
 	}
 

@@ -34,19 +34,19 @@ UnitCount=8
 [VersionInfo]
 Major=3
 Minor=0
-Release=3
-Build=1586
+Release=2
+Build=1589
 LanguageID=1033
 CharsetID=1252
 CompanyName=LocalGen-dev
-FileVersion=3.0.3.1586
+FileVersion=3.0.2.1589
 FileDescription=Local Generals.io (new ver.)
 InternalName=
 LegalCopyright=Copyright (c) 2023 LocalGen-dev
 LegalTrademarks=
 OriginalFilename=
 ProductName=Local Generals.io (new ver.)
-ProductVersion=3.0.3.1586
+ProductVersion=3.0.2.1589
 AutoIncBuildNr=1
 SyncProduct=1
 

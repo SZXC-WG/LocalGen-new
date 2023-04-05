@@ -335,8 +335,8 @@ namespace LGlocal {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
 				if(msg.is_wheel()) {
-					widthPerBlock += msg.wheel / 60;
-					heightPerBlock += msg.wheel / 60;
+					widthPerBlock += msg.wheel / 120;
+					heightPerBlock += msg.wheel / 120;
 					widthPerBlock = max(widthPerBlock, 2);
 					heightPerBlock = max(heightPerBlock, 2);
 				}

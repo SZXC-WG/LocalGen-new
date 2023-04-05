@@ -329,7 +329,8 @@ namespace LGlocal {
 		int midact = 0;
 		LGGraphics::mapDataStore.maplocX = - (LGgame::genCoo[1].y) * widthPerBlock + 800 * LGGraphics::mapDataStore.mapSizeX;
 		LGGraphics::mapDataStore.maplocY = - (LGgame::genCoo[1].x) * heightPerBlock + 450 * LGGraphics::mapDataStore.mapSizeY;
-		int smsx = 0, smsy = 0;
+		int smsx = 0, smsy = 0; bool moved = false;
+		std::chrono::steady_clock::duration prsttm;
 		for(; is_run();) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
@@ -343,21 +344,29 @@ namespace LGlocal {
 					if(midact == 1) {
 						LGGraphics::mapDataStore.maplocX += msg.x - smsx;
 						LGGraphics::mapDataStore.maplocY += msg.y - smsy;
-						smsx = msg.x, smsy = msg.y;
+						smsx = msg.x, smsy = msg.y; moved = true;
 					}
-				} else if(msg.is_mid()) {
-					if(msg.is_down()) midact = 1, smsx = msg.x, smsy = msg.y;
-					else midact = 0;
-				}
-				if(msg.is_down() && msg.is_left() &&
-				   msg.x >= LGGraphics::mapDataStore.maplocX &&
-				   msg.y >= LGGraphics::mapDataStore.maplocY &&
-				   msg.x <= LGGraphics::mapDataStore.maplocX + widthPerBlock * mapW &&
-				   msg.y <= LGGraphics::mapDataStore.maplocY + heightPerBlock * mapH) {
-					int lin = (msg.y + heightPerBlock - 1 - LGGraphics::mapDataStore.maplocY) / heightPerBlock;
-					int col = (msg.x + widthPerBlock - 1 - LGGraphics::mapDataStore.maplocX) / widthPerBlock;
-					LGgame::playerCoo[1] = {lin, col};
-					movement.clear();
+				} else if(msg.is_left()) {
+					if(msg.is_down()) {
+						prsttm = std::chrono::steady_clock::now().time_since_epoch();
+						midact = 1;
+						smsx = msg.x, smsy = msg.y;
+						moved = false;
+					} else {
+						midact = 0;
+						std::chrono::steady_clock::duration now = std::chrono::steady_clock::now().time_since_epoch();
+						if(!moved && now - prsttm < 200ms) {
+							if(msg.x >= LGGraphics::mapDataStore.maplocX &&
+							   msg.y >= LGGraphics::mapDataStore.maplocY &&
+							   msg.x <= LGGraphics::mapDataStore.maplocX + widthPerBlock * mapW &&
+							   msg.y <= LGGraphics::mapDataStore.maplocY + heightPerBlock * mapH) {
+								int lin = (msg.y + heightPerBlock - 1 - LGGraphics::mapDataStore.maplocY) / heightPerBlock;
+								int col = (msg.x + widthPerBlock - 1 - LGGraphics::mapDataStore.maplocX) / widthPerBlock;
+								LGgame::playerCoo[1] = {lin, col};
+								movement.clear();
+							}
+						}
+					}
 				}
 			}
 			while(kbmsg()) {

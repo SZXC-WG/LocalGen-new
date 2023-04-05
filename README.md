@@ -24,17 +24,17 @@ Contributors: see the list on the right bars.
 
 We give our greatest thanks to all contributors who has contributed to our project.
 
-## Warnings
+## Future Versions
 
-The program can't run under Mac OS. (maybe?)
-
-The program can't run in Windows versions under Windows 7 (incl.).
+- `v4.x.y`: add `web` functions.
+- `v3.2.x`: add `replay` functions.
+- `v3.1.x`: add `create map` functions.
 
 ## File Extensions
 
-Local Maps: `.lg`/`.lgmp`
+Local Maps: `.lg`
 
-Replays: `.lgrep`/`.lgreplay`
+Replays: `.lgrep`
 
 ## Releases (Changelog)
 

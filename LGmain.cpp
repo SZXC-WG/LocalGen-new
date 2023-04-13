@@ -33,6 +33,7 @@
 #include "LGzipmap.hpp"
 #include "LGgame.hpp"
 #include "LGweb.hpp"
+#include "LGreplay.hpp"
 
 /* DEBUG */
 #include "LGdebug.hpp"

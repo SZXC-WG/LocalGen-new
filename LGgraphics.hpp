@@ -15,7 +15,6 @@
 #define __LGGRAPHICS_HPP__
 
 #include "LGdef.hpp"
-#include "LGreplay.hpp"
 
 namespace imageOperation {
 	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
@@ -269,9 +268,9 @@ namespace LGGraphics {
 			// if(web.status == 2) {
 			// 	webOptions(); break;
 			// }
-			 if(replay.status == 2) {
-			 	replayPage(); break;
-			 }
+			// if(replay.status == 2) {
+			// 	replayPage(); break;
+			// }
 			// if(createmap.status == 2) {
 			// 	createMapPage(); break;
 			// }
@@ -421,17 +420,6 @@ namespace LGGraphics {
 	}
 
 	void replayPage() {
-		cleardevice();
-		setrendermode(RENDER_MANUAL);
-		rreplay.initReplay();
-		LGGraphics::init();
-		rreplay.gotoLastTurn();
-		printMap(1048575,{1,1});
-		for(;is_run();delay_fps(1000)){
-			rreplay.preTurn();
-			cleardevice();
-			printMap(1048575,{1,1});
-		}
 	}
 
 	void createMapPage() {

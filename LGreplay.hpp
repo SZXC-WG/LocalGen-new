@@ -4,7 +4,7 @@
 #include "LGdef.hpp"
 
 namespace LGreplay {
-	const string defaultReplayFilename="replay.txt";
+	const string defaultReplayFilename="replay.lgr";
 	char ntoc(int x){
 		switch(x){
 			case 0 ... 25:return x+65;

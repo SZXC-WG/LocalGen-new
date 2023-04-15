@@ -34,7 +34,7 @@ We give our greatest thanks to all contributors who has contributed to our proje
 
 Local Maps: `.lg`
 
-Replays: `.lgrep`
+Replays: `.lgr`
 
 ## Releases (Changelog)
 

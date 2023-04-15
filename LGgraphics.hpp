@@ -426,25 +426,47 @@ namespace LGGraphics {
 		LGreplay::rreplay.initReplay();
 		LGGraphics::init();
 		for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 1;
-		printMap(1048575, {1,1});
-		for(; is_run(); delay_ms(50)) {
-			bool res=LGreplay::rreplay.nextTurn();
-			cleardevice();
-			printMap(1048575, {1,1});
-			delay_ms(0);
-			if(res) break;
-		}
-		for(; is_run(); delay_ms(50)) {
-			bool ret=LGreplay::rreplay.preTurn();
-			cleardevice();
-			printMap(1048575, {1,1});
-			if(ret) break;
+		printMap(1048575, {-1,-1});
+		int smsx=0,smsy=0,midact=0;
+		for(; is_run(); delay_fps(120)) {
+			while(mousemsg()) {
+				mouse_msg msg = getmouse();
+				if(msg.is_wheel()) {
+					widthPerBlock += msg.wheel / 120;
+					heightPerBlock += msg.wheel / 120;
+					widthPerBlock = max(widthPerBlock, 2);
+					heightPerBlock = max(heightPerBlock, 2);
+				}
+				if(msg.is_move()) {
+					if(midact == 1) {
+						LGGraphics::mapDataStore.maplocX += msg.x - smsx;
+						LGGraphics::mapDataStore.maplocY += msg.y - smsy;
+						smsx = msg.x, smsy = msg.y;
+					}
+				} else if(msg.is_left()) {
+					if(msg.is_down()) {
+						midact = 1;
+						smsx = msg.x, smsy = msg.y;
+					} else midact = 0;
+				}
+			}
+			while(kbmsg()) {
+				key_msg ch = getkey();
+				if(ch.msg == key_msg_up) continue;
+				switch(ch.key) {
+					case 27: /*[ESC]*/ {
+						closegraph();
+						return;
+					}
+					case key_left: LGreplay::rreplay.preTurn(); break;
+					case key_right: LGreplay::rreplay.nextTurn(); break;
+				}
+			}
 		}
 	}
 
 	void createMapPage() {
 	}
-
 
 	void doMapSelect() {
 		cleardevice();

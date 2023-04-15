@@ -26,7 +26,7 @@ We give our greatest thanks to all contributors who has contributed to our proje
 
 ## Future Versions
 
-- `v4.x.y`: add `web` functions.
+- `v4.x`: add `web` functions.
 - `v3.2.x`: add `create map` functions.
 - `v3.1.x`: add `replay` functions.
 

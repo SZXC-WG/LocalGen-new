@@ -15,6 +15,7 @@
 #define __LGGRAPHICS_HPP__
 
 #include "LGdef.hpp"
+#include "LGreplay.hpp"
 
 namespace imageOperation {
 	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
@@ -115,7 +116,7 @@ namespace LGGraphics {
 			scrsz[p].setfontname("Quicksand");
 			scrsz[p].setfontsz(40, 0);
 			scrsz[p].setlocation(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext(to_string(i * 4) + " ¡Á " + to_string(i * 9 / 4));
+			scrsz[p].addtext(to_string(i * 4) + " ï¿½ï¿½ " + to_string(i * 9 / 4));
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
@@ -128,7 +129,7 @@ namespace LGGraphics {
 			scrsz[p].setfontname("Quicksand");
 			scrsz[p].setfontsz(40, 0);
 			scrsz[p].setlocation(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext("Full Screen ("+to_string(GetSystemMetrics(SM_CXSCREEN))+" ¡Á "+to_string(GetSystemMetrics(SM_CYSCREEN))+")");
+			scrsz[p].addtext("Full Screen ("+to_string(GetSystemMetrics(SM_CXSCREEN))+" ï¿½ï¿½ "+to_string(GetSystemMetrics(SM_CYSCREEN))+")");
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
@@ -268,9 +269,9 @@ namespace LGGraphics {
 			// if(web.status == 2) {
 			// 	webOptions(); break;
 			// }
-			// if(replay.status == 2) {
-			// 	replayPage(); break;
-			// }
+			if(replay.status == 2) {
+				replayPage(); break;
+			}
 			// if(createmap.status == 2) {
 			// 	createMapPage(); break;
 			// }
@@ -307,7 +308,7 @@ namespace LGGraphics {
 			// .addtext("City Count: " + to_string(maps[i].citycnt))
 			// .addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
 			// .addtext("Swamp Count: " + to_string(maps[i].swampcnt))
-			// .addtext("Size: " + to_string(maps[i].hei) + " ¡Á " + to_string(maps[i].wid))
+			// .addtext("Size: " + to_string(maps[i].hei) + " ï¿½ï¿½ " + to_string(maps[i].wid))
 			.display();
 		}
 		sys_edit impbox;
@@ -374,7 +375,7 @@ namespace LGGraphics {
 				.addtext("City Count: " + (~maps[i].citycnt?to_string(maps[i].citycnt):"undetermined"))
 				.addtext("Mountain Count: " + (~maps[i].mountaincnt?to_string(maps[i].mountaincnt):"undetermined"))
 				.addtext("Swamp Count: " + (~maps[i].swampcnt?to_string(maps[i].swampcnt):"undetermined"))
-				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " ¡Á " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
+				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " ï¿½ï¿½ " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
 				.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
@@ -420,6 +421,24 @@ namespace LGGraphics {
 	}
 
 	void replayPage() {
+		cleardevice();
+		setrendermode(RENDER_MANUAL);
+		LGreplay::rreplay.initReplay();
+		LGGraphics::init();
+		for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 1;
+		printMap(1048575,{1,1});
+		for(;is_run();delay_ms(50)){
+			bool res=LGreplay::rreplay.nextTurn();
+			cleardevice();
+			printMap(1048575,{1,1});
+			delay_ms(0);
+			if(res) break;
+		}
+		for(;is_run();delay_ms(50)){
+			LGreplay::rreplay.preTurn();
+			cleardevice();
+			printMap(1048575,{1,1});
+		}
 	}
 
 	void createMapPage() {
@@ -449,7 +468,7 @@ namespace LGGraphics {
 		xyprintf(255 * mapDataStore.mapSizeX, 85 * mapDataStore.mapSizeY,
 		         "Author: %s", maps[mapSelected].auth.c_str());
 		xyprintf(255 * mapDataStore.mapSizeX, 115 * mapDataStore.mapSizeY,
-		         "Size: %d ¡Á %d", maps[mapSelected].hei, maps[mapSelected].wid);
+		         "Size: %d ï¿½ï¿½ %d", maps[mapSelected].hei, maps[mapSelected].wid);
 		xyprintf(255 * mapDataStore.mapSizeX, 145 * mapDataStore.mapSizeY,
 		         "General Count: %d", maps[mapSelected].generalcnt);
 		xyprintf(255 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY,

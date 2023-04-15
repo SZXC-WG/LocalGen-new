@@ -154,9 +154,9 @@ void printMap(int printCode, playerCoord coo) {
 			}
 		}
 	}
-	putimage_withalpha(NULL, npimg[6],
-	                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
-	                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
+	if(~coo.x||~coo.y) putimage_withalpha(NULL, npimg[6],
+	                                      LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
+	                                      LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
 	for(int i=1; i<=6; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
@@ -322,12 +322,12 @@ void createFullPlainMap(int crtH, int crtW, int plCnt) {
 }
 
 void getAllFiles(string path, std::vector<string>& files, string fileType)  {
-	long hFile = 0; // ÎÄ¼þ¾ä±ú
-	struct _finddata_t fileinfo; // ÎÄ¼þÐÅÏ¢
+	long hFile = 0; // ï¿½Ä¼ï¿½ï¿½ï¿½ï¿?
+	struct _finddata_t fileinfo; // ï¿½Ä¼ï¿½ï¿½ï¿½Ï¢
 	string p;
 	if((hFile = _findfirst(p.assign(path).append("\\*" + fileType).c_str(), &fileinfo)) != -1) {
-		do files.push_back(p.assign(path).append("\\").append(fileinfo.name)); // ±£´æÎÄ¼þµÄÈ«Â·¾¶
-		while(_findnext(hFile, &fileinfo) == 0);   // Ñ°ÕÒÏÂÒ»¸ö£¬³É¹¦·µ»Ø0£¬·ñÔò-1
+		do files.push_back(p.assign(path).append("\\").append(fileinfo.name)); // ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½È«Â·ï¿½ï¿½
+		while(_findnext(hFile, &fileinfo) == 0);   // Ñ°ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½-1
 		_findclose(hFile);
 	}
 }

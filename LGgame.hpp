@@ -16,6 +16,7 @@
 
 #include "LGdef.hpp"
 #include "LGbot.hpp"
+#include "LGreplay.hpp"
 
 void LGgame::printGameMessage(gameMessageStore now) {
 	++LGgame::gameMesC;
@@ -49,7 +50,7 @@ void LGgame::printGameMessage(gameMessageStore now) {
 void LGgame::kill(int p1, int p2) {
 	if(p2 == 1) {
 		std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
-		MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + playerInfo[p1].name + " AT TURN " + to_string(LGgame::curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
+		if(!inReplay) MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + playerInfo[p1].name + " AT TURN " + to_string(LGgame::curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
 		std::chrono::nanoseconds ed = std::chrono::steady_clock::now().time_since_epoch();
 		LGgame::beginTime += ed - bg;
 	}
@@ -301,6 +302,7 @@ namespace LGgame {
 		cheatCode = chtC;
 		playerCnt = pC;
 		gameSpeed = gS;
+		inReplay = false;
 		for(register int i = 1; i <= pC; ++i) isAlive[i] = 1;
 	}
 };
@@ -320,6 +322,7 @@ namespace LGlocal {
 		std::deque<int> movement;
 		LGgame::updateMap();
 		Zip();
+		LGreplay::wreplay.initReplay();
 		// LGreplay::zipStatus(LGgame::playerCnt);
 		printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 		LGgame::curTurn = 0;
@@ -427,29 +430,50 @@ namespace LGlocal {
 				}
 			}
 			LGgame::updateMap();
+			LGreplay::wreplay.newTurn();
+			playerCoord tmpcoo=LGgame::playerCoo[1];
 			while(!movement.empty() && LGgame::analyzeMove(1, movement.front(), LGgame::playerCoo[1]))
+				movement.pop_front(),tmpcoo=LGgame::playerCoo[1];
+			int mv;
+			if(!movement.empty()){
+				mv=movement.front();
+				if(mv>=1&&mv<=4){
+					LGreplay::Movement mov(1,mv,tmpcoo);
+					LGreplay::wreplay.newMove(mov);
+				}
 				movement.pop_front();
-			if(!movement.empty())
-				movement.pop_front();
+			}
+			// MessageBoxA(getHWnd(), string("TESTING").c_str(), "TEST MESSAGE", MB_OK);
 			for(int i = 2; i <= LGgame::playerCnt; ++i) {
 				if(!LGgame::isAlive[i])
 					continue;
+				tmpcoo=LGgame::playerCoo[i];
 				switch(LGgame::robotId[i]) {
 					case 0 ... 99:
-						LGgame::analyzeMove(i, smartRandomBot::smartRandomBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
+						mv=smartRandomBot::smartRandomBot(i, LGgame::playerCoo[i]);
+						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4){
+							LGreplay::Movement mov(i,mv,tmpcoo);
+							LGreplay::wreplay.newMove(mov);
+						}
 						break;
 					case 100 ... 199:
-						LGgame::analyzeMove(i, xrzBot::xrzBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
+						mv=xrzBot::xrzBot(i, LGgame::playerCoo[i]);
+						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4){
+							LGreplay::Movement mov(i,mv,tmpcoo);
+							LGreplay::wreplay.newMove(mov);
+						}
 						break;
 					case 200 ... 299:
-						LGgame::analyzeMove(i, xiaruizeBot::xiaruizeBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
+						mv=xiaruizeBot::xiaruizeBot(i, LGgame::playerCoo[i]);
+						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4){
+							LGreplay::Movement mov(i,mv,tmpcoo);
+							LGreplay::wreplay.newMove(mov);
+						}
 						break;
 					default:
 						LGgame::analyzeMove(i, 0, LGgame::playerCoo[i]);
 				}
 			}
-			// if(LGgame::curTurn % 2000 == 0)
-			// 	Zip(true), LGreplay::zipStatus(LGgame::playerCnt);
 			LGgame::flushMove();
 			if(LGgame::cheatCode != 1048575) {
 				int alldead = 0;

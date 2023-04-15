@@ -227,6 +227,7 @@ inline int getWidthPerBlock();
 /***** others *****/
 
 namespace LGgame {
+	bool inReplay;
 	int curTurn;
 	int cheatCode;
 	int playerCnt;

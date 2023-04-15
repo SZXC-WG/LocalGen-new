@@ -426,18 +426,19 @@ namespace LGGraphics {
 		LGreplay::rreplay.initReplay();
 		LGGraphics::init();
 		for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 1;
-		printMap(1048575,{1,1});
-		for(;is_run();delay_ms(50)){
+		printMap(1048575, {1,1});
+		for(; is_run(); delay_ms(50)) {
 			bool res=LGreplay::rreplay.nextTurn();
 			cleardevice();
-			printMap(1048575,{1,1});
+			printMap(1048575, {1,1});
 			delay_ms(0);
 			if(res) break;
 		}
-		for(;is_run();delay_ms(50)){
-			LGreplay::rreplay.preTurn();
+		for(; is_run(); delay_ms(50)) {
+			bool ret=LGreplay::rreplay.preTurn();
 			cleardevice();
-			printMap(1048575,{1,1});
+			printMap(1048575, {1,1});
+			if(ret) break;
 		}
 	}
 

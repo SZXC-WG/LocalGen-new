@@ -172,7 +172,7 @@ void printMap(int printCode, playerCoord coo);
 
 inline long long PMod(long long& x);
 std::pair<long long, long long> bin_search(long long curTurn);
-void Zip(bool rep = false);
+void Zip();
 void deZip();
 
 bool initSock();
@@ -251,25 +251,53 @@ namespace LGgame {
 }
 
 namespace LGreplay {
-	int curLen = 0;
-	Block curMap[505][505];
-	playerCoord mapCoord[17][30], curCoord[30];
-	Block mapSet[17][505][505];
-	long long totTurn, curTurn, totMove;
-	std::pair<long long, long long> curMoveS;
-	std::queue<long long> signMap;
-	std::queue<long long> signCmd;
-	movementS dezipedMovementS[LEN_ZIP<<2];
-	movementS tmp;
-	std::queue<movementS> movementPack;
-
-	void trans(int st, int en);
-	void retrans(int cur);
-	void zipStatus(int playerCnt);
-	void deZipStatus(int st,int en,int cur);
-	void zipGame(long long totTurn);
-	void deZipGame(int playerCnt);
-	void Replay(int dir, long long curTurn);
+	const string defaultReplayFilename="replay.lgr";
+	char ntoc(int x);
+	int cton(char x);
+	string ntos(int x,int len=-1);
+	int ston(char* s,int len=-1);
+	string zipBlock(Block B);
+	struct Movement {
+		int team,dir;
+		playerCoord coord;
+		Movement();
+		Movement(int tm,int d,playerCoord c);
+		string zip();
+	};
+	Movement readMove(char* buf);
+	struct WReplay {
+		string Filename;
+		FILE* file;
+		WReplay(string Fname=defaultReplayFilename);
+		void initReplay(string Fname=defaultReplayFilename);
+		void newTurn();
+		void newMove(Movement mov);
+	} wreplay;
+	string ts(int x);
+	Block readBlock(FILE* fp);
+	int QwQ(Movement mov);
+	void updMap(int turn);
+	struct replayMap {
+		Block rMap[105][105];
+		bool alive[21];
+		void download();
+		void upload();
+	};
+	struct RReplay {
+		string Filename;
+		FILE* file;
+		int totTurn,turnPos[10005],seekPos,replaySize,curTurn;
+		Block startMap[505][505];
+		vector<replayMap> midStates;
+		char* readBuf=new char[256];
+		RReplay(string Fname=defaultReplayFilename);
+		void resetGame();
+		bool _nextTurn();
+		int nextTurn();
+		void gotoTurn(int turnid);
+		int preTurn();
+		void initReplay(string Fname=defaultReplayFilename);
+	} rreplay;
 }
 
 namespace LGlocal {

@@ -4,7 +4,6 @@
 #include "LGdef.hpp"
 
 namespace LGreplay {
-	const string defaultReplayFilename="replay.lgr";
 	char ntoc(int x) {
 		switch(x) {
 			case 0 ... 25:return x+65;
@@ -25,7 +24,7 @@ namespace LGreplay {
 			default:return 0;
 		}
 	}
-	string ntos(int x,int len=-1) {
+	string ntos(int x,int len) {
 		string res="";
 		while(x) {res+=ntoc(x&63); x>>=6;}
 		if(len!=-1) while(res.size()<len) res+='A';
@@ -33,7 +32,7 @@ namespace LGreplay {
 		for(int i=0; i<len/2; ++i) std::swap(res[i],res[len-i-1]);
 		return res;
 	}
-	int ston(char* s,int len=-1) {
+	int ston(char* s,int len) {
 		if(len==-1) len=strlen(s);
 		int res=0;
 		for(int i=0; i<len; ++i) res=res<<6|cton(s[i]);
@@ -46,21 +45,18 @@ namespace LGreplay {
 		res+=ntos(B.army,4);
 		return res;
 	}
-	struct Movement {
-		int team,dir;
-		playerCoord coord;
-		Movement() {}
-		Movement(int tm,int d,playerCoord c) {team=tm; dir=d; coord=c;}
-		string zip() {
-			if(dir<1||dir>4) return "";
-			string res="";
-			res+=ntoc(team);
-			res+=ntos(coord.x,2);
-			res+=ntos(coord.y,2);
-			res+=ntoc(dir);
-			return res;
-		}
-	};
+	
+	Movement::Movement() {}
+	Movement::Movement(int tm,int d,playerCoord c) {team=tm; dir=d; coord=c;}
+	string Movement::zip() {
+		if(dir<1||dir>4) return "";
+		string res="";
+		res+=ntoc(team);
+		res+=ntos(coord.x,2);
+		res+=ntos(coord.y,2);
+		res+=ntoc(dir);
+		return res;
+	}
 	Movement readMove(char* buf) {
 		Movement mov;
 		mov.team=cton(buf[0]);
@@ -70,24 +66,20 @@ namespace LGreplay {
 		return mov;
 	}
 
-	struct WReplay {
-		string Filename;
-		FILE* file;
-		WReplay(string Fname=defaultReplayFilename) {Filename=Fname;}
-		void initReplay(string Fname=defaultReplayFilename) {
-			Filename=Fname;
-			file=fopen(Fname.c_str(),"w");
-			string info="";
-			info+=ntoc(LGgame::playerCnt);
-			info+=ntos(mapH,2);
-			info+=ntos(mapW,2);
-			fprintf(file,info.c_str());
-			for(int i=1; i<=mapH; ++i)
-				for(int j=1; j<=mapW; ++j) fprintf(file,zipBlock(gameMap[i][j]).c_str());
-		}
-		void newTurn() {fprintf(file,"_");}
-		void newMove(Movement mov) {fprintf(file,mov.zip().c_str());}
-	} wreplay;
+	WReplay::WReplay(string Fname) {Filename=Fname;}
+	void WReplay::initReplay(string Fname) {
+		Filename=Fname;
+		file=fopen(Fname.c_str(),"w");
+		string info="";
+		info+=ntoc(LGgame::playerCnt);
+		info+=ntos(mapH,2);
+		info+=ntos(mapW,2);
+		fprintf(file,info.c_str());
+		for(int i=1; i<=mapH; ++i)
+			for(int j=1; j<=mapW; ++j) fprintf(file,zipBlock(gameMap[i][j]).c_str());
+	}
+	void WReplay::newTurn() {fprintf(file,"_");}
+	void WReplay::newMove(Movement mov) {fprintf(file,mov.zip().c_str());}
 
 	string ts(int x) {
 		string s=" ";
@@ -149,122 +141,110 @@ namespace LGreplay {
 			}
 		}
 	}
-	struct replayMap {
-		Block rMap[105][105];
-		bool alive[21];
-		void download() {
-			for(int i=1; i<=mapH; ++i)
-				for(int j=1; j<=mapW; ++j) rMap[i][j]=gameMap[i][j];
-			for(int i=1; i<=LGgame::playerCnt; ++i) alive[i]=LGgame::isAlive[i];
-		}
-		void upload() {
-			for(int i=1; i<=mapH; ++i)
-				for(int j=1; j<=mapW; ++j) gameMap[i][j]=rMap[i][j];
-			for(int i=1; i<=LGgame::playerCnt; ++i) LGgame::isAlive[i]=alive[i];
-		}
-	};
-	struct RReplay {
-		string Filename;
-		FILE* file;
-		int totTurn,turnPos[10005],seekPos,replaySize,curTurn;
-		Block startMap[505][505];
-		vector<replayMap> midStates;
-		char* readBuf=new char[256];
-		RReplay(string Fname=defaultReplayFilename) {Filename=Fname;}
-		void resetGame() {
-			for(int i=1; i<=mapH; ++i)
-				for(int j=1; j<=mapW; ++j) gameMap[i][j]=startMap[i][j];
-			for(int i=1; i<=LGgame::playerCnt; ++i) LGgame::isAlive[i]=1;
-		}
-		bool _nextTurn() {
-			updMap(curTurn);
-			++curTurn;
-			while(1) {
-				if(fread(readBuf,1,1,file)!=1) return 1;
-				++seekPos;
-				if(readBuf[0]=='_') break;
-				fread(readBuf+1,1,5,file);
-				seekPos+=5;
-				QwQ(readMove(readBuf));
-			}
-			LGgame::flushMove();
-			return 0;
-		}
-		int nextTurn() {
-			if(curTurn==totTurn) return 1;
-			updMap(curTurn);
-			++curTurn;
-			fseek(file,1,SEEK_CUR);
+	void replayMap::download() {
+		for(int i=1; i<=mapH; ++i)
+			for(int j=1; j<=mapW; ++j) rMap[i][j]=gameMap[i][j];
+		for(int i=1; i<=LGgame::playerCnt; ++i) alive[i]=LGgame::isAlive[i];
+	}
+	void replayMap::upload() {
+		for(int i=1; i<=mapH; ++i)
+			for(int j=1; j<=mapW; ++j) gameMap[i][j]=rMap[i][j];
+		for(int i=1; i<=LGgame::playerCnt; ++i) LGgame::isAlive[i]=alive[i];
+	}
+	RReplay::RReplay(string Fname) {Filename=Fname;}
+	void RReplay::resetGame() {
+		for(int i=1; i<=mapH; ++i)
+			for(int j=1; j<=mapW; ++j) gameMap[i][j]=startMap[i][j];
+		for(int i=1; i<=LGgame::playerCnt; ++i) LGgame::isAlive[i]=1;
+	}
+	bool RReplay::_nextTurn() {
+		updMap(curTurn);
+		++curTurn;
+		while(1) {
+			if(fread(readBuf,1,1,file)!=1) return 1;
 			++seekPos;
-			while(seekPos<turnPos[curTurn]) {
-				fread(readBuf,1,6,file);
-				seekPos+=6;
-				QwQ(readMove(readBuf));
-			}
-			LGgame::flushMove();
-			return 0;
-		}
-		void gotoTurn(int turnid) {
-			if(turnid<0||turnid>totTurn) return;
-			if(turnid==0) {
-				resetGame();
-				return;
-			}
-			curTurn=0;
-			seekPos=turnPos[curTurn];
-			fseek(file,seekPos,SEEK_SET);
-			resetGame();
-			while(curTurn<turnid) nextTurn();
-		}
-		int preTurn() {
-			if(curTurn==0) return 1;
-			gotoTurn(curTurn-1);
-			return 0;
-		}
-		void initReplay(string Fname=defaultReplayFilename) {
-			LGgame::inReplay = true;
-			Filename=Fname;
-			file=fopen(Fname.c_str(),"r");
-			if(!file) {
-				MessageBoxA(nullptr,"No such replay file!","Local Generals",MB_OK);
-				closegraph();
-				exit(0);
-			}
-			seekPos=0;
-			fseek(file,0,SEEK_SET);
-			fread(readBuf,1,5,file);
+			if(readBuf[0]=='_') break;
+			fread(readBuf+1,1,5,file);
 			seekPos+=5;
-			LGgame::playerCnt=ston(readBuf,1);
-			mapH=ston(readBuf+1,2);
-			mapW=ston(readBuf+3,2);
-			for(int i=1; i<=mapH; ++i)
-				for(int j=1; j<=mapW; ++j) gameMap[i][j]=readBlock(file),seekPos+=6;
-			for(int i=1; i<=mapH; ++i)
-				for(int j=1; j<=mapW; ++j) startMap[i][j]=gameMap[i][j];
-			fseek(file,1,SEEK_CUR);
-			++seekPos;
-			totTurn=0;
-			curTurn=0;
-			midStates.clear();
-			replayMap rmap;
-			rmap.download();
-			midStates.push_back(rmap);
-			while(1) {
-				turnPos[totTurn++]=seekPos-1;
-				if(_nextTurn()) break;
-				if(totTurn%100==0) {
-					replayMap nrmap;
-					nrmap.download();
-					midStates.push_back(nrmap);
-				}
-			}
-			replaySize=seekPos;
-			seekPos=turnPos[0];
-			fseek(file,turnPos[0],SEEK_SET);
-			curTurn=0;
-			resetGame();
+			QwQ(readMove(readBuf));
 		}
-	} rreplay;
+		LGgame::flushMove();
+		return 0;
+	}
+	int RReplay::nextTurn() {
+		if(curTurn==totTurn) return 1;
+		updMap(curTurn);
+		++curTurn;
+		fseek(file,1,SEEK_CUR);
+		++seekPos;
+		while(seekPos<turnPos[curTurn]) {
+			fread(readBuf,1,6,file);
+			seekPos+=6;
+			QwQ(readMove(readBuf));
+		}
+		LGgame::flushMove();
+		return 0;
+	}
+	void RReplay::gotoTurn(int turnid) {
+		if(turnid<0||turnid>totTurn) return;
+		if(turnid==0) {
+			resetGame();
+			return;
+		}
+		curTurn=0;
+		seekPos=turnPos[curTurn];
+		fseek(file,seekPos,SEEK_SET);
+		resetGame();
+		while(curTurn<turnid) nextTurn();
+	}
+	int RReplay::preTurn() {
+		if(curTurn==0) return 1;
+		gotoTurn(curTurn-1);
+		return 0;
+	}
+	void RReplay::initReplay(string Fname) {
+		LGgame::inReplay = true;
+		Filename=Fname;
+		file=fopen(Fname.c_str(),"r");
+		if(!file) {
+			MessageBoxA(nullptr,"No such replay file!","Local Generals",MB_OK);
+			closegraph();
+			exit(0);
+		}
+		seekPos=0;
+		fseek(file,0,SEEK_SET);
+		fread(readBuf,1,5,file);
+		seekPos+=5;
+		LGgame::playerCnt=ston(readBuf,1);
+		mapH=ston(readBuf+1,2);
+		mapW=ston(readBuf+3,2);
+		for(int i=1; i<=mapH; ++i)
+			for(int j=1; j<=mapW; ++j) gameMap[i][j]=readBlock(file),seekPos+=6;
+		for(int i=1; i<=mapH; ++i)
+			for(int j=1; j<=mapW; ++j) startMap[i][j]=gameMap[i][j];
+		fseek(file,1,SEEK_CUR);
+		++seekPos;
+		totTurn=0;
+		curTurn=0;
+		midStates.clear();
+		replayMap rmap;
+		rmap.download();
+		midStates.push_back(rmap);
+		while(1) {
+			turnPos[totTurn++]=seekPos-1;
+			if(_nextTurn()) break;
+			if(totTurn%100==0) {
+				replayMap nrmap;
+				nrmap.download();
+				midStates.push_back(nrmap);
+			}
+		}
+		replaySize=seekPos;
+		seekPos=turnPos[0];
+		fseek(file,turnPos[0],SEEK_SET);
+		curTurn=0;
+		resetGame();
+	}
 }
 
 #endif

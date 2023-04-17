@@ -454,7 +454,7 @@ namespace LGGraphics {
 				key_msg ch = getkey();
 				if(ch.msg == key_msg_up) continue;
 				switch(ch.key) {
-					case 27: /*[ESC]*/ {
+					case 27: { /*[ESC]*/
 						closegraph();
 						return;
 					}
@@ -462,6 +462,9 @@ namespace LGGraphics {
 					case key_right: LGreplay::rreplay.nextTurn(); break;
 				}
 			}
+			cleardevice();
+			printMap(1048575, {-1,-1});
+			LGgame::ranklist();
 		}
 	}
 

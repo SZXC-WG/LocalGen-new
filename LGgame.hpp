@@ -69,7 +69,6 @@ void LGgame::kill(int p1, int p2) {
 
 // movement analyzer
 int LGgame::analyzeMove(int id, int mv, playerCoord& coo) {
-	// LGreplay::movementPack.push(movementS{id, mv, LGgame::curTurn});
 	switch(mv) {
 		case -1:
 			break;
@@ -323,7 +322,6 @@ namespace LGlocal {
 		LGgame::updateMap();
 		Zip();
 		LGreplay::wreplay.initReplay();
-		// LGreplay::zipStatus(LGgame::playerCnt);
 		printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 		LGgame::curTurn = 0;
 		bool gameEnd = 0;
@@ -504,7 +502,6 @@ namespace LGlocal {
 					            "GAME END", MB_OK | MB_SYSTEMMODAL);
 					std::chrono::nanoseconds eed = std::chrono::steady_clock::now().time_since_epoch();
 					LGgame::beginTime += eed - bg;
-					// LGreplay::zipGame(LGgame::curTurn);
 					gameEnd = 1;
 					register int winnerNum = std::__lg(ed);
 					LGgame::cheatCode = 1048575;

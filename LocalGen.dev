@@ -29,24 +29,24 @@ IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=8
+UnitCount=9
 
 [VersionInfo]
 Major=3
 Minor=0
 Release=2
-Build=1623
+Build=1636
 LanguageID=1033
 CharsetID=1252
 CompanyName=LocalGen-dev
-FileVersion=3.0.2.1623
+FileVersion=3.0.2.1636
 FileDescription=Local Generals.io (new ver.)
 InternalName=
 LegalCopyright=Copyright (c) 2023 LocalGen-dev
 LegalTrademarks=
 OriginalFilename=
 ProductName=Local Generals.io (new ver.)
-ProductVersion=3.0.2.1623
+ProductVersion=3.0.2.1636
 AutoIncBuildNr=1
 SyncProduct=1
 
@@ -101,7 +101,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit9]
-FileName=LGweb.hpp
+FileName=LGreplay.hpp
 CompileCpp=1
 Folder=
 Compile=1

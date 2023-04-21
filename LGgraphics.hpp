@@ -270,7 +270,7 @@ namespace LGGraphics {
 			// 	webOptions(); break;
 			// }
 			if(replay.status == 2) {
-				replayPage(); break;
+				replayPage(); exit(0); break;
 			}
 			// if(createmap.status == 2) {
 			// 	createMapPage(); break;

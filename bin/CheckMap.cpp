@@ -206,9 +206,9 @@ void DePack()
 			Map[i][j].K = P_s[k++];
 			Map[i][j].D = 0;
 
-			for (p = 10; p >= 0; p--)
+			for (p = 7; p >= 0; p--)
 				Map[i][j].D = (Map[i][j].D << 6) + P_s[k + p];
-			k += 11;
+			k += 8;
 			Map[i][j].D = f ? (-Map[i][j].D) : Map[i][j].D;
 		}
 }

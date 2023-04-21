@@ -41,8 +41,8 @@ namespace LGreplay {
 	string zipBlock(Block B) {
 		string res="";
 		res+=ntoc(B.lit<<3|B.type);
-		res+=ntoc(B.team);
-		res+=ntos(B.army,4);
+		res+=ntoc(B.team<<1|(B.army<0));
+		res+=ntos(std::abs(B.army),4);
 		return res;
 	}
 	
@@ -95,8 +95,10 @@ namespace LGreplay {
 		Block B;
 		B.lit=cton(readBuf[0])>>3;
 		B.type=cton(readBuf[0])&7;
-		B.team=cton(readBuf[1]);
-		B.army=ston(readBuf+2,4);
+		int t=cton(readBuf[1]);
+		B.team=t>>1;
+		int nega=1; if(t&1) nega=-1;
+		B.army=ston(readBuf+2,4)*nega;
 		return B;
 	}
 	int QwQ(Movement mov) {

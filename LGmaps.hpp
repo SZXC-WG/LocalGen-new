@@ -70,7 +70,8 @@ void printMap(int printCode, playerCoord coo) {
 	static const color_t cscol = 0xff808080,
 	                     plcol = 0xffdcdcdc,
 	                     mtcol = 0xffbbbbbb,
-	                     unseen = 0xff3c3c3c;
+	                     unseen = 0xff3c3c3c,
+	                     gcol = 0xff008080;
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
@@ -92,6 +93,8 @@ void printMap(int printCode, playerCoord coo) {
 						setfillcolor(cscol);
 					else if(gameMap[curx][cury].type == 2)
 						setfillcolor(mtcol);
+					else if(gameMap[curx][cury].type == 3)
+						setfillcolor(gcol);
 					else if(gameMap[curx][cury].type == 4)
 						setfillcolor(cscol);
 				} else

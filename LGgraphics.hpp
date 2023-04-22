@@ -946,6 +946,17 @@ namespace LGGraphics {
 	}
 
 	void importGameSettings() {
+		maps[0].hei=mapH;
+		maps[0].wid=mapW;
+		for(int i=1;i<=mapH;++i)
+			for(int j=1;j<=mapW;++j){
+				if(gameMap[i][j].type==0) ++maps[0].plaincnt;
+				if(gameMap[i][j].type==1) ++maps[0].swampcnt;
+				if(gameMap[i][j].type==2) ++maps[0].mountaincnt;
+				if(gameMap[i][j].type==3) ++maps[0].generalcnt;
+				if(gameMap[i][j].type==4) ++maps[0].citycnt;
+			}
+		cleardevice();
 		sys_edit speedBox;
 		rectBUTTON speedSubmit;
 		rectBUTTON plCntBox[15]; /* 2~12 */

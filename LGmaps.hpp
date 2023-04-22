@@ -161,7 +161,7 @@ void printMap(int printCode, playerCoord coo) {
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 
-void createOptions(int type){
+void createOptions(int type,int h){
 	static const color_t col=0xffdcdcdc,
 						 plcol=0xff3c3c3c,
 						 selcol=0xff008080;
@@ -175,17 +175,17 @@ void createOptions(int type){
 	setfont(14, 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	setfillcolor(col);
-	bar(0,100,40,340);
+	bar(0,h,40,h+240);
 	setfillcolor(selcol);
-	bar(0,100+type*40,40,140+type*40);
+	bar(0,h+type*40,40,h+40+type*40);
 	setfillcolor(plcol);
-	bar(5,305,35,335);
-	putimage_withalpha(NULL,npimg[4],0,140);
-	putimage_withalpha(NULL,npimg[3],0,180);
-	putimage_withalpha(NULL,npimg[2],0,220);
-	putimage_withalpha(NULL,npimg[1],0,260);
-	xyprintf(20,280,"40");
-	xyprintf(20,320,"40");
+	bar(5,h+205,35,h+235);
+	putimage_withalpha(NULL,npimg[4],0,h+40);
+	putimage_withalpha(NULL,npimg[3],0,h+80);
+	putimage_withalpha(NULL,npimg[2],0,h+120);
+	putimage_withalpha(NULL,npimg[1],0,h+160);
+	xyprintf(20,h+180,"40");
+	xyprintf(20,h+220,"40");
 	for(int i=1;i<=6;++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }

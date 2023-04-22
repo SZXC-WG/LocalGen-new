@@ -472,16 +472,17 @@ namespace LGGraphics {
 		cleardevice();
 		setrendermode(RENDER_MANUAL);
 		settextjustify(LEFT_TEXT, TOP_TEXT);
+		int scrw=mapDataStore.mapSizeX*1600,scrh=mapDataStore.mapSizeY*900;
 		sys_edit citynumBox,plainnumBox,savenameBox;
 		rectBUTTON saveButton,cancelButton,loadButton;
 		citynumBox.create();
-		citynumBox.move(140,400);
+		citynumBox.move(140,scrh-50);
 		citynumBox.size(80,30);
 		citynumBox.setfont(20,0,"Quicksand");
 		citynumBox.setcolor(mainColor);
 		citynumBox.settext("40");
 		plainnumBox.create();
-		plainnumBox.move(140,400);
+		plainnumBox.move(140,scrh-50);
 		plainnumBox.size(80,30);
 		plainnumBox.setfont(20,0,"Quicksand");
 		plainnumBox.setcolor(mainColor);
@@ -524,7 +525,7 @@ namespace LGGraphics {
 		for(int i=1;i<=mapH;++i)
 			for(int j=1;j<=mapW;++j) gameMap[i][j]={0,0,0,0};
 		printMap(1048575,{-1,-1});
-		createOptions(0);
+		createOptions(0,scrh/2-120);
 		setfillcolor(mainColor);
 		int smsx=0,smsy=0,midact=0,type=2,citynum=40,plainnum=40;
 		bool moved=false,saved=false;
@@ -554,9 +555,9 @@ namespace LGGraphics {
 						midact = 0;
 						std::chrono::steady_clock::duration now = std::chrono::steady_clock::now().time_since_epoch();
 						if(!moved && now - prsttm < 200ms) {
-							if(msg.x<40&&msg.y>=100&&msg.y<340){
-								type=(msg.y-100)/40;
-							}else if(msg.x>=160&&msg.x<300&&msg.y>=400&&msg.y<440){
+							if(msg.x<40&&msg.y>=scrh/2-120&&msg.y<scrh/2+120){
+								type=(msg.y-(scrh/2-120))/40;
+							}else if(msg.x>=250&&msg.x<390&&msg.y>=scrh-50&&msg.y<scrh-10){
 								settextjustify(CENTER_TEXT, CENTER_TEXT);
 								setfillcolor(WHITE);
 								setcolor(mainColor);
@@ -586,7 +587,7 @@ namespace LGGraphics {
 									if(cancelButton.status==2) break;
 								}
 								savenameBox.visible(false);
-							}else if(msg.x>=320&&msg.x<460&&msg.y>=400&&msg.y<440){
+							}else if(msg.x>=410&&msg.x<550&&msg.y>=scrh-50&&msg.y<scrh-10){
 								settextjustify(CENTER_TEXT, CENTER_TEXT);
 								setfillcolor(WHITE);
 								setcolor(mainColor);
@@ -619,16 +620,16 @@ namespace LGGraphics {
 									if(cancelButton.status==2) break;
 								}
 								savenameBox.visible(false);
-							}else if(msg.x>=55&&msg.x<95&&msg.y<40){
+							}else if(msg.x>=scrw/2-245&&msg.x<scrw/2-205&&msg.y<40){
 								if(mapH>1) --mapH;
-							}else if(msg.x>=245&&msg.x<285&&msg.y<40){
+							}else if(msg.x>=scrw/2-55&&msg.x<scrw/2-15&&msg.y<40){
 								if(mapH<100){
 									++mapH;
 									for(int i=1;i<=mapW;++i) gameMap[mapH][i]={0,0,0,0};
 								}
-							}else if(msg.x>=315&&msg.x<355&&msg.y<40){
+							}else if(msg.x>=scrw/2+15&&msg.x<scrw/2+55&&msg.y<40){
 								if(mapW>1) --mapW;
-							}else if(msg.x>=505&&msg.x<545&&msg.y<40){
+							}else if(msg.x>=scrw/2+205&&msg.x<scrw/2+245&&msg.y<40){
 								if(mapW<100){
 									++mapW;
 									for(int i=1;i<=mapH;++i) gameMap[i][mapW]={0,0,0,0};
@@ -678,14 +679,14 @@ namespace LGGraphics {
 			}
 			cleardevice();
 			printMap(1048575, {-1,-1});
-			createOptions(type);
+			createOptions(type,scrh/2-120);
 			if(type==4){
 				citynumBox.visible(true);
 				setfillcolor(WHITE);
-				bar(60,400,140,430);
+				bar(60,scrh-50,140,scrh-20);
 				setcolor(mainColor);
 				setfont(20,0,"Quicksand");
-				xyprintf(60,400,"City count:");
+				xyprintf(60,scrh-50,"City count:");
 				char s[10];
 				citynumBox.gettext(sizeof(s),s);
 				sscanf(s,"%d",&citynum);
@@ -693,10 +694,10 @@ namespace LGGraphics {
 			if(type==5){
 				plainnumBox.visible(true);
 				setfillcolor(WHITE);
-				bar(60,400,140,430);
+				bar(60,scrh-50,140,scrh-20);
 				setcolor(mainColor);
 				setfont(20,0,"Quicksand");
-				xyprintf(60,400,"Army count:");
+				xyprintf(60,scrh-50,"Army count:");
 				char s[10];
 				plainnumBox.gettext(sizeof(s),s);
 				sscanf(s,"%d",&plainnum);
@@ -705,22 +706,22 @@ namespace LGGraphics {
 			setfillcolor(WHITE);
 			setcolor(mainColor);
 			setfont(40,0,"Quicksand");
-			bar(100,0,240,40);
-			bar(55,0,95,40);
-			bar(245,0,285,40);
-			xyprintf(170,20,"Height: %d",mapH);
-			xyprintf(75,20,"-");
-			xyprintf(265,20,"+");
-			bar(360,0,500,40);
-			bar(315,0,355,40);
-			bar(505,0,545,40);
-			xyprintf(430,20,"Width: %d",mapW);
-			xyprintf(335,20,"-");
-			xyprintf(525,20,"+");
-			bar(160,400,300,440);
-			xyprintf(230,420,"Save map");
-			bar(320,400,460,440);
-			xyprintf(390,420,"Load map");
+			bar(scrw/2-200,0,scrw/2-60,40);
+			bar(scrw/2-245,0,scrw/2-205,40);
+			bar(scrw/2-55,0,scrw/2-15,40);
+			xyprintf(scrw/2-130,20,"Height: %d",mapH);
+			xyprintf(scrw/2-225,20,"-");
+			xyprintf(scrw/2-35,20,"+");
+			bar(scrw/2+60,0,scrw/2+200,40);
+			bar(scrw/2+15,0,scrw/2+55,40);
+			bar(scrw/2+205,0,scrw/2+245,40);
+			xyprintf(scrw/2+130,20,"Width: %d",mapW);
+			xyprintf(scrw/2+35,20,"-");
+			xyprintf(scrw/2+225,20,"+");
+			bar(250,scrh-50,390,scrh-10);
+			xyprintf(320,scrh-30,"Save map");
+			bar(410,scrh-50,550,scrh-10);
+			xyprintf(480,scrh-30,"Load map");
 			settextjustify(LEFT_TEXT, TOP_TEXT);
 		}
 	}

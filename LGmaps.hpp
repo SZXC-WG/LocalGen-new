@@ -75,12 +75,18 @@ void printMap(int printCode, playerCoord coo) {
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
-	PIMAGE npimg[7];
+	PIMAGE npimg[9];
 	for(int i=1; i<=6; ++i) {
 		npimg[i] = newimage();
 		imageOperation::copyImage(npimg[i],pimg[i]);
 		imageOperation::zoomImage(npimg[i],widthPerBlock,heightPerBlock);
 	}
+	npimg[7]=newimage();
+	imageOperation::copyImage(npimg[7],pimg[8]);
+	imageOperation::zoomImage(npimg[7],widthPerBlock/3,heightPerBlock/3);
+	npimg[8]=newimage();
+	imageOperation::copyImage(npimg[8],pimg[8]);
+	imageOperation::zoomImage(npimg[8],widthPerBlock,heightPerBlock);
 	for(int curx = 1; curx <= mapH; curx++) {
 		for(int cury = 1; cury <= mapW; cury++) {
 			if(isVisible(curx, cury, printCode)) {
@@ -155,12 +161,23 @@ void printMap(int printCode, playerCoord coo) {
 					break;
 				}
 			}
+			if(LGgame::inCreate&&gameMap[curx][cury].lit){
+				if(gameMap[curx][cury].type==0&&gameMap[curx][cury].army==0){
+					putimage_withalpha(NULL, npimg[8],
+					                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+					                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+				}else{
+					putimage_withalpha(NULL, npimg[7],
+					                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+					                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+				}
+			}
 		}
 	}
 	if(~coo.x||~coo.y) putimage_withalpha(NULL, npimg[6],
 	                                      LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
 	                                      LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
-	for(int i=1; i<=6; ++i) delimage(npimg[i]);
+	for(int i=1; i<=8; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 
@@ -168,8 +185,8 @@ void createOptions(int type,int h){
 	static const color_t col=0xffdcdcdc,
 						 plcol=0xff3c3c3c,
 						 selcol=0xff008080;
-	PIMAGE npimg[7];
-	for(int i=1; i<=6; ++i) {
+	PIMAGE npimg[9];
+	for(int i=1; i<=8; ++i) {
 		npimg[i] = newimage();
 		imageOperation::copyImage(npimg[i],pimg[i]);
 		imageOperation::zoomImage(npimg[i],40,40);
@@ -178,18 +195,19 @@ void createOptions(int type,int h){
 	setfont(14, 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	setfillcolor(col);
-	bar(0,h,40,h+240);
+	bar(0,h,40,h+280);
 	setfillcolor(selcol);
 	bar(0,h+type*40,40,h+40+type*40);
 	setfillcolor(plcol);
-	bar(5,h+205,35,h+235);
+	bar(5,h+165,35,h+195);
+	putimage_withalpha(NULL,npimg[3],0,h);
 	putimage_withalpha(NULL,npimg[4],0,h+40);
-	putimage_withalpha(NULL,npimg[3],0,h+80);
-	putimage_withalpha(NULL,npimg[2],0,h+120);
-	putimage_withalpha(NULL,npimg[1],0,h+160);
+	putimage_withalpha(NULL,npimg[2],0,h+80);
+	putimage_withalpha(NULL,npimg[1],0,h+120);
+	putimage_withalpha(NULL,npimg[8],0,h+200);
+	putimage_withalpha(NULL,npimg[7],0,h+240);
 	xyprintf(20,h+180,"40");
-	xyprintf(20,h+220,"40");
-	for(int i=1;i<=6;++i) delimage(npimg[i]);
+	for(int i=1;i<=8;++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 

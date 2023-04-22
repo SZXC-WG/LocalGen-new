@@ -488,14 +488,14 @@ namespace LGGraphics {
 		plainnumBox.setcolor(mainColor);
 		plainnumBox.settext("40");
 		savenameBox.create();
-		savenameBox.move(310,240);
+		savenameBox.move(scrw/2+20,scrh/2-20);
 		savenameBox.size(100,40);
 		savenameBox.setfont(30,0,"Quicksand");
 		savenameBox.setcolor(mainColor);
 		savenameBox.settext("map");
 		saveButton
 		.setsize(80,40)
-		.setlocation(200,290)
+		.setlocation(scrw/2-90,scrh/2+30)
 		.setfontname("Quicksand")
 		.setfontsz(40,0)
 		.setbgcol(mainColor)
@@ -504,7 +504,7 @@ namespace LGGraphics {
 		.addtext("Save");
 		cancelButton
 		.setsize(80,40)
-		.setlocation(300,290)
+		.setlocation(scrw/2+10,scrh/2+30)
 		.setfontname("Quicksand")
 		.setfontsz(40,0)
 		.setbgcol(mainColor)
@@ -513,7 +513,7 @@ namespace LGGraphics {
 		.addtext("Cancel");
 		loadButton
 		.setsize(80,40)
-		.setlocation(200,290)
+		.setlocation(scrw/2-90,scrh/2+30)
 		.setfontname("Quicksand")
 		.setfontsz(40,0)
 		.setbgcol(mainColor)
@@ -557,14 +557,14 @@ namespace LGGraphics {
 						if(!moved && now - prsttm < 200ms) {
 							if(msg.x<40&&msg.y>=scrh/2-120&&msg.y<scrh/2+120){
 								type=(msg.y-(scrh/2-120))/40;
-							}else if(msg.x>=250&&msg.x<390&&msg.y>=scrh-50&&msg.y<scrh-10){
+							}else if(msg.x>=scrw/2-150&&msg.x<scrw/2-10&&msg.y>=scrh-50&&msg.y<scrh-10){
 								settextjustify(CENTER_TEXT, CENTER_TEXT);
 								setfillcolor(WHITE);
 								setcolor(mainColor);
-								bar(160,180,420,340);
+								bar(scrw/2-130,scrh/2-80,scrw/2+130,scrh/2+80);
 								setfont(40,0,"Quicksand");
-								xyprintf(290,210,"Save map");
-								xyprintf(235,260,"Map name:");
+								xyprintf(scrw/2,scrh/2-50,"Save map");
+								xyprintf(scrw/2-55,scrh/2,"Map name:");
 								savenameBox.visible(true);
 								setfillcolor(mainColor);
 								saveButton.display();
@@ -587,14 +587,14 @@ namespace LGGraphics {
 									if(cancelButton.status==2) break;
 								}
 								savenameBox.visible(false);
-							}else if(msg.x>=410&&msg.x<550&&msg.y>=scrh-50&&msg.y<scrh-10){
+							}else if(msg.x>=scrw/2+10&&msg.x<scrw/2+150&&msg.y>=scrh-50&&msg.y<scrh-10){
 								settextjustify(CENTER_TEXT, CENTER_TEXT);
 								setfillcolor(WHITE);
 								setcolor(mainColor);
-								bar(160,180,420,340);
+								bar(scrw/2-130,scrh/2-80,scrw/2+130,scrh/2+80);
 								setfont(40,0,"Quicksand");
-								xyprintf(290,210,"Load map");
-								xyprintf(235,260,"Map name:");
+								xyprintf(scrw/2,scrh/2-50,"Load map");
+								xyprintf(scrw/2-55,scrh/2,"Map name:");
 								savenameBox.visible(true);
 								setfillcolor(mainColor);
 								loadButton.display();
@@ -718,10 +718,10 @@ namespace LGGraphics {
 			xyprintf(scrw/2+130,20,"Width: %d",mapW);
 			xyprintf(scrw/2+35,20,"-");
 			xyprintf(scrw/2+225,20,"+");
-			bar(250,scrh-50,390,scrh-10);
-			xyprintf(320,scrh-30,"Save map");
-			bar(410,scrh-50,550,scrh-10);
-			xyprintf(480,scrh-30,"Load map");
+			bar(scrw/2-150,scrh-50,scrw/2-10,scrh-10);
+			xyprintf(scrw/2-80,scrh-30,"Save map");
+			bar(scrw/2+10,scrh-50,scrw/2+150,scrh-10);
+			xyprintf(scrw/2+80,scrh-30,"Load map");
 			settextjustify(LEFT_TEXT, TOP_TEXT);
 		}
 	}

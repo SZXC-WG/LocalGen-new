@@ -169,6 +169,7 @@ void getAllFiles(string path, std::vector<string>& files, string fileType);
 void initMaps();
 void readMap(int mid);
 void printMap(int printCode, playerCoord coo);
+void createOptions(int type,int h);
 
 inline long long PMod(long long& x);
 std::pair<long long, long long> bin_search(long long curTurn);

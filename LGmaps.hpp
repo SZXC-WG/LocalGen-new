@@ -70,16 +70,23 @@ void printMap(int printCode, playerCoord coo) {
 	static const color_t cscol = 0xff808080,
 	                     plcol = 0xffdcdcdc,
 	                     mtcol = 0xffbbbbbb,
-	                     unseen = 0xff3c3c3c;
+	                     unseen = 0xff3c3c3c,
+	                     gcol = 0xff008080;
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
-	PIMAGE npimg[7];
+	PIMAGE npimg[9];
 	for(int i=1; i<=6; ++i) {
 		npimg[i] = newimage();
 		imageOperation::copyImage(npimg[i],pimg[i]);
 		imageOperation::zoomImage(npimg[i],widthPerBlock,heightPerBlock);
 	}
+	npimg[7]=newimage();
+	imageOperation::copyImage(npimg[7],pimg[8]);
+	imageOperation::zoomImage(npimg[7],widthPerBlock/3,heightPerBlock/3);
+	npimg[8]=newimage();
+	imageOperation::copyImage(npimg[8],pimg[8]);
+	imageOperation::zoomImage(npimg[8],widthPerBlock,heightPerBlock);
 	for(int curx = 1; curx <= mapH; curx++) {
 		for(int cury = 1; cury <= mapW; cury++) {
 			if(isVisible(curx, cury, printCode)) {
@@ -92,6 +99,8 @@ void printMap(int printCode, playerCoord coo) {
 						setfillcolor(cscol);
 					else if(gameMap[curx][cury].type == 2)
 						setfillcolor(mtcol);
+					else if(gameMap[curx][cury].type == 3)
+						setfillcolor(gcol);
 					else if(gameMap[curx][cury].type == 4)
 						setfillcolor(cscol);
 				} else
@@ -152,12 +161,53 @@ void printMap(int printCode, playerCoord coo) {
 					break;
 				}
 			}
+			if(LGgame::inCreate&&gameMap[curx][cury].lit){
+				if(gameMap[curx][cury].type==0&&gameMap[curx][cury].army==0){
+					putimage_withalpha(NULL, npimg[8],
+					                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+					                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+				}else{
+					putimage_withalpha(NULL, npimg[7],
+					                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+					                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+				}
+			}
 		}
 	}
 	if(~coo.x||~coo.y) putimage_withalpha(NULL, npimg[6],
 	                                      LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
 	                                      LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
-	for(int i=1; i<=6; ++i) delimage(npimg[i]);
+	for(int i=1; i<=8; ++i) delimage(npimg[i]);
+	settextjustify(LEFT_TEXT, TOP_TEXT);
+}
+
+void createOptions(int type,int h){
+	static const color_t col=0xffdcdcdc,
+						 plcol=0xff3c3c3c,
+						 selcol=0xff008080;
+	PIMAGE npimg[9];
+	for(int i=1; i<=8; ++i) {
+		npimg[i] = newimage();
+		imageOperation::copyImage(npimg[i],pimg[i]);
+		imageOperation::zoomImage(npimg[i],40,40);
+	}
+	setcolor(WHITE);
+	setfont(14, 0, "Segoe UI");
+	settextjustify(CENTER_TEXT, CENTER_TEXT);
+	setfillcolor(col);
+	bar(0,h,40,h+280);
+	setfillcolor(selcol);
+	bar(0,h+type*40,40,h+40+type*40);
+	setfillcolor(plcol);
+	bar(5,h+165,35,h+195);
+	putimage_withalpha(NULL,npimg[3],0,h);
+	putimage_withalpha(NULL,npimg[4],0,h+40);
+	putimage_withalpha(NULL,npimg[2],0,h+80);
+	putimage_withalpha(NULL,npimg[1],0,h+120);
+	putimage_withalpha(NULL,npimg[8],0,h+200);
+	putimage_withalpha(NULL,npimg[7],0,h+240);
+	xyprintf(20,h+180,"40");
+	for(int i=1;i<=8;++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 
@@ -322,12 +372,12 @@ void createFullPlainMap(int crtH, int crtW, int plCnt) {
 }
 
 void getAllFiles(string path, std::vector<string>& files, string fileType)  {
-	long hFile = 0; // �ļ����?
-	struct _finddata_t fileinfo; // �ļ���Ϣ
+	long hFile = 0; // 锟侥硷拷锟斤拷锟?
+	struct _finddata_t fileinfo; // 锟侥硷拷锟斤拷息
 	string p;
 	if((hFile = _findfirst(p.assign(path).append("\\*" + fileType).c_str(), &fileinfo)) != -1) {
-		do files.push_back(p.assign(path).append("\\").append(fileinfo.name)); // �����ļ���ȫ·��
-		while(_findnext(hFile, &fileinfo) == 0);   // Ѱ����һ�����ɹ�����0������-1
+		do files.push_back(p.assign(path).append("\\").append(fileinfo.name)); // 锟斤拷锟斤拷锟侥硷拷锟斤拷全路锟斤拷
+		while(_findnext(hFile, &fileinfo) == 0);   // 寻锟斤拷锟斤拷一锟斤拷锟斤拷锟缴癸拷锟斤拷锟斤拷0锟斤拷锟斤拷锟斤拷-1
 		_findclose(hFile);
 	}
 }
@@ -338,11 +388,11 @@ struct MapInfoS { int id; string chiname; string engname; string auth; int hei; 
 */
 void initMaps() {
 	mapNum = 5;
-	maps[1] = MapInfoS {1, "�����ͼ", "Random", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	maps[2] = MapInfoS {2, "��׼��ͼ", "Standard", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	maps[3] = MapInfoS {3, "��ȫ��", "Full Tower/City", "LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
-	maps[4] = MapInfoS {4, "������", "Great Swamp", "LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
-	maps[5] = MapInfoS {5, "��ƽԭ", "Great Plain", "LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
+	maps[1] = MapInfoS {1, "随机地图", "Random", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	maps[2] = MapInfoS {2, "标准地图", "Standard", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	maps[3] = MapInfoS {3, "完全塔", "Full Tower/City", "LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
+	maps[4] = MapInfoS {4, "大沼泽", "Great Swamp", "LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
+	maps[5] = MapInfoS {5, "大平原", "Great Plain", "LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
 	std::vector<string> files;
 	getAllFiles("maps", files, ".ini");
 	for(auto x : files) {

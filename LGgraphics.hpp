@@ -116,7 +116,7 @@ namespace LGGraphics {
 			scrsz[p].setfontname("Quicksand");
 			scrsz[p].setfontsz(40, 0);
 			scrsz[p].setlocation(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext(to_string(i * 4) + " ¡Á " + to_string(i * 9 / 4));
+			scrsz[p].addtext(to_string(i * 4) + " Ã— " + to_string(i * 9 / 4));
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
@@ -129,7 +129,7 @@ namespace LGGraphics {
 			scrsz[p].setfontname("Quicksand");
 			scrsz[p].setfontsz(40, 0);
 			scrsz[p].setlocation(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext("Full Screen ("+to_string(GetSystemMetrics(SM_CXSCREEN))+" ¡Á "+to_string(GetSystemMetrics(SM_CYSCREEN))+")");
+			scrsz[p].addtext("Full Screen ("+to_string(GetSystemMetrics(SM_CXSCREEN))+" Ã— "+to_string(GetSystemMetrics(SM_CYSCREEN))+")");
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
@@ -270,11 +270,11 @@ namespace LGGraphics {
 			// 	webOptions(); break;
 			// }
 			if(replay.status == 2) {
-				replayPage(); exit(0); break;
+				replayPage(); break;
 			}
-			// if(createmap.status == 2) {
-			// 	createMapPage(); break;
-			// }
+			if(createmap.status == 2) {
+				createMapPage(); break;
+			}
 			if(donate.status == 2) {
 				donate.clickEvent(); goto WelcomePageStartLabel;
 			}
@@ -308,7 +308,7 @@ namespace LGGraphics {
 			// .addtext("City Count: " + to_string(maps[i].citycnt))
 			// .addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
 			// .addtext("Swamp Count: " + to_string(maps[i].swampcnt))
-			// .addtext("Size: " + to_string(maps[i].hei) + " ¡Á " + to_string(maps[i].wid))
+			// .addtext("Size: " + to_string(maps[i].hei) + " Ã— " + to_string(maps[i].wid))
 			.display();
 		}
 		sys_edit impbox;
@@ -375,7 +375,7 @@ namespace LGGraphics {
 				.addtext("City Count: " + (~maps[i].citycnt?to_string(maps[i].citycnt):"undetermined"))
 				.addtext("Mountain Count: " + (~maps[i].mountaincnt?to_string(maps[i].mountaincnt):"undetermined"))
 				.addtext("Swamp Count: " + (~maps[i].swampcnt?to_string(maps[i].swampcnt):"undetermined"))
-				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " ¡Á " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
+				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " Ã— " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
 				.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
@@ -469,6 +469,280 @@ namespace LGGraphics {
 	}
 
 	void createMapPage() {
+		LGgame::inCreate=1;
+		cleardevice();
+		setrendermode(RENDER_MANUAL);
+		settextjustify(LEFT_TEXT, TOP_TEXT);
+		int scrw=mapDataStore.mapSizeX*1600,scrh=mapDataStore.mapSizeY*900;
+		sys_edit citynumBox,plainnumBox,savenameBox;
+		rectBUTTON saveButton,cancelButton,loadButton;
+		citynumBox.create();
+		citynumBox.size(80,30);
+		citynumBox.move(scrw/2+5,scrh-110);
+		citynumBox.setfont(20,0,"Quicksand");
+		citynumBox.setcolor(mainColor);
+		citynumBox.settext("40");
+		plainnumBox.create();
+		plainnumBox.size(80,30);
+		plainnumBox.move(scrw/2+35,scrh-110);
+		plainnumBox.setfont(20,0,"Quicksand");
+		plainnumBox.setcolor(mainColor);
+		plainnumBox.settext("40");
+		savenameBox.create();
+		savenameBox.size(100,40);
+		savenameBox.move(scrw/2+20,scrh/2-20);
+		savenameBox.setfont(30,0,"Quicksand");
+		savenameBox.setcolor(mainColor);
+		savenameBox.settext("map");
+		saveButton
+		.setsize(90,40)
+		.setlocation(scrw/2-100,scrh/2+30)
+		.setfontname("Quicksand")
+		.setfontsz(40,0)
+		.setbgcol(mainColor)
+		.settxtcol(WHITE)
+		.setalign(CENTER_TEXT,CENTER_TEXT)
+		.addtext("Save");
+		cancelButton
+		.setsize(90,40)
+		.setlocation(scrw/2+10,scrh/2+30)
+		.setfontname("Quicksand")
+		.setfontsz(40,0)
+		.setbgcol(mainColor)
+		.settxtcol(WHITE)
+		.setalign(CENTER_TEXT,CENTER_TEXT)
+		.addtext("Cancel");
+		loadButton
+		.setsize(90,40)
+		.setlocation(scrw/2-100,scrh/2+30)
+		.setfontname("Quicksand")
+		.setfontsz(40,0)
+		.setbgcol(mainColor)
+		.settxtcol(WHITE)
+		.setalign(CENTER_TEXT,CENTER_TEXT)
+		.addtext("Load");
+		LGGraphics::init();
+		mapW=mapH=10;
+		for(int i=1;i<=mapH;++i)
+			for(int j=1;j<=mapW;++j) gameMap[i][j]={0,0,0,0};
+		printMap(1048575,{-1,-1});
+		createOptions(0,scrh/2-140);
+		setfillcolor(mainColor);
+		int smsx=0,smsy=0,midact=0,type=0,citynum=40,plainnum=40;
+		bool moved=false,saved=false;
+		std::chrono::steady_clock::duration prsttm;
+		for(;is_run();delay_fps(120)){
+			while(mousemsg()) {
+				mouse_msg msg = getmouse();
+				if(msg.is_wheel()) {
+					widthPerBlock += msg.wheel / 120;
+					heightPerBlock += msg.wheel / 120;
+					widthPerBlock = max(widthPerBlock, 2);
+					heightPerBlock = max(heightPerBlock, 2);
+				}
+				if(msg.is_move()) {
+					if(midact == 1) {
+						LGGraphics::mapDataStore.maplocX += msg.x - smsx;
+						LGGraphics::mapDataStore.maplocY += msg.y - smsy;
+						smsx = msg.x, smsy = msg.y; moved = true;
+					}
+				} else if(msg.is_left()) {
+					if(msg.is_down()) {
+						prsttm = std::chrono::steady_clock::now().time_since_epoch();
+						midact = 1;
+						smsx = msg.x, smsy = msg.y;
+						moved = false;
+					} else {
+						midact = 0;
+						std::chrono::steady_clock::duration now = std::chrono::steady_clock::now().time_since_epoch();
+						if(!moved && now - prsttm < 200ms) {
+							if(msg.x<40&&msg.y>=scrh/2-140&&msg.y<scrh/2+140){
+								type=(msg.y-(scrh/2-140))/40;
+							}else if(msg.x>=scrw/2-145&&msg.x<scrw/2-5&&msg.y>=scrh-60&&msg.y<scrh-20){
+								settextjustify(CENTER_TEXT, CENTER_TEXT);
+								setfillcolor(WHITE);
+								setcolor(BLACK);
+								bar(scrw/2-130,scrh/2-80,scrw/2+130,scrh/2+80);
+								setfont(40,0,"Quicksand");
+								xyprintf(scrw/2,scrh/2-50,"Save map");
+								xyprintf(scrw/2-55,scrh/2,"Map name:");
+								savenameBox.visible(true);
+								setfillcolor(mainColor);
+								saveButton.display();
+								cancelButton.display();
+								delay_ms(0);
+								for(;is_run();delay_fps(120)){
+									saveButton.detect().display();
+									cancelButton.detect().display();
+									if(saveButton.status==2){
+										char s[100];
+										savenameBox.gettext(sizeof(s),s);
+										string ss=s;
+										Zip();
+										freopen(("maps/"+ss+".lg").c_str(),"w",stdout);
+										printf("%s",strZip);
+										fclose(stdout);
+										saved=true;
+										LGgame::inCreate=0;
+										return;
+									}
+									if(cancelButton.status==2) break;
+								}
+								savenameBox.visible(false);
+							}else if(msg.x>=scrw/2+5&&msg.x<scrw/2+145&&msg.y>=scrh-60&&msg.y<scrh-20){
+								settextjustify(CENTER_TEXT, CENTER_TEXT);
+								setfillcolor(WHITE);
+								setcolor(BLACK);
+								bar(scrw/2-130,scrh/2-80,scrw/2+130,scrh/2+80);
+								setfont(40,0,"Quicksand");
+								xyprintf(scrw/2,scrh/2-50,"Load map");
+								xyprintf(scrw/2-55,scrh/2,"Map name:");
+								savenameBox.visible(true);
+								setfillcolor(mainColor);
+								loadButton.display();
+								cancelButton.display();
+								delay_ms(0);
+								for(;is_run();delay_fps(120)){
+									loadButton.detect().display();
+									cancelButton.detect().display();
+									if(loadButton.status==2){
+										char s[100];
+										savenameBox.gettext(sizeof(s),s);
+										string ss=s;
+										FILE* file;
+										file=fopen(("maps/"+ss+".lg").c_str(),"r");
+										if(!file){
+											MessageBoxA(nullptr,"Map not found!","Local Generals",MB_OK);
+											continue;
+										}
+										fread(strdeZip,1,LEN_ZIP,file);
+										deZip();
+										break;
+									}
+									if(cancelButton.status==2) break;
+								}
+								savenameBox.visible(false);
+							}else if(msg.x>=scrw/2-200&&msg.x<scrw/2-170&&msg.y>=10&&msg.y<40){
+								if(mapH>1) --mapH;
+							}else if(msg.x>=scrw/2-50&&msg.x<scrw/2-20&&msg.y>=10&&msg.y<40){
+								if(mapH<100){
+									++mapH;
+									for(int i=1;i<=mapW;++i) gameMap[mapH][i]={0,0,0,0};
+								}
+							}else if(msg.x>=scrw/2+20&&msg.x<scrw/2+50&&msg.y>=10&&msg.y<40){
+								if(mapW>1) --mapW;
+							}else if(msg.x>=scrw/2+170&&msg.x<scrw/2+200&&msg.y>=10&&msg.y<40){
+								if(mapW<100){
+									++mapW;
+									for(int i=1;i<=mapH;++i) gameMap[i][mapW]={0,0,0,0};
+								}
+							}else if(msg.x >= LGGraphics::mapDataStore.maplocX &&
+							   msg.y >= LGGraphics::mapDataStore.maplocY &&
+							   msg.x <= LGGraphics::mapDataStore.maplocX + widthPerBlock * mapW &&
+							   msg.y <= LGGraphics::mapDataStore.maplocY + heightPerBlock * mapH) {
+								int lin = (msg.y + heightPerBlock - 1 - LGGraphics::mapDataStore.maplocY) / heightPerBlock;
+								int col = (msg.x + widthPerBlock - 1 - LGGraphics::mapDataStore.maplocX) / widthPerBlock;
+								switch(type){
+									case 0:
+										gameMap[lin][col].team=0;
+										gameMap[lin][col].type=2;
+										gameMap[lin][col].army=0;
+										break;
+									case 1:
+										gameMap[lin][col].team=0;
+										gameMap[lin][col].type=1;
+										gameMap[lin][col].army=0;
+										break;
+									case 2:
+										gameMap[lin][col].team=0;
+										gameMap[lin][col].type=3;
+										gameMap[lin][col].army=0;
+										break;
+									case 3:
+										gameMap[lin][col].team=0;
+										gameMap[lin][col].type=4;
+										gameMap[lin][col].army=citynum;
+										break;
+									case 4:
+										gameMap[lin][col].team=0;
+										gameMap[lin][col].type=0;
+										gameMap[lin][col].army=plainnum;
+										break;
+									case 5:
+										gameMap[lin][col].lit=!gameMap[lin][col].lit;
+										break;
+									case 6:
+										gameMap[lin][col].team=0;
+										gameMap[lin][col].type=0;
+										gameMap[lin][col].army=0;
+										break;
+								}
+							}
+						}
+					}
+				}
+			}
+			cleardevice();
+			printMap(1048575, {-1,-1});
+			createOptions(type,scrh/2-140);
+			settextjustify(CENTER_TEXT, CENTER_TEXT);
+			setcolor(BLACK);
+			setfillcolor(WHITE);
+			setfont(20,0,"Quicksand");
+			if(type==0){
+				bar(scrw/2-105,scrh-110,scrw/2+105,scrh-80);
+				xyprintf(scrw/2,scrh-95,"Click a tile to place a mountain.");
+			}
+			if(type==1){
+				bar(scrw/2-105,scrh-130,scrw/2+105,scrh-80);
+				xyprintf(scrw/2,scrh-115,"Click a tile to place a swamp.");
+				xyprintf(scrw/2,scrh-95,"Swamps drain 1 army per turn.");
+			}
+			if(type==5){
+				bar(scrw/2-95,scrh-110,scrw/2+95,scrh-80);
+				xyprintf(scrw/2,scrh-95,"Click a tile to toggle light tile.");
+			}
+			if(type==6){
+				bar(scrw/2-80,scrh-110,scrw/2+80,scrh-80);
+				xyprintf(scrw/2,scrh-95,"Click a tile to remove it.");
+			}
+			if(type==3){
+				citynumBox.visible(true);
+				bar(scrw/2-85,scrh-110,scrw/2+5,scrh-80);
+				xyprintf(scrw/2-40,scrh-95,"City Strength:");
+				char s[10];
+				citynumBox.gettext(sizeof(s),s);
+				sscanf(s,"%d",&citynum);
+			}else citynumBox.visible(false);
+			if(type==4){
+				plainnumBox.visible(true);
+				bar(scrw/2-115,scrh-110,scrw/2+35,scrh-80);
+				xyprintf(scrw/2-40,scrh-95,"Neutral Army Strength:");
+				char s[10];
+				plainnumBox.gettext(sizeof(s),s);
+				sscanf(s,"%d",&plainnum);
+			}else plainnumBox.visible(false);
+			setfillcolor(WHITE);
+			setcolor(BLACK);
+			setfont(30,0,"Quicksand");
+			bar(scrw/2-200,10,scrw/2-20,40);
+			xyprintf(scrw/2-110,25,"Height: %d",mapH);
+			xyprintf(scrw/2-185,25,"-");
+			xyprintf(scrw/2-35,25,"+");
+			bar(scrw/2+20,10,scrw/2+200,40);
+			xyprintf(scrw/2+110,25,"Width: %d",mapW);
+			xyprintf(scrw/2+35,25,"-");
+			xyprintf(scrw/2+185,25,"+");
+			bar(scrw/2-155,scrh-70,scrw/2+155,scrh-10);
+			setfillcolor(mainColor);
+			setcolor(WHITE);
+			setfont(40,0,"Quicksand");
+			bar(scrw/2-145,scrh-60,scrw/2-5,scrh-20);
+			xyprintf(scrw/2-75,scrh-40,"Save map");
+			bar(scrw/2+5,scrh-60,scrw/2+145,scrh-20);
+			xyprintf(scrw/2+75,scrh-40,"Load map");
+			settextjustify(LEFT_TEXT, TOP_TEXT);
+		}
 	}
 
 	void doMapSelect() {
@@ -494,7 +768,7 @@ namespace LGGraphics {
 		xyprintf(255 * mapDataStore.mapSizeX, 85 * mapDataStore.mapSizeY,
 		         "Author: %s", maps[mapSelected].auth.c_str());
 		xyprintf(255 * mapDataStore.mapSizeX, 115 * mapDataStore.mapSizeY,
-		         "Size: %d ¡Á %d", maps[mapSelected].hei, maps[mapSelected].wid);
+		         "Size: %d Ã— %d", maps[mapSelected].hei, maps[mapSelected].wid);
 		xyprintf(255 * mapDataStore.mapSizeX, 145 * mapDataStore.mapSizeY,
 		         "General Count: %d", maps[mapSelected].generalcnt);
 		xyprintf(255 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY,
@@ -691,6 +965,17 @@ namespace LGGraphics {
 	}
 
 	void importGameSettings() {
+		maps[0].hei=mapH;
+		maps[0].wid=mapW;
+		for(int i=1;i<=mapH;++i)
+			for(int j=1;j<=mapW;++j){
+				if(gameMap[i][j].type==0) ++maps[0].plaincnt;
+				if(gameMap[i][j].type==1) ++maps[0].swampcnt;
+				if(gameMap[i][j].type==2) ++maps[0].mountaincnt;
+				if(gameMap[i][j].type==3) ++maps[0].generalcnt;
+				if(gameMap[i][j].type==4) ++maps[0].citycnt;
+			}
+		cleardevice();
 		sys_edit speedBox;
 		rectBUTTON speedSubmit;
 		rectBUTTON plCntBox[15]; /* 2~12 */
@@ -881,6 +1166,10 @@ namespace LGGraphics {
 		pimg[6] = newimage();
 		getimage(pimg[6], "img/currentOn.png");
 		// imageOperation::zoomImage(pimg[6], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		pimg[7] = newimage();
+		getimage(pimg[7], "img/erase.png");
+		pimg[8] = newimage();
+		getimage(pimg[8], "img/light.png");
 		// for(int i = 1; i <= 6; i++) ege_enable_aa(true, pimg[i]);
 		// ege_enable_aa(true);
 		setbkcolor(0xff222222);

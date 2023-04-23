@@ -524,7 +524,7 @@ namespace LGGraphics {
 		LGGraphics::init();
 		mapW=mapH=10;
 		for(int i=1; i<=mapH; ++i)
-			for(int j=1; j<=mapW; ++j) gameMap[i][j]= {0,0,0,0};
+			for(int j=1; j<=mapW; ++j) gameMap[i][j] = {0,0,0,0};
 		printMap(1048575, {-1,-1});
 		createOptions(0,scrh/2-140);
 		setfillcolor(mainColor);

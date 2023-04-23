@@ -5,19 +5,19 @@
 #define LOCALGEN_PRIVATE_H
 
 /* VERSION DEFINITIONS */
-#define VER_STRING	"3.0.2.1646"
+#define VER_STRING	"3.0.2.1649"
 #define VER_MAJOR	3
 #define VER_MINOR	0
 #define VER_RELEASE	2
-#define VER_BUILD	1646
+#define VER_BUILD	1649
 #define COMPANY_NAME	"LocalGen-dev"
-#define FILE_VERSION	"3.0.2.1646"
+#define FILE_VERSION	"3.0.2.1649"
 #define FILE_DESCRIPTION	"Local Generals.io (new ver.)"
 #define INTERNAL_NAME	""
 #define LEGAL_COPYRIGHT	"Copyright (c) 2023 LocalGen-dev"
 #define LEGAL_TRADEMARKS	""
 #define ORIGINAL_FILENAME	""
 #define PRODUCT_NAME	"Local Generals.io (new ver.)"
-#define PRODUCT_VERSION	"3.0.2.1646"
+#define PRODUCT_VERSION	"3.0.2.1649"
 
 #endif /*LOCALGEN_PRIVATE_H*/

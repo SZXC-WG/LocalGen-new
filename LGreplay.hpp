@@ -45,7 +45,7 @@ namespace LGreplay {
 		res+=ntos(std::abs(B.army),4);
 		return res;
 	}
-	
+
 	Movement::Movement() {}
 	Movement::Movement(int tm,int d,playerCoord c) {team=tm; dir=d; coord=c;}
 	string Movement::zip() {

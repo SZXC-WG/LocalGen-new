@@ -433,9 +433,9 @@ namespace LGlocal {
 			while(!movement.empty() && LGgame::analyzeMove(1, movement.front(), LGgame::playerCoo[1]))
 				movement.pop_front(),tmpcoo=LGgame::playerCoo[1];
 			int mv;
-			if(!movement.empty()){
+			if(!movement.empty()) {
 				mv=movement.front();
-				if(mv>=1&&mv<=4){
+				if(mv>=1&&mv<=4) {
 					LGreplay::Movement mov(1,mv,tmpcoo);
 					LGreplay::wreplay.newMove(mov);
 				}
@@ -449,21 +449,21 @@ namespace LGlocal {
 				switch(LGgame::robotId[i]) {
 					case 0 ... 99:
 						mv=smartRandomBot::smartRandomBot(i, LGgame::playerCoo[i]);
-						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4){
+						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
 							LGreplay::Movement mov(i,mv,tmpcoo);
 							LGreplay::wreplay.newMove(mov);
 						}
 						break;
 					case 100 ... 199:
 						mv=xrzBot::xrzBot(i, LGgame::playerCoo[i]);
-						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4){
+						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
 							LGreplay::Movement mov(i,mv,tmpcoo);
 							LGreplay::wreplay.newMove(mov);
 						}
 						break;
 					case 200 ... 299:
 						mv=xiaruizeBot::xiaruizeBot(i, LGgame::playerCoo[i]);
-						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4){
+						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
 							LGreplay::Movement mov(i,mv,tmpcoo);
 							LGreplay::wreplay.newMove(mov);
 						}

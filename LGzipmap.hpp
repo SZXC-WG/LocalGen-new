@@ -31,20 +31,20 @@ void Zip() {
 	strZip[p++] = PMod(k2) + CHAR_AD;
 
 	for(i = 1; i <= mapH; i++)
-	for(j = 1; j <= mapW; j++) {
-		strZip[p++] = gameMap[i][j].team + CHAR_AD;
-		strZip[p] = (gameMap[i][j].type << 2) + (gameMap[i][j].lit << 1);
-		k1 = gameMap[i][j].army;
+		for(j = 1; j <= mapW; j++) {
+			strZip[p++] = gameMap[i][j].team + CHAR_AD;
+			strZip[p] = (gameMap[i][j].type << 2) + (gameMap[i][j].lit << 1);
+			k1 = gameMap[i][j].army;
 
-		if(k1 < 0) {
-			k1 = -k1;
-			strZip[p++] += CHAR_AD + 1;
-		} else
-			strZip[p++] += CHAR_AD;
+			if(k1 < 0) {
+				k1 = -k1;
+				strZip[p++] += CHAR_AD + 1;
+			} else
+				strZip[p++] += CHAR_AD;
 
-		for(k2 = 1; k2 <= 8; k2++)
-			strZip[p++] = PMod(k1) + CHAR_AD;
-	}
+			for(k2 = 1; k2 <= 8; k2++)
+				strZip[p++] = PMod(k1) + CHAR_AD;
+		}
 	strZip[p] = '\0';
 }
 
@@ -53,26 +53,26 @@ void deZip() {
 	int f, p = 0;
 
 	for(; strdeZip[p] != '\0'; p++)
-	strdeZip[p] -= CHAR_AD;
+		strdeZip[p] -= CHAR_AD;
 
 	mapH = (strdeZip[1] << 6) + strdeZip[0];
 	mapW = (strdeZip[3] << 6) + strdeZip[2];
 
 	for(i = 1; i <= mapH; i++)
-	for(j = 1; j <= mapW; j++) {
-		gameMap[i][j].team = strdeZip[k++];
-		bool f = strdeZip[k] & 1;
-		strdeZip[k] >>= 1;
-		gameMap[i][j].lit = strdeZip[k] & 1;
-		strdeZip[k] >>= 1;
-		gameMap[i][j].type = strdeZip[k++];
-		gameMap[i][j].army = 0;
+		for(j = 1; j <= mapW; j++) {
+			gameMap[i][j].team = strdeZip[k++];
+			bool f = strdeZip[k] & 1;
+			strdeZip[k] >>= 1;
+			gameMap[i][j].lit = strdeZip[k] & 1;
+			strdeZip[k] >>= 1;
+			gameMap[i][j].type = strdeZip[k++];
+			gameMap[i][j].army = 0;
 
-		for(p = 7; p >= 0; p--)
-			gameMap[i][j].army = (gameMap[i][j].army << 6) + strdeZip[k + p];
-		k += 8;
-		gameMap[i][j].army = f ? (-gameMap[i][j].army) : gameMap[i][j].army;
-	}
+			for(p = 7; p >= 0; p--)
+				gameMap[i][j].army = (gameMap[i][j].army << 6) + strdeZip[k + p];
+			k += 8;
+			gameMap[i][j].army = f ? (-gameMap[i][j].army) : gameMap[i][j].army;
+		}
 }
 
 void toAvoidCEBugInGraphicsImportMap(string fileName) {

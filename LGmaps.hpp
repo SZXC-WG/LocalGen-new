@@ -161,12 +161,12 @@ void printMap(int printCode, playerCoord coo) {
 					break;
 				}
 			}
-			if(LGgame::inCreate&&gameMap[curx][cury].lit){
-				if(gameMap[curx][cury].type==0&&gameMap[curx][cury].army==0){
+			if(LGgame::inCreate&&gameMap[curx][cury].lit) {
+				if(gameMap[curx][cury].type==0&&gameMap[curx][cury].army==0) {
 					putimage_withalpha(NULL, npimg[8],
 					                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
 					                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
-				}else{
+				} else {
 					putimage_withalpha(NULL, npimg[7],
 					                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
 					                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
@@ -175,16 +175,16 @@ void printMap(int printCode, playerCoord coo) {
 		}
 	}
 	if(~coo.x||~coo.y) putimage_withalpha(NULL, npimg[6],
-	                                      LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
-	                                      LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
+		                                      LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
+		                                      LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
 	for(int i=1; i<=8; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 
-void createOptions(int type,int h){
+void createOptions(int type,int h) {
 	static const color_t col=0xffdcdcdc,
-						 plcol=0xff3c3c3c,
-						 selcol=0xff008080;
+	                     plcol=0xff3c3c3c,
+	                     selcol=0xff008080;
 	PIMAGE npimg[9];
 	for(int i=1; i<=8; ++i) {
 		npimg[i] = newimage();
@@ -207,7 +207,7 @@ void createOptions(int type,int h){
 	putimage_withalpha(NULL,npimg[8],0,h+200);
 	putimage_withalpha(NULL,npimg[7],0,h+240);
 	xyprintf(20,h+180,"40");
-	for(int i=1;i<=8;++i) delimage(npimg[i]);
+	for(int i=1; i<=8; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 

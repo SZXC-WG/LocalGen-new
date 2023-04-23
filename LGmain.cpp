@@ -27,7 +27,7 @@
 /* dev project headers */
 #include "LocalGen_private.h"
 #include "LGdef.hpp"
-#include "LGmaps.hpp" 
+#include "LGmaps.hpp"
 #include "LGgraphics.hpp"
 #include "LGbot.hpp"
 #include "LGzipmap.hpp"
@@ -44,7 +44,7 @@ signed main(signed argc, char** argv) {
 	initMaps();
 	MainPage(); // start main page
 	exitExe();	// exit program
-	
+
 //	LGdebug::debugBegin();
 }
 

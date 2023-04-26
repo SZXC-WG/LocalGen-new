@@ -302,6 +302,7 @@ namespace LGgame {
 		playerCnt = pC;
 		gameSpeed = gS;
 		inReplay = false;
+		inCreate = false;
 		for(register int i = 1; i <= pC; ++i) isAlive[i] = 1;
 	}
 };
@@ -327,6 +328,7 @@ namespace LGlocal {
 		bool gameEnd = 0;
 		LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
 		flushkey();
+		flushmouse();
 		int midact = 0;
 		LGGraphics::mapDataStore.maplocX = - (LGgame::genCoo[1].y) * widthPerBlock + 800 * LGGraphics::mapDataStore.mapSizeX;
 		LGGraphics::mapDataStore.maplocY = - (LGgame::genCoo[1].x) * heightPerBlock + 450 * LGGraphics::mapDataStore.mapSizeY;
@@ -508,7 +510,6 @@ namespace LGlocal {
 					LGgame::printGameMessage({winnerNum, -1, LGgame::curTurn});
 				}
 			}
-			cleardevice();
 			if(1) {
 				std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				int needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
@@ -520,6 +521,7 @@ namespace LGlocal {
 						needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
 						lackTurn = LGgame::curTurn - needFlushToTurn;
 					}
+					cleardevice();
 					printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 					LGgame::ranklist();
 					int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
@@ -546,7 +548,6 @@ namespace LGlocal {
 					xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
 					xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, "FPS: %f", getfps());
 					xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGgame::curTurn);
-					delay_ms(0);
 				}
 			}
 		}

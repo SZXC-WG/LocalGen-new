@@ -70,8 +70,7 @@ void printMap(int printCode, playerCoord coo) {
 	static const color_t cscol = 0xff808080,
 	                     plcol = 0xffdcdcdc,
 	                     mtcol = 0xffbbbbbb,
-	                     unseen = 0xff3c3c3c,
-	                     gcol = 0xff008080;
+	                     unseen = 0xff3c3c3c;
 	setcolor(WHITE);
 	setfont(std::max((heightPerBlock + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
@@ -100,7 +99,7 @@ void printMap(int printCode, playerCoord coo) {
 					else if(gameMap[curx][cury].type == 2)
 						setfillcolor(mtcol);
 					else if(gameMap[curx][cury].type == 3)
-						setfillcolor(gcol);
+						setfillcolor(LGGraphics::mainColor);
 					else if(gameMap[curx][cury].type == 4)
 						setfillcolor(cscol);
 				} else
@@ -372,12 +371,12 @@ void createFullPlainMap(int crtH, int crtW, int plCnt) {
 }
 
 void getAllFiles(string path, std::vector<string>& files, string fileType)  {
-	long hFile = 0; // 锟侥硷拷锟斤拷锟?
-	struct _finddata_t fileinfo; // 锟侥硷拷锟斤拷息
+	long hFile = 0;
+	struct _finddata_t fileinfo;
 	string p;
 	if((hFile = _findfirst(p.assign(path).append("\\*" + fileType).c_str(), &fileinfo)) != -1) {
-		do files.push_back(p.assign(path).append("\\").append(fileinfo.name)); // 锟斤拷锟斤拷锟侥硷拷锟斤拷全路锟斤拷
-		while(_findnext(hFile, &fileinfo) == 0);   // 寻锟斤拷锟斤拷一锟斤拷锟斤拷锟缴癸拷锟斤拷锟斤拷0锟斤拷锟斤拷锟斤拷-1
+		do files.push_back(p.assign(path).append("\\").append(fileinfo.name));
+		while(_findnext(hFile, &fileinfo) == 0);
 		_findclose(hFile);
 	}
 }
@@ -388,11 +387,11 @@ struct MapInfoS { int id; string chiname; string engname; string auth; int hei; 
 */
 void initMaps() {
 	mapNum = 5;
-	maps[1] = MapInfoS {1, "随机地图", "Random", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	maps[2] = MapInfoS {2, "标准地图", "Standard", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	maps[3] = MapInfoS {3, "完全塔", "Full Tower/City", "LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
-	maps[4] = MapInfoS {4, "大沼泽", "Great Swamp", "LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
-	maps[5] = MapInfoS {5, "大平原", "Great Plain", "LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
+	maps[1] = MapInfoS {1, "�����ͼ", "Random", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	maps[2] = MapInfoS {2, "��׼��ͼ", "Standard", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	maps[3] = MapInfoS {3, "��ȫ��", "Full Tower/City", "LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
+	maps[4] = MapInfoS {4, "������", "Great Swamp", "LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
+	maps[5] = MapInfoS {5, "��ƽԭ", "Great Plain", "LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
 	std::vector<string> files;
 	getAllFiles("maps", files, ".ini");
 	for(auto x : files) {

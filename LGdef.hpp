@@ -112,7 +112,7 @@ struct moveS {
 
 //====value====//
 
-PIMAGE pimg[7];
+PIMAGE pimg[9];
 MapInfoS maps[5005];
 Block gameMap[505][505]; /* maximum 500*500 */
 playerS playerInfo[64] = {

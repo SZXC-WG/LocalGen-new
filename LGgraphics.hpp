@@ -280,6 +280,7 @@ namespace LGGraphics {
 			}
 		}
 		settextjustify(LEFT_TEXT, TOP_TEXT);
+		exit(0);
 	}
 
 	void localOptions() {

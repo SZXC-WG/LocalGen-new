@@ -422,6 +422,7 @@ namespace LGGraphics {
 	}
 
 	void webOptions() {
+		//
 	}
 
 	void replayPage() {
@@ -964,7 +965,8 @@ namespace LGGraphics {
 		widinput.visible(false);
 		amninput.visible(false);
 		amxinput.visible(false);
-		localGame(cheatCode, plCnt, stDel);
+		LGserver::GAME();
+//		localGame(cheatCode, plCnt, stDel);
 		exit(0);
 	}
 

@@ -47,24 +47,24 @@ void LGserver::zipSendBuf() {
 	sendBuf[p++]=PMod(k2)+CHAR_AD;
 
 	for(i=1; i<=mapH; i++)
-		for(j=1; j<=mapW; j++) {
-			sendBuf[p++]=gameMap[i][j].team+CHAR_AD;
-			sendBuf[p]=(gameMap[i][j].type<<2)+(gameMap[i][j].lit<<1);
-			k1=gameMap[i][j].army;
+	for(j=1; j<=mapW; j++) {
+		sendBuf[p++]=gameMap[i][j].team+CHAR_AD;
+		sendBuf[p]=(gameMap[i][j].type<<2)+(gameMap[i][j].lit<<1);
+		k1=gameMap[i][j].army;
 
-			if(k1<0) {
-				k1=-k1;
-				sendBuf[p++]+=CHAR_AD+1;
-			} else sendBuf[p++]+=CHAR_AD;
+		if(k1<0) {
+			k1=-k1;
+			sendBuf[p++]+=CHAR_AD+1;
+		} else sendBuf[p++]+=CHAR_AD;
 
-			for(k2=1; k2<=8; k2++)
-				sendBuf[p++]=PMod(k1)+CHAR_AD;
-		} sendBuf[p]='\0';
+		for(k2=1; k2<=8; k2++)
+		sendBuf[p++]=PMod(k1)+CHAR_AD;
+	} sendBuf[p]='\0';
 }
 
 void LGserver::sockListen() {
 	if(initSock())
-		return ;
+	return ;
 
 	SOCKET listenSocket=socket(AF_INET,SOCK_STREAM,0);
 	SOCKADDR_IN listenAddr;
@@ -115,7 +115,7 @@ void LGserver::sockListen() {
 void LGserver::procMessage(int sockID) {
 	if(recvBuf[0]==43) {
 		if(recvBuf[1]==CHAR_AD)
-			sockCon[sockID]=false;
+		sockCon[sockID]=false;
 		else {
 			if(lisEnd) sendBuf[1]=CHAR_AD;
 			else sendBuf[1]=sockID+CHAR_AD;
@@ -126,7 +126,7 @@ void LGserver::procMessage(int sockID) {
 		}
 	} else {
 		if(recvBuf[1]!=CHAR_AD)
-			LGgame::analyzeMove(sockID,recvBuf[1]-CHAR_AD,LGgame::playerCoo[sockID]);
+		LGgame::analyzeMove(sockID,recvBuf[1]-CHAR_AD,LGgame::playerCoo[sockID]);
 		else LGgame::playerCoo[sockID]= {recvBuf[2]-CHAR_AD,recvBuf[3]-CHAR_AD};
 	}
 }
@@ -135,7 +135,7 @@ void LGserver::sockBroadcast() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++) if(sockCon[i])
-			send(serverSocket[i],sendBuf,sizeof(sendBuf),0);
+	send(serverSocket[i],sendBuf,sizeof(sendBuf),0);
 
 	memset(sendBuf,0,sizeof(sendBuf));
 }
@@ -144,10 +144,10 @@ void LGserver::sockCollect() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++) if(sockCon[i]) {
-			int res=recv(serverSocket[i],recvBuf,sizeof(recvBuf),0);
-			if(res>0) procMessage(i);
-			memset(recvBuf,0,sizeof(recvBuf));
-		}
+		int res=recv(serverSocket[i],recvBuf,sizeof(recvBuf),0);
+		if(res>0) procMessage(i);
+		memset(recvBuf,0,sizeof(recvBuf));
+	}
 }
 
 int LGserver::GAME() {
@@ -201,6 +201,7 @@ int LGserver::GAME() {
 	.settxtcol(WHITE);
 
 	for(; is_run(); delay_fps(LGgame::gameSpeed)) {
+		//
 		LGgame::updateMap();
 		sockCollect();
 
@@ -228,7 +229,7 @@ int LGserver::GAME() {
 		LGgame::flushMove();
 		zipSendBuf();
 		sockBroadcast();
-
+		//
 		if(LGgame::cheatCode != 1048575) {
 			int alldead = 0;
 			for(int i = 1; i <= LGgame::playerCnt && !alldead; ++i) {

@@ -269,9 +269,9 @@ namespace LGGraphics {
 			if(local.status == 2) {
 				localOptions(); break;
 			}
-			// if(web.status == 2) {
-			// 	webOptions(); break;
-			// }
+			if(web.status == 2) {
+				webOptions(); break;
+			}
 			if(replay.status == 2) {
 				replayPage(); break;
 			}
@@ -422,7 +422,42 @@ namespace LGGraphics {
 	}
 
 	void webOptions() {
-		//
+		cleardevice();
+		setbkmode(TRANSPARENT);
+		setbkcolor(bgColor);
+		setbkcolor_f(bgColor);
+		
+		rectBUTTON serverBox;
+		rectBUTTON clientBox;
+		settextjustify(CENTER_TEXT, CENTER_TEXT);
+		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		setlinewidth(1);
+		
+		serverBox
+		.setsize(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.setlocation(400 * mapDataStore.mapSizeX,350 * mapDataStore.mapSizeY)
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setfontname("Quicksand")
+		.setfontsz(50 * mapDataStore.mapSizeY, 0)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.addtext("Server");
+		serverBox.floatshadow = true;
+		serverBox.display();
+		
+		clientBox
+		.setsize(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.setlocation(400 * mapDataStore.mapSizeX,350 * mapDataStore.mapSizeY)
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setfontname("Quicksand")
+		.setfontsz(50 * mapDataStore.mapSizeY, 0)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.addtext("Client");
+		clientBox.floatshadow = true;
+		clientBox.display();
+		
+		for(; is_run(); delay_fps(120));
 	}
 
 	void replayPage() {

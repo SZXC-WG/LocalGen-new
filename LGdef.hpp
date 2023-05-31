@@ -112,6 +112,7 @@ struct moveS {
 
 //====value====//
 
+string username;
 PIMAGE pimg[9];
 MapInfoS maps[5005];
 Block gameMap[505][505]; /* maximum 500*500 */
@@ -154,6 +155,15 @@ bool operator== (playerCoord a,playerCoord b) {
 	return a.x==b.x&&a.y==b.y;
 }
 
+bool checkValidUsername(string username){
+	if(username.size()<3||username.size()>16) return 0;
+	for(int i=0;i<username.size();++i){
+		int x=username[i];
+		if(x<32||x>126) return 0;
+	}
+	return 1;
+}
+
 inline void exitExe() { WSACleanup(); exit(0); }
 
 bool isVisible(int,int,int);
@@ -192,6 +202,7 @@ namespace imageOperation {
 namespace LGGraphics {
 	const color_t bgColor = 0xff222222;
 	const color_t mainColor = 0xff008080;
+	const color_t errorColor = 0xfffbbbbb;
 	PIMAGE favi;
 	string fileName;
 	int stDel = 1;

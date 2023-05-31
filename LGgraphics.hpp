@@ -412,13 +412,11 @@ namespace LGGraphics {
 
 		/** game options **/
 
-		if(mapSelected) doMapSelect(); // temporary
-		else {
-			importGameSettings();
-			localGame(cheatCode, plCnt, stDel);
-			exit(0);
-			// temporary
-		}
+		if(mapSelected) doMapSelect();
+		else importGameSettings();
+		
+		LGgame::init(cheatCode, plCnt, stDel);
+		int ret = LGlocal::GAME();
 	}
 
 	void webOptions() {
@@ -429,6 +427,11 @@ namespace LGGraphics {
 		
 		rectBUTTON serverBox;
 		rectBUTTON clientBox;
+		rectBUTTON mapbut[505];
+		rectBUTTON impfin;
+		sys_edit impbox;
+		int shiftval = 0,ret;
+		
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
 		setlinewidth(1);
@@ -441,23 +444,180 @@ namespace LGGraphics {
 		.setfontsz(50 * mapDataStore.mapSizeY, 0)
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
-		.addtext("Server");
-		serverBox.floatshadow = true;
+		.addtext("Server")
+		.status=0;
+		serverBox.floatshadow = false;
 		serverBox.display();
 		
 		clientBox
 		.setsize(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
-		.setlocation(400 * mapDataStore.mapSizeX,350 * mapDataStore.mapSizeY)
+		.setlocation(800 * mapDataStore.mapSizeX,350 * mapDataStore.mapSizeY)
 		.setalign(CENTER_TEXT, CENTER_TEXT)
 		.setfontname("Quicksand")
 		.setfontsz(50 * mapDataStore.mapSizeY, 0)
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
-		.addtext("Client");
-		clientBox.floatshadow = true;
+		.addtext("Client")
+		.status=0;
+		clientBox.floatshadow = false;
 		clientBox.display();
 		
-		for(; is_run(); delay_fps(120));
+		for(; is_run(); delay_fps(120)){
+			while(mousemsg()) {
+				serverBox.status=0;
+				clientBox.status=0;
+				mouse_msg msg = getmouse();
+				
+				if(msg.x >= 400 * mapDataStore.mapSizeX && msg.x <= 600 * mapDataStore.mapSizeY
+				   && msg.y >= 350 * mapDataStore.mapSizeY && msg.y <= 450 * mapDataStore.mapSizeY) {
+					serverBox.status = 1;
+					
+					if(msg.is_left()) serverBox.status = 2;
+					continue;
+				}
+				
+				if(msg.x >= 800 * mapDataStore.mapSizeX && msg.x <= 1000 * mapDataStore.mapSizeY
+				   && msg.y >= 350 * mapDataStore.mapSizeY && msg.y <= 450 * mapDataStore.mapSizeY) {
+					clientBox.status = 1;
+					
+					if(msg.is_left()) clientBox.status = 2;
+					continue;
+				}
+			}
+			
+			serverBox.display();
+			clientBox.display();
+			
+			if(serverBox.status==2) goto serverOptions;
+			if(clientBox.status==2) goto clientOptions;
+		}
+		
+		serverOptions:;
+		
+		for(int i = 1; i <= mapNum; ++i) {
+			mapbut[i]
+			.setsize(300 * mapDataStore.mapSizeX - 3, 200 * mapDataStore.mapSizeY - 3)
+			.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
+			.setbgcol(bgColor)
+			.settxtcol(WHITE)
+			.setalign(CENTER_TEXT,CENTER_TEXT)
+			.setfontname("Quicksand")
+			.setfontsz(22 * mapDataStore.mapSizeY, 0)
+			// .addtext(maps[i].chiname)
+			// .addtext(maps[i].engname)
+			// .addtext("General Count: " + to_string(maps[i].generalcnt))
+			// .addtext("Plain Count: " + to_string(maps[i].plaincnt))
+			// .addtext("City Count: " + to_string(maps[i].citycnt))
+			// .addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
+			// .addtext("Swamp Count: " + to_string(maps[i].swampcnt))
+			// .addtext("Size: " + to_string(maps[i].hei) + " ¡Á " + to_string(maps[i].wid))
+			.display();
+		}
+		
+		impbox.create(true);
+		impbox.move(1250 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY);
+		impbox.size(300 * mapDataStore.mapSizeX, 700 * mapDataStore.mapSizeY);
+		impbox.setbgcolor(WHITE);
+		impbox.setcolor(mainColor);
+		impbox.setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
+		impbox.visible(true);
+		
+		impfin
+		.setalign(CENTER_TEXT,CENTER_TEXT)
+		.setlocation(1250 * mapDataStore.mapSizeX, 825 * mapDataStore.mapSizeY)
+		.setsize(300 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setfontname("Quicksand")
+		.setfontsz(40 * mapDataStore.mapSizeY, 0)
+		.addtext("confirm and submit")
+		.display();
+		settextjustify(CENTER_TEXT, CENTER_TEXT);
+		setcolor(WHITE);
+		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		delay_ms(50);
+		xyprintf(1400 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY, "or import a map...");
+		delay_ms(0);
+		delay_ms(50);
+		flushmouse();
+		mapSelected = 0;
+		mouse_msg msg;
+		for(; is_run(); delay_fps(120)) {
+			while(mousemsg()) {
+				int id = int((msg.y - shiftval * mapDataStore.mapSizeX) / (200 * mapDataStore.mapSizeY)) * 4 + int(msg.x / (300 * mapDataStore.mapSizeX)) + 1;
+				mapbut[id].status = 0;
+				impfin.status = 0;
+				msg = getmouse();
+				shiftval += msg.wheel;
+				if(shiftval > 0) shiftval = 0;
+				if(shiftval < -(mapNum - 1) / 4 * 200) shiftval = -(mapNum - 1) / 4 * 200;
+				if(msg.x >= 1250 * mapDataStore.mapSizeX && msg.x <= 1550 * mapDataStore.mapSizeY
+				   && msg.y >= 825 * mapDataStore.mapSizeY && msg.y <= 875 * mapDataStore.mapSizeY) {
+					impfin.status = 1;
+					if(msg.is_left()) impfin.status = 2;
+					continue;
+				}
+				if(msg.x < 0 || msg.x > 1200 * mapDataStore.mapSizeX || msg.y < 0 || msg.y > 900 * mapDataStore.mapSizeY) continue;
+				id = int((msg.y - shiftval * mapDataStore.mapSizeX) / (200 * mapDataStore.mapSizeY)) * 4 + int(msg.x / (300 * mapDataStore.mapSizeX)) + 1;
+				if(msg.is_left()) mapbut[id].status = 2;
+				else mapbut[id].status = 1;
+			}
+			for(int i = 1; i <= mapNum; ++i) {
+				int presta = mapbut[i].status;
+				mapbut[i].status = 0;
+				mapbut[i].cleartext().display();
+				mapbut[i].status = presta;
+			}
+			for(int i = 1; i <= mapNum; ++i) {
+				mapbut[i]
+				.addtext(maps[i].chiname)
+				.addtext(maps[i].engname)
+				.addtext("General Count: " + (~maps[i].generalcnt?to_string(maps[i].generalcnt):"2~12"))
+				.addtext("Plain Count: " + (~maps[i].plaincnt?to_string(maps[i].plaincnt):"undetermined"))
+				.addtext("City Count: " + (~maps[i].citycnt?to_string(maps[i].citycnt):"undetermined"))
+				.addtext("Mountain Count: " + (~maps[i].mountaincnt?to_string(maps[i].mountaincnt):"undetermined"))
+				.addtext("Swamp Count: " + (~maps[i].swampcnt?to_string(maps[i].swampcnt):"undetermined"))
+				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " ¡Á " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
+				.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
+				.display();
+				if(mapbut[i].status == 2) mapSelected = i;
+			}
+			impfin.display();
+			if(impfin.status == 2) {
+				std::array<char,1000> s;
+				impbox.gettext(1000, s.data());
+				std::ifstream fin(s.data());
+				if(!fin) {
+					impfin.poptext().addtext("map not found").display();
+					delay_ms(100);
+					impfin.poptext().addtext("confirm and submit").display();
+					impfin.status = 1;
+					continue;
+				} else {
+					fin>>strdeZip;
+					deZip();
+					impbox.visible(false);
+					mapSelected = 0;
+					break;
+				}
+			}
+			if(mapSelected) {
+				impbox.visible(false);
+				break;
+			}
+		}
+		flushkey();
+		
+		if(mapSelected) doMapSelect();
+		else importGameSettings();
+		
+		LGgame::init(cheatCode, plCnt, stDel);
+		ret = LGserver::GAME();
+		return ;
+		
+		clientOptions:;
+		cleardevice();
+		return ;
 	}
 
 	void replayPage() {
@@ -1000,9 +1160,6 @@ namespace LGGraphics {
 		widinput.visible(false);
 		amninput.visible(false);
 		amxinput.visible(false);
-		LGserver::GAME();
-//		localGame(cheatCode, plCnt, stDel);
-		exit(0);
 	}
 
 	void importGameSettings() {

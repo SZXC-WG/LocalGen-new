@@ -555,10 +555,4 @@ namespace LGlocal {
 	}
 }
 
-int localGame(int cheatCode, int plCnt, int gSpeed) {
-	LGgame::init(cheatCode, plCnt, gSpeed);
-	int ret = LGlocal::GAME();
-	return ret;
-}
-
 #endif // __LGGAME_HPP__

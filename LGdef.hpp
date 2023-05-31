@@ -178,7 +178,6 @@ void deZip();
 
 bool initSock();
 void toAvoidCEBugInGraphicsImportMap(string fileName);
-int localGame(int cheatCode, int plCnt, int stDel);
 
 /***** graphics *****/
 
@@ -341,7 +340,7 @@ void MainPage() {
 	LGGraphics::favi = newimage();
 	getimage_pngfile(LGGraphics::favi, "img/favicon.png");
 	LGGraphics::WelcomePage();
-	LGGraphics::localOptions();
+//	LGGraphics::localOptions();
 	return;
 }
 

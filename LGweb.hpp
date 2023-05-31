@@ -158,7 +158,7 @@ int LGserver::GAME() {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	std::thread th(sockListen);
 	th.detach();
-	int plCnt,rbCnt,stDel;
+	int plCnt=0,rbCnt=LGgame::playerCnt,stDel;
 
 	{
 		std::lock_guard<std::mutex> mGuard(mLock);
@@ -167,8 +167,6 @@ int LGserver::GAME() {
 	}
 
 	LGgame::cheatCode=1048575;
-	LGgame::playerCnt=plCnt+rbCnt;
-	LGgame::gameSpeed=stDel;
 	LGgame::gameMesC = 0;
 
 	int robotId[64];
@@ -177,7 +175,7 @@ int LGserver::GAME() {
 	for(int i = plCnt+1; i <= plCnt+rbCnt; ++i)
 		robotId[i] = mtrd() % 300 + 1;
 
-	LGgame::initGenerals(LGgame::playerCoo);
+	LGgame::initGenerals(LGgame::playerCoo);system("pause");
 	LGgame::updateMap();
 	printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 	LGgame::curTurn = 0;
@@ -229,19 +227,7 @@ int LGserver::GAME() {
 		LGgame::flushMove();
 		zipSendBuf();
 		sockBroadcast();
-		//
-		if(LGgame::cheatCode != 1048575) {
-			int alldead = 0;
-			for(int i = 1; i <= LGgame::playerCnt && !alldead; ++i) {
-				if(LGgame::cheatCode & (1 << i))
-					if(LGgame::isAlive[i])
-						alldead = 1;
-			}
-			if(!alldead) {
-				LGgame::cheatCode = 1048575;
-				MessageBoxA(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
-			}
-		}
+		
 		if(!gameEnd) {
 			int ed = 0;
 			for(int i = 1; i <= LGgame::playerCnt; ++i)
@@ -277,7 +263,7 @@ int LGserver::GAME() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++)
-		closesocket(serverSocket[i]);
+	closesocket(serverSocket[i]);
 
 	return 0;
 }

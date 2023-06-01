@@ -447,7 +447,6 @@ namespace LGGraphics {
 		.addtext("Server")
 		.status=0;
 		serverBox.floatshadow = false;
-		serverBox.display();
 		
 		clientBox
 		.setsize(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
@@ -460,7 +459,10 @@ namespace LGGraphics {
 		.addtext("Client")
 		.status=0;
 		clientBox.floatshadow = false;
+		
+		serverBox.display();
 		clientBox.display();
+		setcolor(WHITE);
 		
 		for(; is_run(); delay_fps(120)){
 			while(mousemsg()) {
@@ -616,7 +618,7 @@ namespace LGGraphics {
 		return ;
 		
 		clientOptions:;
-		cleardevice();
+		ret=LGclient::GAME();
 		return ;
 	}
 

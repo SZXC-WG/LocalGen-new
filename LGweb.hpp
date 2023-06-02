@@ -424,9 +424,9 @@ void LGclient::sockConnect() {
 	connectAddr.sin_addr.S_un.S_addr=inet_addr(IP);
 	connectAddr.sin_port=htons(SKPORT);
 	int res=connect(clientSocket,(LPSOCKADDR)&connectAddr,sizeof(connectAddr));
-	u_long iMode=1;
+	u_long iMode=1;fprintf(Fdebug,"fuck");
 	ioctlsocket(clientSocket,FIONBIO,&iMode);
-
+	
 	if(res==SOCKET_ERROR) {
 		failSock|=4;
 		WSACleanup();

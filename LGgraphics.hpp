@@ -116,7 +116,7 @@ namespace LGGraphics {
 			scrsz[p].setfontname("Quicksand");
 			scrsz[p].setfontsz(40, 0);
 			scrsz[p].setlocation(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext(to_string(i * 4) + " °¡ " + to_string(i * 9 / 4));
+			scrsz[p].addtext(to_string(i * 4) + " ¬°√Å " + to_string(i * 9 / 4));
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
@@ -129,7 +129,7 @@ namespace LGGraphics {
 			scrsz[p].setfontname("Quicksand");
 			scrsz[p].setfontsz(40, 0);
 			scrsz[p].setlocation(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext("Full Screen ("+to_string(GetSystemMetrics(SM_CXSCREEN))+" °¡ "+to_string(GetSystemMetrics(SM_CYSCREEN))+")");
+			scrsz[p].addtext("Full Screen ("+to_string(GetSystemMetrics(SM_CXSCREEN))+" ¬°√Å "+to_string(GetSystemMetrics(SM_CYSCREEN))+")");
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
@@ -162,12 +162,58 @@ namespace LGGraphics {
 		setcaption("LocalGen v" VER_STRING " developed by LocalGen-dev");
 	}
 
+	void initname(){
+		cleardevice();
+		int scrw=mapDataStore.mapSizeX*1600,scrh=mapDataStore.mapSizeY*900;
+		sys_edit nameBox;
+		rectBUTTON submitButton;
+		setfillcolor(WHITE);
+		bar(scrw/2-120,scrh/2-80,scrw/2+120,scrh/2+80);
+		setcolor(BLACK);
+		setfont(30,0,"Quicksand");
+		settextjustify(CENTER_TEXT,CENTER_TEXT);
+		xyprintf(scrw/2,scrh/2-60,"Enter your username:");
+		nameBox.create();
+		nameBox.size(220,40);
+		nameBox.move(scrw/2-110,scrh/2-40);
+		nameBox.setfont(30,0,"Quicksand");
+		nameBox.setcolor(mainColor);
+		nameBox.settext("Anonymous");
+		nameBox.visible(true);
+		submitButton
+		.setsize(100,40)
+		.setlocation(scrw/2-50,scrh/2+30)
+		.setfontname("Quicksand")
+		.setfontsz(40,0)
+		.setbgcol(mainColor)
+		.settxtcol(WHITE)
+		.setalign(CENTER_TEXT,CENTER_TEXT)
+		.addtext("Submit");
+		for(;is_run();delay_fps(120)){
+			submitButton.detect().display();
+			if(submitButton.status==2){
+				char s[100];
+				nameBox.gettext(sizeof(s),s);
+				username=s;
+				if(checkValidUsername(username)) return;
+				else{
+					setfillcolor(errorColor);
+					bar(scrw/2-110,scrh/2+5,scrw/2+110,scrh/2+25);
+					setcolor(BLACK);
+					setfont(15,0,"Quicksand");
+					xyprintf(scrw/2,scrh/2+15,"Username must be between 3 and 16 letters.");
+				}
+			}
+		}
+	}
+
 	void WelcomePage() {
 		initWindowSize();
 	WelcomePageStartLabel:;
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);
 		setbkcolor_f(bgColor);
+		initname();
 		cleardevice();
 		PIMAGE zfavi = newimage();
 		getimage_pngfile(zfavi, "img/favicon.png");
@@ -312,7 +358,7 @@ namespace LGGraphics {
 			// .addtext("City Count: " + to_string(maps[i].citycnt))
 			// .addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
 			// .addtext("Swamp Count: " + to_string(maps[i].swampcnt))
-			// .addtext("Size: " + to_string(maps[i].hei) + " °¡ " + to_string(maps[i].wid))
+			// .addtext("Size: " + to_string(maps[i].hei) + " ¬°√Å " + to_string(maps[i].wid))
 			.display();
 		}
 		sys_edit impbox;
@@ -379,7 +425,7 @@ namespace LGGraphics {
 				.addtext("City Count: " + (~maps[i].citycnt?to_string(maps[i].citycnt):"undetermined"))
 				.addtext("Mountain Count: " + (~maps[i].mountaincnt?to_string(maps[i].mountaincnt):"undetermined"))
 				.addtext("Swamp Count: " + (~maps[i].swampcnt?to_string(maps[i].swampcnt):"undetermined"))
-				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " °¡ " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
+				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " ¬°√Å " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
 				.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
@@ -512,7 +558,7 @@ namespace LGGraphics {
 			// .addtext("City Count: " + to_string(maps[i].citycnt))
 			// .addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
 			// .addtext("Swamp Count: " + to_string(maps[i].swampcnt))
-			// .addtext("Size: " + to_string(maps[i].hei) + " °¡ " + to_string(maps[i].wid))
+			// .addtext("Size: " + to_string(maps[i].hei) + " ¬°√Å " + to_string(maps[i].wid))
 			.display();
 		}
 		
@@ -579,7 +625,7 @@ namespace LGGraphics {
 				.addtext("City Count: " + (~maps[i].citycnt?to_string(maps[i].citycnt):"undetermined"))
 				.addtext("Mountain Count: " + (~maps[i].mountaincnt?to_string(maps[i].mountaincnt):"undetermined"))
 				.addtext("Swamp Count: " + (~maps[i].swampcnt?to_string(maps[i].swampcnt):"undetermined"))
-				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " °¡ " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
+				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " ¬°√Å " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
 				.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
@@ -970,7 +1016,7 @@ namespace LGGraphics {
 		xyprintf(255 * mapDataStore.mapSizeX, 85 * mapDataStore.mapSizeY,
 		         "Author: %s", maps[mapSelected].auth.c_str());
 		xyprintf(255 * mapDataStore.mapSizeX, 115 * mapDataStore.mapSizeY,
-		         "Size: %d °¡ %d", maps[mapSelected].hei, maps[mapSelected].wid);
+		         "Size: %d ¬°√Å %d", maps[mapSelected].hei, maps[mapSelected].wid);
 		xyprintf(255 * mapDataStore.mapSizeX, 145 * mapDataStore.mapSizeY,
 		         "General Count: %d", maps[mapSelected].generalcnt);
 		xyprintf(255 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY,

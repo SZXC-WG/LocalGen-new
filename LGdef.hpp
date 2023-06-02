@@ -319,7 +319,7 @@ namespace LGlocal {
 namespace LGserver {
 	std::mutex mLock;
 	int totSock;
-	bool sockCon[SSN],lisEnd;
+	bool sockCon[SSN],lisEnd,lisCon;
 	SOCKET serverSocket[SSN];
 	char sendBuf[SSL],recvBuf[SSL];
 
@@ -333,15 +333,16 @@ namespace LGserver {
 
 namespace LGclient {
 	std::mutex mLock;
-	char sendBuf[SSL],recvBuf[SSL];
+	char sendBuf[SSL],recvBuf[SSL],IP[25];
 	int playerNumber;
 	SOCKET clientSocket;
+	bool lisCon;
 
 	void dezipRecvBuf();
 	void sockConnect();
 	void procMessage();
 	void sockMessage();
-	void sockCollect();
+	bool sockCollect();
 	void quitGame();
 	int GAME();
 };

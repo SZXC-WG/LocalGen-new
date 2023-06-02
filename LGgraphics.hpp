@@ -116,7 +116,7 @@ namespace LGGraphics {
 			scrsz[p].setfontname("Quicksand");
 			scrsz[p].setfontsz(40, 0);
 			scrsz[p].setlocation(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext(to_string(i * 4) + " ¡Á " + to_string(i * 9 / 4));
+			scrsz[p].addtext(to_string(i * 4) + " x " + to_string(i * 9 / 4));
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
@@ -129,7 +129,7 @@ namespace LGGraphics {
 			scrsz[p].setfontname("Quicksand");
 			scrsz[p].setfontsz(40, 0);
 			scrsz[p].setlocation(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext("Full Screen ("+to_string(GetSystemMetrics(SM_CXSCREEN))+" ¡Á "+to_string(GetSystemMetrics(SM_CYSCREEN))+")");
+			scrsz[p].addtext("Full Screen ("+to_string(GetSystemMetrics(SM_CXSCREEN))+" x "+to_string(GetSystemMetrics(SM_CYSCREEN))+")");
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].setalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
@@ -492,7 +492,7 @@ namespace LGGraphics {
 		.settxtcol(mainColor)
 		.addtext("Server")
 		.status=0;
-		serverBox.floatshadow = false;
+		serverBox.floatshadow = true;
 		
 		clientBox
 		.setsize(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
@@ -504,7 +504,7 @@ namespace LGGraphics {
 		.settxtcol(mainColor)
 		.addtext("Client")
 		.status=0;
-		clientBox.floatshadow = false;
+		clientBox.floatshadow = true;
 		
 		serverBox.display();
 		clientBox.display();

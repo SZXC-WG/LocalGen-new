@@ -165,7 +165,7 @@ int LGserver::GAME() {
 	th.detach();
 	int plCnt=0,rbCnt=LGgame::playerCnt;
 	rectBUTTON startBox;
-	bool lisCon=true;
+	lisCon=true;
 	
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
@@ -189,7 +189,11 @@ int LGserver::GAME() {
 		}
 		
 		startBox.display();
-		xyprintf(1000 * LGGraphics::mapDataStore.mapSizeX, 400 * LGGraphics::mapDataStore.mapSizeY, "Player Number : %d             ",plCnt);
+//		bar(600 * LGGraphics::mapDataStore.mapSizeX, 600 * LGGraphics::mapDataStore.mapSizeY, 1200 * LGGraphics::mapDataStore.mapSizeX, 1000 * LGGraphics::mapDataStore.mapSizeX);
+		xyprintf(800 * LGGraphics::mapDataStore.mapSizeX, 400 * LGGraphics::mapDataStore.mapSizeY, "Player Number : %d",plCnt);
+		zipSendBuf();
+		sockBroadcast();
+		sockCollect();
 		
 		while(mousemsg()) {
 			startBox.status=0;
@@ -212,7 +216,7 @@ int LGserver::GAME() {
 		
 		lisEnd=true;
 	}
-
+	
 	LGgame::cheatCode=1048575;
 	LGgame::gameMesC = 0;
 
@@ -247,6 +251,10 @@ int LGserver::GAME() {
 	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
 	flushkey();
 	flushmouse();
+	
+	sendBuf[0]=42;
+	sendBuf[1]='\0';
+	sockBroadcast();
 
 	for(; is_run(); delay_fps(LGgame::gameSpeed)) {
 		while(mousemsg()) {
@@ -413,7 +421,7 @@ void LGclient::sockConnect() {
 	clientSocket=socket(AF_INET,SOCK_STREAM,0);
 	SOCKADDR_IN connectAddr;
 	connectAddr.sin_family=AF_INET;
-	connectAddr.sin_addr.S_un.S_addr=inet_addr("192.168.32.35");
+	connectAddr.sin_addr.S_un.S_addr=inet_addr(IP);
 	connectAddr.sin_port=htons(SKPORT);
 	int res=connect(clientSocket,(LPSOCKADDR)&connectAddr,sizeof(connectAddr));
 	u_long iMode=1;
@@ -433,7 +441,8 @@ void LGclient::sockMessage() {
 }
 
 void LGclient::procMessage() {
-	if(recvBuf[0]==43) {
+	if(recvBuf[0]==42) lisCon=false;
+	else if(recvBuf[0]==43) {
 		if(recvBuf[1]==CHAR_AD) {
 			failSock=5;
 			exitExe();
@@ -441,13 +450,17 @@ void LGclient::procMessage() {
 	} else dezipRecvBuf();
 }
 
-void LGclient::sockCollect() {
+bool LGclient::sockCollect() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 	int res=recv(clientSocket,recvBuf,sizeof(recvBuf),0);
 
-	if(res>0) procMessage();
+	if(res>0){
+		procMessage();
+		return true;
+	}
 
 	memset(recvBuf,0,sizeof(recvBuf));
+	return false;
 }
 
 void LGclient::quitGame() {
@@ -463,7 +476,90 @@ int LGclient::GAME() {
 	LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
 	LGGraphics::init();
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-
+	rectBUTTON quitBox,IPfin;
+	sys_edit IPbox;
+	int plCnt;
+	lisCon=true;
+	
+	settextjustify(CENTER_TEXT, CENTER_TEXT);
+	setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+	
+	quitBox
+	.setsize(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
+	.setlocation(400 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
+	.setalign(CENTER_TEXT, CENTER_TEXT)
+	.setfontname("Quicksand")
+	.setfontsz(50 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.setbgcol(WHITE)
+	.settxtcol(LGGraphics::mainColor)
+	.addtext("Quit game")
+	.status=0;
+	quitBox.display();
+	
+	IPfin
+	.setsize(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
+	.setlocation(100 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
+	.setalign(CENTER_TEXT, CENTER_TEXT)
+	.setfontname("Quicksand")
+	.setfontsz(50 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.setbgcol(WHITE)
+	.settxtcol(LGGraphics::mainColor)
+	.addtext("Connect")
+	.status=0;
+	IPfin.display();
+	
+	IPbox.create(true);
+	IPbox.move(800 * LGGraphics::mapDataStore.mapSizeX, 350 * LGGraphics::mapDataStore.mapSizeY);
+	IPbox.size(400 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY);
+	IPbox.setbgcolor(WHITE);
+	IPbox.setcolor(LGGraphics::mainColor);
+	IPbox.setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+	IPbox.visible(true);
+	
+	for(; is_run(); delay_fps(60)){
+		quitBox.display();
+		IPfin.display();
+		
+		while(mousemsg()) {
+			quitBox.status=0;
+			mouse_msg msg = getmouse();
+			
+			if(msg.x >= 400 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 600 * LGGraphics::mapDataStore.mapSizeY
+			&& msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+				quitBox.status = 1;
+				
+				if(msg.is_left()){
+					closegraph();
+					return 0;
+				}
+			}
+		}
+	}
+	
+	IPbox.visible(false);
+	
+	for(; is_run()&&lisCon; delay_fps(60)){
+		quitBox.display();
+		xyprintf(1000 * LGGraphics::mapDataStore.mapSizeX, 400 * LGGraphics::mapDataStore.mapSizeY, "Player Number : %d             ",LGgame::playerCnt);
+		sockCollect();
+		
+		while(mousemsg()) {
+			quitBox.status=0;
+			mouse_msg msg = getmouse();
+			
+			if(msg.x >= 400 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 600 * LGGraphics::mapDataStore.mapSizeY
+			&& msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+				quitBox.status = 1;
+				
+				if(msg.is_left()){
+					quitGame();
+					closegraph();
+					return 0;
+				}
+			}
+		}
+	}
+	
 	LGgame::cheatCode=(1<<playerNumber);
 	std::deque<int> movement;
 	printMap(LGgame::cheatCode, LGgame::playerCoo[playerNumber]);
@@ -486,6 +582,10 @@ int LGclient::GAME() {
 	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
 	.setbgcol(BLUE)
 	.settxtcol(WHITE);
+	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
+	flushkey();
+	flushmouse();
+	
 	for(; is_run(); delay_fps(std::min(LGgame::gameSpeed + 0.5, 120.5))) {
 		movLin=LGgame::playerCoo[playerNumber].x;
 		movCol=LGgame::playerCoo[playerNumber].y;
@@ -534,7 +634,7 @@ int LGclient::GAME() {
 					return 0;
 				}
 				case int('\b'): {
-					if(!LGgame::isAlive[1])
+					if(!LGgame::isAlive[playerNumber])
 						break;
 					int confirmSur = MessageBoxA(getHWnd(), string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
 					if(confirmSur == 7)
@@ -559,6 +659,8 @@ int LGclient::GAME() {
 			movement.pop_front();
 		} while(!movement.empty())
 		movement.pop_front();
+		
+		while(sockCollect());
 		
 		if(LGgame::cheatCode != 1048575) {
 			int alldead = 0;
@@ -613,7 +715,7 @@ int LGclient::GAME() {
 				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
 				turnlen = textwidth(("Turn " + to_string(LGgame::curTurn) + ".").c_str());
-				rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());				setfillcolor(RED);
+				rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L))).c_str());				setfillcolor(RED);
 				setfillcolor(GREEN);
 				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
 				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
@@ -624,7 +726,7 @@ int LGclient::GAME() {
 				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
 				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
 				settextjustify(CENTER_TEXT, TOP_TEXT);
-				xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
+				xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L));
 				xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, "FPS: %f", getfps());
 				xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGgame::curTurn);
 			}

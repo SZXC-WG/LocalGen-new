@@ -531,12 +531,29 @@ int LGclient::GAME() {
 				if(msg.is_left()){
 					closegraph();
 					return 0;
-				}
+				}continue;
 			}
+			
+			if(msg.x >= 100 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 300 * LGGraphics::mapDataStore.mapSizeY
+			&& msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+				IPfin.status = 1;
+				
+				if(msg.is_left()){
+					IPfin.status=2;
+					break;
+				}continue;
+			}
+		}
+		
+		if(IPfin.status==2){
+			IPbox.gettext(25,IP);
+			break;
 		}
 	}
 	
+	sockConnect();
 	IPbox.visible(false);
+	cleardevice();
 	
 	for(; is_run()&&lisCon; delay_fps(60)){
 		quitBox.display();

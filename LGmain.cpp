@@ -24,9 +24,6 @@
 
 /*************** header files ***************/
 
-/* DEBUG */
-#include "LGdebug.hpp"
-
 /* dev project headers */
 #include "LocalGen_private.h"
 #include "LGdef.hpp"
@@ -37,6 +34,9 @@
 #include "LGgame.hpp"
 #include "LGweb.hpp"
 #include "LGreplay.hpp"
+
+/* DEBUG */
+#include "LGdebug.hpp"
 
 /*************** the main function ***************/
 signed main(signed argc, char** argv) {

@@ -429,11 +429,7 @@ void LGclient::sockConnect() {
 	int res=connect(clientSocket,(LPSOCKADDR)&connectAddr,sizeof(connectAddr));
 	u_long iMode=1;
 	ioctlsocket(clientSocket,FIONBIO,&iMode);
-	{
-		Fdebug=fopen("debug.txt","w");
-		fprintf(Fdebug,"fuck");
-		return ;
-	}
+	
 	if(res==SOCKET_ERROR) {
 		failSock|=4;
 		WSACleanup();

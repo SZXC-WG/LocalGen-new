@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 
-FILE *Fdebug=fopen("debug.txt","w");
+FILE *Fdebug;
 
 //namespace LGdebug {
 //	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);

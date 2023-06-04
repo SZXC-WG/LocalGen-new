@@ -18,7 +18,7 @@ bool initSock() {
 	WORD w_req=MAKEWORD(2,2);
 	WSADATA wsadata;
 	int err=WSAStartup(w_req,&wsadata);
-
+	
 	if(err!=0) failSock|=1;
 	if(LOBYTE(wsadata.wVersion)!=2||HIBYTE(wsadata.wHighVersion)!=2) {
 		failSock|=2;
@@ -160,6 +160,8 @@ int LGserver::GAME() {
 	setrendermode(RENDER_MANUAL);
 	LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
 	LGGraphics::init();
+	
+	lisEnd=false;
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	std::thread th(sockListen);
 	th.detach();
@@ -187,7 +189,7 @@ int LGserver::GAME() {
 			std::lock_guard<std::mutex> mGuard(mLock);
 			plCnt=totSock-1;
 		}
-		
+		cleardevice();
 		startBox.display();
 //		bar(600 * LGGraphics::mapDataStore.mapSizeX, 600 * LGGraphics::mapDataStore.mapSizeY, 1200 * LGGraphics::mapDataStore.mapSizeX, 1000 * LGGraphics::mapDataStore.mapSizeX);
 		xyprintf(800 * LGGraphics::mapDataStore.mapSizeX, 400 * LGGraphics::mapDataStore.mapSizeY, "Player Number : %d",plCnt);
@@ -248,14 +250,15 @@ int LGserver::GAME() {
 	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
 	.setbgcol(BLUE)
 	.settxtcol(WHITE);
-	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
+	
 	flushkey();
 	flushmouse();
 	
 	sendBuf[0]=42;
 	sendBuf[1]='\0';
 	sockBroadcast();
-
+	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
+	
 	for(; is_run(); delay_fps(LGgame::gameSpeed)) {
 		while(mousemsg()) {
 			mouse_msg msg = getmouse();
@@ -416,17 +419,21 @@ void LGclient::dezipRecvBuf() {
 
 void LGclient::sockConnect() {
 	if(initSock())
-		return ;
-
+	return ;
+	
 	clientSocket=socket(AF_INET,SOCK_STREAM,0);
 	SOCKADDR_IN connectAddr;
 	connectAddr.sin_family=AF_INET;
 	connectAddr.sin_addr.S_un.S_addr=inet_addr(IP);
 	connectAddr.sin_port=htons(SKPORT);
 	int res=connect(clientSocket,(LPSOCKADDR)&connectAddr,sizeof(connectAddr));
-	u_long iMode=1;fprintf(Fdebug,"fuck");
+	u_long iMode=1;
 	ioctlsocket(clientSocket,FIONBIO,&iMode);
-	
+	{
+		Fdebug=fopen("debug.txt","w");
+		fprintf(Fdebug,"fuck");
+		return ;
+	}
 	if(res==SOCKET_ERROR) {
 		failSock|=4;
 		WSACleanup();
@@ -522,6 +529,7 @@ int LGclient::GAME() {
 		
 		while(mousemsg()) {
 			quitBox.status=0;
+			IPfin.status=0;
 			mouse_msg msg = getmouse();
 			
 			if(msg.x >= 400 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 600 * LGGraphics::mapDataStore.mapSizeY
@@ -599,9 +607,10 @@ int LGclient::GAME() {
 	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
 	.setbgcol(BLUE)
 	.settxtcol(WHITE);
-	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
+	
 	flushkey();
 	flushmouse();
+	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
 	
 	for(; is_run(); delay_fps(std::min(LGgame::gameSpeed + 0.5, 120.5))) {
 		movLin=LGgame::playerCoo[playerNumber].x;

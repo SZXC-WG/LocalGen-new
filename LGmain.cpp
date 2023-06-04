@@ -44,8 +44,6 @@ signed main(signed argc, char** argv) {
 	initMaps();
 	MainPage(); // start main page
 	exitExe();	// exit program
-
-//	LGdebug::debugBegin();
 }
 
 #endif // __LGMAIN_CPP__

@@ -332,7 +332,126 @@ namespace LGGraphics {
 		exit(0);
 	}
 
+	void testPage(){
+		cleardevice();
+		int scrw=mapDataStore.mapSizeX*1600,scrh=mapDataStore.mapSizeY*900;
+		for(int i=1;i<=12;++i) LGgame::team[i].clear();
+		int team=1;
+		//receive team id and player names from server
+		LGgame::playerNames[1]=username;
+		LGgame::team[1].push_back(1);
+		LGgame::playerNames[2]="LocalGen";
+		LGgame::playerNames[3]="123123123123";
+		LGgame::playerNames[4]="234234234234";
+		LGgame::playerNames[5]="345345345345";
+		LGgame::playerNames[6]="456456456456";
+		LGgame::playerNames[7]="567567567567";
+		LGgame::playerNames[8]="678678678678";
+		LGgame::playerNames[9]="789789789789";
+		LGgame::playerNames[10]="890890890890";
+		LGgame::playerNames[11]="901901901901";
+		LGgame::team[2].push_back(2);
+		LGgame::team[3].push_back(3);
+		LGgame::team[4].push_back(4);
+		LGgame::team[5].push_back(5);
+		LGgame::team[6].push_back(6);
+		LGgame::team[7].push_back(7);
+		LGgame::team[8].push_back(8);
+		LGgame::team[9].push_back(9);
+		LGgame::team[9].push_back(10);
+		LGgame::team[9].push_back(11);
+		rectBUTTON teamButton[13],selectButton,forceStart;
+		for(int i=1;i<=12;++i){
+			teamButton[i]
+			.setsize(50,30)
+			.setlocation(scrw/2+(i-7)*50,70)
+			.addtext(to_string(i))
+			.setalign(CENTER_TEXT, CENTER_TEXT)
+			.setbgcol(WHITE)
+			.settxtcol(mainColor)
+			.setfontname("Quicksand")
+			.setfontsz(25,0)
+			.setrtcol(false, mainColor);
+		}
+		selectButton
+		.setsize(240,30)
+		.setlocation(scrw/2-120,30)
+		.addtext("Select a custom map")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setfontname("Quicksand")
+		.setfontsz(25,0)
+		.setrtcol(false, mainColor);
+		forceStart//need an on/off button
+		.setsize(220,50)
+		.setlocation(scrw/2-110,scrh-80)
+		.addtext("Force Start 0/1")
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setbgcol(WHITE)
+		.settxtcol(mainColor)
+		.setfontname("Quicksand")
+		.setfontsz(40,0)
+		.setrtcol(false, mainColor);
+		for(;is_run();delay_fps(120)){
+			for(int i=1;i<=12;++i) teamButton[i].detect().display();
+			selectButton.detect().display();
+			for(int i=1;i<=12;++i){
+				if(teamButton[i].status==2){
+					//
+				}
+			}
+			if(selectButton.status==2){
+				//
+			}
+			int width[13],irow[13],rowWidth[13],rowHeight[13],totRows=0,begWid[13];
+			rowWidth[0]=3000;
+			for(int i=1;i<=12;++i){
+				width[i]=0;
+				if(LGgame::team[i].size()==0) continue;
+				setfont(25,0,"Quicksand");
+				width[i]=textwidth(("Team "+to_string(i)).c_str());
+				setfont(15,0,"Quicksand");
+				for(auto x:LGgame::team[i]) width[i]=max(width[i],textwidth(LGgame::playerNames[x].c_str()));
+				if(rowWidth[totRows]+(width[i]+35)>scrw-100){
+					++totRows;
+					rowWidth[totRows]=10;
+					rowHeight[totRows]=0;
+				}
+				irow[i]=totRows;
+				rowWidth[totRows]+=width[i]+35;
+				rowHeight[totRows]=max(rowHeight[totRows],int(32+15*LGgame::team[i].size()));
+			}
+			rowHeight[0]=10;
+			for(int i=1;i<=totRows;++i){
+				rowHeight[i]=rowHeight[i-1]+rowHeight[i]+10;
+				begWid[i]=(scrw-rowWidth[i])/2-10;
+			}
+			setfillcolor(0xff333333);
+			bar(50,110,scrw-50,110+rowHeight[totRows]);
+			for(int i=12;i;--i){
+				if(LGgame::team[i].size()==0) continue;
+				setfillcolor(bgColor);
+				bar(rowWidth[irow[i]]-width[i]-25+begWid[irow[i]],rowHeight[irow[i]-1]+110,rowWidth[irow[i]]+begWid[irow[i]],rowHeight[irow[i]-1]+15*LGgame::team[i].size()+32+110);
+				setcolor(WHITE);
+				setfont(25,0,"Quicksand");
+				settextjustify(CENTER_TEXT,CENTER_TEXT);
+				xyprintf(rowWidth[irow[i]]-(width[i]+25)/2+begWid[irow[i]],rowHeight[irow[i]-1]+12+110,("Team "+to_string(i)).c_str());
+				setfont(15,0,"Quicksand");
+				settextjustify(LEFT_TEXT,TOP_TEXT);
+				for(int j=0;j<LGgame::team[i].size();++j){
+					setfillcolor(playerInfo[LGgame::team[i][j]].color);
+					bar(rowWidth[irow[i]]-width[i]-25+5+2+begWid[irow[i]],rowHeight[irow[i]-1]+5+20+j*15+2+110,
+						rowWidth[irow[i]]-width[i]-25+5+13+begWid[irow[i]],rowHeight[irow[i]-1]+5+20+j*15+13+110);
+					xyprintf(rowWidth[irow[i]]-width[i]-25+20+begWid[irow[i]],rowHeight[irow[i]-1]+5+20+j*15+110,LGgame::playerNames[LGgame::team[i][j]].c_str());
+				}
+				rowWidth[irow[i]]-=width[i]+35;
+			}
+		}
+	}
+
 	void localOptions() {
+testPage();
 		cleardevice();
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);

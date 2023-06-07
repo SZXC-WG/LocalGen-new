@@ -247,6 +247,8 @@ namespace LGgame {
 	int robotId[64];
 	int gameSpeed; /* fps */
 	int gameMesC;
+	string playerNames[64];
+	std::vector<int> team[64];
 	playerCoord genCoo[64];
 	std::deque<moveS> inlineMove;
 	playerCoord playerCoo[64];

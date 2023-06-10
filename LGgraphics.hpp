@@ -162,7 +162,7 @@ namespace LGGraphics {
 		setcaption("LocalGen v" VER_STRING " developed by LocalGen-dev");
 	}
 
-	void initname(){
+	void initname() {
 		cleardevice();
 		int scrw=mapDataStore.mapSizeX*1600,scrh=mapDataStore.mapSizeY*900;
 		sys_edit nameBox;
@@ -189,14 +189,14 @@ namespace LGGraphics {
 		.settxtcol(WHITE)
 		.setalign(CENTER_TEXT,CENTER_TEXT)
 		.addtext("Submit");
-		for(;is_run();delay_fps(120)){
+		for(; is_run(); delay_fps(120)) {
 			submitButton.detect().display();
-			if(submitButton.status==2){
+			if(submitButton.status==2) {
 				char s[100];
 				nameBox.gettext(sizeof(s),s);
 				username=s;
 				if(checkValidUsername(username)) return;
-				else{
+				else {
 					setfillcolor(errorColor);
 					bar(scrw/2-110,scrh/2+5,scrw/2+110,scrh/2+25);
 					setcolor(BLACK);
@@ -245,7 +245,7 @@ namespace LGGraphics {
 		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
 		.setlocation(1125 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
 		.addtext("web game")
-		.addtext("(not available)") 
+		.addtext("(not available)")
 		.setalign(CENTER_TEXT, CENTER_TEXT)
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
@@ -332,10 +332,10 @@ namespace LGGraphics {
 		exit(0);
 	}
 
-	void testPage(){
+	void testPage() {
 		cleardevice();
 		int scrw=mapDataStore.mapSizeX*1600,scrh=mapDataStore.mapSizeY*900;
-		for(int i=1;i<=12;++i) LGgame::team[i].clear();
+		for(int i=1; i<=12; ++i) LGgame::team[i].clear();
 		int team=1;
 		//receive team id and player names from server
 		LGgame::playerNames[1]=username;
@@ -361,7 +361,7 @@ namespace LGGraphics {
 		LGgame::team[9].push_back(10);
 		LGgame::team[9].push_back(11);
 		rectBUTTON teamButton[13],selectButton,forceStart;
-		for(int i=1;i<=12;++i){
+		for(int i=1; i<=12; ++i) {
 			teamButton[i]
 			.setsize(50,30)
 			.setlocation(scrw/2+(i-7)*50,70)
@@ -393,27 +393,27 @@ namespace LGGraphics {
 		.setfontname("Quicksand")
 		.setfontsz(40,0)
 		.setrtcol(false, mainColor);
-		for(;is_run();delay_fps(120)){
-			for(int i=1;i<=12;++i) teamButton[i].detect().display();
+		for(; is_run(); delay_fps(120)) {
+			for(int i=1; i<=12; ++i) teamButton[i].detect().display();
 			selectButton.detect().display();
-			for(int i=1;i<=12;++i){
-				if(teamButton[i].status==2){
+			for(int i=1; i<=12; ++i) {
+				if(teamButton[i].status==2) {
 					//
 				}
 			}
-			if(selectButton.status==2){
+			if(selectButton.status==2) {
 				//
 			}
 			int width[13],irow[13],rowWidth[13],rowHeight[13],totRows=0,begWid[13];
 			rowWidth[0]=3000;
-			for(int i=1;i<=12;++i){
+			for(int i=1; i<=12; ++i) {
 				width[i]=0;
 				if(LGgame::team[i].size()==0) continue;
 				setfont(25,0,"Quicksand");
 				width[i]=textwidth(("Team "+to_string(i)).c_str());
 				setfont(15,0,"Quicksand");
 				for(auto x:LGgame::team[i]) width[i]=max(width[i],textwidth(LGgame::playerNames[x].c_str()));
-				if(rowWidth[totRows]+(width[i]+35)>scrw-100){
+				if(rowWidth[totRows]+(width[i]+35)>scrw-100) {
 					++totRows;
 					rowWidth[totRows]=10;
 					rowHeight[totRows]=0;
@@ -423,13 +423,13 @@ namespace LGGraphics {
 				rowHeight[totRows]=max(rowHeight[totRows],int(32+15*LGgame::team[i].size()));
 			}
 			rowHeight[0]=10;
-			for(int i=1;i<=totRows;++i){
+			for(int i=1; i<=totRows; ++i) {
 				rowHeight[i]=rowHeight[i-1]+rowHeight[i]+10;
 				begWid[i]=(scrw-rowWidth[i])/2-10;
 			}
 			setfillcolor(0xff333333);
 			bar(50,110,scrw-50,110+rowHeight[totRows]);
-			for(int i=12;i;--i){
+			for(int i=12; i; --i) {
 				if(LGgame::team[i].size()==0) continue;
 				setfillcolor(bgColor);
 				bar(rowWidth[irow[i]]-width[i]-25+begWid[irow[i]],rowHeight[irow[i]-1]+110,rowWidth[irow[i]]+begWid[irow[i]],rowHeight[irow[i]-1]+15*LGgame::team[i].size()+32+110);
@@ -439,10 +439,10 @@ namespace LGGraphics {
 				xyprintf(rowWidth[irow[i]]-(width[i]+25)/2+begWid[irow[i]],rowHeight[irow[i]-1]+12+110,("Team "+to_string(i)).c_str());
 				setfont(15,0,"Quicksand");
 				settextjustify(LEFT_TEXT,TOP_TEXT);
-				for(int j=0;j<LGgame::team[i].size();++j){
+				for(int j=0; j<LGgame::team[i].size(); ++j) {
 					setfillcolor(playerInfo[LGgame::team[i][j]].color);
 					bar(rowWidth[irow[i]]-width[i]-25+5+2+begWid[irow[i]],rowHeight[irow[i]-1]+5+20+j*15+2+110,
-						rowWidth[irow[i]]-width[i]-25+5+13+begWid[irow[i]],rowHeight[irow[i]-1]+5+20+j*15+13+110);
+					    rowWidth[irow[i]]-width[i]-25+5+13+begWid[irow[i]],rowHeight[irow[i]-1]+5+20+j*15+13+110);
 					xyprintf(rowWidth[irow[i]]-width[i]-25+20+begWid[irow[i]],rowHeight[irow[i]-1]+5+20+j*15+110,LGgame::playerNames[LGgame::team[i][j]].c_str());
 				}
 				rowWidth[irow[i]]-=width[i]+35;
@@ -451,7 +451,7 @@ namespace LGGraphics {
 	}
 
 	void localOptions() {
-testPage();
+		testPage();
 		cleardevice();
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);
@@ -579,7 +579,7 @@ testPage();
 
 		if(mapSelected) doMapSelect();
 		else importGameSettings();
-		
+
 		LGgame::init(cheatCode, plCnt, stDel);
 		int ret = LGlocal::GAME();
 	}
@@ -589,18 +589,18 @@ testPage();
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);
 		setbkcolor_f(bgColor);
-		
+
 		rectBUTTON serverBox;
 		rectBUTTON clientBox;
 		rectBUTTON mapbut[505];
 		rectBUTTON impfin;
 		sys_edit impbox;
 		int shiftval = 0,ret;
-		
+
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
 		setlinewidth(1);
-		
+
 		serverBox
 		.setsize(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
 		.setlocation(400 * mapDataStore.mapSizeX,350 * mapDataStore.mapSizeY)
@@ -612,7 +612,7 @@ testPage();
 		.addtext("Server")
 		.status=0;
 		serverBox.floatshadow = true;
-		
+
 		clientBox
 		.setsize(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
 		.setlocation(800 * mapDataStore.mapSizeX,350 * mapDataStore.mapSizeY)
@@ -624,43 +624,43 @@ testPage();
 		.addtext("Client")
 		.status=0;
 		clientBox.floatshadow = true;
-		
+
 		serverBox.display();
 		clientBox.display();
 		setcolor(WHITE);
-		
-		for(; is_run(); delay_fps(120)){
+
+		for(; is_run(); delay_fps(120)) {
 			while(mousemsg()) {
 				serverBox.status=0;
 				clientBox.status=0;
 				mouse_msg msg = getmouse();
-				
+
 				if(msg.x >= 400 * mapDataStore.mapSizeX && msg.x <= 600 * mapDataStore.mapSizeY
 				   && msg.y >= 350 * mapDataStore.mapSizeY && msg.y <= 450 * mapDataStore.mapSizeY) {
 					serverBox.status = 1;
-					
+
 					if(msg.is_left()) serverBox.status = 2;
 					continue;
 				}
-				
+
 				if(msg.x >= 800 * mapDataStore.mapSizeX && msg.x <= 1000 * mapDataStore.mapSizeY
 				   && msg.y >= 350 * mapDataStore.mapSizeY && msg.y <= 450 * mapDataStore.mapSizeY) {
 					clientBox.status = 1;
-					
+
 					if(msg.is_left()) clientBox.status = 2;
 					continue;
 				}
 			}
-			
+
 			serverBox.display();
 			clientBox.display();
-			
+
 			if(serverBox.status==2) goto serverOptions;
 			if(clientBox.status==2) goto clientOptions;
 		}
-		
-		serverOptions:;
-		
+
+	serverOptions:;
+
 		for(int i = 1; i <= mapNum; ++i) {
 			mapbut[i]
 			.setsize(300 * mapDataStore.mapSizeX - 3, 200 * mapDataStore.mapSizeY - 3)
@@ -680,7 +680,7 @@ testPage();
 			// .addtext("Size: " + to_string(maps[i].hei) + " ¡Á " + to_string(maps[i].wid))
 			.display();
 		}
-		
+
 		impbox.create(true);
 		impbox.move(1250 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY);
 		impbox.size(300 * mapDataStore.mapSizeX, 700 * mapDataStore.mapSizeY);
@@ -688,7 +688,7 @@ testPage();
 		impbox.setcolor(mainColor);
 		impbox.setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 		impbox.visible(true);
-		
+
 		impfin
 		.setalign(CENTER_TEXT,CENTER_TEXT)
 		.setlocation(1250 * mapDataStore.mapSizeX, 825 * mapDataStore.mapSizeY)
@@ -774,15 +774,15 @@ testPage();
 			}
 		}
 		flushkey();
-		
+
 		if(mapSelected) doMapSelect();
 		else importGameSettings();
-		
+
 		LGgame::init(cheatCode, plCnt, stDel);
 		ret = LGserver::GAME();
 		return ;
-		
-		clientOptions:;
+
+	clientOptions:;
 		ret=LGclient::GAME();
 		return ;
 	}

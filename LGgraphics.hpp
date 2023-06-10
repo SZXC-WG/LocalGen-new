@@ -213,7 +213,7 @@ namespace LGGraphics {
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);
 		setbkcolor_f(bgColor);
-		initname();
+		// initname();
 		cleardevice();
 		PIMAGE zfavi = newimage();
 		getimage_pngfile(zfavi, "img/favicon.png");

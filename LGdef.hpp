@@ -155,9 +155,9 @@ bool operator== (playerCoord a,playerCoord b) {
 	return a.x==b.x&&a.y==b.y;
 }
 
-bool checkValidUsername(string username){
+bool checkValidUsername(string username) {
 	if(username.size()<3||username.size()>16) return 0;
-	for(int i=0;i<username.size();++i){
+	for(int i=0; i<username.size(); ++i) {
 		int x=username[i];
 		if(x<32||x>126) return 0;
 	}
@@ -247,6 +247,8 @@ namespace LGgame {
 	int robotId[64];
 	int gameSpeed; /* fps */
 	int gameMesC;
+	string playerNames[64];
+	std::vector<int> team[64];
 	playerCoord genCoo[64];
 	std::deque<moveS> inlineMove;
 	playerCoord playerCoo[64];

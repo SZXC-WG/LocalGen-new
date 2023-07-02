@@ -18,7 +18,7 @@ bool initSock() {
 	WORD w_req=MAKEWORD(2,2);
 	WSADATA wsadata;
 	int err=WSAStartup(w_req,&wsadata);
-	
+
 	if(err!=0) failSock|=1;
 	if(LOBYTE(wsadata.wVersion)!=2||HIBYTE(wsadata.wHighVersion)!=2) {
 		failSock|=2;
@@ -43,7 +43,7 @@ void LGserver::zipSendBuf() {
 		sendBuf[p++]=LGgame::playerCoo[i].x+CHAR_AD;
 		sendBuf[p++]=LGgame::playerCoo[i].y+CHAR_AD;
 	}
-	
+
 	k1=mapH,k2=mapW;
 	sendBuf[p++]=PMod(k1)+CHAR_AD;
 	sendBuf[p++]=PMod(k1)+CHAR_AD;
@@ -51,24 +51,24 @@ void LGserver::zipSendBuf() {
 	sendBuf[p++]=PMod(k2)+CHAR_AD;
 
 	for(i=1; i<=mapH; i++)
-	for(j=1; j<=mapW; j++) {
-		sendBuf[p++]=gameMap[i][j].team+CHAR_AD;
-		sendBuf[p]=(gameMap[i][j].type<<2)+(gameMap[i][j].lit<<1);
-		k1=gameMap[i][j].army;
+		for(j=1; j<=mapW; j++) {
+			sendBuf[p++]=gameMap[i][j].team+CHAR_AD;
+			sendBuf[p]=(gameMap[i][j].type<<2)+(gameMap[i][j].lit<<1);
+			k1=gameMap[i][j].army;
 
-		if(k1<0) {
-			k1=-k1;
-			sendBuf[p++]+=CHAR_AD+1;
-		} else sendBuf[p++]+=CHAR_AD;
+			if(k1<0) {
+				k1=-k1;
+				sendBuf[p++]+=CHAR_AD+1;
+			} else sendBuf[p++]+=CHAR_AD;
 
-		for(k2=1; k2<=8; k2++)
-		sendBuf[p++]=PMod(k1)+CHAR_AD;
-	} sendBuf[p]='\0';
+			for(k2=1; k2<=8; k2++)
+				sendBuf[p++]=PMod(k1)+CHAR_AD;
+		} sendBuf[p]='\0';
 }
 
 void LGserver::sockListen() {
 	if(initSock())
-	return ;
+		return ;
 
 	SOCKET listenSocket=socket(AF_INET,SOCK_STREAM,0);
 	SOCKADDR_IN listenAddr;
@@ -118,10 +118,10 @@ void LGserver::sockListen() {
 
 void LGserver::procMessage(int sockID) {
 	if(recvBuf[0]==43) {
-		if(recvBuf[1]==CHAR_AD){
+		if(recvBuf[1]==CHAR_AD) {
 			sockCon[sockID]=false;
 			LGgame::isAlive[sockID]=false;
-		}else {
+		} else {
 			if(lisEnd) sendBuf[1]=CHAR_AD;
 			else sendBuf[1]=sockID+CHAR_AD;
 
@@ -131,7 +131,7 @@ void LGserver::procMessage(int sockID) {
 		}
 	} else {
 		if(recvBuf[1]!=CHAR_AD)
-		LGgame::analyzeMove(sockID,recvBuf[1]-CHAR_AD,LGgame::playerCoo[sockID]);
+			LGgame::analyzeMove(sockID,recvBuf[1]-CHAR_AD,LGgame::playerCoo[sockID]);
 		else LGgame::playerCoo[sockID]= {recvBuf[2]-CHAR_AD,recvBuf[3]-CHAR_AD};
 	}
 }
@@ -140,7 +140,7 @@ void LGserver::sockBroadcast() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++) if(sockCon[i])
-	send(serverSocket[i],sendBuf,sizeof(sendBuf),0);
+			send(serverSocket[i],sendBuf,sizeof(sendBuf),0);
 
 	memset(sendBuf,0,sizeof(sendBuf));
 }
@@ -149,10 +149,10 @@ void LGserver::sockCollect() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++) if(sockCon[i]) {
-		int res=recv(serverSocket[i],recvBuf,sizeof(recvBuf),0);
-		if(res>0) procMessage(i);
-		memset(recvBuf,0,sizeof(recvBuf));
-	}
+			int res=recv(serverSocket[i],recvBuf,sizeof(recvBuf),0);
+			if(res>0) procMessage(i);
+			memset(recvBuf,0,sizeof(recvBuf));
+		}
 }
 
 int LGserver::GAME() {
@@ -160,7 +160,7 @@ int LGserver::GAME() {
 	setrendermode(RENDER_MANUAL);
 	LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
 	LGGraphics::init();
-	
+
 	lisEnd=false;
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	std::thread th(sockListen);
@@ -168,10 +168,10 @@ int LGserver::GAME() {
 	int plCnt=0,rbCnt=LGgame::playerCnt;
 	rectBUTTON startBox;
 	lisCon=true;
-	
+
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
-	
+
 	startBox
 	.setsize(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
 	.setlocation(400 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
@@ -183,8 +183,8 @@ int LGserver::GAME() {
 	.addtext("Start game")
 	.status=0;
 	startBox.display();
-	
-	for(; is_run()&&lisCon; delay_fps(60)){
+
+	for(; is_run()&&lisCon; delay_fps(60)) {
 		{
 			std::lock_guard<std::mutex> mGuard(mLock);
 			plCnt=totSock-1;
@@ -196,29 +196,29 @@ int LGserver::GAME() {
 		zipSendBuf();
 		sockBroadcast();
 		sockCollect();
-		
+
 		while(mousemsg()) {
 			startBox.status=0;
 			mouse_msg msg = getmouse();
-			
+
 			if(msg.x >= 400 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 600 * LGGraphics::mapDataStore.mapSizeY
-			&& msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+			   && msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
 				startBox.status = 1;
-				
-				if(msg.is_left()){
+
+				if(msg.is_left()) {
 					lisCon=false;
 					break;
 				}
 			}
 		}
 	}
-	
+
 	{
 		std::lock_guard<std::mutex> mGuard(mLock);
-		
+
 		lisEnd=true;
 	}
-	
+
 	LGgame::cheatCode=1048575;
 	LGgame::gameMesC = 0;
 
@@ -250,19 +250,19 @@ int LGserver::GAME() {
 	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
 	.setbgcol(BLUE)
 	.settxtcol(WHITE);
-	
+
 	flushkey();
 	flushmouse();
-	
+
 	sendBuf[0]=42;
 	sendBuf[1]='\0';
 	sockBroadcast();
 	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
-	
+
 	for(; is_run(); delay_fps(LGgame::gameSpeed)) {
 		while(mousemsg()) {
 			mouse_msg msg = getmouse();
-			
+
 			if(msg.is_wheel()) {
 				widthPerBlock += msg.wheel / 120;
 				heightPerBlock += msg.wheel / 120;
@@ -270,10 +270,10 @@ int LGserver::GAME() {
 				heightPerBlock = max(heightPerBlock, 2);
 			}
 		}
-		
+
 		while(kbmsg()) {
 			key_msg ch = getkey();
-			
+
 			if(ch.msg == key_msg_up) continue;
 			if(ch.key==27) {
 				MessageBoxA(getHWnd(), string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
@@ -281,7 +281,7 @@ int LGserver::GAME() {
 				return 0;
 			}
 		}
-		
+
 		LGgame::updateMap();
 		sockCollect();
 
@@ -309,7 +309,7 @@ int LGserver::GAME() {
 		LGgame::flushMove();
 		zipSendBuf();
 		sockBroadcast();
-		
+
 		if(!gameEnd) {
 			int ed = 0;
 			for(int i = 1; i <= LGgame::playerCnt; ++i)
@@ -327,7 +327,7 @@ int LGserver::GAME() {
 				sockBroadcast();
 			}
 		}
-		
+
 		{
 			std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 			int needFlushToTurn = ceil(timePassed.count() / 1000000000.0L * LGgame::gameSpeed);
@@ -377,7 +377,7 @@ int LGserver::GAME() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++)
-	closesocket(serverSocket[i]);
+		closesocket(serverSocket[i]);
 
 	return 0;
 }
@@ -403,24 +403,24 @@ void LGclient::dezipRecvBuf() {
 	mapW+=((recvBuf[p++]-CHAR_AD)<<6);
 
 	for(i=1; i<=mapH; i++)
-	for(j=1; j<=mapW; j++) {
-		gameMap[i][j].team=recvBuf[p++]-CHAR_AD;
-		bool f=recvBuf[p]&1; recvBuf[p]>>=1;
-		gameMap[i][j].lit=recvBuf[p]&1; recvBuf[p]>>=1;
-		gameMap[i][j].type=sendBuf[p++];
+		for(j=1; j<=mapW; j++) {
+			gameMap[i][j].team=recvBuf[p++]-CHAR_AD;
+			bool f=recvBuf[p]&1; recvBuf[p]>>=1;
+			gameMap[i][j].lit=recvBuf[p]&1; recvBuf[p]>>=1;
+			gameMap[i][j].type=sendBuf[p++];
 
-		for(k=7; k>=0; k++)
-		gameMap[i][j].army=(gameMap[i][j].army<<6)+recvBuf[p+k];
+			for(k=7; k>=0; k++)
+				gameMap[i][j].army=(gameMap[i][j].army<<6)+recvBuf[p+k];
 
-		gameMap[i][j].army=f?(-gameMap[i][j].army):gameMap[i][j].army;
-		p+=8;
-	}
+			gameMap[i][j].army=f?(-gameMap[i][j].army):gameMap[i][j].army;
+			p+=8;
+		}
 }
 
 void LGclient::sockConnect() {
 	if(initSock())
-	return ;
-	
+		return ;
+
 	clientSocket=socket(AF_INET,SOCK_STREAM,0);
 	SOCKADDR_IN connectAddr;
 	connectAddr.sin_family=AF_INET;
@@ -429,7 +429,7 @@ void LGclient::sockConnect() {
 	int res=connect(clientSocket,(LPSOCKADDR)&connectAddr,sizeof(connectAddr));
 	u_long iMode=1;
 	ioctlsocket(clientSocket,FIONBIO,&iMode);
-	
+
 	if(res==SOCKET_ERROR) {
 		failSock|=4;
 		WSACleanup();
@@ -457,7 +457,7 @@ bool LGclient::sockCollect() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 	int res=recv(clientSocket,recvBuf,sizeof(recvBuf),0);
 
-	if(res>0){
+	if(res>0) {
 		procMessage();
 		return true;
 	}
@@ -483,10 +483,10 @@ int LGclient::GAME() {
 	sys_edit IPbox;
 	int plCnt;
 	lisCon=true;
-	
+
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
-	
+
 	quitBox
 	.setsize(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
 	.setlocation(400 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
@@ -498,7 +498,7 @@ int LGclient::GAME() {
 	.addtext("Quit game")
 	.status=0;
 	quitBox.display();
-	
+
 	IPfin
 	.setsize(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
 	.setlocation(100 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
@@ -510,7 +510,7 @@ int LGclient::GAME() {
 	.addtext("Connect")
 	.status=0;
 	IPfin.display();
-	
+
 	IPbox.create(true);
 	IPbox.move(800 * LGGraphics::mapDataStore.mapSizeX, 350 * LGGraphics::mapDataStore.mapSizeY);
 	IPbox.size(400 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY);
@@ -518,61 +518,61 @@ int LGclient::GAME() {
 	IPbox.setcolor(LGGraphics::mainColor);
 	IPbox.setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
 	IPbox.visible(true);
-	
-	for(; is_run(); delay_fps(60)){
+
+	for(; is_run(); delay_fps(60)) {
 		quitBox.display();
 		IPfin.display();
-		
+
 		while(mousemsg()) {
 			quitBox.status=0;
 			IPfin.status=0;
 			mouse_msg msg = getmouse();
-			
+
 			if(msg.x >= 400 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 600 * LGGraphics::mapDataStore.mapSizeY
-			&& msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+			   && msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
 				quitBox.status = 1;
-				
-				if(msg.is_left()){
+
+				if(msg.is_left()) {
 					closegraph();
 					return 0;
-				}continue;
+				} continue;
 			}
-			
+
 			if(msg.x >= 100 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 300 * LGGraphics::mapDataStore.mapSizeY
-			&& msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+			   && msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
 				IPfin.status = 1;
-				
-				if(msg.is_left()){
+
+				if(msg.is_left()) {
 					IPfin.status=2;
 					break;
-				}continue;
+				} continue;
 			}
 		}
-		
-		if(IPfin.status==2){
+
+		if(IPfin.status==2) {
 			IPbox.gettext(25,IP);
 			break;
 		}
 	}
-	
+
 	sockConnect();
 	IPbox.visible(false);
 	cleardevice();
-	
-	for(; is_run()&&lisCon; delay_fps(60)){
+
+	for(; is_run()&&lisCon; delay_fps(60)) {
 		quitBox.display();
 		xyprintf(1000 * LGGraphics::mapDataStore.mapSizeX, 400 * LGGraphics::mapDataStore.mapSizeY, "Player Number : %d             ",LGgame::playerCnt);
 		sockCollect();
-		
+
 		while(mousemsg()) {
 			quitBox.status=0;
 			mouse_msg msg = getmouse();
-			
+
 			if(msg.x >= 400 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 600 * LGGraphics::mapDataStore.mapSizeY
-			&& msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+			   && msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
 				quitBox.status = 1;
-				
-				if(msg.is_left()){
+
+				if(msg.is_left()) {
 					quitGame();
 					closegraph();
 					return 0;
@@ -580,7 +580,7 @@ int LGclient::GAME() {
 			}
 		}
 	}
-	
+
 	LGgame::cheatCode=(1<<playerNumber);
 	std::deque<int> movement;
 	printMap(LGgame::cheatCode, LGgame::playerCoo[playerNumber]);
@@ -603,31 +603,31 @@ int LGclient::GAME() {
 	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
 	.setbgcol(BLUE)
 	.settxtcol(WHITE);
-	
+
 	flushkey();
 	flushmouse();
 	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
-	
+
 	for(; is_run(); delay_fps(std::min(LGgame::gameSpeed + 0.5, 120.5))) {
 		movLin=LGgame::playerCoo[playerNumber].x;
 		movCol=LGgame::playerCoo[playerNumber].y;
 
 		while(mousemsg()) {
 			mouse_msg msg = getmouse();
-			
+
 			if(msg.is_wheel()) {
 				widthPerBlock += msg.wheel / 120;
 				heightPerBlock += msg.wheel / 120;
 				widthPerBlock = max(widthPerBlock, 2);
 				heightPerBlock = max(heightPerBlock, 2);
-			}if(msg.is_down() && msg.is_left() && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH) {
+			} if(msg.is_down() && msg.is_left() && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH) {
 				movLin = (msg.y + heightPerBlock - 1) / heightPerBlock;
 				movCol = (msg.x + widthPerBlock - 1) / widthPerBlock;
 				movement.clear();
 				movement.emplace_back(0);
 			}
 		}
-		
+
 		while(kbmsg()) {
 			key_msg ch = getkey();
 			if(ch.msg == key_msg_up)
@@ -670,7 +670,7 @@ int LGclient::GAME() {
 				}
 			}
 		}
-		
+
 		if(!movement.empty()) {
 			sendBuf[0]=44;
 			sendBuf[1]=movement.front()+CHAR_AD;
@@ -680,10 +680,10 @@ int LGclient::GAME() {
 			sockMessage();
 			movement.pop_front();
 		} while(!movement.empty())
-		movement.pop_front();
-		
+			movement.pop_front();
+
 		while(sockCollect());
-		
+
 		if(LGgame::cheatCode != 1048575) {
 			int alldead = 0;
 			for(int i = 1; i <= LGgame::playerCnt && !alldead; ++i) {
@@ -695,7 +695,7 @@ int LGclient::GAME() {
 				LGgame::cheatCode = 1048575;
 				MessageBoxA(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
 			}
-		}if(!gameEnd) {
+		} if(!gameEnd) {
 			int ed = 0;
 			for(int i = 1; i <= LGgame::playerCnt; ++i)
 				ed |= (LGgame::isAlive[i] << i);
@@ -712,7 +712,7 @@ int LGclient::GAME() {
 				LGgame::printGameMessage({winnerNum, -1, LGgame::curTurn});
 			}
 		}
-		
+
 		{
 			std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 			int needFlushToTurn = ceil(timePassed.count() / 1000000000.0L * LGgame::gameSpeed);

@@ -60,7 +60,7 @@ void LGserver::zipSendBuf() {
 			k1=-k1;
 			sendBuf[p++]+=CHAR_AD+1;
 		} else sendBuf[p++]+=CHAR_AD;
-
+		
 		for(k2=1; k2<=8; k2++)
 		sendBuf[p++]=PMod(k1)+CHAR_AD;
 	} sendBuf[p]='\0';
@@ -314,7 +314,6 @@ int LGserver::GAME() {
 		LGgame::flushMove();
 		zipSendBuf();
 		sockBroadcast();
-		Sleep(2000);
 
 		if(!gameEnd) {
 			int ed = 0;
@@ -414,9 +413,10 @@ void LGclient::dezipRecvBuf() {
 		recvBuf[p]-=CHAR_AD;
 		bool f=recvBuf[p]&1; recvBuf[p]>>=1;
 		gameMap[i][j].lit=recvBuf[p]&1; recvBuf[p]>>=1;
-		gameMap[i][j].type=sendBuf[p++];
-
-		for(k=7; k>=0; k++)
+		gameMap[i][j].type=recvBuf[p++];
+		gameMap[i][j].army=0;
+		
+		for(k=7; k>=0; k--)
 		gameMap[i][j].army=(gameMap[i][j].army<<6)+recvBuf[p+k]-CHAR_AD;
 
 		gameMap[i][j].army=f?(-gameMap[i][j].army):gameMap[i][j].army;
@@ -618,7 +618,7 @@ int LGclient::GAME() {
 	flushkey();
 	flushmouse();
 	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
-
+	
 	for(; is_run(); delay_fps(std::min(LGgame::gameSpeed + 0.5, 120.5))) {
 		movLin=LGgame::playerCoo[playerNumber].x;
 		movCol=LGgame::playerCoo[playerNumber].y;

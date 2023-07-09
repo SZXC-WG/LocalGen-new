@@ -23,11 +23,11 @@ bool isVisible(int x, int y, int printCode) {
 		return true;
 	for(int i = -1; i <= 1; ++i)
 		for(int j = -1; j <= 1; ++j)
-			if(printCode & (1 << gameMap[x + i][y + j].team))
+			if(printCode & (1 << gameMap[x + i][y + j].player))
 				return true;
 	return false;
 }
-void printNum(bool visible, long long army, int team, int curx, int cury) {
+void printNum(bool visible, long long army, int player, int curx, int cury) {
 	if(!visible)
 		return;
 	if(visible) {
@@ -89,7 +89,7 @@ void printMap(int printCode, playerCoord coo) {
 	for(int curx = 1; curx <= mapH; curx++) {
 		for(int cury = 1; cury <= mapW; cury++) {
 			if(isVisible(curx, cury, printCode)) {
-				if(gameMap[curx][cury].team == 0) {
+				if(gameMap[curx][cury].player == 0) {
 					if(gameMap[curx][cury].type == 0 && gameMap[curx][cury].army == 0)
 						setfillcolor(plcol);
 					else if(gameMap[curx][cury].type == 0)
@@ -103,7 +103,7 @@ void printMap(int printCode, playerCoord coo) {
 					else if(gameMap[curx][cury].type == 4)
 						setfillcolor(cscol);
 				} else
-					setfillcolor(playerInfo[gameMap[curx][cury].team].color);
+					setfillcolor(playerInfo[gameMap[curx][cury].player].color);
 			} else
 				setfillcolor(unseen);
 			bar(LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
@@ -114,7 +114,7 @@ void printMap(int printCode, playerCoord coo) {
 			switch(gameMap[curx][cury].type) {
 				case 0: {
 					/* plain */
-					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
 				case 1: {
@@ -122,7 +122,7 @@ void printMap(int printCode, playerCoord coo) {
 					putimage_withalpha(NULL, npimg[4],
 	                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
 	                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
-					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
 				case 2: {
@@ -143,7 +143,7 @@ void printMap(int printCode, playerCoord coo) {
 						putimage_withalpha(NULL, npimg[2],
 		                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
 		                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
-					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
 				case 4: {
@@ -156,7 +156,7 @@ void printMap(int printCode, playerCoord coo) {
 						putimage_withalpha(NULL, npimg[5],
 		                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
 		                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
-					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].team, curx, cury);
+					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
 			}
@@ -325,7 +325,7 @@ void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, i
 		for(int j = 1; j <= mapW; ++j) {
 			gameMap[i][j].type = 4;
 			gameMap[i][j].army = rd(mtrd);
-			gameMap[i][j].team = 0;
+			gameMap[i][j].player = 0;
 			gameMap[i][j].lit = 0;
 		}
 	}
@@ -344,7 +344,7 @@ void createFullSwampMap(int crtH, int crtW, int plCnt) {
 	for(int i = 1; i <= mapH; ++i) {
 		for(int j = 1; j <= mapW; ++j) {
 			gameMap[i][j].type = 1;
-			gameMap[i][j].team = 0;
+			gameMap[i][j].player = 0;
 			gameMap[i][j].army = 0;
 			gameMap[i][j].lit = 0;
 		}
@@ -363,7 +363,7 @@ void createFullPlainMap(int crtH, int crtW, int plCnt) {
 	for(int i = 1; i <= mapH; ++i) {
 		for(int j = 1; j <= mapW; ++j) {
 			gameMap[i][j].type = 0;
-			gameMap[i][j].team = 0;
+			gameMap[i][j].player = 0;
 			gameMap[i][j].army = 0;
 			gameMap[i][j].lit = 0;
 		}

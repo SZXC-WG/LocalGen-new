@@ -35,6 +35,7 @@
 #include <graphics.h>
 #include <ege/sys_edit.h>
 #include "LocalGen_private.h"
+#include "LGbot.hpp"
 #include "bin/LGGrectbut.hpp"
 #include "bin/LGGcircbut.hpp"
 
@@ -47,76 +48,100 @@ using namespace std::literals;
 
 const int dx[5] = {0, -1, 0, 1, 0};
 const int dy[5] = {0, 0, -1, 0, 1};
-const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'};
+const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'}; // number suffixes; 10^2<->10^12
 const int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
 const int SSN=205,SSL=100005;
 const int SKPORT=14514;
 
 //====struct====//
 
+/**
+ * @brief Struct storing the general information of a map.
+ */
 struct MapInfoS {
-	int id;
-	string chiname;
-	string engname;
-	string auth;
-	int hei;
-	int wid;
-	int generalcnt;
-	int swampcnt;
-	int citycnt;
-	int mountaincnt;
-	int plaincnt;
-	string filename;
+	int id; // map id in storage
+	string chiname; // chinese(or other languages) name of map
+	string engname; // english name of map (generic)
+	string auth; // author of the map
+	int hei; // map height
+	int wid; // map width
+	int generalcnt; // count of generals of map
+	int swampcnt; // count of swamps of map
+	int citycnt; // count of cities of map
+	int mountaincnt; // count of mountains of map
+	int plaincnt; // count of plains of map
+	string filename; // map file name (stored in 'maps' folder)
 	MapInfoS() = default;
 	~MapInfoS() = default;
 };
 
+/**
+ * @brief Struct saving a player move (in replay).
+ */
 struct movementS {
-	int id, op;
-	long long turn;
-	void clear() {
+	int id, op; // id: player ID; op: player move type.
+	long long turn; // turn number when the move occurs
+	void clear() { // move clearance; construct a void move.
 		id = turn = op = 0;
 	}
 };
 
+/**
+ * @brief Struct saving the coordinate of a player's focused block.
+ */
 struct playerCoord {
 	int x, y;
 };
 
+/**
+ * @brief Struct saving player's passing info.
+ */
 struct passS {
-	int id, turn;
+	int id, turn; // id: player; turn: passing turn.
 };
 
+/**
+ * @brief Struct saving the basic information of a player.
+ */
 struct playerS {
-	string name;		/* team name */
-	unsigned int color; /* team color */
+	string name;		/* player name */
+	unsigned int color; /* player color */
 };
 
+/**
+ * @brief Struct saving the basic information of a block.
+ */
 struct Block {
-	int team; /* the team who holds this block */
+	int player; /* the player who holds this block */
 	int type; /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
 	long long army;  /* count of army on this block */
 	bool lit; /* whether the block is lighted(lit) */
 };
 
+/**
+ * @brief Struct saving a game message.
+ */
 struct gameMessageStore {
 	int playerA, playerB;
 	int turnNumber;
 };
 
+/**
+ * @brief Struct saving a player move (in game).
+ */
 struct moveS {
-	int id;
-	playerCoord from;
-	playerCoord to;
+	int id; // player id of move
+	playerCoord from; // coordinate from
+	playerCoord to; // coordinate to
 };
 
 //====value====//
 
-string username;
-PIMAGE pimg[9];
-MapInfoS maps[5005];
-Block gameMap[505][505]; /* maximum 500*500 */
-playerS playerInfo[64] = {
+string username; // game user's name
+PIMAGE pimg[9]; // software used images
+MapInfoS maps[5005]; // storing all imported maps
+Block gameMap[505][505]; /* current game map; maximum 500*500 */
+playerS playerInfo[64] = { // player information (default written)
 	{"White", 0xffffffff},
 	{"Red", 0xffff0000},
 	{"Aqua", 0xff4363d8},
@@ -132,29 +157,44 @@ playerS playerInfo[64] = {
 	{"Indigo", 0xff483d8b},
 };
 
-int mapH, mapW;
-int widthPerBlock, heightPerBlock;
-int mapNum;
+int mapH, mapW; // height and width of map
+int widthPerBlock, heightPerBlock; // block height and width when printing
+int mapNum; // count of imported maps
 
 char strZipStatus[LEN_ZIP];
-char strZip[LEN_ZIP];
-char strdeZip[LEN_ZIP];
-char strGameZip[LEN_ZIP<<2];
-char strdeGameZip[LEN_ZIP<<2];
-char strStatusZip[LEN_ZIP<<2];
-char strdeStatusZip[LEN_ZIP<<2];
+char strZip[LEN_ZIP]; // storing the zipped map
+char strdeZip[LEN_ZIP]; // storing the to-be-dezipped zipped map
+char strGameZip[LEN_ZIP<<2]; // storing the zipped game (deprecated)
+char strdeGameZip[LEN_ZIP<<2]; // storing the to-be-dezipped zipped game (deprecated)
+char strStatusZip[LEN_ZIP<<2]; // storing the zipped game status
+char strdeStatusZip[LEN_ZIP<<2]; // storing the to-be-dezipped game status
 
-std::vector<passS> passId[505][505];
-playerCoord lastTurn[20];
+std::vector<passS> passId[505][505]; // every block's passing info
+playerCoord lastTurn[20]; // every player's last turn coordinate (in game)
 
 int failSock;
 
 //====function====//
 
+/**
+ * @brief Function for comparing two coordinates equal.
+ *
+ * @param a playerCoord
+ * @param b playerCoord
+ * @return true
+ * @return false
+ */
 bool operator== (playerCoord a,playerCoord b) {
 	return a.x==b.x&&a.y==b.y;
 }
 
+/**
+ * @brief Function for checking whether the username is valid.
+ *
+ * @param username string
+ * @return true
+ * @return false
+ */
 bool checkValidUsername(string username) {
 	if(username.size()<3||username.size()>16) return 0;
 	for(int i=0; i<username.size(); ++i) {
@@ -164,64 +204,97 @@ bool checkValidUsername(string username) {
 	return 1;
 }
 
+/**
+ * @brief Function for safely exiting software.
+ */
 inline void exitExe() { WSACleanup(); exit(0); }
 
-bool isVisible(int,int,int);
-void printNum(bool visible, long long army, int team, int curx, int cury);
+/**
+ * @brief Check whether the block is visible according to the printCode.
+ *
+ * @return true
+ * @return false
+ */
+bool isVisible(int x, int y, int printCode);
+/**
+ * @brief Print a block's army number.
+ * 
+ * @param visible whether the block is visible
+ * @param army army number
+ * @param player player occupying the block
+ * @param curx block coordinate on x-axis
+ * @param cury block coordinate on y-axis
+ */
+void printNum(bool visible, long long army, int player, int curx, int cury);
 
-void createRandomMap(int crtH, int crtW);
-void createStandardMap(int crtH, int crtW);
+void createRandomMap(int crtH, int crtW); // generate random map (special) with H and W
+void createStandardMap(int crtH, int crtW); // generate standard map (special) with H and W
 void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt);
 void createFullSwampMap(int crtH, int crtW, int plCnt);
 void createFullPlainMap(int crtH, int crtW, int plCnt);
 
 void getAllFiles(string path, std::vector<string>& files, string fileType);
 void initMaps();
-void readMap(int mid);
-void printMap(int printCode, playerCoord coo);
+void readMap(int mid); // read map and copy to gameMap
+void printMap(int printCode, playerCoord coo); // print the current gameMap
 void createOptions(int type,int h);
 
 inline long long PMod(long long& x);
 std::pair<long long, long long> bin_search(long long curTurn);
-void Zip();
-void deZip();
+void Zip(); // zip map
+void deZip(); // dezip map
 
-bool initSock();
-void toAvoidCEBugInGraphicsImportMap(string fileName);
+bool initSock(); // initialize socket web
+void toAvoidCEBugInGraphicsImportMap(string fileName); // ???
 
 /***** graphics *****/
 
 bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60);
 
+/**
+ * @brief Namespace for operations on images. (based on EGE)
+ */
 namespace imageOperation {
+	/**
+	 * @brief Copy one image to another.
+	 * 
+	 * @param dstimg destination image
+	 * @param srcimg source image
+	 */
 	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg);
 	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight);
 	void setWindowTransparent(bool enable, int alpha = 0xFF);
 }
 
+/**
+ * @brief Namespace for EGE graphics (except image operations)
+ */
 namespace LGGraphics {
-	const color_t bgColor = 0xff222222;
-	const color_t mainColor = 0xff008080;
-	const color_t errorColor = 0xfffbbbbb;
-	PIMAGE favi;
-	string fileName;
-	int stDel = 1;
-	int plCnt = 0;
-	int mapSelected = 0;
-	int cheatCode = 0;
+	const color_t bgColor = 0xff222222; // background color
+	const color_t mainColor = 0xff008080; // main color
+	const color_t errorColor = 0xfffbbbbb; // error color
+	PIMAGE favi; // favicon image
+	string fileName; // ???
+	int stDel = 1; // temporary variable for speed (deprecated)
+	int plCnt = 0; // temporary variable for count of players
+	int mapSelected = 0; // ID of the map selected
+	int cheatCode = 0; // binary code of visibility in game
+	/**
+	 * @brief Struct for storing printing info of map.
+	 */
 	struct mapData {
-		int heightPerBlock;
-		int widthPerBlock;
-		int height, width;
-		double mapSizeX, mapSizeY;
-		int maplocX, maplocY;
-	} mapDataStore;
+		int heightPerBlock; // block height in printing
+		int widthPerBlock; // block width in printing
+		int height, width; // ???
+		double mapSizeX, mapSizeY; // ???
+		int maplocX, maplocY; // location of map in printing
+	} mapDataStore; // storing variable
 	void WelcomePage();
 	void localOptions();
 	void webOptions();
 	void createMapPage();
 	void replayPage();
-	void doMapImport();
+	void [[deprecated]] doMapImport();
 	void doMapSelect();
 	// void doRepImport();
 	void importGameSettings();
@@ -232,8 +305,8 @@ namespace LGGraphics {
 	void init();
 }
 
-inline int getHeightPerBlock();
-inline int getWidthPerBlock();
+inline int getHeightPerBlock(); // get LGGraphics::mapDataStore.heightPerBlock; deprecated
+inline int getWidthPerBlock(); // get LGGraphics::mapDataStore.widthPerBlock; deprecated
 
 /***** others *****/
 
@@ -272,7 +345,7 @@ namespace LGreplay {
 	int ston(char* s,int len=-1);
 	string zipBlock(Block B);
 	struct Movement {
-		int team,dir;
+		int player,dir;
 		playerCoord coord;
 		Movement();
 		Movement(int tm,int d,playerCoord c);
@@ -349,6 +422,9 @@ namespace LGclient {
 	int GAME();
 };
 
+/**
+ * @brief Main Page Function. This page occurs when entering the software.
+ */
 void MainPage() {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	LGGraphics::favi = newimage();

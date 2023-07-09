@@ -451,7 +451,7 @@ namespace LGGraphics {
 	}
 
 	void localOptions() {
-		testPage();
+		// testPage();
 		cleardevice();
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);
@@ -1011,27 +1011,27 @@ namespace LGGraphics {
 								int col = (msg.x + widthPerBlock - 1 - LGGraphics::mapDataStore.maplocX) / widthPerBlock;
 								switch(type) {
 									case 0:
-										gameMap[lin][col].team=0;
+										gameMap[lin][col].player=0;
 										gameMap[lin][col].type=2;
 										gameMap[lin][col].army=0;
 										break;
 									case 1:
-										gameMap[lin][col].team=0;
+										gameMap[lin][col].player=0;
 										gameMap[lin][col].type=1;
 										gameMap[lin][col].army=0;
 										break;
 									case 2:
-										gameMap[lin][col].team=0;
+										gameMap[lin][col].player=0;
 										gameMap[lin][col].type=3;
 										gameMap[lin][col].army=0;
 										break;
 									case 3:
-										gameMap[lin][col].team=0;
+										gameMap[lin][col].player=0;
 										gameMap[lin][col].type=4;
 										gameMap[lin][col].army=citynum;
 										break;
 									case 4:
-										gameMap[lin][col].team=0;
+										gameMap[lin][col].player=0;
 										gameMap[lin][col].type=0;
 										gameMap[lin][col].army=plainnum;
 										break;
@@ -1039,7 +1039,7 @@ namespace LGGraphics {
 										gameMap[lin][col].lit=!gameMap[lin][col].lit;
 										break;
 									case 6:
-										gameMap[lin][col].team=0;
+										gameMap[lin][col].player=0;
 										gameMap[lin][col].type=0;
 										gameMap[lin][col].army=0;
 										break;

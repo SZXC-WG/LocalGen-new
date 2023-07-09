@@ -14,6 +14,8 @@
 #ifndef __LGWEB_HPP__
 #define __LGWEB_HPP__
 
+#include "LGdef.hpp"
+
 bool initSock() {
 	WORD w_req=MAKEWORD(2,2);
 	WSADATA wsadata;
@@ -52,7 +54,7 @@ void LGserver::zipSendBuf() {
 
 	for(i=1; i<=mapH; i++)
 	for(j=1; j<=mapW; j++) {
-		sendBuf[p++]=gameMap[i][j].team+CHAR_AD;
+		sendBuf[p++]=gameMap[i][j].player+CHAR_AD;
 		sendBuf[p]=(gameMap[i][j].type<<2)+(gameMap[i][j].lit<<1);
 		k1=gameMap[i][j].army;
 
@@ -409,7 +411,7 @@ void LGclient::dezipRecvBuf() {
 
 	for(i=1; i<=mapH; i++)
 	for(j=1; j<=mapW; j++) {
-		gameMap[i][j].team=recvBuf[p++]-CHAR_AD;
+		gameMap[i][j].player=recvBuf[p++]-CHAR_AD;
 		recvBuf[p]-=CHAR_AD;
 		bool f=recvBuf[p]&1; recvBuf[p]>>=1;
 		gameMap[i][j].lit=recvBuf[p]&1; recvBuf[p]>>=1;

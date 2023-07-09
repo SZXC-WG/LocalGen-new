@@ -50,8 +50,8 @@ namespace xrzBot
             okDir = i;
             des.type = gameMap[des.x][des.y].type;
             des.Army = gameMap[des.x][des.y].army;
-            des.teamOnIt = gameMap[des.x][des.y].team;
-            if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
+            des.teamOnIt = gameMap[des.x][des.y].player;
+            if (gameMap[des.x][des.y].player != id && gameMap[des.x][des.y].type == 3)
             {
                 previousPos[id] = player;
                 return i;
@@ -77,8 +77,8 @@ namespace xrzBot
                 continue;
             des.type = gameMap[des.x][des.y].type;
             des.Army = gameMap[des.x][des.y].army;
-            des.teamOnIt = gameMap[des.x][des.y].team;
-            if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
+            des.teamOnIt = gameMap[des.x][des.y].player;
+            if (gameMap[des.x][des.y].player != id && gameMap[des.x][des.y].type == 3)
                 return i;
             if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt == 0)
                 return i;

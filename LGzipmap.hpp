@@ -32,7 +32,7 @@ void Zip() {
 
 	for(i = 1; i <= mapH; i++)
 		for(j = 1; j <= mapW; j++) {
-			strZip[p++] = gameMap[i][j].team + CHAR_AD;
+			strZip[p++] = gameMap[i][j].player + CHAR_AD;
 			strZip[p] = (gameMap[i][j].type << 2) + (gameMap[i][j].lit << 1);
 			k1 = gameMap[i][j].army;
 
@@ -60,7 +60,7 @@ void deZip() {
 
 	for(i = 1; i <= mapH; i++)
 		for(j = 1; j <= mapW; j++) {
-			gameMap[i][j].team = strdeZip[k++];
+			gameMap[i][j].player = strdeZip[k++];
 			bool f = strdeZip[k] & 1;
 			strdeZip[k] >>= 1;
 			gameMap[i][j].lit = strdeZip[k] & 1;

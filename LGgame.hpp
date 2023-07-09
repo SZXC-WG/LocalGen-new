@@ -57,8 +57,8 @@ void LGgame::kill(int p1, int p2) {
 	LGgame::isAlive[p2] = 0;
 	for(int i = 1; i <= mapH; ++i) {
 		for(int j = 1; j <= mapW; ++j) {
-			if(gameMap[i][j].team == p2 && gameMap[i][j].type != 3) {
-				gameMap[i][j].team = p1;
+			if(gameMap[i][j].player == p2 && gameMap[i][j].type != 3) {
+				gameMap[i][j].player = p1;
 				gameMap[i][j].army = (gameMap[i][j].army + 1) >> 1;
 			}
 		}
@@ -110,9 +110,9 @@ void LGgame::flushMove() {
 		LGgame::inlineMove.pop_front();
 		if(!LGgame::isAlive[cur.id])
 			continue;
-		if(gameMap[cur.from.x][cur.from.y].team != cur.id)
+		if(gameMap[cur.from.x][cur.from.y].player != cur.id)
 			continue;
-		if(gameMap[cur.to.x][cur.to.y].team == cur.id) {
+		if(gameMap[cur.to.x][cur.to.y].player == cur.id) {
 			gameMap[cur.to.x][cur.to.y].army += gameMap[cur.from.x][cur.from.y].army - 1;
 			gameMap[cur.from.x][cur.from.y].army = 1;
 		} else {
@@ -120,8 +120,8 @@ void LGgame::flushMove() {
 			gameMap[cur.from.x][cur.from.y].army = 1;
 			if(gameMap[cur.to.x][cur.to.y].army < 0) {
 				gameMap[cur.to.x][cur.to.y].army = -gameMap[cur.to.x][cur.to.y].army;
-				int p = gameMap[cur.to.x][cur.to.y].team;
-				gameMap[cur.to.x][cur.to.y].team = cur.id;
+				int p = gameMap[cur.to.x][cur.to.y].player;
+				gameMap[cur.to.x][cur.to.y].player = cur.id;
 				if(gameMap[cur.to.x][cur.to.y].type == 3) {
 					/* general */
 					kill(cur.id, p);
@@ -154,19 +154,19 @@ void LGgame::initGenerals(playerCoord coos[]) {
 	std::shuffle(gens.begin(), gens.end(), std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
 	for(int i = 1; i <= LGgame::playerCnt; ++i) {
 		coos[i] = lastTurn[i] = LGgame::genCoo[i] = gens[i - 1];
-		gameMap[coos[i].x][coos[i].y].team = i;
+		gameMap[coos[i].x][coos[i].y].player = i;
 		gameMap[coos[i].x][coos[i].y].army = 0;
 	}
 	for(int i = 1; i <= mapH; ++i)
 		for(int j = 1; j <= mapW; ++j)
-			if(gameMap[i][j].type == 3 && gameMap[i][j].team == 0)
+			if(gameMap[i][j].type == 3 && gameMap[i][j].player == 0)
 				gameMap[i][j].type = 0;
 }
 void LGgame::updateMap() {
 	++LGgame::curTurn;
 	for(int i = 1; i <= mapH; ++i) {
 		for(int j = 1; j <= mapW; ++j) {
-			if(gameMap[i][j].team == 0) continue;
+			if(gameMap[i][j].player == 0) continue;
 			switch(gameMap[i][j].type) {
 				case 0: {
 					/* plain */
@@ -175,7 +175,7 @@ void LGgame::updateMap() {
 				}
 				case 1: {
 					/* swamp */
-					if(gameMap[i][j].army > 0) if(!(--gameMap[i][j].army)) gameMap[i][j].team = 0;
+					if(gameMap[i][j].army > 0) if(!(--gameMap[i][j].army)) gameMap[i][j].player = 0;
 					break;
 				}
 				case 2:	   /* mountain */
@@ -215,22 +215,22 @@ void LGgame::ranklist() {
 	}
 	for(int i = 1; i <= mapH; ++i) {
 		for(int j = 1; j <= mapW; ++j) {
-			if(gameMap[i][j].team == 0)
+			if(gameMap[i][j].player == 0)
 				continue;
 			if(gameMap[i][j].type == 2)
 				continue;
-			++rklst[gameMap[i][j].team].tot;
+			++rklst[gameMap[i][j].player].tot;
 			if(gameMap[i][j].type == 0)
-				++rklst[gameMap[i][j].team].plain;
+				++rklst[gameMap[i][j].player].plain;
 			else if(gameMap[i][j].type == 4)
-				++rklst[gameMap[i][j].team].city;
+				++rklst[gameMap[i][j].player].city;
 			else if(gameMap[i][j].type == 3)
-				++rklst[gameMap[i][j].team].city;
-			rklst[gameMap[i][j].team].army += gameMap[i][j].army;
+				++rklst[gameMap[i][j].player].city;
+			rklst[gameMap[i][j].player].army += gameMap[i][j].army;
 		}
 	}
 	for(int i = 1; i <= LGgame::playerCnt; ++i) {
-		if(gameMap[LGgame::playerCoo[i].x][LGgame::playerCoo[i].y].team != i)
+		if(gameMap[LGgame::playerCoo[i].x][LGgame::playerCoo[i].y].player != i)
 			continue;
 		rklst[i].armyInHand = gameMap[LGgame::playerCoo[i].x][LGgame::playerCoo[i].y].army;
 	}
@@ -416,8 +416,8 @@ namespace LGlocal {
 						LGgame::isAlive[1] = 0;
 						for(int i = 1; i <= mapH; ++i) {
 							for(int j = 1; j <= mapW; ++j) {
-								if(gameMap[i][j].team == 1) {
-									gameMap[i][j].team = 0;
+								if(gameMap[i][j].player == 1) {
+									gameMap[i][j].player = 0;
 									if(gameMap[i][j].type == 3)
 										gameMap[i][j].type = 4;
 								}

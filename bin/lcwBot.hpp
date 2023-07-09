@@ -31,7 +31,7 @@ namespace lcwBot
             return -100;
         if (des.x < 1 || des.x > mapH || des.y < 1 || des.y > mapW)
             return 500000;
-        des.teamOnIt = gameMap[des.x][des.y].team;
+        des.teamOnIt = gameMap[des.x][des.y].player;
         des.Army = gameMap[des.x][des.y].army;
         des.type = gameMap[des.x][des.y].type;
         if (des.x == previousPos[id].x && des.y == previousPos[id].y)
@@ -58,7 +58,7 @@ namespace lcwBot
 //	        id = ind;
 //	        turnCount[id]++;
 //	        visitTime[id][player.x][player.y]++;
-	        if (gameMap[player.x][player.y].army == 0 || gameMap[player.x][player.y].team != id)
+	        if (gameMap[player.x][player.y].army == 0 || gameMap[player.x][player.y].player != id)
 	        {
 //	            memset(visitTime[id], 0, sizeof(visitTime[id]));
 	            return 0;
@@ -75,9 +75,9 @@ namespace lcwBot
 	        node nowPos;
 	        nowPos.x = player.x;
 	        nowPos.y = player.y;
-	        nowPos.teamOnIt = gameMap[player.x][player.y].team;
+	        nowPos.teamOnIt = gameMap[player.x][player.y].player;
 	        nowPos.Army = gameMap[player.x][player.y].army;
-            if(gameMap[nowPos.x][nowPos.y].team != id){
+            if(gameMap[nowPos.x][nowPos.y].player != id){
 				nowPos.Army = armyNow - nowPos.Army;
 				nowPos.teamOnIt = id;
 			}else{
@@ -101,8 +101,8 @@ namespace lcwBot
 	            okDir = i;
 	            des.type = gameMap[des.x][des.y].type;
 	            des.Army = gameMap[des.x][des.y].army;
-	            des.teamOnIt = gameMap[des.x][des.y].team;
-	            if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
+	            des.teamOnIt = gameMap[des.x][des.y].player;
+	            if (gameMap[des.x][des.y].player != id && gameMap[des.x][des.y].type == 3)
 	            {
 	                previousPos[id] = player;
 	                return i;
@@ -128,8 +128,8 @@ namespace lcwBot
 	                continue;
 	            des.type = gameMap[des.x][des.y].type;
 	            des.Army = gameMap[des.x][des.y].army;
-	            des.teamOnIt = gameMap[des.x][des.y].team;
-	            if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
+	            des.teamOnIt = gameMap[des.x][des.y].player;
+	            if (gameMap[des.x][des.y].player != id && gameMap[des.x][des.y].type == 3)
 	                return i;
 	            if (des.type == 4 && des.Army <= nowPos.Army && des.teamOnIt == 0)
 	                return i;
@@ -164,7 +164,7 @@ namespace lcwBot
         visitTime[id][player.x][player.y]++;
         int cnt[5] = {4, 4, 4, 4, 4};
 //        int addcnt = turnCount[id] * 10;
-        if (gameMap[player.x][player.y].army == 0 || gameMap[player.x][player.y].team != id)
+        if (gameMap[player.x][player.y].army == 0 || gameMap[player.x][player.y].player != id)
         {
             memset(visitTime[id], 0, sizeof(visitTime[id]));
             return 0;
@@ -194,8 +194,8 @@ namespace lcwBot
             okDir = i;
             des.type = gameMap[des.x][des.y].type;
             des.Army = gameMap[des.x][des.y].army;
-            des.teamOnIt = gameMap[des.x][des.y].team;
-            if (gameMap[des.x][des.y].team != id && gameMap[des.x][des.y].type == 3)
+            des.teamOnIt = gameMap[des.x][des.y].player;
+            if (gameMap[des.x][des.y].player != id && gameMap[des.x][des.y].type == 3)
             {
                 previousPos[id] = player;
                 return i;
@@ -209,7 +209,7 @@ namespace lcwBot
             cnt[i] = getCnt(player, i);
             cnt[i] = std::max(0, cnt[i] + visitTime[id][des.x][des.y]);
             //ex next round
-            if(gameMap[des.x][des.y].team != id){
+            if(gameMap[des.x][des.y].player != id){
             	if(des.Army >= gameMap[player.x][player.y].army){
             		cnt[i] += std::max(visitTime[id][des.x][des.y] * 10, 50000);
             		continue;

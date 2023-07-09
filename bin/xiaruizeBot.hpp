@@ -46,14 +46,14 @@ namespace xiaruizeBot
                 continue;
             if (gameMap[ToX][ToY].type == 2)
                 continue;
-            if (gameMap[ToX][ToY].type == 3 && gameMap[ToX][ToY].team != id)
+            if (gameMap[ToX][ToY].type == 3 && gameMap[ToX][ToY].player != id)
             {
                 operation[id].push_back(x);
                 previousPos[id] = coord;
                 if (gameMap[ToX][ToY].army < gameMap[coord.x][coord.y].army)
                 {
-                    if (!operation[gameMap[ToX][ToY].team].empty())
-                        operation[id].insert(operation[id].end(), operation[gameMap[ToX][ToY].team].begin(), operation[gameMap[ToX][ToY].team].end());
+                    if (!operation[gameMap[ToX][ToY].player].empty())
+                        operation[id].insert(operation[id].end(), operation[gameMap[ToX][ToY].player].begin(), operation[gameMap[ToX][ToY].player].end());
                 }
                 return x;
             }
@@ -68,7 +68,7 @@ namespace xiaruizeBot
                 continue;
             if (gameMap[ToX][ToY].type == 2)
                 continue;
-            if (gameMap[ToX][ToY].type == 4 && gameMap[ToX][ToY].army <= gameMap[coord.x][coord.y].army && gameMap[ToX][ToY].team != id)
+            if (gameMap[ToX][ToY].type == 4 && gameMap[ToX][ToY].army <= gameMap[coord.x][coord.y].army && gameMap[ToX][ToY].player != id)
             {
                 operation[id].push_back(x);
                 previousPos[id] = coord;

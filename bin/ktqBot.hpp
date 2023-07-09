@@ -30,7 +30,7 @@ namespace ktqBot
             int tx = coo.x + dx[i], ty = coo.y + dy[i];
             if (gameMap[tx][ty].type == 2 || tx < 1 || tx > mapH || ty < 1 || ty > mapW)
                 continue;
-            p[++cnt] = {i, gameMap[tx][ty].team, gameMap[tx][ty].army, gameMap[tx][ty].army, gameMap[tx][ty].type};
+            p[++cnt] = {i, gameMap[tx][ty].player, gameMap[tx][ty].army, gameMap[tx][ty].army, gameMap[tx][ty].type};
             if (p[cnt].type != 1 && p[cnt].team == id)
                 p[cnt].army = -p[cnt].army, p[cnt].del = -p[cnt].del;
             if (p[cnt].type == 4 && p[cnt].team != id)

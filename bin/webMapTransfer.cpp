@@ -8,7 +8,7 @@ using pii = pair<int,int>;
 using pll = pair<ll,int>;
 
 struct Block {
-	int team; /* the team who holds this block */
+	int player; /* the team who holds this block */
 	int type; /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
 	long long army;  /* count of army on this block */
 	bool lit; /* whether the block is lighted(lit) */
@@ -36,7 +36,7 @@ void Zip() {
 
 	for(i = 1; i <= mapH; i++)
 		for(j = 1; j <= mapW; j++) {
-			strZip[p++] = gameMap[i][j].team + CHAR_AD;
+			strZip[p++] = gameMap[i][j].player + CHAR_AD;
 			strZip[p] = (gameMap[i][j].type << 2) + (gameMap[i][j].lit << 1);
 			k1 = gameMap[i][j].army;
 

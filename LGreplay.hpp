@@ -41,7 +41,7 @@ namespace LGreplay {
 	string zipBlock(Block B) {
 		string res="";
 		res+=ntoc(B.lit<<3|B.type);
-		res+=ntoc(B.team<<1|(B.army<0));
+		res+=ntoc(B.player<<1|(B.army<0));
 		res+=ntos(std::abs(B.army),4);
 		return res;
 	}
@@ -96,7 +96,7 @@ namespace LGreplay {
 		B.lit=cton(readBuf[0])>>3;
 		B.type=cton(readBuf[0])&7;
 		int t=cton(readBuf[1]);
-		B.team=t>>1;
+		B.player=t>>1;
 		int nega=1; if(t&1) nega=-1;
 		B.army=ston(readBuf+2,4)*nega;
 		return B;
@@ -120,14 +120,14 @@ namespace LGreplay {
 	void updMap(int turn) {
 		for(int i = 1; i <= mapH; ++i) {
 			for(int j = 1; j <= mapW; ++j) {
-				if(gameMap[i][j].team == 0) continue;
+				if(gameMap[i][j].player == 0) continue;
 				switch(gameMap[i][j].type) {
 					case 0: {
 						if(turn % 25 == 0) ++gameMap[i][j].army;
 						break;
 					}
 					case 1: {
-						if(gameMap[i][j].army > 0) if(!(--gameMap[i][j].army)) gameMap[i][j].team = 0;
+						if(gameMap[i][j].army > 0) if(!(--gameMap[i][j].army)) gameMap[i][j].player = 0;
 						break;
 					}
 					case 2:break;

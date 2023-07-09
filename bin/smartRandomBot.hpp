@@ -25,7 +25,7 @@ namespace smartRandomBot {
 			if(nx < 1 || nx > mapH || ny < 1 || ny > mapW || gameMap[nx][ny].type == 2)
 				continue;
 			p[++pl] = {
-				gameMap[nx][ny].type, gameMap[nx][ny].team, gameMap[nx][ny].army, i,
+				gameMap[nx][ny].type, gameMap[nx][ny].player, gameMap[nx][ny].army, i,
 				std::find(lastCoord[id].rbegin(), lastCoord[id].rend(), playerCoord{nx, ny}) - lastCoord[id].rbegin()
 			};
 		}

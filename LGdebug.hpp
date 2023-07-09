@@ -204,15 +204,15 @@ namespace LGdebug {
 	}
 
 	inline bool printCheck(int x, int y, int printCode) {
-		if(printCode & (1 << gameMap[x][y].team))
+		if(printCode & (1 << gameMap[x][y].player))
 			return true;
-		if(x - 1 > 0 && (printCode & (1 << gameMap[x - 1][y].team)))
+		if(x - 1 > 0 && (printCode & (1 << gameMap[x - 1][y].player)))
 			return true;
-		if(x + 1 <= mapH && (printCode & (1 << gameMap[x + 1][y].team)))
+		if(x + 1 <= mapH && (printCode & (1 << gameMap[x + 1][y].player)))
 			return true;
-		if(y - 1 > 0 && (printCode & (1 << gameMap[x][y - 1].team)))
+		if(y - 1 > 0 && (printCode & (1 << gameMap[x][y - 1].player)))
 			return true;
-		if(y + 1 <= mapW && (printCode & (1 << gameMap[x][y + 1].team)))
+		if(y + 1 <= mapW && (printCode & (1 << gameMap[x][y + 1].player)))
 			return true;
 		return false;
 	}
@@ -249,7 +249,7 @@ namespace LGdebug {
 						fillNs(i, j * 5 - 3, j * 5 - 1);
 					} else gameMap[i][j].army = 0;
 
-					fillCf(i, j * 5 - 4, i, j * 5, COLOR[gameMap[i][j].team]);
+					fillCf(i, j * 5 - 4, i, j * 5, COLOR[gameMap[i][j].player]);
 				} else {
 					switch(gameMap[i][j].type) {
 						case 0:
@@ -387,8 +387,8 @@ namespace LGdebug {
 //						LGgame::isAlive[1] = 0;
 //						for(int i = 1; i <= mapH; ++i) {
 //							for(int j = 1; j <= mapW; ++j) {
-//								if(gameMap[i][j].team == 1) {
-//									gameMap[i][j].team = 0;
+//								if(gameMap[i][j].player == 1) {
+//									gameMap[i][j].player = 0;
 //									if(gameMap[i][j].type == 3)
 //										gameMap[i][j].type = 4;
 //								}

@@ -142,9 +142,8 @@ void LGserver::procMessage(int sockID) {
 void LGserver::sockBroadcast() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
-	for(int i=1; i<totSock; i++)
-		if(sockCon[i]&&LGgame::isAlive[i])
-			send(serverSocket[i],sendBuf,sizeof(sendBuf),0);
+	for(int i=1; i<totSock; i++) if(sockCon[i])
+	send(serverSocket[i],sendBuf,sizeof(sendBuf),0);
 
 	memset(sendBuf,0,sizeof(sendBuf));
 }
@@ -153,10 +152,10 @@ void LGserver::sockCollect() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++) if(sockCon[i]) {
-			int res=recv(serverSocket[i],recvBuf,sizeof(recvBuf),0);
-			if(res>0) procMessage(i);
-			memset(recvBuf,0,sizeof(recvBuf));
-		}
+		int res=recv(serverSocket[i],recvBuf,sizeof(recvBuf),0);
+		if(res>0) procMessage(i);
+		memset(recvBuf,0,sizeof(recvBuf));
+	}
 }
 
 int LGserver::GAME() {
@@ -188,19 +187,17 @@ int LGserver::GAME() {
 	.addtext("Start game")
 	.status=0;
 	startBox.display();
-
-	for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 0;
+	
 	for(; is_run()&&lisCon; delay_fps(60)) {
 		{
 			std::lock_guard<std::mutex> mGuard(mLock);
 			plCnt=totSock-1;
 		}
+		
+		rbCnt=LGgame::playerCnt-plCnt;
 		cleardevice();
 		startBox.display();
-//		bar(600 * LGGraphics::mapDataStore.mapSizeX, 600 * LGGraphics::mapDataStore.mapSizeY, 1200 * LGGraphics::mapDataStore.mapSizeX, 1000 * LGGraphics::mapDataStore.mapSizeX);
 		xyprintf(800 * LGGraphics::mapDataStore.mapSizeX, 400 * LGGraphics::mapDataStore.mapSizeY, "Player Number : %d",plCnt);
-//		zipSendBuf();
-//		sockBroadcast();
 		sockCollect();
 
 		while(mousemsg()) {
@@ -231,7 +228,6 @@ int LGserver::GAME() {
 	int robotId[64];
 	std::deque<int> movement;
 
-	for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 1;
 	for(int i = plCnt+1; i <= plCnt+rbCnt; ++i)
 		robotId[i] = mtrd() % 300 + 1;
 
@@ -466,7 +462,7 @@ void LGclient::procMessage() {
 bool LGclient::sockCollect() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 	int res=recv(clientSocket,recvBuf,sizeof(recvBuf),0);
-//	xyprintf(800 * LGGraphics::mapDataStore.mapSizeX, 600 * LGGraphics::mapDataStore.mapSizeY, "%s",recvBuf);
+	
 	if(res>0) {
 		procMessage();
 		return true;

@@ -1,6 +1,8 @@
 #ifndef __BOT_XIARUIZE__
 #define __BOT_XIARUIZE__
 
+#include "../LGdef.hpp" 
+
 namespace xiaruizeBot
 {
     const int dx[5] = {0, -1, 0, 1, 0};
@@ -112,7 +114,7 @@ namespace xiaruizeBot
 
     int xiaruizeBot(int id, playerCoord coord)
     {
-        if (gameMap[coord.x][coord.y].army == 0 || gameMap[coord.x][coord.y].team != id)
+        if (gameMap[coord.x][coord.y].army == 0 || gameMap[coord.x][coord.y].player != id)
         {
             memset(vis[id], 0, sizeof(vis[id]));
             backCountCnt[id] = 1;

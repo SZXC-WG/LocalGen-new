@@ -35,7 +35,6 @@
 #include <graphics.h>
 #include <ege/sys_edit.h>
 #include "LocalGen_private.h"
-#include "LGbot.hpp"
 #include "bin/LGGrectbut.hpp"
 #include "bin/LGGcircbut.hpp"
 

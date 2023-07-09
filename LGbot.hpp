@@ -15,7 +15,7 @@
 #define __LGBOT_HPP__
 
 // Bots
-#include "bin/ktqBot.hpp"
+// #include "bin/ktqBot.hpp"
 #include "bin/xiaruizeBot.hpp"
 #include "bin/xrzBot.hpp"
 #include "bin/smartRandomBot.hpp"

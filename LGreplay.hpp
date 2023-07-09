@@ -47,11 +47,11 @@ namespace LGreplay {
 	}
 
 	Movement::Movement() {}
-	Movement::Movement(int tm,int d,playerCoord c) {team=tm; dir=d; coord=c;}
+	Movement::Movement(int tm,int d,playerCoord c) {player=tm; dir=d; coord=c;}
 	string Movement::zip() {
 		if(dir<1||dir>4) return "";
 		string res="";
-		res+=ntoc(team);
+		res+=ntoc(player);
 		res+=ntos(coord.x,2);
 		res+=ntos(coord.y,2);
 		res+=ntoc(dir);
@@ -59,7 +59,7 @@ namespace LGreplay {
 	}
 	Movement readMove(char* buf) {
 		Movement mov;
-		mov.team=cton(buf[0]);
+		mov.player=cton(buf[0]);
 		mov.coord.x=ston(buf+1,2);
 		mov.coord.y=ston(buf+3,2);
 		mov.dir=cton(buf[5]);
@@ -103,7 +103,7 @@ namespace LGreplay {
 	}
 	int QwQ(Movement mov) {
 		playerCoord coo=mov.coord;
-		int id=mov.team,mv=mov.dir;
+		int id=mov.player,mv=mov.dir;
 		switch(mv) {
 			case 1 ... 4: {
 				playerCoord newCoo{coo.x + dx[mv], coo.y + dy[mv]};

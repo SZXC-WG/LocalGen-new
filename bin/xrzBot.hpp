@@ -1,6 +1,7 @@
 #ifndef __BOT_XRZ__
 #define __BOT_XRZ__
 
+#include "../LGdef.hpp"
 namespace xrzBot
 {
     const int dx[5] = {0, -1, 0, 1, 0};
@@ -20,7 +21,7 @@ namespace xrzBot
         id = ind;
         turnCount[id]++;
         visitTime[id][player.x][player.y]++;
-        if (gameMap[player.x][player.y].army == 0 || gameMap[player.x][player.y].team != id)
+        if (gameMap[player.x][player.y].army == 0 || gameMap[player.x][player.y].player != id)
         {
             memset(visitTime[id], 0, sizeof(visitTime[id]));
             return 0;

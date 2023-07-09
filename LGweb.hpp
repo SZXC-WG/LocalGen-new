@@ -143,7 +143,7 @@ void LGserver::sockBroadcast() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++) if(sockCon[i])
-	send(serverSocket[i],sendBuf,sizeof(sendBuf),0);
+			send(serverSocket[i],sendBuf,sizeof(sendBuf),0);
 
 	memset(sendBuf,0,sizeof(sendBuf));
 }
@@ -152,10 +152,10 @@ void LGserver::sockCollect() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++) if(sockCon[i]) {
-		int res=recv(serverSocket[i],recvBuf,sizeof(recvBuf),0);
-		if(res>0) procMessage(i);
-		memset(recvBuf,0,sizeof(recvBuf));
-	}
+			int res=recv(serverSocket[i],recvBuf,sizeof(recvBuf),0);
+			if(res>0) procMessage(i);
+			memset(recvBuf,0,sizeof(recvBuf));
+		}
 }
 
 int LGserver::GAME() {
@@ -187,13 +187,13 @@ int LGserver::GAME() {
 	.addtext("Start game")
 	.status=0;
 	startBox.display();
-	
+
 	for(; is_run()&&lisCon; delay_fps(60)) {
 		{
 			std::lock_guard<std::mutex> mGuard(mLock);
 			plCnt=totSock-1;
 		}
-		
+
 		rbCnt=LGgame::playerCnt-plCnt;
 		cleardevice();
 		startBox.display();
@@ -356,7 +356,7 @@ int LGserver::GAME() {
 				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
 				turnlen = textwidth(("Turn " + to_string(LGgame::curTurn) + ".").c_str());
-				rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L))).c_str());setfillcolor(RED);
+				rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L))).c_str()); setfillcolor(RED);
 				setfillcolor(GREEN);
 				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
 				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
@@ -462,7 +462,7 @@ void LGclient::procMessage() {
 bool LGclient::sockCollect() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 	int res=recv(clientSocket,recvBuf,sizeof(recvBuf),0);
-	
+
 	if(res>0) {
 		procMessage();
 		return true;
@@ -618,6 +618,9 @@ int LGclient::GAME() {
 	flushmouse();
 	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
 
+	int midact = 0;
+	int smsx = 0, smsy = 0; bool moved = false;
+	std::chrono::steady_clock::duration prsttm;
 	for(; is_run(); delay_fps(std::min(LGgame::gameSpeed + 0.5, 120.5))) {
 		movLin=LGgame::playerCoo[playerNumber].x;
 		movCol=LGgame::playerCoo[playerNumber].y;
@@ -630,11 +633,34 @@ int LGclient::GAME() {
 				heightPerBlock += msg.wheel / 120;
 				widthPerBlock = max(widthPerBlock, 2);
 				heightPerBlock = max(heightPerBlock, 2);
-			} if(msg.is_down() && msg.is_left() && msg.x <= widthPerBlock * mapW && msg.y <= heightPerBlock * mapH) {
-				movLin = (msg.y + heightPerBlock - 1) / heightPerBlock;
-				movCol = (msg.x + widthPerBlock - 1) / widthPerBlock;
-				movement.clear();
-				movement.emplace_back(0);
+			}
+			if(msg.is_move()) {
+				if(midact == 1) {
+					LGGraphics::mapDataStore.maplocX += msg.x - smsx;
+					LGGraphics::mapDataStore.maplocY += msg.y - smsy;
+					smsx = msg.x, smsy = msg.y; moved = true;
+				}
+			} else if(msg.is_left()) {
+				if(msg.is_down()) {
+					prsttm = std::chrono::steady_clock::now().time_since_epoch();
+					midact = 1;
+					smsx = msg.x, smsy = msg.y;
+					moved = false;
+				} else {
+					midact = 0;
+					std::chrono::steady_clock::duration now = std::chrono::steady_clock::now().time_since_epoch();
+					if(!moved && now - prsttm < 300ms) {
+						if(msg.x >= LGGraphics::mapDataStore.maplocX &&
+						   msg.y >= LGGraphics::mapDataStore.maplocY &&
+						   msg.x <= LGGraphics::mapDataStore.maplocX + widthPerBlock * mapW &&
+						   msg.y <= LGGraphics::mapDataStore.maplocY + heightPerBlock * mapH) {
+							movLin = (msg.y - LGGraphics::mapDataStore.maplocY + heightPerBlock - 1) / heightPerBlock;
+							movCol = (msg.x - LGGraphics::mapDataStore.maplocX + widthPerBlock - 1) / widthPerBlock;
+							movement.clear();
+							movement.emplace_back(0);
+						}
+					}
+				}
 			}
 		}
 

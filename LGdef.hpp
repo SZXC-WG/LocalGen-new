@@ -293,7 +293,7 @@ namespace LGGraphics {
 	void webOptions();
 	void createMapPage();
 	void replayPage();
-	void [[deprecated]] doMapImport();
+	[[deprecated]] void doMapImport();
 	void doMapSelect();
 	// void doRepImport();
 	void importGameSettings();

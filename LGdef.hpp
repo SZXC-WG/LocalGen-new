@@ -312,6 +312,7 @@ inline int getWidthPerBlock(); // get LGGraphics::mapDataStore.widthPerBlock; de
 namespace LGgame {
 	bool inReplay;
 	bool inCreate;
+	bool inServer;
 	int curTurn;
 	int cheatCode;
 	int playerCnt;

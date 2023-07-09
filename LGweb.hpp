@@ -265,6 +265,7 @@ int LGserver::GAME() {
 	flushkey();
 	flushmouse();
 	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
+	LGgame::inServer=true;
 
 	for(; is_run(); delay_fps(LGgame::gameSpeed)) {
 		while(mousemsg()) {
@@ -359,7 +360,7 @@ int LGserver::GAME() {
 				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
 				turnlen = textwidth(("Turn " + to_string(LGgame::curTurn) + ".").c_str());
-				rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());				setfillcolor(RED);
+				rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L))).c_str());setfillcolor(RED);
 				setfillcolor(GREEN);
 				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
 				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
@@ -370,7 +371,7 @@ int LGserver::GAME() {
 				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
 				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
 				settextjustify(CENTER_TEXT, TOP_TEXT);
-				xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
+				xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L));
 				xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, "FPS: %f", getfps());
 				xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGgame::curTurn);
 			}
@@ -697,18 +698,7 @@ int LGclient::GAME() {
 
 		while(sockCollect());
 
-		if(LGgame::cheatCode != 1048575) {
-			int alldead = 0;
-			for(int i = 1; i <= LGgame::playerCnt && !alldead; ++i) {
-				if(LGgame::cheatCode & (1 << i))
-					if(LGgame::isAlive[i])
-						alldead = 1;
-			}
-			if(!alldead) {
-				LGgame::cheatCode = 1048575;
-				MessageBoxA(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
-			}
-		} if(!gameEnd) {
+		if(!gameEnd) {
 			int ed = 0;
 			for(int i = 1; i <= LGgame::playerCnt; ++i)
 				ed |= (LGgame::isAlive[i] << i);

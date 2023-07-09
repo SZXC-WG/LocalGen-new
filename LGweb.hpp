@@ -53,19 +53,19 @@ void LGserver::zipSendBuf() {
 	sendBuf[p++]=PMod(k2)+CHAR_AD;
 
 	for(i=1; i<=mapH; i++)
-	for(j=1; j<=mapW; j++) {
-		sendBuf[p++]=gameMap[i][j].player+CHAR_AD;
-		sendBuf[p]=(gameMap[i][j].type<<2)+(gameMap[i][j].lit<<1);
-		k1=gameMap[i][j].army;
+		for(j=1; j<=mapW; j++) {
+			sendBuf[p++]=gameMap[i][j].player+CHAR_AD;
+			sendBuf[p]=(gameMap[i][j].type<<2)+(gameMap[i][j].lit<<1);
+			k1=gameMap[i][j].army;
 
-		if(k1<0) {
-			k1=-k1;
-			sendBuf[p++]+=CHAR_AD+1;
-		} else sendBuf[p++]+=CHAR_AD;
-		
-		for(k2=1; k2<=8; k2++)
-		sendBuf[p++]=PMod(k1)+CHAR_AD;
-	} sendBuf[p]='\0';
+			if(k1<0) {
+				k1=-k1;
+				sendBuf[p++]+=CHAR_AD+1;
+			} else sendBuf[p++]+=CHAR_AD;
+
+			for(k2=1; k2<=8; k2++)
+				sendBuf[p++]=PMod(k1)+CHAR_AD;
+		} sendBuf[p]='\0';
 }
 
 void LGserver::sockListen() {
@@ -134,7 +134,7 @@ void LGserver::procMessage(int sockID) {
 		}
 	} else {
 		if(recvBuf[1]!=CHAR_AD)
-		LGgame::analyzeMove(sockID,recvBuf[1]-CHAR_AD,LGgame::playerCoo[sockID]);
+			LGgame::analyzeMove(sockID,recvBuf[1]-CHAR_AD,LGgame::playerCoo[sockID]);
 		else LGgame::playerCoo[sockID]= {recvBuf[2]-CHAR_AD,recvBuf[3]-CHAR_AD};
 	}
 }
@@ -143,8 +143,8 @@ void LGserver::sockBroadcast() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++)
-	if(sockCon[i]&&LGgame::isAlive[i])
-	send(serverSocket[i],sendBuf,sizeof(sendBuf),0);
+		if(sockCon[i]&&LGgame::isAlive[i])
+			send(serverSocket[i],sendBuf,sizeof(sendBuf),0);
 
 	memset(sendBuf,0,sizeof(sendBuf));
 }
@@ -153,10 +153,10 @@ void LGserver::sockCollect() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++) if(sockCon[i]) {
-		int res=recv(serverSocket[i],recvBuf,sizeof(recvBuf),0);
-		if(res>0) procMessage(i);
-		memset(recvBuf,0,sizeof(recvBuf));
-	}
+			int res=recv(serverSocket[i],recvBuf,sizeof(recvBuf),0);
+			if(res>0) procMessage(i);
+			memset(recvBuf,0,sizeof(recvBuf));
+		}
 }
 
 int LGserver::GAME() {
@@ -172,7 +172,7 @@ int LGserver::GAME() {
 	int plCnt=0,rbCnt=LGgame::playerCnt;
 	rectBUTTON startBox;
 	lisCon=true;
-	
+
 	LGgame::initGenerals(LGgame::playerCoo);
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
@@ -188,7 +188,7 @@ int LGserver::GAME() {
 	.addtext("Start game")
 	.status=0;
 	startBox.display();
-	
+
 	for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 0;
 	for(; is_run()&&lisCon; delay_fps(60)) {
 		{
@@ -224,17 +224,17 @@ int LGserver::GAME() {
 
 		lisEnd=true;
 	}
-	
+
 	LGgame::cheatCode=1048575;
 	LGgame::gameMesC = 0;
 
 	int robotId[64];
 	std::deque<int> movement;
-	
+
 	for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 1;
 	for(int i = plCnt+1; i <= plCnt+rbCnt; ++i)
-	robotId[i] = mtrd() % 300 + 1;
-	
+		robotId[i] = mtrd() % 300 + 1;
+
 	zipSendBuf();
 	sockBroadcast();
 	sendBuf[0]=42;
@@ -384,7 +384,7 @@ int LGserver::GAME() {
 	std::lock_guard<std::mutex> mGuard(mLock);
 
 	for(int i=1; i<totSock; i++)
-	closesocket(serverSocket[i]);
+		closesocket(serverSocket[i]);
 
 	return 0;
 }
@@ -410,20 +410,20 @@ void LGclient::dezipRecvBuf() {
 	mapW+=((recvBuf[p++]-CHAR_AD)<<6);
 
 	for(i=1; i<=mapH; i++)
-	for(j=1; j<=mapW; j++) {
-		gameMap[i][j].player=recvBuf[p++]-CHAR_AD;
-		recvBuf[p]-=CHAR_AD;
-		bool f=recvBuf[p]&1; recvBuf[p]>>=1;
-		gameMap[i][j].lit=recvBuf[p]&1; recvBuf[p]>>=1;
-		gameMap[i][j].type=recvBuf[p++];
-		gameMap[i][j].army=0;
-		
-		for(k=7; k>=0; k--)
-		gameMap[i][j].army=(gameMap[i][j].army<<6)+recvBuf[p+k]-CHAR_AD;
+		for(j=1; j<=mapW; j++) {
+			gameMap[i][j].player=recvBuf[p++]-CHAR_AD;
+			recvBuf[p]-=CHAR_AD;
+			bool f=recvBuf[p]&1; recvBuf[p]>>=1;
+			gameMap[i][j].lit=recvBuf[p]&1; recvBuf[p]>>=1;
+			gameMap[i][j].type=recvBuf[p++];
+			gameMap[i][j].army=0;
 
-		gameMap[i][j].army=f?(-gameMap[i][j].army):gameMap[i][j].army;
-		p+=8;
-	}
+			for(k=7; k>=0; k--)
+				gameMap[i][j].army=(gameMap[i][j].army<<6)+recvBuf[p+k]-CHAR_AD;
+
+			gameMap[i][j].army=f?(-gameMap[i][j].army):gameMap[i][j].army;
+			p+=8;
+		}
 }
 
 void LGclient::sockConnect() {
@@ -593,7 +593,7 @@ int LGclient::GAME() {
 			}
 		}
 	}
-	
+
 	LGgame::cheatCode=(1<<playerNumber);
 	std::deque<int> movement;
 	printMap(LGgame::cheatCode, LGgame::playerCoo[playerNumber]);
@@ -620,7 +620,7 @@ int LGclient::GAME() {
 	flushkey();
 	flushmouse();
 	LGgame::beginTime = std::chrono::steady_clock::now().time_since_epoch();
-	
+
 	for(; is_run(); delay_fps(std::min(LGgame::gameSpeed + 0.5, 120.5))) {
 		movLin=LGgame::playerCoo[playerNumber].x;
 		movCol=LGgame::playerCoo[playerNumber].y;

@@ -217,7 +217,7 @@ inline void exitExe() { WSACleanup(); exit(0); }
 bool isVisible(int x, int y, int printCode);
 /**
  * @brief Print a block's army number.
- * 
+ *
  * @param visible whether the block is visible
  * @param army army number
  * @param player player occupying the block
@@ -256,7 +256,7 @@ bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), 
 namespace imageOperation {
 	/**
 	 * @brief Copy one image to another.
-	 * 
+	 *
 	 * @param dstimg destination image
 	 * @param srcimg source image
 	 */

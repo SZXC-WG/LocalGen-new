@@ -120,8 +120,8 @@ void printMap(int printCode, playerCoord coo) {
 				case 1: {
 					/* swamp */
 					putimage_withalpha(NULL, npimg[4],
-	                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
-	                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+					                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+					                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
@@ -129,20 +129,20 @@ void printMap(int printCode, playerCoord coo) {
 					/* mountain */
 					if(isVisible(curx, cury, printCode))
 						putimage_withalpha(NULL, npimg[3],
-		                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
-		                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+						                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+						                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					else
 						putimage_withalpha(NULL, npimg[5],
-		                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
-		                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+						                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+						                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					break;
 				}
 				case 3: {
 					/* general */
 					if(isVisible(curx, cury, printCode))
 						putimage_withalpha(NULL, npimg[2],
-		                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
-		                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+						                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+						                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
@@ -150,12 +150,12 @@ void printMap(int printCode, playerCoord coo) {
 					/* city */
 					if(isVisible(curx, cury, printCode))
 						putimage_withalpha(NULL, npimg[1],
-		                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
-		                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+						                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+						                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					else
 						putimage_withalpha(NULL, npimg[5],
-		                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
-		                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+						                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+						                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 					printNum(isVisible(curx, cury, printCode), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
@@ -163,27 +163,27 @@ void printMap(int printCode, playerCoord coo) {
 			if(LGgame::inCreate&&gameMap[curx][cury].lit) {
 				if(gameMap[curx][cury].type==0&&gameMap[curx][cury].army==0) {
 					putimage_withalpha(NULL, npimg[8],
-	                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
-	                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+					                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+					                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 				} else {
 					putimage_withalpha(NULL, npimg[7],
-	                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
-	                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
+					                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (cury - 1),
+					                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (curx - 1));
 				}
 			}
 		}
 	}
 	if(~coo.x||~coo.y) putimage_withalpha(NULL, npimg[6],
-      LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
-      LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
+		                                      LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
+		                                      LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
 	for(int i=1; i<=8; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 
 void createOptions(int type,int h) {
 	static const color_t col=0xffdcdcdc,
-                 plcol=0xff3c3c3c,
-                 selcol=0xff008080;
+	                     plcol=0xff3c3c3c,
+	                     selcol=0xff008080;
 	PIMAGE npimg[9];
 	for(int i=1; i<=8; ++i) {
 		npimg[i] = newimage();
@@ -242,20 +242,20 @@ void createRandomMap(int crtH = -1, int crtW = -1) {
 					gameMap[i][j].army = mtrd() % 2;
 
 					if(gameMap[i][j].army)
-					gameMap[i][j].army = mtrd() % 100 + 1;
+						gameMap[i][j].army = mtrd() % 100 + 1;
 				} else {
 					gameMap[i][j].type = f + 1;
 					gameMap[i][j].army = mtrd() % 2;
 
 					if(gameMap[i][j].army)
-					gameMap[i][j].army = mtrd() % 100 + 1;
+						gameMap[i][j].army = mtrd() % 100 + 1;
 				}
 			} else {
 				gameMap[i][j].type = mtrd() % 5;
 				gameMap[i][j].army = mtrd() % 2;
 
 				if(gameMap[i][j].army)
-				gameMap[i][j].army = mtrd() % 100 + 1;
+					gameMap[i][j].army = mtrd() % 100 + 1;
 			}
 		}
 }

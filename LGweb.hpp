@@ -218,7 +218,6 @@ int LGserver::GAME() {
 
 	{
 		std::lock_guard<std::mutex> mGuard(mLock);
-
 		lisEnd=true;
 	}
 
@@ -273,6 +272,7 @@ int LGserver::GAME() {
 				widthPerBlock = max(widthPerBlock, 2);
 				heightPerBlock = max(heightPerBlock, 2);
 			}
+			/* Server map doesn't need dragging? */
 		}
 
 		while(kbmsg()) {
@@ -314,23 +314,24 @@ int LGserver::GAME() {
 		zipSendBuf();
 		sockBroadcast();
 
-		if(!gameEnd) {
-			int ed = 0;
-			for(int i = 1; i <= LGgame::playerCnt; ++i)
-				ed |= (LGgame::isAlive[i] << i);
-			if(__builtin_popcount(ed) == 1) {
-				MessageBoxA(nullptr,
-				            ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
-				             "THE game WILL CONTINUE." + "\n" +
-				             "YOU CAN PRESS [ESC] TO EXIT.")
-				            .c_str(),
-				            "game END", MB_OK | MB_SYSTEMMODAL);
-				gameEnd = 1;
-				LGgame::cheatCode = 1048575;
-				zipSendBuf();
-				sockBroadcast();
-			}
-		}
+		/* Server doesn't need a game end tip. */
+		// if(!gameEnd) {
+		// 	int ed = 0;
+		// 	for(int i = 1; i <= LGgame::playerCnt; ++i)
+		// 		ed |= (LGgame::isAlive[i] << i);
+		// 	if(__builtin_popcount(ed) == 1) {
+		// 		MessageBoxA(nullptr,
+		// 		            ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
+		// 		             "THE game WILL CONTINUE." + "\n" +
+		// 		             "YOU CAN PRESS [ESC] TO EXIT.")
+		// 		            .c_str(),
+		// 		            "game END", MB_OK | MB_SYSTEMMODAL);
+		// 		gameEnd = 1;
+		// 		LGgame::cheatCode = 1048575;
+		// 		zipSendBuf();
+		// 		sockBroadcast();
+		// 	}
+		// }
 
 		{
 			std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;

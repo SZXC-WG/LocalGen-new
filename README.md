@@ -47,15 +47,15 @@ Replays: `.lgr`
 
 ## Project Information
 
-## Recent activity [![Time period](https://images.repography.com/34099006/LocalGen-dev/LocalGen-new/recent-activity/_Oz79uR6v6lqrovPTtdqbA3PhmIoujyqAu3icIHymGI/bipMPxVZoAZcw5LYse-BNGymcq7pCzZSzroqWzpOPFk_badge.svg)](https://repography.com)
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/39584401/LocalGen-dev/LocalGen-new/recent-activity/3gjEtdpgx0E_lec-eyUw5_Cib-zwgYr7YmsAoe3QrQk/mHHxcguoyNmZDMSMlPte9ti9eo9YZMaKNI3LXAlFrb8_badge.svg)](https://repography.com)
 
-[![Timeline graph](https://images.repography.com/34099006/LocalGen-dev/LocalGen-new/recent-activity/_Oz79uR6v6lqrovPTtdqbA3PhmIoujyqAu3icIHymGI/bipMPxVZoAZcw5LYse-BNGymcq7pCzZSzroqWzpOPFk_timeline.svg)](https://github.com/LocalGen-dev/LocalGen-new/commits)
-[![Issue status graph](https://images.repography.com/34099006/LocalGen-dev/LocalGen-new/recent-activity/_Oz79uR6v6lqrovPTtdqbA3PhmIoujyqAu3icIHymGI/bipMPxVZoAZcw5LYse-BNGymcq7pCzZSzroqWzpOPFk_issues.svg)](https://github.com/LocalGen-dev/LocalGen-new/issues)
-[![Pull request status graph](https://images.repography.com/34099006/LocalGen-dev/LocalGen-new/recent-activity/_Oz79uR6v6lqrovPTtdqbA3PhmIoujyqAu3icIHymGI/bipMPxVZoAZcw5LYse-BNGymcq7pCzZSzroqWzpOPFk_prs.svg)](https://github.com/LocalGen-dev/LocalGen-new/pulls)
-[![Trending topics](https://images.repography.com/34099006/LocalGen-dev/LocalGen-new/recent-activity/_Oz79uR6v6lqrovPTtdqbA3PhmIoujyqAu3icIHymGI/bipMPxVZoAZcw5LYse-BNGymcq7pCzZSzroqWzpOPFk_words.svg)](https://github.com/LocalGen-dev/LocalGen-new/commits)
-[![Top contributors](https://images.repography.com/34099006/LocalGen-dev/LocalGen-new/recent-activity/_Oz79uR6v6lqrovPTtdqbA3PhmIoujyqAu3icIHymGI/bipMPxVZoAZcw5LYse-BNGymcq7pCzZSzroqWzpOPFk_users.svg)](https://github.com/LocalGen-dev/LocalGen-new/graphs/contributors)
-[![Activity map](https://images.repography.com/34099006/LocalGen-dev/LocalGen-new/recent-activity/_Oz79uR6v6lqrovPTtdqbA3PhmIoujyqAu3icIHymGI/bipMPxVZoAZcw5LYse-BNGymcq7pCzZSzroqWzpOPFk_map.svg)](https://github.com/LocalGen-dev/LocalGen-new/commits)
+[![Timeline graph](https://images.repography.com/39584401/LocalGen-dev/LocalGen-new/recent-activity/3gjEtdpgx0E_lec-eyUw5_Cib-zwgYr7YmsAoe3QrQk/mHHxcguoyNmZDMSMlPte9ti9eo9YZMaKNI3LXAlFrb8_timeline.svg)](https://github.com/LocalGen-dev/LocalGen-new/commits)
+[![Issue status graph](https://images.repography.com/39584401/LocalGen-dev/LocalGen-new/recent-activity/3gjEtdpgx0E_lec-eyUw5_Cib-zwgYr7YmsAoe3QrQk/mHHxcguoyNmZDMSMlPte9ti9eo9YZMaKNI3LXAlFrb8_issues.svg)](https://github.com/LocalGen-dev/LocalGen-new/issues)
+[![Pull request status graph](https://images.repography.com/39584401/LocalGen-dev/LocalGen-new/recent-activity/3gjEtdpgx0E_lec-eyUw5_Cib-zwgYr7YmsAoe3QrQk/mHHxcguoyNmZDMSMlPte9ti9eo9YZMaKNI3LXAlFrb8_prs.svg)](https://github.com/LocalGen-dev/LocalGen-new/pulls)
+[![Trending topics](https://images.repography.com/39584401/LocalGen-dev/LocalGen-new/recent-activity/3gjEtdpgx0E_lec-eyUw5_Cib-zwgYr7YmsAoe3QrQk/mHHxcguoyNmZDMSMlPte9ti9eo9YZMaKNI3LXAlFrb8_words.svg)](https://github.com/LocalGen-dev/LocalGen-new/commits)
+[![Top contributors](https://images.repography.com/39584401/LocalGen-dev/LocalGen-new/recent-activity/3gjEtdpgx0E_lec-eyUw5_Cib-zwgYr7YmsAoe3QrQk/mHHxcguoyNmZDMSMlPte9ti9eo9YZMaKNI3LXAlFrb8_users.svg)](https://github.com/LocalGen-dev/LocalGen-new/graphs/contributors)
+[![Activity map](https://images.repography.com/39584401/LocalGen-dev/LocalGen-new/recent-activity/3gjEtdpgx0E_lec-eyUw5_Cib-zwgYr7YmsAoe3QrQk/mHHxcguoyNmZDMSMlPte9ti9eo9YZMaKNI3LXAlFrb8_map.svg)](https://github.com/LocalGen-dev/LocalGen-new/commits)
 
-## Top contributors
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contributors
 
-[![Top contributors](https://images.repography.com/34099006/LocalGen-dev/LocalGen-new/top-contributors/_Oz79uR6v6lqrovPTtdqbA3PhmIoujyqAu3icIHymGI/bipMPxVZoAZcw5LYse-BNGymcq7pCzZSzroqWzpOPFk_table.svg)](https://github.com/LocalGen-dev/LocalGen-new/graphs/contributors)
+[![Top contributors](https://images.repography.com/39584401/LocalGen-dev/LocalGen-new/top-contributors/3gjEtdpgx0E_lec-eyUw5_Cib-zwgYr7YmsAoe3QrQk/mHHxcguoyNmZDMSMlPte9ti9eo9YZMaKNI3LXAlFrb8_table.svg)](https://github.com/LocalGen-dev/LocalGen-new/graphs/contributors)

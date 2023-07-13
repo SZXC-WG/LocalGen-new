@@ -477,7 +477,7 @@ namespace LGGraphics {
 			// .addtext("City Count: " + to_string(maps[i].citycnt))
 			// .addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
 			// .addtext("Swamp Count: " + to_string(maps[i].swampcnt))
-			// .addtext("Size: " + to_string(maps[i].hei) + " ¬°√Å " + to_string(maps[i].wid))
+			// .addtext("Size: " + to_string(maps[i].hei) + " °¡ " + to_string(maps[i].wid))
 			.display();
 		}
 		sys_edit impbox;
@@ -544,7 +544,7 @@ namespace LGGraphics {
 				.addtext("City Count: " + (~maps[i].citycnt?to_string(maps[i].citycnt):"undetermined"))
 				.addtext("Mountain Count: " + (~maps[i].mountaincnt?to_string(maps[i].mountaincnt):"undetermined"))
 				.addtext("Swamp Count: " + (~maps[i].swampcnt?to_string(maps[i].swampcnt):"undetermined"))
-				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " ¬°√Å " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
+				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " °¡ " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
 				.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
@@ -677,7 +677,7 @@ namespace LGGraphics {
 			// .addtext("City Count: " + to_string(maps[i].citycnt))
 			// .addtext("Mountain Count: " + to_string(maps[i].mountaincnt))
 			// .addtext("Swamp Count: " + to_string(maps[i].swampcnt))
-			// .addtext("Size: " + to_string(maps[i].hei) + " ¬°√Å " + to_string(maps[i].wid))
+			// .addtext("Size: " + to_string(maps[i].hei) + " °¡ " + to_string(maps[i].wid))
 			.display();
 		}
 
@@ -744,7 +744,7 @@ namespace LGGraphics {
 				.addtext("City Count: " + (~maps[i].citycnt?to_string(maps[i].citycnt):"undetermined"))
 				.addtext("Mountain Count: " + (~maps[i].mountaincnt?to_string(maps[i].mountaincnt):"undetermined"))
 				.addtext("Swamp Count: " + (~maps[i].swampcnt?to_string(maps[i].swampcnt):"undetermined"))
-				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " ¬°√Å " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
+				.addtext("Size: " + (~maps[i].hei?to_string(maps[i].hei):"undetermined") + " °¡ " + (~maps[i].wid?to_string(maps[i].wid):"undetermined"))
 				.setlocation(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
@@ -794,8 +794,46 @@ namespace LGGraphics {
 		LGGraphics::init();
 		for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 1;
 		printMap(1048575, {-1,-1});
+
+		rectBUTTON turnbut;
+		rectBUTTON jumpbut;
+		sys_edit jumpbox;
+		rectBUTTON jumpsmbut;
+		rectBUTTON stepbybut;
+		rectBUTTON exitbut;
+		rectBUTTON backbut;
+		rectBUTTON nextbut;
+		rectBUTTON autobut;
+
+		turnbut.setalign(CENTER_TEXT,CENTER_TEXT)
+		.setbgcol(WHITE).settxtcol(BLACK)
+		.setlocation(0 * mapDataStore.mapSizeX, 0 * mapDataStore.mapSizeY)
+		.setfontname("Quicksand")
+		.setfontsz(30 * mapDataStore.mapSizeY, 0)
+		.setsize(120 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY)
+		.txtshadow = false;
+		jumpbut.setalign(CENTER_TEXT,CENTER_TEXT)
+		.setbgcol(WHITE).settxtcol(BLACK)
+		.setlocation(0 * mapDataStore.mapSizeX, 35 * mapDataStore.mapSizeY)
+		.setfontname("Quicksand")
+		.setfontsz(30 * mapDataStore.mapSizeY, 0)
+		.setsize(150 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY)
+		.addtext("Jump to turn: ").txtshadow = false;
+		jumpbox.create(false);
+		jumpbox.size(50 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY);
+		jumpbox.move(150 * mapDataStore.mapSizeX, 35 * mapDataStore.mapSizeY);
+		jumpbox.setfont(25 * mapDataStore.mapSizeY, 0, "Quicksand");
+		jumpbox.visible(true);
+		jumpsmbut.setalign(CENTER_TEXT,CENTER_TEXT)
+		.setbgcol(WHITE).settxtcol(BLACK)
+		.setlocation(200 * mapDataStore.mapSizeX, 35 * mapDataStore.mapSizeY)
+		.setfontname("Quicksand")
+		.setfontsz(30 * mapDataStore.mapSizeY, 0)
+		.setsize(50 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY)
+		.addtext("°˙").txtshadow = false;
+
 		int smsx=0,smsy=0,midact=0;
-		for(; is_run(); delay_fps(120)) {
+		for(; is_run(); ) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
 				if(msg.is_wheel()) {
@@ -821,7 +859,7 @@ namespace LGGraphics {
 				key_msg ch = getkey();
 				if(ch.msg == key_msg_up) continue;
 				switch(ch.key) {
-					case 27: { /*[ESC]*/
+					case key_esc: { /*[ESC]*/
 						closegraph();
 						return;
 					}
@@ -832,6 +870,16 @@ namespace LGGraphics {
 			cleardevice();
 			printMap(1048575, {-1,-1});
 			LGgame::ranklist();
+			turnbut.cleartext().addtext("Turn "+to_string(LGreplay::rreplay.curTurn)+".").display();
+			jumpbut.display();
+			jumpsmbut.detect().display();
+			if(jumpsmbut.status==2) {
+				char s[101];
+				jumpbox.gettext(sizeof(s)-1,s);
+				int toTurn = atoi(s);
+				if(toTurn!=0) LGreplay::rreplay.gotoTurn(toTurn);
+			}
+			delay(0);
 		}
 	}
 
@@ -1135,7 +1183,7 @@ namespace LGGraphics {
 		xyprintf(255 * mapDataStore.mapSizeX, 85 * mapDataStore.mapSizeY,
 		         "Author: %s", maps[mapSelected].auth.c_str());
 		xyprintf(255 * mapDataStore.mapSizeX, 115 * mapDataStore.mapSizeY,
-		         "Size: %d ¬°√Å %d", maps[mapSelected].hei, maps[mapSelected].wid);
+		         "Size: %d °¡ %d", maps[mapSelected].hei, maps[mapSelected].wid);
 		xyprintf(255 * mapDataStore.mapSizeX, 145 * mapDataStore.mapSizeY,
 		         "General Count: %d", maps[mapSelected].generalcnt);
 		xyprintf(255 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY,

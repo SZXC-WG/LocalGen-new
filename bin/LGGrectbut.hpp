@@ -30,6 +30,7 @@ class rectBUTTON {
   private:
 	PIMAGE button; // image info
 	PIMAGE bgImage; // background image
+	int bgimgwid, bgimghei;
 	int wid, hei; // width & height
 	color_t bgcol; // background color
 	color_t txtcol; // text color
@@ -84,6 +85,7 @@ class rectBUTTON {
 		delimage(button);
 		if(floating && floatshadow) button = newimage(wid+3, hei+3);
 		else button = newimage(wid, hei);
+		ege_enable_aa(button);
 		setbkcolor(0xff222222, button);
 		setbkcolor_f(0xff222222, button);
 		setbkmode(TRANSPARENT, button);
@@ -94,8 +96,8 @@ class rectBUTTON {
 		setfillcolor(bgcol, button);
 		bar(0, 0, wid, hei, button);
 		if(bgImage != nullptr) {
-			if(getwidth(bgImage)!=wid||getheight(bgImage)!=hei) imageOperation::zoomImage(bgImage,wid,hei);
-			putimage(button,0,0,bgImage);
+			if(getwidth(bgImage)!=bgimgwid||getheight(bgImage)!=bgimghei) imageOperation::zoomImage(bgImage,bgimgwid,bgimghei);
+			putimage_withalpha(button,bgImage,0,0);
 		}
 		setfont(fonthei, fontwid, font.c_str(), button);
 		settextjustify(walign, halign, button);
@@ -153,7 +155,10 @@ class rectBUTTON {
 	inline rectBUTTON& setrtcol(bool automated = 1, color_t col = 0xffffffff) { autortcol = automated, rtcol = col; return *this; }
 	inline rectBUTTON& setbgimg(PIMAGE img) {
 		if(bgImage == nullptr) bgImage = newimage();
-		imageOperation::copyImage(bgImage,img); return *this;
+		imageOperation::copyImage(bgImage,img);
+		bgimgwid = getwidth(bgImage);
+		bgimghei = getheight(bgImage);
+		return *this;
 	}
 	inline rectBUTTON& delbgimg() { bgImage = nullptr; return *this; }
 	inline rectBUTTON& detect() {
@@ -161,13 +166,13 @@ class rectBUTTON {
 		GetCursorPos(&mousePos);
 		ScreenToClient(getHWnd(), &mousePos);
 		if(mousePos.x < wloc || mousePos.x > min(wloc + wid - 1, getwidth()) || mousePos.y < hloc || mousePos.y > min(hloc + hei - 1, getheight()))
-			return status = 0, *this;
+			return status = 0, * this;
 		while(mousemsg()) {
 			mouse_msg msg = getmouse();
 			if(!(msg.x < wloc || msg.x > min(wloc + wid - 1, getwidth()) || msg.y < hloc || msg.y > min(hloc + hei - 1, getheight()))
-			   && msg.is_left() && msg.is_down()) return status = 2, *this;
+			   && msg.is_left() && msg.is_down()) return status = 2, * this;
 		}
-		return status = 1, *this;
+		return status = 1, * this;
 	}
 };
 

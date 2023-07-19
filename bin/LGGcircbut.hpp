@@ -32,7 +32,7 @@ class circBUTTON {
   private:
 	PIMAGE button; // image info
 	PIMAGE bgImage;
-	int bgimgwid,bgimghei;
+	int bgimgwid, bgimghei;
 	int radius; // radius
 	color_t bgcol; // background color
 	color_t txtcol; // text color
@@ -158,8 +158,8 @@ class circBUTTON {
 	inline circBUTTON& setbgimg(PIMAGE img) {
 		if(bgImage == nullptr) bgImage = newimage();
 		imageOperation::copyImage(bgImage,img);
-		bgimgwid=getwidth(bgImage);
-		bgimghei=getheight(bgImage);
+		bgimgwid = getwidth(bgImage);
+		bgimghei = getheight(bgImage);
 		return *this;
 	}
 	inline circBUTTON& setbgsize(int w,int h) { bgimgwid = w,bgimghei = h; return *this; }

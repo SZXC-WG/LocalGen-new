@@ -15,7 +15,6 @@
 #define __LGGRAPHICS_HPP__
 
 #include "LGdef.hpp"
-#include "LGreplay.hpp"
 
 namespace imageOperation {
 	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
@@ -137,7 +136,6 @@ namespace LGGraphics {
 		for(; is_run(); delay_fps(60)) {
 			for(int i = 200; i <= 600; i += 100) {
 				register int p = i / 100 - 2;
-				register int k = scrsz[p].status;
 				scrsz[p].detect();
 				scrsz[p].display();
 				if(scrsz[p].status == 2) scrsz[p].clickEvent(), changeMade = false;
@@ -209,6 +207,7 @@ namespace LGGraphics {
 
 	void WelcomePage() {
 		initWindowSize();
+		init();
 	WelcomePageStartLabel:;
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);
@@ -229,8 +228,9 @@ namespace LGGraphics {
 		xyprintf(330 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY, "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
 		rectBUTTON local, web, replay, createmap;
 		rectBUTTON donate;
+		circBUTTON settings,repo;
 		local
-		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
+		.setsize(600 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
 		.setlocation(700 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
 		.addtext("local game")
 		.setalign(CENTER_TEXT, CENTER_TEXT)
@@ -242,10 +242,9 @@ namespace LGGraphics {
 		.setlnwid(10 * mapDataStore.mapSizeY)
 		.display();
 		web
-		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
-		.setlocation(1125 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
-		.addtext("web game")
-		.addtext("(not available)")
+		.setsize(600 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.setlocation(700 * mapDataStore.mapSizeX, 225 * mapDataStore.mapSizeY)
+		.addtext("web game (beta)")
 		.setalign(CENTER_TEXT, CENTER_TEXT)
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
@@ -255,10 +254,9 @@ namespace LGGraphics {
 		.setlnwid(10 * mapDataStore.mapSizeY)
 		.display();
 		replay
-		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
-		.setlocation(700 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY)
-		.addtext("load replay")
-		.addtext("(beta, preview)")
+		.setsize(600 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.setlocation(700 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY)
+		.addtext("load replay (beta)")
 		.setalign(CENTER_TEXT, CENTER_TEXT)
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
@@ -268,10 +266,9 @@ namespace LGGraphics {
 		.setlnwid(10 * mapDataStore.mapSizeY)
 		.display();
 		createmap
-		.setsize(375 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY)
-		.setlocation(1125 * mapDataStore.mapSizeX, 300 * mapDataStore.mapSizeY)
-		.addtext("create map")
-		.addtext("(beta, preview)")
+		.setsize(600 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.setlocation(700 * mapDataStore.mapSizeX, 475 * mapDataStore.mapSizeY)
+		.addtext("create map (beta)")
 		.setalign(CENTER_TEXT, CENTER_TEXT)
 		.setbgcol(WHITE)
 		.settxtcol(mainColor)
@@ -282,7 +279,7 @@ namespace LGGraphics {
 		.display();
 		donate
 		.setsize(400 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY)
-		.setlocation(1150 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY)
+		.setlocation(1150 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY)
 		.addtext("Please donate to support us!")
 		.setalign(CENTER_TEXT, CENTER_TEXT)
 		.setbgcol(WHITE)
@@ -305,6 +302,27 @@ namespace LGGraphics {
 			flushkey();
 			getkey();
 		}).display();
+		settings
+		.setrad(50 * min(mapDataStore.mapSizeX,mapDataStore.mapSizeY))
+		.setlocation(1450 * mapDataStore.mapSizeX, 150 * mapDataStore.mapSizeY)
+		.setbgimg(pimg[9]) // settings (options.png)
+		.setbgsize(75 * mapDataStore.mapSizeX, 75 * mapDataStore.mapSizeY)
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setbgcol(WHITE)
+		.setrtcol(false, mainColor)
+		.setlnwid(10 * mapDataStore.mapSizeY)
+		.display();
+		repo
+		.setrad(50 * min(mapDataStore.mapSizeX,mapDataStore.mapSizeY))
+		.setlocation(1450 * mapDataStore.mapSizeX, 525 * mapDataStore.mapSizeY)
+		.setbgimg(pimg[10]) // github repo (github.png)
+		.setbgsize(75 * mapDataStore.mapSizeX, 75 * mapDataStore.mapSizeY)
+		.setalign(CENTER_TEXT, CENTER_TEXT)
+		.setbgcol(WHITE)
+		.setrtcol(false, mainColor)
+		.setlnwid(10 * mapDataStore.mapSizeY)
+		.setevent([]()->void{system("start http://github.com/LocalGen-dev/LocalGen-new");})
+		.display();
 		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {
 			local.detect().display();
@@ -312,6 +330,8 @@ namespace LGGraphics {
 			replay.detect().display();
 			createmap.detect().display();
 			donate.detect().display();
+			settings.detect().display();
+			repo.detect().display();
 			if(local.status == 2) {
 				localOptions(); break;
 			}
@@ -326,6 +346,9 @@ namespace LGGraphics {
 			}
 			if(donate.status == 2) {
 				donate.clickEvent(); goto WelcomePageStartLabel;
+			}
+			if(repo.status == 2) {
+				repo.clickEvent();
 			}
 		}
 		settextjustify(LEFT_TEXT, TOP_TEXT);
@@ -791,7 +814,6 @@ namespace LGGraphics {
 		cleardevice();
 		setrendermode(RENDER_MANUAL);
 		LGreplay::rreplay.initReplay();
-		LGGraphics::init();
 		for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 1;
 		printMap(1048575, {-1,-1});
 
@@ -830,10 +852,10 @@ namespace LGGraphics {
 		.setfontname("Quicksand")
 		.setfontsz(30 * mapDataStore.mapSizeY, 0)
 		.setsize(50 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY)
-		.addtext("¡ú").txtshadow = false;
+		.addtext("¡Á").txtshadow = false;
 
 		int smsx=0,smsy=0,midact=0;
-		for(; is_run(); ) {
+		for(; is_run();) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
 				if(msg.is_wheel()) {
@@ -936,7 +958,6 @@ namespace LGGraphics {
 		.settxtcol(WHITE)
 		.setalign(CENTER_TEXT,CENTER_TEXT)
 		.addtext("Load");
-		LGGraphics::init();
 		mapW=mapH=10;
 		for(int i=1; i<=mapH; ++i)
 			for(int j=1; j<=mapW; ++j) gameMap[i][j] = {0,0,0,0};
@@ -1572,7 +1593,11 @@ namespace LGGraphics {
 		getimage(pimg[7], "img/erase.png");
 		pimg[8] = newimage();
 		getimage(pimg[8], "img/light.png");
-		for(int i = 1; i <= 8; i++) ege_enable_aa(true, pimg[i]);
+		pimg[9] = newimage();
+		getimage(pimg[9], "img/options.png");
+		pimg[10] = newimage();
+		getimage(pimg[10], "img/github.png");
+		for(int i = 1; i <= 10; i++) ege_enable_aa(true, pimg[i]);
 		ege_enable_aa(true);
 		setbkcolor(0xff222222);
 		setbkcolor_f(0xff222222);

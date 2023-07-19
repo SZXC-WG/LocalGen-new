@@ -16,7 +16,7 @@ namespace xiaruizeBot
     int backCountCnt[20];
     playerCoord previousPos[20];
 
-    int changeDirection(int x, int &res)
+    void changeDirection(int x, int &res)
     {
         switch (x)
         {

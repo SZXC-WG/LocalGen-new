@@ -31,6 +31,8 @@ using std::min; using std::max;
 class circBUTTON {
   private:
 	PIMAGE button; // image info
+	PIMAGE bgImage;
+	int bgimgwid,bgimghei;
 	int radius; // radius
 	color_t bgcol; // background color
 	color_t txtcol; // text color
@@ -50,6 +52,7 @@ class circBUTTON {
 	std::function<void()> clickEvent; // event when clicked
 	explicit circBUTTON() {
 		button = newimage();
+		bgImage = nullptr;
 		radius = 1;
 		walign = LEFT_TEXT, halign = TOP_TEXT;
 		lnwid = 1;
@@ -60,6 +63,7 @@ class circBUTTON {
 	}
 	~circBUTTON() {
 		delimage(button);
+		delimage(bgImage);
 	}
 	circBUTTON(int rad) {
 		circBUTTON();
@@ -83,15 +87,20 @@ class circBUTTON {
 		delimage(button);
 		if(floating && floatshadow) button = newimage(radius * 2 + 3, radius * 2 + 3);
 		else button = newimage(radius * 2, radius * 2);
-		setbkcolor(0xff222222, button);
-		setbkcolor_f(0xff222222, button);
+		ege_enable_aa(button);
+		setbkcolor(LGGraphics::bgColor, button);
+		setbkcolor_f(LGGraphics::bgColor, button);
 		setbkmode(TRANSPARENT, button);
 		if((status == 1 || status == 2) && floating && floatshadow) {
-			setfillcolor(0xff008080, button);
+			setfillcolor(LGGraphics::mainColor, button);
 			fillellipse(radius + 3, radius + 3, radius, radius, button);
 		}
 		setfillcolor(bgcol, button);
 		fillellipse(radius, radius, radius, radius, button);
+		if(bgImage != nullptr) {
+			if(getwidth(bgImage)!=bgimgwid||getheight(bgImage)!=bgimghei) imageOperation::zoomImage(bgImage,bgimgwid,bgimghei);
+			putimage_withalpha(button,bgImage,radius-bgimgwid/2,radius-bgimghei/2);
+		}
 		setfont(fonthei, fontwid, font.c_str(), button);
 		settextjustify(walign, halign, button);
 		register int ox, oy;
@@ -139,20 +148,28 @@ class circBUTTON {
 	inline circBUTTON& setfontsz(int fh, int fw) { fonthei = fh; fontwid = fw; return *this; }
 	inline circBUTTON& setlocation(int w, int h) { hloc = h, wloc = w; return *this; }
 	inline circBUTTON& setalign(int wa = -1, int ha = -1) {
-		if(~ha) halign = ha;
 		if(~wa) walign = wa;
+		if(~ha) halign = ha;
 		return *this;
 	}
 	inline circBUTTON& setevent(std::function<void()> event) { clickEvent = event; return *this; }
 	inline circBUTTON& setlnwid(int w) { lnwid = w; return *this; }
 	inline circBUTTON& setrtcol(bool automated = 1, color_t col = 0xffffffff) { autortcol = automated, rtcol = col; return *this; }
+	inline circBUTTON& setbgimg(PIMAGE img) {
+		if(bgImage == nullptr) bgImage = newimage();
+		imageOperation::copyImage(bgImage,img);
+		bgimgwid=getwidth(bgImage);
+		bgimghei=getheight(bgImage);
+		return *this;
+	}
+	inline circBUTTON& setbgsize(int w,int h) { bgimgwid = w,bgimghei = h; return *this; }
+	inline circBUTTON& delbgimg() { bgImage = nullptr; return *this; }
 	inline circBUTTON& detect() {
-		/* todo */
 		POINT mousePos;
 		GetCursorPos(&mousePos);
 		ScreenToClient(getHWnd(), &mousePos);
 		double dist = hypot(mousePos.x - wloc, mousePos.y - hloc);
-		if(dist > radius) return status = 0, *this;
+		if(dist > radius) return status = 0, * this;
 		while(mousemsg()) {
 			mouse_msg msg = getmouse();
 			if(hypot(msg.x - wloc, msg.y - hloc) <= radius

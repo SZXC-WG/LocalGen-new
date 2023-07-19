@@ -29,6 +29,7 @@ using std::min; using std::max;
 class rectBUTTON {
   private:
 	PIMAGE button; // image info
+	PIMAGE bgImage; // background image
 	int wid, hei; // width & height
 	color_t bgcol; // background color
 	color_t txtcol; // text color
@@ -48,6 +49,7 @@ class rectBUTTON {
 	std::function<void()> clickEvent; // event when clicked
 	explicit rectBUTTON() {
 		button = newimage();
+		bgImage = nullptr;
 		wid = hei = 1;
 		walign = LEFT_TEXT, halign = TOP_TEXT;
 		lnwid = 1;
@@ -58,6 +60,7 @@ class rectBUTTON {
 	}
 	~rectBUTTON() {
 		delimage(button);
+		delimage(bgImage);
 	}
 	rectBUTTON(int w, int h) {
 		rectBUTTON();
@@ -90,6 +93,10 @@ class rectBUTTON {
 		}
 		setfillcolor(bgcol, button);
 		bar(0, 0, wid, hei, button);
+		if(bgImage != nullptr) {
+			if(getwidth(bgImage)!=wid||getheight(bgImage)!=hei) imageOperation::zoomImage(bgImage,wid,hei);
+			putimage(button,0,0,bgImage);
+		}
 		setfont(fonthei, fontwid, font.c_str(), button);
 		settextjustify(walign, halign, button);
 		register int ox, oy;
@@ -137,15 +144,19 @@ class rectBUTTON {
 	inline rectBUTTON& setfontsz(int fh, int fw) { fonthei = fh; fontwid = fw; return *this; }
 	inline rectBUTTON& setlocation(int w, int h) { hloc = h, wloc = w; return *this; }
 	inline rectBUTTON& setalign(int wa = -1, int ha = -1) {
-		if(~ha) halign = ha;
 		if(~wa) walign = wa;
+		if(~ha) halign = ha;
 		return *this;
 	}
 	inline rectBUTTON& setevent(std::function<void()> event) { clickEvent = event; return *this; }
 	inline rectBUTTON& setlnwid(int w) { lnwid = w; return *this; }
 	inline rectBUTTON& setrtcol(bool automated = 1, color_t col = 0xffffffff) { autortcol = automated, rtcol = col; return *this; }
+	inline rectBUTTON& setbgimg(PIMAGE img) {
+		if(bgImage == nullptr) bgImage = newimage();
+		imageOperation::copyImage(bgImage,img); return *this;
+	}
+	inline rectBUTTON& delbgimg() { bgImage = nullptr; return *this; }
 	inline rectBUTTON& detect() {
-		/* todo */
 		POINT mousePos;
 		GetCursorPos(&mousePos);
 		ScreenToClient(getHWnd(), &mousePos);

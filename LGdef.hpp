@@ -35,9 +35,8 @@
 #include <graphics.h>
 #include <ege/sys_edit.h>
 #include "LocalGen_private.h"
-#include "bin/LGGrectbut.hpp"
-#include "bin/LGGcircbut.hpp"
 
+using std::vector;
 using std::deque;
 using std::string;
 using std::to_string;
@@ -137,7 +136,7 @@ struct moveS {
 //====value====//
 
 string username; // game user's name
-PIMAGE pimg[9]; // software used images
+PIMAGE pimg[55]; // software used images
 MapInfoS maps[5005]; // storing all imported maps
 Block gameMap[505][505]; /* current game map; maximum 500*500 */
 playerS playerInfo[64] = { // player information (default written)
@@ -433,5 +432,8 @@ void MainPage() {
 //	LGGraphics::localOptions();
 	return;
 }
+
+#include "bin/LGGrectbut.hpp"
+#include "bin/LGGcircbut.hpp"
 
 #endif // __LGDEF_HPP__

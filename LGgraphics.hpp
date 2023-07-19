@@ -311,6 +311,7 @@ namespace LGGraphics {
 		.setbgcol(WHITE)
 		.setrtcol(false, mainColor)
 		.setlnwid(10 * mapDataStore.mapSizeY)
+		.floatshadow = false; settings
 		.display();
 		repo
 		.setrad(50 * min(mapDataStore.mapSizeX,mapDataStore.mapSizeY))
@@ -322,6 +323,7 @@ namespace LGGraphics {
 		.setrtcol(false, mainColor)
 		.setlnwid(10 * mapDataStore.mapSizeY)
 		.setevent([]()->void{system("start http://github.com/LocalGen-dev/LocalGen-new");})
+		.floatshadow = false; settings
 		.display();
 		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {

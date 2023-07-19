@@ -334,6 +334,7 @@ namespace LGlocal {
 		LGGraphics::mapDataStore.maplocY = - (LGgame::genCoo[1].x) * heightPerBlock + 450 * LGGraphics::mapDataStore.mapSizeY;
 		int smsx = 0, smsy = 0; bool moved = false;
 		std::chrono::steady_clock::duration prsttm;
+		bool toNextTurn = true;
 		for(; is_run();) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
@@ -429,52 +430,54 @@ namespace LGlocal {
 					}
 				}
 			}
-			LGgame::updateMap();
-			LGreplay::wreplay.newTurn();
-			playerCoord tmpcoo=LGgame::playerCoo[1];
-			while(!movement.empty() && LGgame::analyzeMove(1, movement.front(), LGgame::playerCoo[1]))
-				movement.pop_front(),tmpcoo=LGgame::playerCoo[1];
-			int mv;
-			if(!movement.empty()) {
-				mv=movement.front();
-				if(mv>=1&&mv<=4) {
-					LGreplay::Movement mov(1,mv,tmpcoo);
-					LGreplay::wreplay.newMove(mov);
+			if(toNextTurn) {
+				LGgame::updateMap();
+				LGreplay::wreplay.newTurn();
+				playerCoord tmpcoo=LGgame::playerCoo[1];
+				while(!movement.empty() && LGgame::analyzeMove(1, movement.front(), LGgame::playerCoo[1]))
+					movement.pop_front(),tmpcoo=LGgame::playerCoo[1];
+				int mv;
+				if(!movement.empty()) {
+					mv=movement.front();
+					if(mv>=1&&mv<=4) {
+						LGreplay::Movement mov(1,mv,tmpcoo);
+						LGreplay::wreplay.newMove(mov);
+					}
+					movement.pop_front();
 				}
-				movement.pop_front();
-			}
-			// MessageBoxA(getHWnd(), string("TESTING").c_str(), "TEST MESSAGE", MB_OK);
-			for(int i = 2; i <= LGgame::playerCnt; ++i) {
-				if(!LGgame::isAlive[i])
-					continue;
-				tmpcoo=LGgame::playerCoo[i];
-				switch(LGgame::robotId[i]) {
-					case 0 ... 99:
-						mv=smartRandomBot::smartRandomBot(i, LGgame::playerCoo[i]);
-						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
-							LGreplay::Movement mov(i,mv,tmpcoo);
-							LGreplay::wreplay.newMove(mov);
-						}
-						break;
-					case 100 ... 199:
-						mv=xrzBot::xrzBot(i, LGgame::playerCoo[i]);
-						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
-							LGreplay::Movement mov(i,mv,tmpcoo);
-							LGreplay::wreplay.newMove(mov);
-						}
-						break;
-					case 200 ... 299:
-						mv=xiaruizeBot::xiaruizeBot(i, LGgame::playerCoo[i]);
-						if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
-							LGreplay::Movement mov(i,mv,tmpcoo);
-							LGreplay::wreplay.newMove(mov);
-						}
-						break;
-					default:
-						LGgame::analyzeMove(i, 0, LGgame::playerCoo[i]);
+				// MessageBoxA(getHWnd(), string("TESTING").c_str(), "TEST MESSAGE", MB_OK);
+				for(int i = 2; i <= LGgame::playerCnt; ++i) {
+					if(!LGgame::isAlive[i])
+						continue;
+					tmpcoo=LGgame::playerCoo[i];
+					switch(LGgame::robotId[i]) {
+						case 0 ... 99:
+							mv=smartRandomBot::smartRandomBot(i, LGgame::playerCoo[i]);
+							if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
+								LGreplay::Movement mov(i,mv,tmpcoo);
+								LGreplay::wreplay.newMove(mov);
+							}
+							break;
+						case 100 ... 199:
+							mv=xrzBot::xrzBot(i, LGgame::playerCoo[i]);
+							if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
+								LGreplay::Movement mov(i,mv,tmpcoo);
+								LGreplay::wreplay.newMove(mov);
+							}
+							break;
+						case 200 ... 299:
+							mv=xiaruizeBot::xiaruizeBot(i, LGgame::playerCoo[i]);
+							if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
+								LGreplay::Movement mov(i,mv,tmpcoo);
+								LGreplay::wreplay.newMove(mov);
+							}
+							break;
+						default:
+							LGgame::analyzeMove(i, 0, LGgame::playerCoo[i]);
+					}
 				}
+				LGgame::flushMove();
 			}
-			LGgame::flushMove();
 			if(LGgame::cheatCode != 1048575) {
 				int alldead = 0;
 				for(int i = 1; i <= LGgame::playerCnt && !alldead; ++i) {
@@ -511,16 +514,12 @@ namespace LGlocal {
 				}
 			}
 			if(1) {
+				toNextTurn = true;
 				std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				int needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
 				int lackTurn = LGgame::curTurn - needFlushToTurn;
-				if(lackTurn < 0);
+				if(lackTurn <= 0);
 				else {
-					while(lackTurn > 0) {
-						timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
-						needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
-						lackTurn = LGgame::curTurn - needFlushToTurn;
-					}
 					cleardevice();
 					printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 					LGgame::ranklist();
@@ -548,6 +547,10 @@ namespace LGlocal {
 					xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
 					xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, "FPS: %f", getfps());
 					xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGgame::curTurn);
+					timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
+					needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
+					lackTurn = LGgame::curTurn - needFlushToTurn;
+					if(lackTurn > 0) toNextTurn = false;
 				}
 			}
 		}

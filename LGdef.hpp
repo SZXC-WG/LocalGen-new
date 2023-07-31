@@ -312,6 +312,7 @@ namespace LGgame {
 	bool inReplay;
 	bool inCreate;
 	bool inServer;
+	bool inClient;
 	int curTurn;
 	int cheatCode;
 	int playerCnt;

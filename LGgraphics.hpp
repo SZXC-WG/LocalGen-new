@@ -349,9 +349,8 @@ namespace LGGraphics {
 			if(donate.status == 2) {
 				donate.clickEvent(); goto WelcomePageStartLabel;
 			}
-			if(repo.status == 2) {
+			if(repo.status == 2)
 				repo.clickEvent();
-			}
 		}
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 		exit(0);
@@ -819,7 +818,6 @@ namespace LGGraphics {
 		for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 1;
 		printMap(1048575, {-1,-1});
 
-		rectBUTTON turnbut;
 		rectBUTTON jumpbut;
 		sys_edit jumpbox;
 		rectBUTTON jumpsmbut;
@@ -829,13 +827,6 @@ namespace LGGraphics {
 		rectBUTTON nextbut;
 		rectBUTTON autobut;
 
-		turnbut.setalign(CENTER_TEXT,CENTER_TEXT)
-		.setbgcol(WHITE).settxtcol(BLACK)
-		.setlocation(0 * mapDataStore.mapSizeX, 0 * mapDataStore.mapSizeY)
-		.setfontname("Quicksand")
-		.setfontsz(30 * mapDataStore.mapSizeY, 0)
-		.setsize(120 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY)
-		.txtshadow = false;
 		jumpbut.setalign(CENTER_TEXT,CENTER_TEXT)
 		.setbgcol(WHITE).settxtcol(BLACK)
 		.setlocation(0 * mapDataStore.mapSizeX, 35 * mapDataStore.mapSizeY)
@@ -854,7 +845,7 @@ namespace LGGraphics {
 		.setfontname("Quicksand")
 		.setfontsz(30 * mapDataStore.mapSizeY, 0)
 		.setsize(50 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY)
-		.addtext("¡Á").txtshadow = false;
+		.addtext("¡ú").txtshadow = false;
 
 		int smsx=0,smsy=0,midact=0;
 		for(; is_run();) {
@@ -893,8 +884,24 @@ namespace LGGraphics {
 			}
 			cleardevice();
 			printMap(1048575, {-1,-1});
+			const static int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
+			static int fpslen;
+			static int turnlen;
+			setfillcolor(LGGraphics::bgColor);
+			bar(screenszr - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+			setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+			fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
+			turnlen = textwidth(("Turn " + to_string(LGreplay::rreplay.curTurn) + ".").c_str());
+			setfillcolor(RED);
+			bar(screenszr - fpslen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+			rectangle(screenszr - fpslen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+			setfillcolor(BLUE);
+			bar(screenszr - fpslen - 10 - turnlen - 10, 0, screenszr - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+			rectangle(screenszr - fpslen - 10 - turnlen - 10, 0, screenszr - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+			settextjustify(CENTER_TEXT, TOP_TEXT);
+			xyprintf(screenszr - fpslen / 2 - 5, 0, "FPS: %f", getfps());
+			xyprintf(screenszr - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGreplay::rreplay.curTurn);
 			LGgame::ranklist();
-			turnbut.cleartext().addtext("Turn "+to_string(LGreplay::rreplay.curTurn)+".").display();
 			jumpbut.display();
 			jumpsmbut.detect().display();
 			if(jumpsmbut.status==2) {
@@ -903,7 +910,7 @@ namespace LGGraphics {
 				int toTurn = atoi(s);
 				if(toTurn!=0) LGreplay::rreplay.gotoTurn(toTurn);
 			}
-			delay(0);
+			delay_ms(0);
 		}
 	}
 

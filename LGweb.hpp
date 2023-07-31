@@ -485,6 +485,7 @@ int LGclient::GAME() {
 	setrendermode(RENDER_MANUAL);
 	LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);
 	LGGraphics::init();
+	LGgame::inClient = true;
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	rectBUTTON quitBox,IPfin;
 	sys_edit IPbox;

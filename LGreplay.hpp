@@ -189,10 +189,10 @@ namespace LGreplay {
 	}
 	void RReplay::gotoTurn(int turnid) {
 		if(turnid<0||turnid>totTurn) return;
-		if(turnid==0) {
-			resetGame();
-			return;
-		}
+		// if(turnid==0) {
+		// 	resetGame();
+		// 	return;
+		// }
 		curTurn=0;
 		seekPos=turnPos[curTurn];
 		fseek(file,seekPos,SEEK_SET);

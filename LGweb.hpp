@@ -720,7 +720,7 @@ int LGclient::GAME() {
 		} while(!movement.empty())
 			movement.pop_front();
 
-		if(sockCollect());
+		while(sockCollect());
 
 		if(!gameEnd) {
 			int ed = 0;

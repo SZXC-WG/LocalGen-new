@@ -242,7 +242,7 @@ void LGgame::ranklist() {
 	plen = textwidth("PLAIN");
 	clen = textwidth("CITY");
 	tlen = textwidth("TOT");
-	if(printAIH) aihlen = textwidth("ARMY IN HAND");
+	if(printAIH) aihlen = textwidth("AIH");
 	if(printBot) botlen = textwidth("BOT NAME");
 	for(int i = 1; i <= LGgame::playerCnt; ++i) {
 		nlen = max(nlen, textwidth(playerInfo[rklst[i].id].name.c_str()));
@@ -276,7 +276,7 @@ void LGgame::ranklist() {
 	xyprintf((s3+s4)/2, prhei, "PLAIN");
 	xyprintf((s4+s5)/2, prhei, "CITY");
 	xyprintf((s5+s6)/2, prhei, "TOT");
-	if(printAIH) xyprintf((s6+s7)/2, prhei, "ARMY IN HAND");
+	if(printAIH) xyprintf((s6+s7)/2, prhei, "AIH");
 	if(printBot) xyprintf((s7+ed)/2, prhei, "BOT NAME");
 	for(int i = 1; i <= LGgame::playerCnt; i++) {
 		setfillcolor(playerInfo[rklst[i].id].color);

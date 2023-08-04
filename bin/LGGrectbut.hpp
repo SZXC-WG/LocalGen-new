@@ -28,148 +28,149 @@ using std::min; using std::max;
 // class for rect buttons
 class rectBUTTON {
   private:
-	PIMAGE button; // image info
-	PIMAGE bgImage; // background image
-	int bgimgwid, bgimghei;
-	int wid, hei; // width & height
-	color_t bgcol; // background color
-	color_t txtcol; // text color
+	PIMAGE buttonImage; // image info
+	PIMAGE backgroundImage; // background image
+	int backgroundImageWidth, backgroundImageHeight;
+	int buttonWidth, buttonHeight; // width & height
+	color_t backgroundColor; // background color
+	color_t textColor; // text color
 	vector<string> text; // text
-	string font; // font face name
-	int fonthei, fontwid; // font height & width
-	int lnwid;
-	bool autortcol; color_t rtcol;
+	string fontName; // font face name
+	int fontHeight, fontWidth; // font height & width
+	int frameWidth;
+	bool enableAutoFrameColor; color_t frameColor;
 	int walign, halign; // align method
-	int wloc, hloc; // location on screen
+	int locationX, locationY; // location on screen
 
   public:
-	bool txtshadow; int txtshadowwei;
-	bool floating;
-	bool floatshadow;
+	bool enableTextShadow; int textShadowWeight;
+	bool enableShadow;
+	bool enableButtonShadow;
 	int status; // button status: free(0) / cursor-on(1) / clicked(2)
 	std::function<void()> clickEvent; // event when clicked
 	explicit rectBUTTON() {
-		button = newimage();
-		bgImage = nullptr;
-		wid = hei = 1;
+		buttonImage = newimage();
+		backgroundImage = nullptr;
+		buttonWidth = buttonHeight = 1;
 		walign = LEFT_TEXT, halign = TOP_TEXT;
-		lnwid = 1;
+		frameWidth = 1;
 		status = 0;
-		autortcol = true;
-		txtshadow = true; txtshadowwei = 1;
-		floating = 1; floatshadow = 1;
+		enableAutoFrameColor = true;
+		enableTextShadow = true; textShadowWeight = 1;
+		enableShadow = 1; enableButtonShadow = 1;
 	}
 	~rectBUTTON() {
-		delimage(button);
-		delimage(bgImage);
+		delimage(buttonImage);
+		delimage(backgroundImage);
 	}
-	rectBUTTON(int w, int h) {
+	rectBUTTON(int _width, int _height) {
 		rectBUTTON();
-		hei = h, wid = w;
+		buttonHeight = _height, buttonWidth = _width;
 	}
 	rectBUTTON(rectBUTTON&& but) {
-		delimage(button);
-		button = but.button;
-		hei = but.hei, wid = but.wid;
-		bgcol = but.bgcol, txtcol = but.txtcol;
+		delimage(buttonImage);
+		buttonImage = but.buttonImage;
+		buttonHeight = but.buttonHeight, buttonWidth = but.buttonWidth;
+		backgroundColor = but.backgroundColor, textColor = but.textColor;
 		text = but.text;
 	}
 	rectBUTTON(const rectBUTTON& but) {
-		delimage(button);
-		button = but.button;
-		hei = but.hei, wid = but.wid;
-		bgcol = but.bgcol, txtcol = but.txtcol;
+		delimage(buttonImage);
+		buttonImage = but.buttonImage;
+		buttonHeight = but.buttonHeight, buttonWidth = but.buttonWidth;
+		backgroundColor = but.backgroundColor, textColor = but.textColor;
 		text = but.text;
 	}
 	inline rectBUTTON& draw() {
-		delimage(button);
-		if(floating && floatshadow) button = newimage(wid+3, hei+3);
-		else button = newimage(wid, hei);
-		ege_enable_aa(button);
-		setbkcolor(0xff222222, button);
-		setbkcolor_f(0xff222222, button);
-		setbkmode(TRANSPARENT, button);
-		if((status == 1 || status == 2) && floating && floatshadow) {
-			setfillcolor(0xff008080, button);
-			bar(3, 3, wid+3, hei+3, button);
+		delimage(buttonImage);
+		if(enableShadow && enableButtonShadow) buttonImage = newimage(buttonWidth+3, buttonHeight+3);
+		else buttonImage = newimage(buttonWidth, buttonHeight);
+		ege_enable_aa(buttonImage);
+		setbkcolor(LGGraphics::bgColor, buttonImage);
+		setbkcolor_f(LGGraphics::bgColor, buttonImage);
+		setbkmode(TRANSPARENT, buttonImage);
+		if((status == 1 || status == 2) && enableShadow && enableButtonShadow) {
+			setfillcolor(LGGraphics::mainColor, buttonImage);
+			bar(3, 3, buttonWidth+3, buttonHeight+3, buttonImage);
 		}
-		setfillcolor(bgcol, button);
-		bar(0, 0, wid, hei, button);
-		if(bgImage != nullptr) {
-			if(getwidth(bgImage)!=bgimgwid||getheight(bgImage)!=bgimghei) imageOperation::zoomImage(bgImage,bgimgwid,bgimghei);
-			putimage_withalpha(button,bgImage,0,0);
+		setfillcolor(backgroundColor, buttonImage);
+		bar(0, 0, buttonWidth, buttonHeight, buttonImage);
+		if(backgroundImage != nullptr) {
+			if(getwidth(backgroundImage)!=backgroundImageWidth||getheight(backgroundImage)!=backgroundImageHeight) imageOperation::zoomImage(backgroundImage,backgroundImageWidth,backgroundImageHeight);
+			putimage_withalpha(buttonImage,backgroundImage,0,0);
 		}
-		setfont(fonthei, fontwid, font.c_str(), button);
-		settextjustify(walign, halign, button);
+		setfont(fontHeight, fontWidth, fontName.c_str(), buttonImage);
+		settextjustify(walign, halign, buttonImage);
 		register int ox, oy;
 		if(walign == LEFT_TEXT) ox = 0;
-		else if(walign == CENTER_TEXT) ox = wid / 2;
-		else ox = wid - 1;
+		else if(walign == CENTER_TEXT) ox = buttonWidth / 2;
+		else ox = buttonWidth - 1;
 		if(halign == TOP_TEXT) oy = 0;
-		else if(halign == CENTER_TEXT) oy = (hei - fonthei * (text.size() - 1)) / 2;
-		else oy = hei - fonthei * (text.size() - 1) - 1;
+		else if(halign == CENTER_TEXT) oy = (buttonHeight - fontHeight * (text.size() - 1)) / 2;
+		else oy = buttonHeight - fontHeight * (text.size() - 1) - 1;
 		for(auto s:text) {
-			if(txtshadow) {
-				setcolor(0xff008080, button);
-				outtextxy(ox+txtshadowwei, oy+txtshadowwei, s.c_str(), button);
+			if(enableShadow && enableTextShadow) {
+				setcolor(LGGraphics::mainColor, buttonImage);
+				outtextxy(ox+textShadowWeight, oy+textShadowWeight, s.c_str(), buttonImage);
 			}
-			setcolor(txtcol, button);
-			outtextxy(ox, oy, s.c_str(), button);
-			oy += fonthei;
+			setcolor(textColor, buttonImage);
+			outtextxy(ox, oy, s.c_str(), buttonImage);
+			oy += fontHeight;
 		}
-		if(!floating) {
-			if(autortcol) setcolor(0xff000000 | ~bgcol, button);
-			else setcolor(rtcol, button);
-			setlinewidth(lnwid, button);
+		if(!enableShadow) {
+			if(enableAutoFrameColor) setcolor(0xff000000 | ~backgroundColor, buttonImage);
+			else setcolor(frameColor, buttonImage);
+			setlinewidth(frameWidth, buttonImage);
 			if(status == 1 || status == 2)
-				rectangle(1, 1, wid, hei, button);
+				rectangle(1, 1, buttonWidth, buttonHeight, buttonImage);
 		} else {
 			if(status == 1 || status == 2) {
-				setfillcolor(0x80808080, button);
-				ege_fillrect(0, 0, wid, hei, button);
+				setfillcolor(0x80808080, buttonImage);
+				ege_fillrect(0, 0, buttonWidth, buttonHeight, buttonImage);
 			}
 		}
 		return *this;
 	}
 	inline rectBUTTON& display() {
 		draw();
-		putimage(wloc, hloc, button);
+		putimage(locationX, locationY, buttonImage);
 		return *this;
 	}
-	inline rectBUTTON& setsize(int w, int h) { hei = h; wid = w; return *this; }
-	inline rectBUTTON& setbgcol(color_t col) { bgcol = col; return *this; }
-	inline rectBUTTON& settxtcol(color_t col) { txtcol = col; return *this; }
-	inline rectBUTTON& addtext(string txt) { text.push_back(txt); return *this; }
+	inline rectBUTTON& size(int _width, int _height) { buttonHeight = _height; buttonWidth = _width; return *this; }
+	inline rectBUTTON& bgcolor(color_t _color) { backgroundColor = _color; return *this; }
+	inline rectBUTTON& textcolor(color_t _color) { textColor = _color; return *this; }
+	inline rectBUTTON& addtext(string _text) { text.push_back(_text); return *this; }
 	inline rectBUTTON& poptext() { if(!text.empty()) text.pop_back(); return *this; }
 	inline rectBUTTON& cleartext() { text.clear(); return *this; }
-	inline rectBUTTON& setfontname(string ft) { font = ft; return *this; }
-	inline rectBUTTON& setfontsz(int fh, int fw) { fonthei = fh; fontwid = fw; return *this; }
-	inline rectBUTTON& setlocation(int w, int h) { hloc = h, wloc = w; return *this; }
-	inline rectBUTTON& setalign(int wa = -1, int ha = -1) {
-		if(~wa) walign = wa;
-		if(~ha) halign = ha;
+	inline rectBUTTON& fontname(string _fontName) { fontName = _fontName; return *this; }
+	inline rectBUTTON& fontsize(int _fontHeight, int _fontWidth) { fontHeight = _fontHeight; fontWidth = _fontWidth; return *this; }
+	inline rectBUTTON& move(int _X, int _Y) { locationY = _Y, locationX = _X; return *this; }
+	inline rectBUTTON& textalign(int _walign = -1, int _halign = -1) {
+		if(~_walign) walign = _walign;
+		if(~_halign) halign = _halign;
 		return *this;
 	}
-	inline rectBUTTON& setevent(std::function<void()> event) { clickEvent = event; return *this; }
-	inline rectBUTTON& setlnwid(int w) { lnwid = w; return *this; }
-	inline rectBUTTON& setrtcol(bool automated = 1, color_t col = 0xffffffff) { autortcol = automated, rtcol = col; return *this; }
-	inline rectBUTTON& setbgimg(PIMAGE img) {
-		if(bgImage == nullptr) bgImage = newimage();
-		imageOperation::copyImage(bgImage,img);
-		bgimgwid = getwidth(bgImage);
-		bgimghei = getheight(bgImage);
+	inline rectBUTTON& event(std::function<void()> event) { clickEvent = event; return *this; }
+	inline rectBUTTON& frame(int _width) { frameWidth = _width; return *this; }
+	inline rectBUTTON& framecolor(bool _enableAuto = 1, color_t _color = 0xffffffff) { enableAutoFrameColor = _enableAuto, frameColor = _color; return *this; }
+	inline rectBUTTON& bgimage(PIMAGE _img) {
+		if(backgroundImage == nullptr) backgroundImage = newimage();
+		imageOperation::copyImage(backgroundImage,_img);
+		backgroundImageWidth = getwidth(backgroundImage);
+		backgroundImageHeight = getheight(backgroundImage);
 		return *this;
 	}
-	inline rectBUTTON& delbgimg() { bgImage = nullptr; return *this; }
+	inline rectBUTTON& bgsize(int w,int h) { backgroundImageWidth = w,backgroundImageHeight = h; return *this; }
+	inline rectBUTTON& delbgimage() { backgroundImage = nullptr; return *this; }
 	inline rectBUTTON& detect() {
 		POINT mousePos;
 		GetCursorPos(&mousePos);
 		ScreenToClient(getHWnd(), &mousePos);
-		if(mousePos.x < wloc || mousePos.x > min(wloc + wid - 1, getwidth()) || mousePos.y < hloc || mousePos.y > min(hloc + hei - 1, getheight()))
+		if(mousePos.x < locationX || mousePos.x > min(locationX + buttonWidth - 1, getwidth()) || mousePos.y < locationY || mousePos.y > min(locationY + buttonHeight - 1, getheight()))
 			return status = 0, * this;
 		while(mousemsg()) {
 			mouse_msg msg = getmouse();
-			if(!(msg.x < wloc || msg.x > min(wloc + wid - 1, getwidth()) || msg.y < hloc || msg.y > min(hloc + hei - 1, getheight()))
+			if(!(msg.x < locationX || msg.x > min(locationX + buttonWidth - 1, getwidth()) || msg.y < locationY || msg.y > min(locationY + buttonHeight - 1, getheight()))
 			   && msg.is_left() && msg.is_down()) return status = 2, * this;
 		}
 		return status = 1, * this;

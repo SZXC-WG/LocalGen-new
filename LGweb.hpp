@@ -177,13 +177,13 @@ int LGserver::GAME() {
 	setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
 
 	startBox
-	.setsize(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
-	.setlocation(400 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
-	.setalign(CENTER_TEXT, CENTER_TEXT)
-	.setfontname("Quicksand")
-	.setfontsz(50 * LGGraphics::mapDataStore.mapSizeY, 0)
-	.setbgcol(WHITE)
-	.settxtcol(LGGraphics::mainColor)
+	.size(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
+	.move(400 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
+	.textalign(CENTER_TEXT, CENTER_TEXT)
+	.fontname("Quicksand")
+	.fontsize(50 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.bgcolor(WHITE)
+	.textcolor(LGGraphics::mainColor)
 	.addtext("Start game")
 	.status=0;
 	startBox.display();
@@ -240,22 +240,22 @@ int LGserver::GAME() {
 	LGgame::curTurn = 0;
 	bool gameEnd = 0;
 	rectBUTTON fpsbut;
-	fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
-	fpsbut.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
-	fpsbut.setalign(CENTER_TEXT, CENTER_TEXT);
-	fpsbut.setfontname("Courier New");
-	fpsbut.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0);
-	fpsbut.setbgcol(RED);
-	fpsbut.settxtcol(WHITE);
+	fpsbut.move(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
+	fpsbut.size(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
+	fpsbut.textalign(CENTER_TEXT, CENTER_TEXT);
+	fpsbut.fontname("Courier New");
+	fpsbut.fontsize(20 * LGGraphics::mapDataStore.mapSizeY, 0);
+	fpsbut.bgcolor(RED);
+	fpsbut.textcolor(WHITE);
 	rectBUTTON turnbut;
 	turnbut
-	.setlocation(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
-	.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
-	.setalign(CENTER_TEXT, CENTER_TEXT)
-	.setfontname("Courier New")
-	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
-	.setbgcol(BLUE)
-	.settxtcol(WHITE);
+	.move(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
+	.size(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
+	.textalign(CENTER_TEXT, CENTER_TEXT)
+	.fontname("Courier New")
+	.fontsize(20 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.bgcolor(BLUE)
+	.textcolor(WHITE);
 
 	flushkey();
 	flushmouse();
@@ -496,25 +496,25 @@ int LGclient::GAME() {
 	setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
 
 	quitBox
-	.setsize(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
-	.setlocation(400 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
-	.setalign(CENTER_TEXT, CENTER_TEXT)
-	.setfontname("Quicksand")
-	.setfontsz(50 * LGGraphics::mapDataStore.mapSizeY, 0)
-	.setbgcol(WHITE)
-	.settxtcol(LGGraphics::mainColor)
+	.size(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
+	.move(400 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
+	.textalign(CENTER_TEXT, CENTER_TEXT)
+	.fontname("Quicksand")
+	.fontsize(50 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.bgcolor(WHITE)
+	.textcolor(LGGraphics::mainColor)
 	.addtext("Quit game")
 	.status=0;
 	quitBox.display();
 
 	IPfin
-	.setsize(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
-	.setlocation(100 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
-	.setalign(CENTER_TEXT, CENTER_TEXT)
-	.setfontname("Quicksand")
-	.setfontsz(50 * LGGraphics::mapDataStore.mapSizeY, 0)
-	.setbgcol(WHITE)
-	.settxtcol(LGGraphics::mainColor)
+	.size(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
+	.move(100 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
+	.textalign(CENTER_TEXT, CENTER_TEXT)
+	.fontname("Quicksand")
+	.fontsize(50 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.bgcolor(WHITE)
+	.textcolor(LGGraphics::mainColor)
 	.addtext("Connect")
 	.status=0;
 	IPfin.display();
@@ -599,22 +599,22 @@ int LGclient::GAME() {
 	bool gameEnd = 0;
 	int movLin,movCol;
 	rectBUTTON fpsbut;
-	fpsbut.setlocation(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
-	fpsbut.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
-	fpsbut.setalign(CENTER_TEXT, CENTER_TEXT);
-	fpsbut.setfontname("Courier New");
-	fpsbut.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0);
-	fpsbut.setbgcol(RED);
-	fpsbut.settxtcol(WHITE);
+	fpsbut.move(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
+	fpsbut.size(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
+	fpsbut.textalign(CENTER_TEXT, CENTER_TEXT);
+	fpsbut.fontname("Courier New");
+	fpsbut.fontsize(20 * LGGraphics::mapDataStore.mapSizeY, 0);
+	fpsbut.bgcolor(RED);
+	fpsbut.textcolor(WHITE);
 	rectBUTTON turnbut;
 	turnbut
-	.setlocation(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
-	.setsize(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
-	.setalign(CENTER_TEXT, CENTER_TEXT)
-	.setfontname("Courier New")
-	.setfontsz(20 * LGGraphics::mapDataStore.mapSizeY, 0)
-	.setbgcol(BLUE)
-	.settxtcol(WHITE);
+	.move(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
+	.size(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
+	.textalign(CENTER_TEXT, CENTER_TEXT)
+	.fontname("Courier New")
+	.fontsize(20 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.bgcolor(BLUE)
+	.textcolor(WHITE);
 
 	flushkey();
 	flushmouse();

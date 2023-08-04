@@ -1,6 +1,4 @@
-# Local Generals.io (new version)
-
-> This project is not going to be deprecated any more.
+# Local Generals.io
 
 Welcome to the project of Local Generals.io!
 
@@ -31,9 +29,11 @@ We give our greatest thanks to all contributors who has contributed to our proje
 
 ## File Extensions
 
-Local Maps: `.lg`
-
-Replays: `.lgr`
+|             File Usage             | File Extensions | Notes                                                                                                        |
+| :--------------------------------: | --------------: | :----------------------------------------------------------------------------------------------------------- |
+| Local map storage (text, editable) |          `.ini` | Contains two lines: 1st line "Chinese(or others) Name", 2nd line "English Name"; Should be in ANSI encoding. |
+|         Local map storage          |           `.lg` | Created by the create map functions in LocalGen.                                                             |
+|           Replay storage           |          `.lgr` | Create by the replay functions in LocalGen.                                                                  |
 
 ## Releases (Changelog)
 
@@ -58,3 +58,4 @@ Replays: `.lgr`
 ## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contributors
 
 [![Top contributors](https://images.repography.com/39584401/LocalGen-dev/LocalGen-new/top-contributors/3gjEtdpgx0E_lec-eyUw5_Cib-zwgYr7YmsAoe3QrQk/mHHxcguoyNmZDMSMlPte9ti9eo9YZMaKNI3LXAlFrb8_table.svg)](https://github.com/LocalGen-dev/LocalGen-new/graphs/contributors)
+

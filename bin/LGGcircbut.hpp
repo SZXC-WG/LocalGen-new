@@ -162,7 +162,7 @@ class circBUTTON {
 		backgroundImageHeight = getheight(backgroundImage);
 		return *this;
 	}
-	inline circBUTTON& bgsize(int w,int h) { backgroundImageWidth = w,backgroundImageHeight = h; return *this; }
+	inline circBUTTON& bgsize(int _width,int _height) { backgroundImageWidth = _width,backgroundImageHeight = _height; return *this; }
 	inline circBUTTON& delbgimage() { backgroundImage = nullptr; return *this; }
 	inline circBUTTON& detect() {
 		POINT mousePos;

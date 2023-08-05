@@ -160,7 +160,7 @@ class rectBUTTON {
 		backgroundImageHeight = getheight(backgroundImage);
 		return *this;
 	}
-	inline rectBUTTON& bgsize(int w,int h) { backgroundImageWidth = w,backgroundImageHeight = h; return *this; }
+	inline rectBUTTON& bgsize(int _width,int _height) { backgroundImageWidth = _width,backgroundImageHeight = _height; return *this; }
 	inline rectBUTTON& delbgimage() { backgroundImage = nullptr; return *this; }
 	inline rectBUTTON& detect() {
 		POINT mousePos;

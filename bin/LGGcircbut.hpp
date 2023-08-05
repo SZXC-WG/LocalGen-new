@@ -36,7 +36,7 @@ class circBUTTON {
 	int buttonRadius; // radius
 	color_t backgroundColor; // background color
 	color_t textColor; // text color
-	vector<string> text; // text
+	vector<wstring> text; // text
 	string fontName; // font face name
 	int fontHeight, fontWidth; // font height & width
 	int frameWidth;
@@ -141,7 +141,7 @@ class circBUTTON {
 	inline circBUTTON& radius(int _radius) { buttonRadius = _radius; return *this; }
 	inline circBUTTON& bgcolor(color_t _color) { backgroundColor = _color; return *this; }
 	inline circBUTTON& textcolor(color_t _color) { textColor = _color; return *this; }
-	inline circBUTTON& addtext(string _text) { text.push_back(_text); return *this; }
+	inline circBUTTON& addtext(wstring _text) { text.push_back(_text); return *this; }
 	inline circBUTTON& poptext() { if(!text.empty()) text.pop_back(); return *this; }
 	inline circBUTTON& cleartext() { text.clear(); return *this; }
 	inline circBUTTON& fontname(string _fontName) { fontName = _fontName; return *this; }

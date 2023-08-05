@@ -376,12 +376,12 @@ namespace LGdebug {
 //						movement.clear();
 //						break;
 //					case 27:
-//						MessageBox(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK);
+//						MessageBoxW(nullptr, string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK);
 //						return 0;
 //					case int('\b'): {
 //						if(!LGgame::isAlive[1])
 //							break;
-//						int confirmSur = MessageBox(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO);
+//						int confirmSur = MessageBoxW(nullptr, string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO);
 //						if(confirmSur == 7)
 //							break;
 //						LGgame::isAlive[1] = 0;
@@ -431,7 +431,7 @@ namespace LGdebug {
 				}
 				if(!alldead) {
 					PTC=1048575;
-					MessageBox(nullptr,"ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.","TIP",MB_OK);
+					MessageBoxW(nullptr,L"ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.",L"TIP",MB_OK);
 				}
 			}
 			if(!gameEnd) {
@@ -439,12 +439,12 @@ namespace LGdebug {
 				for(int i = 1; i <= plCnt; ++i)
 					ed |= (LGgame::isAlive[i] << i);
 				if(__builtin_popcount(ed) == 1) {
-					MessageBox(nullptr,
-					           ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
-					            "THE GAME WILL CONTINUE." + "\n" +
-					            "YOU CAN PRESS [ESC] TO EXIT.")
+					MessageBoxW(nullptr,
+					           (L"PLAYER " + playerInfo[std::__lg(ed)].name + L" WON!" + L"\n" +
+					            L"THE GAME WILL CONTINUE." + L"\n" +
+					            L"YOU CAN PRESS [ESC] TO EXIT.")
 					           .c_str(),
-					           "GAME END", MB_OK);
+					           L"GAME END", MB_OK);
 					gameEnd = 1;
 					PTC = 1048575;
 				}

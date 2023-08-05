@@ -39,7 +39,9 @@
 using std::vector;
 using std::deque;
 using std::string;
+using std::wstring;
 using std::to_string;
+using std::to_wstring;
 using namespace std::literals;
 
 //====const====//
@@ -58,9 +60,9 @@ const int SKPORT=14514;
  */
 struct MapInfoS {
 	int id; // map id in storage
-	string chiname; // chinese(or other languages) name of map
-	string engname; // english name of map (generic)
-	string auth; // author of the map
+	wstring chiname; // chinese(or other languages) name of map
+	wstring engname; // english name of map (generic)
+	wstring auth; // author of the map
 	int hei; // map height
 	int wid; // map width
 	int generalcnt; // count of generals of map
@@ -102,7 +104,7 @@ struct passS {
  * @brief Struct saving the basic information of a player.
  */
 struct playerS {
-	string name;		/* player name */
+	wstring name;		/* player name */
 	unsigned int color; /* player color */
 };
 
@@ -140,19 +142,19 @@ PIMAGE pimg[55]; // software used images
 MapInfoS maps[5005]; // storing all imported maps
 Block gameMap[505][505]; /* current game map; maximum 500*500 */
 playerS playerInfo[64] = { // player information (default written)
-	{"White", 0xffffffff},
-	{"Red", 0xffff0000},
-	{"Aqua", 0xff4363d8},
-	{"Green", 0xff008000},
-	{"Teal", 0xff008080},
-	{"Orange", 0xfff58231},
-	{"Pink", 0xfff032e6},
-	{"Purple", 0xff800080},
-	{"Maroon", 0xff800000},
-	{"Yellow", 0xffb09f30},
-	{"Brown", 0xff9a6324},
-	{"Blue", 0xff0000ff},
-	{"Indigo", 0xff483d8b},
+	{L"White", 0xffffffff},
+	{L"Red", 0xffff0000},
+	{L"Aqua", 0xff4363d8},
+	{L"Green", 0xff008000},
+	{L"Teal", 0xff008080},
+	{L"Orange", 0xfff58231},
+	{L"Pink", 0xfff032e6},
+	{L"Purple", 0xff800080},
+	{L"Maroon", 0xff800000},
+	{L"Yellow", 0xffb09f30},
+	{L"Brown", 0xff9a6324},
+	{L"Blue", 0xff0000ff},
+	{L"Indigo", 0xff483d8b},
 };
 
 int mapH, mapW; // height and width of map

@@ -209,7 +209,7 @@ namespace LGreplay {
 		Filename=Fname;
 		file=fopen(Fname.c_str(),"r");
 		if(!file) {
-			MessageBoxA(nullptr,"No such replay file!","Local Generals",MB_OK);
+			MessageBoxW(nullptr,L"No such replay file!",L"Local Generals",MB_OK);
 			closegraph();
 			exit(0);
 		}

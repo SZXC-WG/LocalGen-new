@@ -184,7 +184,7 @@ int LGserver::GAME() {
 	.fontsize(50 * LGGraphics::mapDataStore.mapSizeY, 0)
 	.bgcolor(WHITE)
 	.textcolor(LGGraphics::mainColor)
-	.addtext("Start game")
+	.addtext(L"Start game")
 	.status=0;
 	startBox.display();
 
@@ -280,7 +280,7 @@ int LGserver::GAME() {
 
 			if(ch.msg == key_msg_up) continue;
 			if(ch.key==27) {
-				MessageBoxA(getHWnd(), string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
+				MessageBoxW(getHWnd(), wstring(L"YOU QUIT THE GAME.").c_str(), L"EXIT", MB_OK | MB_SYSTEMMODAL);
 				closegraph();
 				return 0;
 			}
@@ -320,7 +320,7 @@ int LGserver::GAME() {
 		// 	for(int i = 1; i <= LGgame::playerCnt; ++i)
 		// 		ed |= (LGgame::isAlive[i] << i);
 		// 	if(__builtin_popcount(ed) == 1) {
-		// 		MessageBoxA(nullptr,
+		// 		MessageBoxW(nullptr,
 		// 		            ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
 		// 		             "THE game WILL CONTINUE." + "\n" +
 		// 		             "YOU CAN PRESS [ESC] TO EXIT.")
@@ -503,7 +503,7 @@ int LGclient::GAME() {
 	.fontsize(50 * LGGraphics::mapDataStore.mapSizeY, 0)
 	.bgcolor(WHITE)
 	.textcolor(LGGraphics::mainColor)
-	.addtext("Quit game")
+	.addtext(L"Quit game")
 	.status=0;
 	quitBox.display();
 
@@ -515,7 +515,7 @@ int LGclient::GAME() {
 	.fontsize(50 * LGGraphics::mapDataStore.mapSizeY, 0)
 	.bgcolor(WHITE)
 	.textcolor(LGGraphics::mainColor)
-	.addtext("Connect")
+	.addtext(L"Connect")
 	.status=0;
 	IPfin.display();
 
@@ -688,7 +688,7 @@ int LGclient::GAME() {
 					break;
 				case int('q'): movement.clear(); break;
 				case 27: {
-					MessageBoxA(getHWnd(), string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
+					MessageBoxW(getHWnd(), wstring(L"YOU QUIT THE GAME.").c_str(), L"EXIT", MB_OK | MB_SYSTEMMODAL);
 					quitGame();
 					closegraph();
 					return 0;
@@ -696,7 +696,7 @@ int LGclient::GAME() {
 				case int('\b'): {
 					if(!LGgame::isAlive[playerNumber])
 						break;
-					int confirmSur = MessageBoxA(getHWnd(), string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
+					int confirmSur = MessageBoxW(getHWnd(), wstring(L"ARE YOU SURE TO SURRENDER?").c_str(), L"CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
 					if(confirmSur == 7)
 						break;
 					LGgame::isAlive[playerNumber] = 0;
@@ -727,12 +727,12 @@ int LGclient::GAME() {
 			for(int i = 1; i <= LGgame::playerCnt; ++i)
 				ed |= (LGgame::isAlive[i] << i);
 			if(__builtin_popcount(ed) == 1) {
-				MessageBoxA(nullptr,
-				            ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
-				             "THE GAME WILL CONTINUE." + "\n" +
-				             "YOU CAN PRESS [ESC] TO EXIT.")
+				MessageBoxW(nullptr,
+				            (L"PLAYER " + playerInfo[std::__lg(ed)].name + L" WON!" + L"\n" +
+				             L"THE GAME WILL CONTINUE." + L"\n" +
+				             L"YOU CAN PRESS [ESC] TO EXIT.")
 				            .c_str(),
-				            "GAME END", MB_OK | MB_SYSTEMMODAL);
+				            L"GAME END", MB_OK | MB_SYSTEMMODAL);
 				gameEnd = 1;
 				register int winnerNum = std::__lg(ed);
 				LGgame::cheatCode = 1048575;
@@ -760,9 +760,9 @@ int LGclient::GAME() {
 				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
 				setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
 				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
-				fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
-				turnlen = textwidth(("Turn " + to_string(LGgame::curTurn) + ".").c_str());
-				rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L))).c_str()); setfillcolor(RED);
+				fpslen = textwidth((L"FPS: " + to_wstring(getfps())).c_str());
+				turnlen = textwidth((L"Turn " + to_wstring(LGgame::curTurn) + L".").c_str());
+				rspeedlen = textwidth((L"Real Speed: " + to_wstring(LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L))).c_str()); setfillcolor(RED);
 				setfillcolor(GREEN);
 				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
 				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
@@ -773,9 +773,9 @@ int LGclient::GAME() {
 				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
 				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
 				settextjustify(CENTER_TEXT, TOP_TEXT);
-				xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L));
-				xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, "FPS: %f", getfps());
-				xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGgame::curTurn);
+				xyprintf(screenszr - rspeedlen / 2 - 5, 0, L"Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L));
+				xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, L"FPS: %f", getfps());
+				xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, L"Turn %d.", LGgame::curTurn);
 			}
 		}
 	}

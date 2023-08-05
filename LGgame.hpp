@@ -36,11 +36,11 @@ void LGgame::printGameMessage(gameMessageStore now) {
 		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, "You surrendered at Turn #%d", now.turnNumber);
 	else {
 		setcolor(playerInfo[now.playerA].color);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()) - textwidth((" " + playerInfo[now.playerB].name).c_str()) - textwidth(" killed "), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%7s", playerInfo[now.playerA].name.c_str());
+		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((L" at Turn #" + to_wstring(now.turnNumber)).c_str()) - textwidth((L" " + playerInfo[now.playerB].name).c_str()) - textwidth(L" killed "), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, L"%7ls", playerInfo[now.playerA].name.c_str());
 		setcolor(WHITE);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()) - textwidth((" " + playerInfo[now.playerB].name).c_str()), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, " killed ", now.turnNumber);
+		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((L" at Turn #" + to_wstring(now.turnNumber)).c_str()) - textwidth((L" " + playerInfo[now.playerB].name).c_str()), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, L" killed ", now.turnNumber);
 		setcolor(playerInfo[now.playerB].color);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" at Turn #" + to_string(now.turnNumber)).c_str()), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%s", playerInfo[now.playerB].name.c_str());
+		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((L" at Turn #" + to_wstring(now.turnNumber)).c_str()), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%s", playerInfo[now.playerB].name.c_str());
 		setcolor(WHITE);
 		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, " at Turn #%d", now.turnNumber);
 	}
@@ -50,7 +50,7 @@ void LGgame::printGameMessage(gameMessageStore now) {
 void LGgame::kill(int p1, int p2) {
 	if(p2 == 1) {
 		std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
-		if((!inReplay)&&(!inServer)) MessageBoxA(nullptr, string("YOU ARE KILLED BY PLAYER " + playerInfo[p1].name + " AT TURN " + to_string(LGgame::curTurn) + ".").c_str(), "", MB_OK | MB_SYSTEMMODAL);
+		if((!inReplay)&&(!inServer)) MessageBoxW(nullptr, wstring(L"YOU ARE KILLED BY PLAYER " + playerInfo[p1].name + L" AT TURN " + to_wstring(LGgame::curTurn) + L".").c_str(), L"", MB_OK | MB_SYSTEMMODAL);
 		std::chrono::nanoseconds ed = std::chrono::steady_clock::now().time_since_epoch();
 		LGgame::beginTime += ed - bg;
 	}
@@ -237,13 +237,13 @@ void LGgame::ranklist() {
 		rklst[i].armyInHand = gameMap[LGgame::playerCoo[i].x][LGgame::playerCoo[i].y].army;
 	}
 	std::sort(rklst + 1, rklst + LGgame::playerCnt + 1, [](node a, node b) { return a.army > b.army; });
-	nlen = textwidth("PLAYER");
-	alen = textwidth("ARMY");
-	plen = textwidth("PLAIN");
-	clen = textwidth("CITY");
-	tlen = textwidth("TOT");
-	if(printAIH) aihlen = textwidth("AIH");
-	if(printBot) botlen = textwidth("BOT NAME");
+	nlen = textwidth(L"PLAYER");
+	alen = textwidth(L"ARMY");
+	plen = textwidth(L"PLAIN");
+	clen = textwidth(L"CITY");
+	tlen = textwidth(L"TOT");
+	if(printAIH) aihlen = textwidth(L"AIH");
+	if(printBot) botlen = textwidth(L"BOT NAME");
 	for(int i = 1; i <= LGgame::playerCnt; ++i) {
 		nlen = max(nlen, textwidth(playerInfo[rklst[i].id].name.c_str()));
 		alen = max(alen, textwidth(to_string(rklst[i].army).c_str()));
@@ -271,13 +271,13 @@ void LGgame::ranklist() {
 	rectangle(s5, prhei, s6, prhei + prhei);
 	rectangle(s6, prhei, s7, prhei + prhei);
 	rectangle(s7, prhei, ed, prhei + prhei);
-	xyprintf((s1+s2)/2, prhei, "PLAYER");
-	xyprintf((s2+s3)/2, prhei, "ARMY");
-	xyprintf((s3+s4)/2, prhei, "PLAIN");
-	xyprintf((s4+s5)/2, prhei, "CITY");
-	xyprintf((s5+s6)/2, prhei, "TOT");
-	if(printAIH) xyprintf((s6+s7)/2, prhei, "AIH");
-	if(printBot) xyprintf((s7+ed)/2, prhei, "BOT NAME");
+	xyprintf((s1+s2)/2, prhei, L"PLAYER");
+	xyprintf((s2+s3)/2, prhei, L"ARMY");
+	xyprintf((s3+s4)/2, prhei, L"PLAIN");
+	xyprintf((s4+s5)/2, prhei, L"CITY");
+	xyprintf((s5+s6)/2, prhei, L"TOT");
+	if(printAIH) xyprintf((s6+s7)/2, prhei, L"AIH");
+	if(printBot) xyprintf((s7+ed)/2, prhei, L"BOT NAME");
 	for(int i = 1; i <= LGgame::playerCnt; i++) {
 		setfillcolor(playerInfo[rklst[i].id].color);
 		bar(s1, prhei * (i + 1), ed, prhei * (i + 2));
@@ -403,7 +403,7 @@ namespace LGlocal {
 						break;
 					case int('q'): movement.clear(); break;
 					case 27: {
-						MessageBoxA(getHWnd(), string("YOU QUIT THE GAME.").c_str(), "EXIT", MB_OK | MB_SYSTEMMODAL);
+						MessageBoxW(getHWnd(), wstring(L"YOU QUIT THE GAME.").c_str(), L"EXIT", MB_OK | MB_SYSTEMMODAL);
 						closegraph();
 						return 0;
 					}
@@ -411,7 +411,7 @@ namespace LGlocal {
 						if(!LGgame::isAlive[1])
 							break;
 						std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
-						int confirmSur = MessageBoxA(getHWnd(), string("ARE YOU SURE TO SURRENDER?").c_str(), "CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
+						int confirmSur = MessageBoxW(getHWnd(), wstring(L"ARE YOU SURE TO SURRENDER?").c_str(), L"CONFIRM SURRENDER", MB_YESNO | MB_SYSTEMMODAL);
 						std::chrono::nanoseconds ed = std::chrono::steady_clock::now().time_since_epoch();
 						LGgame::beginTime += ed - bg;
 						if(confirmSur == 7)
@@ -490,7 +490,7 @@ namespace LGlocal {
 				if(!alldead) {
 					LGgame::cheatCode = 1048575;
 					std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
-					MessageBoxA(nullptr, "ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", "TIP", MB_OK | MB_SYSTEMMODAL);
+					MessageBoxW(nullptr, L"ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", L"TIP", MB_OK | MB_SYSTEMMODAL);
 					std::chrono::nanoseconds ed = std::chrono::steady_clock::now().time_since_epoch();
 					LGgame::beginTime += ed - bg;
 				}
@@ -501,12 +501,12 @@ namespace LGlocal {
 					ed |= (LGgame::isAlive[i] << i);
 				if(__builtin_popcount(ed) == 1) {
 					std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
-					MessageBoxA(nullptr,
-					            ("PLAYER " + playerInfo[std::__lg(ed)].name + " WON!" + "\n" +
-					             "THE GAME WILL CONTINUE." + "\n" +
-					             "YOU CAN PRESS [ESC] TO EXIT.")
+					MessageBoxW(nullptr,
+					            (L"PLAYER " + playerInfo[std::__lg(ed)].name + L" WON!" + L"\n" +
+					             L"THE GAME WILL CONTINUE." + L"\n" +
+					             L"YOU CAN PRESS [ESC] TO EXIT.")
 					            .c_str(),
-					            "GAME END", MB_OK | MB_SYSTEMMODAL);
+					            L"GAME END", MB_OK | MB_SYSTEMMODAL);
 					std::chrono::nanoseconds eed = std::chrono::steady_clock::now().time_since_epoch();
 					LGgame::beginTime += eed - bg;
 					gameEnd = 1;
@@ -533,9 +533,9 @@ namespace LGlocal {
 					bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
 					setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
 					timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
-					fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
-					turnlen = textwidth(("Turn " + to_string(LGgame::curTurn) + ".").c_str());
-					rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());				setfillcolor(RED);
+					fpslen = textwidth((L"FPS: " + to_wstring(getfps())).c_str());
+					turnlen = textwidth((L"Turn " + to_wstring(LGgame::curTurn) + L".").c_str());
+					rspeedlen = textwidth((L"Real Speed: " + to_wstring(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());				setfillcolor(RED);
 					setfillcolor(GREEN);
 					bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
 					rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
@@ -546,9 +546,9 @@ namespace LGlocal {
 					bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
 					rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
 					settextjustify(CENTER_TEXT, TOP_TEXT);
-					xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
-					xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, "FPS: %f", getfps());
-					xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGgame::curTurn);
+					xyprintf(screenszr - rspeedlen / 2 - 5, 0, L"Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
+					xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, L"FPS: %f", getfps());
+					xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, L"Turn %d.", LGgame::curTurn);
 					timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 					needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
 					lackTurn = LGgame::curTurn - needFlushToTurn;

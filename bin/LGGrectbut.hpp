@@ -34,7 +34,7 @@ class rectBUTTON {
 	int buttonWidth, buttonHeight; // width & height
 	color_t backgroundColor; // background color
 	color_t textColor; // text color
-	vector<string> text; // text
+	vector<wstring> text; // text
 	string fontName; // font face name
 	int fontHeight, fontWidth; // font height & width
 	int frameWidth;
@@ -139,7 +139,7 @@ class rectBUTTON {
 	inline rectBUTTON& size(int _width, int _height) { buttonHeight = _height; buttonWidth = _width; return *this; }
 	inline rectBUTTON& bgcolor(color_t _color) { backgroundColor = _color; return *this; }
 	inline rectBUTTON& textcolor(color_t _color) { textColor = _color; return *this; }
-	inline rectBUTTON& addtext(string _text) { text.push_back(_text); return *this; }
+	inline rectBUTTON& addtext(wstring _text) { text.push_back(_text); return *this; }
 	inline rectBUTTON& poptext() { if(!text.empty()) text.pop_back(); return *this; }
 	inline rectBUTTON& cleartext() { text.clear(); return *this; }
 	inline rectBUTTON& fontname(string _fontName) { fontName = _fontName; return *this; }

@@ -387,17 +387,18 @@ struct MapInfoS { int id; string chiname; string engname; string auth; int hei; 
 */
 void initMaps() {
 	mapNum = 5;
-	maps[1] = MapInfoS {1, "Ëæ»úµØÍ¼", "Random", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	maps[2] = MapInfoS {2, "±ê×¼µØÍ¼", "Standard", "LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	maps[3] = MapInfoS {3, "ÍêÈ«Ëş", "Full Tower/City", "LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
-	maps[4] = MapInfoS {4, "´óÕÓÔó", "Great Swamp", "LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
-	maps[5] = MapInfoS {5, "´óÆ½Ô­", "Great Plain", "LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
+	maps[1] = MapInfoS {1, L"éšæœºåœ°å›¾", L"Random", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	maps[2] = MapInfoS {2, L"æ ‡å‡†åœ°å›¾", L"Standard", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	maps[3] = MapInfoS {3, L"å®Œå…¨å¡”", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
+	maps[4] = MapInfoS {4, L"å¤§æ²¼æ³½", L"Great Swamp", L"LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
+	maps[5] = MapInfoS {5, L"å¤§å¹³åŸ", L"Great Plain", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
 	std::vector<string> files;
 	getAllFiles("maps", files, ".ini");
 	for(auto x : files) {
 		string s = x.substr(0, x.size() - 4);
-		string chin, engn, auth;
-		std::ifstream inif(x);
+		wstring chin;
+		wstring engn, auth;
+		std::wifstream inif(x);
 		std::getline(inif, chin);
 		std::getline(inif, engn);
 		std::getline(inif, auth);

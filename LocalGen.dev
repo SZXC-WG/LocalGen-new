@@ -29,24 +29,24 @@ IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=9
+UnitCount=10
 
 [VersionInfo]
 Major=4
 Minor=0
-Release=0
-Build=2116
+Release=2
+Build=2142
 LanguageID=1033
 CharsetID=1252
 CompanyName=LocalGen-dev
-FileVersion=4.0.0.2116
+FileVersion=4.0.2.2142
 FileDescription=Local Generals.io (new ver.)
 InternalName=
 LegalCopyright=Copyright (c) 2023 LocalGen-dev
 LegalTrademarks=
 OriginalFilename=
 ProductName=Local Generals.io (new ver.)
-ProductVersion=4.0.0.2116
+ProductVersion=4.0.2.2142
 AutoIncBuildNr=1
 SyncProduct=1
 
@@ -111,7 +111,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit10]
-FileName=LGzipmap.hpp
+FileName=LGencoding.hpp
 CompileCpp=1
 Folder=
 Compile=1

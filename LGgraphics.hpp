@@ -79,7 +79,7 @@ namespace LGGraphics {
 	void initWindowSize() {
 		initgraph(800, 600);
 		ege_enable_aa(true, NULL);
-		setcaption("LocalGen v" VER_STRING " Window Size Selection");
+		setcaption(L"LocalGen v" VER_STRING " Window Size Selection");
 		setbkcolor(bgColor);
 		setbkcolor_f(bgColor);
 		bool changeMade = true;
@@ -88,23 +88,23 @@ namespace LGGraphics {
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setfont(100, 0, "QuickSand", 0, 0, FW_BOLD, 0, 0, 0);
 		setcolor(mainColor);
-		xyprintf(252, 82, "Local");
+		xyprintf(252, 82, L"Local");
 		setcolor(WHITE);
-		xyprintf(250, 80, "Local");
+		xyprintf(250, 80, L"Local");
 		setcolor(mainColor);
-		xyprintf(252, 152, "generals.io");
+		xyprintf(252, 152, L"generals.io");
 		setcolor(WHITE);
-		xyprintf(250, 150, "generals.io");
+		xyprintf(250, 150, L"generals.io");
 		putimage_withalpha(NULL, favi, 500, 10, 0, 0, getwidth(favi), getheight(favi));
 		delimage(favi);
 		setfont(20, 0, "Lucida Fax");
 		xyprintf(500 + getwidth(favi) / 2, 10 + getheight(favi) + 20 / 2 + 10,
-		         "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
+		         L"version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
 		setfont(50, 0, "Quicksand");
 		setcolor(mainColor);
-		xyprintf(251, 251, "Please Select Window Size:");
+		xyprintf(251, 251, L"Please Select Window Size:");
 		setcolor(WHITE);
-		xyprintf(250, 250, "Please Select Window Size:");
+		xyprintf(250, 250, L"Please Select Window Size:");
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 		rectBUTTON scrsz[10];
 		for(int i = 200; i <= 500; i += 100) {
@@ -157,7 +157,7 @@ namespace LGGraphics {
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 			initgraph(1600 * mapDataStore.mapSizeX, 900 * mapDataStore.mapSizeY, RENDER_AUTO);
 		}
-		setcaption("LocalGen v" VER_STRING " developed by LocalGen-dev");
+		setcaption(L"LocalGen v" VER_STRING " developed by LocalGen-dev");
 	}
 
 	void initname() {
@@ -297,7 +297,7 @@ namespace LGGraphics {
 			imageOperation::zoomImage(donate_ap, 600 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
 			putimage(100 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_wc);
 			putimage((100 + 800) * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_ap);
-			xyprintf(800 * mapDataStore.mapSizeX, 830 * mapDataStore.mapSizeY, "press any key to close...");
+			xyprintf(800 * mapDataStore.mapSizeX, 830 * mapDataStore.mapSizeY, L"press any key to close...");
 			delimage(donate_wc); delimage(donate_ap);
 			flushkey();
 			getkey();
@@ -1205,9 +1205,9 @@ namespace LGGraphics {
 		setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand", 0, 0, FW_BOLD, false, false, false);
 		settextjustify(CENTER_TEXT,TOP_TEXT);
 		xyprintf(255 * mapDataStore.mapSizeX, 5 * mapDataStore.mapSizeY,
-		         "%ls", maps[mapSelected].chiname.c_str());
+		         L"%ls %zu", maps[mapSelected].chiname.c_str(), maps[mapSelected].chiname.length());
 		xyprintf(255 * mapDataStore.mapSizeX, 45 * mapDataStore.mapSizeY,
-		         "%ls", maps[mapSelected].engname.c_str());
+		         L"%ls", maps[mapSelected].engname.c_str());
 		setcolor(WHITE);
 		setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
 		xyprintf(255 * mapDataStore.mapSizeX, 85 * mapDataStore.mapSizeY,

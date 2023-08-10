@@ -392,6 +392,10 @@ void initMaps() {
 	maps[3] = MapInfoS {3, L"完全塔", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
 	maps[4] = MapInfoS {4, L"大沼泽", L"Great Swamp", L"LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
 	maps[5] = MapInfoS {5, L"大平原", L"Great Plain", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
+	std::wofstream onof("check.log");
+	for(auto ch:maps[1].chiname) onof<<int(ch)<<" ";
+	onof<<std::endl;
+	onof.close();
 	std::vector<string> files;
 	getAllFiles("maps", files, ".ini");
 	for(auto x : files) {
@@ -399,10 +403,16 @@ void initMaps() {
 		wstring chin;
 		wstring engn, auth;
 		std::wifstream inif(x);
+		std::wofstream onof("check.log",std::ios::app);
 		std::getline(inif, chin);
+		chin = wcharTransfer(chin);
 		std::getline(inif, engn);
 		std::getline(inif, auth);
+		onof<<chin.size()<<std::endl;
+		for(auto ch:chin) onof<<int(ch)<<" ";
+		onof<<std::endl;
 		inif.close();
+		onof.close();
 		++mapNum;
 		maps[mapNum].id = mapNum;
 		maps[mapNum].chiname = chin;

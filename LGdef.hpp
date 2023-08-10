@@ -176,6 +176,8 @@ int failSock;
 
 //====function====//
 
+std::wstring wcharTransfer(const wstring& ws);
+
 /**
  * @brief Function for comparing two coordinates equal.
  *

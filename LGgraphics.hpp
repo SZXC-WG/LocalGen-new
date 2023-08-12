@@ -1205,7 +1205,7 @@ namespace LGGraphics {
 		setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand", 0, 0, FW_BOLD, false, false, false);
 		settextjustify(CENTER_TEXT,TOP_TEXT);
 		xyprintf(255 * mapDataStore.mapSizeX, 5 * mapDataStore.mapSizeY,
-		         L"%ls %zu", maps[mapSelected].chiname.c_str(), maps[mapSelected].chiname.length());
+		         L"%ls", maps[mapSelected].chiname.c_str());
 		xyprintf(255 * mapDataStore.mapSizeX, 45 * mapDataStore.mapSizeY,
 		         L"%ls", maps[mapSelected].engname.c_str());
 		setcolor(WHITE);

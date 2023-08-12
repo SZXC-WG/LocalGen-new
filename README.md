@@ -10,18 +10,6 @@ Interested? Then go to [the release page](http://github.com/LocalGen-dev/LocalGe
 
 If you have an idea or find bugs, you can also take part in contributing to the project! Just **create an issue** or **create a pull request**.
 
-## Copyright
-
-The project is licensed under **the MIT license**.
-
-Copyright (c) 2023 LocalGen-dev
-
-Developers: LocalGen-dev team
-
-Contributors: see the list on the right bars.
-
-We give our greatest thanks to all contributors who has contributed to our project.
-
 ## Future Versions
 
 - `v4.1/5.1` Fix web flashing problem.

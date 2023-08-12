@@ -31,7 +31,7 @@ We give our greatest thanks to all contributors who has contributed to our proje
 
 |             File Usage             | File Extensions | Notes                                                                                                        |
 | :--------------------------------: | --------------: | :----------------------------------------------------------------------------------------------------------- |
-| Local map storage (text, editable) |          `.ini` | Contains two lines: 1st line "Chinese(or others) Name", 2nd line "English Name"; Should be in ANSI encoding. |
+| Local map storage (text, editable) |          `.ini` | Contains two lines: 1st line "Chinese(or others) Name", 2nd line "English Name"; Should be in UTF-8 encoding. |
 |         Local map storage          |           `.lg` | Created by the create map functions in LocalGen.                                                             |
 |           Replay storage           |          `.lgr` | Create by the replay functions in LocalGen.                                                                  |
 

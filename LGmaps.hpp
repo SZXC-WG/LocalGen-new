@@ -173,9 +173,10 @@ void printMap(int printCode, playerCoord coo) {
 			}
 		}
 	}
-	if(~coo.x||~coo.y) putimage_withalpha(NULL, npimg[6],
-		                                      LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
-		                                      LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
+	if((~coo.x)||(~coo.y))
+		putimage_withalpha(NULL, npimg[6],
+		                   LGGraphics::mapDataStore.maplocX + widthPerBlock * (coo.y - 1),
+		                   LGGraphics::mapDataStore.maplocY + heightPerBlock * (coo.x - 1));
 	for(int i=1; i<=8; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }

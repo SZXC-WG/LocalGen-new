@@ -36,9 +36,6 @@
 #include "LGweb.hpp"
 #include "LGreplay.hpp"
 
-/* DEBUG */
-#include "LGdebug.hpp"
-
 /*************** the main function ***************/
 signed main(signed argc, char** argv) {
 	FreeConsole();

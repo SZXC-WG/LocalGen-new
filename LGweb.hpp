@@ -750,7 +750,7 @@ int LGclient::GAME() {
 					lackTurn = LGgame::curTurn - needFlushToTurn;
 				}
 				cleardevice();
-				printMap(LGgame::cheatCode, LGgame::playerCoo[0]);
+				printMap(LGgame::cheatCode, LGgame::playerCoo[playerNumber]);
 				LGgame::ranklist();
 				int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
 				static int fpslen;

@@ -336,7 +336,8 @@ namespace LGlocal {
 		LGGraphics::mapDataStore.maplocY = - (LGgame::genCoo[1].x) * heightPerBlock + 450 * LGGraphics::mapDataStore.mapSizeY;
 		int smsx = 0, smsy = 0; bool moved = false;
 		std::chrono::steady_clock::duration prsttm;
-		bool toNextTurn = true;
+		bool toNextTurn = true, paused = false;
+		std::chrono::nanoseconds pauseBeginTime, pauseEndTime;
 		for(; is_run();) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
@@ -378,10 +379,14 @@ namespace LGlocal {
 			while(kbmsg()) {
 				key_msg ch = getkey();
 				if(ch.key == key_space) {
-					std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
-					while((!kbmsg()) || (getkey().key != key_space));
-					std::chrono::nanoseconds ed = std::chrono::steady_clock::now().time_since_epoch();
-					LGgame::beginTime += ed - bg;
+					if(!paused) {
+						pauseBeginTime = std::chrono::steady_clock::now().time_since_epoch();
+						paused = true;
+					} else {
+						paused = false;
+						pauseEndTime = std::chrono::steady_clock::now().time_since_epoch();
+						LGgame::beginTime += pauseEndTime - pauseBeginTime;
+					}
 				}
 				if(ch.msg == key_msg_up)
 					continue;
@@ -432,6 +437,7 @@ namespace LGlocal {
 					}
 				}
 			}
+			if(paused) toNextTurn = false;
 			if(toNextTurn) {
 				LGgame::updateMap();
 				LGreplay::wreplay.newTurn();
@@ -520,40 +526,37 @@ namespace LGlocal {
 				std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				int needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
 				int lackTurn = LGgame::curTurn - needFlushToTurn;
-				if(lackTurn <= 0);
-				else {
-					cleardevice();
-					printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
-					LGgame::ranklist();
-					int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
-					static int fpslen;
-					static int turnlen;
-					static int rspeedlen;
-					setfillcolor(LGGraphics::bgColor);
-					bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-					setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
-					timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
-					fpslen = textwidth((L"FPS: " + to_wstring(getfps())).c_str());
-					turnlen = textwidth((L"Turn " + to_wstring(LGgame::curTurn) + L".").c_str());
-					rspeedlen = textwidth((L"Real Speed: " + to_wstring(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());				setfillcolor(RED);
-					setfillcolor(GREEN);
-					bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-					rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-					setfillcolor(RED);
-					bar(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-					rectangle(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-					setfillcolor(BLUE);
-					bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-					rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-					settextjustify(CENTER_TEXT, TOP_TEXT);
-					xyprintf(screenszr - rspeedlen / 2 - 5, 0, L"Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
-					xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, L"FPS: %f", getfps());
-					xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, L"Turn %d.", LGgame::curTurn);
-					timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
-					needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
-					lackTurn = LGgame::curTurn - needFlushToTurn;
-					if(lackTurn > 0) toNextTurn = false;
-				}
+				cleardevice();
+				printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
+				LGgame::ranklist();
+				int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
+				static int fpslen;
+				static int turnlen;
+				static int rspeedlen;
+				setfillcolor(LGGraphics::bgColor);
+				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+				setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
+				fpslen = textwidth((L"FPS: " + to_wstring(getfps())).c_str());
+				turnlen = textwidth((L"Turn " + to_wstring(LGgame::curTurn) + L".").c_str());
+				rspeedlen = textwidth((L"Real Speed: " + to_wstring(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());				setfillcolor(RED);
+				setfillcolor(GREEN);
+				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+				setfillcolor(RED);
+				bar(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+				rectangle(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+				setfillcolor(BLUE);
+				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+				settextjustify(CENTER_TEXT, TOP_TEXT);
+				xyprintf(screenszr - rspeedlen / 2 - 5, 0, L"Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
+				xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, L"FPS: %f", getfps());
+				xyprintf(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5, 0, L"Turn %d.", LGgame::curTurn);
+				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
+				needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
+				lackTurn = LGgame::curTurn - needFlushToTurn;
+				if(lackTurn > 0 || paused) toNextTurn = false;
 			}
 		}
 		return 0;

@@ -5,11 +5,11 @@ namespace smartRandomBot {
 	const int dx[5] = {0, -1, 0, 1, 0};
 	const int dy[5] = {0, 0, -1, 0, 1};
 
-	int calcNextMove(int id, coordS coo) {
+	moveS calcNextMove(int id, coordS coo) {
 		static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 		static deque<coordS> lastCoord[20];
 		if(gameMap[coo.x][coo.y].player != id || gameMap[coo.x][coo.y].army == 0)
-			return 0;
+			return moveS { id, false, coo, LGgame::genCoo[id] };
 		struct node {
 			int type, team;
 			long long army;
@@ -50,7 +50,7 @@ namespace smartRandomBot {
 		std::sort(p + 1, p + pl + 1, cmp);
 		lastCoord[id].push_back(coo);
 		if(lastCoord[id].size() > 100) lastCoord[id].pop_front();
-		return p[1].dir;
+		return moveS { id, true, coo, coordS{coo.x+dx[p[1].dir],coo.y+dy[p[1].dir]} };
 	}
 }
 

@@ -142,6 +142,7 @@ struct gameMessageStore {
  */
 struct moveS {
 	int id; // player id of move
+	bool takeArmy; // whether the move takes army
 	coordS from; // coordinate from
 	coordS to; // coordinate to
 };
@@ -338,13 +339,14 @@ namespace LGgame {
 	coordS genCoo[64];
 	std::deque<moveS> inlineMove;
 	coordS playerCoo[64];
+	coordS playerFocus[64];
 	std::chrono::nanoseconds beginTime;
 
 	void init(int chtC, int pC, int gS);
 	void printGameMessage(gameMessageStore now);
 	void capture(int p1, int p2);
 	[[deprecated("This function will be deleted since v5.0.")]] int analyzeMove(int id, int mv, coordS& coo);
-	int checkMove(int id, coordS coo);
+	int checkMove(moveS coo);
 	void flushMove();
 	void initGenerals(coordS coos[]);
 	void updateMap();
@@ -359,10 +361,9 @@ namespace LGreplay {
 	int ston(char* s,int len=-1);
 	string zipBlock(Block B);
 	struct Movement {
-		int player,dir;
-		coordS coord;
+		moveS move;
 		Movement();
-		Movement(int tm,int d,coordS c);
+		Movement(moveS c);
 		string zip();
 	};
 	Movement readMove(char* buf);

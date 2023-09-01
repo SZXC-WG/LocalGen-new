@@ -296,17 +296,18 @@ int LGserver::GAME() {
 			if(!LGgame::isAlive[i])
 				continue;
 			switch(robotId[i]) {
-				case 1 ... 100:
-					LGgame::analyzeMove(i, smartRandomBot::calcNextMove(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
-					break;
-				case 101 ... 200:
-					LGgame::analyzeMove(i, xrzBot::calcNextMove(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
-					break;
-				case 201 ... 300:
-					LGgame::analyzeMove(i, xiaruizeBot::calcNextMove(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
-					break;
-				default:
-					LGgame::analyzeMove(i, 0, LGgame::playerCoo[i]);
+				case 1 ... 100: {
+					moveS mv = smartRandomBot::calcNextMove(i, LGgame::playerCoo[i]);
+					if(LGgame::checkMove(mv)) LGgame::inlineMove.push_back(mv);
+				} break;
+				case 101 ... 200: {
+					moveS mv = xrzBot::calcNextMove(i, LGgame::playerCoo[i]);
+					if(LGgame::checkMove(mv)) LGgame::inlineMove.push_back(mv);
+				} break;
+				case 201 ... 300: {
+					moveS mv = xiaruizeBot::calcNextMove(i, LGgame::playerCoo[i]);
+					if(LGgame::checkMove(mv)) LGgame::inlineMove.push_back(mv);
+				} break;
 			}
 		}
 

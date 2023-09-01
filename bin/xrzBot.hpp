@@ -1,19 +1,18 @@
 #ifndef __BOT_XRZ__
 #define __BOT_XRZ__
 
-#include "../LGdef.hpp"
 namespace xrzBot
 {
     const int dx[5] = {0, -1, 0, 1, 0};
     const int dy[5] = {0, 0, -1, 0, 1};
     static int armyNow;
     int checkOrder[5] = {0, 1, 2, 3, 4};
-    playerCoord previousPos[17];
+    coordS previousPos[17];
     static int visitTime[17][505][505];
     static int turnCount[17];
     static int id;
 
-    int xrzBot(int ind, playerCoord player)
+    int calcNextMove(int ind, coordS player)
     {
         srand(time(0));
         static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());

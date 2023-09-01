@@ -174,14 +174,14 @@ int LGserver::GAME() {
 
 	LGgame::initGenerals(LGgame::playerCoo);
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
-	setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+	setfont(50 * LGGraphics::windowData.zoomY, 0, "Quicksand");
 
 	startBox
-	.size(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
-	.move(400 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
+	.size(200 * LGGraphics::windowData.zoomX, 100 * LGGraphics::windowData.zoomY)
+	.move(400 * LGGraphics::windowData.zoomX,350 * LGGraphics::windowData.zoomY)
 	.textalign(CENTER_TEXT, CENTER_TEXT)
 	.fontname("Quicksand")
-	.fontsize(50 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.fontsize(50 * LGGraphics::windowData.zoomY, 0)
 	.bgcolor(WHITE)
 	.textcolor(LGGraphics::mainColor)
 	.addtext(L"Start game")
@@ -197,15 +197,15 @@ int LGserver::GAME() {
 		rbCnt=LGgame::playerCnt-plCnt;
 		cleardevice();
 		startBox.display();
-		xyprintf(800 * LGGraphics::mapDataStore.mapSizeX, 400 * LGGraphics::mapDataStore.mapSizeY, "Player Number : %d",plCnt);
+		xyprintf(800 * LGGraphics::windowData.zoomX, 400 * LGGraphics::windowData.zoomY, "Player Number : %d",plCnt);
 		sockCollect();
 
 		while(mousemsg()) {
 			startBox.status=0;
 			mouse_msg msg = getmouse();
 
-			if(msg.x >= 400 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 600 * LGGraphics::mapDataStore.mapSizeY
-			   && msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+			if(msg.x >= 400 * LGGraphics::windowData.zoomX && msg.x <= 600 * LGGraphics::windowData.zoomY
+			   && msg.y >= 350 * LGGraphics::windowData.zoomY && msg.y <= 450 * LGGraphics::windowData.zoomY) {
 				startBox.status = 1;
 
 				if(msg.is_left()) {
@@ -240,20 +240,20 @@ int LGserver::GAME() {
 	LGgame::curTurn = 0;
 	bool gameEnd = 0;
 	rectBUTTON fpsbut;
-	fpsbut.move(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
-	fpsbut.size(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
+	fpsbut.move(0, 1400 * LGGraphics::windowData.zoomX);
+	fpsbut.size(20 * LGGraphics::windowData.zoomY, 200 * LGGraphics::windowData.zoomX);
 	fpsbut.textalign(CENTER_TEXT, CENTER_TEXT);
 	fpsbut.fontname("Courier New");
-	fpsbut.fontsize(20 * LGGraphics::mapDataStore.mapSizeY, 0);
+	fpsbut.fontsize(20 * LGGraphics::windowData.zoomY, 0);
 	fpsbut.bgcolor(RED);
 	fpsbut.textcolor(WHITE);
 	rectBUTTON turnbut;
 	turnbut
-	.move(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
-	.size(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
+	.move(0, 1250 * LGGraphics::windowData.zoomX)
+	.size(20 * LGGraphics::windowData.zoomY, 150 * LGGraphics::windowData.zoomX)
 	.textalign(CENTER_TEXT, CENTER_TEXT)
 	.fontname("Courier New")
-	.fontsize(20 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.fontsize(20 * LGGraphics::windowData.zoomY, 0)
 	.bgcolor(BLUE)
 	.textcolor(WHITE);
 
@@ -267,10 +267,10 @@ int LGserver::GAME() {
 			mouse_msg msg = getmouse();
 
 			if(msg.is_wheel()) {
-				widthPerBlock += msg.wheel / 120;
-				heightPerBlock += msg.wheel / 120;
-				widthPerBlock = max(widthPerBlock, 2);
-				heightPerBlock = max(heightPerBlock, 2);
+				blockWidth += msg.wheel / 120;
+				blockHeight += msg.wheel / 120;
+				blockWidth = max(blockWidth, 2);
+				blockHeight = max(blockHeight, 2);
 			}
 			/* Server map doesn't need dragging? */
 		}
@@ -297,13 +297,13 @@ int LGserver::GAME() {
 				continue;
 			switch(robotId[i]) {
 				case 1 ... 100:
-					LGgame::analyzeMove(i, smartRandomBot::smartRandomBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
+					LGgame::analyzeMove(i, smartRandomBot::calcNextMove(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
 					break;
 				case 101 ... 200:
-					LGgame::analyzeMove(i, xrzBot::xrzBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
+					LGgame::analyzeMove(i, xrzBot::calcNextMove(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
 					break;
 				case 201 ... 300:
-					LGgame::analyzeMove(i, xiaruizeBot::xiaruizeBot(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
+					LGgame::analyzeMove(i, xiaruizeBot::calcNextMove(i, LGgame::playerCoo[i]), LGgame::playerCoo[i]);
 					break;
 				default:
 					LGgame::analyzeMove(i, 0, LGgame::playerCoo[i]);
@@ -347,26 +347,26 @@ int LGserver::GAME() {
 				cleardevice();
 				printMap(LGgame::cheatCode, LGgame::playerCoo[0]);
 				LGgame::ranklist();
-				int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
+				int screenszr = 1600 * LGGraphics::windowData.zoomX;
 				static int fpslen;
 				static int turnlen;
 				static int rspeedlen;
 				setfillcolor(LGGraphics::bgColor);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-				setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
+				setfont(20 * LGGraphics::windowData.zoomY, 0, "Quicksand");
 				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
 				turnlen = textwidth(("Turn " + to_string(LGgame::curTurn) + ".").c_str());
 				rspeedlen = textwidth(("Real Speed: " + to_string(LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L))).c_str()); setfillcolor(RED);
 				setfillcolor(GREEN);
-				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
+				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
 				setfillcolor(RED);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+				bar(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::windowData.zoomY);
+				rectangle(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::windowData.zoomY);
 				setfillcolor(BLUE);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::windowData.zoomY);
+				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::windowData.zoomY);
 				settextjustify(CENTER_TEXT, TOP_TEXT);
 				xyprintf(screenszr - rspeedlen / 2 - 5, 0, "Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L));
 				xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, "FPS: %f", getfps());
@@ -493,14 +493,14 @@ int LGclient::GAME() {
 	lisCon=true;
 
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
-	setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+	setfont(50 * LGGraphics::windowData.zoomY, 0, "Quicksand");
 
 	quitBox
-	.size(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
-	.move(400 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
+	.size(200 * LGGraphics::windowData.zoomX, 100 * LGGraphics::windowData.zoomY)
+	.move(400 * LGGraphics::windowData.zoomX,350 * LGGraphics::windowData.zoomY)
 	.textalign(CENTER_TEXT, CENTER_TEXT)
 	.fontname("Quicksand")
-	.fontsize(50 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.fontsize(50 * LGGraphics::windowData.zoomY, 0)
 	.bgcolor(WHITE)
 	.textcolor(LGGraphics::mainColor)
 	.addtext(L"Quit game")
@@ -508,11 +508,11 @@ int LGclient::GAME() {
 	quitBox.display();
 
 	IPfin
-	.size(200 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY)
-	.move(100 * LGGraphics::mapDataStore.mapSizeX,350 * LGGraphics::mapDataStore.mapSizeY)
+	.size(200 * LGGraphics::windowData.zoomX, 100 * LGGraphics::windowData.zoomY)
+	.move(100 * LGGraphics::windowData.zoomX,350 * LGGraphics::windowData.zoomY)
 	.textalign(CENTER_TEXT, CENTER_TEXT)
 	.fontname("Quicksand")
-	.fontsize(50 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.fontsize(50 * LGGraphics::windowData.zoomY, 0)
 	.bgcolor(WHITE)
 	.textcolor(LGGraphics::mainColor)
 	.addtext(L"Connect")
@@ -520,11 +520,11 @@ int LGclient::GAME() {
 	IPfin.display();
 
 	IPbox.create(true);
-	IPbox.move(800 * LGGraphics::mapDataStore.mapSizeX, 350 * LGGraphics::mapDataStore.mapSizeY);
-	IPbox.size(400 * LGGraphics::mapDataStore.mapSizeX, 100 * LGGraphics::mapDataStore.mapSizeY);
+	IPbox.move(800 * LGGraphics::windowData.zoomX, 350 * LGGraphics::windowData.zoomY);
+	IPbox.size(400 * LGGraphics::windowData.zoomX, 100 * LGGraphics::windowData.zoomY);
 	IPbox.setbgcolor(WHITE);
 	IPbox.setcolor(LGGraphics::mainColor);
-	IPbox.setfont(50 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+	IPbox.setfont(50 * LGGraphics::windowData.zoomY, 0, "Quicksand");
 	IPbox.visible(true);
 
 	for(; is_run(); delay_fps(60)) {
@@ -536,8 +536,8 @@ int LGclient::GAME() {
 			IPfin.status=0;
 			mouse_msg msg = getmouse();
 
-			if(msg.x >= 400 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 600 * LGGraphics::mapDataStore.mapSizeY
-			   && msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+			if(msg.x >= 400 * LGGraphics::windowData.zoomX && msg.x <= 600 * LGGraphics::windowData.zoomY
+			   && msg.y >= 350 * LGGraphics::windowData.zoomY && msg.y <= 450 * LGGraphics::windowData.zoomY) {
 				quitBox.status = 1;
 
 				if(msg.is_left()) {
@@ -546,8 +546,8 @@ int LGclient::GAME() {
 				} continue;
 			}
 
-			if(msg.x >= 100 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 300 * LGGraphics::mapDataStore.mapSizeY
-			   && msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+			if(msg.x >= 100 * LGGraphics::windowData.zoomX && msg.x <= 300 * LGGraphics::windowData.zoomY
+			   && msg.y >= 350 * LGGraphics::windowData.zoomY && msg.y <= 450 * LGGraphics::windowData.zoomY) {
 				IPfin.status = 1;
 
 				if(msg.is_left()) {
@@ -573,15 +573,15 @@ int LGclient::GAME() {
 	for(; is_run()&&lisCon; delay_fps(60)) {
 		cleardevice();
 		quitBox.display();
-		xyprintf(1000 * LGGraphics::mapDataStore.mapSizeX, 400 * LGGraphics::mapDataStore.mapSizeY, "Player Number : %d",playerNumber);
+		xyprintf(1000 * LGGraphics::windowData.zoomX, 400 * LGGraphics::windowData.zoomY, "Player Number : %d",playerNumber);
 		sockCollect();
 
 		while(mousemsg()) {
 			quitBox.status=0;
 			mouse_msg msg = getmouse();
 
-			if(msg.x >= 400 * LGGraphics::mapDataStore.mapSizeX && msg.x <= 600 * LGGraphics::mapDataStore.mapSizeY
-			   && msg.y >= 350 * LGGraphics::mapDataStore.mapSizeY && msg.y <= 450 * LGGraphics::mapDataStore.mapSizeY) {
+			if(msg.x >= 400 * LGGraphics::windowData.zoomX && msg.x <= 600 * LGGraphics::windowData.zoomY
+			   && msg.y >= 350 * LGGraphics::windowData.zoomY && msg.y <= 450 * LGGraphics::windowData.zoomY) {
 				quitBox.status = 1;
 
 				if(msg.is_left()) {
@@ -599,20 +599,20 @@ int LGclient::GAME() {
 	bool gameEnd = 0;
 	int movLin,movCol;
 	rectBUTTON fpsbut;
-	fpsbut.move(0, 1400 * LGGraphics::mapDataStore.mapSizeX);
-	fpsbut.size(20 * LGGraphics::mapDataStore.mapSizeY, 200 * LGGraphics::mapDataStore.mapSizeX);
+	fpsbut.move(0, 1400 * LGGraphics::windowData.zoomX);
+	fpsbut.size(20 * LGGraphics::windowData.zoomY, 200 * LGGraphics::windowData.zoomX);
 	fpsbut.textalign(CENTER_TEXT, CENTER_TEXT);
 	fpsbut.fontname("Courier New");
-	fpsbut.fontsize(20 * LGGraphics::mapDataStore.mapSizeY, 0);
+	fpsbut.fontsize(20 * LGGraphics::windowData.zoomY, 0);
 	fpsbut.bgcolor(RED);
 	fpsbut.textcolor(WHITE);
 	rectBUTTON turnbut;
 	turnbut
-	.move(0, 1250 * LGGraphics::mapDataStore.mapSizeX)
-	.size(20 * LGGraphics::mapDataStore.mapSizeY, 150 * LGGraphics::mapDataStore.mapSizeX)
+	.move(0, 1250 * LGGraphics::windowData.zoomX)
+	.size(20 * LGGraphics::windowData.zoomY, 150 * LGGraphics::windowData.zoomX)
 	.textalign(CENTER_TEXT, CENTER_TEXT)
 	.fontname("Courier New")
-	.fontsize(20 * LGGraphics::mapDataStore.mapSizeY, 0)
+	.fontsize(20 * LGGraphics::windowData.zoomY, 0)
 	.bgcolor(BLUE)
 	.textcolor(WHITE);
 
@@ -631,15 +631,15 @@ int LGclient::GAME() {
 			mouse_msg msg = getmouse();
 
 			if(msg.is_wheel()) {
-				widthPerBlock += msg.wheel / 120;
-				heightPerBlock += msg.wheel / 120;
-				widthPerBlock = max(widthPerBlock, 2);
-				heightPerBlock = max(heightPerBlock, 2);
+				blockWidth += msg.wheel / 120;
+				blockHeight += msg.wheel / 120;
+				blockWidth = max(blockWidth, 2);
+				blockHeight = max(blockHeight, 2);
 			}
 			if(msg.is_move()) {
 				if(midact == 1) {
-					LGGraphics::mapDataStore.maplocX += msg.x - smsx;
-					LGGraphics::mapDataStore.maplocY += msg.y - smsy;
+					LGGraphics::windowData.maplocX += msg.x - smsx;
+					LGGraphics::windowData.maplocY += msg.y - smsy;
 					smsx = msg.x, smsy = msg.y; moved = true;
 				}
 			} else if(msg.is_left()) {
@@ -652,12 +652,12 @@ int LGclient::GAME() {
 					midact = 0;
 					std::chrono::steady_clock::duration now = std::chrono::steady_clock::now().time_since_epoch();
 					if(!moved && now - prsttm < 300ms) {
-						if(msg.x >= LGGraphics::mapDataStore.maplocX &&
-						   msg.y >= LGGraphics::mapDataStore.maplocY &&
-						   msg.x <= LGGraphics::mapDataStore.maplocX + widthPerBlock * mapW &&
-						   msg.y <= LGGraphics::mapDataStore.maplocY + heightPerBlock * mapH) {
-							movLin = (msg.y - LGGraphics::mapDataStore.maplocY + heightPerBlock - 1) / heightPerBlock;
-							movCol = (msg.x - LGGraphics::mapDataStore.maplocX + widthPerBlock - 1) / widthPerBlock;
+						if(msg.x >= LGGraphics::windowData.maplocX &&
+						   msg.y >= LGGraphics::windowData.maplocY &&
+						   msg.x <= LGGraphics::windowData.maplocX + blockWidth * mapW &&
+						   msg.y <= LGGraphics::windowData.maplocY + blockHeight * mapH) {
+							movLin = (msg.y - LGGraphics::windowData.maplocY + blockHeight - 1) / blockHeight;
+							movCol = (msg.x - LGGraphics::windowData.maplocX + blockWidth - 1) / blockWidth;
 							movement.clear();
 							movement.emplace_back(0);
 						}
@@ -752,26 +752,26 @@ int LGclient::GAME() {
 				cleardevice();
 				printMap(LGgame::cheatCode, LGgame::playerCoo[playerNumber]);
 				LGgame::ranklist();
-				int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
+				int screenszr = 1600 * LGGraphics::windowData.zoomX;
 				static int fpslen;
 				static int turnlen;
 				static int rspeedlen;
 				setfillcolor(LGGraphics::bgColor);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-				setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
+				setfont(20 * LGGraphics::windowData.zoomY, 0, "Quicksand");
 				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				fpslen = textwidth((L"FPS: " + to_wstring(getfps())).c_str());
 				turnlen = textwidth((L"Turn " + to_wstring(LGgame::curTurn) + L".").c_str());
 				rspeedlen = textwidth((L"Real Speed: " + to_wstring(LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L))).c_str()); setfillcolor(RED);
 				setfillcolor(GREEN);
-				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
+				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
 				setfillcolor(RED);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+				bar(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::windowData.zoomY);
+				rectangle(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::windowData.zoomY);
 				setfillcolor(BLUE);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::windowData.zoomY);
+				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::windowData.zoomY);
 				settextjustify(CENTER_TEXT, TOP_TEXT);
 				xyprintf(screenszr - rspeedlen / 2 - 5, 0, L"Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1000000000.0L));
 				xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, L"FPS: %f", getfps());
@@ -782,4 +782,4 @@ int LGclient::GAME() {
 	return 0;
 }
 
-#endif
+#endif // __LGWEB_HPP__

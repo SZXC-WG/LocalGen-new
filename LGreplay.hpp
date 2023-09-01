@@ -47,7 +47,7 @@ namespace LGreplay {
 	}
 
 	Movement::Movement() {}
-	Movement::Movement(int tm,int d,playerCoord c) {player=tm; dir=d; coord=c;}
+	Movement::Movement(int tm,int d,coordS c) {player=tm; dir=d; coord=c;}
 	string Movement::zip() {
 		if(dir<1||dir>4) return "";
 		string res="";
@@ -102,11 +102,11 @@ namespace LGreplay {
 		return B;
 	}
 	int QwQ(Movement mov) {
-		playerCoord coo=mov.coord;
+		coordS coo=mov.coord;
 		int id=mov.player,mv=mov.dir;
 		switch(mv) {
 			case 1 ... 4: {
-				playerCoord newCoo{coo.x + dx[mv], coo.y + dy[mv]};
+				coordS newCoo{coo.x + dx[mv], coo.y + dy[mv]};
 				if(newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW || gameMap[newCoo.x][newCoo.y].type == 2)
 					return 1;
 				moveS insMv{id,coo,newCoo,};

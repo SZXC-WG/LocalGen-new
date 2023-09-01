@@ -1,8 +1,6 @@
 #ifndef __BOT_XIARUIZE__
 #define __BOT_XIARUIZE__
 
-#include "../LGdef.hpp" 
-
 namespace xiaruizeBot
 {
     const int dx[5] = {0, -1, 0, 1, 0};
@@ -14,7 +12,7 @@ namespace xiaruizeBot
     static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
     int sendArmyProcess[20];
     int backCountCnt[20];
-    playerCoord previousPos[20];
+    coordS previousPos[20];
 
     void changeDirection(int x, int &res)
     {
@@ -35,7 +33,7 @@ namespace xiaruizeBot
         }
     }
 
-    int dfs(int id, playerCoord coord)
+    int dfs(int id, coordS coord)
     {
         shuffle(checkOrder + 1, checkOrder + 5, mtrd);
         int x;
@@ -112,7 +110,7 @@ namespace xiaruizeBot
         return -1;
     }
 
-    int xiaruizeBot(int id, playerCoord coord)
+    int calcNextMove(int id, coordS coord)
     {
         if (gameMap[coord.x][coord.y].army == 0 || gameMap[coord.x][coord.y].player != id)
         {

@@ -1,20 +1,19 @@
 #include <algorithm>
 #include <vector>
-#include "../LGdef.hpp"
 
 namespace lcwBot
 {
     const int dx[5] = {0, -1, 0, 1, 0};
     const int dy[5] = {0, 0, -1, 0, 1};
     static int armyNow;
-    playerCoord previousPos[17];
+    coordS previousPos[17];
     static int visitTime[17][505][505];
     static int turnCount[17];
     static int id;
     
     static bool isEx = 0;
     
-    int getCnt(playerCoord player, int i){
+    int getCnt(coordS player, int i){
     	int cnt = 4;
         struct node
         {
@@ -49,7 +48,7 @@ namespace lcwBot
         return cnt;
 	}
 
-    int lcwBot(int ind, playerCoord player)
+    int calcNextMove(int ind, coordS player)
     {
     	if(isEx){
     		int checkOrder[5] = {0, 1, 2, 3, 4};
@@ -219,11 +218,11 @@ namespace lcwBot
 			}else{
 				des.Army = gameMap[player.x][player.y].army + des.Army - 1;
 			}
-			playerCoord nextPos;
+			coordS nextPos;
 			nextPos.x = des.x;
 			nextPos.y = des.y;
             isEx = 1;
-            int dir = lcwBot(id, nextPos);
+            int dir = calcNextMove(id, nextPos);
             cnt[i] += getCnt(nextPos, i);
             isEx = 0;
             

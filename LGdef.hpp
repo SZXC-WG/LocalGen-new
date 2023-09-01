@@ -14,28 +14,39 @@
 #ifndef __LGDEF_HPP__
 #define __LGDEF_HPP__
 
-//====def====//
+/**** OVERALL HEADERS ****/
 
+/** C/C++ file operations **/
 #include <cstdio>
-#include <iostream>
 #include <fstream>
+/** C++ string operations **/
 #include <string>
+/** C++ random library **/
 #include <random>
+/** C++ time library **/
 #include <chrono>
+/** C++ STL **/
 #include <algorithm>
+/** used containers (other than string) **/
 #include <vector>
 #include <deque>
 #include <array>
 #include <queue>
+/** thread operations **/
 #include <mutex>
 #include <thread>
+/** web operations (of Windows) **/
 #include <winsock2.h>
+/** Win32 library **/
 #include <windows.h>
 #include <io.h>
-#include <graphics.h>
-#include <ege/sys_edit.h>
-#include "LocalGen_private.h"
+/** EGE library **/
+#include <graphics.h> // main file of EGE
+#include <ege/sys_edit.h> // text boxes of EGE
+/** project header **/
+#include "LocalGen_private.h" // project information
 
+/** using **/
 using std::vector;
 using std::deque;
 using std::string;
@@ -44,16 +55,16 @@ using std::to_string;
 using std::to_wstring;
 using namespace std::literals;
 
-//====const====//
+/**** constant variables ****/
 
-const int dx[5] = {0, -1, 0, 1, 0};
-const int dy[5] = {0, 0, -1, 0, 1};
-const char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'}; // number suffixes; 10^2<->10^12
-const int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
-const int SSN=205,SSL=100005;
-const int SKPORT=14514;
+constexpr int dx[5] = {0, -1, 0, 1, 0};
+constexpr int dy[5] = {0, 0, -1, 0, 1};
+constexpr char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N', 'T'}; // number suffixes; 10^2<->10^12
+constexpr int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
+constexpr int SSN=205,SSL=100005;
+constexpr int SKPORT=14514;
 
-//====struct====//
+/**** structures ****/
 
 /**
  * @brief Struct storing the general information of a map.
@@ -63,14 +74,14 @@ struct MapInfoS {
 	wstring chiname; // chinese(or other languages) name of map
 	wstring engname; // english name of map (generic)
 	wstring auth; // author of the map
-	int hei; // map height
-	int wid; // map width
+	int height; // map height
+	int width; // map width
 	int generalcnt; // count of generals of map
 	int swampcnt; // count of swamps of map
 	int citycnt; // count of cities of map
 	int mountaincnt; // count of mountains of map
 	int plaincnt; // count of plains of map
-	string filename; // map file name (stored in 'maps' folder)
+	string mapFile; // map file name (stored in 'maps' folder)
 	MapInfoS() = default;
 	~MapInfoS() = default;
 };
@@ -89,7 +100,7 @@ struct movementS {
 /**
  * @brief Struct saving the coordinate of a player's focused block.
  */
-struct playerCoord {
+struct coordS {
 	int x, y;
 };
 
@@ -131,15 +142,15 @@ struct gameMessageStore {
  */
 struct moveS {
 	int id; // player id of move
-	playerCoord from; // coordinate from
-	playerCoord to; // coordinate to
+	coordS from; // coordinate from
+	coordS to; // coordinate to
 };
 
 //====value====//
 
 string username; // game user's name
 PIMAGE pimg[55]; // software used images
-MapInfoS maps[5005]; // storing all imported maps
+MapInfoS mapInfo[5005]; // storing all imported maps
 Block gameMap[505][505]; /* current game map; maximum 500*500 */
 playerS playerInfo[64] = { // player information (default written)
 	{L"White", 0xffffffff},
@@ -158,7 +169,7 @@ playerS playerInfo[64] = { // player information (default written)
 };
 
 int mapH, mapW; // height and width of map
-int widthPerBlock, heightPerBlock; // block height and width when printing
+int blockWidth, blockHeight; // block height and width when printing
 int mapNum; // count of imported maps
 
 char strZipStatus[LEN_ZIP];
@@ -170,23 +181,23 @@ char strStatusZip[LEN_ZIP<<2]; // storing the zipped game status
 char strdeStatusZip[LEN_ZIP<<2]; // storing the to-be-dezipped game status
 
 std::vector<passS> passId[505][505]; // every block's passing info
-playerCoord lastTurn[20]; // every player's last turn coordinate (in game)
+coordS lastTurn[20]; // every player's last turn coordinate (in game)
 
 int failSock;
 
-//====function====//
+/**** ALL functions ****/
 
 std::wstring wcharTransfer(const wstring& ws);
 
 /**
  * @brief Function for comparing two coordinates equal.
  *
- * @param a playerCoord
- * @param b playerCoord
+ * @param a coordS
+ * @param b coordS
  * @return true
  * @return false
  */
-bool operator== (playerCoord a,playerCoord b) {
+bool operator== (coordS a,coordS b) {
 	return a.x==b.x&&a.y==b.y;
 }
 
@@ -212,12 +223,12 @@ bool checkValidUsername(string username) {
 inline void exitExe() { WSACleanup(); exit(0); }
 
 /**
- * @brief Check whether the block is visible according to the printCode.
+ * @brief Check whether the block is visible according to the Code.
  *
  * @return true
  * @return false
  */
-bool isVisible(int x, int y, int printCode);
+bool isVisible(int x, int y, int Code);
 /**
  * @brief Print a block's army number.
  *
@@ -227,7 +238,7 @@ bool isVisible(int x, int y, int printCode);
  * @param curx block coordinate on x-axis
  * @param cury block coordinate on y-axis
  */
-void printNum(bool visible, long long army, int player, int curx, int cury);
+void printBlockNum(bool visible, long long army, int player, int curx, int cury);
 
 void createRandomMap(int crtH, int crtW); // generate random map (special) with H and W
 void createStandardMap(int crtH, int crtW); // generate standard map (special) with H and W
@@ -235,10 +246,10 @@ void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, i
 void createFullSwampMap(int crtH, int crtW, int plCnt);
 void createFullPlainMap(int crtH, int crtW, int plCnt);
 
-void getAllFiles(string path, std::vector<string>& files, string fileType);
+void getAllFiles(string path, std::vector<string>& files, string fileExt);
 void initMaps();
 void readMap(int mid); // read map and copy to gameMap
-void printMap(int printCode, playerCoord coo); // print the current gameMap
+void printMap(int Code, coordS coo); // print the current gameMap
 void createOptions(int type,int h);
 
 inline long long PMod(long long& x);
@@ -247,9 +258,8 @@ void Zip(); // zip map
 void deZip(); // dezip map
 
 bool initSock(); // initialize socket web
-void toAvoidCEBugInGraphicsImportMap(string fileName); // ???
 
-/***** graphics *****/
+/*** graphics ***/
 
 bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60);
 
@@ -272,33 +282,32 @@ namespace imageOperation {
  * @brief Namespace for EGE graphics (except image operations)
  */
 namespace LGGraphics {
-	const color_t bgColor = 0xff222222; // background color
-	const color_t mainColor = 0xff008080; // main color
-	const color_t errorColor = 0xfffbbbbb; // error color
-	PIMAGE favi; // favicon image
+	constexpr color_t bgColor = 0xff222222; // background color
+	constexpr color_t mainColor = 0xff008080; // main color
+	constexpr color_t errorColor = 0xfffbbbbb; // error color
+	PIMAGE iconImg; // favicon image
 	string fileName; // ???
-	int stDel = 1; // temporary variable for speed (deprecated)
+	[[deprecated]] int stDel = 1; // temporary variable for speed (deprecated)
 	int plCnt = 0; // temporary variable for count of players
 	int mapSelected = 0; // ID of the map selected
 	int cheatCode = 0; // binary code of visibility in game
 	/**
 	 * @brief Struct for storing printing info of map.
 	 */
-	struct mapData {
+	struct WindowDataS {
 		int heightPerBlock; // block height in printing
 		int widthPerBlock; // block width in printing
 		int height, width; // ???
-		double mapSizeX, mapSizeY; // ???
+		double zoomX, zoomY; // window size zoom (relatively to 1920x1080)
 		int maplocX, maplocY; // location of map in printing
-	} mapDataStore; // storing variable
+	} windowData; // storing variable
 	void WelcomePage();
 	void localOptions();
 	void webOptions();
 	void createMapPage();
 	void replayPage();
-	[[deprecated]] void doMapImport();
+	[[deprecated("The function is to be deleted.")]] void doMapImport();
 	void doMapSelect();
-	// void doRepImport();
 	void importGameSettings();
 	void inputMapData(int a, int b, int c, int d);
 	int select = 0;
@@ -307,10 +316,10 @@ namespace LGGraphics {
 	void init();
 }
 
-inline int getHeightPerBlock(); // get LGGraphics::mapDataStore.heightPerBlock; deprecated
-inline int getWidthPerBlock(); // get LGGraphics::mapDataStore.widthPerBlock; deprecated
+inline int getHeightPerBlock(); // get LGGraphics::windowData.heightPerBlock; deprecated
+inline int getWidthPerBlock(); // get LGGraphics::windowData.widthPerBlock; deprecated
 
-/***** others *****/
+/**** others ****/
 
 namespace LGgame {
 	bool inReplay;
@@ -322,27 +331,28 @@ namespace LGgame {
 	int playerCnt;
 	int isAlive[64];
 	int robotId[64];
-	int gameSpeed; /* fps */
+	int gameSpeed;
 	int gameMesC;
 	string playerNames[64];
 	std::vector<int> team[64];
-	playerCoord genCoo[64];
+	coordS genCoo[64];
 	std::deque<moveS> inlineMove;
-	playerCoord playerCoo[64];
+	coordS playerCoo[64];
 	std::chrono::nanoseconds beginTime;
 
 	void init(int chtC, int pC, int gS);
 	void printGameMessage(gameMessageStore now);
-	void kill(int p1, int p2);
-	int analyzeMove(int id, int mv, playerCoord& coo);
+	void capture(int p1, int p2);
+	[[deprecated("This function will be deleted since v5.0.")]] int analyzeMove(int id, int mv, coordS& coo);
+	int checkMove(int id, coordS coo);
 	void flushMove();
-	void initGenerals(playerCoord coos[]);
+	void initGenerals(coordS coos[]);
 	void updateMap();
 	void ranklist();
 }
 
 namespace LGreplay {
-	const string defaultReplayFilename="replay.lgr";
+	const string defaultReplayFile="replay.lgr";
 	char ntoc(int x);
 	int cton(char x);
 	string ntos(int x,int len=-1);
@@ -350,17 +360,17 @@ namespace LGreplay {
 	string zipBlock(Block B);
 	struct Movement {
 		int player,dir;
-		playerCoord coord;
+		coordS coord;
 		Movement();
-		Movement(int tm,int d,playerCoord c);
+		Movement(int tm,int d,coordS c);
 		string zip();
 	};
 	Movement readMove(char* buf);
 	struct WReplay {
 		string Filename;
 		FILE* file;
-		WReplay(string Fname=defaultReplayFilename);
-		void initReplay(string Fname=defaultReplayFilename);
+		WReplay(string Fname=defaultReplayFile);
+		void initReplay(string Fname=defaultReplayFile);
 		void newTurn();
 		void newMove(Movement mov);
 	} wreplay;
@@ -381,13 +391,13 @@ namespace LGreplay {
 		Block startMap[505][505];
 		vector<replayMap> midStates;
 		char* readBuf=new char[256];
-		RReplay(string Fname=defaultReplayFilename);
+		RReplay(string Fname=defaultReplayFile);
 		void resetGame();
 		bool _nextTurn();
 		int nextTurn();
 		void gotoTurn(int turnid);
 		int preTurn();
-		void initReplay(string Fname=defaultReplayFilename);
+		void initReplay(string Fname=defaultReplayFile);
 	} rreplay;
 }
 
@@ -427,18 +437,18 @@ namespace LGclient {
 };
 
 /**
- * @brief Main Page Function. This page occurs when entering the software.
+ * @brief Main Page Function. This page occurs when entering the program.
  */
 void MainPage() {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-	LGGraphics::favi = newimage();
-	getimage_pngfile(LGGraphics::favi, "img/favicon.png");
+	LGGraphics::iconImg = newimage();
+	getimage_pngfile(LGGraphics::iconImg, "img/favicon.png");
 	LGGraphics::WelcomePage();
 //	LGGraphics::localOptions();
 	return;
 }
 
-#include "bin/LGGrectbut.hpp"
-#include "bin/LGGcircbut.hpp"
+#include "bin/LGGrectbut.hpp" // rectangular button
+#include "bin/LGGcircbut.hpp" // circular button
 
 #endif // __LGDEF_HPP__

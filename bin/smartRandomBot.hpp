@@ -1,15 +1,13 @@
 #ifndef __BOT_SMARTRANDOM__
 #define __BOT_SMARTRANDOM__
 
-#include "../LGdef.hpp"
-
 namespace smartRandomBot {
 	const int dx[5] = {0, -1, 0, 1, 0};
 	const int dy[5] = {0, 0, -1, 0, 1};
 
-	int smartRandomBot(int id, playerCoord coo) {
+	int calcNextMove(int id, coordS coo) {
 		static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-		static deque<playerCoord> lastCoord[20];
+		static deque<coordS> lastCoord[20];
 		if(gameMap[coo.x][coo.y].player != id || gameMap[coo.x][coo.y].army == 0)
 			return 0;
 		struct node {
@@ -26,7 +24,7 @@ namespace smartRandomBot {
 				continue;
 			p[++pl] = {
 				gameMap[nx][ny].type, gameMap[nx][ny].player, gameMap[nx][ny].army, i,
-				std::find(lastCoord[id].rbegin(), lastCoord[id].rend(), playerCoord{nx, ny}) - lastCoord[id].rbegin()
+				std::find(lastCoord[id].rbegin(), lastCoord[id].rend(), coordS{nx, ny}) - lastCoord[id].rbegin()
 			};
 		}
 		bool rdret = mtrd() % 2;

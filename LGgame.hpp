@@ -21,33 +21,33 @@
 void LGgame::printGameMessage(gameMessageStore now) {
 	++LGgame::gameMesC;
 	setcolor(WHITE);
-	// setfont(40 * LGGraphics::mapDataStore.mapSizeY, 0, "Lucida Fax");
-	// xyprintf(960 * LGGraphics::mapDataStore.mapSizeX, 330 * LGGraphics::mapDataStore.mapSizeY, "GameMessage");
-	setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Courier New");
+	// setfont(40 * LGGraphics::windowData.mapSizeY, 0, "Lucida Fax");
+	// xyprintf(960 * LGGraphics::windowData.mapSizeX, 330 * LGGraphics::windowData.mapSizeY, "GameMessage");
+	setfont(20 * LGGraphics::windowData.zoomY, 0, "Courier New");
 	settextjustify(RIGHT_TEXT, TOP_TEXT);
 	int tmp = 0;
 	if(now.playerB == -1) {
 		setcolor(playerInfo[now.playerA].color);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((" won the game at Turn #" + to_string(now.turnNumber)).c_str()), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%7s", playerInfo[now.playerA].name.c_str());
+		xyprintf(1600 * LGGraphics::windowData.zoomX - 1 - textwidth((" won the game at Turn #" + to_string(now.turnNumber)).c_str()), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::windowData.zoomY, "%7s", playerInfo[now.playerA].name.c_str());
 		setcolor(RED);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, " won the game at Turn #%d", now.turnNumber);
+		xyprintf(1600 * LGGraphics::windowData.zoomX - 1, 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::windowData.zoomY, " won the game at Turn #%d", now.turnNumber);
 		setcolor(WHITE);
 	} else if(1 == now.playerB && now.playerA == 1)
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, "You surrendered at Turn #%d", now.turnNumber);
+		xyprintf(1600 * LGGraphics::windowData.zoomX - 1, 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::windowData.zoomY, "You surrendered at Turn #%d", now.turnNumber);
 	else {
 		setcolor(playerInfo[now.playerA].color);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((L" at Turn #" + to_wstring(now.turnNumber)).c_str()) - textwidth((L" " + playerInfo[now.playerB].name).c_str()) - textwidth(L" killed "), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, L"%7ls", playerInfo[now.playerA].name.c_str());
+		xyprintf(1600 * LGGraphics::windowData.zoomX - 1 - textwidth((L" at Turn #" + to_wstring(now.turnNumber)).c_str()) - textwidth((L" " + playerInfo[now.playerB].name).c_str()) - textwidth(L" killed "), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::windowData.zoomY, L"%7ls", playerInfo[now.playerA].name.c_str());
 		setcolor(WHITE);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((L" at Turn #" + to_wstring(now.turnNumber)).c_str()) - textwidth((L" " + playerInfo[now.playerB].name).c_str()), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, L" killed ", now.turnNumber);
+		xyprintf(1600 * LGGraphics::windowData.zoomX - 1 - textwidth((L" at Turn #" + to_wstring(now.turnNumber)).c_str()) - textwidth((L" " + playerInfo[now.playerB].name).c_str()), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::windowData.zoomY, L" killed ", now.turnNumber);
 		setcolor(playerInfo[now.playerB].color);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1 - textwidth((L" at Turn #" + to_wstring(now.turnNumber)).c_str()), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, "%s", playerInfo[now.playerB].name.c_str());
+		xyprintf(1600 * LGGraphics::windowData.zoomX - 1 - textwidth((L" at Turn #" + to_wstring(now.turnNumber)).c_str()), 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::windowData.zoomY, "%s", playerInfo[now.playerB].name.c_str());
 		setcolor(WHITE);
-		xyprintf(1600 * LGGraphics::mapDataStore.mapSizeX - 1, 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::mapDataStore.mapSizeY, " at Turn #%d", now.turnNumber);
+		xyprintf(1600 * LGGraphics::windowData.zoomX - 1, 20 * (LGgame::playerCnt + 2 + LGgame::gameMesC) * LGGraphics::windowData.zoomY, " at Turn #%d", now.turnNumber);
 	}
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 
-void LGgame::kill(int p1, int p2) {
+void LGgame::capture(int p1, int p2) {
 	if(p2 == 1) {
 		std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
 		if((!inReplay)&&(!inServer)) MessageBoxW(nullptr, wstring(L"YOU ARE KILLED BY PLAYER " + playerInfo[p1].name + L" AT TURN " + to_wstring(LGgame::curTurn) + L".").c_str(), L"", MB_OK | MB_SYSTEMMODAL);
@@ -64,11 +64,11 @@ void LGgame::kill(int p1, int p2) {
 		}
 	}
 	printGameMessage({p1, p2, LGgame::curTurn});
-	lastTurn[p2] = playerCoord{-1, -1};
+	lastTurn[p2] = coordS{-1, -1};
 }
 
 // movement analyzer
-int LGgame::analyzeMove(int id, int mv, playerCoord& coo) {
+int LGgame::analyzeMove(int id, int mv, coordS& coo) {
 	switch(mv) {
 		case -1:
 			break;
@@ -77,7 +77,7 @@ int LGgame::analyzeMove(int id, int mv, playerCoord& coo) {
 			lastTurn[id] = coo;
 			break;
 		case 1 ... 4: {
-			playerCoord newCoo{coo.x + dx[mv], coo.y + dy[mv]};
+			coordS newCoo{coo.x + dx[mv], coo.y + dy[mv]};
 			if(newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW || gameMap[newCoo.x][newCoo.y].type == 2)
 				return 1;
 			moveS insMv{
@@ -91,7 +91,7 @@ int LGgame::analyzeMove(int id, int mv, playerCoord& coo) {
 			break;
 		}
 		case 5 ... 8: {
-			playerCoord newCoo{coo.x + dx[mv - 4], coo.y + dy[mv - 4]};
+			coordS newCoo{coo.x + dx[mv - 4], coo.y + dy[mv - 4]};
 			if(newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW)
 				return 1;
 			coo = newCoo;
@@ -124,7 +124,7 @@ void LGgame::flushMove() {
 				gameMap[cur.to.x][cur.to.y].player = cur.id;
 				if(gameMap[cur.to.x][cur.to.y].type == 3) {
 					/* general */
-					kill(cur.id, p);
+					capture(cur.id, p);
 					gameMap[cur.to.x][cur.to.y].type = 4;
 					for(auto& mv : LGgame::inlineMove)
 						if(mv.id == p)
@@ -135,22 +135,22 @@ void LGgame::flushMove() {
 	}
 }
 // general init
-void LGgame::initGenerals(playerCoord coos[]) {
-	std::deque<playerCoord> gens;
+void LGgame::initGenerals(coordS coos[]) {
+	std::deque<coordS> gens;
 	for(int i = 1; i <= mapH; ++i)
 		for(int j = 1; j <= mapW; ++j)
 			if(gameMap[i][j].type == 3)
-				gens.push_back(playerCoord{i, j});
+				gens.push_back(coordS{i, j});
 	while(gens.size() < LGgame::playerCnt) {
 		std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
 		int x, y;
 		do x = p() % mapH + 1, y = p() % mapW + 1;
 		while(gameMap[x][y].type != 0);
-		gens.push_back(playerCoord{x, y});
+		gens.push_back(coordS{x, y});
 		gameMap[x][y].type = 3;
 		gameMap[x][y].army = 0;
 	}
-	sort(gens.begin(), gens.end(), [](playerCoord a, playerCoord b) { return a.x == b.x ? a.y < b.y : a.x < b.x; });
+	sort(gens.begin(), gens.end(), [](coordS a, coordS b) { return a.x == b.x ? a.y < b.y : a.x < b.x; });
 	std::shuffle(gens.begin(), gens.end(), std::mt19937(std::chrono::system_clock::now().time_since_epoch().count()));
 	for(int i = 1; i <= LGgame::playerCnt; ++i) {
 		coos[i] = lastTurn[i] = LGgame::genCoo[i] = gens[i - 1];
@@ -199,11 +199,11 @@ void LGgame::updateMap() {
 void LGgame::ranklist() {
 	bool printBot = !(LGgame::inReplay|LGgame::inServer|LGgame::inClient);
 	bool printAIH = !(LGgame::inReplay);
-	setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+	setfont(20 * LGGraphics::windowData.zoomY, 0, "Quicksand");
 	static int nlen, alen, plen, clen, tlen, aihlen = -10, botlen = -10;
 	setfillcolor(LGGraphics::bgColor);
-	// bar(1600 * LGGraphics::mapDataStore.mapSizeX - nlen - alen - plen - clen - tlen - aihlen - botlen - 35, 20 * LGGraphics::mapDataStore.mapSizeY,
-	//     1600 * LGGraphics::mapDataStore.mapSizeX, (LGgame::playerCnt + 2) * 20 * LGGraphics::mapDataStore.mapSizeY + 5 + 5);
+	// bar(1600 * LGGraphics::windowData.mapSizeX - nlen - alen - plen - clen - tlen - aihlen - botlen - 35, 20 * LGGraphics::windowData.mapSizeY,
+	//     1600 * LGGraphics::windowData.mapSizeX, (LGgame::playerCnt + 2) * 20 * LGGraphics::windowData.mapSizeY + 5 + 5);
 	struct node {
 		int id;
 		long long army;
@@ -253,7 +253,7 @@ void LGgame::ranklist() {
 		if(printAIH) aihlen = max(aihlen, textwidth(to_string(rklst[i].armyInHand).c_str()));
 		if(printBot) botlen = max(botlen, textwidth(botName[LGgame::robotId[rklst[i].id]/100+1].c_str()));
 	}
-	int ed = 1600 * LGGraphics::mapDataStore.mapSizeX;
+	int ed = 1600 * LGGraphics::windowData.zoomX;
 	int s7 = ed - botlen - 10;
 	int s6 = s7 - aihlen - 10;
 	int s5 = s6 - tlen - 10;
@@ -261,7 +261,7 @@ void LGgame::ranklist() {
 	int s3 = s4 - plen - 10;
 	int s2 = s3 - alen - 10;
 	int s1 = s2 - nlen - 10;
-	int prhei = 20 * LGGraphics::mapDataStore.mapSizeY;
+	int prhei = 20 * LGGraphics::windowData.zoomY;
 	setcolor(WHITE);
 	settextjustify(CENTER_TEXT, TOP_TEXT);
 	rectangle(s1, prhei, s2, prhei + prhei);
@@ -332,8 +332,8 @@ namespace LGlocal {
 		flushkey();
 		flushmouse();
 		int midact = 0;
-		LGGraphics::mapDataStore.maplocX = - (LGgame::genCoo[1].y) * widthPerBlock + 800 * LGGraphics::mapDataStore.mapSizeX;
-		LGGraphics::mapDataStore.maplocY = - (LGgame::genCoo[1].x) * heightPerBlock + 450 * LGGraphics::mapDataStore.mapSizeY;
+		LGGraphics::windowData.maplocX = - (LGgame::genCoo[1].y) * blockWidth + 800 * LGGraphics::windowData.zoomX;
+		LGGraphics::windowData.maplocY = - (LGgame::genCoo[1].x) * blockHeight + 450 * LGGraphics::windowData.zoomY;
 		int smsx = 0, smsy = 0; bool moved = false;
 		std::chrono::steady_clock::duration prsttm;
 		bool toNextTurn = true, paused = false;
@@ -342,15 +342,15 @@ namespace LGlocal {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
 				if(msg.is_wheel()) {
-					widthPerBlock += msg.wheel / 120;
-					heightPerBlock += msg.wheel / 120;
-					widthPerBlock = max(widthPerBlock, 2);
-					heightPerBlock = max(heightPerBlock, 2);
+					blockWidth += msg.wheel / 120;
+					blockHeight += msg.wheel / 120;
+					blockWidth = max(blockWidth, 2);
+					blockHeight = max(blockHeight, 2);
 				}
 				if(msg.is_move()) {
 					if(midact == 1) {
-						LGGraphics::mapDataStore.maplocX += msg.x - smsx;
-						LGGraphics::mapDataStore.maplocY += msg.y - smsy;
+						LGGraphics::windowData.maplocX += msg.x - smsx;
+						LGGraphics::windowData.maplocY += msg.y - smsy;
 						smsx = msg.x, smsy = msg.y; moved = true;
 					}
 				} else if(msg.is_left()) {
@@ -363,12 +363,12 @@ namespace LGlocal {
 						midact = 0;
 						std::chrono::steady_clock::duration now = std::chrono::steady_clock::now().time_since_epoch();
 						if(!moved && now - prsttm < 200ms) {
-							if(msg.x >= LGGraphics::mapDataStore.maplocX &&
-							   msg.y >= LGGraphics::mapDataStore.maplocY &&
-							   msg.x <= LGGraphics::mapDataStore.maplocX + widthPerBlock * mapW &&
-							   msg.y <= LGGraphics::mapDataStore.maplocY + heightPerBlock * mapH) {
-								int lin = (msg.y + heightPerBlock - 1 - LGGraphics::mapDataStore.maplocY) / heightPerBlock;
-								int col = (msg.x + widthPerBlock - 1 - LGGraphics::mapDataStore.maplocX) / widthPerBlock;
+							if(msg.x >= LGGraphics::windowData.maplocX &&
+							   msg.y >= LGGraphics::windowData.maplocY &&
+							   msg.x <= LGGraphics::windowData.maplocX + blockWidth * mapW &&
+							   msg.y <= LGGraphics::windowData.maplocY + blockHeight * mapH) {
+								int lin = (msg.y + blockHeight - 1 - LGGraphics::windowData.maplocY) / blockHeight;
+								int col = (msg.x + blockWidth - 1 - LGGraphics::windowData.maplocX) / blockWidth;
 								LGgame::playerCoo[1] = {lin, col};
 								movement.clear();
 							}
@@ -432,7 +432,7 @@ namespace LGlocal {
 							}
 						}
 						LGgame::printGameMessage({1, 1, LGgame::curTurn});
-						lastTurn[1] = playerCoord{-1, -1};
+						lastTurn[1] = coordS{-1, -1};
 						break;
 					}
 				}
@@ -441,7 +441,7 @@ namespace LGlocal {
 			if(toNextTurn) {
 				LGgame::updateMap();
 				LGreplay::wreplay.newTurn();
-				playerCoord tmpcoo=LGgame::playerCoo[1];
+				coordS tmpcoo=LGgame::playerCoo[1];
 				while(!movement.empty() && LGgame::analyzeMove(1, movement.front(), LGgame::playerCoo[1]))
 					movement.pop_front(),tmpcoo=LGgame::playerCoo[1];
 				int mv;
@@ -460,21 +460,21 @@ namespace LGlocal {
 					tmpcoo=LGgame::playerCoo[i];
 					switch(LGgame::robotId[i]) {
 						case 0 ... 99:
-							mv=smartRandomBot::smartRandomBot(i, LGgame::playerCoo[i]);
+							mv=smartRandomBot::calcNextMove(i, LGgame::playerCoo[i]);
 							if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
 								LGreplay::Movement mov(i,mv,tmpcoo);
 								LGreplay::wreplay.newMove(mov);
 							}
 							break;
 						case 100 ... 199:
-							mv=xrzBot::xrzBot(i, LGgame::playerCoo[i]);
+							mv=xrzBot::calcNextMove(i, LGgame::playerCoo[i]);
 							if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
 								LGreplay::Movement mov(i,mv,tmpcoo);
 								LGreplay::wreplay.newMove(mov);
 							}
 							break;
 						case 200 ... 299:
-							mv=xiaruizeBot::xiaruizeBot(i, LGgame::playerCoo[i]);
+							mv=xiaruizeBot::calcNextMove(i, LGgame::playerCoo[i]);
 							if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
 								LGreplay::Movement mov(i,mv,tmpcoo);
 								LGreplay::wreplay.newMove(mov);
@@ -529,26 +529,26 @@ namespace LGlocal {
 				cleardevice();
 				printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
 				LGgame::ranklist();
-				int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
+				int screenszr = 1600 * LGGraphics::windowData.zoomX;
 				static int fpslen;
 				static int turnlen;
 				static int rspeedlen;
 				setfillcolor(LGGraphics::bgColor);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-				setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
+				setfont(20 * LGGraphics::windowData.zoomY, 0, "Quicksand");
 				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				fpslen = textwidth((L"FPS: " + to_wstring(getfps())).c_str());
 				turnlen = textwidth((L"Turn " + to_wstring(LGgame::curTurn) + L".").c_str());
 				rspeedlen = textwidth((L"Real Speed: " + to_wstring(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());				setfillcolor(RED);
 				setfillcolor(GREEN);
-				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+				bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
+				rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
 				setfillcolor(RED);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+				bar(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::windowData.zoomY);
+				rectangle(screenszr - rspeedlen - 10 - fpslen - 10, 0, screenszr - rspeedlen - 10, 20 * LGGraphics::windowData.zoomY);
 				setfillcolor(BLUE);
-				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::windowData.zoomY);
+				rectangle(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr - rspeedlen - 10 - fpslen - 10, 20 * LGGraphics::windowData.zoomY);
 				settextjustify(CENTER_TEXT, TOP_TEXT);
 				xyprintf(screenszr - rspeedlen / 2 - 5, 0, L"Real Speed: %Lf", LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L));
 				xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0, L"FPS: %f", getfps());

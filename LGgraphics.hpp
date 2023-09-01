@@ -70,10 +70,10 @@ inline void ege_fillcircle(int x, int y, int r) { ege_fillellipse(x - r, y - r, 
 
 namespace LGGraphics {
 	void inputMapData(int a, int b, int c, int d) {
-		mapDataStore.heightPerBlock = a;
-		mapDataStore.widthPerBlock = b;
-		mapDataStore.height = c;
-		mapDataStore.width = d;
+		windowData.heightPerBlock = a;
+		windowData.widthPerBlock = b;
+		windowData.height = c;
+		windowData.width = d;
 		return;
 	}
 	void initWindowSize() {
@@ -95,10 +95,10 @@ namespace LGGraphics {
 		xyprintf(252, 152, L"generals.io");
 		setcolor(WHITE);
 		xyprintf(250, 150, L"generals.io");
-		putimage_withalpha(NULL, favi, 500, 10, 0, 0, getwidth(favi), getheight(favi));
-		delimage(favi);
+		putimage_withalpha(NULL, iconImg, 500, 10, 0, 0, getwidth(iconImg), getheight(iconImg));
+		delimage(iconImg);
 		setfont(20, 0, "Lucida Fax");
-		xyprintf(500 + getwidth(favi) / 2, 10 + getheight(favi) + 20 / 2 + 10,
+		xyprintf(500 + getwidth(iconImg) / 2, 10 + getheight(iconImg) + 20 / 2 + 10,
 		         L"version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
 		setfont(50, 0, "Quicksand");
 		setcolor(mainColor);
@@ -148,21 +148,21 @@ namespace LGGraphics {
 			resizewindow(-1, -1);
 			FullScreen(getHWnd());
 			int w = getmaxx(), h = getmaxy();
-			mapDataStore.mapSizeX = (double)(1.0 * (double)w / 1600.0);
-			mapDataStore.mapSizeY = (double)(1.0 * (double)h / 900.0);
+			windowData.zoomX = (double)(1.0 * (double)w / 1600.0);
+			windowData.zoomY = (double)(1.0 * (double)h / 900.0);
 		} else {
-			mapDataStore.mapSizeX = mapDataStore.mapSizeY = (double)select / 4.0;
+			windowData.zoomX = windowData.zoomY = (double)select / 4.0;
 			int nScreenWidth, nScreenHeight;
 			nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-			initgraph(1600 * mapDataStore.mapSizeX, 900 * mapDataStore.mapSizeY, RENDER_AUTO);
+			initgraph(1600 * windowData.zoomX, 900 * windowData.zoomY, RENDER_AUTO);
 		}
 		setcaption(L"LocalGen v" VER_STRING " developed by LocalGen-dev");
 	}
 
 	void initname() {
 		cleardevice();
-		int scrw=mapDataStore.mapSizeX*1600,scrh=mapDataStore.mapSizeY*900;
+		int scrw=windowData.zoomX*1600,scrh=windowData.zoomY*900;
 		sys_edit nameBox;
 		rectBUTTON submitButton;
 		setfillcolor(WHITE);
@@ -216,112 +216,112 @@ namespace LGGraphics {
 		cleardevice();
 		PIMAGE zfavi = newimage();
 		getimage_pngfile(zfavi, "img/favicon.png");
-		imageOperation::zoomImage(zfavi, getwidth(zfavi) * 1.8 * mapDataStore.mapSizeX, getheight(zfavi) * 1.8 * mapDataStore.mapSizeY);
-		putimage_withalpha(NULL, zfavi, 100 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY,
+		imageOperation::zoomImage(zfavi, getwidth(zfavi) * 1.8 * windowData.zoomX, getheight(zfavi) * 1.8 * windowData.zoomY);
+		putimage_withalpha(NULL, zfavi, 100 * windowData.zoomX, 50 * windowData.zoomY,
 		                   0, 0, getwidth(zfavi), getheight(zfavi));
 		settextjustify(CENTER_TEXT, TOP_TEXT);
-		setfont(150 * mapDataStore.mapSizeY, 0, "Quicksand", 0, 0, FW_BOLD, 0, 0, 0);
+		setfont(150 * windowData.zoomY, 0, "Quicksand", 0, 0, FW_BOLD, 0, 0, 0);
 		setcolor(WHITE);
-		xyprintf(330 * mapDataStore.mapSizeX, 500 * mapDataStore.mapSizeY, "Local");
-		xyprintf(330 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY, "generals.io");
+		xyprintf(330 * windowData.zoomX, 500 * windowData.zoomY, "Local");
+		xyprintf(330 * windowData.zoomX, 600 * windowData.zoomY, "generals.io");
 		setfont(30, 0, "Lucida Fax");
-		xyprintf(330 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY, "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
+		xyprintf(330 * windowData.zoomX, 750 * windowData.zoomY, "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
 		rectBUTTON local, web, replay, createmap;
 		rectBUTTON donate;
 		circBUTTON settings,repo;
 		local
-		.size(600 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
-		.move(700 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.size(600 * windowData.zoomX, 100 * windowData.zoomY)
+		.move(700 * windowData.zoomX, 100 * windowData.zoomY)
 		.addtext(L"local game")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname("Quicksand")
-		.fontsize(75 * mapDataStore.mapSizeY, 0)
+		.fontsize(75 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
-		.frame(10 * mapDataStore.mapSizeY)
+		.frame(10 * windowData.zoomY)
 		.display();
 		web
-		.size(600 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
-		.move(700 * mapDataStore.mapSizeX, 225 * mapDataStore.mapSizeY)
+		.size(600 * windowData.zoomX, 100 * windowData.zoomY)
+		.move(700 * windowData.zoomX, 225 * windowData.zoomY)
 		.addtext(L"web game (beta)")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname("Quicksand")
-		.fontsize(75 * mapDataStore.mapSizeY, 0)
+		.fontsize(75 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
-		.frame(10 * mapDataStore.mapSizeY)
+		.frame(10 * windowData.zoomY)
 		.display();
 		replay
-		.size(600 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
-		.move(700 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY)
+		.size(600 * windowData.zoomX, 100 * windowData.zoomY)
+		.move(700 * windowData.zoomX, 350 * windowData.zoomY)
 		.addtext(L"load replay (beta)")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname("Quicksand")
-		.fontsize(75 * mapDataStore.mapSizeY, 0)
+		.fontsize(75 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
-		.frame(10 * mapDataStore.mapSizeY)
+		.frame(10 * windowData.zoomY)
 		.display();
 		createmap
-		.size(600 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
-		.move(700 * mapDataStore.mapSizeX, 475 * mapDataStore.mapSizeY)
+		.size(600 * windowData.zoomX, 100 * windowData.zoomY)
+		.move(700 * windowData.zoomX, 475 * windowData.zoomY)
 		.addtext(L"create map (beta)")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname("Quicksand")
-		.fontsize(75 * mapDataStore.mapSizeY, 0)
+		.fontsize(75 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
-		.frame(10 * mapDataStore.mapSizeY)
+		.frame(10 * windowData.zoomY)
 		.display();
 		donate
-		.size(400 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY)
-		.move(1150 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY)
+		.size(400 * windowData.zoomX, 50 * windowData.zoomY)
+		.move(1150 * windowData.zoomX, 750 * windowData.zoomY)
 		.addtext(L"Please donate to support us!")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname("Quicksand")
-		.fontsize(40 * mapDataStore.mapSizeY, 0)
+		.fontsize(40 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
-		.frame(10 * mapDataStore.mapSizeY)
+		.frame(10 * windowData.zoomY)
 		.event([]() {
 			cleardevice();
 			PIMAGE donate_wc = newimage(), donate_ap = newimage();
 			getimage_pngfile(donate_wc, "img/donate_wechat.png");
 			getimage_pngfile(donate_ap, "img/donate_alipay.png");
-			imageOperation::zoomImage(donate_wc, 600 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
-			imageOperation::zoomImage(donate_ap, 600 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
-			putimage(100 * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_wc);
-			putimage((100 + 800) * mapDataStore.mapSizeX, 10 * mapDataStore.mapSizeY, donate_ap);
-			xyprintf(800 * mapDataStore.mapSizeX, 830 * mapDataStore.mapSizeY, L"press any key to close...");
+			imageOperation::zoomImage(donate_wc, 600 * windowData.zoomX, 800 * windowData.zoomY);
+			imageOperation::zoomImage(donate_ap, 600 * windowData.zoomX, 800 * windowData.zoomY);
+			putimage(100 * windowData.zoomX, 10 * windowData.zoomY, donate_wc);
+			putimage((100 + 800) * windowData.zoomX, 10 * windowData.zoomY, donate_ap);
+			xyprintf(800 * windowData.zoomX, 830 * windowData.zoomY, L"press any key to close...");
 			delimage(donate_wc); delimage(donate_ap);
 			flushkey();
 			getkey();
 		}).display();
 		settings
-		.radius(50 * min(mapDataStore.mapSizeX,mapDataStore.mapSizeY))
-		.move(1450 * mapDataStore.mapSizeX, 150 * mapDataStore.mapSizeY)
+		.radius(50 * min(windowData.zoomX,windowData.zoomY))
+		.move(1450 * windowData.zoomX, 150 * windowData.zoomY)
 		.bgimage(pimg[9]) // settings (options.png)
-		.bgsize(75 * mapDataStore.mapSizeX, 75 * mapDataStore.mapSizeY)
+		.bgsize(75 * windowData.zoomX, 75 * windowData.zoomY)
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.framecolor(false, mainColor)
-		.frame(10 * mapDataStore.mapSizeY)
+		.frame(10 * windowData.zoomY)
 		.enableButtonShadow = false; settings
 		.display();
 		repo
-		.radius(50 * min(mapDataStore.mapSizeX,mapDataStore.mapSizeY))
-		.move(1450 * mapDataStore.mapSizeX, 525 * mapDataStore.mapSizeY)
+		.radius(50 * min(windowData.zoomX,windowData.zoomY))
+		.move(1450 * windowData.zoomX, 525 * windowData.zoomY)
 		.bgimage(pimg[10]) // github repo (github.png)
-		.bgsize(75 * mapDataStore.mapSizeX, 75 * mapDataStore.mapSizeY)
+		.bgsize(75 * windowData.zoomX, 75 * windowData.zoomY)
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.framecolor(false, mainColor)
-		.frame(10 * mapDataStore.mapSizeY)
+		.frame(10 * windowData.zoomY)
 		.event([]()->void{system("start http://github.com/LocalGen-dev/LocalGen-new");})
 		.enableButtonShadow = false; settings
 		.display();
@@ -358,7 +358,7 @@ namespace LGGraphics {
 
 	void testPage() {
 		cleardevice();
-		int scrw=mapDataStore.mapSizeX*1600,scrh=mapDataStore.mapSizeY*900;
+		int scrw=windowData.zoomX*1600,scrh=windowData.zoomY*900;
 		for(int i=1; i<=12; ++i) LGgame::team[i].clear();
 		int team=1;
 		//receive team id and player names from server
@@ -487,13 +487,13 @@ namespace LGGraphics {
 		int shiftval = 0;
 		for(int i = 1; i <= mapNum; ++i) {
 			mapbut[i]
-			.size(300 * mapDataStore.mapSizeX - 3, 200 * mapDataStore.mapSizeY - 3)
-			.move(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
+			.size(300 * windowData.zoomX - 3, 200 * windowData.zoomY - 3)
+			.move(((i - 1) % 4 * 300) * windowData.zoomX, ((i - 1) / 4 * 200 + shiftval) * windowData.zoomY)
 			.bgcolor(bgColor)
 			.textcolor(WHITE)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
 			.fontname("Quicksand")
-			.fontsize(22 * mapDataStore.mapSizeY, 0)
+			.fontsize(22 * windowData.zoomY, 0)
 			// .addtext(maps[i].chiname)
 			// .addtext(maps[i].engname)
 			// .addtext("General Count: " + to_string(maps[i].generalcnt))
@@ -506,28 +506,28 @@ namespace LGGraphics {
 		}
 		sys_edit impbox;
 		impbox.create(true);
-		impbox.move(1250 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY);
-		impbox.size(300 * mapDataStore.mapSizeX, 700 * mapDataStore.mapSizeY);
+		impbox.move(1250 * windowData.zoomX, 100 * windowData.zoomY);
+		impbox.size(300 * windowData.zoomX, 700 * windowData.zoomY);
 		impbox.setbgcolor(WHITE);
 		impbox.setcolor(mainColor);
-		impbox.setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
+		impbox.setfont(30 * windowData.zoomY, 0, "Quicksand");
 		impbox.visible(true);
 		rectBUTTON impfin;
 		impfin
 		.textalign(CENTER_TEXT,CENTER_TEXT)
-		.move(1250 * mapDataStore.mapSizeX, 825 * mapDataStore.mapSizeY)
-		.size(300 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY)
+		.move(1250 * windowData.zoomX, 825 * windowData.zoomY)
+		.size(300 * windowData.zoomX, 50 * windowData.zoomY)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname("Quicksand")
-		.fontsize(40 * mapDataStore.mapSizeY, 0)
+		.fontsize(40 * windowData.zoomY, 0)
 		.addtext(L"confirm and submit")
 		.display();
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setcolor(WHITE);
-		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		setfont(50 * windowData.zoomY, 0, "Quicksand");
 		delay_ms(50);
-		xyprintf(1400 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY, "or import a map...");
+		xyprintf(1400 * windowData.zoomX, 50 * windowData.zoomY, "or import a map...");
 		delay_ms(0);
 		delay_ms(50);
 		flushmouse();
@@ -535,21 +535,21 @@ namespace LGGraphics {
 		mouse_msg msg;
 		for(; is_run(); delay_fps(120)) {
 			while(mousemsg()) {
-				int id = int((msg.y - shiftval * mapDataStore.mapSizeX) / (200 * mapDataStore.mapSizeY)) * 4 + int(msg.x / (300 * mapDataStore.mapSizeX)) + 1;
+				int id = int((msg.y - shiftval * windowData.zoomX) / (200 * windowData.zoomY)) * 4 + int(msg.x / (300 * windowData.zoomX)) + 1;
 				mapbut[id].status = 0;
 				impfin.status = 0;
 				msg = getmouse();
 				shiftval += msg.wheel;
 				if(shiftval > 0) shiftval = 0;
 				if(shiftval < -(mapNum - 1) / 4 * 200) shiftval = -(mapNum - 1) / 4 * 200;
-				if(msg.x >= 1250 * mapDataStore.mapSizeX && msg.x <= 1550 * mapDataStore.mapSizeY
-				   && msg.y >= 825 * mapDataStore.mapSizeY && msg.y <= 875 * mapDataStore.mapSizeY) {
+				if(msg.x >= 1250 * windowData.zoomX && msg.x <= 1550 * windowData.zoomY
+				   && msg.y >= 825 * windowData.zoomY && msg.y <= 875 * windowData.zoomY) {
 					impfin.status = 1;
 					if(msg.is_left()) impfin.status = 2;
 					continue;
 				}
-				if(msg.x < 0 || msg.x > 1200 * mapDataStore.mapSizeX || msg.y < 0 || msg.y > 900 * mapDataStore.mapSizeY) continue;
-				id = int((msg.y - shiftval * mapDataStore.mapSizeX) / (200 * mapDataStore.mapSizeY)) * 4 + int(msg.x / (300 * mapDataStore.mapSizeX)) + 1;
+				if(msg.x < 0 || msg.x > 1200 * windowData.zoomX || msg.y < 0 || msg.y > 900 * windowData.zoomY) continue;
+				id = int((msg.y - shiftval * windowData.zoomX) / (200 * windowData.zoomY)) * 4 + int(msg.x / (300 * windowData.zoomX)) + 1;
 				if(msg.is_left()) mapbut[id].status = 2;
 				else mapbut[id].status = 1;
 			}
@@ -561,15 +561,15 @@ namespace LGGraphics {
 			}
 			for(int i = 1; i <= mapNum; ++i) {
 				mapbut[i]
-				.addtext(maps[i].chiname)
-				.addtext(maps[i].engname)
-				.addtext(L"General Count: " + (~maps[i].generalcnt?to_wstring(maps[i].generalcnt):L"2~12"))
-				.addtext(L"Plain Count: " + (~maps[i].plaincnt?to_wstring(maps[i].plaincnt):L"undetermined"))
-				.addtext(L"City Count: " + (~maps[i].citycnt?to_wstring(maps[i].citycnt):L"undetermined"))
-				.addtext(L"Mountain Count: " + (~maps[i].mountaincnt?to_wstring(maps[i].mountaincnt):L"undetermined"))
-				.addtext(L"Swamp Count: " + (~maps[i].swampcnt?to_wstring(maps[i].swampcnt):L"undetermined"))
-				.addtext(L"Size: " + (~maps[i].hei?to_wstring(maps[i].hei):L"undetermined") + L" × " + (~maps[i].wid?to_wstring(maps[i].wid):L"undetermined"))
-				.move(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
+				.addtext(mapInfo[i].chiname)
+				.addtext(mapInfo[i].engname)
+				.addtext(L"General Count: " + (~mapInfo[i].generalcnt?to_wstring(mapInfo[i].generalcnt):L"2~12"))
+				.addtext(L"Plain Count: " + (~mapInfo[i].plaincnt?to_wstring(mapInfo[i].plaincnt):L"undetermined"))
+				.addtext(L"City Count: " + (~mapInfo[i].citycnt?to_wstring(mapInfo[i].citycnt):L"undetermined"))
+				.addtext(L"Mountain Count: " + (~mapInfo[i].mountaincnt?to_wstring(mapInfo[i].mountaincnt):L"undetermined"))
+				.addtext(L"Swamp Count: " + (~mapInfo[i].swampcnt?to_wstring(mapInfo[i].swampcnt):L"undetermined"))
+				.addtext(L"Size: " + (~mapInfo[i].height?to_wstring(mapInfo[i].height):L"undetermined") + L" × " + (~mapInfo[i].width?to_wstring(mapInfo[i].width):L"undetermined"))
+				.move(((i - 1) % 4 * 300) * windowData.zoomX, ((i - 1) / 4 * 200 + shiftval) * windowData.zoomY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
 			}
@@ -622,15 +622,15 @@ namespace LGGraphics {
 		int shiftval = 0,ret;
 
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
-		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		setfont(50 * windowData.zoomY, 0, "Quicksand");
 		setlinewidth(1);
 
 		serverBox
-		.size(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
-		.move(400 * mapDataStore.mapSizeX,350 * mapDataStore.mapSizeY)
+		.size(200 * windowData.zoomX, 100 * windowData.zoomY)
+		.move(400 * windowData.zoomX,350 * windowData.zoomY)
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.fontname("Quicksand")
-		.fontsize(50 * mapDataStore.mapSizeY, 0)
+		.fontsize(50 * windowData.zoomY, 0)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.addtext(L"Server")
@@ -638,11 +638,11 @@ namespace LGGraphics {
 		serverBox.enableButtonShadow = true;
 
 		clientBox
-		.size(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
-		.move(800 * mapDataStore.mapSizeX,350 * mapDataStore.mapSizeY)
+		.size(200 * windowData.zoomX, 100 * windowData.zoomY)
+		.move(800 * windowData.zoomX,350 * windowData.zoomY)
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.fontname("Quicksand")
-		.fontsize(50 * mapDataStore.mapSizeY, 0)
+		.fontsize(50 * windowData.zoomY, 0)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.addtext(L"Client")
@@ -659,16 +659,16 @@ namespace LGGraphics {
 				clientBox.status=0;
 				mouse_msg msg = getmouse();
 
-				if(msg.x >= 400 * mapDataStore.mapSizeX && msg.x <= 600 * mapDataStore.mapSizeY
-				   && msg.y >= 350 * mapDataStore.mapSizeY && msg.y <= 450 * mapDataStore.mapSizeY) {
+				if(msg.x >= 400 * windowData.zoomX && msg.x <= 600 * windowData.zoomY
+				   && msg.y >= 350 * windowData.zoomY && msg.y <= 450 * windowData.zoomY) {
 					serverBox.status = 1;
 
 					if(msg.is_left()) serverBox.status = 2;
 					continue;
 				}
 
-				if(msg.x >= 800 * mapDataStore.mapSizeX && msg.x <= 1000 * mapDataStore.mapSizeY
-				   && msg.y >= 350 * mapDataStore.mapSizeY && msg.y <= 450 * mapDataStore.mapSizeY) {
+				if(msg.x >= 800 * windowData.zoomX && msg.x <= 1000 * windowData.zoomY
+				   && msg.y >= 350 * windowData.zoomY && msg.y <= 450 * windowData.zoomY) {
 					clientBox.status = 1;
 
 					if(msg.is_left()) clientBox.status = 2;
@@ -687,13 +687,13 @@ namespace LGGraphics {
 
 		for(int i = 1; i <= mapNum; ++i) {
 			mapbut[i]
-			.size(300 * mapDataStore.mapSizeX - 3, 200 * mapDataStore.mapSizeY - 3)
-			.move(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
+			.size(300 * windowData.zoomX - 3, 200 * windowData.zoomY - 3)
+			.move(((i - 1) % 4 * 300) * windowData.zoomX, ((i - 1) / 4 * 200 + shiftval) * windowData.zoomY)
 			.bgcolor(bgColor)
 			.textcolor(WHITE)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
 			.fontname("Quicksand")
-			.fontsize(22 * mapDataStore.mapSizeY, 0)
+			.fontsize(22 * windowData.zoomY, 0)
 			// .addtext(maps[i].chiname)
 			// .addtext(maps[i].engname)
 			// .addtext("General Count: " + to_string(maps[i].generalcnt))
@@ -706,28 +706,28 @@ namespace LGGraphics {
 		}
 
 		impbox.create(true);
-		impbox.move(1250 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY);
-		impbox.size(300 * mapDataStore.mapSizeX, 700 * mapDataStore.mapSizeY);
+		impbox.move(1250 * windowData.zoomX, 100 * windowData.zoomY);
+		impbox.size(300 * windowData.zoomX, 700 * windowData.zoomY);
 		impbox.setbgcolor(WHITE);
 		impbox.setcolor(mainColor);
-		impbox.setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
+		impbox.setfont(30 * windowData.zoomY, 0, "Quicksand");
 		impbox.visible(true);
 
 		impfin
 		.textalign(CENTER_TEXT,CENTER_TEXT)
-		.move(1250 * mapDataStore.mapSizeX, 825 * mapDataStore.mapSizeY)
-		.size(300 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY)
+		.move(1250 * windowData.zoomX, 825 * windowData.zoomY)
+		.size(300 * windowData.zoomX, 50 * windowData.zoomY)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname("Quicksand")
-		.fontsize(40 * mapDataStore.mapSizeY, 0)
+		.fontsize(40 * windowData.zoomY, 0)
 		.addtext(L"confirm and submit")
 		.display();
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setcolor(WHITE);
-		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		setfont(50 * windowData.zoomY, 0, "Quicksand");
 		delay_ms(50);
-		xyprintf(1400 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY, "or import a map...");
+		xyprintf(1400 * windowData.zoomX, 50 * windowData.zoomY, "or import a map...");
 		delay_ms(0);
 		delay_ms(50);
 		flushmouse();
@@ -735,21 +735,21 @@ namespace LGGraphics {
 		mouse_msg msg;
 		for(; is_run(); delay_fps(120)) {
 			while(mousemsg()) {
-				int id = int((msg.y - shiftval * mapDataStore.mapSizeX) / (200 * mapDataStore.mapSizeY)) * 4 + int(msg.x / (300 * mapDataStore.mapSizeX)) + 1;
+				int id = int((msg.y - shiftval * windowData.zoomX) / (200 * windowData.zoomY)) * 4 + int(msg.x / (300 * windowData.zoomX)) + 1;
 				mapbut[id].status = 0;
 				impfin.status = 0;
 				msg = getmouse();
 				shiftval += msg.wheel;
 				if(shiftval > 0) shiftval = 0;
 				if(shiftval < -(mapNum - 1) / 4 * 200) shiftval = -(mapNum - 1) / 4 * 200;
-				if(msg.x >= 1250 * mapDataStore.mapSizeX && msg.x <= 1550 * mapDataStore.mapSizeY
-				   && msg.y >= 825 * mapDataStore.mapSizeY && msg.y <= 875 * mapDataStore.mapSizeY) {
+				if(msg.x >= 1250 * windowData.zoomX && msg.x <= 1550 * windowData.zoomY
+				   && msg.y >= 825 * windowData.zoomY && msg.y <= 875 * windowData.zoomY) {
 					impfin.status = 1;
 					if(msg.is_left()) impfin.status = 2;
 					continue;
 				}
-				if(msg.x < 0 || msg.x > 1200 * mapDataStore.mapSizeX || msg.y < 0 || msg.y > 900 * mapDataStore.mapSizeY) continue;
-				id = int((msg.y - shiftval * mapDataStore.mapSizeX) / (200 * mapDataStore.mapSizeY)) * 4 + int(msg.x / (300 * mapDataStore.mapSizeX)) + 1;
+				if(msg.x < 0 || msg.x > 1200 * windowData.zoomX || msg.y < 0 || msg.y > 900 * windowData.zoomY) continue;
+				id = int((msg.y - shiftval * windowData.zoomX) / (200 * windowData.zoomY)) * 4 + int(msg.x / (300 * windowData.zoomX)) + 1;
 				if(msg.is_left()) mapbut[id].status = 2;
 				else mapbut[id].status = 1;
 			}
@@ -761,15 +761,15 @@ namespace LGGraphics {
 			}
 			for(int i = 1; i <= mapNum; ++i) {
 				mapbut[i]
-				.addtext(maps[i].chiname)
-				.addtext(maps[i].engname)
-				.addtext(L"General Count: " + (~maps[i].generalcnt?to_wstring(maps[i].generalcnt):L"2~12"))
-				.addtext(L"Plain Count: " + (~maps[i].plaincnt?to_wstring(maps[i].plaincnt):L"undetermined"))
-				.addtext(L"City Count: " + (~maps[i].citycnt?to_wstring(maps[i].citycnt):L"undetermined"))
-				.addtext(L"Mountain Count: " + (~maps[i].mountaincnt?to_wstring(maps[i].mountaincnt):L"undetermined"))
-				.addtext(L"Swamp Count: " + (~maps[i].swampcnt?to_wstring(maps[i].swampcnt):L"undetermined"))
-				.addtext(L"Size: " + (~maps[i].hei?to_wstring(maps[i].hei):L"undetermined") + L" × " + (~maps[i].wid?to_wstring(maps[i].wid):L"undetermined"))
-				.move(((i - 1) % 4 * 300) * mapDataStore.mapSizeX, ((i - 1) / 4 * 200 + shiftval) * mapDataStore.mapSizeY)
+				.addtext(mapInfo[i].chiname)
+				.addtext(mapInfo[i].engname)
+				.addtext(L"General Count: " + (~mapInfo[i].generalcnt?to_wstring(mapInfo[i].generalcnt):L"2~12"))
+				.addtext(L"Plain Count: " + (~mapInfo[i].plaincnt?to_wstring(mapInfo[i].plaincnt):L"undetermined"))
+				.addtext(L"City Count: " + (~mapInfo[i].citycnt?to_wstring(mapInfo[i].citycnt):L"undetermined"))
+				.addtext(L"Mountain Count: " + (~mapInfo[i].mountaincnt?to_wstring(mapInfo[i].mountaincnt):L"undetermined"))
+				.addtext(L"Swamp Count: " + (~mapInfo[i].swampcnt?to_wstring(mapInfo[i].swampcnt):L"undetermined"))
+				.addtext(L"Size: " + (~mapInfo[i].height?to_wstring(mapInfo[i].height):L"undetermined") + L" × " + (~mapInfo[i].width?to_wstring(mapInfo[i].width):L"undetermined"))
+				.move(((i - 1) % 4 * 300) * windowData.zoomX, ((i - 1) / 4 * 200 + shiftval) * windowData.zoomY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
 			}
@@ -829,22 +829,22 @@ namespace LGGraphics {
 
 		jumpbut.textalign(CENTER_TEXT,CENTER_TEXT)
 		.bgcolor(WHITE).textcolor(BLACK)
-		.move(0 * mapDataStore.mapSizeX, 35 * mapDataStore.mapSizeY)
+		.move(0 * windowData.zoomX, 35 * windowData.zoomY)
 		.fontname("Quicksand")
-		.fontsize(30 * mapDataStore.mapSizeY, 0)
-		.size(150 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY)
+		.fontsize(30 * windowData.zoomY, 0)
+		.size(150 * windowData.zoomX, 30 * windowData.zoomY)
 		.addtext(L"Jump to turn: ").enableTextShadow = false;
 		jumpbox.create(false);
-		jumpbox.size(50 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY);
-		jumpbox.move(150 * mapDataStore.mapSizeX, 35 * mapDataStore.mapSizeY);
-		jumpbox.setfont(25 * mapDataStore.mapSizeY, 0, "Quicksand");
+		jumpbox.size(50 * windowData.zoomX, 30 * windowData.zoomY);
+		jumpbox.move(150 * windowData.zoomX, 35 * windowData.zoomY);
+		jumpbox.setfont(25 * windowData.zoomY, 0, "Quicksand");
 		jumpbox.visible(true);
 		jumpsmbut.textalign(CENTER_TEXT,CENTER_TEXT)
 		.bgcolor(WHITE).textcolor(BLACK)
-		.move(200 * mapDataStore.mapSizeX, 35 * mapDataStore.mapSizeY)
+		.move(200 * windowData.zoomX, 35 * windowData.zoomY)
 		.fontname("Quicksand")
-		.fontsize(30 * mapDataStore.mapSizeY, 0)
-		.size(50 * mapDataStore.mapSizeX, 30 * mapDataStore.mapSizeY)
+		.fontsize(30 * windowData.zoomY, 0)
+		.size(50 * windowData.zoomX, 30 * windowData.zoomY)
 		.addtext(L"→").enableTextShadow = false;
 
 		int smsx=0,smsy=0,midact=0;
@@ -852,15 +852,15 @@ namespace LGGraphics {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
 				if(msg.is_wheel()) {
-					widthPerBlock += msg.wheel / 120;
-					heightPerBlock += msg.wheel / 120;
-					widthPerBlock = max(widthPerBlock, 2);
-					heightPerBlock = max(heightPerBlock, 2);
+					blockWidth += msg.wheel / 120;
+					blockHeight += msg.wheel / 120;
+					blockWidth = max(blockWidth, 2);
+					blockHeight = max(blockHeight, 2);
 				}
 				if(msg.is_move()) {
 					if(midact == 1) {
-						LGGraphics::mapDataStore.maplocX += msg.x - smsx;
-						LGGraphics::mapDataStore.maplocY += msg.y - smsy;
+						LGGraphics::windowData.maplocX += msg.x - smsx;
+						LGGraphics::windowData.maplocY += msg.y - smsy;
 						smsx = msg.x, smsy = msg.y;
 					}
 				} else if(msg.is_left()) {
@@ -884,20 +884,20 @@ namespace LGGraphics {
 			}
 			cleardevice();
 			printMap(1048575, {-1,-1});
-			const static int screenszr = 1600 * LGGraphics::mapDataStore.mapSizeX;
+			const static int screenszr = 1600 * LGGraphics::windowData.zoomX;
 			static int fpslen;
 			static int turnlen;
 			setfillcolor(LGGraphics::bgColor);
-			bar(screenszr - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-			setfont(20 * LGGraphics::mapDataStore.mapSizeY, 0, "Quicksand");
+			bar(screenszr - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
+			setfont(20 * LGGraphics::windowData.zoomY, 0, "Quicksand");
 			fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
 			turnlen = textwidth(("Turn " + to_string(LGreplay::rreplay.curTurn) + ".").c_str());
 			setfillcolor(RED);
-			bar(screenszr - fpslen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
-			rectangle(screenszr - fpslen - 10, 0, screenszr, 20 * LGGraphics::mapDataStore.mapSizeY);
+			bar(screenszr - fpslen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
+			rectangle(screenszr - fpslen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
 			setfillcolor(BLUE);
-			bar(screenszr - fpslen - 10 - turnlen - 10, 0, screenszr - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
-			rectangle(screenszr - fpslen - 10 - turnlen - 10, 0, screenszr - fpslen - 10, 20 * LGGraphics::mapDataStore.mapSizeY);
+			bar(screenszr - fpslen - 10 - turnlen - 10, 0, screenszr - fpslen - 10, 20 * LGGraphics::windowData.zoomY);
+			rectangle(screenszr - fpslen - 10 - turnlen - 10, 0, screenszr - fpslen - 10, 20 * LGGraphics::windowData.zoomY);
 			settextjustify(CENTER_TEXT, TOP_TEXT);
 			xyprintf(screenszr - fpslen / 2 - 5, 0, "FPS: %f", getfps());
 			xyprintf(screenszr - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGreplay::rreplay.curTurn);
@@ -919,7 +919,7 @@ namespace LGGraphics {
 		cleardevice();
 		setrendermode(RENDER_MANUAL);
 		settextjustify(LEFT_TEXT, TOP_TEXT);
-		int scrw=mapDataStore.mapSizeX*1600,scrh=mapDataStore.mapSizeY*900;
+		int scrw=windowData.zoomX*1600,scrh=windowData.zoomY*900;
 		sys_edit citynumBox,plainnumBox,savenameBox;
 		rectBUTTON saveButton,cancelButton,loadButton;
 		citynumBox.create();
@@ -980,15 +980,15 @@ namespace LGGraphics {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
 				if(msg.is_wheel()) {
-					widthPerBlock += msg.wheel / 120;
-					heightPerBlock += msg.wheel / 120;
-					widthPerBlock = max(widthPerBlock, 2);
-					heightPerBlock = max(heightPerBlock, 2);
+					blockWidth += msg.wheel / 120;
+					blockHeight += msg.wheel / 120;
+					blockWidth = max(blockWidth, 2);
+					blockHeight = max(blockHeight, 2);
 				}
 				if(msg.is_move()) {
 					if(midact == 1) {
-						LGGraphics::mapDataStore.maplocX += msg.x - smsx;
-						LGGraphics::mapDataStore.maplocY += msg.y - smsy;
+						LGGraphics::windowData.maplocX += msg.x - smsx;
+						LGGraphics::windowData.maplocY += msg.y - smsy;
 						smsx = msg.x, smsy = msg.y; moved = true;
 					}
 				} else if(msg.is_left()) {
@@ -1081,12 +1081,12 @@ namespace LGGraphics {
 									++mapW;
 									for(int i=1; i<=mapH; ++i) gameMap[i][mapW]= {0,0,0,0};
 								}
-							} else if(msg.x >= LGGraphics::mapDataStore.maplocX &&
-							          msg.y >= LGGraphics::mapDataStore.maplocY &&
-							          msg.x <= LGGraphics::mapDataStore.maplocX + widthPerBlock * mapW &&
-							          msg.y <= LGGraphics::mapDataStore.maplocY + heightPerBlock * mapH) {
-								int lin = (msg.y + heightPerBlock - 1 - LGGraphics::mapDataStore.maplocY) / heightPerBlock;
-								int col = (msg.x + widthPerBlock - 1 - LGGraphics::mapDataStore.maplocX) / widthPerBlock;
+							} else if(msg.x >= LGGraphics::windowData.maplocX &&
+							          msg.y >= LGGraphics::windowData.maplocY &&
+							          msg.x <= LGGraphics::windowData.maplocX + blockWidth * mapW &&
+							          msg.y <= LGGraphics::windowData.maplocY + blockHeight * mapH) {
+								int lin = (msg.y + blockHeight - 1 - LGGraphics::windowData.maplocY) / blockHeight;
+								int col = (msg.x + blockWidth - 1 - LGGraphics::windowData.maplocX) / blockWidth;
 								switch(type) {
 									case 0:
 										gameMap[lin][col].player=0;
@@ -1194,36 +1194,36 @@ namespace LGGraphics {
 		cleardevice();
 		setrendermode(RENDER_AUTO);
 		// setfillcolor(WHITE);
-		// bar(5 * mapDataStore.mapSizeX, 5 * mapDataStore.mapSizeY,
-		//     505 * mapDataStore.mapSizeX, 305 * mapDataStore.mapSizeY);
+		// bar(5 * windowData.mapSizeX, 5 * windowData.mapSizeY,
+		//     505 * windowData.mapSizeX, 305 * windowData.mapSizeY);
 		setcolor(WHITE);
-		setlinewidth(5 * mapDataStore.mapSizeY);
-		rectangle(5 * mapDataStore.mapSizeX, 5 * mapDataStore.mapSizeY,
-		          505 * mapDataStore.mapSizeX, 305 * mapDataStore.mapSizeY);
+		setlinewidth(5 * windowData.zoomY);
+		rectangle(5 * windowData.zoomX, 5 * windowData.zoomY,
+		          505 * windowData.zoomX, 305 * windowData.zoomY);
 		setlinewidth(1);
 		setcolor(mainColor);
-		setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand", 0, 0, FW_BOLD, false, false, false);
+		setfont(40 * windowData.zoomY, 0, "Quicksand", 0, 0, FW_BOLD, false, false, false);
 		settextjustify(CENTER_TEXT,TOP_TEXT);
-		xyprintf(255 * mapDataStore.mapSizeX, 5 * mapDataStore.mapSizeY,
-		         L"%ls", maps[mapSelected].chiname.c_str());
-		xyprintf(255 * mapDataStore.mapSizeX, 45 * mapDataStore.mapSizeY,
-		         L"%ls", maps[mapSelected].engname.c_str());
+		xyprintf(255 * windowData.zoomX, 5 * windowData.zoomY,
+		         L"%ls", mapInfo[mapSelected].chiname.c_str());
+		xyprintf(255 * windowData.zoomX, 45 * windowData.zoomY,
+		         L"%ls", mapInfo[mapSelected].engname.c_str());
 		setcolor(WHITE);
-		setfont(30 * mapDataStore.mapSizeY, 0, "Quicksand");
-		xyprintf(255 * mapDataStore.mapSizeX, 85 * mapDataStore.mapSizeY,
-		         L"Author: %ls", maps[mapSelected].auth.c_str());
-		xyprintf(255 * mapDataStore.mapSizeX, 115 * mapDataStore.mapSizeY,
-		         L"Size: %d × %d", maps[mapSelected].hei, maps[mapSelected].wid);
-		xyprintf(255 * mapDataStore.mapSizeX, 145 * mapDataStore.mapSizeY,
-		         L"General Count: %d", maps[mapSelected].generalcnt);
-		xyprintf(255 * mapDataStore.mapSizeX, 175 * mapDataStore.mapSizeY,
-		         L"Plain Count: %d", maps[mapSelected].plaincnt);
-		xyprintf(255 * mapDataStore.mapSizeX, 205 * mapDataStore.mapSizeY,
-		         L"City Count: %d", maps[mapSelected].citycnt);
-		xyprintf(255 * mapDataStore.mapSizeX, 235 * mapDataStore.mapSizeY,
-		         L"Mountain Count: %d", maps[mapSelected].mountaincnt);
-		xyprintf(255 * mapDataStore.mapSizeX, 265 * mapDataStore.mapSizeY,
-		         L"Swamp Count: %d", maps[mapSelected].swampcnt);
+		setfont(30 * windowData.zoomY, 0, "Quicksand");
+		xyprintf(255 * windowData.zoomX, 85 * windowData.zoomY,
+		         L"Author: %ls", mapInfo[mapSelected].auth.c_str());
+		xyprintf(255 * windowData.zoomX, 115 * windowData.zoomY,
+		         L"Size: %d × %d", mapInfo[mapSelected].height, mapInfo[mapSelected].width);
+		xyprintf(255 * windowData.zoomX, 145 * windowData.zoomY,
+		         L"General Count: %d", mapInfo[mapSelected].generalcnt);
+		xyprintf(255 * windowData.zoomX, 175 * windowData.zoomY,
+		         L"Plain Count: %d", mapInfo[mapSelected].plaincnt);
+		xyprintf(255 * windowData.zoomX, 205 * windowData.zoomY,
+		         L"City Count: %d", mapInfo[mapSelected].citycnt);
+		xyprintf(255 * windowData.zoomX, 235 * windowData.zoomY,
+		         L"Mountain Count: %d", mapInfo[mapSelected].mountaincnt);
+		xyprintf(255 * windowData.zoomX, 265 * windowData.zoomY,
+		         L"Swamp Count: %d", mapInfo[mapSelected].swampcnt);
 		sys_edit heiinput,widinput,amninput,amxinput;
 		int height,width,armymin,armymax;
 		heiinput.create();
@@ -1232,35 +1232,35 @@ namespace LGGraphics {
 		amxinput.create();
 		if(mapSelected < 6) {
 			setcolor(WHITE);
-			setfont(40 * mapDataStore.mapSizeY, 0, "Quicksand");
+			setfont(40 * windowData.zoomY, 0, "Quicksand");
 			settextjustify(RIGHT_TEXT,TOP_TEXT);
-			xyprintf(800 * mapDataStore.mapSizeX, 5 * mapDataStore.mapSizeY, L"Input Height (<=100):");
-			xyprintf(800 * mapDataStore.mapSizeX, 45 * mapDataStore.mapSizeY, L"Input Width (<=100):");
+			xyprintf(800 * windowData.zoomX, 5 * windowData.zoomY, L"Input Height (<=100):");
+			xyprintf(800 * windowData.zoomX, 45 * windowData.zoomY, L"Input Width (<=100):");
 			if(mapSelected == 3) {
-				xyprintf(800 * mapDataStore.mapSizeX, 85 * mapDataStore.mapSizeY, L"Input MINIMUM Army:");
-				xyprintf(800 * mapDataStore.mapSizeX, 125 * mapDataStore.mapSizeY, L"Input MAXIMUM Army:");
+				xyprintf(800 * windowData.zoomX, 85 * windowData.zoomY, L"Input MINIMUM Army:");
+				xyprintf(800 * windowData.zoomX, 125 * windowData.zoomY, L"Input MAXIMUM Army:");
 			}
-			heiinput.move(810 * mapDataStore.mapSizeX, 6 * mapDataStore.mapSizeY);
-			heiinput.size(200 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY);
+			heiinput.move(810 * windowData.zoomX, 6 * windowData.zoomY);
+			heiinput.size(200 * windowData.zoomX, 38 * windowData.zoomY);
 			heiinput.setbgcolor(WHITE);
 			heiinput.setcolor(mainColor);
-			heiinput.setfont(35 * mapDataStore.mapSizeY, 0, "Quicksand");
-			widinput.move(810 * mapDataStore.mapSizeX, 46 * mapDataStore.mapSizeY);
-			widinput.size(200 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY);
+			heiinput.setfont(35 * windowData.zoomY, 0, "Quicksand");
+			widinput.move(810 * windowData.zoomX, 46 * windowData.zoomY);
+			widinput.size(200 * windowData.zoomX, 38 * windowData.zoomY);
 			widinput.setbgcolor(WHITE);
 			widinput.setcolor(mainColor);
-			widinput.setfont(35 * mapDataStore.mapSizeY, 0, "Quicksand");
+			widinput.setfont(35 * windowData.zoomY, 0, "Quicksand");
 			if(mapSelected == 3) {
-				amninput.move(810 * mapDataStore.mapSizeX, 86 * mapDataStore.mapSizeY);
-				amninput.size(200 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY);
+				amninput.move(810 * windowData.zoomX, 86 * windowData.zoomY);
+				amninput.size(200 * windowData.zoomX, 38 * windowData.zoomY);
 				amninput.setbgcolor(WHITE);
 				amninput.setcolor(mainColor);
-				amninput.setfont(35 * mapDataStore.mapSizeY, 0, "Quicksand");
-				amxinput.move(810 * mapDataStore.mapSizeX, 126 * mapDataStore.mapSizeY);
-				amxinput.size(200 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY);
+				amninput.setfont(35 * windowData.zoomY, 0, "Quicksand");
+				amxinput.move(810 * windowData.zoomX, 126 * windowData.zoomY);
+				amxinput.size(200 * windowData.zoomX, 38 * windowData.zoomY);
 				amxinput.setbgcolor(WHITE);
 				amxinput.setcolor(mainColor);
-				amxinput.setfont(35 * mapDataStore.mapSizeY, 0, "Quicksand");
+				amxinput.setfont(35 * windowData.zoomY, 0, "Quicksand");
 			}
 			heiinput.visible(true);
 			widinput.visible(true);
@@ -1270,50 +1270,50 @@ namespace LGGraphics {
 			}
 			rectBUTTON heib,widb,amnb,amxb,endb;
 			heib
-			.move(1020 * mapDataStore.mapSizeX, 6 * mapDataStore.mapSizeY)
-			.size(100 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY)
+			.move(1020 * windowData.zoomX, 6 * windowData.zoomY)
+			.size(100 * windowData.zoomX, 38 * windowData.zoomY)
 			.bgcolor(WHITE)
 			.textcolor(mainColor)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
-			.fontsize(35 * mapDataStore.mapSizeY, 0)
+			.fontsize(35 * windowData.zoomY, 0)
 			.fontname("Quicksand")
 			.addtext(L"confirm");
 			widb
-			.move(1020 * mapDataStore.mapSizeX, 46 * mapDataStore.mapSizeY)
-			.size(100 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY)
+			.move(1020 * windowData.zoomX, 46 * windowData.zoomY)
+			.size(100 * windowData.zoomX, 38 * windowData.zoomY)
 			.bgcolor(WHITE)
 			.textcolor(mainColor)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
-			.fontsize(35 * mapDataStore.mapSizeY, 0)
+			.fontsize(35 * windowData.zoomY, 0)
 			.fontname("Quicksand")
 			.addtext(L"confirm");
 			if(mapSelected == 3) {
 				amnb
-				.move(1020 * mapDataStore.mapSizeX, 86 * mapDataStore.mapSizeY)
-				.size(100 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY)
+				.move(1020 * windowData.zoomX, 86 * windowData.zoomY)
+				.size(100 * windowData.zoomX, 38 * windowData.zoomY)
 				.bgcolor(WHITE)
 				.textcolor(mainColor)
 				.textalign(CENTER_TEXT,CENTER_TEXT)
-				.fontsize(35 * mapDataStore.mapSizeY, 0)
+				.fontsize(35 * windowData.zoomY, 0)
 				.fontname("Quicksand")
 				.addtext(L"confirm");
 				amxb
-				.move(1020 * mapDataStore.mapSizeX, 126 * mapDataStore.mapSizeY)
-				.size(100 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY)
+				.move(1020 * windowData.zoomX, 126 * windowData.zoomY)
+				.size(100 * windowData.zoomX, 38 * windowData.zoomY)
 				.bgcolor(WHITE)
 				.textcolor(mainColor)
 				.textalign(CENTER_TEXT,CENTER_TEXT)
-				.fontsize(35 * mapDataStore.mapSizeY, 0)
+				.fontsize(35 * windowData.zoomY, 0)
 				.fontname("Quicksand")
 				.addtext(L"confirm");
 			}
 			endb
-			.move(810 * mapDataStore.mapSizeX, 166 * mapDataStore.mapSizeY)
-			.size(310 * mapDataStore.mapSizeX, 38 * mapDataStore.mapSizeY)
+			.move(810 * windowData.zoomX, 166 * windowData.zoomY)
+			.size(310 * windowData.zoomX, 38 * windowData.zoomY)
 			.bgcolor(WHITE)
 			.textcolor(mainColor)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
-			.fontsize(35 * mapDataStore.mapSizeY, 0)
+			.fontsize(35 * windowData.zoomY, 0)
 			.fontname("Quicksand")
 			.addtext(L"end input");
 			heib.display();
@@ -1416,55 +1416,55 @@ namespace LGGraphics {
 		rectBUTTON gameBox;
 		plCnt = 2; stDel = 1;
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
-		setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
-		xyprintf(250 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
+		setfont(50 * windowData.zoomY, 0, "Quicksand");
+		xyprintf(250 * windowData.zoomX, 350 * windowData.zoomY,
 		         "Choose Player Count");
 		setlinewidth(1);
 		for(int i=2; i<=12; ++i) {
 			int rowNum = (i - 2) / 4;
 			int colNum = (i - 2) % 4;
-			rectangle(55 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum,
-			          400 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum,
-			          155 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum,
-			          500 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum);
+			rectangle(55 * windowData.zoomX + 100 * windowData.zoomX * colNum,
+			          400 * windowData.zoomY + 100 * windowData.zoomY * rowNum,
+			          155 * windowData.zoomX + 100 * windowData.zoomX * colNum,
+			          500 * windowData.zoomY + 100 * windowData.zoomY * rowNum);
 			plCntBox[i]
-			.size(100 * mapDataStore.mapSizeX - 1*2, 100 * mapDataStore.mapSizeY - 1*2)
-			.move(55 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum + 1,
-			      400 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum + 1)
+			.size(100 * windowData.zoomX - 1*2, 100 * windowData.zoomY - 1*2)
+			.move(55 * windowData.zoomX + 100 * windowData.zoomX * colNum + 1,
+			      400 * windowData.zoomY + 100 * windowData.zoomY * rowNum + 1)
 			.textalign(CENTER_TEXT, CENTER_TEXT)
 			.fontname("Quicksand")
-			.fontsize(50 * mapDataStore.mapSizeY, 0)
+			.fontsize(50 * windowData.zoomY, 0)
 			.bgcolor(bgColor)
 			.textcolor(WHITE)
 			.addtext(to_wstring(i));
 			plCntBox[i].enableButtonShadow = false;
 			plCntBox[i].display();
 		}
-		xyprintf(250 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY,
+		xyprintf(250 * windowData.zoomX, 750 * windowData.zoomY,
 		         "Current Count: %d", plCnt);
-		xyprintf(800 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
+		xyprintf(800 * windowData.zoomX, 350 * windowData.zoomY,
 		         "Input Game Speed");
-		xyprintf(800 * mapDataStore.mapSizeX, 400 * mapDataStore.mapSizeY,
+		xyprintf(800 * windowData.zoomX, 400 * windowData.zoomY,
 		         "(integer between 1 and 10000)");
 		speedBox.create();
-		speedBox.move(575 * mapDataStore.mapSizeX, 450 * mapDataStore.mapSizeY);
-		speedBox.size(300 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY);
-		speedBox.setfont(50 * mapDataStore.mapSizeY, 0, "Quicksand");
+		speedBox.move(575 * windowData.zoomX, 450 * windowData.zoomY);
+		speedBox.size(300 * windowData.zoomX, 50 * windowData.zoomY);
+		speedBox.setfont(50 * windowData.zoomY, 0, "Quicksand");
 		speedBox.setcolor(mainColor);
 		speedBox.visible(true);
 		speedSubmit
-		.size(150 * mapDataStore.mapSizeX, 50 * mapDataStore.mapSizeY)
-		.move(900 * mapDataStore.mapSizeX, 450 * mapDataStore.mapSizeY)
+		.size(150 * windowData.zoomX, 50 * windowData.zoomY)
+		.move(900 * windowData.zoomX, 450 * windowData.zoomY)
 		.fontname("Quicksand")
-		.fontsize(50 * mapDataStore.mapSizeY, 0)
+		.fontsize(50 * windowData.zoomY, 0)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.textalign(CENTER_TEXT,CENTER_TEXT)
 		.addtext(L"submit");
 		speedSubmit.display();
-		xyprintf(800 * mapDataStore.mapSizeX, 550 * mapDataStore.mapSizeY,
+		xyprintf(800 * windowData.zoomX, 550 * windowData.zoomY,
 		         "Current Speed: %d", stDel);
-		xyprintf(1350 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
+		xyprintf(1350 * windowData.zoomX, 350 * windowData.zoomY,
 		         "Choose Visible Players:");
 		cheatCode = 0b0000000000010;
 		for(int i=1; i<=12; ++i) {
@@ -1474,30 +1474,30 @@ namespace LGGraphics {
 			.addtext(playerInfo[i].name)
 			.textalign(CENTER_TEXT, CENTER_TEXT)
 			.fontname("Quicksand")
-			.fontsize(40 * mapDataStore.mapSizeY, 0)
-			.size(100 * mapDataStore.mapSizeX - 1*2, 100 * mapDataStore.mapSizeY - 1*2)
-			.move(1150 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum + 1,
-			      400 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum + 1);
+			.fontsize(40 * windowData.zoomY, 0)
+			.size(100 * windowData.zoomX - 1*2, 100 * windowData.zoomY - 1*2)
+			.move(1150 * windowData.zoomX + 100 * windowData.zoomX * colNum + 1,
+			      400 * windowData.zoomY + 100 * windowData.zoomY * rowNum + 1);
 			checkBox[i].enableButtonShadow = false;
 			checkBox[i].enableTextShadow = false;
 		}
 		checkOA
-		.size(400 * mapDataStore.mapSizeX - 1*2, 100 * mapDataStore.mapSizeY - 1*2)
-		.move(1150 * mapDataStore.mapSizeX + 1, 700 * mapDataStore.mapSizeY + 1)
+		.size(400 * windowData.zoomX - 1*2, 100 * windowData.zoomY - 1*2)
+		.move(1150 * windowData.zoomX + 1, 700 * windowData.zoomY + 1)
 		.addtext(L"Overall Select")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.fontname("Quicksand")
-		.fontsize(50 * mapDataStore.mapSizeY, 0);
+		.fontsize(50 * windowData.zoomY, 0);
 		checkOA.enableButtonShadow = false;
 		checkOA.enableTextShadow = false;
 		checkOA.display();
 		gameBox
-		.size(200 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
-		.move(1150 * mapDataStore.mapSizeX, 100 * mapDataStore.mapSizeY)
+		.size(200 * windowData.zoomX, 100 * windowData.zoomY)
+		.move(1150 * windowData.zoomX, 100 * windowData.zoomY)
 		.addtext(L"START")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.fontname("Quicksand")
-		.fontsize(50 * mapDataStore.mapSizeY, 0)
+		.fontsize(50 * windowData.zoomY, 0)
 		.bgcolor(WHITE)
 		.textcolor(mainColor);
 		delay_ms(0);
@@ -1506,11 +1506,11 @@ namespace LGGraphics {
 				plCntBox[i].detect().display();
 				if(plCntBox[i].status == 2) plCnt = i;
 			}
-			plCnt = min(plCnt, maps[mapSelected].generalcnt + maps[mapSelected].plaincnt);
+			plCnt = min(plCnt, mapInfo[mapSelected].generalcnt + mapInfo[mapSelected].plaincnt);
 			setfillcolor(bgColor);
-			bar(55 * mapDataStore.mapSizeX, 701 * mapDataStore.mapSizeY,
-			    455 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
-			xyprintf(250 * mapDataStore.mapSizeX, 750 * mapDataStore.mapSizeY,
+			bar(55 * windowData.zoomX, 701 * windowData.zoomY,
+			    455 * windowData.zoomX, 800 * windowData.zoomY);
+			xyprintf(250 * windowData.zoomX, 750 * windowData.zoomY,
 			         "Current Count: %d", plCnt);
 			speedSubmit.detect().display();
 			if(speedSubmit.status == 2) {
@@ -1521,14 +1521,14 @@ namespace LGGraphics {
 				if(f!=1) stDel=t;
 				if(stDel<=0||stDel>10000) stDel=t;
 			}
-			bar(600 * mapDataStore.mapSizeX, 501 * mapDataStore.mapSizeY,
-			    1050 * mapDataStore.mapSizeX, 600 * mapDataStore.mapSizeY);
-			xyprintf(800 * mapDataStore.mapSizeX, 550 * mapDataStore.mapSizeY,
+			bar(600 * windowData.zoomX, 501 * windowData.zoomY,
+			    1050 * windowData.zoomX, 600 * windowData.zoomY);
+			xyprintf(800 * windowData.zoomX, 550 * windowData.zoomY,
 			         "Current Speed: %d", stDel);
 			setfillcolor(bgColor);
-			bar(1150 * mapDataStore.mapSizeX, 400 * mapDataStore.mapSizeY,
-			    1550 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
-			xyprintf(1350 * mapDataStore.mapSizeX, 350 * mapDataStore.mapSizeY,
+			bar(1150 * windowData.zoomX, 400 * windowData.zoomY,
+			    1550 * windowData.zoomX, 800 * windowData.zoomY);
+			xyprintf(1350 * windowData.zoomX, 350 * windowData.zoomY,
 			         "Choose Visible Players:");
 			for(int i=1; i<=plCnt; ++i) {
 				if(cheatCode>>i&1) {
@@ -1542,10 +1542,10 @@ namespace LGGraphics {
 				}
 				int rowNum = (i - 1) / 4;
 				int colNum = (i - 1) % 4;
-				rectangle(1150 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum,
-				          400 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum,
-				          1250 * mapDataStore.mapSizeX + 100 * mapDataStore.mapSizeX * colNum,
-				          500 * mapDataStore.mapSizeY + 100 * mapDataStore.mapSizeY * rowNum);
+				rectangle(1150 * windowData.zoomX + 100 * windowData.zoomX * colNum,
+				          400 * windowData.zoomY + 100 * windowData.zoomY * rowNum,
+				          1250 * windowData.zoomX + 100 * windowData.zoomX * colNum,
+				          500 * windowData.zoomY + 100 * windowData.zoomY * rowNum);
 				checkBox[i].detect().display();
 				if(checkBox[i].status == 2) {
 					cheatCode &= (((1<<plCnt)-1)<<1);
@@ -1561,8 +1561,8 @@ namespace LGGraphics {
 				.bgcolor(bgColor)
 				.textcolor(mainColor);
 			}
-			rectangle(1150 * mapDataStore.mapSizeX, 700 * mapDataStore.mapSizeY,
-			          1550 * mapDataStore.mapSizeX, 800 * mapDataStore.mapSizeY);
+			rectangle(1150 * windowData.zoomX, 700 * windowData.zoomY,
+			          1550 * windowData.zoomX, 800 * windowData.zoomY);
 			checkOA.detect().display();
 			if(checkOA.status == 2) {
 				if(cheatCode != 1048575) cheatCode = 1048575;
@@ -1574,30 +1574,30 @@ namespace LGGraphics {
 	}
 
 	void init() {
-		heightPerBlock = 22 * mapDataStore.mapSizeY;
-		widthPerBlock = 22 * mapDataStore.mapSizeX;
-		heightPerBlock = widthPerBlock = min(heightPerBlock, widthPerBlock);
-		mapDataStore.widthPerBlock = widthPerBlock;
-		mapDataStore.heightPerBlock = heightPerBlock;
+		blockHeight = 22 * windowData.zoomY;
+		blockWidth = 22 * windowData.zoomX;
+		blockHeight = blockWidth = min(blockHeight, blockWidth);
+		windowData.widthPerBlock = blockWidth;
+		windowData.heightPerBlock = blockHeight;
 		setbkmode(TRANSPARENT);
 		pimg[1] = newimage();
 		getimage(pimg[1], "img/city.png");
-		// imageOperation::zoomImage(pimg[1], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[1], windowData.heightPerBlock, windowData.widthPerBlock);
 		pimg[2] = newimage();
 		getimage(pimg[2], "img/crown.png");
-		// imageOperation::zoomImage(pimg[2], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[2], windowData.heightPerBlock, windowData.widthPerBlock);
 		pimg[3] = newimage();
 		getimage(pimg[3], "img/mountain.png");
-		// imageOperation::zoomImage(pimg[3], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[3], windowData.heightPerBlock, windowData.widthPerBlock);
 		pimg[4] = newimage();
 		getimage(pimg[4], "img/swamp.png");
-		// imageOperation::zoomImage(pimg[4], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[4], windowData.heightPerBlock, windowData.widthPerBlock);
 		pimg[5] = newimage();
 		getimage(pimg[5], "img/obstacle.png");
-		// imageOperation::zoomImage(pimg[5], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[5], windowData.heightPerBlock, windowData.widthPerBlock);
 		pimg[6] = newimage();
 		getimage(pimg[6], "img/currentOn.png");
-		// imageOperation::zoomImage(pimg[6], mapDataStore.heightPerBlock, mapDataStore.widthPerBlock);
+		// imageOperation::zoomImage(pimg[6], windowData.heightPerBlock, windowData.widthPerBlock);
 		pimg[7] = newimage();
 		getimage(pimg[7], "img/erase.png");
 		pimg[8] = newimage();
@@ -1614,8 +1614,8 @@ namespace LGGraphics {
 	}
 }
 
-inline int getHeightPerBlock() { return LGGraphics::mapDataStore.heightPerBlock; }
+inline int getHeightPerBlock() { return LGGraphics::windowData.heightPerBlock; }
 
-inline int getWidthPerBlock() { return LGGraphics::mapDataStore.widthPerBlock; }
+inline int getWidthPerBlock() { return LGGraphics::windowData.widthPerBlock; }
 
 #endif // __LGGRAPHICS_HPP__

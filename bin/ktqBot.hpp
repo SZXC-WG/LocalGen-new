@@ -6,7 +6,7 @@ namespace ktqBot
     const int dx[5] = {0, -1, 0, 1, 0};
     const int dy[5] = {0, 0, -1, 0, 1};
 
-    int ktqBot(int id, playerCoord coo)
+    int calcNextMove(int id, playerCoord coo)
     {
         static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
         using ll = long long;

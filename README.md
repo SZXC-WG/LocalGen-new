@@ -12,7 +12,7 @@ If you have an idea or find bugs, you can also take part in contributing to the 
 
 ## The robots in game are too weak! I want to write a new one!
 
-Go see [issue #31](../../issue/31).
+Go see [issue #31](../../issues/31).
 
 ## File Extensions
 

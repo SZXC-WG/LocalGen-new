@@ -12,7 +12,7 @@ namespace xrzBot
     static int turnCount[17];
     static int id;
 
-    int calcNextMove(int ind, coordS player)
+    moveS calcNextMove(int ind, coordS player)
     {
         srand(time(0));
         static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
@@ -23,7 +23,7 @@ namespace xrzBot
         if (gameMap[player.x][player.y].army == 0 || gameMap[player.x][player.y].player != id)
         {
             memset(visitTime[id], 0, sizeof(visitTime[id]));
-            return 0;
+            return moveS { id, false, player, LGgame::genCoo[ind] };
         }
         struct node
         {
@@ -54,12 +54,12 @@ namespace xrzBot
             if (gameMap[des.x][des.y].player != id && gameMap[des.x][des.y].type == 3)
             {
                 previousPos[id] = player;
-                return i;
+                return moveS { id, true, player, coordS { player.x + dx[i], player.y + dy[i] } };
             }
             if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt != id)
             {
                 previousPos[id] = player;
-                return i;
+                return moveS { id, true, player, coordS { player.x + dx[i], player.y + dy[i] } };
             }
         }
         int i;
@@ -79,9 +79,9 @@ namespace xrzBot
             des.Army = gameMap[des.x][des.y].army;
             des.teamOnIt = gameMap[des.x][des.y].player;
             if (gameMap[des.x][des.y].player != id && gameMap[des.x][des.y].type == 3)
-                return i;
+                return moveS { id, true, player, coordS { player.x + dx[i], player.y + dy[i] } };
             if (des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt == 0)
-                return i;
+                return moveS { id, true, player, coordS { player.x + dx[i], player.y + dy[i] } };
             int cnt = 4;
             if (des.x == previousPos[id].x && des.y == previousPos[id].y)
                 cnt += turnCount[id] * 10;
@@ -99,10 +99,10 @@ namespace xrzBot
             if (mtrd() % cnt == 0)
             {
                 previousPos[id] = player;
-                return i;
+                return moveS { id, true, player, coordS { player.x + dx[i], player.y + dy[i] } };
             }
         }
-        return okDir;
+        return moveS { id, true, player, coordS { player.x + dx[okDir], player.y + dy[okDir] } };
     }
 }
 

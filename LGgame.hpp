@@ -80,8 +80,9 @@ int LGgame::analyzeMove(int id, int mv, coordS& coo) {
 			coordS newCoo{coo.x + dx[mv], coo.y + dy[mv]};
 			if(newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW || gameMap[newCoo.x][newCoo.y].type == 2)
 				return 1;
-			moveS insMv{
+			moveS insMv {
 				id,
+				true,
 				coo,
 				newCoo,
 			};
@@ -103,11 +104,25 @@ int LGgame::analyzeMove(int id, int mv, coordS& coo) {
 	}
 	return 0;
 }
+int LGgame::checkMove(moveS mv) {
+	if(mv.id < 1 || mv.id > LGgame::playerCnt) return 5;
+	if(mv.from == mv.to) return 4;
+	if(mv.from.x < 1 || mv.from.x > mapH || mv.from.y < 1 || mv.from.y > mapW) return 2;
+	if(mv.to.x < 1 || mv.to.x > mapH || mv.to.y < 1 || mv.to.y > mapW) return 2;
+	if(gameMap[mv.from.x][mv.from.y].type == 2 && mv.takeArmy) return 2;
+	if(gameMap[mv.to.x][mv.to.y].type == 2 && mv.takeArmy) return 2;
+	if(abs(mv.to.x - mv.from.x) + abs(mv.to.y - mv.from.y) > 1 && mv.takeArmy) return 3; // focus change
+	return 0;
+}
 // flush existing movements
 void LGgame::flushMove() {
 	while(!LGgame::inlineMove.empty()) {
 		moveS cur = LGgame::inlineMove.front();
 		LGgame::inlineMove.pop_front();
+		if(!cur.takeArmy) {
+			LGgame::playerCoo[cur.id] = cur.to;
+			continue;
+		}
 		if(!LGgame::isAlive[cur.id])
 			continue;
 		if(gameMap[cur.from.x][cur.from.y].player != cur.id)
@@ -132,6 +147,7 @@ void LGgame::flushMove() {
 				}
 			}
 		}
+		LGgame::playerCoo[cur.id] = cur.to;
 	}
 }
 // general init
@@ -320,8 +336,8 @@ namespace LGlocal {
 		for(int i = 2; i <= LGgame::playerCnt; ++i)
 			LGgame::robotId[i] = mtrd() % 300;
 		LGgame::initGenerals(LGgame::playerCoo);
-		for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::playerCoo[i] = LGgame::genCoo[i];
-		std::deque<int> movement;
+		for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::playerFocus[i] = LGgame::playerCoo[i] = LGgame::genCoo[i];
+		std::deque<moveS> movement;
 		LGgame::updateMap();
 		Zip();
 		LGreplay::wreplay.initReplay();
@@ -336,8 +352,9 @@ namespace LGlocal {
 		LGGraphics::windowData.maplocY = - (LGgame::genCoo[1].x) * blockHeight + 450 * LGGraphics::windowData.zoomY;
 		int smsx = 0, smsy = 0; bool moved = false;
 		std::chrono::steady_clock::duration prsttm;
-		bool toNextTurn = true, paused = false;
+		bool toNextTurn = true, gamePaused = false;
 		std::chrono::nanoseconds pauseBeginTime, pauseEndTime;
+		bool shiftPressed = false;
 		for(; is_run();) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
@@ -369,8 +386,11 @@ namespace LGlocal {
 							   msg.y <= LGGraphics::windowData.maplocY + blockHeight * mapH) {
 								int lin = (msg.y + blockHeight - 1 - LGGraphics::windowData.maplocY) / blockHeight;
 								int col = (msg.x + blockWidth - 1 - LGGraphics::windowData.maplocX) / blockWidth;
-								LGgame::playerCoo[1] = {lin, col};
-								movement.clear();
+								moveS mv { 1, false, LGgame::playerFocus[1], coordS{lin,col} };
+								if(!LGgame::checkMove(mv)) {
+									LGgame::inlineMove.push_back(mv);
+									LGgame::playerFocus[1] = mv.to;
+								}
 							}
 						}
 					}
@@ -379,34 +399,71 @@ namespace LGlocal {
 			while(kbmsg()) {
 				key_msg ch = getkey();
 				if(ch.key == key_space) {
-					if(!paused) {
+					if(!gamePaused) {
 						pauseBeginTime = std::chrono::steady_clock::now().time_since_epoch();
-						paused = true;
+						gamePaused = true;
 					} else {
-						paused = false;
+						gamePaused = false;
 						pauseEndTime = std::chrono::steady_clock::now().time_since_epoch();
 						LGgame::beginTime += pauseEndTime - pauseBeginTime;
 					}
 				}
+				if(ch.key == key_shift) {
+					if(ch.msg == key_msg_up) shiftPressed = false;
+					else if(ch.msg == key_msg_down) shiftPressed = true;
+				}
 				if(ch.msg == key_msg_up)
 					continue;
 				switch(ch.key) {
-					case int('w'): movement.emplace_back(1); break;
-					case int('a'): movement.emplace_back(2); break;
-					case int('s'): movement.emplace_back(3); break;
-					case int('d'): movement.emplace_back(4); break;
+					case int('w'): case key_up: { /*[UP]*/
+						coordS to = coordS{LGgame::playerFocus[1].x+dx[1],LGgame::playerFocus[1].y+dy[1]};
+						moveS mv = moveS{1, !shiftPressed, LGgame::playerFocus[1], to};
+						if(!LGgame::checkMove(mv)) {
+							movement.push_back(mv);
+							LGgame::playerFocus[1] = to;
+						}
+					} break;
+					case int('a'): case key_left: { /*[LEFT]*/
+						coordS to = coordS{LGgame::playerFocus[1].x+dx[2],LGgame::playerFocus[1].y+dy[2]};
+						moveS mv = moveS{1, !shiftPressed, LGgame::playerFocus[1], to};
+						if(!LGgame::checkMove(mv)) {
+							movement.push_back(mv);
+							LGgame::playerFocus[1] = to;
+						}
+					} break;
+					case int('s'): case key_down: { /*[DOWN]*/
+						coordS to = coordS{LGgame::playerFocus[1].x+dx[3],LGgame::playerFocus[1].y+dy[3]};
+						moveS mv = moveS{1, !shiftPressed, LGgame::playerFocus[1], to};
+						if(!LGgame::checkMove(mv)) {
+							movement.push_back(mv);
+							LGgame::playerFocus[1] = to;
+						}
+					} break;
+					case int('d'): case key_right: { /*[RIGHT]*/
+						coordS to = coordS{LGgame::playerFocus[1].x+dx[4],LGgame::playerFocus[1].y+dy[4]};
+						moveS mv = moveS{1, !shiftPressed, LGgame::playerFocus[1], to};
+						if(!LGgame::checkMove(mv)) {
+							movement.push_back(mv);
+							LGgame::playerFocus[1] = to;
+						}
+					} break;
 
-					case key_up: /*[UP]*/ movement.emplace_back(5); break;
-					case key_left: /*[LEFT]*/ movement.emplace_back(6); break;
-					case key_down: /*[DOWN]*/ movement.emplace_back(7); break;
-					case key_right: /*[RIGHT]*/ movement.emplace_back(8); break;
-
-					case int('g'): movement.emplace_back(0); break;
-					case int('e'):
-						if(!movement.empty())
+					case int('g'): {
+						movement.push_back({1, false, LGgame::playerFocus[1], LGgame::genCoo[1]});
+						LGgame::playerFocus[1] = LGgame::playerCoo[1] = LGgame::genCoo[1];
+						movement.clear();
+					} break;
+					case int('e'): {
+						if(!movement.empty()) {
+							moveS mv = movement.back();
 							movement.pop_back();
-						break;
-					case int('q'): movement.clear(); break;
+							LGgame::playerFocus[1] = mv.from;
+						}
+					} break;
+					case int('q'): {
+						movement.clear();
+						LGgame::playerFocus[1] = LGgame::playerCoo[1];
+					} break;
 					case 27: {
 						MessageBoxW(getHWnd(), wstring(L"YOU QUIT THE GAME.").c_str(), L"EXIT", MB_OK | MB_SYSTEMMODAL);
 						closegraph();
@@ -437,51 +494,54 @@ namespace LGlocal {
 					}
 				}
 			}
-			if(paused) toNextTurn = false;
+			if(gamePaused) toNextTurn = false;
 			if(toNextTurn) {
 				LGgame::updateMap();
 				LGreplay::wreplay.newTurn();
-				coordS tmpcoo=LGgame::playerCoo[1];
-				while(!movement.empty() && LGgame::analyzeMove(1, movement.front(), LGgame::playerCoo[1]))
-					movement.pop_front(),tmpcoo=LGgame::playerCoo[1];
-				int mv;
+				coordS tmpcoo=LGgame::playerFocus[1];
+				moveS mv;
+				while(!movement.empty() && LGgame::checkMove(movement.front()))
+					movement.pop_front(),tmpcoo=LGgame::playerFocus[1];
 				if(!movement.empty()) {
 					mv=movement.front();
-					if(mv>=1&&mv<=4) {
-						LGreplay::Movement mov(1,mv,tmpcoo);
-						LGreplay::wreplay.newMove(mov);
-					}
+					LGreplay::Movement mov(mv);
+					LGreplay::wreplay.newMove(mov);
+					LGgame::inlineMove.push_back(mv);
 					movement.pop_front();
 				}
 				// MessageBoxA(getHWnd(), string("TESTING").c_str(), "TEST MESSAGE", MB_OK);
 				for(int i = 2; i <= LGgame::playerCnt; ++i) {
 					if(!LGgame::isAlive[i])
 						continue;
-					tmpcoo=LGgame::playerCoo[i];
+					tmpcoo=LGgame::playerFocus[i];
 					switch(LGgame::robotId[i]) {
 						case 0 ... 99:
-							mv=smartRandomBot::calcNextMove(i, LGgame::playerCoo[i]);
-							if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
-								LGreplay::Movement mov(i,mv,tmpcoo);
+							mv=smartRandomBot::calcNextMove(i, LGgame::playerFocus[i]);
+							if(!LGgame::checkMove(mv)) {
+								LGreplay::Movement mov(mv);
 								LGreplay::wreplay.newMove(mov);
+								LGgame::inlineMove.push_back(mv);
+								LGgame::playerFocus[i] = mv.to;
 							}
 							break;
 						case 100 ... 199:
-							mv=xrzBot::calcNextMove(i, LGgame::playerCoo[i]);
-							if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
-								LGreplay::Movement mov(i,mv,tmpcoo);
+							mv=xrzBot::calcNextMove(i, LGgame::playerFocus[i]);
+							if(!LGgame::checkMove(mv)) {
+								LGreplay::Movement mov(mv);
 								LGreplay::wreplay.newMove(mov);
+								LGgame::inlineMove.push_back(mv);
+								LGgame::playerFocus[i] = mv.to;
 							}
 							break;
 						case 200 ... 299:
-							mv=xiaruizeBot::calcNextMove(i, LGgame::playerCoo[i]);
-							if(!LGgame::analyzeMove(i, mv, LGgame::playerCoo[i])&&mv>=1&&mv<=4) {
-								LGreplay::Movement mov(i,mv,tmpcoo);
+							mv=xiaruizeBot::calcNextMove(i, LGgame::playerFocus[i]);
+							if(!LGgame::checkMove(mv)) {
+								LGreplay::Movement mov(mv);
 								LGreplay::wreplay.newMove(mov);
+								LGgame::inlineMove.push_back(mv);
+								LGgame::playerFocus[i] = mv.to;
 							}
 							break;
-						default:
-							LGgame::analyzeMove(i, 0, LGgame::playerCoo[i]);
 					}
 				}
 				LGgame::flushMove();
@@ -527,7 +587,7 @@ namespace LGlocal {
 				int needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
 				int lackTurn = LGgame::curTurn - needFlushToTurn;
 				cleardevice();
-				printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
+				printMap(LGgame::cheatCode, LGgame::playerFocus[1]);
 				LGgame::ranklist();
 				int screenszr = 1600 * LGGraphics::windowData.zoomX;
 				static int fpslen;
@@ -556,7 +616,7 @@ namespace LGlocal {
 				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
 				lackTurn = LGgame::curTurn - needFlushToTurn;
-				if(lackTurn > 0 || paused) toNextTurn = false;
+				if(lackTurn > 0 || gamePaused) toNextTurn = false;
 			}
 		}
 		return 0;

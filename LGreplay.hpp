@@ -47,22 +47,23 @@ namespace LGreplay {
 	}
 
 	Movement::Movement() {}
-	Movement::Movement(int tm,int d,coordS c) {player=tm; dir=d; coord=c;}
+	Movement::Movement(moveS m) {move=m;}
 	string Movement::zip() {
-		if(dir<1||dir>4) return "";
 		string res="";
-		res+=ntoc(player);
-		res+=ntos(coord.x,2);
-		res+=ntos(coord.y,2);
-		res+=ntoc(dir);
+		res+=ntoc(move.id<<1|move.takeArmy);
+		res+=ntos(move.from.x,2);
+		res+=ntos(move.from.y,2);
+		res+=ntos(move.to.x,2);
+		res+=ntos(move.to.y,2);
 		return res;
 	}
 	Movement readMove(char* buf) {
 		Movement mov;
-		mov.player=cton(buf[0]);
-		mov.coord.x=ston(buf+1,2);
-		mov.coord.y=ston(buf+3,2);
-		mov.dir=cton(buf[5]);
+		mov.move = moveS {
+			(cton(buf[0])>>1), bool(cton(buf[0])&1),
+			coordS { ston(buf+1,2), ston(buf+3,2) },
+			coordS { ston(buf+5,2), ston(buf+7,2) }
+		};
 		return mov;
 	}
 
@@ -102,19 +103,7 @@ namespace LGreplay {
 		return B;
 	}
 	int QwQ(Movement mov) {
-		coordS coo=mov.coord;
-		int id=mov.player,mv=mov.dir;
-		switch(mv) {
-			case 1 ... 4: {
-				coordS newCoo{coo.x + dx[mv], coo.y + dy[mv]};
-				if(newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW || gameMap[newCoo.x][newCoo.y].type == 2)
-					return 1;
-				moveS insMv{id,coo,newCoo,};
-				LGgame::inlineMove.push_back(insMv);
-				break;
-			}
-			default:return -1;
-		}
+		LGgame::inlineMove.push_back(mov.move);
 		return 0;
 	}
 	void updMap(int turn) {
@@ -166,8 +155,8 @@ namespace LGreplay {
 			if(fread(readBuf,1,1,file)!=1) return 1;
 			++seekPos;
 			if(readBuf[0]=='_') break;
-			fread(readBuf+1,1,5,file);
-			seekPos+=5;
+			fread(readBuf+1,1,8,file);
+			seekPos+=8;
 			QwQ(readMove(readBuf));
 		}
 		LGgame::flushMove();
@@ -180,8 +169,8 @@ namespace LGreplay {
 		fseek(file,1,SEEK_CUR);
 		++seekPos;
 		while(seekPos<turnPos[curTurn]) {
-			fread(readBuf,1,6,file);
-			seekPos+=6;
+			fread(readBuf,1,9,file);
+			seekPos+=9;
 			QwQ(readMove(readBuf));
 		}
 		LGgame::flushMove();
@@ -209,7 +198,7 @@ namespace LGreplay {
 		Filename=Fname;
 		file=fopen(Fname.c_str(),"r");
 		if(!file) {
-			MessageBoxW(nullptr,L"No such replay file!",L"Local Generals",MB_OK);
+			MessageBoxW(nullptr,L"No such replay file!",L"Local Generals.io",MB_OK);
 			closegraph();
 			exit(0);
 		}

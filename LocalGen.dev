@@ -33,20 +33,20 @@ UnitCount=10
 
 [VersionInfo]
 Major=4
-Minor=1
+Minor=2
 Release=0
-Build=2147
+Build=2170
 LanguageID=1033
 CharsetID=1252
 CompanyName=LocalGen-dev
-FileVersion=4.1.0.2147
+FileVersion=4.2.0.2170
 FileDescription=Local Generals.io (new ver.)
 InternalName=
 LegalCopyright=Copyright (c) 2023 LocalGen-dev
 LegalTrademarks=
 OriginalFilename=
 ProductName=Local Generals.io (new ver.)
-ProductVersion=4.1.0.2147
+ProductVersion=4.2.0.2170
 AutoIncBuildNr=1
 SyncProduct=1
 

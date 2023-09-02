@@ -12,7 +12,7 @@ If you have an idea or find bugs, you can also take part in contributing to the 
 
 ## The robots in game are too weak! I want to write a new one!
 
-Go see issue #31.
+Go see [issue #31](issue/31).
 
 ## File Extensions
 
@@ -45,4 +45,3 @@ Go see issue #31.
 ## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contributors
 
 [![Top contributors](https://images.repography.com/39584401/LocalGen-dev/LocalGen-new/top-contributors/3gjEtdpgx0E_lec-eyUw5_Cib-zwgYr7YmsAoe3QrQk/mHHxcguoyNmZDMSMlPte9ti9eo9YZMaKNI3LXAlFrb8_table.svg)](https://github.com/LocalGen-dev/LocalGen-new/graphs/contributors)
-

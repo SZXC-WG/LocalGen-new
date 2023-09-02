@@ -155,8 +155,8 @@ namespace LGreplay {
 			if(fread(readBuf,1,1,file)!=1) return 1;
 			++seekPos;
 			if(readBuf[0]=='_') break;
-			fread(readBuf+1,1,9,file);
-			seekPos+=9;
+			fread(readBuf+1,1,8,file);
+			seekPos+=8;
 			QwQ(readMove(readBuf));
 		}
 		LGgame::flushMove();
@@ -198,7 +198,7 @@ namespace LGreplay {
 		Filename=Fname;
 		file=fopen(Fname.c_str(),"r");
 		if(!file) {
-			MessageBoxW(nullptr,L"No such replay file!",L"Local Generals",MB_OK);
+			MessageBoxW(nullptr,L"No such replay file!",L"Local Generals.io",MB_OK);
 			closegraph();
 			exit(0);
 		}

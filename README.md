@@ -10,10 +10,9 @@ Interested? Then go to [the release page](http://github.com/LocalGen-dev/LocalGe
 
 If you have an idea or find bugs, you can also take part in contributing to the project! Just **create an issue** or **create a pull request**.
 
-## Future Versions
+## The robots in game are too weak! I want to write a new one!
 
-- `v4.1/5.1` Fix web flashing problem.
-- `v5.0` Brand new settings.
+Go see issue #31.
 
 ## File Extensions
 

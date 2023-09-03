@@ -451,5 +451,6 @@ void MainPage() {
 
 #include "bin/LGGrectbut.hpp" // rectangular button
 #include "bin/LGGcircbut.hpp" // circular button
+#include "bin/LGGrectcbox.hpp"
 
 #endif // __LGDEF_HPP__

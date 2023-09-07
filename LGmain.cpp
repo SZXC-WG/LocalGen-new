@@ -1,7 +1,7 @@
 /* This is the MAIN program of LocalGen.                                 */
-/* Copyright (c) 2023 LocalGen-dev; All rights reserved.                 */
-/* Developers: http://github.com/LocalGen-dev                            */
-/* Project: http://github.com/LocalGen-dev/LocalGen-new                  */
+/* Copyright (c) 2023 SZXC Work Group; All rights reserved.              */
+/* Developers: http://github.com/SZXC-WG                                 */
+/* Project: http://github.com/SZXC-WG/LocalGen-new                       */
 /*                                                                       */
 /* This project is licensed under the MIT license. That means you can    */
 /* download, use and share a copy of the product of this project. You    */
@@ -9,7 +9,7 @@
 /* must print the copyright information at the front of your product.    */
 /*                                                                       */
 /* The full MIT license this project uses can be found here:             */
-/* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
+/* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
 #ifndef __LGMAIN_CPP__
 #define __LGMAIN_CPP__
@@ -27,6 +27,11 @@
 /* dev project headers */
 #include "LocalGen_private.h"
 #include "LGdef.hpp"
+#include "glib/GLIB_HEAD.hpp"
+#include "glib/GLIB_image.hpp"
+#include "glib/GLIB_rectbut.hpp"
+#include "glib/GLIB_circbut.hpp"
+#include "glib/GLIB_rectcbox.hpp"
 #include "LGencoding.hpp"
 #include "LGmaps.hpp"
 #include "LGgraphics.hpp"

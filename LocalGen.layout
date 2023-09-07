@@ -1,9 +1,9 @@
 [Editors]
 Order=
 [Editor_0]
-CursorCol=21
-CursorRow=8
-TopLine=1
+CursorCol=23
+CursorRow=21
+TopLine=7
 LeftChar=1
 [Editor_8]
 CursorCol=35
@@ -16,9 +16,9 @@ CursorRow=35
 TopLine=26
 LeftChar=1
 [Editor_4]
-CursorCol=2
-CursorRow=16
-TopLine=1
+CursorCol=38
+CursorRow=85
+TopLine=71
 LeftChar=1
 [Editor_9]
 CursorCol=28
@@ -39,4 +39,9 @@ LeftChar=1
 CursorCol=3
 CursorRow=139
 TopLine=122
+LeftChar=1
+[Editor_3]
+CursorCol=41
+CursorRow=581
+TopLine=572
 LeftChar=1

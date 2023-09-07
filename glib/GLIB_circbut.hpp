@@ -1,8 +1,8 @@
-/* This is LGGcircbut.hpp file of LocalGen graphics lib. (based on EGE)  */
+/* This is GLIB_circbut.hpp file of SZXC-WG graphics lib.                */
 /* Thanks to EGE: http://xege.org/                                       */
-/* Copyright (c) 2023 LocalGen-dev; All rights reserved.                 */
-/* Developers: http://github.com/LocalGen-dev                            */
-/* Project: http://github.com/LocalGen-dev/LocalGen-new                  */
+/* Copyright (c) 2023 SZXC Work Group; All rights reserved.              */
+/* Developers: http://github.com/SZXC-WG                                 */
+/* Project: http://github.com/SZXC-WG/LocalGen-new                       */
 /*                                                                       */
 /* This project is licensed under the MIT license. That means you can    */
 /* download, use and share a copy of the product of this project. You    */
@@ -10,47 +10,18 @@
 /* must print the copyright information at the front of your product.    */
 /*                                                                       */
 /* The full MIT license this project uses can be found here:             */
-/* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
+/* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
-#ifndef __LGGCIRCBUT_HPP__
-#define __LGGCIRCBUT_HPP__
+#ifndef __LG_GLIB_CIRCBUT_HPP__
+#define __LG_GLIB_CIRCBUT_HPP__
 
-#include <graphics.h> // EGE
-#include <cmath>
-#include <algorithm>
-#include <vector>
-#include <string>
-#include <functional>
-using std::hypot;
-using std::string;
-using std::to_string;
-using std::vector;
-using std::min; using std::max;
+#include "GLIB_HEAD.hpp"
 
-// class for circ buttons
-class circBUTTON {
-  private:
-	PIMAGE buttonImage; // image info
-	PIMAGE backgroundImage;
-	int backgroundImageWidth, backgroundImageHeight;
-	int buttonRadius; // radius
-	color_t backgroundColor; // background color
-	color_t textColor; // text color
-	vector<wstring> text; // text
-	string fontName; // font face name
-	int fontHeight, fontWidth; // font height & width
-	int frameWidth;
-	bool enableAutoFrameColor; color_t frameColor;
-	int walign, halign; // align method
-	int locationX, locationY; // location on screen
+_GLIB_NAMESPACE_HEAD
 
-  public:
-	bool enableTextShadow; int textShadowWeight;
-	bool enableShadow;
-	bool enableButtonShadow;
-	int status; // button status: free(0) / cursor-on(1) / clicked(2)
-	std::function<void()> clickEvent; // event when clicked
-	explicit circBUTTON() {
+inline namespace button {
+
+	circBUTTON::circBUTTON() {
 		buttonImage = newimage();
 		backgroundImage = nullptr;
 		buttonRadius = 1;
@@ -61,29 +32,29 @@ class circBUTTON {
 		enableTextShadow = true; textShadowWeight = 1;
 		enableShadow = 1; enableButtonShadow = 1;
 	}
-	~circBUTTON() {
+	circBUTTON::~circBUTTON() {
 		delimage(buttonImage);
 		delimage(backgroundImage);
 	}
-	circBUTTON(int _radius) {
+	circBUTTON::circBUTTON(int _radius) {
 		circBUTTON();
 		buttonRadius = _radius;
 	}
-	circBUTTON(circBUTTON&& but) {
+	circBUTTON::circBUTTON(circBUTTON&& but) {
 		delimage(buttonImage);
 		buttonImage = but.buttonImage;
 		buttonRadius = but.buttonRadius;
 		backgroundColor = but.backgroundColor, textColor = but.textColor;
 		text = but.text;
 	}
-	circBUTTON(const circBUTTON& but) {
+	circBUTTON::circBUTTON(const circBUTTON& but) {
 		delimage(buttonImage);
 		buttonImage = but.buttonImage;
 		buttonRadius = but.buttonRadius;
 		backgroundColor = but.backgroundColor, textColor = but.textColor;
 		text = but.text;
 	}
-	inline circBUTTON& draw() {
+	inline circBUTTON& circBUTTON::draw() {
 		delimage(buttonImage);
 		if(enableShadow && enableButtonShadow) buttonImage = newimage(buttonRadius * 2 + 3, buttonRadius * 2 + 3);
 		else buttonImage = newimage(buttonRadius * 2, buttonRadius * 2);
@@ -98,7 +69,7 @@ class circBUTTON {
 		setfillcolor(backgroundColor, buttonImage);
 		fillellipse(buttonRadius, buttonRadius, buttonRadius, buttonRadius, buttonImage);
 		if(backgroundImage != nullptr) {
-			if(getwidth(backgroundImage)!=backgroundImageWidth||getheight(backgroundImage)!=backgroundImageHeight) imageOperation::zoomImage(backgroundImage,backgroundImageWidth,backgroundImageHeight);
+			if(getwidth(backgroundImage)!=backgroundImageWidth||getheight(backgroundImage)!=backgroundImageHeight) images::zoomImage(backgroundImage,backgroundImageWidth,backgroundImageHeight);
 			putimage_withalpha(buttonImage,backgroundImage,buttonRadius-backgroundImageWidth/2,buttonRadius-backgroundImageHeight/2);
 		}
 		setfont(fontHeight, fontWidth, fontName.c_str(), buttonImage);
@@ -133,38 +104,38 @@ class circBUTTON {
 		}
 		return *this;
 	}
-	inline circBUTTON& display() {
+	inline circBUTTON& circBUTTON::display() {
 		draw();
 		putimage(locationX - buttonRadius, locationY - buttonRadius, buttonImage);
 		return *this;
 	}
-	inline circBUTTON& radius(int _radius) { buttonRadius = _radius; return *this; }
-	inline circBUTTON& bgcolor(color_t _color) { backgroundColor = _color; return *this; }
-	inline circBUTTON& textcolor(color_t _color) { textColor = _color; return *this; }
-	inline circBUTTON& addtext(wstring _text) { text.push_back(_text); return *this; }
-	inline circBUTTON& poptext() { if(!text.empty()) text.pop_back(); return *this; }
-	inline circBUTTON& cleartext() { text.clear(); return *this; }
-	inline circBUTTON& fontname(string _fontName) { fontName = _fontName; return *this; }
-	inline circBUTTON& fontsize(int _fontHeight, int _fontWidth) { fontHeight = _fontHeight; fontWidth = _fontWidth; return *this; }
-	inline circBUTTON& move(int _X, int _Y) { locationY = _Y, locationX = _X; return *this; }
-	inline circBUTTON& textalign(int _walign = -1, int _halign = -1) {
+	inline circBUTTON& circBUTTON::radius(int _radius) { buttonRadius = _radius; return *this; }
+	inline circBUTTON& circBUTTON::bgcolor(color_t _color) { backgroundColor = _color; return *this; }
+	inline circBUTTON& circBUTTON::textcolor(color_t _color) { textColor = _color; return *this; }
+	inline circBUTTON& circBUTTON::addtext(wstring _text) { text.push_back(_text); return *this; }
+	inline circBUTTON& circBUTTON::poptext() { if(!text.empty()) text.pop_back(); return *this; }
+	inline circBUTTON& circBUTTON::cleartext() { text.clear(); return *this; }
+	inline circBUTTON& circBUTTON::fontname(string _fontName) { fontName = _fontName; return *this; }
+	inline circBUTTON& circBUTTON::fontsize(int _fontHeight, int _fontWidth) { fontHeight = _fontHeight; fontWidth = _fontWidth; return *this; }
+	inline circBUTTON& circBUTTON::move(int _X, int _Y) { locationY = _Y, locationX = _X; return *this; }
+	inline circBUTTON& circBUTTON::textalign(int _walign, int _halign) {
 		if(~_walign) walign = _walign;
 		if(~_halign) halign = _halign;
 		return *this;
 	}
-	inline circBUTTON& event(std::function<void()> event) { clickEvent = event; return *this; }
-	inline circBUTTON& frame(int _width) { frameWidth = _width; return *this; }
-	inline circBUTTON& framecolor(bool _enableAuto = 1, color_t _color = 0xffffffff) { enableAutoFrameColor = _enableAuto, frameColor = _color; return *this; }
-	inline circBUTTON& bgimage(PIMAGE _img) {
+	inline circBUTTON& circBUTTON::event(std::function<void()> event) { clickEvent = event; return *this; }
+	inline circBUTTON& circBUTTON::frame(int _width) { frameWidth = _width; return *this; }
+	inline circBUTTON& circBUTTON::framecolor(bool _enableAuto, color_t _color) { enableAutoFrameColor = _enableAuto, frameColor = _color; return *this; }
+	inline circBUTTON& circBUTTON::bgimage(PIMAGE _img) {
 		if(backgroundImage == nullptr) backgroundImage = newimage();
-		imageOperation::copyImage(backgroundImage,_img);
+		images::copyImage(backgroundImage,_img);
 		backgroundImageWidth = getwidth(backgroundImage);
 		backgroundImageHeight = getheight(backgroundImage);
 		return *this;
 	}
-	inline circBUTTON& bgsize(int _width,int _height) { backgroundImageWidth = _width,backgroundImageHeight = _height; return *this; }
-	inline circBUTTON& delbgimage() { backgroundImage = nullptr; return *this; }
-	inline circBUTTON& detect() {
+	inline circBUTTON& circBUTTON::bgsize(int _width,int _height) { backgroundImageWidth = _width,backgroundImageHeight = _height; return *this; }
+	inline circBUTTON& circBUTTON::delbgimage() { backgroundImage = nullptr; return *this; }
+	inline circBUTTON& circBUTTON::detect() {
 		POINT mousePos;
 		GetCursorPos(&mousePos);
 		ScreenToClient(getHWnd(), &mousePos);
@@ -177,6 +148,9 @@ class circBUTTON {
 		}
 		return status = 1, * this;
 	}
-};
 
-#endif // __LGGCIRCBUT_HPP__
+}
+
+_GLIB_NAMESPACE_TAIL
+
+#endif // __LG_GLIB_CIRCBUT_HPP__

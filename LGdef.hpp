@@ -1,7 +1,7 @@
 /* This is LGdef.hpp file of LocalGen.                                   */
-/* Copyright (c) 2023 LocalGen-dev; All rights reserved.                 */
-/* Developers: http://github.com/LocalGen-dev                            */
-/* Project: http://github.com/LocalGen-dev/LocalGen-new                  */
+/* Copyright (c) 2023 SZXC Work Group; All rights reserved.              */
+/* Developers: http://github.com/SZXC-WG                                 */
+/* Project: http://github.com/SZXC-WG/LocalGen-new                       */
 /*                                                                       */
 /* This project is licensed under the MIT license. That means you can    */
 /* download, use and share a copy of the product of this project. You    */
@@ -9,7 +9,7 @@
 /* must print the copyright information at the front of your product.    */
 /*                                                                       */
 /* The full MIT license this project uses can be found here:             */
-/* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
+/* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
 #ifndef __LGDEF_HPP__
 #define __LGDEF_HPP__
@@ -53,6 +53,7 @@ using std::string;
 using std::wstring;
 using std::to_string;
 using std::to_wstring;
+using std::min; using std::max;
 using namespace std::literals;
 
 /**** constant variables ****/
@@ -265,21 +266,6 @@ bool initSock(); // initialize socket web
 bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60);
 
 /**
- * @brief Namespace for operations on images. (based on EGE)
- */
-namespace imageOperation {
-	/**
-	 * @brief Copy one image to another.
-	 *
-	 * @param dstimg destination image
-	 * @param srcimg source image
-	 */
-	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg);
-	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight);
-	void setWindowTransparent(bool enable, int alpha = 0xFF);
-}
-
-/**
  * @brief Namespace for EGE graphics (except image operations)
  */
 namespace LGGraphics {
@@ -448,9 +434,5 @@ void MainPage() {
 //	LGGraphics::localOptions();
 	return;
 }
-
-#include "bin/LGGrectbut.hpp" // rectangular button
-#include "bin/LGGcircbut.hpp" // circular button
-#include "bin/LGGrectcbox.hpp"
 
 #endif // __LGDEF_HPP__

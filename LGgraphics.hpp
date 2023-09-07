@@ -1,7 +1,7 @@
-/* This is LGgraphics.hpp file of LocalGen.                                */
-/* Copyright (c) 2023 LocalGen-dev; All rights reserved.                 */
-/* Developers: http://github.com/LocalGen-dev                            */
-/* Project: http://github.com/LocalGen-dev/LocalGen-new                  */
+/* This is LGgraphics.hpp file of LocalGen.                              */
+/* Copyright (c) 2023 SZXC Work Group; All rights reserved.              */
+/* Developers: http://github.com/SZXC-WG                                 */
+/* Project: http://github.com/SZXC-WG/LocalGen-new                       */
 /*                                                                       */
 /* This project is licensed under the MIT license. That means you can    */
 /* download, use and share a copy of the product of this project. You    */
@@ -9,38 +9,13 @@
 /* must print the copyright information at the front of your product.    */
 /*                                                                       */
 /* The full MIT license this project uses can be found here:             */
-/* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
+/* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
 #ifndef __LGGRAPHICS_HPP__
 #define __LGGRAPHICS_HPP__
 
 #include "LGdef.hpp"
-
-namespace imageOperation {
-	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
-		if(dstimg == NULL || srcimg == NULL) return;
-		getimage(dstimg,srcimg,0,0,getwidth(srcimg),getheight(srcimg));
-	}
-	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
-		if((pimg == NULL) || (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
-			return;
-
-		PIMAGE zoomImage = newimage(zoomWidth, zoomHeight);
-		putimage(zoomImage, 0, 0, zoomWidth, zoomHeight, pimg, 0, 0, getwidth(pimg), getheight(pimg));
-		delimage(pimg);
-
-		pimg = zoomImage;
-	}
-	void setWindowTransparent(bool enable, int alpha) {
-		HWND egeHwnd = getHWnd();
-		LONG nRet = ::GetWindowLong(egeHwnd, GWL_EXSTYLE);
-		nRet |= WS_EX_LAYERED;
-		::SetWindowLong(egeHwnd, GWL_EXSTYLE, nRet);
-		if(!enable)
-			alpha = 0xFF;
-		SetLayeredWindowAttributes(egeHwnd, 0, alpha, LWA_ALPHA);
-	}
-}
+#include "glib/GLIB_HEAD.hpp"
 
 bool FullScreen(HWND hwnd, int fullscreenWidth, int fullscreenHeight, int colourBits, int refreshRate) {
 	DEVMODE fullscreenSettings;
@@ -216,7 +191,7 @@ namespace LGGraphics {
 		cleardevice();
 		PIMAGE zfavi = newimage();
 		getimage_pngfile(zfavi, "img/favicon.png");
-		imageOperation::zoomImage(zfavi, getwidth(zfavi) * 1.8 * windowData.zoomX, getheight(zfavi) * 1.8 * windowData.zoomY);
+		images::zoomImage(zfavi, getwidth(zfavi) * 1.8 * windowData.zoomX, getheight(zfavi) * 1.8 * windowData.zoomY);
 		putimage_withalpha(NULL, zfavi, 100 * windowData.zoomX, 50 * windowData.zoomY,
 		                   0, 0, getwidth(zfavi), getheight(zfavi));
 		settextjustify(CENTER_TEXT, TOP_TEXT);
@@ -293,8 +268,8 @@ namespace LGGraphics {
 			PIMAGE donate_wc = newimage(), donate_ap = newimage();
 			getimage_pngfile(donate_wc, "img/donate_wechat.png");
 			getimage_pngfile(donate_ap, "img/donate_alipay.png");
-			imageOperation::zoomImage(donate_wc, 600 * windowData.zoomX, 800 * windowData.zoomY);
-			imageOperation::zoomImage(donate_ap, 600 * windowData.zoomX, 800 * windowData.zoomY);
+			images::zoomImage(donate_wc, 600 * windowData.zoomX, 800 * windowData.zoomY);
+			images::zoomImage(donate_ap, 600 * windowData.zoomX, 800 * windowData.zoomY);
 			putimage(100 * windowData.zoomX, 10 * windowData.zoomY, donate_wc);
 			putimage((100 + 800) * windowData.zoomX, 10 * windowData.zoomY, donate_ap);
 			xyprintf(800 * windowData.zoomX, 830 * windowData.zoomY, L"press any key to close...");

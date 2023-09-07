@@ -300,6 +300,16 @@ namespace LGGraphics {
 		.event([]()->void{system("start http://github.com/LocalGen-dev/LocalGen-new");})
 		.enableButtonShadow = false; settings
 		.display();
+
+		// rectCBOX cbox_test;
+		// cbox_test
+		// .size(20 * windowData.zoomX, 20 * windowData.zoomY)
+		// .move(20 * windowData.zoomX, 20 * windowData.zoomY)
+		// .bgcolor(bgColor)
+		// .framecolor(0xffffffff)
+		// .fillcolor(0xffffffff)
+		// .frame(5 * windowData.zoomX);
+
 		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {
 			local.detect().display();
@@ -326,6 +336,9 @@ namespace LGGraphics {
 			}
 			if(repo.status == 2)
 				repo.clickEvent();
+
+			// cbox_test.detect().display();
+			// if(cbox_test.status == 2) cbox_test.changeState();
 		}
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 		exit(0);

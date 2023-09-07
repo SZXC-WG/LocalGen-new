@@ -41,6 +41,7 @@ _GLIB_NAMESPACE_HEAD
  * @brief Namespace for operations on images.
  */
 namespace images {
+
 	/**
 	 * @brief Copy one image to another.
 	 *
@@ -50,7 +51,8 @@ namespace images {
 	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg);
 	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight);
 	void setWindowTransparent(bool enable, int alpha = 0xFF);
-}
+
+} // namespace images
 
 /**
  * @brief Inline namespace for storing texts.
@@ -205,8 +207,39 @@ inline namespace button {
 } // inline namespace button
 
 inline namespace checkbox {
-}
+
+	class rectCBOX {
+	  private:
+		PIMAGE boxImage;
+		int boxWidth, boxHeight;
+		int locationX, locationY;
+		color_t backgroundColor;
+		color_t frameColor;
+		int frameWidth;
+		color_t fillColor;
+	  public:
+		bool pressed;
+		int status; /* button status: free(0) / cursor-on(1) / clicked(2) */
+		bool* varPtr;
+		std::function<void()> clickEvent;
+		explicit rectCBOX();
+		~rectCBOX();
+		inline rectCBOX& draw();
+		inline rectCBOX& display();
+		inline rectCBOX& size(int _width, int _height);
+		inline rectCBOX& bgcolor(color_t _color);
+		inline rectCBOX& move(int _X, int _Y);
+		inline rectCBOX& event(decltype(clickEvent) _event);
+		inline rectCBOX& frame(int _width);
+		inline rectCBOX& framecolor(color_t _color);
+		inline rectCBOX& fillcolor(color_t _color);
+		inline rectCBOX& detect();
+		inline rectCBOX& variable(bool* _varPtr);
+		inline rectCBOX& changeState();
+	};
+
+} // inline namespace checkbox
 
 _GLIB_NAMESPACE_TAIL // inline namespace glib
 
-#endif // __LGG_LIB_HEAD_HPP__
+#endif // __LG_GLIB_HEAD_HPP__

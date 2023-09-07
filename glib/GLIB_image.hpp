@@ -20,6 +20,7 @@
 _GLIB_NAMESPACE_HEAD
 
 namespace images {
+
 	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
 		if(dstimg == NULL || srcimg == NULL) return;
 		getimage(dstimg,srcimg,0,0,getwidth(srcimg),getheight(srcimg));
@@ -43,6 +44,7 @@ namespace images {
 			alpha = 0xFF;
 		SetLayeredWindowAttributes(egeHwnd, 0, alpha, LWA_ALPHA);
 	}
+
 }
 
 _GLIB_NAMESPACE_TAIL

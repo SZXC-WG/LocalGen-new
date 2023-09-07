@@ -21,36 +21,65 @@ _GLIB_NAMESPACE_HEAD
 
 inline namespace checkbox {
 
-	class rectCBOX {
-	  private:
-		PIMAGE boxImage;
-		int width, height;
-		int locationX, locationY;
-		color_t backgroundColor;
-		color_t frameColor;
-		int frameWidth;
-		color_t fillColor;
-		bool pressed;
-		int status; /* button status: free(0) / cursor-on(1) / clicked(2) */
-		std::function<void()> clickEvent;
-	  public:
-		explicit rectCBOX() {
-			boxImage = newimage();
-			width = height = 1;
-			frameColor = fillColor = 0xffffffff;
-			status = 0; pressed = 0;
-		};
-		~rectCBOX() { delimage(boxImage); }
-		inline rectCBOX& draw() {}
-		inline rectCBOX& display() {}
-		inline rectCBOX& size(int _width, int _height) {}
-		inline rectCBOX& bgcolor(color_t _color) {}
-		inline rectCBOX& move(int _X, int _Y) {}
-		inline rectCBOX& event(decltype(clickEvent) _event) { clickEvent = _event; }
-		inline rectCBOX& frame(int _width) {}
-		inline rectCBOX& framecolor(bool _enableAuto = 1, color_t _color = 0xffffffff) {}
-		inline rectCBOX& detect() {}
+	rectCBOX::rectCBOX() {
+		boxImage = newimage();
+		boxWidth = boxHeight = 1;
+		frameColor = fillColor = 0xffffffff;
+		status = 0; pressed = 0;
+		varPtr = nullptr;
 	};
+	rectCBOX::~rectCBOX() { delimage(boxImage); }
+	inline rectCBOX& rectCBOX::draw() {
+		delimage(boxImage);
+		boxImage = newimage(boxWidth, boxHeight);
+		setfillcolor(backgroundColor, boxImage);
+		bar(0, 0, boxWidth, boxHeight, boxImage);
+		setcolor(frameColor, boxImage);
+		setlinewidth(frameWidth, boxImage);
+		rectangle(1, 1, boxWidth, boxHeight, boxImage);
+		if(pressed) {
+			setfillcolor(fillColor, boxImage);
+			bar(frameWidth - 1, frameWidth - 1, boxWidth - frameWidth + 1, boxHeight - frameWidth + 1, boxImage);
+		}
+		if(status == 1 || status == 2) {
+			setfillcolor(0x80808080, boxImage);
+			// ege_fillrect(frameWidth - 1, frameWidth - 1,
+			//              boxWidth - 2 * frameWidth + 1, boxHeight - 2 * frameWidth + 1,
+			//              boxImage);
+			ege_fillrect(0, 0, boxWidth, boxHeight, boxImage);
+		}
+		return *this;
+	}
+	inline rectCBOX& rectCBOX::display() {
+		draw(); putimage(locationX, locationY, boxImage);
+		return *this;
+	}
+	inline rectCBOX& rectCBOX::size(int _width, int _height) { boxWidth = _width, boxHeight = _height; return *this; }
+	inline rectCBOX& rectCBOX::bgcolor(color_t _color) { backgroundColor = _color; return *this; }
+	inline rectCBOX& rectCBOX::move(int _X, int _Y) { locationX = _X, locationY = _Y; return *this; }
+	inline rectCBOX& rectCBOX::event(decltype(clickEvent) _event) { clickEvent = _event; return *this; }
+	inline rectCBOX& rectCBOX::frame(int _width) { frameWidth = _width; return *this; }
+	inline rectCBOX& rectCBOX::framecolor(color_t _color) { frameColor = _color; return *this; }
+	inline rectCBOX& rectCBOX::fillcolor(color_t _color) { fillColor = _color; return *this; }
+	inline rectCBOX& rectCBOX::detect() {
+		POINT mousePos;
+		GetCursorPos(&mousePos);
+		ScreenToClient(getHWnd(), &mousePos);
+		if(mousePos.x < locationX || mousePos.x > min(locationX + boxWidth - 1, getwidth()) || mousePos.y < locationY || mousePos.y > min(locationY + boxHeight - 1, getheight()))
+			return status = 0, * this;
+		while(mousemsg()) {
+			mouse_msg msg = getmouse();
+			if(!(msg.x < locationX || msg.x > min(locationX + boxWidth - 1, getwidth()) || msg.y < locationY || msg.y > min(locationY + boxHeight - 1, getheight()))
+			   && msg.is_left() && msg.is_down()) return status = 2, * this;
+		}
+		return status = 1, * this;
+	}
+	inline rectCBOX& rectCBOX::variable(bool* _varPtr) { varPtr = _varPtr; return *this; }
+	inline rectCBOX& rectCBOX::changeState() {
+		pressed = !pressed;
+		if(varPtr != nullptr) *varPtr = pressed;
+		return *this;
+	}
 
 }
 

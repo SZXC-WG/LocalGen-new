@@ -1,6 +1,6 @@
 [Project]
 FileName=LocalGen.dev
-Name=LocalGen
+Name=Local Generals.io
 Type=0
 Ver=2
 ObjFiles=
@@ -29,24 +29,24 @@ IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=10
+UnitCount=11
 
 [VersionInfo]
-Major=4
-Minor=2
+Major=5
+Minor=0
 Release=0
-Build=2197
+Build=2235
 LanguageID=1033
 CharsetID=1252
-CompanyName=LocalGen-dev
-FileVersion=4.2.0.2197
-FileDescription=Local Generals.io (new ver.)
+CompanyName=SZXC Work Group
+FileVersion=5.0.0.2235
+FileDescription=Local Generals.io
 InternalName=
-LegalCopyright=Copyright (c) 2023 LocalGen-dev
+LegalCopyright=Copyright (c) 2023 SZXC Work Group
 LegalTrademarks=
 OriginalFilename=
-ProductName=Local Generals.io (new ver.)
-ProductVersion=4.2.0.2197
+ProductName=Local Generals.io
+ProductVersion=5.0.0.2235
 AutoIncBuildNr=1
 SyncProduct=1
 
@@ -121,7 +121,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit11]
-FileName=LGmain.cpp
+FileName=LGset.hpp
 CompileCpp=1
 Folder=
 Compile=1

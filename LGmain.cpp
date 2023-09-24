@@ -33,6 +33,7 @@
 #include "glib/GLIB_circbut.hpp"
 #include "glib/GLIB_rectcbox.hpp"
 #include "LGencoding.hpp"
+#include "LGset.hpp"
 #include "LGmaps.hpp"
 #include "LGgraphics.hpp"
 #include "LGbot.hpp"
@@ -45,6 +46,7 @@
 signed main(signed argc, char** argv) {
 	FreeConsole();
 	initMaps();
+	LGset::read();
 	MainPage(); // start main page
 	exitExe();	// exit program
 }

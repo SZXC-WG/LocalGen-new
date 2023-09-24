@@ -1,12 +1,8 @@
-
-CheckMap.exe
 *.exe
-try.cpp
-Makefile.win
+*.win
 *.gch
-LocalGen-new.layout
+*.layout
 *.o
 *.res
-*.lgmp
-.history
 *.lgr
+*.lgsts

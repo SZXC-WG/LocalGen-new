@@ -261,6 +261,34 @@ void deZip(); // dezip map
 
 bool initSock(); // initialize socket web
 
+/*** settings ***/
+
+// Namespace for LocalGen settings.
+namespace LGset {
+	const string settingFileExt = ".lgsts";
+	const string settingFile = "_settings" + settingFileExt;
+
+	static size_t settingLength = 0;
+
+	wstring userName = L"Anomynous";
+	bool enableGodPower = false; // god power - originated from v1.0.0 bug
+	unsigned short defaultPlayerNum = 2;
+	unsigned short defaultSpeed = 1;
+	unsigned short defaultUserId = 1; // for player color
+	bool enableGongSound = false; // currently always false as there's now no gong sound
+	wstring defaultReplayFile = L"replay.lgr";
+	bool enableBinarySettings = true; // no change allowed
+	bool enableBetaTag = true; // currently no change allowed
+	unsigned short webSocketPort = 14514; // no change allowed
+
+	inline namespace file {
+		inline void calcLength();
+		inline bool check();
+		inline void read();
+		inline void write();
+	} // inline namespace file
+} // namespace LGset
+
 /*** graphics ***/
 
 bool FullScreen(HWND hwnd, int fullscreenWidth = GetSystemMetrics(SM_CXSCREEN), int fullscreenHeight = GetSystemMetrics(SM_CYSCREEN), int colourBits = 32, int refreshRate = 60);

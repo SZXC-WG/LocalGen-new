@@ -132,7 +132,7 @@ namespace LGGraphics {
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 			initgraph(1600 * windowData.zoomX, 900 * windowData.zoomY, RENDER_AUTO);
 		}
-		setcaption(L"LocalGen v" VER_STRING " developed by LocalGen-dev");
+		setcaption(L"LocalGen v" VER_STRING " by SZXC Work Group");
 	}
 
 	void initname() {
@@ -297,7 +297,7 @@ namespace LGGraphics {
 		.bgcolor(WHITE)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
-		.event([]()->void{system("start http://github.com/LocalGen-dev/LocalGen-new");})
+		.event([]()->void{system("start http://github.com/SZXC-WG/LocalGen-new");})
 		.enableButtonShadow = false; settings
 		.display();
 

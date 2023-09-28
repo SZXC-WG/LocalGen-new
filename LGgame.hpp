@@ -280,6 +280,8 @@ void LGgame::ranklist() {
 	int prhei = 20 * LGGraphics::windowData.zoomY;
 	setcolor(WHITE);
 	settextjustify(CENTER_TEXT, TOP_TEXT);
+	setfillcolor(LGGraphics::bgColor);
+	bar(s1, prhei * 1, ed, prhei * 2);
 	rectangle(s1, prhei, s2, prhei + prhei);
 	rectangle(s2, prhei, s3, prhei + prhei);
 	rectangle(s3, prhei, s4, prhei + prhei);

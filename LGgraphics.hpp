@@ -476,7 +476,7 @@ namespace LGGraphics {
 		for(int i = 1; i <= mapNum; ++i) {
 			mapbut[i]
 			.size(300 * windowData.zoomX - 3, 200 * windowData.zoomY - 3)
-			.move(((i - 1) % 4 * 300) * windowData.zoomX, ((i - 1) / 4 * 200 + shiftval) * windowData.zoomY)
+			.move(((i - 1) % 5 * 300 + 50) * windowData.zoomX, ((i - 1) / 5 * 200 + 100 + shiftval) * windowData.zoomY)
 			.bgcolor(bgColor)
 			.textcolor(WHITE)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
@@ -492,52 +492,25 @@ namespace LGGraphics {
 			// .addtext("Size: " + to_string(maps[i].hei) + " × " + to_string(maps[i].wid))
 			.display();
 		}
-		sys_edit impbox;
-		impbox.create(true);
-		impbox.move(1250 * windowData.zoomX, 100 * windowData.zoomY);
-		impbox.size(300 * windowData.zoomX, 700 * windowData.zoomY);
-		impbox.setbgcolor(WHITE);
-		impbox.setcolor(mainColor);
-		impbox.setfont(30 * windowData.zoomY, 0, "Quicksand");
-		impbox.visible(true);
-		rectBUTTON impfin;
-		impfin
-		.textalign(CENTER_TEXT,CENTER_TEXT)
-		.move(1250 * windowData.zoomX, 825 * windowData.zoomY)
-		.size(300 * windowData.zoomX, 50 * windowData.zoomY)
-		.bgcolor(WHITE)
-		.textcolor(mainColor)
-		.fontname("Quicksand")
-		.fontsize(40 * windowData.zoomY, 0)
-		.addtext(L"confirm and submit")
-		.display();
-		settextjustify(CENTER_TEXT, CENTER_TEXT);
+		settextjustify(CENTER_TEXT, TOP_TEXT);
 		setcolor(WHITE);
-		setfont(50 * windowData.zoomY, 0, "Quicksand");
-		delay_ms(50);
-		xyprintf(1400 * windowData.zoomX, 50 * windowData.zoomY, "or import a map...");
-		delay_ms(0);
+		setfont(100 * windowData.zoomY, 0, "Quicksand");
+		setlinewidth(5 * windowData.zoomY);
 		delay_ms(50);
 		flushmouse();
 		mapSelected = 0;
 		mouse_msg msg;
 		for(; is_run(); delay_fps(120)) {
+			cleardevice();
 			while(mousemsg()) {
-				int id = int((msg.y - shiftval * windowData.zoomX) / (200 * windowData.zoomY)) * 4 + int(msg.x / (300 * windowData.zoomX)) + 1;
+				int id = int((msg.y / windowData.zoomY - 100 - shiftval) / 200) * 5 + int((msg.x / windowData.zoomX - 50) / 300) + 1;
 				mapbut[id].status = 0;
-				impfin.status = 0;
 				msg = getmouse();
 				shiftval += msg.wheel;
 				if(shiftval > 0) shiftval = 0;
-				if(shiftval < -(mapNum - 1) / 4 * 200) shiftval = -(mapNum - 1) / 4 * 200;
-				if(msg.x >= 1250 * windowData.zoomX && msg.x <= 1550 * windowData.zoomY
-				   && msg.y >= 825 * windowData.zoomY && msg.y <= 875 * windowData.zoomY) {
-					impfin.status = 1;
-					if(msg.is_left()) impfin.status = 2;
-					continue;
-				}
-				if(msg.x < 0 || msg.x > 1200 * windowData.zoomX || msg.y < 0 || msg.y > 900 * windowData.zoomY) continue;
-				id = int((msg.y - shiftval * windowData.zoomX) / (200 * windowData.zoomY)) * 4 + int(msg.x / (300 * windowData.zoomX)) + 1;
+				if(shiftval < -((mapNum - 1) / 5 * 200)) shiftval = -((mapNum - 1) / 5 * 200);
+				if(msg.x < 50 * windowData.zoomX || msg.x > 1550 * windowData.zoomX || msg.y < 100 * windowData.zoomY || msg.y > 900 * windowData.zoomY) continue;
+				id = int((msg.y / windowData.zoomY - 100 - shiftval) / 200) * 5 + int((msg.x / windowData.zoomX - 50) / 300) + 1;
 				if(msg.is_left()) mapbut[id].status = 2;
 				else mapbut[id].status = 1;
 			}
@@ -557,40 +530,21 @@ namespace LGGraphics {
 				.addtext(L"Mountain Count: " + (~mapInfo[i].mountaincnt?to_wstring(mapInfo[i].mountaincnt):L"undetermined"))
 				.addtext(L"Swamp Count: " + (~mapInfo[i].swampcnt?to_wstring(mapInfo[i].swampcnt):L"undetermined"))
 				.addtext(L"Size: " + (~mapInfo[i].height?to_wstring(mapInfo[i].height):L"undetermined") + L" × " + (~mapInfo[i].width?to_wstring(mapInfo[i].width):L"undetermined"))
-				.move(((i - 1) % 4 * 300) * windowData.zoomX, ((i - 1) / 4 * 200 + shiftval) * windowData.zoomY)
+				.move(((i - 1) % 5 * 300 + 50) * windowData.zoomX, ((i - 1) / 5 * 200 + 100 + shiftval) * windowData.zoomY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
 			}
-			impfin.display();
-			if(impfin.status == 2) {
-				std::array<char,1000> s;
-				impbox.gettext(1000, s.data());
-				std::ifstream fin(s.data());
-				if(!fin) {
-					impfin.poptext().addtext(L"map not found").display();
-					delay_ms(100);
-					impfin.poptext().addtext(L"confirm and submit").display();
-					impfin.status = 1;
-					continue;
-				} else {
-					fin>>strdeZip;
-					deZip();
-					impbox.visible(false);
-					mapSelected = 0;
-					break;
-				}
-			}
-			if(mapSelected) {
-				impbox.visible(false);
-				break;
-			}
+			setfillcolor(bgColor);
+			bar(0, 0, 1600 * windowData.zoomX, 100 * windowData.zoomY);
+			xyprintf(800 * windowData.zoomX, 0, "CHOOSE A MAP FROM BELOW:");
+			line(0, 100 * windowData.zoomY, 1600 * windowData.zoomX, 100 * windowData.zoomY);
+			if(mapSelected) break;
 		}
 		flushkey();
 
 		/** game options **/
 
-		if(mapSelected) doMapSelect();
-		else importGameSettings();
+		doMapSelect();
 
 		LGgame::init(cheatCode, plCnt, stDel);
 		int ret = LGlocal::GAME();

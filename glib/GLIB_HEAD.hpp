@@ -1,8 +1,8 @@
 /* This is GLIB_HEAD.hpp file of SZXC EGE graphics lib.                  */
 /* Thanks to EGE: http://xege.org/                                       */
-/* Copyright (c) 2023 LocalGen-dev; All rights reserved.                 */
-/* Developers: http://github.com/LocalGen-dev                            */
-/* Project: http://github.com/LocalGen-dev/LocalGen-new                  */
+/* Copyright (c) 2023 SZXC Work Group; All rights reserved.              */
+/* Developers: http://github.com/SZXC-WG                                 */
+/* Project: http://github.com/SZXC-WG/LocalGen-new                       */
 /*                                                                       */
 /* This project is licensed under the MIT license. That means you can    */
 /* download, use and share a copy of the product of this project. You    */
@@ -10,7 +10,7 @@
 /* must print the copyright information at the front of your product.    */
 /*                                                                       */
 /* The full MIT license this project uses can be found here:             */
-/* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
+/* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
 #ifndef __LG_GLIB_HEAD_HPP__
 #define __LG_GLIB_HEAD_HPP__
@@ -238,7 +238,113 @@ inline namespace checkbox {
 		inline rectCBOX& changeState();
 	};
 
+	struct CBOXtextS {
+		rectCBOX checkBox;
+		lineTextS boxText;
+		int blankWidth;
+	};
+
 } // inline namespace checkbox
+
+inline namespace page {
+
+	class pageS;
+	class scrBarS;
+
+	struct itemS {
+		unsigned iType;
+		union {
+			/* 0 */ pageS* subPage;
+			/* 1 */ lineTextS* lText;
+			// /* 2 */ conditionText* cdtnText; // to do
+			/* 3 */ rectBUTTON* rButton;
+			/* 4 */ circBUTTON* cButton;
+			/* 5 */ rectCBOX* rChkBox;
+			/* 6 */ CBOXtextS* cBText;
+		} info;
+		inline operator decltype(info)& () { return info; }
+		inline itemS() = default;
+		inline itemS(decltype(iType) _iType) : iType(_iType) {};
+
+		template <typename _Ftn_t>
+		inline void work(_Ftn_t _ftn) {
+			switch(iType) {
+				case 0: { _ftn(*info.subPage); } break;
+				case 1: { _ftn(*info.lText); } break;
+				// case 2: { _ftn(*info.cdtnText); } break;
+				case 3: { _ftn(*info.rButton); } break;
+				case 4: { _ftn(*info.cButton); } break;
+				case 5: { _ftn(*info.rChkBox); } break;
+				case 6: { _ftn(*info.cBText); } break;
+			}
+		}
+		template <typename _Ftn_t,
+		          typename _Rtn_t>
+		inline _Rtn_t workRet(_Ftn_t _ftn) {
+			register _Rtn_t ret;
+			switch(iType) {
+				case 0: { ret = _ftn(*info.subPage); } break;
+				case 1: { ret = _ftn(*info.lText); } break;
+				// case 2: { ret = _ftn(*info.cdtnText); } break;
+				case 3: { ret = _ftn(*info.rButton); } break;
+				case 4: { ret = _ftn(*info.cButton); } break;
+				case 5: { ret = _ftn(*info.rChkBox); } break;
+				case 6: { ret = _ftn(*info.cBText); } break;
+			}
+			return ret;
+		}
+		inline ~itemS() { work([](auto _itm)->void{delete(&_itm);}); }
+	};
+
+	struct scrBarS {
+		double fromRatio;
+		double toRatio;
+		int barWidth;
+		int barLength;
+		// To do: drag function.
+		inline void draw();
+		inline void display();
+	};
+
+	class pageS {
+	  public:
+		typedef itemS item_t;
+		typedef vector<item_t> ctn_t;
+		typedef scrBarS scroll_t;
+	  private:
+		PIMAGE pageImage;
+		int sizeX, sizeY;
+		int locX, locY;
+		ctn_t content;
+		struct { int fX,fY,tX,tY; } dispSize;
+		scroll_t scrBarV, scrBarH;
+		bool enableVBar, enableHBar;
+	  public:
+		pageS() : pageImage(newimage()) {};
+		pageS(int _sizeX,
+		      int _sizeY,
+		      int _locX,
+		      int _locY)
+			: sizeX(_sizeX),
+			  sizeY(_sizeY),
+			  locX(_locX),
+			  locY(_locY) {
+			pageImage = newimage(_sizeX, _sizeY);
+		};
+		~pageS() { delimage(pageImage); }
+
+		inline /* void */ pageS& detect(); // overall detect (for interactive items, e.g.buttons)
+		inline /* void */ pageS& draw(); // draw page backstage
+		inline /* void */ pageS& display(); // draw page frontstage (including backstage)
+
+		inline /* void */ pageS& addItem(itemS _item);
+		inline /* void */ pageS& popItem();
+		inline /* void */ pageS& delItem(int _pos);
+		inline item_t& getItem(int _pos);
+		inline ctn_t::iterator getItemIt(int _pos);
+	};
+
+} // inline namespace page
 
 _GLIB_NAMESPACE_TAIL // inline namespace glib
 

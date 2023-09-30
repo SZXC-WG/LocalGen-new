@@ -1,6 +1,6 @@
 As the developers are preparing for the exams in Informatics, the project will not be updated for a long time.
 
-The current develop branch is `v5.0-dev`. ~~The v4.x versions will not be published any more.~~ For further v4.x versions (before v5.0), see the develop branch `v5.0-dev`.
+The current develop branch is `v5.0-dev`. ~~The v4.x versions will not be published any more.~~ Further v4.x versions will be published based on the develop branch `v5.0-dev`, and all of them will be pre-releases.
 
 If you want to keep the project lively, you can fork the `v5.0-dev` branch and make contribution to it.
 

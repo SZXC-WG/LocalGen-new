@@ -1,10 +1,10 @@
 As the developers are preparing for the exams in Informatics, the project will not be updated for a long time.
 
-The current develop branch is `v5.0-dev`. The v4.x versions will not be published any more.
+The current develop branch is `v5.0-dev`. ~~The v4.x versions will not be published any more.~~ For further v4.x versions (before v5.0), see the develop branch `v5.0-dev`.
 
 If you want to keep the project lively, you can fork the `v5.0-dev` branch and make contribution to it.
 
-Target: Object-oriented EGE Graphics
+v5.0 Target: Object-oriented EGE Graphics
 
 The developers of SZXC Work Group will check pull requests irregularly.
 

@@ -587,8 +587,8 @@ namespace LGlocal {
 				toNextTurn = true;
 				std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				int needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
-				int lackTurn = LGgame::curTurn - needFlushToTurn;
-				if(lackTurn>=0) {
+				int lackTurn = needFlushToTurn - LGgame::curTurn;
+				if(lackTurn<=0||gamePaused) {
 					cleardevice();
 					printMap(LGgame::cheatCode, LGgame::playerFocus[1]);
 					LGgame::ranklist();
@@ -619,7 +619,7 @@ namespace LGlocal {
 					timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 					needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
 					lackTurn = LGgame::curTurn - needFlushToTurn;
-					if(lackTurn > 0 || gamePaused) toNextTurn = false;
+					if(lackTurn <= 0 || gamePaused) toNextTurn = false;
 				}
 			}
 		}

@@ -174,13 +174,13 @@ int LGserver::GAME() {
 
 	LGgame::initGenerals(LGgame::playerCoo);
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
-	setfont(50 * LGGraphics::windowData.zoomY, 0, "Quicksand");
+	setfont(50 * LGGraphics::windowData.zoomY, 0, LGset::mainFontName.c_str());
 
 	startBox
 	.size(200 * LGGraphics::windowData.zoomX, 100 * LGGraphics::windowData.zoomY)
 	.move(400 * LGGraphics::windowData.zoomX,350 * LGGraphics::windowData.zoomY)
 	.textalign(CENTER_TEXT, CENTER_TEXT)
-	.fontname("Quicksand")
+	.fontname(LGset::mainFontName.c_str())
 	.fontsize(50 * LGGraphics::windowData.zoomY, 0)
 	.bgcolor(WHITE)
 	.textcolor(LGGraphics::mainColor)
@@ -243,7 +243,7 @@ int LGserver::GAME() {
 	fpsbut.move(0, 1400 * LGGraphics::windowData.zoomX);
 	fpsbut.size(20 * LGGraphics::windowData.zoomY, 200 * LGGraphics::windowData.zoomX);
 	fpsbut.textalign(CENTER_TEXT, CENTER_TEXT);
-	fpsbut.fontname("Courier New");
+	fpsbut.fontname(L"Courier New");
 	fpsbut.fontsize(20 * LGGraphics::windowData.zoomY, 0);
 	fpsbut.bgcolor(RED);
 	fpsbut.textcolor(WHITE);
@@ -252,7 +252,7 @@ int LGserver::GAME() {
 	.move(0, 1250 * LGGraphics::windowData.zoomX)
 	.size(20 * LGGraphics::windowData.zoomY, 150 * LGGraphics::windowData.zoomX)
 	.textalign(CENTER_TEXT, CENTER_TEXT)
-	.fontname("Courier New")
+	.fontname(L"Courier New")
 	.fontsize(20 * LGGraphics::windowData.zoomY, 0)
 	.bgcolor(BLUE)
 	.textcolor(WHITE);
@@ -354,7 +354,7 @@ int LGserver::GAME() {
 				static int rspeedlen;
 				setfillcolor(LGGraphics::bgColor);
 				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
-				setfont(20 * LGGraphics::windowData.zoomY, 0, "Quicksand");
+				setfont(20 * LGGraphics::windowData.zoomY, 0, LGset::mainFontName.c_str());
 				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
 				turnlen = textwidth(("Turn " + to_string(LGgame::curTurn) + ".").c_str());
@@ -494,13 +494,13 @@ int LGclient::GAME() {
 	lisCon=true;
 
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
-	setfont(50 * LGGraphics::windowData.zoomY, 0, "Quicksand");
+	setfont(50 * LGGraphics::windowData.zoomY, 0, LGset::mainFontName.c_str());
 
 	quitBox
 	.size(200 * LGGraphics::windowData.zoomX, 100 * LGGraphics::windowData.zoomY)
 	.move(400 * LGGraphics::windowData.zoomX,350 * LGGraphics::windowData.zoomY)
 	.textalign(CENTER_TEXT, CENTER_TEXT)
-	.fontname("Quicksand")
+	.fontname(LGset::mainFontName.c_str())
 	.fontsize(50 * LGGraphics::windowData.zoomY, 0)
 	.bgcolor(WHITE)
 	.textcolor(LGGraphics::mainColor)
@@ -512,7 +512,7 @@ int LGclient::GAME() {
 	.size(200 * LGGraphics::windowData.zoomX, 100 * LGGraphics::windowData.zoomY)
 	.move(100 * LGGraphics::windowData.zoomX,350 * LGGraphics::windowData.zoomY)
 	.textalign(CENTER_TEXT, CENTER_TEXT)
-	.fontname("Quicksand")
+	.fontname(LGset::mainFontName.c_str())
 	.fontsize(50 * LGGraphics::windowData.zoomY, 0)
 	.bgcolor(WHITE)
 	.textcolor(LGGraphics::mainColor)
@@ -525,7 +525,7 @@ int LGclient::GAME() {
 	IPbox.size(400 * LGGraphics::windowData.zoomX, 100 * LGGraphics::windowData.zoomY);
 	IPbox.setbgcolor(WHITE);
 	IPbox.setcolor(LGGraphics::mainColor);
-	IPbox.setfont(50 * LGGraphics::windowData.zoomY, 0, "Quicksand");
+	IPbox.setfont(50 * LGGraphics::windowData.zoomY, 0, LGset::mainFontName.c_str());
 	IPbox.visible(true);
 
 	for(; is_run(); delay_fps(60)) {
@@ -603,7 +603,7 @@ int LGclient::GAME() {
 	fpsbut.move(0, 1400 * LGGraphics::windowData.zoomX);
 	fpsbut.size(20 * LGGraphics::windowData.zoomY, 200 * LGGraphics::windowData.zoomX);
 	fpsbut.textalign(CENTER_TEXT, CENTER_TEXT);
-	fpsbut.fontname("Courier New");
+	fpsbut.fontname(L"Courier New");
 	fpsbut.fontsize(20 * LGGraphics::windowData.zoomY, 0);
 	fpsbut.bgcolor(RED);
 	fpsbut.textcolor(WHITE);
@@ -612,7 +612,7 @@ int LGclient::GAME() {
 	.move(0, 1250 * LGGraphics::windowData.zoomX)
 	.size(20 * LGGraphics::windowData.zoomY, 150 * LGGraphics::windowData.zoomX)
 	.textalign(CENTER_TEXT, CENTER_TEXT)
-	.fontname("Courier New")
+	.fontname(L"Courier New")
 	.fontsize(20 * LGGraphics::windowData.zoomY, 0)
 	.bgcolor(BLUE)
 	.textcolor(WHITE);
@@ -759,7 +759,7 @@ int LGclient::GAME() {
 				static int rspeedlen;
 				setfillcolor(LGGraphics::bgColor);
 				bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
-				setfont(20 * LGGraphics::windowData.zoomY, 0, "Quicksand");
+				setfont(20 * LGGraphics::windowData.zoomY, 0, LGset::mainFontName.c_str());
 				timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				fpslen = textwidth((L"FPS: " + to_wstring(getfps())).c_str());
 				turnlen = textwidth((L"Turn " + to_wstring(LGgame::curTurn) + L".").c_str());

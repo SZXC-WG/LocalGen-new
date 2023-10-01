@@ -61,7 +61,7 @@ namespace LGGraphics {
 		cleardevice();
 		setbkmode(TRANSPARENT);
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
-		setfont(100, 0, "QuickSand", 0, 0, FW_BOLD, 0, 0, 0);
+		setfont(100, 0, LGset::mainFontName.c_str(), 0, 0, FW_BOLD, 0, 0, 0);
 		setcolor(mainColor);
 		xyprintf(252, 82, L"Local");
 		setcolor(WHITE);
@@ -75,7 +75,7 @@ namespace LGGraphics {
 		setfont(20, 0, "Lucida Fax");
 		xyprintf(500 + getwidth(iconImg) / 2, 10 + getheight(iconImg) + 20 / 2 + 10,
 		         L"version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
-		setfont(50, 0, "Quicksand");
+		setfont(50, 0, LGset::mainFontName.c_str());
 		setcolor(mainColor);
 		xyprintf(251, 251, L"Please Select Window Size:");
 		setcolor(WHITE);
@@ -87,7 +87,7 @@ namespace LGGraphics {
 			scrsz[p].size(400, 50);
 			scrsz[p].bgcolor(bgColor);
 			scrsz[p].textcolor(WHITE);
-			scrsz[p].fontname("Quicksand");
+			scrsz[p].fontname(LGset::mainFontName.c_str());
 			scrsz[p].fontsize(40, 0);
 			scrsz[p].move(50, 180 + i / 4 * 2 + p * 3);
 			scrsz[p].addtext(to_wstring(i * 4) + L" × " + to_wstring(i * 9 / 4));
@@ -100,10 +100,10 @@ namespace LGGraphics {
 			scrsz[p].size(400, 50);
 			scrsz[p].bgcolor(bgColor);
 			scrsz[p].textcolor(WHITE);
-			scrsz[p].fontname("Quicksand");
+			scrsz[p].fontname(LGset::mainFontName.c_str());
 			scrsz[p].fontsize(40, 0);
 			scrsz[p].move(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext(L"Full Screen ("+to_wstring(GetSystemMetrics(SM_CXSCREEN))+L" x "+to_wstring(GetSystemMetrics(SM_CYSCREEN))+L")");
+			scrsz[p].addtext(L"Full Screen ("+to_wstring(GetSystemMetrics(SM_CXSCREEN))+L" × "+to_wstring(GetSystemMetrics(SM_CYSCREEN))+L")");
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
 			scrsz[p].textalign(CENTER_TEXT, CENTER_TEXT);
 			scrsz[p].display();
@@ -143,20 +143,20 @@ namespace LGGraphics {
 		setfillcolor(WHITE);
 		bar(scrw/2-120,scrh/2-80,scrw/2+120,scrh/2+80);
 		setcolor(BLACK);
-		setfont(30,0,"Quicksand");
+		setfont(30,0,LGset::mainFontName.c_str());
 		settextjustify(CENTER_TEXT,CENTER_TEXT);
 		xyprintf(scrw/2,scrh/2-60,"Enter your username:");
 		nameBox.create();
 		nameBox.size(220,40);
 		nameBox.move(scrw/2-110,scrh/2-40);
-		nameBox.setfont(30,0,"Quicksand");
+		nameBox.setfont(30,0,LGset::mainFontName.c_str());
 		nameBox.setcolor(mainColor);
 		nameBox.settext("Anonymous");
 		nameBox.visible(true);
 		submitButton
 		.size(100,40)
 		.move(scrw/2-50,scrh/2+30)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(40,0)
 		.bgcolor(mainColor)
 		.textcolor(WHITE)
@@ -173,7 +173,7 @@ namespace LGGraphics {
 					setfillcolor(errorColor);
 					bar(scrw/2-110,scrh/2+5,scrw/2+110,scrh/2+25);
 					setcolor(BLACK);
-					setfont(15,0,"Quicksand");
+					setfont(15,0,LGset::mainFontName.c_str());
 					xyprintf(scrw/2,scrh/2+15,"Username must be between 3 and 16 letters.");
 				}
 			}
@@ -195,7 +195,7 @@ namespace LGGraphics {
 		putimage_withalpha(NULL, zfavi, 100 * windowData.zoomX, 50 * windowData.zoomY,
 		                   0, 0, getwidth(zfavi), getheight(zfavi));
 		settextjustify(CENTER_TEXT, TOP_TEXT);
-		setfont(150 * windowData.zoomY, 0, "Quicksand", 0, 0, FW_BOLD, 0, 0, 0);
+		setfont(150 * windowData.zoomY, 0, LGset::mainFontName.c_str(), 0, 0, FW_BOLD, 0, 0, 0);
 		setcolor(WHITE);
 		xyprintf(330 * windowData.zoomX, 500 * windowData.zoomY, "Local");
 		xyprintf(330 * windowData.zoomX, 600 * windowData.zoomY, "generals.io");
@@ -211,7 +211,7 @@ namespace LGGraphics {
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(75 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
@@ -223,7 +223,7 @@ namespace LGGraphics {
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(75 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
@@ -235,7 +235,7 @@ namespace LGGraphics {
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(75 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
@@ -247,7 +247,7 @@ namespace LGGraphics {
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(75 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
@@ -259,7 +259,7 @@ namespace LGGraphics {
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(40 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
@@ -381,7 +381,7 @@ namespace LGGraphics {
 			.textalign(CENTER_TEXT, CENTER_TEXT)
 			.bgcolor(WHITE)
 			.textcolor(mainColor)
-			.fontname("Quicksand")
+			.fontname(LGset::mainFontName.c_str())
 			.fontsize(25,0)
 			.framecolor(false, mainColor);
 		}
@@ -392,7 +392,7 @@ namespace LGGraphics {
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(25,0)
 		.framecolor(false, mainColor);
 		forceStart//need an on/off button
@@ -402,7 +402,7 @@ namespace LGGraphics {
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(40,0)
 		.framecolor(false, mainColor);
 		for(; is_run(); delay_fps(120)) {
@@ -421,9 +421,9 @@ namespace LGGraphics {
 			for(int i=1; i<=12; ++i) {
 				width[i]=0;
 				if(LGgame::team[i].size()==0) continue;
-				setfont(25,0,"Quicksand");
+				setfont(25,0,LGset::mainFontName.c_str());
 				width[i]=textwidth(("Team "+to_string(i)).c_str());
-				setfont(15,0,"Quicksand");
+				setfont(15,0,LGset::mainFontName.c_str());
 				for(auto x:LGgame::team[i]) width[i]=max(width[i],textwidth(LGgame::playerNames[x].c_str()));
 				if(rowWidth[totRows]+(width[i]+35)>scrw-100) {
 					++totRows;
@@ -446,10 +446,10 @@ namespace LGGraphics {
 				setfillcolor(bgColor);
 				bar(rowWidth[irow[i]]-width[i]-25+begWid[irow[i]],rowHeight[irow[i]-1]+110,rowWidth[irow[i]]+begWid[irow[i]],rowHeight[irow[i]-1]+15*LGgame::team[i].size()+32+110);
 				setcolor(WHITE);
-				setfont(25,0,"Quicksand");
+				setfont(25,0,LGset::mainFontName.c_str());
 				settextjustify(CENTER_TEXT,CENTER_TEXT);
 				xyprintf(rowWidth[irow[i]]-(width[i]+25)/2+begWid[irow[i]],rowHeight[irow[i]-1]+12+110,("Team "+to_string(i)).c_str());
-				setfont(15,0,"Quicksand");
+				setfont(15,0,LGset::mainFontName.c_str());
 				settextjustify(LEFT_TEXT,TOP_TEXT);
 				for(int j=0; j<LGgame::team[i].size(); ++j) {
 					setfillcolor(playerInfo[LGgame::team[i][j]].color);
@@ -480,7 +480,7 @@ namespace LGGraphics {
 			.bgcolor(bgColor)
 			.textcolor(WHITE)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
-			.fontname("Quicksand")
+			.fontname(LGset::mainFontName.c_str())
 			.fontsize(22 * windowData.zoomY, 0)
 			// .addtext(maps[i].chiname)
 			// .addtext(maps[i].engname)
@@ -494,7 +494,7 @@ namespace LGGraphics {
 		}
 		settextjustify(CENTER_TEXT, TOP_TEXT);
 		setcolor(WHITE);
-		setfont(100 * windowData.zoomY, 0, "Quicksand");
+		setfont(100 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 		setlinewidth(5 * windowData.zoomY);
 		delay_ms(50);
 		flushmouse();
@@ -564,14 +564,14 @@ namespace LGGraphics {
 		int shiftval = 0,ret;
 
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
-		setfont(50 * windowData.zoomY, 0, "Quicksand");
+		setfont(50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 		setlinewidth(1);
 
 		serverBox
 		.size(200 * windowData.zoomX, 100 * windowData.zoomY)
 		.move(400 * windowData.zoomX,350 * windowData.zoomY)
 		.textalign(CENTER_TEXT, CENTER_TEXT)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(50 * windowData.zoomY, 0)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
@@ -583,7 +583,7 @@ namespace LGGraphics {
 		.size(200 * windowData.zoomX, 100 * windowData.zoomY)
 		.move(800 * windowData.zoomX,350 * windowData.zoomY)
 		.textalign(CENTER_TEXT, CENTER_TEXT)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(50 * windowData.zoomY, 0)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
@@ -634,7 +634,7 @@ namespace LGGraphics {
 			.bgcolor(bgColor)
 			.textcolor(WHITE)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
-			.fontname("Quicksand")
+			.fontname(LGset::mainFontName.c_str())
 			.fontsize(22 * windowData.zoomY, 0)
 			// .addtext(maps[i].chiname)
 			// .addtext(maps[i].engname)
@@ -652,7 +652,7 @@ namespace LGGraphics {
 		impbox.size(300 * windowData.zoomX, 700 * windowData.zoomY);
 		impbox.setbgcolor(WHITE);
 		impbox.setcolor(mainColor);
-		impbox.setfont(30 * windowData.zoomY, 0, "Quicksand");
+		impbox.setfont(30 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 		impbox.visible(true);
 
 		impfin
@@ -661,13 +661,13 @@ namespace LGGraphics {
 		.size(300 * windowData.zoomX, 50 * windowData.zoomY)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(40 * windowData.zoomY, 0)
 		.addtext(L"confirm and submit")
 		.display();
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
 		setcolor(WHITE);
-		setfont(50 * windowData.zoomY, 0, "Quicksand");
+		setfont(50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 		delay_ms(50);
 		xyprintf(1400 * windowData.zoomX, 50 * windowData.zoomY, "or import a map...");
 		delay_ms(0);
@@ -772,19 +772,19 @@ namespace LGGraphics {
 		jumpbut.textalign(CENTER_TEXT,CENTER_TEXT)
 		.bgcolor(WHITE).textcolor(BLACK)
 		.move(0 * windowData.zoomX, 35 * windowData.zoomY)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(30 * windowData.zoomY, 0)
 		.size(150 * windowData.zoomX, 30 * windowData.zoomY)
 		.addtext(L"Jump to turn: ").enableTextShadow = false;
 		jumpbox.create(false);
 		jumpbox.size(50 * windowData.zoomX, 30 * windowData.zoomY);
 		jumpbox.move(150 * windowData.zoomX, 35 * windowData.zoomY);
-		jumpbox.setfont(25 * windowData.zoomY, 0, "Quicksand");
+		jumpbox.setfont(25 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 		jumpbox.visible(true);
 		jumpsmbut.textalign(CENTER_TEXT,CENTER_TEXT)
 		.bgcolor(WHITE).textcolor(BLACK)
 		.move(200 * windowData.zoomX, 35 * windowData.zoomY)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(30 * windowData.zoomY, 0)
 		.size(50 * windowData.zoomX, 30 * windowData.zoomY)
 		.addtext(L"→").enableTextShadow = false;
@@ -831,7 +831,7 @@ namespace LGGraphics {
 			static int turnlen;
 			setfillcolor(LGGraphics::bgColor);
 			bar(screenszr - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
-			setfont(20 * LGGraphics::windowData.zoomY, 0, "Quicksand");
+			setfont(20 * LGGraphics::windowData.zoomY, 0, LGset::mainFontName.c_str());
 			fpslen = textwidth(("FPS: " + to_string(getfps())).c_str());
 			turnlen = textwidth(("Turn " + to_string(LGreplay::rreplay.curTurn) + ".").c_str());
 			setfillcolor(RED);
@@ -867,25 +867,25 @@ namespace LGGraphics {
 		citynumBox.create();
 		citynumBox.size(80,30);
 		citynumBox.move(scrw/2+5,scrh-110);
-		citynumBox.setfont(20,0,"Quicksand");
+		citynumBox.setfont(20,0,LGset::mainFontName.c_str());
 		citynumBox.setcolor(mainColor);
 		citynumBox.settext("40");
 		plainnumBox.create();
 		plainnumBox.size(80,30);
 		plainnumBox.move(scrw/2+35,scrh-110);
-		plainnumBox.setfont(20,0,"Quicksand");
+		plainnumBox.setfont(20,0,LGset::mainFontName.c_str());
 		plainnumBox.setcolor(mainColor);
 		plainnumBox.settext("40");
 		savenameBox.create();
 		savenameBox.size(100,40);
 		savenameBox.move(scrw/2+20,scrh/2-20);
-		savenameBox.setfont(30,0,"Quicksand");
+		savenameBox.setfont(30,0,LGset::mainFontName.c_str());
 		savenameBox.setcolor(mainColor);
 		savenameBox.settext("map");
 		saveButton
 		.size(90,40)
 		.move(scrw/2-100,scrh/2+30)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(40,0)
 		.bgcolor(mainColor)
 		.textcolor(WHITE)
@@ -894,7 +894,7 @@ namespace LGGraphics {
 		cancelButton
 		.size(90,40)
 		.move(scrw/2+10,scrh/2+30)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(40,0)
 		.bgcolor(mainColor)
 		.textcolor(WHITE)
@@ -903,7 +903,7 @@ namespace LGGraphics {
 		loadButton
 		.size(90,40)
 		.move(scrw/2-100,scrh/2+30)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(40,0)
 		.bgcolor(mainColor)
 		.textcolor(WHITE)
@@ -950,7 +950,7 @@ namespace LGGraphics {
 								setfillcolor(WHITE);
 								setcolor(BLACK);
 								bar(scrw/2-130,scrh/2-80,scrw/2+130,scrh/2+80);
-								setfont(40,0,"Quicksand");
+								setfont(40,0,LGset::mainFontName.c_str());
 								xyprintf(scrw/2,scrh/2-50,"Save map");
 								xyprintf(scrw/2-55,scrh/2,"Map name:");
 								savenameBox.visible(true);
@@ -981,7 +981,7 @@ namespace LGGraphics {
 								setfillcolor(WHITE);
 								setcolor(BLACK);
 								bar(scrw/2-130,scrh/2-80,scrw/2+130,scrh/2+80);
-								setfont(40,0,"Quicksand");
+								setfont(40,0,LGset::mainFontName.c_str());
 								xyprintf(scrw/2,scrh/2-50,"Load map");
 								xyprintf(scrw/2-55,scrh/2,"Map name:");
 								savenameBox.visible(true);
@@ -1075,7 +1075,7 @@ namespace LGGraphics {
 			settextjustify(CENTER_TEXT, CENTER_TEXT);
 			setcolor(BLACK);
 			setfillcolor(WHITE);
-			setfont(20,0,"Quicksand");
+			setfont(20,0,LGset::mainFontName.c_str());
 			if(type==0) {
 				bar(scrw/2-105,scrh-110,scrw/2+105,scrh-80);
 				xyprintf(scrw/2,scrh-95,"Click a tile to place a mountain.");
@@ -1111,7 +1111,7 @@ namespace LGGraphics {
 			} else plainnumBox.visible(false);
 			setfillcolor(WHITE);
 			setcolor(BLACK);
-			setfont(30,0,"Quicksand");
+			setfont(30,0,LGset::mainFontName.c_str());
 			bar(scrw/2-200,10,scrw/2-20,40);
 			xyprintf(scrw/2-110,25,"Height: %d",mapH);
 			xyprintf(scrw/2-185,25,"-");
@@ -1123,7 +1123,7 @@ namespace LGGraphics {
 			bar(scrw/2-155,scrh-70,scrw/2+155,scrh-10);
 			setfillcolor(mainColor);
 			setcolor(WHITE);
-			setfont(40,0,"Quicksand");
+			setfont(40,0,LGset::mainFontName.c_str());
 			bar(scrw/2-145,scrh-60,scrw/2-5,scrh-20);
 			xyprintf(scrw/2-75,scrh-40,"Save map");
 			bar(scrw/2+5,scrh-60,scrw/2+145,scrh-20);
@@ -1144,14 +1144,14 @@ namespace LGGraphics {
 		          505 * windowData.zoomX, 305 * windowData.zoomY);
 		setlinewidth(1);
 		setcolor(mainColor);
-		setfont(40 * windowData.zoomY, 0, "Quicksand", 0, 0, FW_BOLD, false, false, false);
+		setfont(40 * windowData.zoomY, 0, LGset::mainFontName.c_str(), 0, 0, FW_BOLD, false, false, false);
 		settextjustify(CENTER_TEXT,TOP_TEXT);
 		xyprintf(255 * windowData.zoomX, 5 * windowData.zoomY,
 		         L"%ls", mapInfo[mapSelected].chiname.c_str());
 		xyprintf(255 * windowData.zoomX, 45 * windowData.zoomY,
 		         L"%ls", mapInfo[mapSelected].engname.c_str());
 		setcolor(WHITE);
-		setfont(30 * windowData.zoomY, 0, "Quicksand");
+		setfont(30 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 		xyprintf(255 * windowData.zoomX, 85 * windowData.zoomY,
 		         L"Author: %ls", mapInfo[mapSelected].auth.c_str());
 		xyprintf(255 * windowData.zoomX, 115 * windowData.zoomY,
@@ -1174,7 +1174,7 @@ namespace LGGraphics {
 		amxinput.create();
 		if(mapSelected < 6) {
 			setcolor(WHITE);
-			setfont(40 * windowData.zoomY, 0, "Quicksand");
+			setfont(40 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 			settextjustify(RIGHT_TEXT,TOP_TEXT);
 			xyprintf(800 * windowData.zoomX, 5 * windowData.zoomY, L"Input Height (<=100):");
 			xyprintf(800 * windowData.zoomX, 45 * windowData.zoomY, L"Input Width (<=100):");
@@ -1186,23 +1186,23 @@ namespace LGGraphics {
 			heiinput.size(200 * windowData.zoomX, 38 * windowData.zoomY);
 			heiinput.setbgcolor(WHITE);
 			heiinput.setcolor(mainColor);
-			heiinput.setfont(35 * windowData.zoomY, 0, "Quicksand");
+			heiinput.setfont(35 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 			widinput.move(810 * windowData.zoomX, 46 * windowData.zoomY);
 			widinput.size(200 * windowData.zoomX, 38 * windowData.zoomY);
 			widinput.setbgcolor(WHITE);
 			widinput.setcolor(mainColor);
-			widinput.setfont(35 * windowData.zoomY, 0, "Quicksand");
+			widinput.setfont(35 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 			if(mapSelected == 3) {
 				amninput.move(810 * windowData.zoomX, 86 * windowData.zoomY);
 				amninput.size(200 * windowData.zoomX, 38 * windowData.zoomY);
 				amninput.setbgcolor(WHITE);
 				amninput.setcolor(mainColor);
-				amninput.setfont(35 * windowData.zoomY, 0, "Quicksand");
+				amninput.setfont(35 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 				amxinput.move(810 * windowData.zoomX, 126 * windowData.zoomY);
 				amxinput.size(200 * windowData.zoomX, 38 * windowData.zoomY);
 				amxinput.setbgcolor(WHITE);
 				amxinput.setcolor(mainColor);
-				amxinput.setfont(35 * windowData.zoomY, 0, "Quicksand");
+				amxinput.setfont(35 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 			}
 			heiinput.visible(true);
 			widinput.visible(true);
@@ -1218,7 +1218,7 @@ namespace LGGraphics {
 			.textcolor(mainColor)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
 			.fontsize(35 * windowData.zoomY, 0)
-			.fontname("Quicksand")
+			.fontname(LGset::mainFontName.c_str())
 			.addtext(L"confirm");
 			widb
 			.move(1020 * windowData.zoomX, 46 * windowData.zoomY)
@@ -1227,7 +1227,7 @@ namespace LGGraphics {
 			.textcolor(mainColor)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
 			.fontsize(35 * windowData.zoomY, 0)
-			.fontname("Quicksand")
+			.fontname(LGset::mainFontName.c_str())
 			.addtext(L"confirm");
 			if(mapSelected == 3) {
 				amnb
@@ -1237,7 +1237,7 @@ namespace LGGraphics {
 				.textcolor(mainColor)
 				.textalign(CENTER_TEXT,CENTER_TEXT)
 				.fontsize(35 * windowData.zoomY, 0)
-				.fontname("Quicksand")
+				.fontname(LGset::mainFontName.c_str())
 				.addtext(L"confirm");
 				amxb
 				.move(1020 * windowData.zoomX, 126 * windowData.zoomY)
@@ -1246,7 +1246,7 @@ namespace LGGraphics {
 				.textcolor(mainColor)
 				.textalign(CENTER_TEXT,CENTER_TEXT)
 				.fontsize(35 * windowData.zoomY, 0)
-				.fontname("Quicksand")
+				.fontname(LGset::mainFontName.c_str())
 				.addtext(L"confirm");
 			}
 			endb
@@ -1256,7 +1256,7 @@ namespace LGGraphics {
 			.textcolor(mainColor)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
 			.fontsize(35 * windowData.zoomY, 0)
-			.fontname("Quicksand")
+			.fontname(LGset::mainFontName.c_str())
 			.addtext(L"end input");
 			heib.display();
 			widb.display();
@@ -1356,9 +1356,9 @@ namespace LGGraphics {
 		rectBUTTON checkBox[15]; /* 2~12 */
 		rectBUTTON checkOA;
 		rectBUTTON gameBox;
-		plCnt = 2; stDel = 1;
+		plCnt = LGset::defaultPlayerNum; stDel = LGset::defaultSpeed;
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
-		setfont(50 * windowData.zoomY, 0, "Quicksand");
+		setfont(50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 		xyprintf(250 * windowData.zoomX, 350 * windowData.zoomY,
 		         "Choose Player Count");
 		setlinewidth(1);
@@ -1374,7 +1374,7 @@ namespace LGGraphics {
 			.move(55 * windowData.zoomX + 100 * windowData.zoomX * colNum + 1,
 			      400 * windowData.zoomY + 100 * windowData.zoomY * rowNum + 1)
 			.textalign(CENTER_TEXT, CENTER_TEXT)
-			.fontname("Quicksand")
+			.fontname(LGset::mainFontName.c_str())
 			.fontsize(50 * windowData.zoomY, 0)
 			.bgcolor(bgColor)
 			.textcolor(WHITE)
@@ -1391,13 +1391,13 @@ namespace LGGraphics {
 		speedBox.create();
 		speedBox.move(575 * windowData.zoomX, 450 * windowData.zoomY);
 		speedBox.size(300 * windowData.zoomX, 50 * windowData.zoomY);
-		speedBox.setfont(50 * windowData.zoomY, 0, "Quicksand");
+		speedBox.setfont(50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 		speedBox.setcolor(mainColor);
 		speedBox.visible(true);
 		speedSubmit
 		.size(150 * windowData.zoomX, 50 * windowData.zoomY)
 		.move(900 * windowData.zoomX, 450 * windowData.zoomY)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(50 * windowData.zoomY, 0)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
@@ -1415,7 +1415,7 @@ namespace LGGraphics {
 			checkBox[i]
 			.addtext(playerInfo[i].name)
 			.textalign(CENTER_TEXT, CENTER_TEXT)
-			.fontname("Quicksand")
+			.fontname(LGset::mainFontName.c_str())
 			.fontsize(40 * windowData.zoomY, 0)
 			.size(100 * windowData.zoomX - 1*2, 100 * windowData.zoomY - 1*2)
 			.move(1150 * windowData.zoomX + 100 * windowData.zoomX * colNum + 1,
@@ -1428,7 +1428,7 @@ namespace LGGraphics {
 		.move(1150 * windowData.zoomX + 1, 700 * windowData.zoomY + 1)
 		.addtext(L"Overall Select")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(50 * windowData.zoomY, 0);
 		checkOA.enableButtonShadow = false;
 		checkOA.enableTextShadow = false;
@@ -1438,7 +1438,7 @@ namespace LGGraphics {
 		.move(1150 * windowData.zoomX, 100 * windowData.zoomY)
 		.addtext(L"START")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
-		.fontname("Quicksand")
+		.fontname(LGset::mainFontName.c_str())
 		.fontsize(50 * windowData.zoomY, 0)
 		.bgcolor(WHITE)
 		.textcolor(mainColor);

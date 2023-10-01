@@ -47,6 +47,7 @@ signed main(signed argc, char** argv) {
 	FreeConsole();
 	initMaps();
 	LGset::read();
+	LGset::write();
 	MainPage(); // start main page
 	exitExe();	// exit program
 }

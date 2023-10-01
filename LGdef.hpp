@@ -19,7 +19,8 @@
 /** C/C++ file operations **/
 #include <cstdio>
 #include <fstream>
-/** C++ string operations **/
+/** C/C++ string operations **/
+#include <cstring>
 #include <string>
 /** C++ random library **/
 #include <random>
@@ -32,6 +33,8 @@
 #include <deque>
 #include <array>
 #include <queue>
+#include <map>
+#include <unordered_map>
 /** thread operations **/
 #include <mutex>
 #include <thread>
@@ -64,6 +67,27 @@ constexpr char NUM_s[20] = {0, 'H', 'K', 'W', 'L', 'M', 'Q', 'I', 'G', 'B', 'N',
 constexpr int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
 constexpr int SSN=205,SSL=100005;
 constexpr int SKPORT=14514;
+
+const int CTHour = atoi(__TIME__);
+const int CTMin = atoi(&__TIME__[3]);
+const int CTSec = atoi(&__TIME__[6]);
+std::unordered_map<string,int> __MTON({
+	{"Jan"s,  1},
+	{"Feb"s,  2},
+	{"Mar"s,  3},
+	{"Apr"s,  4},
+	{"May"s,  5},
+	{"Jun"s,  6},
+	{"Jul"s,  7},
+	{"Aug"s,  8},
+	{"Sep"s,  9},
+	{"Oct"s, 10},
+	{"Nov"s, 11},
+	{"Dec"s, 12},
+});
+const int CTMonth = __MTON[string(__DATE__).substr(0,3)];
+const int CTDay = atoi(&__DATE__[4]);
+const int CTYear = atoi(&__DATE__[7]);
 
 /**** structures ****/
 
@@ -269,20 +293,22 @@ namespace LGset {
 	const string settingFile = "_settings" + settingFileExt;
 
 	static size_t settingLength = 0;
+	static unsigned settingV = 1;
 
-	wstring userName = L"Anomynous";
+	wstring userName(L"Anomynous\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16);
 	bool enableGodPower = false; // god power - originated from v1.0.0 bug
 	unsigned short defaultPlayerNum = 2;
 	unsigned short defaultSpeed = 1;
 	unsigned short defaultUserId = 1; // for player color
 	bool enableGongSound = false; // currently always false as there's now no gong sound
-	wstring defaultReplayFile = L"replay.lgr";
-	bool enableBinarySettings = true; // no change allowed
+	wstring replayFileName(L"replay.lgr\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",50);
 	bool enableBetaTag = true; // currently no change allowed
 	unsigned short webSocketPort = 14514; // no change allowed
+	// wstring mainFontName = L"Quicksand\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+	wstring mainFontName(L"Quicksand\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",30);
 
 	inline namespace file {
-		inline void calcLength();
+		inline vector<wchar_t> getBuf();
 		inline bool check();
 		inline void read();
 		inline void write();
@@ -368,7 +394,7 @@ namespace LGgame {
 }
 
 namespace LGreplay {
-	const string defaultReplayFile="replay.lgr";
+	const string replayFileName="replay.lgr";
 	char ntoc(int x);
 	int cton(char x);
 	string ntos(int x,int len=-1);
@@ -384,8 +410,8 @@ namespace LGreplay {
 	struct WReplay {
 		string Filename;
 		FILE* file;
-		WReplay(string Fname=defaultReplayFile);
-		void initReplay(string Fname=defaultReplayFile);
+		WReplay(string Fname=replayFileName);
+		void initReplay(string Fname=replayFileName);
 		void newTurn();
 		void newMove(Movement mov);
 	} wreplay;
@@ -406,13 +432,13 @@ namespace LGreplay {
 		Block startMap[505][505];
 		vector<replayMap> midStates;
 		char* readBuf=new char[256];
-		RReplay(string Fname=defaultReplayFile);
+		RReplay(string Fname=replayFileName);
 		void resetGame();
 		bool _nextTurn();
 		int nextTurn();
 		void gotoTurn(int turnid);
 		int preTurn();
-		void initReplay(string Fname=defaultReplayFile);
+		void initReplay(string Fname=replayFileName);
 	} rreplay;
 }
 

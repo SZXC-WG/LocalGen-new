@@ -20,8 +20,10 @@ namespace LGset {
 
 	// namespace for setting file operation.
 	inline namespace file {
-		inline void calcLength() {
+		inline vector<wchar_t> getBuf() {
 			vector<wchar_t> buf;
+			buf.push_back(settingV>>16);
+			buf.push_back(settingV&((1u<<16)-1u));
 			for(wchar_t wch : userName) buf.push_back(wch);
 			buf.push_back(L'\n');
 			buf.push_back(enableGodPower);
@@ -30,12 +32,14 @@ namespace LGset {
 			buf.push_back(defaultUserId);
 			buf.push_back(enableGongSound);
 			buf.push_back(L'\n');
-			for(wchar_t wch : defaultReplayFile) buf.push_back(wch);
+			for(wchar_t wch : replayFileName) buf.push_back(wch);
 			buf.push_back(L'\n');
 			buf.push_back(enableBetaTag);
 			buf.push_back(webSocketPort);
 			buf.push_back(L'\n');
-			settingLength = buf.size();
+			for(wchar_t wch : mainFontName) buf.push_back(wch);
+			buf.push_back(L'\n');
+			return buf;
 		}
 		inline bool check() {
 			/* CHECK WHETHER THE SETTING FILE EXISTS */ {
@@ -52,12 +56,12 @@ namespace LGset {
 					                NULL);
 					CloseHandle(hFile);
 					return true;
-				} else FindClose(FileHandle);
+				} else CloseHandle(FileHandle);
 			}
 			return false;
 		}
 		inline void read() {
-			if(settingLength == 0) calcLength();
+			if(settingLength == 0) settingLength = getBuf().size();
 			if(check()) write();
 			HANDLE hFile = CreateFileA(settingFile.c_str(),
 			                           GENERIC_READ,
@@ -68,7 +72,7 @@ namespace LGset {
 			                           NULL);
 			if(hFile == INVALID_HANDLE_VALUE)
 				MessageBoxW(GetConsoleWindow(),(L"Open File Failed: CODE "+to_wstring(GetLastError())).c_str(),L"ERROR",MB_OK);
-			vector<wchar_t> buf(settingLength);
+			vector<wchar_t> buf(settingLength*2);
 			DWORD dwReadedSize;
 			bool f = ReadFile(hFile,
 			                  buf.data(),
@@ -78,49 +82,45 @@ namespace LGset {
 			if(!f)
 				MessageBoxW(GetConsoleWindow(), (L"Reading setting file failed: CODE " + to_wstring(GetLastError())).c_str(), L"ERROR", MB_HELP);
 			CloseHandle(hFile);
-			int i=0;
+			int i=0,rdV=0;
+			rdV=(buf[0]<<16)|buf[1];
+			i=2;
+			userName.clear();
 			while(buf[i++]!=L'\n') userName.push_back(buf[i-1]);
+			userName.resize(16);
 			enableGodPower = buf[i++];
 			defaultPlayerNum = buf[i++];
 			defaultSpeed = buf[i++];
 			defaultUserId = buf[i++];
 			enableGongSound = buf[i++];
 			buf[i++]; // L'\n'
-			while(buf[i++]!=L'\n') defaultReplayFile.push_back(buf[i-1]);
+			replayFileName.clear();
+			while(buf[i++]!=L'\n') replayFileName.push_back(buf[i-1]);
+			replayFileName.resize(50);
 			enableBetaTag = buf[i++];
 			webSocketPort = buf[i++];
 			buf[i++]; // L'\n'
+			mainFontName.clear();
+			while(buf[i++]!=L'\n') mainFontName.push_back(buf[i-1]);
+			mainFontName.resize(30);
 		}
 		inline void write() {
-			vector<wchar_t> buf;
-			for(wchar_t wch : userName) buf.push_back(wch);
-			buf.push_back(L'\n');
-			buf.push_back(enableGodPower);
-			buf.push_back(defaultPlayerNum);
-			buf.push_back(defaultSpeed);
-			buf.push_back(defaultUserId);
-			buf.push_back(enableGongSound);
-			buf.push_back(L'\n');
-			for(wchar_t wch : defaultReplayFile) buf.push_back(wch);
-			buf.push_back(L'\n');
-			buf.push_back(enableBetaTag);
-			buf.push_back(webSocketPort);
-			buf.push_back(L'\n');
-			HANDLE hFile = CreateFileA(settingFile.c_str(),//要打开的文件名
-			                           GENERIC_WRITE,//以写方式打开开
-			                           0,//可共享读
-			                           NULL,//默认安全设置
-			                           OPEN_ALWAYS,//打开已经存在的文件
-			                           FILE_ATTRIBUTE_NORMAL,//常规属性打开
+			vector<wchar_t> buf = getBuf();
+			HANDLE hFile = CreateFileA(settingFile.c_str(),
+			                           GENERIC_WRITE,
+			                           FILE_SHARE_WRITE,
+			                           NULL,
+			                           OPEN_ALWAYS,
+			                           FILE_ATTRIBUTE_HIDDEN,
 			                           NULL);
 			if(hFile == INVALID_HANDLE_VALUE)
 				MessageBoxW(GetConsoleWindow(),(L"Open File Failed: CODE "+to_wstring(GetLastError())).c_str(),L"ERROR",MB_OK);
-			SetFilePointer(hFile, 0, 0, FILE_END);
-			DWORD dwWritedDateSize;
+			SetFilePointer(hFile, 0, 0, FILE_BEGIN);
+			DWORD dwWritedDataSize;
 			bool f = WriteFile(hFile,
 			                   buf.data(),
 			                   buf.size() * sizeof(wchar_t),
-			                   &dwWritedDateSize,
+			                   &dwWritedDataSize,
 			                   NULL);
 			if(!f)
 				MessageBoxW(GetConsoleWindow(), (L"Writing setting file failed: CODE " + to_wstring(GetLastError())).c_str(), L"ERROR", MB_HELP);

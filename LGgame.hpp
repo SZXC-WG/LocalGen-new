@@ -125,7 +125,7 @@ void LGgame::flushMove() {
 		}
 		if(!LGgame::isAlive[cur.id])
 			continue;
-		if(gameMap[cur.from.x][cur.from.y].player != cur.id)
+		if(gameMap[cur.from.x][cur.from.y].player != cur.id && !LGset::enableGodPower)
 			continue;
 		if(gameMap[cur.to.x][cur.to.y].player == cur.id) {
 			gameMap[cur.to.x][cur.to.y].army += gameMap[cur.from.x][cur.from.y].army - 1;
@@ -215,7 +215,7 @@ void LGgame::updateMap() {
 void LGgame::ranklist() {
 	bool printBot = !(LGgame::inReplay|LGgame::inServer|LGgame::inClient);
 	bool printAIH = !(LGgame::inReplay);
-	setfont(20 * LGGraphics::windowData.zoomY, 0, "Quicksand");
+	setfont(20 * LGGraphics::windowData.zoomY, 0, LGset::mainFontName.c_str());
 	static int nlen, alen, plen, clen, tlen, aihlen = -10, botlen = -10;
 	setfillcolor(LGGraphics::bgColor);
 	// bar(1600 * LGGraphics::windowData.mapSizeX - nlen - alen - plen - clen - tlen - aihlen - botlen - 35, 20 * LGGraphics::windowData.mapSizeY,
@@ -598,7 +598,7 @@ namespace LGlocal {
 					static int rspeedlen;
 					setfillcolor(LGGraphics::bgColor);
 					bar(screenszr - rspeedlen - 10 - fpslen - 10 - turnlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
-					setfont(20 * LGGraphics::windowData.zoomY, 0, "Quicksand");
+					setfont(20 * LGGraphics::windowData.zoomY, 0, LGset::mainFontName.c_str());
 					timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 					fpslen = textwidth((L"FPS: " + to_wstring(getfps())).c_str());
 					turnlen = textwidth((L"Turn " + to_wstring(LGgame::curTurn) + L".").c_str());

@@ -119,7 +119,7 @@ inline namespace button {
 		color_t backgroundColor; // background color
 		color_t textColor; // text color
 		vector<wstring> text; // text
-		string fontName; // font face name
+		wstring fontName; // font face name
 		int fontHeight, fontWidth; // font height & width
 		int frameWidth;
 		bool enableAutoFrameColor; color_t frameColor;
@@ -144,7 +144,7 @@ inline namespace button {
 		inline rectBUTTON& addtext(wstring _text);
 		inline rectBUTTON& poptext();
 		inline rectBUTTON& cleartext();
-		inline rectBUTTON& fontname(string _fontName);
+		inline rectBUTTON& fontname(wstring _fontName);
 		inline rectBUTTON& fontsize(int _fontHeight, int _fontWidth);
 		inline rectBUTTON& move(int _X, int _Y);
 		inline rectBUTTON& textalign(int _walign = -1, int _halign = -1);

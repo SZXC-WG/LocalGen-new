@@ -115,7 +115,7 @@ inline namespace button {
 	inline rectBUTTON& rectBUTTON::addtext(wstring _text) { text.push_back(_text); return *this; }
 	inline rectBUTTON& rectBUTTON::poptext() { if(!text.empty()) text.pop_back(); return *this; }
 	inline rectBUTTON& rectBUTTON::cleartext() { text.clear(); return *this; }
-	inline rectBUTTON& rectBUTTON::fontname(string _fontName) { fontName = _fontName; return *this; }
+	inline rectBUTTON& rectBUTTON::fontname(wstring _fontName) { fontName = _fontName; return *this; }
 	inline rectBUTTON& rectBUTTON::fontsize(int _fontHeight, int _fontWidth) { fontHeight = _fontHeight; fontWidth = _fontWidth; return *this; }
 	inline rectBUTTON& rectBUTTON::move(int _X, int _Y) { locationY = _Y, locationX = _X; return *this; }
 	inline rectBUTTON& rectBUTTON::textalign(int _walign, int _halign) {

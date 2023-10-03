@@ -360,15 +360,15 @@ void createLabyrinthMap(int crtH, int crtW) {
 	}
 	for(int i=1; i<=c; ++i) {
 		if(ec[i]==1) gameMap[p[i].x][p[i].y].type = 3;
-		else if(mec[i]-ec[i]==0) {
-			gameMap[p[i].x][p[i].y].type = 4;
-			gameMap[p[i].x][p[i].y].army = 500;
-		} else if(mec[i]-ec[i]==1) {
-			gameMap[p[i].x][p[i].y].type = 4;
-			gameMap[p[i].x][p[i].y].army = 200;
-		} else if(mec[i]-ec[i]==2) {
+		else if(ec[i]==2) {
 			gameMap[p[i].x][p[i].y].type = 4;
 			gameMap[p[i].x][p[i].y].army = 40;
+		} else if(ec[i]==3) {
+			gameMap[p[i].x][p[i].y].type = 4;
+			gameMap[p[i].x][p[i].y].army = 200;
+		} else if(ec[i]==4) {
+			gameMap[p[i].x][p[i].y].type = 4;
+			gameMap[p[i].x][p[i].y].army = 500;
 		}
 	}
 }
@@ -446,8 +446,8 @@ void initMaps() {
 	mapInfo[2] = MapInfoS {2, L"标准", L"Standard", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
 	mapInfo[3] = MapInfoS {3, L"迷宫", L"Labyrinth", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
 	mapInfo[4] = MapInfoS {4, L"全塔", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
-	mapInfo[5] = MapInfoS {5, L"大沼泽", L"Great Swamp", L"LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
-	mapInfo[6] = MapInfoS {6, L"大平原", L"Everglades", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
+	mapInfo[5] = MapInfoS {5, L"大平原", L"Great Plains", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
+	mapInfo[6] = MapInfoS {6, L"大沼泽", L"Everglades", L"LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
 	std::vector<string> files;
 	getAllFiles("maps", files, ".ini");
 	for(auto iniFile : files) {

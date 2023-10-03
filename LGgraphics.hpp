@@ -1340,8 +1340,8 @@ namespace LGGraphics {
 				case 2: createStandardMap(height,width); break;
 				case 3: createLabyrinthMap(height,width); break;
 				case 4: createFullCityMap(height,width,armymin,armymax,plCnt); break;
-				case 5: createFullSwampMap(height,width,plCnt); break;
-				case 6: createFullPlainMap(height,width,plCnt); break;
+				case 5: createFullPlainMap(height,width,plCnt); break;
+				case 6: createFullSwampMap(height,width,plCnt); break;
 			}
 		} else readMap(mapSelected);
 		heiinput.visible(false);

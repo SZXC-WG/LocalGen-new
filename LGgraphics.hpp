@@ -1172,13 +1172,13 @@ namespace LGGraphics {
 		widinput.create();
 		amninput.create();
 		amxinput.create();
-		if(mapSelected < 6) {
+		if(mapSelected < 7) {
 			setcolor(WHITE);
 			setfont(40 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 			settextjustify(RIGHT_TEXT,TOP_TEXT);
 			xyprintf(800 * windowData.zoomX, 5 * windowData.zoomY, L"Input Height (<=100):");
 			xyprintf(800 * windowData.zoomX, 45 * windowData.zoomY, L"Input Width (<=100):");
-			if(mapSelected == 3) {
+			if(mapSelected == 4) {
 				xyprintf(800 * windowData.zoomX, 85 * windowData.zoomY, L"Input MINIMUM Army:");
 				xyprintf(800 * windowData.zoomX, 125 * windowData.zoomY, L"Input MAXIMUM Army:");
 			}
@@ -1192,7 +1192,7 @@ namespace LGGraphics {
 			widinput.setbgcolor(WHITE);
 			widinput.setcolor(mainColor);
 			widinput.setfont(35 * windowData.zoomY, 0, LGset::mainFontName.c_str());
-			if(mapSelected == 3) {
+			if(mapSelected == 4) {
 				amninput.move(810 * windowData.zoomX, 86 * windowData.zoomY);
 				amninput.size(200 * windowData.zoomX, 38 * windowData.zoomY);
 				amninput.setbgcolor(WHITE);
@@ -1206,7 +1206,7 @@ namespace LGGraphics {
 			}
 			heiinput.visible(true);
 			widinput.visible(true);
-			if(mapSelected == 3) {
+			if(mapSelected == 4) {
 				amninput.visible(true);
 				amxinput.visible(true);
 			}
@@ -1229,7 +1229,7 @@ namespace LGGraphics {
 			.fontsize(35 * windowData.zoomY, 0)
 			.fontname(LGset::mainFontName.c_str())
 			.addtext(L"confirm");
-			if(mapSelected == 3) {
+			if(mapSelected == 4) {
 				amnb
 				.move(1020 * windowData.zoomX, 86 * windowData.zoomY)
 				.size(100 * windowData.zoomX, 38 * windowData.zoomY)
@@ -1260,7 +1260,7 @@ namespace LGGraphics {
 			.addtext(L"end input");
 			heib.display();
 			widb.display();
-			if(mapSelected == 3) {
+			if(mapSelected == 4) {
 				amnb.display();
 				amxb.display();
 			}
@@ -1270,7 +1270,7 @@ namespace LGGraphics {
 			for(; is_run(); delay_fps(60)) {
 				heib.detect().display();
 				widb.detect().display();
-				if(mapSelected == 3) {
+				if(mapSelected == 4) {
 					amnb.detect().display();
 					amxb.detect().display();
 				}
@@ -1316,7 +1316,7 @@ namespace LGGraphics {
 					} else xb=true;
 				}
 				if(endb.status == 2) {
-					if(hb&&wb&&(mapSelected==3?(nb&&xb):1)) {
+					if(hb&&wb&&(mapSelected==4?(nb&&xb):1)) {
 						endb.status = 0;
 						endb.display();
 						break;
@@ -1334,13 +1334,14 @@ namespace LGGraphics {
 		amxinput.setreadonly(true);
 		settextjustify(LEFT_TEXT,TOP_TEXT);
 		importGameSettings();
-		if(mapSelected < 6) {
+		if(mapSelected < 7) {
 			switch(mapSelected) {
 				case 1: createRandomMap(height,width); break;
 				case 2: createStandardMap(height,width); break;
-				case 3: createFullCityMap(height,width,armymin,armymax,plCnt); break;
-				case 4: createFullSwampMap(height,width,plCnt); break;
-				case 5: createFullPlainMap(height,width,plCnt); break;
+				case 3: createLabyrinthMap(height,width); break;
+				case 4: createFullCityMap(height,width,armymin,armymax,plCnt); break;
+				case 5: createFullSwampMap(height,width,plCnt); break;
+				case 6: createFullPlainMap(height,width,plCnt); break;
 			}
 		} else readMap(mapSelected);
 		heiinput.visible(false);

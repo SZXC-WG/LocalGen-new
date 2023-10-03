@@ -319,6 +319,59 @@ void createStandardMap(int crtH = -1, int crtW = -1) {
 			}
 		}
 }
+void createLabyrinthMap(int crtH, int crtW) {
+	mapH = crtH, mapW = crtW;
+	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].army = 0;
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].type = 2;
+	static coordS p[10005];
+	static std::function<bool(int,int)> adjacent = [](int i,int j)->bool{ return (abs(p[i].x-p[j].x)+abs(p[i].y-p[j].y)==2); };
+	static int c,f[10005];
+	static std::function<int(int)> getf = [](int u)->int{ return f[u]=(f[u]==u?u:getf(f[u])); };
+	static std::function<void(int,int)> unite = [](int u,int v)->void { int x=getf(u),y=getf(v); f[x]=(x==y?f[x]:y); };
+	static struct edge { int u,v; } e[10005];
+	static int ec[10005],mec[10005];
+	c=0;
+	for(int i=1; i<=crtH; i+=2)
+		for(int j=1; j<=crtW; j+=2) {
+			p[++c]=coordS{i,j};
+			mec[c]=4;
+			if(i-2<0) --mec[c];
+			if(i+2>crtH) --mec[c];
+			if(j-2<0) --mec[c];
+			if(j+2>crtW) --mec[c];
+			ec[c]=0;
+			gameMap[i][j].type=0;
+		}
+	std::iota(f+1,f+c+1,1);
+	for(int i=1; i<c; ++i) {
+		int u,v;
+		while(1) {
+			u=mtrd()%c+1,v=mtrd()%c+1;
+			if(adjacent(u,v)&&getf(u)!=getf(v)) break;
+		}
+		unite(u,v);
+		e[i]=edge{u,v};
+		++ec[u],++ec[v];
+	}
+	for(int i=1; i<c; ++i) {
+		coordS a=p[e[i].u],b=p[e[i].v];
+		gameMap[(a.x+b.x)>>1][(a.y+b.y)>>1].type = 0;
+	}
+	for(int i=1; i<=c; ++i) {
+		if(ec[i]==1) gameMap[p[i].x][p[i].y].type = 3;
+		else if(mec[i]-ec[i]==0) {
+			gameMap[p[i].x][p[i].y].type = 4;
+			gameMap[p[i].x][p[i].y].army = 500;
+		} else if(mec[i]-ec[i]==1) {
+			gameMap[p[i].x][p[i].y].type = 4;
+			gameMap[p[i].x][p[i].y].army = 200;
+		} else if(mec[i]-ec[i]==2) {
+			gameMap[p[i].x][p[i].y].type = 4;
+			gameMap[p[i].x][p[i].y].army = 40;
+		}
+	}
+}
 void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt) {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	std::uniform_int_distribution<long long> rd(armyMN, armyMX);
@@ -388,12 +441,13 @@ extern int mapNum;
 struct MapInfoS { int id; string chiname; string engname; string auth; int hei; int wid; int generalcnt; int swampcnt; int citycnt; int mountaincnt; int plaincnt; MapInfoS() = default; ~MapInfoS() = default; };
 */
 void initMaps() {
-	mapNum = 5;
-	mapInfo[1] = MapInfoS {1, L"随机地图", L"Random", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[2] = MapInfoS {2, L"标准地图", L"Standard", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[3] = MapInfoS {3, L"完全塔", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
-	mapInfo[4] = MapInfoS {4, L"大沼泽", L"Great Swamp", L"LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
-	mapInfo[5] = MapInfoS {5, L"大平原", L"Great Plain", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
+	mapNum = 6;
+	mapInfo[1] = MapInfoS {1, L"随机", L"Random", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	mapInfo[2] = MapInfoS {2, L"标准", L"Standard", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	mapInfo[3] = MapInfoS {3, L"迷宫", L"Labyrinth", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	mapInfo[4] = MapInfoS {4, L"全塔", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
+	mapInfo[5] = MapInfoS {5, L"大沼泽", L"Great Swamp", L"LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
+	mapInfo[6] = MapInfoS {6, L"大平原", L"Everglades", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
 	std::vector<string> files;
 	getAllFiles("maps", files, ".ini");
 	for(auto iniFile : files) {

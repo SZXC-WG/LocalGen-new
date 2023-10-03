@@ -268,6 +268,7 @@ void printBlockNum(bool visible, long long army, int player, int curx, int cury)
 
 void createRandomMap(int crtH, int crtW); // generate random map (special) with H and W
 void createStandardMap(int crtH, int crtW); // generate standard map (special) with H and W
+void createLabyrinthMap(int crtH, int crtW); // generate labyrinth map (special) with H and W
 void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt);
 void createFullSwampMap(int crtH, int crtW, int plCnt);
 void createFullPlainMap(int crtH, int crtW, int plCnt);
@@ -347,7 +348,6 @@ namespace LGGraphics {
 	void webOptions();
 	void createMapPage();
 	void replayPage();
-	[[deprecated("The function is to be deleted.")]] void doMapImport();
 	void doMapSelect();
 	void importGameSettings();
 	void inputMapData(int a, int b, int c, int d);

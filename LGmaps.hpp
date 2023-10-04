@@ -319,18 +319,21 @@ void createStandardMap(int crtH = -1, int crtW = -1) {
 			}
 		}
 }
-void createLabyrinthMap(int crtH, int crtW) {
+void createLabyrinthMap(int crtH, int crtW, int TYPE) {
 	mapH = crtH, mapW = crtW;
 	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].army = 0;
-	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].type = 2;
+	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].lit = false;
+	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].player = 0;
+	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	static coordS p[10005];
 	static std::function<bool(int,int)> adjacent = [](int i,int j)->bool{ return (abs(p[i].x-p[j].x)+abs(p[i].y-p[j].y)==2); };
-	static int c,f[10005];
+	static int c,m,f[10005];
 	static std::function<int(int)> getf = [](int u)->int{ return f[u]=(f[u]==u?u:getf(f[u])); };
-	static std::function<void(int,int)> unite = [](int u,int v)->void { int x=getf(u),y=getf(v); f[x]=(x==y?f[x]:y); };
+	static std::function<void(int,int)> unite = [](int u,int v)->void{ int x=getf(u),y=getf(v); f[x]=(x==y?f[x]:y); };
 	static struct edge { int u,v; } e[10005];
 	static int ec[10005],mec[10005];
+	static bool vs[10005][10005];
 	c=0;
 	for(int i=1; i<=crtH; i+=2)
 		for(int j=1; j<=crtW; j+=2) {
@@ -343,6 +346,10 @@ void createLabyrinthMap(int crtH, int crtW) {
 			ec[c]=0;
 			gameMap[i][j].type=0;
 		}
+	for(int i=1; i<=c; ++i) for(int j=1; j<=c; ++j) vs[i][j]=false;
+	m=c-1;
+	if(TYPE==1) ++m;
+	if(TYPE==2) m+=crtH+crtW;
 	std::iota(f+1,f+c+1,1);
 	for(int i=1; i<c; ++i) {
 		int u,v;
@@ -353,8 +360,18 @@ void createLabyrinthMap(int crtH, int crtW) {
 		unite(u,v);
 		e[i]=edge{u,v};
 		++ec[u],++ec[v];
+		vs[u][v]=vs[v][u]=true;
 	}
-	for(int i=1; i<c; ++i) {
+	for(int i=c; i<=m; ++i) {
+		int u,v;
+		while(1) {
+			u=mtrd()%c+1,v=mtrd()%c+1;
+			if(adjacent(u,v)&&!vs[u][v]) break;
+		}
+		e[i]=edge{u,v};
+		++ec[u],++ec[v];
+	}
+	for(int i=1; i<=m; ++i) {
 		coordS a=p[e[i].u],b=p[e[i].v];
 		gameMap[(a.x+b.x)>>1][(a.y+b.y)>>1].type = 0;
 	}
@@ -441,13 +458,15 @@ extern int mapNum;
 struct MapInfoS { int id; string chiname; string engname; string auth; int hei; int wid; int generalcnt; int swampcnt; int citycnt; int mountaincnt; int plaincnt; MapInfoS() = default; ~MapInfoS() = default; };
 */
 void initMaps() {
-	mapNum = 6;
+	mapNum = 8;
 	mapInfo[1] = MapInfoS {1, L"随机", L"Random", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
 	mapInfo[2] = MapInfoS {2, L"标准", L"Standard", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[3] = MapInfoS {3, L"迷宫", L"Labyrinth", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[4] = MapInfoS {4, L"全塔", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
-	mapInfo[5] = MapInfoS {5, L"大平原", L"Great Plains", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
-	mapInfo[6] = MapInfoS {6, L"大沼泽", L"Everglades", L"LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
+	mapInfo[3] = MapInfoS {3, L"单路迷宫（无环迷宫）", L"Single-Path Labyrinth", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	mapInfo[4] = MapInfoS {4, L"基环迷宫", L"Single-Ring Labyrinth", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	mapInfo[5] = MapInfoS {5, L"多环迷宫", L"Multi-Ring Labyrinth", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	mapInfo[6] = MapInfoS {6, L"全塔", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
+	mapInfo[7] = MapInfoS {7, L"大平原", L"Great Plains", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
+	mapInfo[8] = MapInfoS {8, L"大沼泽", L"Everglades", L"LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
 	std::vector<string> files;
 	getAllFiles("maps", files, ".ini");
 	for(auto iniFile : files) {

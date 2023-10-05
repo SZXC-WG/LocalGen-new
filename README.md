@@ -2,7 +2,7 @@ As the developers are preparing for the exams in Informatics, the project will n
 
 The current develop branch is `v5.0-dev`. ~~The v4.x versions will not be published any more.~~ Further v4.x versions will be published based on the develop branch `v5.0-dev`, and all of them will be pre-releases.
 
-For the current stable and preview versions, please see [here](https://github.com/SZXC-WG/LocalGen-new#releases-changelog).
+For the current stable and preview versions, please see [here](#releases-changelog).
 
 If you want to keep the project lively, you can fork the `v5.0-dev` branch and make contribution to it.
 

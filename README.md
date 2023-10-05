@@ -41,7 +41,7 @@ Go see [issue #31](../../issues/31).
 |  Release TYPE  |                                         LINKS                                          |
 | :------------: | :------------------------------------------------------------------------------------: |
 | Latest Stable  |           [`v4.1.0`](http://github.com/SZXC-WG/LocalGen-new/releases/latest)           |
-| Latest Preview | [`v4.2.1` (br `v5.0-dev`)](http://github.com/SZXC-WG/LocalGen-new/releases/tag/v4.2.1) |
+| Latest Preview | [`v4.2.2` (br `v5.0-dev`)](http://github.com/SZXC-WG/LocalGen-new/releases/tag/v4.2.2) |
 
 ## Donate Please!
 

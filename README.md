@@ -38,10 +38,10 @@ Go see [issue #31](../../issues/31).
 
 ## Releases (Changelog)
 
-|  Release TYPE  |                                         LINKS                                          |
-| :------------: | :------------------------------------------------------------------------------------: |
-| Latest Stable  |           [`v4.1.0`](http://github.com/SZXC-WG/LocalGen-new/releases/latest)           |
-| Latest Preview | [`v4.2.2` (br `v5.0-dev`)](http://github.com/SZXC-WG/LocalGen-new/releases/tag/v4.2.2) |
+|  Release TYPE  |                                          LINKS                                           |
+| :------------: | :--------------------------------------------------------------------------------------: |
+| Latest Stable  |            [`v4.1.0`](http://github.com/SZXC-WG/LocalGen-new/releases/latest)            |
+| Latest Preview | [`v4.2.2D` (br `v5.0-dev`)](http://github.com/SZXC-WG/LocalGen-new/releases/tag/v4.2.2D) |
 
 ## Donate Please!
 

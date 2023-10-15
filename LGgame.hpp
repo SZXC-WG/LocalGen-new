@@ -54,6 +54,9 @@ void LGgame::capture(int p1, int p2) {
 		std::chrono::nanoseconds ed = std::chrono::steady_clock::now().time_since_epoch();
 		LGgame::beginTime += ed - bg;
 	}
+	historyLand[p2].push_back({curTurn,0ll});
+	historyArmy[p2].push_back({curTurn,0ll});
+	historyAIH[p2].push_back({curTurn,0ll});
 	LGgame::isAlive[p2] = 0;
 	for(int i = 1; i <= mapH; ++i) {
 		for(int j = 1; j <= mapW; ++j) {
@@ -252,6 +255,15 @@ void LGgame::ranklist() {
 			continue;
 		rklst[i].armyInHand = gameMap[LGgame::playerCoo[i].x][LGgame::playerCoo[i].y].army;
 	}
+	for(int i = 1; i <= LGgame::playerCnt; ++i) {
+		if(!LGgame::isAlive[rklst[i].id]) continue;
+		if(historyLand[rklst[i].id].empty()||historyLand[rklst[i].id].back().first!=curTurn)
+			historyLand[rklst[i].id].push_back(std::make_pair(LGgame::curTurn,rklst[i].tot));
+		if(historyArmy[rklst[i].id].empty()||historyArmy[rklst[i].id].back().first!=curTurn)
+			historyArmy[rklst[i].id].push_back(std::make_pair(LGgame::curTurn,rklst[i].army));
+		if(historyAIH[rklst[i].id].empty()||historyAIH[rklst[i].id].back().first!=curTurn)
+			historyAIH[rklst[i].id].push_back(std::make_pair(LGgame::curTurn,rklst[i].armyInHand));
+	}
 	std::sort(rklst + 1, rklst + LGgame::playerCnt + 1, [](node a, node b) { return a.army > b.army; });
 	nlen = textwidth(L"PLAYER");
 	alen = textwidth(L"ARMY");
@@ -298,6 +310,7 @@ void LGgame::ranklist() {
 	if(printBot) xyprintf((s7+ed)/2, prhei, L"BOT NAME");
 	for(int i = 1; i <= LGgame::playerCnt; i++) {
 		setfillcolor(playerInfo[rklst[i].id].color);
+		if(!LGgame::isAlive[rklst[i].id]) setfillcolor(0xff808080);
 		bar(s1, prhei * (i + 1), ed, prhei * (i + 2));
 		rectangle(s1, prhei * (i + 1), s2, prhei * (i + 2));
 		rectangle(s2, prhei * (i + 1), s3, prhei * (i + 2));
@@ -314,6 +327,183 @@ void LGgame::ranklist() {
 		if(printAIH) xyprintf((s6+s7)/2, prhei * (i + 1), to_string(rklst[i].armyInHand).c_str());
 		if(printBot) xyprintf((s7+ed)/2, prhei * (i + 1), botName[LGgame::robotId[rklst[i].id]/100+1].c_str());
 	}
+}
+void LGgame::printAnalysis() {
+	static int XTurn = 1, XTurnINC = 1;
+	static int YMaxLand = 50;
+	static int YMaxArmy = 1;
+	static int YMaxAIH = 1;
+	static double landX[64], landY[64],
+	       armyX[64], armyY[64],
+	       AIHX[64], AIHY[64];
+	static PIMAGE landI = newimage(600 * LGGraphics::windowData.zoomX, 200 * LGGraphics::windowData.zoomY),
+	       armyI = newimage(600 * LGGraphics::windowData.zoomX, 200 * LGGraphics::windowData.zoomY),
+	       AIHI = newimage(600 * LGGraphics::windowData.zoomX, 200 * LGGraphics::windowData.zoomY);
+	setbkcolor(LGGraphics::bgColor, landI);
+	setbkcolor(LGGraphics::bgColor, armyI);
+	setbkcolor(LGGraphics::bgColor, AIHI);
+	setbkcolor_f(LGGraphics::bgColor, landI);
+	setbkcolor_f(LGGraphics::bgColor, armyI);
+	setbkcolor_f(LGGraphics::bgColor, AIHI);
+	const int graphRDX = 600 * LGGraphics::windowData.zoomX, graphRDY = 200 * LGGraphics::windowData.zoomY;
+	static const auto ulLand = [&]()->long long {
+		long long upperLimit = 0;
+		for(int i=LGgame::playerCnt; i>=1; --i) for(auto x : historyLand[i]) upperLimit = max(upperLimit, x.second);
+		return upperLimit;
+	};
+	static const auto ulArmy = [&]()->long long {
+		long long upperLimit = 0;
+		for(int i=LGgame::playerCnt; i>=1; --i) for(auto x : historyArmy[i]) upperLimit = max(upperLimit, x.second);
+		return upperLimit;
+	};
+	static const auto ulAIH = [&]()->long long {
+		long long upperLimit = 0;
+		for(int i=LGgame::playerCnt; i>=1; --i) for(auto x : historyAIH[i]) upperLimit = max(upperLimit, x.second);
+		return upperLimit;
+	};
+	static const auto redrawLand = [&]()->void {
+		cleardevice(landI);
+		// settextjustify(LEFT_TEXT,CENTER_TEXT);
+		// xyprintf(0,800 * LGGraphics::windowData.zoomY,"upperLimit: %lld",upperLimit);
+		setlinewidth(2,landI);
+		setcolor(0xffffffff,landI);
+		rectangle(0,0,graphRDX,graphRDY,landI);
+		setlinewidth(1,landI);
+		for(int i=LGgame::playerCnt; i>=1; --i) {
+			setcolor(playerInfo[i].color,landI);
+			double cx=0,cy=0;
+			long long ca=0;
+			int n=historyLand[i].size();
+			for(int j=0; j<n; ++j) {
+				int ct;
+				long long a;
+				std::tie(ct,a)=historyLand[i][j];
+				double nx=(ct)*(graphRDX-0)*1.0/XTurn;
+				double ny=a*(graphRDY-0)*1.0/YMaxLand;
+				// if(nx-cx<=3) continue;
+				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,landI);
+				cx=nx,cy=ny,ca=a;
+			}
+			landX[i]=cx,landY[i]=cy;
+			// xyprintf(0,(800-15*(LGgame::playerCnt-i+1)) * LGGraphics::windowData.zoomY,"%ls - army:%lld cx:%.1f cy:%.1f ca:%.1f",playerInfo[i].name.c_str(),historyArmy[i].back().second,cx,cy,ca);
+		}
+	};
+	static const auto redrawArmy = [&]()->void {
+		cleardevice(armyI);
+		// settextjustify(LEFT_TEXT,CENTER_TEXT);
+		// xyprintf(0,800 * LGGraphics::windowData.zoomY,"upperLimit: %lld",upperLimit);
+		setlinewidth(2,armyI);
+		setcolor(0xffffffff,armyI);
+		rectangle(0,0,graphRDX,graphRDY,armyI);
+		setlinewidth(1,armyI);
+		for(int i=LGgame::playerCnt; i>=1; --i) {
+			setcolor(playerInfo[i].color,armyI);
+			double cx=0,cy=0;
+			long long ca=0;
+			int n=historyArmy[i].size();
+			for(int j=0; j<n; ++j) {
+				int ct;
+				long long a;
+				std::tie(ct,a)=historyArmy[i][j];
+				double nx=(ct)*(graphRDX-0)*1.0/XTurn;
+				double ny=a*(graphRDY-0)*1.0/YMaxArmy;
+				// if(nx-cx<=3) continue;
+				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,armyI);
+				cx=nx,cy=ny,ca=a;
+			}
+			armyX[i]=cx,armyY[i]=cy;
+			// xyprintf(0,(800-15*(LGgame::playerCnt-i+1)) * LGGraphics::windowData.zoomY,"%ls - army:%lld cx:%.1f cy:%.1f ca:%.1f",playerInfo[i].name.c_str(),historyArmy[i].back().second,cx,cy,ca);
+		}
+	};
+	static auto redrawAIH = [&]()->void {
+		cleardevice(AIHI);
+		// settextjustify(LEFT_TEXT,CENTER_TEXT);
+		// xyprintf(0,800 * LGGraphics::windowData.zoomY,"upperLimit: %lld",upperLimit);
+		setlinewidth(2,AIHI);
+		setcolor(0xffffffff,AIHI);
+		rectangle(0,0,graphRDX,graphRDY,AIHI);
+		setlinewidth(1,AIHI);
+		for(int i=LGgame::playerCnt; i>=1; --i) {
+			setcolor(playerInfo[i].color,AIHI);
+			double cx=0,cy=0;
+			long long ca=0;
+			int n=historyAIH[i].size();
+			for(int j=0; j<n; ++j) {
+				int ct;
+				long long a;
+				std::tie(ct,a)=historyAIH[i][j];
+				double nx=(ct)*(graphRDX-0)*1.0/XTurn;
+				double ny=a*(graphRDY-0)*1.0/YMaxAIH;
+				// if(nx-cx<=3) continue;
+				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,AIHI);
+				cx=nx,cy=ny,ca=a;
+			}
+			AIHX[i]=cx,AIHY[i]=cy;
+			// xyprintf(0,(800-15*(LGgame::playerCnt-i+1)) * LGGraphics::windowData.zoomY,"%ls - army:%lld cx:%.1f cy:%.1f ca:%.1f",playerInfo[i].name.c_str(),historyArmy[i].back().second,cx,cy,ca);
+		}
+	};
+	bool flagLand, flagArmy, flagAIH;
+	flagLand = flagArmy = flagAIH = false;
+	while(XTurn < LGgame::curTurn) {
+		XTurn += XTurnINC;
+		if(XTurn >= XTurnINC * 10) XTurnINC *= 10;
+		flagLand = flagArmy = flagAIH = true;
+	}
+	while(YMaxLand < ulLand()) {
+		YMaxLand += 50;
+		flagLand = true;
+	}
+	while(YMaxArmy < ulArmy()) {
+		YMaxArmy *= 2;
+		flagArmy = true;
+	}
+	while(YMaxAIH < ulAIH()) {
+		YMaxAIH *= 2;
+		flagAIH = true;
+	}
+	if(flagLand) redrawLand();
+	else {
+		for(int i=LGgame::playerCnt; i>=1; --i) {
+			setcolor(playerInfo[i].color,landI);
+			double cx=0,cy=0;
+			int ct; long long a;
+			std::tie(ct,a) = historyLand[i].back();
+			cx=(ct)*(graphRDX-0)*1.0/XTurn;
+			cy=a*(graphRDY-0)*1.0/YMaxLand;
+			// if(nx-cx<=3) continue;
+			line(0+landX[i],graphRDY-landY[i],0+cx,graphRDY-cy,landI);
+			landX[i]=cx,landY[i]=cy;
+		}
+	}
+	if(flagArmy) redrawArmy();
+	else {
+		for(int i=LGgame::playerCnt; i>=1; --i) {
+			setcolor(playerInfo[i].color,armyI);
+			double cx=0,cy=0;
+			int ct; long long a;
+			std::tie(ct,a) = historyArmy[i].back();
+			cx=(ct)*(graphRDX-0)*1.0/XTurn;
+			cy=a*(graphRDY-0)*1.0/YMaxArmy;
+			line(0+armyX[i],graphRDY-armyY[i],0+cx,graphRDY-cy,armyI);
+			armyX[i]=cx,armyY[i]=cy;
+		}
+	}
+	if(flagAIH) redrawAIH();
+	else {
+		for(int i=LGgame::playerCnt; i>=1; --i) {
+			setcolor(playerInfo[i].color,AIHI);
+			double cx=0,cy=0;
+			int ct; long long a;
+			std::tie(ct,a) = historyAIH[i].back();
+			cx=(ct)*(graphRDX-0)*1.0/XTurn;
+			cy=a*(graphRDY-0)*1.0/YMaxAIH;
+			line(0+AIHX[i],graphRDY-AIHY[i],0+cx,graphRDY-cy,AIHI);
+			AIHX[i]=cx,AIHY[i]=cy;
+		}
+	}
+	putimage(1000 * LGGraphics::windowData.zoomX, 300 * LGGraphics::windowData.zoomY, landI);
+	putimage(1000 * LGGraphics::windowData.zoomX, 500 * LGGraphics::windowData.zoomY, armyI);
+	putimage(1000 * LGGraphics::windowData.zoomX, 700 * LGGraphics::windowData.zoomY, AIHI);
 }
 
 namespace LGgame {
@@ -592,6 +782,7 @@ namespace LGlocal {
 					cleardevice();
 					printMap(LGgame::cheatCode, LGgame::playerFocus[1]);
 					LGgame::ranklist();
+					LGgame::printAnalysis();
 					int screenszr = 1600 * LGGraphics::windowData.zoomX;
 					static int fpslen;
 					static int turnlen;

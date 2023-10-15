@@ -152,7 +152,7 @@ struct passS {
  */
 struct playerS {
 	wstring name;		/* player name */
-	unsigned int color; /* player color */
+	color_t color; /* player color */
 };
 
 /**
@@ -392,6 +392,9 @@ namespace LGgame {
 	coordS playerCoo[64];
 	coordS playerFocus[64];
 	std::chrono::nanoseconds beginTime;
+	vector<std::pair<int,long long>> historyArmy[64];
+	vector<std::pair<int,long long>> historyAIH[64];
+	vector<std::pair<int,long long>> historyLand[64];
 
 	void init(int chtC, int pC, int gS);
 	void printGameMessage(gameMessageStore now);
@@ -402,6 +405,7 @@ namespace LGgame {
 	void initGenerals(coordS coos[]);
 	void updateMap();
 	void ranklist();
+	void printAnalysis();
 }
 
 namespace LGreplay {

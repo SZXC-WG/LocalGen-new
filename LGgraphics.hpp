@@ -1172,7 +1172,7 @@ namespace LGGraphics {
 		widinput.create();
 		amninput.create();
 		amxinput.create();
-		if(mapSelected < 7) {
+		if(mapSelected < 9) {
 			setcolor(WHITE);
 			setfont(40 * windowData.zoomY, 0, LGset::mainFontName.c_str());
 			settextjustify(RIGHT_TEXT,TOP_TEXT);
@@ -1334,7 +1334,7 @@ namespace LGGraphics {
 		amxinput.setreadonly(true);
 		settextjustify(LEFT_TEXT,TOP_TEXT);
 		importGameSettings();
-		if(mapSelected < 7) {
+		if(mapSelected < 9) {
 			switch(mapSelected) {
 				case 1: createRandomMap(height,width); break;
 				case 2: createStandardMap(height,width); break;

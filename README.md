@@ -1,6 +1,6 @@
 As the developers are preparing for the exams in Informatics, the project will not be updated for a long time.
 
-The current develop branch is `v5.0-dev`. ~~The v4.x versions will not be published any more.~~ Further v4.x versions will be published based on the develop branch `v5.0-dev`, and all of them will be pre-releases.
+The current develop branch is `v5.0-dev`. Further v4.x versions will be published based on the develop branch `v5.0-dev`, and all of them will be pre-releases.
 
 For the current stable and preview versions, please see [here](#releases-changelog).
 
@@ -41,7 +41,7 @@ Go see [issue #31](../../issues/31).
 |  Release TYPE  |                                          LINKS                                           |
 | :------------: | :--------------------------------------------------------------------------------------: |
 | Latest Stable  |            [`v4.1.0`](http://github.com/SZXC-WG/LocalGen-new/releases/latest)            |
-| Latest Preview | [`v4.2.2D` (br `v5.0-dev`)](http://github.com/SZXC-WG/LocalGen-new/releases/tag/v4.2.2D) |
+| Latest Preview | [`v4.2.3D` (br `v5.0-dev`)](http://github.com/SZXC-WG/LocalGen-new/releases/tag/v4.2.3D) |
 
 ## Donate Please!
 

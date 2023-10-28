@@ -90,7 +90,8 @@ void printMap(int Code, coordS coo) {
 			switch(gameMap[curx][cury].type) {
 				case 0: {
 					/* plain */
-					printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
+					if(gameMap[curx][cury].army != 0)
+						printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
 				case 1: {
@@ -133,8 +134,7 @@ void printMap(int Code, coordS coo) {
 						putimage_withalpha(NULL, npimg[5],
 						                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
 						                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
-					if(gameMap[curx][cury].army != 0)
-						printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
+					printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
 			}

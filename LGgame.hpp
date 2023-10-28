@@ -562,10 +562,15 @@ namespace LGlocal {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
 				if(msg.is_wheel()) {
+					int msx = msg.x, msy = msg.y;
+					int blx = (msg.y - LGGraphics::windowData.maplocY) / blockHeight;
+					int bly = (msg.x - LGGraphics::windowData.maplocX) / blockWidth;
 					blockWidth += msg.wheel / 120;
 					blockHeight += msg.wheel / 120;
 					blockWidth = max(blockWidth, 2);
 					blockHeight = max(blockHeight, 2);
+					LGGraphics::windowData.maplocX = msx - bly * blockWidth;
+					LGGraphics::windowData.maplocY = msy - blx * blockHeight;
 				}
 				if(msg.is_move()) {
 					if(midact == 1) {

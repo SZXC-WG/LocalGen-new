@@ -33,9 +33,9 @@ void printBlockNum(bool visible, long long army, int player, int curx, int cury)
 	int luY = LGGraphics::windowData.maplocY + blockHeight * (curx - 1);
 	string out = to_string(army);
 	if(!visible) return;
-	if(textwidth(out.c_str()) <= blockWidth - 2) {
+	if(textwidth(out.c_str()) <= blockWidth - 2)
 		outtextxy(luX + blockWidth / 2, luY + blockHeight / 2, out.c_str());
-	} else {
+	else {
 		while(!out.empty() && textwidth((out+".."s).c_str()) > blockWidth - 2) out.pop_back();
 		outtextxy(luX + blockWidth / 2, luY + blockHeight / 2, (out+".."s).c_str());
 	}
@@ -98,7 +98,8 @@ void printMap(int Code, coordS coo) {
 					putimage_withalpha(NULL, npimg[4],
 					                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
 					                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
-					printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
+					if(gameMap[curx][cury].army != 0)
+						printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
 				case 2: {
@@ -132,7 +133,8 @@ void printMap(int Code, coordS coo) {
 						putimage_withalpha(NULL, npimg[5],
 						                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
 						                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
-					printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
+					if(gameMap[curx][cury].army != 0)
+						printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
 					break;
 				}
 			}

@@ -380,7 +380,7 @@ void LGgame::printAnalysis() {
 				std::tie(ct,a)=historyLand[i][j];
 				double nx=(ct)*(graphRDX-0)*1.0/XTurn;
 				double ny=a*(graphRDY-0)*1.0/YMaxLand;
-				// if(nx-cx<=3) continue;
+				// if(nx-cx<=2) continue;
 				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,landI);
 				cx=nx,cy=ny,ca=a;
 			}
@@ -407,7 +407,7 @@ void LGgame::printAnalysis() {
 				std::tie(ct,a)=historyArmy[i][j];
 				double nx=(ct)*(graphRDX-0)*1.0/XTurn;
 				double ny=a*(graphRDY-0)*1.0/YMaxArmy;
-				// if(nx-cx<=3) continue;
+				// if(nx-cx<=2) continue;
 				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,armyI);
 				cx=nx,cy=ny,ca=a;
 			}
@@ -434,7 +434,7 @@ void LGgame::printAnalysis() {
 				std::tie(ct,a)=historyAIH[i][j];
 				double nx=(ct)*(graphRDX-0)*1.0/XTurn;
 				double ny=a*(graphRDY-0)*1.0/YMaxAIH;
-				// if(nx-cx<=3) continue;
+				// if(nx-cx<=2) continue;
 				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,AIHI);
 				cx=nx,cy=ny,ca=a;
 			}
@@ -470,7 +470,7 @@ void LGgame::printAnalysis() {
 			std::tie(ct,a) = historyLand[i].back();
 			cx=(ct)*(graphRDX-0)*1.0/XTurn;
 			cy=a*(graphRDY-0)*1.0/YMaxLand;
-			// if(nx-cx<=3) continue;
+			// if(cx-landX[i]<=2) continue;
 			line(0+landX[i],graphRDY-landY[i],0+cx,graphRDY-cy,landI);
 			landX[i]=cx,landY[i]=cy;
 		}
@@ -484,6 +484,7 @@ void LGgame::printAnalysis() {
 			std::tie(ct,a) = historyArmy[i].back();
 			cx=(ct)*(graphRDX-0)*1.0/XTurn;
 			cy=a*(graphRDY-0)*1.0/YMaxArmy;
+			// if(cx-armyX[i]<=2) continue;
 			line(0+armyX[i],graphRDY-armyY[i],0+cx,graphRDY-cy,armyI);
 			armyX[i]=cx,armyY[i]=cy;
 		}
@@ -497,6 +498,7 @@ void LGgame::printAnalysis() {
 			std::tie(ct,a) = historyAIH[i].back();
 			cx=(ct)*(graphRDX-0)*1.0/XTurn;
 			cy=a*(graphRDY-0)*1.0/YMaxAIH;
+			// if(cx-AIHX[i]<=2) continue;
 			line(0+AIHX[i],graphRDY-AIHY[i],0+cx,graphRDY-cy,AIHI);
 			AIHX[i]=cx,AIHY[i]=cy;
 		}
@@ -519,6 +521,15 @@ namespace LGgame {
 
 namespace LGlocal {
 	int GAME() {
+		if(LGset::enableGongSound) {
+			MUSIC gongsound;
+			gongsound.OpenFile("sound/gong.mp3");
+			if(gongsound.IsOpen()) {
+				gongsound.Play();
+				while(gongsound.GetPlayStatus()==MUSIC_MODE_PLAY);
+				gongsound.Close();
+			}
+		}
 		cleardevice();
 		setrendermode(RENDER_MANUAL);
 		LGGraphics::inputMapData(std::min(900 / mapH, 900 / mapW), std::min(900 / mapH, 900 / mapW), mapH, mapW);

@@ -29,41 +29,15 @@ bool isVisible(int x, int y, int Code) {
 	return false;
 }
 void printBlockNum(bool visible, long long army, int player, int curx, int cury) {
-	if(!visible)
-		return;
-	if(visible) {
-		if(army < 0) {
-			register long long absd = -army;
-			if(absd < 100)
-				xyprintf(LGGraphics::windowData.maplocX + blockWidth * (cury - 1) + blockWidth / 2,
-				         LGGraphics::windowData.maplocY + blockHeight * (curx - 1) + blockHeight / 2,
-				         "%lld", army);
-			else if(absd < (ll)(1e13)) {
-				string p = to_string(army);
-				xyprintf(LGGraphics::windowData.maplocX + blockWidth * (cury - 1) + blockWidth / 2,
-				         LGGraphics::windowData.maplocY + blockHeight * (curx - 1) + blockHeight / 2,
-				         "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-			} else
-				xyprintf(LGGraphics::windowData.maplocX + blockWidth * (cury - 1) + blockWidth / 2,
-				         LGGraphics::windowData.maplocY + blockHeight * (curx - 1) + blockHeight / 2,
-				         "-MX");
-		} else if(army == 0) {
-			if(gameMap[curx][cury].type != 0 && gameMap[curx][cury].type != 1)
-				xyprintf(LGGraphics::windowData.maplocX + blockWidth * (cury - 1) + blockWidth / 2,
-				         LGGraphics::windowData.maplocY + blockHeight * (curx - 1) + blockHeight / 2,
-				         "0");
-		} else if(army < 1000)
-			xyprintf(LGGraphics::windowData.maplocX + blockWidth * (cury - 1) + blockWidth / 2,
-			         LGGraphics::windowData.maplocY + blockHeight * (curx - 1) + blockHeight / 2,
-			         "%lld", army);
-		else if(army < (ll)(1e14)) {
-			string p = to_string(army);
-			xyprintf(LGGraphics::windowData.maplocX + blockWidth * (cury - 1) + blockWidth / 2,
-			         LGGraphics::windowData.maplocY + blockHeight * (curx - 1) + blockHeight / 2,
-			         "%s%c", p.substr(0, 2).c_str(), NUM_s[p.size() - 3]);
-		} else
-			xyprintf(LGGraphics::windowData.maplocX + blockWidth * (cury - 1) + blockWidth / 2,
-			         LGGraphics::windowData.maplocY + blockHeight * (curx - 1) + blockHeight / 2, "MAX");
+	int luX = LGGraphics::windowData.maplocX + blockWidth * (cury - 1);
+	int luY = LGGraphics::windowData.maplocY + blockHeight * (curx - 1);
+	string out = to_string(army);
+	if(!visible) return;
+	if(textwidth(out.c_str()) <= blockWidth - 2) {
+		outtextxy(luX + blockWidth / 2, luY + blockHeight / 2, out.c_str());
+	} else {
+		while(!out.empty() && textwidth((out+".."s).c_str()) > blockWidth - 2) out.pop_back();
+		outtextxy(luX + blockWidth / 2, luY + blockHeight / 2, (out+".."s).c_str());
 	}
 }
 
@@ -73,7 +47,8 @@ void printMap(int Code, coordS coo) {
 	                     mtcol = 0xffbbbbbb,
 	                     unseen = 0xff3c3c3c;
 	setcolor(WHITE);
-	setfont(std::max((blockHeight + 2) / 3 * 2 - 2, 3), 0, "Segoe UI");
+	int blockFontSize = std::min(std::max(int(blockHeight / (log(blockHeight)/log(4))), (int)LGset::blockMinFontSize), (int)LGset::blockMaxFontSize);
+	setfont(blockFontSize, 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	PIMAGE npimg[9];
 	for(int i=1; i<=6; ++i) {

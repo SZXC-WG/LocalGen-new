@@ -22,8 +22,8 @@ namespace LGset {
 	inline namespace file {
 		inline vector<wchar_t> getBuf() {
 			vector<wchar_t> buf;
-			buf.push_back(settingV>>16);
-			buf.push_back(settingV&((1u<<16)-1u));
+			buf.push_back(VER_BUILD>>16);
+			buf.push_back(VER_BUILD&((1u<<16)-1u));
 			for(wchar_t wch : userName) buf.push_back(wch);
 			buf.push_back(L'\n');
 			buf.push_back(enableGodPower);
@@ -35,10 +35,12 @@ namespace LGset {
 			for(wchar_t wch : replayFileName) buf.push_back(wch);
 			buf.push_back(L'\n');
 			buf.push_back(enableBetaTag);
-			buf.push_back(webSocketPort);
+			buf.push_back(socketPort);
 			buf.push_back(L'\n');
 			for(wchar_t wch : mainFontName) buf.push_back(wch);
 			buf.push_back(L'\n');
+			buf.push_back(blockMinFontSize);
+			buf.push_back(blockMaxFontSize);
 			return buf;
 		}
 		inline bool check() {
@@ -79,11 +81,15 @@ namespace LGset {
 			                  settingLength * sizeof(wchar_t),
 			                  &dwReadedSize,
 			                  NULL);
-			if(!f)
-				MessageBoxW(GetConsoleWindow(), (L"Reading setting file failed: CODE " + to_wstring(GetLastError())).c_str(), L"ERROR", MB_HELP);
+			if(!f) {
+				MessageBoxW(GetConsoleWindow(),
+				            (L"Reading setting file failed: CODE " + to_wstring(GetLastError())).c_str(),
+				            L"ERROR",
+				            MB_HELP);
+			}
 			CloseHandle(hFile);
-			int i=0,rdV=0;
-			rdV=(buf[0]<<16)|buf[1];
+			int i=0,rdBuild=0;
+			rdBuild=(buf[0]<<16)|buf[1];
 			i=2;
 			userName.clear();
 			while(buf[i++]!=L'\n') userName.push_back(buf[i-1]);
@@ -98,11 +104,15 @@ namespace LGset {
 			while(buf[i++]!=L'\n') replayFileName.push_back(buf[i-1]);
 			replayFileName.resize(50);
 			enableBetaTag = buf[i++];
-			webSocketPort = buf[i++];
+			socketPort = buf[i++];
 			buf[i++]; // L'\n'
 			mainFontName.clear();
 			while(buf[i++]!=L'\n') mainFontName.push_back(buf[i-1]);
 			mainFontName.resize(30);
+			// settings before build 2365 (inclusive)
+			if(rdBuild<=2365) return; // build 2365 settings
+			blockMinFontSize = buf[i++];
+			blockMaxFontSize = buf[i++];
 		}
 		inline void write() {
 			vector<wchar_t> buf = getBuf();
@@ -122,8 +132,12 @@ namespace LGset {
 			                   buf.size() * sizeof(wchar_t),
 			                   &dwWritedDataSize,
 			                   NULL);
-			if(!f)
-				MessageBoxW(GetConsoleWindow(), (L"Writing setting file failed: CODE " + to_wstring(GetLastError())).c_str(), L"ERROR", MB_HELP);
+			if(!f) {
+				MessageBoxW(GetConsoleWindow(),
+				            (L"Writing setting file failed: CODE " + to_wstring(GetLastError())).c_str(),
+				            L"ERROR",
+				            MB_HELP);
+			}
 			CloseHandle(hFile);
 		}
 	} // inline namespace file

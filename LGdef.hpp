@@ -305,19 +305,19 @@ namespace LGset {
 	const string settingFile = "_settings" + settingFileExt;
 
 	static size_t settingLength = 0;
-	static unsigned settingV = 1;
 
-	wstring userName(L"Anomynous\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 16);
+	wstring userName((L"Anomynous"s + wstring(16,0)).c_str(), 16);
 	bool enableGodPower = false; // god power - originated from v1.0.0 bug
 	unsigned short defaultPlayerNum = 2;
 	unsigned short defaultSpeed = 1;
 	unsigned short defaultUserId = 1; // for player color
-	bool enableGongSound = false; // currently always false as there's now no gong sound
-	wstring replayFileName(L"replay.lgr\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",50);
+	bool enableGongSound = true;
+	wstring replayFileName((L"replay.lgr"s + wstring(50,0)).c_str(),50);
 	bool enableBetaTag = true; // currently no change allowed
-	unsigned short webSocketPort = 14514; // no change allowed
-	// wstring mainFontName = L"Quicksand\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-	wstring mainFontName(L"Quicksand\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",30);
+	unsigned short socketPort = 14514; // no change allowed
+	wstring mainFontName((L"Quicksand"s + wstring(30,0)).c_str(),30);
+	unsigned short blockMinFontSize = 11;
+	unsigned short blockMaxFontSize = 30;
 
 	inline namespace file {
 		inline vector<wchar_t> getBuf();

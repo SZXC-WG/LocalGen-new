@@ -565,10 +565,10 @@ namespace LGlocal {
 					int msx = msg.x, msy = msg.y;
 					int blx = (msg.y - LGGraphics::windowData.maplocY) / blockHeight;
 					int bly = (msg.x - LGGraphics::windowData.maplocX) / blockWidth;
-					blockWidth += msg.wheel / 120;
-					blockHeight += msg.wheel / 120;
-					blockWidth = max(blockWidth, 2);
-					blockHeight = max(blockHeight, 2);
+					blockWidth += msg.wheel / 120 * 2;
+					blockHeight += msg.wheel / 120 * 2;
+					blockWidth = max(blockWidth, 10);
+					blockHeight = max(blockHeight, 10);
 					LGGraphics::windowData.maplocX = msx - bly * blockWidth;
 					LGGraphics::windowData.maplocY = msy - blx * blockHeight;
 				}

@@ -50,8 +50,8 @@ inline namespace checkbox {
 		}
 		return *this;
 	}
-	inline rectCBOX& rectCBOX::display() {
-		draw(); putimage(locationX, locationY, boxImage);
+	inline rectCBOX& rectCBOX::display(PIMAGE pimg) {
+		draw(); putimage(pimg, locationX, locationY, boxImage);
 		return *this;
 	}
 	inline rectCBOX& rectCBOX::size(int _width, int _height) { boxWidth = _width, boxHeight = _height; return *this; }

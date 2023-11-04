@@ -72,7 +72,7 @@ inline namespace button {
 			if(getwidth(backgroundImage)!=backgroundImageWidth||getheight(backgroundImage)!=backgroundImageHeight) images::zoomImage(backgroundImage,backgroundImageWidth,backgroundImageHeight);
 			putimage_withalpha(buttonImage,backgroundImage,buttonRadius-backgroundImageWidth/2,buttonRadius-backgroundImageHeight/2);
 		}
-		setfont(fontHeight, fontWidth, fontName.c_str(), buttonImage);
+		setfont(-fontHeight, fontWidth, fontName.c_str(), buttonImage);
 		settextjustify(walign, halign, buttonImage);
 		register int ox, oy;
 		if(walign == LEFT_TEXT) ox = 0;
@@ -104,9 +104,9 @@ inline namespace button {
 		}
 		return *this;
 	}
-	inline circBUTTON& circBUTTON::display() {
+	inline circBUTTON& circBUTTON::display(PIMAGE pimg) {
 		draw();
-		putimage(locationX - buttonRadius, locationY - buttonRadius, buttonImage);
+		putimage(pimg, locationX - buttonRadius, locationY - buttonRadius, buttonImage);
 		return *this;
 	}
 	inline circBUTTON& circBUTTON::radius(int _radius) { buttonRadius = _radius; return *this; }

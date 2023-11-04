@@ -316,8 +316,8 @@ namespace LGset {
 	bool enableBetaTag = true; // currently no change allowed
 	unsigned short socketPort = 14514; // no change allowed
 	wstring mainFontName((L"Quicksand"s + wstring(30,0)).c_str(),30);
-	unsigned short blockMinFontSize = 11;
-	unsigned short blockMaxFontSize = 30;
+	unsigned short blockMinFontSize = 8;
+	unsigned short blockMaxFontSize = 18;
 
 	inline namespace file {
 		inline vector<wchar_t> getBuf();

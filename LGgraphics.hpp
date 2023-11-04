@@ -61,7 +61,7 @@ namespace LGGraphics {
 		cleardevice();
 		setbkmode(TRANSPARENT);
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
-		setfont(100, 0, LGset::mainFontName.c_str(), 0, 0, FW_BOLD, 0, 0, 0);
+		setfont(-80, 0, LGset::mainFontName.c_str(), 0, 0, FW_BOLD, 0, 0, 0);
 		setcolor(mainColor);
 		xyprintf(252, 82, L"Local");
 		setcolor(WHITE);
@@ -88,7 +88,7 @@ namespace LGGraphics {
 			scrsz[p].bgcolor(bgColor);
 			scrsz[p].textcolor(WHITE);
 			scrsz[p].fontname(LGset::mainFontName.c_str());
-			scrsz[p].fontsize(40, 0);
+			scrsz[p].fontsize(30, 0);
 			scrsz[p].move(50, 180 + i / 4 * 2 + p * 3);
 			scrsz[p].addtext(to_wstring(i * 4) + L" × " + to_wstring(i * 9 / 4));
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
@@ -101,7 +101,7 @@ namespace LGGraphics {
 			scrsz[p].bgcolor(bgColor);
 			scrsz[p].textcolor(WHITE);
 			scrsz[p].fontname(LGset::mainFontName.c_str());
-			scrsz[p].fontsize(40, 0);
+			scrsz[p].fontsize(30, 0);
 			scrsz[p].move(50, 180 + i / 4 * 2 + p * 3);
 			scrsz[p].addtext(L"Full Screen ("+to_wstring(GetSystemMetrics(SM_CXSCREEN))+L" × "+to_wstring(GetSystemMetrics(SM_CYSCREEN))+L")");
 			scrsz[p].clickEvent = [i]()->void { select = i / 100; };
@@ -212,7 +212,7 @@ namespace LGGraphics {
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(75 * windowData.zoomY, 0)
+		.fontsize(50 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
 		.display();
@@ -224,7 +224,7 @@ namespace LGGraphics {
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(75 * windowData.zoomY, 0)
+		.fontsize(50 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
 		.display();
@@ -236,7 +236,7 @@ namespace LGGraphics {
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(75 * windowData.zoomY, 0)
+		.fontsize(50 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
 		.display();
@@ -248,7 +248,7 @@ namespace LGGraphics {
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(75 * windowData.zoomY, 0)
+		.fontsize(50 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
 		.display();
@@ -260,7 +260,7 @@ namespace LGGraphics {
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(40 * windowData.zoomY, 0)
+		.fontsize(25 * windowData.zoomY, 0)
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
 		.event([]() {
@@ -473,15 +473,16 @@ namespace LGGraphics {
 
 		rectBUTTON mapbut[505];
 		int shiftval = 0;
+		static const int butH = 150;
 		for(int i = 1; i <= mapNum; ++i) {
 			mapbut[i]
-			.size(300 * windowData.zoomX - 3, 200 * windowData.zoomY - 3)
-			.move(((i - 1) % 5 * 300 + 50) * windowData.zoomX, ((i - 1) / 5 * 200 + 100 + shiftval) * windowData.zoomY)
+			.size(300 * windowData.zoomX - 3, butH * windowData.zoomY - 3)
+			.move(((i - 1) % 5 * 300 + 50) * windowData.zoomX, ((i - 1) / 5 * butH + 100 + shiftval) * windowData.zoomY)
 			.bgcolor(bgColor)
 			.textcolor(WHITE)
 			.textalign(CENTER_TEXT,CENTER_TEXT)
 			.fontname(LGset::mainFontName.c_str())
-			.fontsize(22 * windowData.zoomY, 0)
+			.fontsize(16 * windowData.zoomY, 0)
 			// .addtext(maps[i].chiname)
 			// .addtext(maps[i].engname)
 			// .addtext("General Count: " + to_string(maps[i].generalcnt))
@@ -503,14 +504,14 @@ namespace LGGraphics {
 		for(; is_run(); delay_fps(120)) {
 			cleardevice();
 			while(mousemsg()) {
-				int id = int((msg.y / windowData.zoomY - 100 - shiftval) / 200) * 5 + int((msg.x / windowData.zoomX - 50) / 300) + 1;
+				int id = int((msg.y / windowData.zoomY - 100 - shiftval) / butH) * 5 + int((msg.x / windowData.zoomX - 50) / 300) + 1;
 				mapbut[id].status = 0;
 				msg = getmouse();
 				shiftval += msg.wheel;
 				if(shiftval > 0) shiftval = 0;
-				if(shiftval < -((mapNum - 1) / 5 * 200)) shiftval = -((mapNum - 1) / 5 * 200);
+				if(shiftval < -((mapNum - 1) / 5 * butH)) shiftval = -((mapNum - 1) / 5 * butH);
 				if(msg.x < 50 * windowData.zoomX || msg.x > 1550 * windowData.zoomX || msg.y < 100 * windowData.zoomY || msg.y > 900 * windowData.zoomY) continue;
-				id = int((msg.y / windowData.zoomY - 100 - shiftval) / 200) * 5 + int((msg.x / windowData.zoomX - 50) / 300) + 1;
+				id = int((msg.y / windowData.zoomY - 100 - shiftval) / butH) * 5 + int((msg.x / windowData.zoomX - 50) / 300) + 1;
 				if(msg.is_left()) mapbut[id].status = 2;
 				else mapbut[id].status = 1;
 			}
@@ -530,7 +531,7 @@ namespace LGGraphics {
 				.addtext(L"Mountain Count: " + (~mapInfo[i].mountaincnt?to_wstring(mapInfo[i].mountaincnt):L"undetermined"))
 				.addtext(L"Swamp Count: " + (~mapInfo[i].swampcnt?to_wstring(mapInfo[i].swampcnt):L"undetermined"))
 				.addtext(L"Size: " + (~mapInfo[i].height?to_wstring(mapInfo[i].height):L"undetermined") + L" × " + (~mapInfo[i].width?to_wstring(mapInfo[i].width):L"undetermined"))
-				.move(((i - 1) % 5 * 300 + 50) * windowData.zoomX, ((i - 1) / 5 * 200 + 100 + shiftval) * windowData.zoomY)
+				.move(((i - 1) % 5 * 300 + 50) * windowData.zoomX, ((i - 1) / 5 * butH + 100 + shiftval) * windowData.zoomY)
 				.display();
 				if(mapbut[i].status == 2) mapSelected = i;
 			}
@@ -1378,7 +1379,7 @@ namespace LGGraphics {
 			      400 * windowData.zoomY + 100 * windowData.zoomY * rowNum + 1)
 			.textalign(CENTER_TEXT, CENTER_TEXT)
 			.fontname(LGset::mainFontName.c_str())
-			.fontsize(50 * windowData.zoomY, 0)
+			.fontsize(30 * windowData.zoomY, 0)
 			.bgcolor(bgColor)
 			.textcolor(WHITE)
 			.addtext(to_wstring(i));
@@ -1401,7 +1402,7 @@ namespace LGGraphics {
 		.size(150 * windowData.zoomX, 50 * windowData.zoomY)
 		.move(900 * windowData.zoomX, 450 * windowData.zoomY)
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(50 * windowData.zoomY, 0)
+		.fontsize(30 * windowData.zoomY, 0)
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.textalign(CENTER_TEXT,CENTER_TEXT)
@@ -1419,7 +1420,7 @@ namespace LGGraphics {
 			.addtext(playerInfo[i].name)
 			.textalign(CENTER_TEXT, CENTER_TEXT)
 			.fontname(LGset::mainFontName.c_str())
-			.fontsize(40 * windowData.zoomY, 0)
+			.fontsize(26 * windowData.zoomY, 0)
 			.size(100 * windowData.zoomX - 1*2, 100 * windowData.zoomY - 1*2)
 			.move(1150 * windowData.zoomX + 100 * windowData.zoomX * colNum + 1,
 			      400 * windowData.zoomY + 100 * windowData.zoomY * rowNum + 1);
@@ -1432,7 +1433,7 @@ namespace LGGraphics {
 		.addtext(L"Overall Select")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(50 * windowData.zoomY, 0);
+		.fontsize(35 * windowData.zoomY, 0);
 		checkOA.enableButtonShadow = false;
 		checkOA.enableTextShadow = false;
 		checkOA.display();

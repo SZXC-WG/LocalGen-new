@@ -137,7 +137,7 @@ inline namespace button {
 		rectBUTTON(rectBUTTON&& but);
 		rectBUTTON(const rectBUTTON& but);
 		inline rectBUTTON& draw();
-		inline rectBUTTON& display();
+		inline rectBUTTON& display(PIMAGE pimg = NULL);
 		inline rectBUTTON& size(int _width, int _height);
 		inline rectBUTTON& bgcolor(color_t _color);
 		inline rectBUTTON& textcolor(color_t _color);
@@ -184,7 +184,7 @@ inline namespace button {
 		circBUTTON(circBUTTON&& but);
 		circBUTTON(const circBUTTON& but);
 		inline circBUTTON& draw();
-		inline circBUTTON& display();
+		inline circBUTTON& display(PIMAGE pimg = NULL);
 		inline circBUTTON& radius(int _radius);
 		inline circBUTTON& bgcolor(color_t _color);
 		inline circBUTTON& textcolor(color_t _color);
@@ -225,7 +225,7 @@ inline namespace checkbox {
 		explicit rectCBOX();
 		~rectCBOX();
 		inline rectCBOX& draw();
-		inline rectCBOX& display();
+		inline rectCBOX& display(PIMAGE pimg = NULL);
 		inline rectCBOX& size(int _width, int _height);
 		inline rectCBOX& bgcolor(color_t _color);
 		inline rectCBOX& move(int _X, int _Y);
@@ -242,6 +242,8 @@ inline namespace checkbox {
 		rectCBOX checkBox;
 		lineTextS boxText;
 		int blankWidth;
+		inline CBOXtextS& draw();
+		inline CBOXtextS& display();
 	};
 
 } // inline namespace checkbox
@@ -253,6 +255,7 @@ inline namespace page {
 
 	struct itemS {
 		unsigned iType;
+		int locX, locY;
 		union {
 			/* 0 */ pageS* subPage;
 			/* 1 */ lineTextS* lText;
@@ -265,6 +268,8 @@ inline namespace page {
 		inline operator decltype(info)& () { return info; }
 		inline itemS() = default;
 		inline itemS(decltype(iType) _iType) : iType(_iType) {};
+
+		inline void move(int _X, int _Y) { locX = _X, locY = _Y; }
 
 		template <typename _Ftn_t>
 		inline void work(_Ftn_t _ftn) {
@@ -316,7 +321,7 @@ inline namespace page {
 		int sizeX, sizeY;
 		int locX, locY;
 		ctn_t content;
-		struct { int fX,fY,tX,tY; } dispSize;
+		struct { int lX,lY; } dispSize;
 		scroll_t scrBarV, scrBarH;
 		bool enableVBar, enableHBar;
 	  public:
@@ -335,7 +340,7 @@ inline namespace page {
 
 		inline /* void */ pageS& detect(); // overall detect (for interactive items, e.g.buttons)
 		inline /* void */ pageS& draw(); // draw page backstage
-		inline /* void */ pageS& display(); // draw page frontstage (including backstage)
+		inline /* void */ pageS& display(PIMAGE pimg = NULL); // draw page frontstage (including backstage)
 
 		inline /* void */ pageS& addItem(itemS _item);
 		inline /* void */ pageS& popItem();

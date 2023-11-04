@@ -32,6 +32,7 @@
 #include "glib/GLIB_rectbut.hpp"
 #include "glib/GLIB_circbut.hpp"
 #include "glib/GLIB_rectcbox.hpp"
+#include "glib/GLIB_page.hpp"
 #include "LGencoding.hpp"
 #include "LGset.hpp"
 #include "LGmaps.hpp"

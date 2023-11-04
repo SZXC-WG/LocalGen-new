@@ -36,7 +36,7 @@ void printBlockNum(bool visible, long long army, int player, int curx, int cury)
 	if(textwidth(out.c_str()) <= blockWidth - 2)
 		outtextxy(luX + blockWidth / 2, luY + blockHeight / 2, out.c_str());
 	else {
-		while(!out.empty() && textwidth((out+".."s).c_str()) > blockWidth - 2) out.pop_back();
+		while(out.size()>1ull && textwidth((out+".."s).c_str()) > blockWidth - 2) out.pop_back();
 		outtextxy(luX + blockWidth / 2, luY + blockHeight / 2, (out+".."s).c_str());
 	}
 }
@@ -47,8 +47,11 @@ void printMap(int Code, coordS coo) {
 	                     mtcol = 0xffbbbbbb,
 	                     unseen = 0xff3c3c3c;
 	setcolor(WHITE);
-	int blockFontSize = std::min(std::max(int(blockHeight / (log(blockHeight)/log(4))), (int)LGset::blockMinFontSize), (int)LGset::blockMaxFontSize);
-	setfont(blockFontSize, 0, "Segoe UI");
+	int blockFontSize = std::min(std::max(int(0.375 * blockHeight /* from the site */), (int)(LGset::blockMinFontSize)), (int)(LGset::blockMaxFontSize));
+	// setfont(20, 0, LGset::mainFontName.c_str());
+	// xyprintf(5 * LGGraphics::windowData.zoomX, 800 * LGGraphics::windowData.zoomY,
+	//          "block font size: %d px\n", blockFontSize);
+	setfont(-blockFontSize, 0, LGset::mainFontName.c_str());
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	PIMAGE npimg[9];
 	for(int i=1; i<=6; ++i) {

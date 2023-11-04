@@ -72,7 +72,7 @@ inline namespace button {
 			if(getwidth(backgroundImage)!=backgroundImageWidth||getheight(backgroundImage)!=backgroundImageHeight) images::zoomImage(backgroundImage,backgroundImageWidth,backgroundImageHeight);
 			putimage_withalpha(buttonImage,backgroundImage,0,0);
 		}
-		setfont(fontHeight, fontWidth, fontName.c_str(), buttonImage);
+		setfont(-fontHeight, fontWidth, fontName.c_str(), buttonImage);
 		settextjustify(walign, halign, buttonImage);
 		register int ox, oy;
 		if(walign == LEFT_TEXT) ox = 0;
@@ -104,9 +104,9 @@ inline namespace button {
 		}
 		return *this;
 	}
-	inline rectBUTTON& rectBUTTON::display() {
+	inline rectBUTTON& rectBUTTON::display(PIMAGE pimg) {
 		draw();
-		putimage(locationX, locationY, buttonImage);
+		putimage(pimg, locationX, locationY, buttonImage);
 		return *this;
 	}
 	inline rectBUTTON& rectBUTTON::size(int _width, int _height) { buttonHeight = _height; buttonWidth = _width; return *this; }

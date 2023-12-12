@@ -353,20 +353,13 @@ void createLabyrinthMap(int crtH, int crtW, int TYPE) {
 	}
 	for(int i=1; i<=m; ++i) {
 		coordS a=p[e[i].u],b=p[e[i].v];
-		gameMap[(a.x+b.x)>>1][(a.y+b.y)>>1].type = 0;
+		coordS coo = coordS{(a.x+b.x)>>1,(a.y+b.y)>>1};
+		gameMap[coo.x][coo.y].type = 4;
+		gameMap[coo.x][coo.y].army = 40;
 	}
 	for(int i=1; i<=c; ++i) {
+		gameMap[p[i].x][p[i].y].type = 0;
 		if(ec[i]==1) gameMap[p[i].x][p[i].y].type = 3;
-		else if(ec[i]==2) {
-			gameMap[p[i].x][p[i].y].type = 4;
-			gameMap[p[i].x][p[i].y].army = 40;
-		} else if(ec[i]==3) {
-			gameMap[p[i].x][p[i].y].type = 4;
-			gameMap[p[i].x][p[i].y].army = 200;
-		} else if(ec[i]==4) {
-			gameMap[p[i].x][p[i].y].type = 4;
-			gameMap[p[i].x][p[i].y].army = 500;
-		}
 	}
 }
 void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt) {

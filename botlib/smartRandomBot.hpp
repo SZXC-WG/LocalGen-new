@@ -8,8 +8,21 @@ namespace smartRandomBot {
 	moveS calcNextMove(int id, coordS coo) {
 		static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 		static deque<coordS> lastCoord[20];
-		if(gameMap[coo.x][coo.y].player != id || gameMap[coo.x][coo.y].army == 0)
-			return moveS { id, false, coo, LGgame::genCoo[id] };
+		if(gameMap[coo.x][coo.y].player != id || gameMap[coo.x][coo.y].army == 0) {
+			long long mxArmy = 0;
+			coordS mxCoo = LGgame::genCoo[id];
+			for(int i = 1; i <= mapH; ++i) {
+				for(int j = 1; j <= mapW; ++j) {
+					if(gameMap[i][j].player == id) {
+						if(gameMap[i][j].army > mxArmy) {
+							mxArmy = gameMap[i][j].army;
+							mxCoo = coordS{i,j};
+						}
+					}
+				}
+			}
+			return moveS { id, false, coo, mxCoo };
+		}
 		struct node {
 			int type, team;
 			long long army;

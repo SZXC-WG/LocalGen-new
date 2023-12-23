@@ -28,6 +28,7 @@
 #include <chrono>
 /** C++ STL **/
 #include <algorithm>
+#include <functional>
 /** used containers (other than string) **/
 #include <vector>
 #include <deque>
@@ -138,7 +139,13 @@ struct movementS {
  */
 struct coordS {
 	int x, y;
+	coordS() = default;
+	coordS(int x, int y) : x(x), y(y) {};
 };
+bool operator==(coordS a, coordS b) { return a.x == b.x && a.y == b.y; }
+bool operator!=(coordS a, coordS b) { return a.x != b.x || a.y != b.y; }
+coordS operator+(coordS a, coordS b) { return coordS(a.x + b.x, a.y + b.y); }
+coordS operator-(coordS a, coordS b) { return coordS(a.x - b.x, a.y - b.y); }
 
 /**
  * @brief Struct saving player's passing info.
@@ -225,18 +232,6 @@ int failSock;
 /**** ALL functions ****/
 
 std::wstring wcharTransfer(const wstring& ws);
-
-/**
- * @brief Function for comparing two coordinates equal.
- *
- * @param a coordS
- * @param b coordS
- * @return true
- * @return false
- */
-bool operator== (coordS a,coordS b) {
-	return a.x==b.x&&a.y==b.y;
-}
 
 /**
  * @brief Function for checking whether the username is valid.
@@ -404,7 +399,7 @@ namespace LGgame {
 	void flushMove();
 	void initGenerals(coordS coos[]);
 	void updateMap();
-	void ranklist();
+	void ranklist(bool print);
 	void printAnalysis();
 }
 

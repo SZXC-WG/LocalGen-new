@@ -19,14 +19,15 @@
 #include "botlib/xiaruizeBot.hpp"
 #include "botlib/xrzBot.hpp"
 #include "botlib/smartRandomBot.hpp"
+#include "botlib/zlyBot.hpp"
 //#include "Bot/lcwBot.hpp"
 
 string botName[] = {
-	"HUMAN",
+	"",
 	"smartRandomBot",
 	"xrzBot",
 	"xiaruizeBot",
-	"lcwBot",
+	"zlyBot",
 };
 
 #endif

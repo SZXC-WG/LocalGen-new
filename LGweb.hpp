@@ -347,7 +347,7 @@ int LGserver::GAME() {
 				}
 				cleardevice();
 				printMap(LGgame::cheatCode, LGgame::playerCoo[0]);
-				LGgame::ranklist();
+				LGgame::ranklist(true);
 				int screenszr = 1600 * LGGraphics::windowData.zoomX;
 				static int fpslen;
 				static int turnlen;
@@ -752,7 +752,7 @@ int LGclient::GAME() {
 				}
 				cleardevice();
 				printMap(LGgame::cheatCode, LGgame::playerCoo[playerNumber]);
-				LGgame::ranklist();
+				LGgame::ranklist(true);
 				int screenszr = 1600 * LGGraphics::windowData.zoomX;
 				static int fpslen;
 				static int turnlen;

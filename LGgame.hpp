@@ -215,7 +215,7 @@ void LGgame::updateMap() {
 }
 
 // ranklist printings
-void LGgame::ranklist() {
+void LGgame::ranklist(bool print) {
 	bool printBot = !(LGgame::inReplay|LGgame::inServer|LGgame::inClient);
 	bool printAIH = !(LGgame::inReplay);
 	setfont(20 * LGGraphics::windowData.zoomY, 0, LGset::mainFontName.c_str());
@@ -264,6 +264,7 @@ void LGgame::ranklist() {
 		if(historyAIH[rklst[i].id].empty()||historyAIH[rklst[i].id].back().first!=curTurn)
 			historyAIH[rklst[i].id].push_back(std::make_pair(LGgame::curTurn,rklst[i].armyInHand));
 	}
+	if(!print) return;
 	std::sort(rklst + 1, rklst + LGgame::playerCnt + 1, [](node a, node b) { return a.army > b.army; });
 	nlen = textwidth(L"PLAYER");
 	alen = textwidth(L"ARMY");
@@ -329,6 +330,7 @@ void LGgame::ranklist() {
 	}
 }
 void LGgame::printAnalysis() {
+#define log(x) (((x)==0)?(0):(log(x)+1))
 	static int XTurn = 1, XTurnINC = 1;
 	static int YMaxLand = 50;
 	static int YMaxArmy = 1;
@@ -378,9 +380,9 @@ void LGgame::printAnalysis() {
 				int ct;
 				long long a;
 				std::tie(ct,a)=historyLand[i][j];
-				double nx=(ct)*(graphRDX-0)*1.0/XTurn;
-				double ny=a*(graphRDY-0)*1.0/YMaxLand;
-				// if(nx-cx<=2) continue;
+				double nx=log(ct)*(graphRDX-0)*1.0/log(XTurn);
+				double ny=log(a)*(graphRDY-0)*1.0/log(YMaxLand);
+				if(nx-cx<=1&&ny!=0) continue;
 				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,landI);
 				cx=nx,cy=ny,ca=a;
 			}
@@ -405,9 +407,9 @@ void LGgame::printAnalysis() {
 				int ct;
 				long long a;
 				std::tie(ct,a)=historyArmy[i][j];
-				double nx=(ct)*(graphRDX-0)*1.0/XTurn;
-				double ny=a*(graphRDY-0)*1.0/YMaxArmy;
-				// if(nx-cx<=2) continue;
+				double nx=log(ct)*(graphRDX-0)*1.0/log(XTurn);
+				double ny=log(a)*(graphRDY-0)*1.0/log(YMaxArmy);
+				if(nx-cx<=1&&ny!=0) continue;
 				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,armyI);
 				cx=nx,cy=ny,ca=a;
 			}
@@ -432,9 +434,9 @@ void LGgame::printAnalysis() {
 				int ct;
 				long long a;
 				std::tie(ct,a)=historyAIH[i][j];
-				double nx=(ct)*(graphRDX-0)*1.0/XTurn;
-				double ny=a*(graphRDY-0)*1.0/YMaxAIH;
-				// if(nx-cx<=2) continue;
+				double nx=log(ct)*(graphRDX-0)*1.0/log(XTurn);
+				double ny=log(a)*(graphRDY-0)*1.0/log(YMaxAIH);
+				if(nx-cx<=1&&ny!=0) continue;
 				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,AIHI);
 				cx=nx,cy=ny,ca=a;
 			}
@@ -468,9 +470,9 @@ void LGgame::printAnalysis() {
 			double cx=0,cy=0;
 			int ct; long long a;
 			std::tie(ct,a) = historyLand[i].back();
-			cx=(ct)*(graphRDX-0)*1.0/XTurn;
-			cy=a*(graphRDY-0)*1.0/YMaxLand;
-			// if(cx-landX[i]<=2) continue;
+			cx=log(ct)*(graphRDX-0)*1.0/log(XTurn);
+			cy=log(a)*(graphRDY-0)*1.0/log(YMaxLand);
+			if(cx-landX[i]<=1&&cy!=0) continue;
 			line(0+landX[i],graphRDY-landY[i],0+cx,graphRDY-cy,landI);
 			landX[i]=cx,landY[i]=cy;
 		}
@@ -482,9 +484,9 @@ void LGgame::printAnalysis() {
 			double cx=0,cy=0;
 			int ct; long long a;
 			std::tie(ct,a) = historyArmy[i].back();
-			cx=(ct)*(graphRDX-0)*1.0/XTurn;
-			cy=a*(graphRDY-0)*1.0/YMaxArmy;
-			// if(cx-armyX[i]<=2) continue;
+			cx=log(ct)*(graphRDX-0)*1.0/log(XTurn);
+			cy=log(a)*(graphRDY-0)*1.0/log(YMaxArmy);
+			if(cx-armyX[i]<=1&&cy!=0) continue;
 			line(0+armyX[i],graphRDY-armyY[i],0+cx,graphRDY-cy,armyI);
 			armyX[i]=cx,armyY[i]=cy;
 		}
@@ -496,9 +498,9 @@ void LGgame::printAnalysis() {
 			double cx=0,cy=0;
 			int ct; long long a;
 			std::tie(ct,a) = historyAIH[i].back();
-			cx=(ct)*(graphRDX-0)*1.0/XTurn;
-			cy=a*(graphRDY-0)*1.0/YMaxAIH;
-			// if(cx-AIHX[i]<=2) continue;
+			cx=log(ct)*(graphRDX-0)*1.0/log(XTurn);
+			cy=log(a)*(graphRDY-0)*1.0/log(YMaxAIH);
+			if(cx-AIHX[i]<=1&&cy!=0) continue;
 			line(0+AIHX[i],graphRDY-AIHY[i],0+cx,graphRDY-cy,AIHI);
 			AIHX[i]=cx,AIHY[i]=cy;
 		}
@@ -506,6 +508,7 @@ void LGgame::printAnalysis() {
 	putimage(1000 * LGGraphics::windowData.zoomX, 300 * LGGraphics::windowData.zoomY, landI);
 	putimage(1000 * LGGraphics::windowData.zoomX, 500 * LGGraphics::windowData.zoomY, armyI);
 	putimage(1000 * LGGraphics::windowData.zoomX, 700 * LGGraphics::windowData.zoomY, AIHI);
+#undef log
 }
 
 namespace LGgame {
@@ -516,6 +519,11 @@ namespace LGgame {
 		inReplay = false;
 		inCreate = false;
 		for(register int i = 1; i <= pC; ++i) isAlive[i] = 1;
+		for(register int i = 1; i <= pC; ++i) {
+			historyLand[i].push_back({0,0});
+			historyArmy[i].push_back({0,0});
+			historyAIH[i].push_back({0,0});
+		}
 	}
 };
 
@@ -536,8 +544,10 @@ namespace LGlocal {
 		LGGraphics::init();
 		std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 		LGgame::robotId[1] = -100;
-		for(int i = 2; i <= LGgame::playerCnt; ++i)
-			LGgame::robotId[i] = mtrd() % 300;
+		for(int i = 2; i <= LGgame::playerCnt; ++i) {
+			LGgame::robotId[i] = mtrd() % 400;
+			if(300 <= LGgame::robotId[i] && LGgame::robotId[i] < 400) zlyBot::initBot(i);
+		}
 		LGgame::initGenerals(LGgame::playerCoo);
 		for(int i = 1; i <= LGgame::playerCnt; ++i) LGgame::playerFocus[i] = LGgame::playerCoo[i] = LGgame::genCoo[i];
 		std::deque<moveS> movement;
@@ -558,6 +568,7 @@ namespace LGlocal {
 		bool toNextTurn = true, gamePaused = false;
 		std::chrono::nanoseconds pauseBeginTime, pauseEndTime;
 		bool shiftPressed = false;
+		delay_ms(0);
 		for(; is_run();) {
 			while(mousemsg()) {
 				mouse_msg msg = getmouse();
@@ -750,6 +761,15 @@ namespace LGlocal {
 								LGgame::playerFocus[i] = mv.to;
 							}
 							break;
+						case 300 ... 399:
+							mv=zlyBot::calcNextMove(i, LGgame::playerFocus[i]);
+							if(!LGgame::checkMove(mv)) {
+								LGreplay::Movement mov(mv);
+								LGreplay::wreplay.newMove(mov);
+								LGgame::inlineMove.push_back(mv);
+								LGgame::playerFocus[i] = mv.to;
+							}
+							break;
 					}
 				}
 				LGgame::flushMove();
@@ -797,7 +817,9 @@ namespace LGlocal {
 				if(lackTurn<=0||gamePaused) {
 					cleardevice();
 					printMap(LGgame::cheatCode, LGgame::playerFocus[1]);
-					LGgame::ranklist();
+				}
+				LGgame::ranklist(lackTurn<=0||gamePaused);
+				if(lackTurn<=0||gamePaused) {
 					LGgame::printAnalysis();
 					int screenszr = 1600 * LGGraphics::windowData.zoomX;
 					static int fpslen;

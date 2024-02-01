@@ -15,11 +15,12 @@ namespace zlyBot {
 	botModeE botMode[64];
 	coordS seenGeneral[64][64];
 	deque<coordS> stackedMove[64];
-	const ll blockValueWeight[] = {10,-100,-INF,5,50,25};
+	ll blockValueWeight[] = {10,-150,-INF,5,30,15}; // p s m g c (o)
 	ll blockValue[64][505][505];
 	ll dist[64][505][505];
 	int blockTypeRem[64][505][505];
 
+	// tool to make block access legal 
 	inline int getType(int id,int x,int y) {
 		if(blockTypeRem[id][x][y]!=-1) return blockTypeRem[id][x][y];
 		else if(isVisible(x,y,1<<id)) return blockTypeRem[id][x][y]=gameMap[x][y].type;
@@ -155,8 +156,8 @@ namespace zlyBot {
 		for(int i=1; i<=LGgame::playerCnt; ++i) {
 			if(seenGeneral[id][i] != coordS(-1,-1) && LGgame::isAlive[i]) {
 				botMode[id] = BOT_MODE_ATTACK;
-				if(LGgame::historyArmy[i].back().second < goalGeneralArmy) {
-					goalGeneralArmy = LGgame::historyArmy[i].back().second;
+				if(LGgame::gameStats[i].back().army < goalGeneralArmy) {
+					goalGeneralArmy = LGgame::gameStats[i].back().army;
 					goalGeneralId = i;
 				}
 			}

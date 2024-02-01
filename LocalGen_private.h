@@ -5,19 +5,19 @@
 #define LOCALGEN_PRIVATE_H
 
 /* VERSION DEFINITIONS */
-#define VER_STRING	"4.2.4.2506"
+#define VER_STRING	"4.2.4.2544"
 #define VER_MAJOR	4
 #define VER_MINOR	2
 #define VER_RELEASE	4
-#define VER_BUILD	2506
+#define VER_BUILD	2544
 #define COMPANY_NAME	"SZXC Work Group"
-#define FILE_VERSION	"4.2.4.2506"
+#define FILE_VERSION	"4.2.4.2544"
 #define FILE_DESCRIPTION	"Local Generals.io"
 #define INTERNAL_NAME	""
 #define LEGAL_COPYRIGHT	"Copyright (c) 2023 SZXC Work Group"
 #define LEGAL_TRADEMARKS	""
 #define ORIGINAL_FILENAME	""
 #define PRODUCT_NAME	"Local Generals.io"
-#define PRODUCT_VERSION	"4.2.4.2506"
+#define PRODUCT_VERSION	"4.2.4.2544"
 
 #endif /*LOCALGEN_PRIVATE_H*/

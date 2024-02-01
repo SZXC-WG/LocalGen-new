@@ -54,6 +54,9 @@ inline namespace checkbox {
 		draw(); putimage(pimg, locationX, locationY, boxImage);
 		return *this;
 	}
+	inline int rectCBOX::gwidth() { return boxWidth; }
+	inline int rectCBOX::gheight() { return boxHeight; }
+	inline std::pair<int,int> rectCBOX::gsize() { return std::make_pair(boxWidth, boxHeight); }
 	inline rectCBOX& rectCBOX::size(int _width, int _height) { boxWidth = _width, boxHeight = _height; return *this; }
 	inline rectCBOX& rectCBOX::bgcolor(color_t _color) { backgroundColor = _color; return *this; }
 	inline rectCBOX& rectCBOX::move(int _X, int _Y) { locationX = _X, locationY = _Y; return *this; }
@@ -79,6 +82,26 @@ inline namespace checkbox {
 		pressed = !pressed;
 		if(varPtr != nullptr) *varPtr = pressed;
 		return *this;
+	}
+
+	inline rCBOXtextS::rCBOXtextS() {
+		textImage = newimage();
+		blankWidth = 0;
+	}
+	inline rCBOXtextS::~rCBOXtextS() { delimage(textImage); }
+	inline rCBOXtextS& rCBOXtextS::detect() { checkBox.detect(); return *this; }
+	inline rCBOXtextS& rCBOXtextS::draw() {
+		int totW = boxText.width() + blankWidth + checkBox.gwidth();
+		int totH = max(boxText.height(), checkBox.gheight());
+		delimage(textImage);
+		textImage = newimage(totW, totH);
+		settextjustify(LEFT_TEXT, TOP_TEXT);
+		boxText.print(0,0,textImage);
+		checkBox.move(totW-checkBox.gwidth(),totH/2-checkBox.gheight()/2);
+		checkBox.display(textImage);
+	}
+	inline rCBOXtextS& rCBOXtextS::display(int _X, int _Y, PIMAGE pimg) {
+		draw(); putimage(pimg, _X, _Y, textImage);
 	}
 
 }

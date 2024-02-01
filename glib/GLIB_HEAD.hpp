@@ -49,7 +49,20 @@ namespace images {
 	 * @param srcimg source image
 	 */
 	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg);
+	/**
+	 * @brief Zoom a image.
+	 * 
+	 * @param pimg target image
+	 * @param zoomWidth target width
+	 * @param zoomHeight target height
+	 */
 	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight);
+	/**
+	 * @brief Set the Window Transparent object
+	 * 
+	 * @param enable whether enabled
+	 * @param alpha value
+	 */
 	void setWindowTransparent(bool enable, int alpha = 0xFF);
 
 } // namespace images
@@ -226,6 +239,9 @@ inline namespace checkbox {
 		~rectCBOX();
 		inline rectCBOX& draw();
 		inline rectCBOX& display(PIMAGE pimg = NULL);
+		inline int gwidth();
+		inline int gheight();
+		inline std::pair<int,int> gsize();
 		inline rectCBOX& size(int _width, int _height);
 		inline rectCBOX& bgcolor(color_t _color);
 		inline rectCBOX& move(int _X, int _Y);
@@ -238,12 +254,18 @@ inline namespace checkbox {
 		inline rectCBOX& changeState();
 	};
 
-	struct CBOXtextS {
+	struct rCBOXtextS {
+		PIMAGE textImage;
 		rectCBOX checkBox;
 		lineTextS boxText;
 		int blankWidth;
-		inline CBOXtextS& draw();
-		inline CBOXtextS& display();
+
+		explicit rCBOXtextS();
+		~rCBOXtextS();
+
+		inline rCBOXtextS& detect();
+		inline rCBOXtextS& draw();
+		inline rCBOXtextS& display(int _X, int _Y, PIMAGE pimg = NULL);
 	};
 
 } // inline namespace checkbox
@@ -263,7 +285,7 @@ inline namespace page {
 			/* 3 */ rectBUTTON* rButton;
 			/* 4 */ circBUTTON* cButton;
 			/* 5 */ rectCBOX* rChkBox;
-			/* 6 */ CBOXtextS* cBText;
+			/* 6 */ rCBOXtextS* cBText;
 		} info;
 		inline operator decltype(info)& () { return info; }
 		inline itemS() = default;

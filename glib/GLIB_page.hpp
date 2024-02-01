@@ -42,7 +42,7 @@ inline namespace page {
 				case 3: { it.info.rButton->display(pageImage); } break;
 				case 4: { it.info.cButton->display(pageImage); } break;
 				case 5: { it.info.rChkBox->display(pageImage); } break;
-				case 6: { it.info.cBText; } break; // to do
+				case 6: { it.info.cBText->display(it.locX,it.locY,pageImage); } break; // to do
 			}
 		}
 	}

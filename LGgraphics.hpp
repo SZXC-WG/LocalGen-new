@@ -334,14 +334,58 @@ namespace LGGraphics {
 			if(donate.status == 2) {
 				donate.clickEvent(); goto WelcomePageStartLabel;
 			}
-			if(repo.status == 2)
-				repo.clickEvent();
+			if(settings.status == 2) {
+				settingsPage(); goto WelcomePageStartLabel;
+			}
+			if(repo.status == 2) {
+				repo.clickEvent();;
+			}
 
 			// cbox_test.detect().display();
 			// if(cbox_test.status == 2) cbox_test.changeState();
 		}
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 		exit(0);
+	}
+
+	void settingsPage() {
+		cleardevice();
+		flushkey();
+		for(; is_run(); delay_fps(120)) {
+			while(kbmsg()) {
+				key_msg msg = getkey();
+				if(msg.key == 27) return;
+			}
+			cleardevice();
+			setcolor(WHITE);
+			settextjustify(CENTER_TEXT, BOTTOM_TEXT);
+			setfont(-50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
+			xyprintf(800 * windowData.zoomX, 75 * windowData.zoomY, L"Settings");
+			setlinewidth(2);
+			line(0, 100 * windowData.zoomY, 1600 * windowData.zoomX, 100 * windowData.zoomY);
+			setfont(-20 * windowData.zoomY, 0, LGset::mainFontName.c_str());
+			settextjustify(LEFT_TEXT, CENTER_TEXT);
+			xyprintf(100 * windowData.zoomX, 125 * windowData.zoomY, L"Setting File: ./%s", LGset::settingFile.c_str());
+			xyprintf(100 * windowData.zoomX, 150 * windowData.zoomY, L"Username: %ls", LGset::userName.c_str());
+			xyprintf(100 * windowData.zoomX, 175 * windowData.zoomY, L"God Power: %s", (LGset::enableGodPower?"Enabled":"Disabled"));
+			xyprintf(100 * windowData.zoomX, 200 * windowData.zoomY, L"Player Count (default): %d", LGset::defaultPlayerNum);
+			xyprintf(100 * windowData.zoomX, 225 * windowData.zoomY, L"Game Speed (default): %d", LGset::defaultSpeed);
+			xyprintf(100 * windowData.zoomX, 250 * windowData.zoomY, L"User ID in game (default): %d (%s)", LGset::defaultUserId, playerInfo[LGset::defaultUserId].name.c_str());
+			xyprintf(100 * windowData.zoomX, 275 * windowData.zoomY, L"Gong Sound: %s", (LGset::enableGongSound?"Enabled":"Disabled"));
+			xyprintf(100 * windowData.zoomX, 300 * windowData.zoomY, L"Replay File: %ls", LGset::replayFileName.c_str());
+			xyprintf(100 * windowData.zoomX, 325 * windowData.zoomY, L"Beta Tag: %s", (LGset::enableBetaTag?"Enabled":"Disabled"));
+			xyprintf(100 * windowData.zoomX, 350 * windowData.zoomY, L"Web Socket Port: %d", LGset::socketPort);
+			xyprintf(100 * windowData.zoomX, 375 * windowData.zoomY, L"General Font: %ls", LGset::mainFontName.c_str());
+			xyprintf(100 * windowData.zoomX, 400 * windowData.zoomY, L"Block Font Size Range: [%d, %d]", LGset::blockMinFontSize, LGset::blockMaxFontSize);
+			setfont(-40 * windowData.zoomY, 0, LGset::mainFontName.c_str());
+			xyprintf(100 * windowData.zoomX, 450 * windowData.zoomY, L"General Game Mode: %d", LGset::gameMode);
+			setfont(-20 * windowData.zoomY, 0, LGset::mainFontName.c_str());
+			switch(LGset::gameMode) {
+				case 0: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(normal generals.io)"); break;
+				case 1: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(city state)"); break;
+				case 2: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(land state)"); break;
+			}
+		}
 	}
 
 	void testPage() {

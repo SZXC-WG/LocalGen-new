@@ -39,6 +39,7 @@ namespace LGset {
 			buf.push_back(L'\n');
 			for(wchar_t wch : mainFontName) buf.push_back(wch);
 			buf.push_back(L'\n');
+			// build 2365+ settings
 			buf.push_back(blockMinFontSize);
 			buf.push_back(blockMaxFontSize);
 			return buf;
@@ -110,7 +111,7 @@ namespace LGset {
 			while(buf[i++]!=L'\n') mainFontName.push_back(buf[i-1]);
 			mainFontName.resize(30);
 			// settings before build 2365 (inclusive)
-			if(rdBuild<=2365) return; // build 2365 settings
+			if(rdBuild<=2365) return; // build 2365+ settings
 			blockMinFontSize = buf[i++];
 			blockMaxFontSize = buf[i++];
 		}

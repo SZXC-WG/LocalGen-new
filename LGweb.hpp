@@ -701,7 +701,6 @@ int LGclient::GAME() {
 					if(confirmSur == 7)
 						break;
 					LGgame::isAlive[playerNumber] = 0;
-					LGgame::printGameMessage({playerNumber, playerNumber, LGgame::curTurn});
 					quitGame();
 					closegraph();
 					return 0;
@@ -737,7 +736,6 @@ int LGclient::GAME() {
 				gameEnd = 1;
 				register int winnerNum = std::__lg(ed);
 				LGgame::cheatCode = 1048575;
-				LGgame::printGameMessage({winnerNum, -1, LGgame::curTurn});
 			}
 		} {
 			std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;

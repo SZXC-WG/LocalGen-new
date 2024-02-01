@@ -173,14 +173,6 @@ struct Block {
 };
 
 /**
- * @brief Struct saving a game message.
- */
-struct gameMessageStore {
-	int playerA, playerB;
-	int turnNumber;
-};
-
-/**
  * @brief Struct saving a player move (in game).
  */
 struct moveS {
@@ -230,6 +222,16 @@ coordS lastTurn[20]; // every player's last turn coordinate (in game)
 int failSock;
 
 /**** ALL functions ****/
+
+// quick game map functions
+inline int& gmp(int x,int y) { return gameMap[x][y].player; }
+inline int& gmt(int x,int y) { return gameMap[x][y].type; }
+inline long long& gma(int x,int y) { return gameMap[x][y].army; }
+inline bool& gml(int x,int y) { return gameMap[x][y].lit; }
+inline int& gmp(coordS c) { return gameMap[c.x][c.y].player; }
+inline int& gmt(coordS c) { return gameMap[c.x][c.y].type; }
+inline long long& gma(coordS c) { return gameMap[c.x][c.y].army; }
+inline bool& gml(coordS c) { return gameMap[c.x][c.y].lit; }
 
 std::wstring wcharTransfer(const wstring& ws);
 
@@ -314,6 +316,19 @@ namespace LGset {
 	unsigned short blockMinFontSize = 8;
 	unsigned short blockMaxFontSize = 18;
 
+	inline namespace game {
+		/**
+		 * game mode:
+		 * 0: normal 普通
+		 * 1: city state 城邦
+		 * 即：只要 CITY > 0 即可为国
+		 * 2: land state 社稷江山！
+		 * 即：只要 TOT > 0 即可为国
+		 */
+		unsigned short gameMode = 0;
+		short plainRate[3] = {25, 25, 2};
+	}
+
 	inline namespace file {
 		inline vector<wchar_t> getBuf();
 		inline bool check();
@@ -350,6 +365,7 @@ namespace LGGraphics {
 		int maplocX, maplocY; // location of map in printing
 	} windowData; // storing variable
 	void WelcomePage();
+	void settingsPage();
 	void localOptions();
 	void webOptions();
 	void createMapPage();
@@ -387,18 +403,28 @@ namespace LGgame {
 	coordS playerCoo[64];
 	coordS playerFocus[64];
 	std::chrono::nanoseconds beginTime;
-	vector<std::pair<int,long long>> historyArmy[64];
-	vector<std::pair<int,long long>> historyAIH[64];
-	vector<std::pair<int,long long>> historyLand[64];
+	struct turnStatS {
+		int id;
+		int plain, city, mount, swamp;
+		long long army;
+		coordS focus, coo;
+		inline int gtot() { return plain + city + mount + swamp; }
+		inline long long gaih() {
+			if(gmp(coo)!=id) return 0;
+			return gma(coo);
+		}
+	};
+	vector<turnStatS> gameStats[64];
 
 	void init(int chtC, int pC, int gS);
-	void printGameMessage(gameMessageStore now);
 	void capture(int p1, int p2);
-	[[deprecated("This function will be deleted since v5.0.")]] int analyzeMove(int id, int mv, coordS& coo);
+	[[deprecated("This function will be deleted since v5.0.")]]
+	int analyzeMove(int id, int mv, coordS& coo);
 	int checkMove(moveS coo);
 	void flushMove();
 	void initGenerals(coordS coos[]);
 	void updateMap();
+	void statistics();
 	void ranklist(bool print);
 	void printAnalysis();
 }

@@ -52,6 +52,12 @@ inline namespace page {
 		         pageImage, 0, 0, sizeX, sizeY);
 	}
 
+	inline pageS& pageS::addItem(pageS::item_t item) {}
+	inline pageS& pageS::popItem() {}
+	inline pageS& pageS::delItem(int _pos) {}
+	inline pageS::item_t& pageS::getItem(int _pos) {}
+	inline pageS::ctn_t::iterator pageS::getItemIt(int _pos) {}
+
 }
 
 _GLIB_NAMESPACE_TAIL

@@ -51,7 +51,7 @@ namespace images {
 	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg);
 	/**
 	 * @brief Zoom a image.
-	 * 
+	 *
 	 * @param pimg target image
 	 * @param zoomWidth target width
 	 * @param zoomHeight target height
@@ -59,7 +59,7 @@ namespace images {
 	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight);
 	/**
 	 * @brief Set the Window Transparent object
-	 * 
+	 *
 	 * @param enable whether enabled
 	 * @param alpha value
 	 */
@@ -335,11 +335,13 @@ inline namespace page {
 
 	class pageS {
 	  public:
+		// specify class types
 		typedef itemS item_t;
 		typedef vector<item_t> ctn_t;
 		typedef scrBarS scroll_t;
 	  private:
 		PIMAGE pageImage;
+		pageS* parentPage;
 		int sizeX, sizeY;
 		int locX, locY;
 		ctn_t content;
@@ -347,8 +349,10 @@ inline namespace page {
 		scroll_t scrBarV, scrBarH;
 		bool enableVBar, enableHBar;
 	  public:
-		pageS() : pageImage(newimage()) {};
-		pageS(int _sizeX,
+		pageS() : pageImage(newimage()), parentPage(NULL) {};
+		pageS(pageS* _parent) : pageImage(newimage()), parentPage(_parent) {};
+		pageS(pageS* _parent,
+		      int _sizeX,
 		      int _sizeY,
 		      int _locX,
 		      int _locY)
@@ -357,17 +361,26 @@ inline namespace page {
 			  locX(_locX),
 			  locY(_locY) {
 			pageImage = newimage(_sizeX, _sizeY);
+			parentPage = _parent;
 		};
 		~pageS() { delimage(pageImage); }
 
-		inline /* void */ pageS& detect(); // overall detect (for interactive items, e.g.buttons)
-		inline /* void */ pageS& draw(); // draw page backstage
-		inline /* void */ pageS& display(PIMAGE pimg = NULL); // draw page frontstage (including backstage)
+		// overall detect (for interactive items, e.g.buttons)
+		inline pageS& detect();
+		// draw page backstage
+		inline pageS& draw();
+		// draw page frontstage (including backstage)
+		inline pageS& display(PIMAGE pimg = NULL);
 
-		inline /* void */ pageS& addItem(itemS _item);
-		inline /* void */ pageS& popItem();
-		inline /* void */ pageS& delItem(int _pos);
+		// add a new page item
+		inline pageS& addItem(pageS::item_t _item);
+		// pop the last page item
+		inline pageS& popItem();
+		// delete a specific page item
+		inline pageS& delItem(int _pos);
+		// get a specific page item (itself)
 		inline item_t& getItem(int _pos);
+		// get a specific page item (its iterator)
 		inline ctn_t::iterator getItemIt(int _pos);
 	};
 

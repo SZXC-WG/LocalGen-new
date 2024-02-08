@@ -1,49 +1,47 @@
-As the developers are preparing for the exams in Informatics, the project will not be updated for a long time.
-
-The current develop branch is `v5.0-dev`. Further v4.x versions will be published based on the develop branch `v5.0-dev`, and all of them will be pre-releases.
-
-For the current stable and preview versions, please see [here](#releases-changelog).
-
-If you want to keep the project lively, you can fork the `v5.0-dev` branch and make contribution to it.
-
-v5.0 Target: Object-oriented EGE Graphics
-
-The developers of SZXC Work Group will check pull requests irregularly.
-
----
+<center>
 
 # Local Generals.io
 
+![GitHub release](https://img.shields.io/github/release/SZXC-WG/LocalGen-new.svg)
+![GitHub Release Date](https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new.svg)
+![License](https://img.shields.io/github/license/SZXC-WG/LocalGen-new.svg)
+![GitHub stars](https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social)  
+
+</center>
+
+## Intro
+
 Welcome to the project of Local Generals.io!
 
-Here you can play [generals.io](http://generals.io) on your computer without **connecting the internet**!
+Here you can play [generals.io](http://generals.io) on your computer **without connecting the internet**!
 
 You can play with robots or **play with your friends** connecting the same WLAN.
 
 Interested? Then go to [the release page](http://github.com/SZXC-WG/LocalGen-new/releases) to download!
 
-If you have an idea or find bugs, you can also take part in contributing to the project! Just **create an issue** or **create a pull request**.
+If you have an idea or find bugs, you can also take part in contributing to the project! Just **create an issue** to tell us or **fork the project and create a pull request** to modify the codes.
 
-## The robots in game are too weak! I want to write a new one!
+## Weak robots in game! I want to write a new one!
 
 Go see [issue #31](../../issues/31).
 
-## File Extensions
+## [Releases (Changelog)](http://github.com/SZXC-WG/LocalGen-new/releases)
 
-|             File Usage             | File Extensions | Notes                                                                                                         |
-| :--------------------------------: | --------------: | :------------------------------------------------------------------------------------------------------------ |
-| Local map storage (text, editable) |          `.ini` | Contains two lines: 1st line "Chinese(or others) Name", 2nd line "English Name"; Should be in UTF-8 encoding. |
-|         Local map storage          |           `.lg` | Created by the create map functions in LocalGen.                                                              |
-|           Replay storage           |          `.lgr` | Create by the replay functions in LocalGen.                                                                   |
+## Contributing
 
-## Releases (Changelog)
+Currently, Local Generals.io (LocalGen) is split into three branches.
 
-|  Release TYPE  |                                          LINKS                                           |
-| :------------: | :--------------------------------------------------------------------------------------: |
-| Latest Stable  |            [`v4.1.0`](http://github.com/SZXC-WG/LocalGen-new/releases/latest)            |
-| Latest Preview | [`v4.2.3D` (br `v5.0-dev`)](http://github.com/SZXC-WG/LocalGen-new/releases/tag/v4.2.3D) |
+- **`release`**: This branch is the main branch, shown in the project homepage.  
+  The branch is used to publish new releases and save history releases. Maps and fonts are also stored in this branch.
+- **`v5-EGE`**: The current main developing branch.  
+  We use [EGE Graphics](http://xege.org) for LocalGen in our versions 2 to 5. Version 5 will be our last major version using EGE Graphics.  
+  It is still developing, as we are building an object-oriented system based on the EGE Graphics.
+- **`v6`** (planning): The future new-generation developing branch.  
+  We are planning to use a new graphics library (e.g. Qt) in our version 6. We aim to give our users a better software performance.
 
-## Donate Please!
+To contribute to our project, please fork our `v5-EGE` branch and create a pull request. Thanks.
+
+## Donate Please! (WeChat Pay and AliPay)
 
 [![QIM4p.md.jpg](https://i.imgtg.com/2023/01/19/QIM4p.md.jpg)](https://imgtg.com/image/QIM4p)
 [![Quwij.md.jpg](https://i.imgtg.com/2023/01/19/Quwij.md.jpg)](https://imgtg.com/image/Quwij)

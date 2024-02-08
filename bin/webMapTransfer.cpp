@@ -1,3 +1,9 @@
+/*
+Temporary code to transfer web map downloaded by our temporary Userscript to LocalGen map.
+The code have some essential items of LocalGen main codes.
+May be removed in the future when our Userscript is done.
+*/
+
 #include <bits/stdc++.h>
 using namespace std;
 

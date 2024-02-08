@@ -1,12 +1,9 @@
 <center>
-
-# Local Generals.io
-
-![GitHub release](https://img.shields.io/github/release/SZXC-WG/LocalGen-new.svg)
-![GitHub Release Date](https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new.svg)
-![License](https://img.shields.io/github/license/SZXC-WG/LocalGen-new.svg)
-![GitHub stars](https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social)  
-
+  <h1>Local Generals.io</h1>
+  <img alt="GitHub release" src="https://img.shields.io/github/release/SZXC-WG/LocalGen-new.svg" />
+  <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new.svg" />
+  <img alt="License" src="https://img.shields.io/github/license/SZXC-WG/LocalGen-new.svg" />
+  <img alt="GitHub stars" src="https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social" />
 </center>
 
 ## Intro

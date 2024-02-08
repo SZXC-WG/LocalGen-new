@@ -1,10 +1,10 @@
-<center>
+<div align="center">
   <h1>Local Generals.io</h1>
   <img alt="GitHub release" src="https://img.shields.io/github/release/SZXC-WG/LocalGen-new.svg" />
   <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new.svg" />
   <img alt="License" src="https://img.shields.io/github/license/SZXC-WG/LocalGen-new.svg" />
   <img alt="GitHub stars" src="https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social" />
-</center>
+</div>
 
 ## Intro
 

@@ -34,8 +34,8 @@ Currently, Local Generals.io (LocalGen) is split into three branches.
   We use [EGE Graphics](http://xege.org) for LocalGen in our versions 2 to 5. Version 5 will be our last major version using EGE Graphics.  
   It is still developing, as we are building an object-oriented system based on the EGE Graphics.  
   The releases published under this branch are for Windows users only, as EGE Graphics is built on Windows.
-- **`v6`** (planning): The future new-generation developing branch.  
-  We are planning to use a new cross-platform graphics library (e.g. Qt) in our version 6. We aim to give our users a better software performance.
+- **`v6`** : The future new-generation developing branch.  
+  We will use Qt to reconstruct our program in our version 6. We aim to give our users a better software performance.
 
 To contribute to our project, please fork our `v5-EGE` branch and create a pull request. Thanks.
 

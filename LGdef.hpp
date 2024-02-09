@@ -44,7 +44,7 @@
 /** Win32 library **/
 #include <windows.h>
 #include <io.h>
-/** EGE library **/
+/** EGE Graphics library **/
 #include <graphics.h> // main file of EGE
 #include <ege/sys_edit.h> // text boxes of EGE
 /** project header **/

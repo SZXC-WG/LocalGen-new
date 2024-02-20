@@ -89,16 +89,19 @@ inline namespace checkbox {
 		blankWidth = 0;
 	}
 	inline rCBOXtextS::~rCBOXtextS() { delimage(textImage); }
+	inline rCBOXtextS& rCBOXtextS::move(int _X, int _Y) { locX = _X; locY = _Y; return *this; }
 	inline rCBOXtextS& rCBOXtextS::detect() { checkBox.detect(); return *this; }
 	inline rCBOXtextS& rCBOXtextS::draw() {
-		int totW = boxText.width() + blankWidth + checkBox.gwidth();
-		int totH = max(boxText.height(), checkBox.gheight());
+		int totW = boxText.width(textImage) + blankWidth + checkBox.gwidth();
+		int totH = max(boxText.height(textImage), checkBox.gheight());
 		delimage(textImage);
 		textImage = newimage(totW, totH);
+		setbkcolor(bgColor, textImage);
+		setbkcolor_f(bgColor, textImage);
 		settextjustify(LEFT_TEXT, TOP_TEXT);
-		boxText.print(0,0,textImage);
-		checkBox.move(totW-checkBox.gwidth(),totH/2-checkBox.gheight()/2);
+		checkBox.move(0,totH/2-checkBox.gheight()/2);
 		checkBox.display(textImage);
+		boxText.print(checkBox.gwidth()+blankWidth,totH/2-boxText.height(textImage)/2,textImage);
 	}
 	inline rCBOXtextS& rCBOXtextS::display(int _X, int _Y, PIMAGE pimg) {
 		draw(); putimage(pimg, _X, _Y, textImage);

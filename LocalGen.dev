@@ -10,7 +10,7 @@ PrivateResource=LocalGen_private.rc
 ResourceIncludes=
 MakeIncludes=
 Compiler=
-CppCompiler=-O3_@@_
+CppCompiler=-std=c++14 -O2_@@_
 Linker=-static-libgcc -lgraphics64 -luuid -lmsimg32 -lgdi32 -limm32 -lole32 -loleaut32 -lwinmm -lgdiplus -lws2_32_@@_
 IsCpp=1
 Icon=LocalGen.ico
@@ -28,25 +28,25 @@ Folders=
 IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=0000000000000000000000000
+CompilerSettings=0000000000000000001000000
 UnitCount=11
 
 [VersionInfo]
 Major=4
 Minor=2
 Release=4
-Build=2550
+Build=2608
 LanguageID=1033
 CharsetID=1252
 CompanyName=SZXC Work Group
-FileVersion=4.2.4.2550
+FileVersion=4.2.4.2608
 FileDescription=Local Generals.io
 InternalName=
 LegalCopyright=Copyright (c) 2023 SZXC Work Group
 LegalTrademarks=
 OriginalFilename=
 ProductName=Local Generals.io
-ProductVersion=4.2.4.2550
+ProductVersion=4.2.4.2608
 AutoIncBuildNr=1
 SyncProduct=1
 

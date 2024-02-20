@@ -183,6 +183,8 @@ namespace LGGraphics {
 	void WelcomePage() {
 		initWindowSize();
 		init();
+		// printf("before pages.");
+		initPages();
 	WelcomePageStartLabel:;
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);
@@ -351,40 +353,50 @@ namespace LGGraphics {
 	void settingsPage() {
 		cleardevice();
 		flushkey();
+		LGset::read();
 		for(; is_run(); delay_fps(120)) {
 			while(kbmsg()) {
 				key_msg msg = getkey();
-				if(msg.key == 27) return;
+				if(msg.key == 27) {
+					LGset::write();
+					return;
+				}
 			}
-			cleardevice();
-			setcolor(WHITE);
-			settextjustify(CENTER_TEXT, BOTTOM_TEXT);
-			setfont(-50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
-			xyprintf(800 * windowData.zoomX, 75 * windowData.zoomY, L"Settings");
-			setlinewidth(2);
-			line(0, 100 * windowData.zoomY, 1600 * windowData.zoomX, 100 * windowData.zoomY);
-			setfont(-20 * windowData.zoomY, 0, LGset::mainFontName.c_str());
-			settextjustify(LEFT_TEXT, CENTER_TEXT);
-			xyprintf(100 * windowData.zoomX, 125 * windowData.zoomY, L"Setting File: ./%s", LGset::settingFile.c_str());
-			xyprintf(100 * windowData.zoomX, 150 * windowData.zoomY, L"Username: %ls", LGset::userName.c_str());
-			xyprintf(100 * windowData.zoomX, 175 * windowData.zoomY, L"God Power: %s", (LGset::enableGodPower?"Enabled":"Disabled"));
-			xyprintf(100 * windowData.zoomX, 200 * windowData.zoomY, L"Player Count (default): %d", LGset::defaultPlayerNum);
-			xyprintf(100 * windowData.zoomX, 225 * windowData.zoomY, L"Game Speed (default): %d", LGset::defaultSpeed);
-			xyprintf(100 * windowData.zoomX, 250 * windowData.zoomY, L"User ID in game (default): %d (%s)", LGset::defaultUserId, playerInfo[LGset::defaultUserId].name.c_str());
-			xyprintf(100 * windowData.zoomX, 275 * windowData.zoomY, L"Gong Sound: %s", (LGset::enableGongSound?"Enabled":"Disabled"));
-			xyprintf(100 * windowData.zoomX, 300 * windowData.zoomY, L"Replay File: %ls", LGset::replayFileName.c_str());
-			xyprintf(100 * windowData.zoomX, 325 * windowData.zoomY, L"Beta Tag: %s", (LGset::enableBetaTag?"Enabled":"Disabled"));
-			xyprintf(100 * windowData.zoomX, 350 * windowData.zoomY, L"Web Socket Port: %d", LGset::socketPort);
-			xyprintf(100 * windowData.zoomX, 375 * windowData.zoomY, L"General Font: %ls", LGset::mainFontName.c_str());
-			xyprintf(100 * windowData.zoomX, 400 * windowData.zoomY, L"Block Font Size Range: [%d, %d]", LGset::blockMinFontSize, LGset::blockMaxFontSize);
-			setfont(-40 * windowData.zoomY, 0, LGset::mainFontName.c_str());
-			xyprintf(100 * windowData.zoomX, 450 * windowData.zoomY, L"General Game Mode: %d", LGset::gameMode);
-			setfont(-20 * windowData.zoomY, 0, LGset::mainFontName.c_str());
-			switch(LGset::gameMode) {
-				case 0: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(normal generals.io)"); break;
-				case 1: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(city state)"); break;
-				case 2: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(land state)"); break;
-			}
+			// cleardevice();
+			p_settings.detect();
+			p_settings.display(NULL);
+			if(p_settings.getItem(1).info.cBText->checkBox.status == 2)
+				p_settings.getItem(1).info.cBText->checkBox.changeState();
+			printf("\nSTATUS: %d\n\n",p_settings.getItem(1).info.cBText->checkBox.status);
+			fflush(stdout);
+			// setcolor(WHITE);
+			// settextjustify(CENTER_TEXT, BOTTOM_TEXT);
+			// setfont(-50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
+			// xyprintf(800 * windowData.zoomX, 75 * windowData.zoomY, L"Settings");
+			// setlinewidth(2);
+			// line(0, 100 * windowData.zoomY, 1600 * windowData.zoomX, 100 * windowData.zoomY);
+			// setfont(-20 * windowData.zoomY, 0, LGset::mainFontName.c_str());
+			// settextjustify(LEFT_TEXT, CENTER_TEXT);
+			// xyprintf(100 * windowData.zoomX, 125 * windowData.zoomY, L"Setting File: ./%s", LGset::settingFile.c_str());
+			// xyprintf(100 * windowData.zoomX, 150 * windowData.zoomY, L"Username: %ls", LGset::userName.c_str());
+			// xyprintf(100 * windowData.zoomX, 175 * windowData.zoomY, L"God Power: %s", (LGset::enableGodPower?"Enabled":"Disabled"));
+			// xyprintf(100 * windowData.zoomX, 200 * windowData.zoomY, L"Player Count (default): %d", LGset::defaultPlayerNum);
+			// xyprintf(100 * windowData.zoomX, 225 * windowData.zoomY, L"Game Speed (default): %d", LGset::defaultSpeed);
+			// xyprintf(100 * windowData.zoomX, 250 * windowData.zoomY, L"User ID in game (default): %d (%s)", LGset::defaultUserId, playerInfo[LGset::defaultUserId].name.c_str());
+			// xyprintf(100 * windowData.zoomX, 275 * windowData.zoomY, L"Gong Sound: %s", (LGset::enableGongSound?"Enabled":"Disabled"));
+			// xyprintf(100 * windowData.zoomX, 300 * windowData.zoomY, L"Replay File: %ls", LGset::replayFileName.c_str());
+			// xyprintf(100 * windowData.zoomX, 325 * windowData.zoomY, L"Beta Tag: %s", (LGset::enableBetaTag?"Enabled":"Disabled"));
+			// xyprintf(100 * windowData.zoomX, 350 * windowData.zoomY, L"Web Socket Port: %d", LGset::socketPort);
+			// xyprintf(100 * windowData.zoomX, 375 * windowData.zoomY, L"General Font: %ls", LGset::mainFontName.c_str());
+			// xyprintf(100 * windowData.zoomX, 400 * windowData.zoomY, L"Block Font Size Range: [%d, %d]", LGset::blockMinFontSize, LGset::blockMaxFontSize);
+			// setfont(-40 * windowData.zoomY, 0, LGset::mainFontName.c_str());
+			// xyprintf(100 * windowData.zoomX, 450 * windowData.zoomY, L"General Game Mode: %d", LGset::gameMode);
+			// setfont(-20 * windowData.zoomY, 0, LGset::mainFontName.c_str());
+			// switch(LGset::gameMode) {
+			// 	case 0: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(normal generals.io)"); break;
+			// 	case 1: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(city state)"); break;
+			// 	case 2: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(land state)"); break;
+			// }
 		}
 	}
 
@@ -556,7 +568,7 @@ namespace LGGraphics {
 				if(shiftval < -((mapNum - 1) / 5 * butH)) shiftval = -((mapNum - 1) / 5 * butH);
 				if(msg.x < 50 * windowData.zoomX || msg.x > 1550 * windowData.zoomX || msg.y < 100 * windowData.zoomY || msg.y > 900 * windowData.zoomY) continue;
 				id = int((msg.y / windowData.zoomY - 100 - shiftval) / butH) * 5 + int((msg.x / windowData.zoomX - 50) / 300) + 1;
-				if(msg.is_left()) mapbut[id].status = 2;
+				if(msg.is_left() && msg.is_down()) mapbut[id].status = 2;
 				else mapbut[id].status = 1;
 			}
 			for(int i = 1; i <= mapNum; ++i) {
@@ -1601,6 +1613,37 @@ namespace LGGraphics {
 		setbkcolor(0xff222222);
 		setbkcolor_f(0xff222222);
 		cleardevice();
+	}
+
+	void initPages() {
+		itemS tmp; // temp variable for items
+
+		// settings page
+		p_settings.size(zoomX(1600),zoomY(900)).move(zoomX(0),zoomY(0)).dSize(zoomX(1600),zoomY(900)).setBgColor(LGGraphics::bgColor);
+		tmp.iType = ITEM_LINETEXT;
+		tmp.info.lText = new lineTextS;
+		tmp.locX = zoomX(100);
+		tmp.locY = zoomY(20);
+		tmp.info.lText->push_back(singleTextS(WHITE,L"Settings",LGset::mainFontName,-zoomY(50),0));
+		p_settings.addItem(tmp);
+		tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
+		tmp.info.cBText = new rCBOXtextS;
+		tmp.locX = zoomX(100);
+		tmp.locY = zoomY(120);
+		tmp.info.cBText->bgColor = LGGraphics::bgColor;
+		tmp.info.cBText->boxText.push_back(singleTextS(WHITE,L"Enable god power (originated from v1.0.0 bug)",LGset::mainFontName,-zoomY(20),0));
+		tmp.info.cBText->checkBox.size(zoomX(20),zoomY(20)).frame(2).variable(&LGset::enableGodPower).bgcolor(bgColor).fillcolor(WHITE).framecolor(WHITE);
+		tmp.info.cBText->blankWidth = zoomX(10);
+		p_settings.addItem(tmp);
+		tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
+		tmp.info.cBText = new rCBOXtextS;
+		tmp.locX = zoomX(100);
+		tmp.locY = zoomY(150);
+		tmp.info.cBText->bgColor = LGGraphics::bgColor;
+		tmp.info.cBText->boxText.push_back(singleTextS(WHITE,L"Enable gong sound when starting game",LGset::mainFontName,-zoomY(20),0));
+		tmp.info.cBText->checkBox.size(zoomX(20),zoomY(20)).frame(2).variable(&LGset::enableGongSound).bgcolor(bgColor).fillcolor(WHITE).framecolor(WHITE);
+		tmp.info.cBText->blankWidth = zoomX(10);
+		p_settings.addItem(tmp);
 	}
 }
 

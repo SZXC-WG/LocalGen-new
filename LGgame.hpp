@@ -293,7 +293,8 @@ void LGgame::ranklist(bool print) {
 	}
 }
 void LGgame::printAnalysis() {
-#define log2(x) (((x)!=-1)?(((x)==0)?(0):(log2(x)+1)):-1)
+#define _log(b,x) (((x)!=-1)?(((x)==0)?(0):(log(x)/log(b)+1)):-1)
+	static constexpr double lB = 1.00001;
 	static int XTurn = 1, XTurnINC = 1;
 	static int YMaxLand = 50;
 	static int YMaxArmy = 1;
@@ -348,8 +349,8 @@ void LGgame::printAnalysis() {
 				int ct = j;
 				long long a;
 				a=gameStats[i][j].gtot();
-				double nx=log2(ct)*(graphRDX-0)*1.0/log2(XTurn);
-				double ny=log2(a)*(graphRDY-0)*1.0/log2(YMaxLand);
+				double nx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
+				double ny=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxLand);
 				if(nx-cx<=1&&!(ny==0&&cy!=0)) continue;
 				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,landI);
 				cx=nx,cy=ny,ca=a;
@@ -374,8 +375,8 @@ void LGgame::printAnalysis() {
 				int ct = j;
 				long long a;
 				a=gameStats[i][j].army;
-				double nx=log2(ct)*(graphRDX-0)*1.0/log2(XTurn);
-				double ny=log2(a)*(graphRDY-0)*1.0/log2(YMaxArmy);
+				double nx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
+				double ny=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxArmy);
 				if(nx-cx<=1&&!(ny==0&&cy!=0)) continue;
 				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,armyI);
 				cx=nx,cy=ny,ca=a;
@@ -400,8 +401,8 @@ void LGgame::printAnalysis() {
 				int ct = j;
 				long long a;
 				a=gameStats[i][j].city+gameStats[i][j].plain/LGset::plainRate[LGset::gameMode];
-				double nx=/* log2 */(ct)*(graphRDX-0)*1.0/ /* log2 */(XTurn);
-				double ny=(a)*(graphRDY-0)*1.0/(YMaxCity);
+				double nx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
+				double ny=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxCity);
 				if(nx-cx<=1&&!(ny==0&&cy!=0)) continue;
 				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,cityI);
 				cx=nx,cy=ny,ca=a;
@@ -436,9 +437,9 @@ void LGgame::printAnalysis() {
 			double cx=0,cy=0;
 			int ct = curTurn; long long a;
 			a = gameStats[i].back().gtot();
-			cx=log2(ct)*(graphRDX-0)*1.0/log2(XTurn);
-			cy=log2(a)*(graphRDY-0)*1.0/log2(YMaxLand);
-			if(cx-landX[i]<=1&&!(cy==0&&landY[i-1]!=0)) continue;
+			cx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
+			cy=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxLand);
+			if(cx-landX[i]<=1&&!(cy==0&&landY[i]!=0)) continue;
 			line(0+landX[i],graphRDY-landY[i],0+cx,graphRDY-cy,landI);
 			landX[i]=cx,landY[i]=cy;
 		}
@@ -450,9 +451,9 @@ void LGgame::printAnalysis() {
 			double cx=0,cy=0;
 			int ct = curTurn; long long a;
 			a = gameStats[i].back().army;
-			cx=log2(ct)*(graphRDX-0)*1.0/log2(XTurn);
-			cy=log2(a)*(graphRDY-0)*1.0/log2(YMaxArmy);
-			if(cx-armyX[i]<=1&&!(cy==0&&armyY[i-1]!=0)) continue;
+			cx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
+			cy=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxArmy);
+			if(cx-armyX[i]<=1&&!(cy==0&&armyY[i]!=0)) continue;
 			line(0+armyX[i],graphRDY-armyY[i],0+cx,graphRDY-cy,armyI);
 			armyX[i]=cx,armyY[i]=cy;
 		}
@@ -464,9 +465,9 @@ void LGgame::printAnalysis() {
 			double cx=0,cy=0;
 			int ct = curTurn; long long a;
 			a = gameStats[i].back().city+gameStats[i].back().plain/LGset::plainRate[LGset::gameMode];
-			cx=/* log2 */(ct)*(graphRDX-0)*1.0/ /* log2 */(XTurn);
-			cy=(a)*(graphRDY-0)*1.0/(YMaxCity);
-			if(cx-cityX[i]<=1&&(cy==0&&cityY[i]!=0)) continue;
+			cx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
+			cy=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxCity);
+			if(cx-cityX[i]<=1&&!(cy==0&&cityY[i]!=0)) continue;
 			line(0+cityX[i],graphRDY-cityY[i],0+cx,graphRDY-cy,cityI);
 			cityX[i]=cx,cityY[i]=cy;
 		}
@@ -474,7 +475,7 @@ void LGgame::printAnalysis() {
 	putimage(1000 * LGGraphics::windowData.zoomX, 300 * LGGraphics::windowData.zoomY, landI);
 	putimage(1000 * LGGraphics::windowData.zoomX, 500 * LGGraphics::windowData.zoomY, armyI);
 	putimage(1000 * LGGraphics::windowData.zoomX, 700 * LGGraphics::windowData.zoomY, cityI);
-#undef log2
+#undef _log
 }
 
 namespace LGgame {

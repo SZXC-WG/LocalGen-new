@@ -45,7 +45,7 @@
 
 /*************** the main function ***************/
 signed main(signed argc, char** argv) {
-	FreeConsole();
+	// FreeConsole();
 	initMaps();
 	LGset::read();
 	LGset::write();

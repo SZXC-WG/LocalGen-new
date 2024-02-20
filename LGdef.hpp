@@ -47,6 +47,7 @@
 /** EGE Graphics library **/
 #include <graphics.h> // main file of EGE
 #include <ege/sys_edit.h> // text boxes of EGE
+#include "glib/GLIB_HEAD.hpp"
 /** project header **/
 #include "LocalGen_private.h" // project information
 
@@ -300,6 +301,7 @@ bool initSock(); // initialize socket web
 namespace LGset {
 	const string settingFileExt = ".lgsts";
 	const string settingFile = "_settings" + settingFileExt;
+	const wstring replayFileExt = L".lgr";
 
 	static size_t settingLength = 0;
 
@@ -325,7 +327,7 @@ namespace LGset {
 		 * 2: land state 社稷江山！
 		 * 即：只要 TOT > 0 即可为国
 		 */
-		unsigned short gameMode = 0;
+		unsigned short gameMode = 2;
 		short plainRate[3] = {25, 25, 2};
 	}
 
@@ -361,9 +363,13 @@ namespace LGGraphics {
 		int heightPerBlock; // block height in printing
 		int widthPerBlock; // block width in printing
 		int height, width; // ???
-		double zoomX, zoomY; // window size zoom (relatively to 1920x1080)
+		double zoomX, zoomY; // window size zoom (relative to 1920x1080)
 		int maplocX, maplocY; // location of map in printing
 	} windowData; // storing variable
+	inline __attribute__((always_inline))
+	double zoomX(double X) { return X * windowData.zoomX; }
+	inline __attribute__((always_inline))
+	double zoomY(double Y) { return Y * windowData.zoomY; }
 	void WelcomePage();
 	void settingsPage();
 	void localOptions();
@@ -377,7 +383,10 @@ namespace LGGraphics {
 	void initWindowSize();
 	bool cheatCodeSelected[13];
 	void init();
+	void initPages();
 }
+
+pageS p_settings;
 
 inline int getHeightPerBlock(); // get LGGraphics::windowData.heightPerBlock; deprecated
 inline int getWidthPerBlock(); // get LGGraphics::windowData.widthPerBlock; deprecated

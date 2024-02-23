@@ -46,15 +46,15 @@ To contribute to our project, please fork our `v5-EGE` branch and create a pull 
 
 ## Project Information
 
-## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/42124647/SZXC-WG/LocalGen-new/recent-activity/XnXpQ0y3K2h1ESKaVXLXbzqDKcdoEmpaZjmhU3nCzro/CRA4m_uvwWo9lmTkmfFrYDayP3O6In-PqUzba64awvw_badge.svg)](https://repography.com)
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Recent activity [![Time period](https://images.repography.com/47659777/SZXC-WG/LocalGen-new/recent-activity/gUg3PG3xTkQ6ol_L2r9aA8TVRaJOevlWMwBaE4AUx9k/95fgHewoZid0BQQ08PcQ1jpT4d28H-0hkwnR5pMema8_badge.svg)](https://repography.com)
 
-[![Timeline graph](https://images.repography.com/42124647/SZXC-WG/LocalGen-new/recent-activity/XnXpQ0y3K2h1ESKaVXLXbzqDKcdoEmpaZjmhU3nCzro/CRA4m_uvwWo9lmTkmfFrYDayP3O6In-PqUzba64awvw_timeline.svg)](https://github.com/SZXC-WG/LocalGen-new/commits)
-[![Issue status graph](https://images.repography.com/42124647/SZXC-WG/LocalGen-new/recent-activity/XnXpQ0y3K2h1ESKaVXLXbzqDKcdoEmpaZjmhU3nCzro/CRA4m_uvwWo9lmTkmfFrYDayP3O6In-PqUzba64awvw_issues.svg)](https://github.com/SZXC-WG/LocalGen-new/issues)
-[![Pull request status graph](https://images.repography.com/42124647/SZXC-WG/LocalGen-new/recent-activity/XnXpQ0y3K2h1ESKaVXLXbzqDKcdoEmpaZjmhU3nCzro/CRA4m_uvwWo9lmTkmfFrYDayP3O6In-PqUzba64awvw_prs.svg)](https://github.com/SZXC-WG/LocalGen-new/pulls)
-[![Trending topics](https://images.repography.com/42124647/SZXC-WG/LocalGen-new/recent-activity/XnXpQ0y3K2h1ESKaVXLXbzqDKcdoEmpaZjmhU3nCzro/CRA4m_uvwWo9lmTkmfFrYDayP3O6In-PqUzba64awvw_words.svg)](https://github.com/SZXC-WG/LocalGen-new/commits)
-[![Top contributors](https://images.repography.com/42124647/SZXC-WG/LocalGen-new/recent-activity/XnXpQ0y3K2h1ESKaVXLXbzqDKcdoEmpaZjmhU3nCzro/CRA4m_uvwWo9lmTkmfFrYDayP3O6In-PqUzba64awvw_users.svg)](https://github.com/SZXC-WG/LocalGen-new/graphs/contributors)
-[![Activity map](https://images.repography.com/42124647/SZXC-WG/LocalGen-new/recent-activity/XnXpQ0y3K2h1ESKaVXLXbzqDKcdoEmpaZjmhU3nCzro/CRA4m_uvwWo9lmTkmfFrYDayP3O6In-PqUzba64awvw_map.svg)](https://github.com/SZXC-WG/LocalGen-new/commits)
+[![Timeline graph](https://images.repography.com/47659777/SZXC-WG/LocalGen-new/recent-activity/gUg3PG3xTkQ6ol_L2r9aA8TVRaJOevlWMwBaE4AUx9k/95fgHewoZid0BQQ08PcQ1jpT4d28H-0hkwnR5pMema8_timeline.svg)](https://github.com/SZXC-WG/LocalGen-new/commits)
+[![Issue status graph](https://images.repography.com/47659777/SZXC-WG/LocalGen-new/recent-activity/gUg3PG3xTkQ6ol_L2r9aA8TVRaJOevlWMwBaE4AUx9k/95fgHewoZid0BQQ08PcQ1jpT4d28H-0hkwnR5pMema8_issues.svg)](https://github.com/SZXC-WG/LocalGen-new/issues)
+[![Pull request status graph](https://images.repography.com/47659777/SZXC-WG/LocalGen-new/recent-activity/gUg3PG3xTkQ6ol_L2r9aA8TVRaJOevlWMwBaE4AUx9k/95fgHewoZid0BQQ08PcQ1jpT4d28H-0hkwnR5pMema8_prs.svg)](https://github.com/SZXC-WG/LocalGen-new/pulls)
+[![Trending topics](https://images.repography.com/47659777/SZXC-WG/LocalGen-new/recent-activity/gUg3PG3xTkQ6ol_L2r9aA8TVRaJOevlWMwBaE4AUx9k/95fgHewoZid0BQQ08PcQ1jpT4d28H-0hkwnR5pMema8_words.svg)](https://github.com/SZXC-WG/LocalGen-new/commits)
+[![Top contributors](https://images.repography.com/47659777/SZXC-WG/LocalGen-new/recent-activity/gUg3PG3xTkQ6ol_L2r9aA8TVRaJOevlWMwBaE4AUx9k/95fgHewoZid0BQQ08PcQ1jpT4d28H-0hkwnR5pMema8_users.svg)](https://github.com/SZXC-WG/LocalGen-new/graphs/contributors)
+[![Activity map](https://images.repography.com/47659777/SZXC-WG/LocalGen-new/recent-activity/gUg3PG3xTkQ6ol_L2r9aA8TVRaJOevlWMwBaE4AUx9k/95fgHewoZid0BQQ08PcQ1jpT4d28H-0hkwnR5pMema8_map.svg)](https://github.com/SZXC-WG/LocalGen-new/commits)
 
 ## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contributors
 
-[![Top contributors](https://images.repography.com/42124647/SZXC-WG/LocalGen-new/top-contributors/XnXpQ0y3K2h1ESKaVXLXbzqDKcdoEmpaZjmhU3nCzro/CRA4m_uvwWo9lmTkmfFrYDayP3O6In-PqUzba64awvw_table.svg)](https://github.com/SZXC-WG/LocalGen-new/graphs/contributors)
+[![Top contributors](https://images.repography.com/47659777/SZXC-WG/LocalGen-new/top-contributors/gUg3PG3xTkQ6ol_L2r9aA8TVRaJOevlWMwBaE4AUx9k/95fgHewoZid0BQQ08PcQ1jpT4d28H-0hkwnR5pMema8_table.svg)](https://github.com/SZXC-WG/LocalGen-new/graphs/contributors)

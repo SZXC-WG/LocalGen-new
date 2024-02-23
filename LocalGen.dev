@@ -34,19 +34,19 @@ UnitCount=11
 [VersionInfo]
 Major=4
 Minor=2
-Release=4
-Build=2618
+Release=5
+Build=2629
 LanguageID=1033
 CharsetID=1252
 CompanyName=SZXC Work Group
-FileVersion=4.2.4.2618
+FileVersion=4.2.5.2629
 FileDescription=Local Generals.io
 InternalName=
 LegalCopyright=Copyright (c) 2023 SZXC Work Group
 LegalTrademarks=
 OriginalFilename=
 ProductName=Local Generals.io
-ProductVersion=4.2.4.2618
+ProductVersion=4.2.5.2629
 AutoIncBuildNr=1
 SyncProduct=1
 

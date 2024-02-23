@@ -362,13 +362,48 @@ namespace LGGraphics {
 					return;
 				}
 			}
-			// cleardevice();
-			p_settings.detect();
+			while(mousemsg()) {
+				mouse_msg msg = getmouse();
+				p_settings.detect(msg);
+				// printf("mouse msg:\n");
+				// #define TF(v) ((v)?("TRUE"):("FALSE"))
+				// printf("is_left(): %s\n", TF(msg.is_left()));
+				// printf("is_down(): %s\n", TF(msg.is_down()));
+				// fflush(stdout);
+			}
+			cleardevice();
 			p_settings.display(NULL);
-			if(p_settings.getItem(1).info.cBText->checkBox.status == 2)
-				p_settings.getItem(1).info.cBText->checkBox.changeState();
-			printf("\nSTATUS: %d\n\n",p_settings.getItem(1).info.cBText->checkBox.status);
-			fflush(stdout);
+			for(auto it : p_settings.gContent()) {
+				switch(it.iType) {
+					case ITEM_SUBPAGE: { it.info.subPage; } break;
+					// case ITEM_LINETEXT: { it.info.lText; } break;
+					// case ITEM_CONDTEXT: { it.info.cdtnText->print(); } break;
+					case ITEM_RECTBUTTON: {
+						if(it.info.rButton->status == 2) {
+							it.info.rButton->clickEvent();
+							it.info.rButton->status = 0;
+						}
+					} break;
+					case ITEM_CIRCBUTTON: {
+						if(it.info.cButton->status == 2) {
+							it.info.cButton->clickEvent();
+							it.info.cButton->status = 0;
+						}
+					} break;
+					case ITEM_RECTCHKBOX: {
+						if(it.info.rChkBox->status == 2) {
+							it.info.rChkBox->changeState();
+							it.info.rChkBox->status = 0;
+						}
+					} break;
+					case ITEM_RECTCHKBOX_WITH_TEXT: {
+						if(it.info.cBText->checkBox.status == 2) {
+							it.info.cBText->checkBox.changeState();
+							it.info.cBText->checkBox.status = 0;
+						}
+					} break;
+				}
+			}
 			// setcolor(WHITE);
 			// settextjustify(CENTER_TEXT, BOTTOM_TEXT);
 			// setfont(-50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
@@ -1486,7 +1521,7 @@ namespace LGGraphics {
 		checkOA
 		.size(400 * windowData.zoomX - 1*2, 100 * windowData.zoomY - 1*2)
 		.move(1150 * windowData.zoomX + 1, 700 * windowData.zoomY + 1)
-		.addtext(L"Overall Select")
+		.addtext(L"Crystal Clear")
 		.textalign(CENTER_TEXT, CENTER_TEXT)
 		.fontname(LGset::mainFontName.c_str())
 		.fontsize(35 * windowData.zoomY, 0);
@@ -1624,12 +1659,14 @@ namespace LGGraphics {
 		tmp.info.lText = new lineTextS;
 		tmp.locX = zoomX(100);
 		tmp.locY = zoomY(20);
+		tmp.downLoc();
 		tmp.info.lText->push_back(singleTextS(WHITE,L"Settings",LGset::mainFontName,-zoomY(50),0));
 		p_settings.addItem(tmp);
 		tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
 		tmp.info.cBText = new rCBOXtextS;
 		tmp.locX = zoomX(100);
 		tmp.locY = zoomY(120);
+		tmp.downLoc();
 		tmp.info.cBText->bgColor = LGGraphics::bgColor;
 		tmp.info.cBText->boxText.push_back(singleTextS(WHITE,L"Enable god power (originated from v1.0.0 bug)",LGset::mainFontName,-zoomY(20),0));
 		tmp.info.cBText->checkBox.size(zoomX(20),zoomY(20)).frame(2).variable(&LGset::enableGodPower).bgcolor(bgColor).fillcolor(WHITE).framecolor(WHITE);
@@ -1639,6 +1676,7 @@ namespace LGGraphics {
 		tmp.info.cBText = new rCBOXtextS;
 		tmp.locX = zoomX(100);
 		tmp.locY = zoomY(150);
+		tmp.downLoc();
 		tmp.info.cBText->bgColor = LGGraphics::bgColor;
 		tmp.info.cBText->boxText.push_back(singleTextS(WHITE,L"Enable gong sound when starting game",LGset::mainFontName,-zoomY(20),0));
 		tmp.info.cBText->checkBox.size(zoomX(20),zoomY(20)).frame(2).variable(&LGset::enableGongSound).bgcolor(bgColor).fillcolor(WHITE).framecolor(WHITE);

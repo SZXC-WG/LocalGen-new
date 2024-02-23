@@ -148,6 +148,13 @@ inline namespace button {
 		}
 		return status = 1, * this;
 	}
+	inline bool rectBUTTON::detect(mouse_msg _mouse) {
+		_mouse.x -= locationX; _mouse.y -= locationY;
+		if(_mouse.x < 0 || _mouse.x > buttonWidth - 1 || _mouse.y < 0 || _mouse.y > buttonHeight - 1) return status = 0, false;
+		if(_mouse.is_left() && _mouse.is_down()) status = 2;
+		else status = 1;
+		return true;
+	}
 
 }
 

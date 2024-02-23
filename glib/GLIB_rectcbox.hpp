@@ -77,7 +77,14 @@ inline namespace checkbox {
 		}
 		return status = 1, * this;
 	}
-	inline rectCBOX& rectCBOX::variable(bool* _varPtr) { varPtr = _varPtr; return *this; }
+	inline bool rectCBOX::detect(mouse_msg _mouse) {
+		_mouse.x -= locationX; _mouse.y -= locationY;
+		if(_mouse.x < 0 || _mouse.x > boxWidth - 1 || _mouse.y < 0 || _mouse.y > boxHeight - 1) return status = 0, false;
+		if(_mouse.is_left() && _mouse.is_down()) status = 2;
+		else status = 1;
+		return true;
+	}
+	inline rectCBOX& rectCBOX::variable(bool* _varPtr) { varPtr = _varPtr; pressed = *varPtr; return *this; }
 	inline rectCBOX& rectCBOX::changeState() {
 		pressed = !pressed;
 		if(varPtr != nullptr) *varPtr = pressed;
@@ -91,6 +98,7 @@ inline namespace checkbox {
 	inline rCBOXtextS::~rCBOXtextS() { delimage(textImage); }
 	inline rCBOXtextS& rCBOXtextS::move(int _X, int _Y) { locX = _X; locY = _Y; return *this; }
 	inline rCBOXtextS& rCBOXtextS::detect() { checkBox.detect(); return *this; }
+	inline bool rCBOXtextS::detect(mouse_msg _mouse) { _mouse.x -= locX; _mouse.y -= locY; return checkBox.detect(_mouse); }
 	inline rCBOXtextS& rCBOXtextS::draw() {
 		int totW = boxText.width(textImage) + blankWidth + checkBox.gwidth();
 		int totH = max(boxText.height(textImage), checkBox.gheight());

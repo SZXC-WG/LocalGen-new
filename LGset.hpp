@@ -42,15 +42,24 @@ namespace LGset {
 			// build 2365+ settings
 			buf.push_back(blockMinFontSize);
 			buf.push_back(blockMaxFontSize);
+			buf.push_back(L'\n');
+			buf.push_back(enableAnalysisInGame);
+			buf.push_back(gameMode);
+			buf.push_back(L'\n');
+			buf.push_back(modifier::LeapFrog);
+			buf.push_back(modifier::CityState);
+			buf.push_back(modifier::MistyVeil);
+			buf.push_back(modifier::SilentWar);
+			buf.push_back(L'\n');
 			return buf;
 		}
 		inline bool check() {
 			/* CHECK WHETHER THE SETTING FILE EXISTS */ {
-				WIN32_FIND_DATAA FileData;
-				HANDLE FileHandle = FindFirstFileA(settingFile.c_str(),&FileData);
+				WIN32_FIND_DATAW FileData;
+				HANDLE FileHandle = FindFirstFileW(settingFile.c_str(),&FileData);
 				if(FileHandle == INVALID_HANDLE_VALUE && GetLastError() == ERROR_FILE_NOT_FOUND) {
 					HANDLE hFile =
-					    CreateFileA(settingFile.c_str(),
+					    CreateFileW(settingFile.c_str(),
 					                0,
 					                0,
 					                NULL,
@@ -66,7 +75,7 @@ namespace LGset {
 		inline void read() {
 			if(settingLength == 0) settingLength = getBuf().size();
 			if(check()) write();
-			HANDLE hFile = CreateFileA(settingFile.c_str(),
+			HANDLE hFile = CreateFileW(settingFile.c_str(),
 			                           GENERIC_READ,
 			                           FILE_SHARE_READ,
 			                           NULL,
@@ -74,7 +83,7 @@ namespace LGset {
 			                           FILE_ATTRIBUTE_HIDDEN,
 			                           NULL);
 			if(hFile == INVALID_HANDLE_VALUE)
-				MessageBoxW(GetConsoleWindow(),(L"Open File Failed: CODE "+to_wstring(GetLastError())).c_str(),L"ERROR",MB_OK);
+				MessageBoxW(getHWnd(),(L"Open File Failed: CODE "+to_wstring(GetLastError())).c_str(),L"ERROR",MB_OK);
 			vector<wchar_t> buf(settingLength*2);
 			DWORD dwReadedSize;
 			bool f = ReadFile(hFile,
@@ -83,7 +92,7 @@ namespace LGset {
 			                  &dwReadedSize,
 			                  NULL);
 			if(!f) {
-				MessageBoxW(GetConsoleWindow(),
+				MessageBoxW(getHWnd(),
 				            (L"Reading setting file failed: CODE " + to_wstring(GetLastError())).c_str(),
 				            L"ERROR",
 				            MB_HELP);
@@ -110,14 +119,24 @@ namespace LGset {
 			mainFontName.clear();
 			while(buf[i++]!=L'\n') mainFontName.push_back(buf[i-1]);
 			mainFontName.resize(30);
-			// settings before build 2365 (inclusive)
 			if(rdBuild<=2365) return; // build 2365+ settings
 			blockMinFontSize = buf[i++];
 			blockMaxFontSize = buf[i++];
+			if(rdBuild<=2619) return; // build 2619+ settings
+			buf[i++]; // L'\n'
+			enableAnalysisInGame = buf[i++];
+			gameMode = buf[i++];
+			if(rdBuild<=2630) return; // build 2630+ settings
+			buf[i++]; // L'\n'
+			modifier::LeapFrog = buf[i++];
+			modifier::CityState = buf[i++];
+			modifier::MistyVeil = buf[i++];
+			modifier::SilentWar = buf[i++];
+			buf[i++]; // L'\n'
 		}
 		inline void write() {
 			vector<wchar_t> buf = getBuf();
-			HANDLE hFile = CreateFileA(settingFile.c_str(),
+			HANDLE hFile = CreateFileW(settingFile.c_str(),
 			                           GENERIC_WRITE,
 			                           FILE_SHARE_WRITE,
 			                           NULL,
@@ -125,7 +144,7 @@ namespace LGset {
 			                           FILE_ATTRIBUTE_HIDDEN,
 			                           NULL);
 			if(hFile == INVALID_HANDLE_VALUE)
-				MessageBoxW(GetConsoleWindow(),(L"Open File Failed: CODE "+to_wstring(GetLastError())).c_str(),L"ERROR",MB_OK);
+				MessageBoxW(getHWnd(),(L"Open File Failed: CODE "+to_wstring(GetLastError())).c_str(),L"ERROR",MB_OK);
 			SetFilePointer(hFile, 0, 0, FILE_BEGIN);
 			DWORD dwWritedDataSize;
 			bool f = WriteFile(hFile,
@@ -134,7 +153,7 @@ namespace LGset {
 			                   &dwWritedDataSize,
 			                   NULL);
 			if(!f) {
-				MessageBoxW(GetConsoleWindow(),
+				MessageBoxW(getHWnd(),
 				            (L"Writing setting file failed: CODE " + to_wstring(GetLastError())).c_str(),
 				            L"ERROR",
 				            MB_HELP);

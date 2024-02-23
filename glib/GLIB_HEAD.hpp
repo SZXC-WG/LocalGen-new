@@ -74,7 +74,7 @@ namespace images {
 inline namespace text {
 
 	/**
-	 * @category glib.text;
+	 * @category glib.text
 	 * @brief Easy struct for a piece of text.
 	 */
 	struct singleTextS {
@@ -93,6 +93,31 @@ inline namespace text {
 			setcolor(color, _pimg);
 			setfont(fontHeight, fontWidth, font.c_str(), _pimg);
 			outtextxy(_X, _Y, text.c_str(), _pimg);
+		}
+	};
+
+	/**
+	 * @category glib.text
+	 * @brief Easy struct for a text attached to a variable.
+	 */
+	struct varIntTextS {
+		int* var;
+		color_t color;
+		wstring font;
+		int fontHeight, fontWidth;
+		varIntTextS() {};
+		varIntTextS(int* _var) : var(_var) {};
+		varIntTextS(int* _var, color_t _color) : var(_var), color(_color) {};
+		varIntTextS(int* _var, color_t _color, wstring _font, int _fH, int _fW = 0)
+			: var(_var), color(_color), font(_font), fontHeight(_fH), fontWidth(_fW) {};
+
+		int width(PIMAGE _pimg = NULL) { setfont(fontHeight, fontWidth, font.c_str(), _pimg); return textwidth(to_wstring(*var).c_str(), _pimg); }
+		int height(PIMAGE _pimg = NULL) { setfont(fontHeight, fontWidth, font.c_str(), _pimg); return textheight(to_wstring(*var).c_str(), _pimg); }
+
+		void print(int _X, int _Y, PIMAGE _pimg = NULL) {
+			setcolor(color, _pimg);
+			setfont(fontHeight, fontWidth, font.c_str(), _pimg);
+			outtextxy(_X, _Y, to_wstring(*var).c_str(), _pimg);
 		}
 	};
 
@@ -181,6 +206,7 @@ inline namespace button {
 		inline rectBUTTON& bgsize(int _width,int _height);
 		inline rectBUTTON& delbgimage();
 		[[deprecated]] inline rectBUTTON& detect();
+		inline bool detect(mouse_msg _mouse);
 	};
 
 	class circBUTTON {
@@ -228,8 +254,8 @@ inline namespace button {
 		inline circBUTTON& bgsize(int _width,int _height);
 		inline circBUTTON& delbgimage();
 		[[deprecated]] inline circBUTTON& detect();
+		inline bool detect(mouse_msg _mouse);
 	};
-
 } // inline namespace button
 
 inline namespace checkbox {
@@ -263,6 +289,7 @@ inline namespace checkbox {
 		inline rectCBOX& framecolor(color_t _color);
 		inline rectCBOX& fillcolor(color_t _color);
 		[[deprecated]] inline rectCBOX& detect();
+		inline bool detect(mouse_msg _mouse);
 		inline rectCBOX& variable(bool* _varPtr);
 		inline rectCBOX& changeState();
 	};
@@ -281,6 +308,7 @@ inline namespace checkbox {
 		inline rCBOXtextS& move(int _X, int _Y);
 
 		[[deprecated]] inline rCBOXtextS& detect();
+		inline bool detect(mouse_msg _mouse);
 		inline rCBOXtextS& draw();
 		inline rCBOXtextS& display(int _X, int _Y, PIMAGE pimg = NULL);
 	};
@@ -295,6 +323,7 @@ inline namespace page {
 	// Enum to specify type of a page item.
 	enum item_type {
 		ITEM_SUBPAGE = 0,
+		ITEM_VARINTTEXT,
 		ITEM_LINETEXT,
 		ITEM_CONDTEXT,
 		ITEM_RECTBUTTON,
@@ -307,48 +336,28 @@ inline namespace page {
 		item_type iType;
 		int locX, locY;
 		union {
-			/* 0 */ pageS* subPage;
-			/* 1 */ lineTextS* lText;
-			// /* 2 */ conditionText* cdtnText; // todo))
-			/* 3 */ rectBUTTON* rButton;
-			/* 4 */ circBUTTON* cButton;
-			/* 5 */ rectCBOX* rChkBox;
-			/* 6 */ rCBOXtextS* cBText;
+			pageS* subPage;
+			varIntTextS* vIText;
+			lineTextS* lText;
+			// conditionText* cdtnText; // todo))
+			rectBUTTON* rButton;
+			circBUTTON* cButton;
+			rectCBOX* rChkBox;
+			rCBOXtextS* cBText;
 		} info;
 
 		inline itemS() = default;
 		inline itemS(decltype(iType) _iType) : iType(_iType) {};
 		inline itemS(decltype(iType) _iType, int _locX, int _locY) : iType(_iType), locX(_locX), locY(_locY) {};
 
-		inline void move(int _X, int _Y) { locX = _X, locY = _Y; }
+		inline void move(int _X, int _Y);
+		inline void downLoc();
 
 		template <typename _Ftn_t>
-		inline void work(_Ftn_t _ftn) {
-			switch(iType) {
-				case ITEM_SUBPAGE: { _ftn(*info.subPage); } break;
-				case ITEM_LINETEXT: { _ftn(*info.lText); } break;
-				// case ITEM_CONDTEXT: { _ftn(*info.cdtnText); } break;
-				case ITEM_RECTBUTTON: { _ftn(*info.rButton); } break;
-				case ITEM_CIRCBUTTON: { _ftn(*info.cButton); } break;
-				case ITEM_RECTCHKBOX: { _ftn(*info.rChkBox); } break;
-				case ITEM_RECTCHKBOX_WITH_TEXT: { _ftn(*info.cBText); } break;
-			}
-		}
+		inline void work(_Ftn_t _ftn);
 		template <typename _Ftn_t,
 		          typename _Rtn_t>
-		inline _Rtn_t workRet(_Ftn_t _ftn) {
-			register _Rtn_t ret;
-			switch(iType) {
-				case ITEM_SUBPAGE: { ret = _ftn(*info.subPage); } break;
-				case ITEM_LINETEXT: { ret = _ftn(*info.lText); } break;
-				// case ITEM_CONDTEXT: { ret = _ftn(*info.cdtnText); } break;
-				case ITEM_RECTBUTTON: { ret = _ftn(*info.rButton); } break;
-				case ITEM_CIRCBUTTON: { ret = _ftn(*info.cButton); } break;
-				case ITEM_RECTCHKBOX: { ret = _ftn(*info.rChkBox); } break;
-				case ITEM_RECTCHKBOX_WITH_TEXT: { ret = _ftn(*info.cBText); } break;
-			}
-			return ret;
-		}
+		inline _Rtn_t workRet(_Ftn_t _ftn);
 		// inline ~itemS() { work([](auto _itm)->void{delete(&_itm);}); }
 	};
 
@@ -409,11 +418,18 @@ inline namespace page {
 		// overall mouse & keyboard detect (for interactive items, e.g.buttons)
 		// this mode of message collecting is deprecated, and will be removed.
 		inline pageS& detect();
+		// overall mouse & keyboard detect (for interactive items, e.g.buttons)
+		// right implementation.
+		inline bool detect(mouse_msg _mouse);
 		// draw page backstage
 		inline pageS& draw();
 		// draw page frontstage (including backstage)
 		inline pageS& display(PIMAGE pimg);
 
+		// get the content itself
+		inline ctn_t& gContent();
+		// get the content items count
+		inline ctn_t::size_type cSize() const;
 		// add a new page item
 		inline pageS& addItem(const pageS::item_t& _item);
 		// pop the last page item

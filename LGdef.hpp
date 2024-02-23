@@ -299,8 +299,8 @@ bool initSock(); // initialize socket web
 
 // Namespace for LocalGen settings.
 namespace LGset {
-	const string settingFileExt = ".lgsts";
-	const string settingFile = "_settings" + settingFileExt;
+	const wstring settingFileExt = L".lgsts";
+	const wstring settingFile = L"_settings" + settingFileExt;
 	const wstring replayFileExt = L".lgr";
 
 	static size_t settingLength = 0;
@@ -317,6 +317,7 @@ namespace LGset {
 	wstring mainFontName((L"Quicksand"s + wstring(30,0)).c_str(),30);
 	unsigned short blockMinFontSize = 8;
 	unsigned short blockMaxFontSize = 18;
+	bool enableAnalysisInGame = true;
 
 	inline namespace game {
 		/**
@@ -327,8 +328,16 @@ namespace LGset {
 		 * 2: land state 社稷江山！
 		 * 即：只要 TOT > 0 即可为国
 		 */
-		unsigned short gameMode = 2;
+		unsigned short gameMode = 0;
 		short plainRate[3] = {25, 25, 2};
+		namespace modifier {
+			// default modifiers
+			bool LeapFrog = false; // note: unavailable when (gameMode != 0)
+			bool CityState = false; // todo))
+			bool MistyVeil = false;
+			// bool CrystalClear = false; // no use in LocalGen.
+			bool SilentWar = false;
+		}
 	}
 
 	inline namespace file {

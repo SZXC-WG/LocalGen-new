@@ -22,10 +22,13 @@
 bool isVisible(int x, int y, int Code) {
 	if(gameMap[x][y].lit)
 		return true;
-	for(int i = -1; i <= 1; ++i)
-		for(int j = -1; j <= 1; ++j)
-			if(Code & (1 << gameMap[x + i][y + j].player))
-				return true;
+	if(Code & (1 << gameMap[x][y].player)) return true;
+	if(!LGset::modifier::MistyVeil) {
+		for(int i = -1; i <= 1; ++i)
+			for(int j = -1; j <= 1; ++j)
+				if(Code & (1 << gameMap[x + i][y + j].player))
+					return true;
+	}
 	return false;
 }
 void printBlockNum(bool visible, long long army, int player, int curx, int cury) {

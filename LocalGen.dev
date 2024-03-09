@@ -29,24 +29,24 @@ IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000001000000
-UnitCount=11
+UnitCount=12
 
 [VersionInfo]
 Major=4
 Minor=2
 Release=5
-Build=2629
+Build=2688
 LanguageID=1033
 CharsetID=1252
 CompanyName=SZXC Work Group
-FileVersion=4.2.5.2629
+FileVersion=4.2.5.2688
 FileDescription=Local Generals.io
 InternalName=
 LegalCopyright=Copyright (c) 2023 SZXC Work Group
 LegalTrademarks=
 OriginalFilename=
 ProductName=Local Generals.io
-ProductVersion=4.2.5.2629
+ProductVersion=4.2.5.2688
 AutoIncBuildNr=1
 SyncProduct=1
 
@@ -156,6 +156,15 @@ CompileCpp=1
 Folder=
 Compile=1
 Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit12]
+FileName=resources.rc
+Folder=Resources
+Compile=1
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=

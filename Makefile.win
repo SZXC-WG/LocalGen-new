@@ -28,6 +28,6 @@ $(BIN): $(OBJ)
 LGmain.o: LGmain.cpp
 	$(CPP) -c LGmain.cpp -o LGmain.o $(CXXFLAGS)
 
-LocalGen_private.res: LocalGen_private.rc 
+LocalGen_private.res: LocalGen_private.rc resources.rc
 	$(WINDRES) -i LocalGen_private.rc --input-format=rc -o LocalGen_private.res -O coff 
 

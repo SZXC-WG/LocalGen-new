@@ -3,6 +3,7 @@
 
 #include <windows.h> // include for version info constants
 
+#include "resources.rc"
 
 A ICON "LocalGen.ico"
 
@@ -10,8 +11,8 @@ A ICON "LocalGen.ico"
 // TO CHANGE VERSION INFORMATION, EDIT PROJECT OPTIONS...
 //
 1 VERSIONINFO
-FILEVERSION 4,2,5,2629
-PRODUCTVERSION 4,2,5,2629
+FILEVERSION 4,2,5,2688
+PRODUCTVERSION 4,2,5,2688
 FILETYPE VFT_APP
 {
   BLOCK "StringFileInfo"
@@ -19,14 +20,14 @@ FILETYPE VFT_APP
     BLOCK "040904E4"
     {
       VALUE "CompanyName", "SZXC Work Group"
-      VALUE "FileVersion", "4.2.5.2629"
+      VALUE "FileVersion", "4.2.5.2688"
       VALUE "FileDescription", "Local Generals.io"
       VALUE "InternalName", ""
       VALUE "LegalCopyright", "Copyright (c) 2023 SZXC Work Group"
       VALUE "LegalTrademarks", ""
       VALUE "OriginalFilename", ""
       VALUE "ProductName", "Local Generals.io"
-      VALUE "ProductVersion", "4.2.5.2629"
+      VALUE "ProductVersion", "4.2.5.2688"
     }
   }
   BLOCK "VarFileInfo"

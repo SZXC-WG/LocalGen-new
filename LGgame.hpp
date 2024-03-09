@@ -35,7 +35,7 @@ void LGgame::capture(int p1, int p2) {
 		}
 	}
 	gmt(genCoo[p2]) = 4;
-	if(LGset::modifier::LeapFrog) {
+	if(LGset::modifier::Leapfrog) {
 		// modifier Leap Frog
 		gmt(genCoo[p1]) = 4;
 		gmt(genCoo[p2]) = 3;
@@ -519,9 +519,12 @@ namespace LGlocal {
 		LGgame::robotId[1] = -100;
 		for(int i = 2; i <= LGgame::playerCnt; ++i) {
 			LGgame::robotId[i] = mtrd() % 400;
+			// LGgame::robotId[i] = mtrd() % 100 + 300;
+			// LGgame::robotId[i] = mtrd() % 000 + 400;
 			while(((LGset::gameMode == 1 || LGset::gameMode == 2)
 			       && (200 <= LGgame::robotId[i] && LGgame::robotId[i] < 300)))
-				LGgame::robotId[i] = mtrd() % 400;
+				// LGgame::robotId[i] = mtrd() % 400;
+				LGgame::robotId[i] = mtrd() % 100 + 300;
 			if(300 <= LGgame::robotId[i] && LGgame::robotId[i] < 400) zlyBot::initBot(i);
 		}
 

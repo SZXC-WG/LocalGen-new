@@ -15,7 +15,7 @@ namespace zlyBot {
 	botModeE botMode[64];
 	coordS seenGeneral[64][64];
 	deque<coordS> stackedMove[64];
-	ll blockValueWeight[] = {10,-150,-INF,5,30,15}; // p s m g c (o)
+	vector<ll> blockValueWeight[64]; // p s m g c (o)
 	ll blockValue[64][505][505];
 	ll dist[64][505][505];
 	int blockTypeRem[64][505][505];
@@ -30,6 +30,7 @@ namespace zlyBot {
 	}
 
 	inline void initBot(int id) {
+		blockValueWeight[id] = {30-LGset::plainRate[LGset::gameMode]+1,-1500,-INF,5,30,30};
 		for(int i=1; i<=LGgame::playerCnt; ++i) seenGeneral[id][i] = coordS(-1,-1);
 		memset(blockTypeRem[id],-1,sizeof(blockTypeRem[id]));
 		// std::ofstream db("player_"s+to_string(id)+"_debug.txt");
@@ -59,7 +60,7 @@ namespace zlyBot {
 		for(int i=1; i<=mapH; ++i) {
 			for(int j=1; j<=mapW; ++j) {
 				if(gameMap[i][j].player==id) blockValue[id][i][j] = -INF;
-				else blockValue[id][i][j] = blockValueWeight[gameMap[i][j].type] - dist[id][i][j];
+				else blockValue[id][i][j] = blockValueWeight[id][gameMap[i][j].type] - dist[id][i][j];
 			}
 		}
 	}

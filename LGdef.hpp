@@ -14,6 +14,10 @@
 #ifndef __LGDEF_HPP__
 #define __LGDEF_HPP__
 
+#ifndef UNICODE
+	#define UNICODE
+#endif
+
 /**** OVERALL HEADERS ****/
 
 /** C/C++ file operations **/
@@ -332,7 +336,7 @@ namespace LGset {
 		short plainRate[3] = {25, 25, 2};
 		namespace modifier {
 			// default modifiers
-			bool LeapFrog = false; // note: unavailable when (gameMode != 0)
+			bool Leapfrog = false; // note: unavailable when (gameMode != 0)
 			bool CityState = false; // todo))
 			bool MistyVeil = false;
 			// bool CrystalClear = false; // no use in LocalGen.
@@ -537,7 +541,7 @@ namespace LGclient {
 void MainPage() {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	LGGraphics::iconImg = newimage();
-	getimage_pngfile(LGGraphics::iconImg, "img/favicon.png");
+	getimage(LGGraphics::iconImg, "PNG", "IMAGE_FAVICON");
 	LGGraphics::WelcomePage();
 //	LGGraphics::localOptions();
 	return;

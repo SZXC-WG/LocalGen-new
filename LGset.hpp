@@ -46,7 +46,7 @@ namespace LGset {
 			buf.push_back(enableAnalysisInGame);
 			buf.push_back(gameMode);
 			buf.push_back(L'\n');
-			buf.push_back(modifier::LeapFrog);
+			buf.push_back(modifier::Leapfrog);
 			buf.push_back(modifier::CityState);
 			buf.push_back(modifier::MistyVeil);
 			buf.push_back(modifier::SilentWar);
@@ -128,7 +128,7 @@ namespace LGset {
 			gameMode = buf[i++];
 			if(rdBuild<=2630) return; // build 2630+ settings
 			buf[i++]; // L'\n'
-			modifier::LeapFrog = buf[i++];
+			modifier::Leapfrog = buf[i++];
 			modifier::CityState = buf[i++];
 			modifier::MistyVeil = buf[i++];
 			modifier::SilentWar = buf[i++];

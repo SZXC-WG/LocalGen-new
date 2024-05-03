@@ -98,18 +98,20 @@ inline namespace text {
 
 	/**
 	 * @category glib.text
-	 * @brief Easy struct for a text attached to a variable.
+	 * @brief Easy struct for a text attached to a variable integer.
 	 */
 	struct varIntTextS {
 		int* var;
 		color_t color;
+		wstring sbText;
 		wstring font;
 		int fontHeight, fontWidth;
 		varIntTextS() {};
 		varIntTextS(int* _var) : var(_var) {};
 		varIntTextS(int* _var, color_t _color) : var(_var), color(_color) {};
-		varIntTextS(int* _var, color_t _color, wstring _font, int _fH, int _fW = 0)
-			: var(_var), color(_color), font(_font), fontHeight(_fH), fontWidth(_fW) {};
+		varIntTextS(int* _var, color_t _color, wstring _sbText) : var(_var), color(_color), sbText(_sbText) {};
+		varIntTextS(int* _var, color_t _color, wstring _sbText, wstring _font, int _fH, int _fW = 0)
+			: var(_var), color(_color), sbText(_sbText), font(_font), fontHeight(_fH), fontWidth(_fW) {};
 
 		int width(PIMAGE _pimg = NULL) { setfont(fontHeight, fontWidth, font.c_str(), _pimg); return textwidth(to_wstring(*var).c_str(), _pimg); }
 		int height(PIMAGE _pimg = NULL) { setfont(fontHeight, fontWidth, font.c_str(), _pimg); return textheight(to_wstring(*var).c_str(), _pimg); }
@@ -117,7 +119,7 @@ inline namespace text {
 		void print(int _X, int _Y, PIMAGE _pimg = NULL) {
 			setcolor(color, _pimg);
 			setfont(fontHeight, fontWidth, font.c_str(), _pimg);
-			outtextxy(_X, _Y, to_wstring(*var).c_str(), _pimg);
+			outtextxy(_X, _Y, (sbText+to_wstring(*var)).c_str(), _pimg);
 		}
 	};
 
@@ -218,7 +220,7 @@ inline namespace button {
 		color_t backgroundColor; // background color
 		color_t textColor; // text color
 		vector<wstring> text; // text
-		string fontName; // font face name
+		wstring fontName; // font face name
 		int fontHeight, fontWidth; // font height & width
 		int frameWidth;
 		bool enableAutoFrameColor; color_t frameColor;
@@ -243,7 +245,7 @@ inline namespace button {
 		inline circBUTTON& addtext(wstring _text);
 		inline circBUTTON& poptext();
 		inline circBUTTON& cleartext();
-		inline circBUTTON& fontname(string _fontName);
+		inline circBUTTON& fontname(wstring _fontName);
 		inline circBUTTON& fontsize(int _fontHeight, int _fontWidth);
 		inline circBUTTON& move(int _X, int _Y);
 		inline circBUTTON& textalign(int _walign = -1, int _halign = -1);

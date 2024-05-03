@@ -184,7 +184,18 @@ namespace LGGraphics {
 		initWindowSize();
 		init();
 		// printf("before pages.");
-		initPages();
+		initPages(); {
+			std::wifstream pnfin("_players.ini");
+			if(!pnfin.fail()) {
+				for(int i=1; i<=12; ++i) {
+					wstring name;
+					getline(pnfin, name);
+					name = wcharTransfer(name);
+					playerInfo[i].name = name;
+				}
+				pnfin.close();
+			}
+		}
 	WelcomePageStartLabel:;
 		setbkmode(TRANSPARENT);
 		setbkcolor(bgColor);
@@ -300,7 +311,7 @@ namespace LGGraphics {
 		.framecolor(false, mainColor)
 		.frame(10 * windowData.zoomY)
 		.event([]()->void{system("start http://github.com/SZXC-WG/LocalGen-new");})
-		.enableButtonShadow = false; settings
+		.enableButtonShadow = false; repo
 		.display();
 
 		// rectCBOX cbox_test;
@@ -1692,6 +1703,23 @@ namespace LGGraphics {
 		tmp.info.cBText->checkBox.size(zoomX(20),zoomY(20)).frame(2).variable(&LGset::enableAnalysisInGame).bgcolor(bgColor).fillcolor(WHITE).framecolor(WHITE);
 		tmp.info.cBText->blankWidth = zoomX(10);
 		p_settings.addItem(tmp);
+		tmp.iType = ITEM_VARINTTEXT;
+		tmp.info.vIText = new varIntTextS(&LGset::game::gameMode,WHITE,L"Game Mode: ",LGset::mainFontName,-zoomY(20),0);
+		tmp.locX = zoomX(100);
+		tmp.locY = zoomY(210);
+		tmp.downLoc();
+		p_settings.addItem(tmp);
+		// tmp.iType = ITEM_CIRCBUTTON;
+		// tmp.info.cButton = new circBUTTON(zoomY(10));
+		// tmp.locX = zoomX(130);
+		// tmp.locY = zoomY(220); // centre
+		// tmp.downLoc();
+		// tmp.info.cButton->addtext(L"0").bgcolor(LGGraphics::mainColor).textcolor(WHITE).fontsize(-zoomY(20),0).textalign(CENTER_TEXT,CENTER_TEXT).fontname(LGset::mainFontName);
+		// tmp.info.cButton->enableShadow = true;
+		// tmp.info.cButton->enableTextShadow = false;
+		// tmp.info.cButton->enableButtonShadow = false;
+		// tmp.info.cButton->event([&]()->void{LGset::game::gameMode=2;});
+		// p_settings.addItem(tmp);
 		tmp.iType = ITEM_LINETEXT;
 		tmp.info.lText = new lineTextS;
 		tmp.locX = zoomX(800);

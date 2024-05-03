@@ -20,6 +20,7 @@
 #include "botlib/xrzBot.hpp"
 #include "botlib/smartRandomBot.hpp"
 #include "botlib/zlyBot.hpp"
+#include "botlib/zlyBot_v2.hpp"
 //#include "Bot/lcwBot.hpp"
 
 string botName[] = {
@@ -28,6 +29,7 @@ string botName[] = {
 	"xrzBot",
 	"xiaruizeBot",
 	"zlyBot",
+	"zlyBot V2",
 };
 
 #endif

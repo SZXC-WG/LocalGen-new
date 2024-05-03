@@ -65,6 +65,9 @@ using std::to_wstring;
 using std::min; using std::max;
 using namespace std::literals;
 
+/** definitions **/
+#define _LG_DEPRECATED [[deprecated]]
+
 /**** constant variables ****/
 
 constexpr int dx[5] = {0, -1, 0, 1, 0};
@@ -189,7 +192,7 @@ struct moveS {
 
 //====value====//
 
-string username; // game user's name
+_LG_DEPRECATED string username; // game user's name
 PIMAGE pimg[55]; // software used images
 MapInfoS mapInfo[5005]; // storing all imported maps
 Block gameMap[505][505]; /* current game map; maximum 500*500 */
@@ -309,7 +312,7 @@ namespace LGset {
 
 	static size_t settingLength = 0;
 
-	wstring userName((L"Anomynous"s + wstring(16,0)).c_str(), 16);
+	wstring userName((L"Anonymous"s + wstring(16,0)).c_str(), 16);
 	bool enableGodPower = false; // god power - originated from v1.0.0 bug
 	unsigned short defaultPlayerNum = 2;
 	unsigned short defaultSpeed = 1;
@@ -318,7 +321,7 @@ namespace LGset {
 	wstring replayFileName((L"replay.lgr"s + wstring(50,0)).c_str(),50);
 	bool enableBetaTag = true; // currently no change allowed
 	unsigned short socketPort = 14514; // no change allowed
-	wstring mainFontName((L"Quicksand"s + wstring(30,0)).c_str(),30);
+	wstring mainFontName((L"MiSans"s + wstring(30,0)).c_str(),30);
 	unsigned short blockMinFontSize = 8;
 	unsigned short blockMaxFontSize = 18;
 	bool enableAnalysisInGame = true;
@@ -332,15 +335,22 @@ namespace LGset {
 		 * 2: land state 社稷江山！
 		 * 即：只要 TOT > 0 即可为国
 		 */
-		unsigned short gameMode = 0;
+		int gameMode = 0;
 		short plainRate[3] = {25, 25, 2};
 		namespace modifier {
-			// default modifiers
+			// modifiers available in LocalGen
+
+			/* generals.io modifiers */
 			bool Leapfrog = false; // note: unavailable when (gameMode != 0)
 			bool CityState = false; // todo))
 			bool MistyVeil = false;
 			// bool CrystalClear = false; // no use in LocalGen.
 			bool SilentWar = false;
+
+			/* [TODO) LocalGen Modifiers: */
+			// bool DeepSwamp = false; // swamp drain speed increase as the dist to land increase.
+			// bool SuburbPlain = false; // plain inc speed increase as the dist to cities decrease.
+			// bool NeutralResist = false; // neutral troops increase half the speed as players.
 		}
 	}
 
@@ -365,7 +375,7 @@ namespace LGGraphics {
 	constexpr color_t errorColor = 0xfffbbbbb; // error color
 	PIMAGE iconImg; // favicon image
 	string fileName; // ???
-	[[deprecated]] int stDel = 1; // temporary variable for speed (deprecated)
+	_LG_DEPRECATED int stDel = 1; // temporary variable for speed (deprecated)
 	int plCnt = 0; // temporary variable for count of players
 	int mapSelected = 0; // ID of the map selected
 	int cheatCode = 0; // binary code of visibility in game

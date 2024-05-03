@@ -30,7 +30,7 @@ inline namespace button {
 		status = 0;
 		enableAutoFrameColor = true;
 		enableTextShadow = true; textShadowWeight = 1;
-		enableShadow = 1; enableButtonShadow = 1;
+		enableShadow = true; enableButtonShadow = true;
 	}
 	circBUTTON::~circBUTTON() {
 		delimage(buttonImage);
@@ -115,7 +115,7 @@ inline namespace button {
 	inline circBUTTON& circBUTTON::addtext(wstring _text) { text.push_back(_text); return *this; }
 	inline circBUTTON& circBUTTON::poptext() { if(!text.empty()) text.pop_back(); return *this; }
 	inline circBUTTON& circBUTTON::cleartext() { text.clear(); return *this; }
-	inline circBUTTON& circBUTTON::fontname(string _fontName) { fontName = _fontName; return *this; }
+	inline circBUTTON& circBUTTON::fontname(wstring _fontName) { fontName = _fontName; return *this; }
 	inline circBUTTON& circBUTTON::fontsize(int _fontHeight, int _fontWidth) { fontHeight = _fontHeight; fontWidth = _fontWidth; return *this; }
 	inline circBUTTON& circBUTTON::move(int _X, int _Y) { locationY = _Y, locationX = _X; return *this; }
 	inline circBUTTON& circBUTTON::textalign(int _walign, int _halign) {

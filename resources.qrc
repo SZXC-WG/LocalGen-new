@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/images">
+        <file alias="m_city">img/city.png</file>
+        <file alias="m_crown">img/crown.png</file>
+        <file>img/currentOn.png</file>
+        <file>img/donate_alipay.png</file>
+        <file>img/donate_wechat.png</file>
+        <file alias="m_erase">img/erase.png</file>
+        <file alias="ICON">img/favicon.png</file>
+        <file alias="GitHub">img/github.png</file>
+        <file alias="m_light">img/light.png</file>
+        <file alias="m_mountain">img/mountain.png</file>
+        <file alias="m_obstacle">img/obstacle.png</file>
+        <file alias="ui_options">img/options.png</file>
+        <file alias="m_swamp">img/swamp.png</file>
+    </qresource>
+</RCC>

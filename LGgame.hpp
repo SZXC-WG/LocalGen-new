@@ -210,7 +210,7 @@ void LGgame::updateMap() {
 					}
 					case 4: {
 						/* city */
-						if(LGgame::curTurn % max(2,LGset::plainRate[LGset::gameMode]+1) == 0) ++gameMap[i][j].army;
+						if(LGgame::curTurn % 3 == 0) ++gameMap[i][j].army;
 						break;
 					}
 				}

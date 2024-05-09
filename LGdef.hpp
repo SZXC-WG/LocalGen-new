@@ -350,7 +350,7 @@ namespace LGset {
 			/* LocalGen Modifiers: */
 			bool DeepSwamp = false; // [todo) swamp drain speed increase as the dist to land increase.
 			bool SuburbPlain = false; // [todo) plain inc speed increase as the dist to cities decrease.
-			bool NeutralResist = false; // neutral troops increase half the speed of players. (but always not higher than the minimum speed of players)
+			bool NeutralResist = false; // neutral troops increase half to one third the speed of players.
 		}
 	}
 

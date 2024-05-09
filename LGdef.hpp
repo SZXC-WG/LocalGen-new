@@ -123,12 +123,12 @@ struct MapInfoS {
 enum special_map_id {
 	MAP_RANDOM_ID = 1,
 	MAP_STANDARD_ID = 2,
-	MAP_SP_LABYRINTH_ID = 3,
-	MAP_SR_LABYRINTH_ID = 4,
-	MAP_MR_LABYRINTH_ID = 5,
-	MAP_CITY_ID = 6,
-	MAP_PLAIN_ID = 7,
-	MAP_SWAMP_ID = 8,
+	MAP_SP_MAZE_ID = 3,
+	MAP_MR_MAZE_ID = 4,
+	MAP_SP_SMAZE_ID = 5,
+	MAP_MR_SMAZE_ID = 6,
+	MAP_CITY_ID = 7,
+	MAP_PLAIN_ID = 8,
 };
 
 /**
@@ -284,9 +284,8 @@ void printBlockNum(bool visible, long long army, int player, int curx, int cury)
 
 void createRandomMap(int crtH, int crtW); // generate random map (special) with H and W
 void createStandardMap(int crtH, int crtW); // generate standard map (special) with H and W
-void createLabyrinthMap(int crtH, int crtW, int TYPE); // generate labyrinth map (special) with H and W
+void createMazeMap(int crtH, int crtW, int ringTYPE, int routeTYPE); // generate labyrinth map (special) with H and W
 void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt);
-void createFullSwampMap(int crtH, int crtW, int plCnt);
 void createFullPlainMap(int crtH, int crtW, int plCnt);
 
 void getAllFiles(string path, std::vector<string>& files, string fileExt);

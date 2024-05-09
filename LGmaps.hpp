@@ -302,7 +302,7 @@ void createStandardMap(int crtH = -1, int crtW = -1) {
 			}
 		}
 }
-void createLabyrinthMap(int crtH, int crtW, int TYPE) {
+void createMazeMap(int crtH, int crtW, int ringTYPE, int routeTYPE = 0) {
 	mapH = crtH, mapW = crtW;
 	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].army = 0;
 	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].type = 2;
@@ -331,8 +331,8 @@ void createLabyrinthMap(int crtH, int crtW, int TYPE) {
 		}
 	for(int i=1; i<=c; ++i) for(int j=1; j<=c; ++j) vs[i][j]=false;
 	m=c-1;
-	if(TYPE==1) ++m;
-	if(TYPE==2) m+=crtH+crtW;
+	if(ringTYPE==1) ++m;
+	if(ringTYPE==2) m+=crtH+crtW;
 	std::iota(f+1,f+c+1,1);
 	for(int i=1; i<c; ++i) {
 		int u,v;
@@ -361,7 +361,7 @@ void createLabyrinthMap(int crtH, int crtW, int TYPE) {
 		gameMap[coo.x][coo.y].army = 40;
 	}
 	for(int i=1; i<=c; ++i) {
-		gameMap[p[i].x][p[i].y].type = 0;
+		gameMap[p[i].x][p[i].y].type = routeTYPE;
 		if(ec[i]==1) gameMap[p[i].x][p[i].y].type = 3;
 	}
 }
@@ -382,26 +382,6 @@ void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, i
 		do
 			x = mtrd() % mapH + 1, y = mtrd() % mapW + 1;
 		while(gameMap[x][y].type != 4);
-		gameMap[x][y].type = 3;
-		gameMap[x][y].army = 0;
-	}
-}
-void createFullSwampMap(int crtH, int crtW, int plCnt) {
-	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-	mapH = crtH, mapW = crtW;
-	for(int i = 1; i <= mapH; ++i) {
-		for(int j = 1; j <= mapW; ++j) {
-			gameMap[i][j].type = 1;
-			gameMap[i][j].player = 0;
-			gameMap[i][j].army = 0;
-			gameMap[i][j].lit = 0;
-		}
-	}
-	for(int i = 1; i <= plCnt; ++i) {
-		int x, y;
-		do
-			x = mtrd() % mapH + 1, y = mtrd() % mapW + 1;
-		while(gameMap[x][y].type != 1);
 		gameMap[x][y].type = 3;
 		gameMap[x][y].army = 0;
 	}
@@ -437,12 +417,12 @@ void initMaps() {
 	mapNum = 8;
 	mapInfo[1] = MapInfoS {1, L"随机", L"Random", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
 	mapInfo[2] = MapInfoS {2, L"标准", L"Standard", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[3] = MapInfoS {3, L"单路迷宫（无环迷宫）", L"Single-Path Labyrinth", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[4] = MapInfoS {4, L"基环迷宫", L"Single-Ring Labyrinth", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[5] = MapInfoS {5, L"多环迷宫", L"Multi-Ring Labyrinth", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[6] = MapInfoS {6, L"全塔", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
-	mapInfo[7] = MapInfoS {7, L"大平原", L"Great Plains", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
-	mapInfo[8] = MapInfoS {8, L"大沼泽", L"Everglades", L"LocalGen", 50, 50, 2500, 2500, 0, 0, 0, string()};
+	mapInfo[3] = MapInfoS {3, L"单路（无环）迷宫", L"Single-Path Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	mapInfo[4] = MapInfoS {4, L"多环迷宫", L"Multi-Ring Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	mapInfo[5] = MapInfoS {5, L"单路（无环）沼泽迷宫", L"Single-Path Swamp Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	mapInfo[6] = MapInfoS {6, L"多环沼泽迷宫", L"Multi-Ring Swamp Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
+	mapInfo[7] = MapInfoS {7, L"全塔", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
+	mapInfo[8] = MapInfoS {8, L"大平原", L"Great Plains", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
 	std::vector<string> files;
 	getAllFiles("maps", files, ".ini");
 	for(auto iniFile : files) {

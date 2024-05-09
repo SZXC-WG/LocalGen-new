@@ -1442,14 +1442,14 @@ namespace LGGraphics {
 		importGameSettings();
 		if(mapSelected < 9) {
 			switch(mapSelected) {
-				case 1: createRandomMap(height,width); break;
-				case 2: createStandardMap(height,width); break;
-				case 3: createLabyrinthMap(height,width,0); break;
-				case 4: createLabyrinthMap(height,width,1); break;
-				case 5: createLabyrinthMap(height,width,2); break;
-				case 6: createFullCityMap(height,width,armymin,armymax,plCnt); break;
-				case 7: createFullPlainMap(height,width,plCnt); break;
-				case 8: createFullSwampMap(height,width,plCnt); break;
+				case MAP_RANDOM_ID: createRandomMap(height,width); break;
+				case MAP_STANDARD_ID: createStandardMap(height,width); break;
+				case MAP_SP_MAZE_ID: createMazeMap(height,width,0,0); break;
+				case MAP_MR_MAZE_ID: createMazeMap(height,width,2,0); break;
+				case MAP_SP_SMAZE_ID: createMazeMap(height,width,0,1); break;
+				case MAP_MR_SMAZE_ID: createMazeMap(height,width,2,1); break;
+				case MAP_CITY_ID: createFullCityMap(height,width,armymin,armymax,plCnt); break;
+				case MAP_PLAIN_ID: createFullPlainMap(height,width,plCnt); break;
 			}
 		} else readMap(mapSelected);
 		heiinput.visible(false);

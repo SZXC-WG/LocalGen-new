@@ -157,7 +157,7 @@ namespace LGGraphics {
 		.size(100,40)
 		.move(scrw/2-50,scrh/2+30)
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(40,0)
+		.fontsize(zoomY(40),0)
 		.bgcolor(mainColor)
 		.textcolor(WHITE)
 		.textalign(CENTER_TEXT,CENTER_TEXT)
@@ -188,10 +188,13 @@ namespace LGGraphics {
 			std::wifstream pnfin("_players.ini");
 			if(!pnfin.fail()) {
 				for(int i=1; i<=12; ++i) {
-					wstring name;
+					wstring name, col;
 					getline(pnfin, name);
 					name = wcharTransfer(name);
 					playerInfo[i].name = name;
+					getline(pnfin, col);
+					color_t c = std::stoul(col,nullptr,0);
+					playerInfo[i].color = c;
 				}
 				pnfin.close();
 			}
@@ -505,7 +508,7 @@ namespace LGGraphics {
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(40,0)
+		.fontsize(zoomY(40),0)
 		.framecolor(false, mainColor);
 		for(; is_run(); delay_fps(120)) {
 			for(int i=1; i<=12; ++i) teamButton[i].detect().display();
@@ -765,7 +768,7 @@ namespace LGGraphics {
 		.bgcolor(WHITE)
 		.textcolor(mainColor)
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(40 * windowData.zoomY, 0)
+		.fontsize(zoomY(40) * windowData.zoomY, 0)
 		.addtext(L"confirm and submit")
 		.display();
 		settextjustify(CENTER_TEXT, CENTER_TEXT);
@@ -968,46 +971,46 @@ namespace LGGraphics {
 		sys_edit citynumBox,plainnumBox,savenameBox;
 		rectBUTTON saveButton,cancelButton,loadButton;
 		citynumBox.create();
-		citynumBox.size(80,30);
-		citynumBox.move(scrw/2+5,scrh-110);
-		citynumBox.setfont(20,0,LGset::mainFontName.c_str());
+		citynumBox.size(zoomX(80),zoomY(30));
+		citynumBox.move(scrw/2+zoomX(5),scrh-zoomY(110));
+		citynumBox.setfont(zoomY(20),0,LGset::mainFontName.c_str());
 		citynumBox.setcolor(mainColor);
 		citynumBox.settext("40");
 		plainnumBox.create();
-		plainnumBox.size(80,30);
-		plainnumBox.move(scrw/2+35,scrh-110);
-		plainnumBox.setfont(20,0,LGset::mainFontName.c_str());
+		plainnumBox.size(zoomX(80),zoomY(30));
+		plainnumBox.move(scrw/2+zoomX(35),scrh-zoomY(110));
+		plainnumBox.setfont(zoomY(20),0,LGset::mainFontName.c_str());
 		plainnumBox.setcolor(mainColor);
 		plainnumBox.settext("40");
 		savenameBox.create();
-		savenameBox.size(100,40);
-		savenameBox.move(scrw/2+20,scrh/2-20);
-		savenameBox.setfont(30,0,LGset::mainFontName.c_str());
+		savenameBox.size(zoomX(100),zoomY(40));
+		savenameBox.move(scrw/2+zoomX(20),scrh/2-zoomY(20));
+		savenameBox.setfont(zoomY(30),0,LGset::mainFontName.c_str());
 		savenameBox.setcolor(mainColor);
 		savenameBox.settext("map");
 		saveButton
-		.size(90,40)
-		.move(scrw/2-100,scrh/2+30)
+		.size(zoomX(90),zoomY(40))
+		.move(scrw/2-zoomX(100),scrh/2+zoomY(30))
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(40,0)
+		.fontsize(zoomY(40),0)
 		.bgcolor(mainColor)
 		.textcolor(WHITE)
 		.textalign(CENTER_TEXT,CENTER_TEXT)
 		.addtext(L"Save");
 		cancelButton
-		.size(90,40)
-		.move(scrw/2+10,scrh/2+30)
+		.size(zoomX(90),zoomY(40))
+		.move(scrw/2+zoomX(10),scrh/2+zoomY(30))
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(40,0)
+		.fontsize(zoomY(40),0)
 		.bgcolor(mainColor)
 		.textcolor(WHITE)
 		.textalign(CENTER_TEXT,CENTER_TEXT)
 		.addtext(L"Cancel");
 		loadButton
-		.size(90,40)
-		.move(scrw/2-100,scrh/2+30)
+		.size(zoomX(90),zoomY(40))
+		.move(scrw/2-zoomX(100),scrh/2+zoomY(30))
 		.fontname(LGset::mainFontName.c_str())
-		.fontsize(40,0)
+		.fontsize(zoomY(40),0)
 		.bgcolor(mainColor)
 		.textcolor(WHITE)
 		.textalign(CENTER_TEXT,CENTER_TEXT)
@@ -1016,7 +1019,7 @@ namespace LGGraphics {
 		for(int i=1; i<=mapH; ++i)
 			for(int j=1; j<=mapW; ++j) gameMap[i][j] = {0,0,0,0};
 		printMap(1048575, {-1,-1});
-		createOptions(0,scrh/2-140);
+		createOptions(0,scrh/2-zoomY(140));
 		setfillcolor(mainColor);
 		int smsx=0,smsy=0,midact=0,type=0,citynum=40,plainnum=40;
 		bool moved=false,saved=false;
@@ -1046,16 +1049,16 @@ namespace LGGraphics {
 						midact = 0;
 						std::chrono::steady_clock::duration now = std::chrono::steady_clock::now().time_since_epoch();
 						if(!moved && now - prsttm < 200ms) {
-							if(msg.x<40&&msg.y>=scrh/2-140&&msg.y<scrh/2+140)
-								type=(msg.y-(scrh/2-140))/40;
-							else if(msg.x>=scrw/2-145&&msg.x<scrw/2-5&&msg.y>=scrh-60&&msg.y<scrh-20) {
+							if(msg.x<zoomX(40)&&msg.y>=scrh/2-zoomY(140)&&msg.y<scrh/2+zoomY(140))
+								type=(msg.y-(scrh/2-zoomY(140)))/zoomY(40);
+							else if(msg.x>=scrw/2-zoomX(145)&&msg.x<scrw/2-zoomX(5)&&msg.y>=scrh-zoomY(60)&&msg.y<scrh-zoomY(20)) {
 								settextjustify(CENTER_TEXT, CENTER_TEXT);
 								setfillcolor(WHITE);
 								setcolor(BLACK);
-								bar(scrw/2-130,scrh/2-80,scrw/2+130,scrh/2+80);
-								setfont(40,0,LGset::mainFontName.c_str());
-								xyprintf(scrw/2,scrh/2-50,"Save map");
-								xyprintf(scrw/2-55,scrh/2,"Map name:");
+								bar(scrw/2-zoomX(130),scrh/2-zoomY(80),scrw/2+zoomX(130),scrh/2+zoomY(80));
+								setfont(zoomY(40),0,LGset::mainFontName.c_str());
+								xyprintf(scrw/2,scrh/2-zoomY(50),"Save map");
+								xyprintf(scrw/2-zoomX(55),scrh/2,"Map name:");
 								savenameBox.visible(true);
 								setfillcolor(mainColor);
 								saveButton.display();
@@ -1079,14 +1082,14 @@ namespace LGGraphics {
 									if(cancelButton.status==2) break;
 								}
 								savenameBox.visible(false);
-							} else if(msg.x>=scrw/2+5&&msg.x<scrw/2+145&&msg.y>=scrh-60&&msg.y<scrh-20) {
+							} else if(msg.x>=scrw/2+zoomX(5)&&msg.x<scrw/2+zoomX(145)&&msg.y>=scrh-zoomY(60)&&msg.y<scrh-zoomY(20)) {
 								settextjustify(CENTER_TEXT, CENTER_TEXT);
 								setfillcolor(WHITE);
 								setcolor(BLACK);
-								bar(scrw/2-130,scrh/2-80,scrw/2+130,scrh/2+80);
-								setfont(40,0,LGset::mainFontName.c_str());
-								xyprintf(scrw/2,scrh/2-50,"Load map");
-								xyprintf(scrw/2-55,scrh/2,"Map name:");
+								bar(scrw/2-zoomX(130),scrh/2-zoomY(80),scrw/2+zoomX(130),scrh/2+zoomY(80));
+								setfont(zoomY(40),0,LGset::mainFontName.c_str());
+								xyprintf(scrw/2,scrh/2-zoomY(50),"Load map");
+								xyprintf(scrw/2-zoomX(55),scrh/2,"Map name:");
 								savenameBox.visible(true);
 								setfillcolor(mainColor);
 								loadButton.display();
@@ -1112,16 +1115,16 @@ namespace LGGraphics {
 									if(cancelButton.status==2) break;
 								}
 								savenameBox.visible(false);
-							} else if(msg.x>=scrw/2-200&&msg.x<scrw/2-170&&msg.y>=10&&msg.y<40) {
+							} else if(msg.x>=scrw/2-zoomX(200)&&msg.x<scrw/2-zoomX(170)&&msg.y>=zoomY(10)&&msg.y<zoomY(40)) {
 								if(mapH>1) --mapH;
-							} else if(msg.x>=scrw/2-50&&msg.x<scrw/2-20&&msg.y>=10&&msg.y<40) {
+							} else if(msg.x>=scrw/2-zoomX(50)&&msg.x<scrw/2-zoomY(20)&&msg.y>=zoomY(10)&&msg.y<zoomY(40)) {
 								if(mapH<100) {
 									++mapH;
 									for(int i=1; i<=mapW; ++i) gameMap[mapH][i]= {0,0,0,0};
 								}
-							} else if(msg.x>=scrw/2+20&&msg.x<scrw/2+50&&msg.y>=10&&msg.y<40) {
+							} else if(msg.x>=scrw/2+zoomX(20)&&msg.x<scrw/2+zoomX(50)&&msg.y>=zoomY(10)&&msg.y<zoomY(40)) {
 								if(mapW>1) --mapW;
-							} else if(msg.x>=scrw/2+170&&msg.x<scrw/2+200&&msg.y>=10&&msg.y<40) {
+							} else if(msg.x>=scrw/2+zoomX(170)&&msg.x<scrw/2+zoomX(200)&&msg.y>=zoomY(10)&&msg.y<zoomY(40)) {
 								if(mapW<100) {
 									++mapW;
 									for(int i=1; i<=mapH; ++i) gameMap[i][mapW]= {0,0,0,0};
@@ -1174,63 +1177,63 @@ namespace LGGraphics {
 			}
 			cleardevice();
 			printMap(1048575, {-1,-1});
-			createOptions(type,scrh/2-140);
+			createOptions(type,scrh/2-zoomY(140));
 			settextjustify(CENTER_TEXT, CENTER_TEXT);
 			setcolor(BLACK);
 			setfillcolor(WHITE);
-			setfont(20,0,LGset::mainFontName.c_str());
+			setfont(zoomY(20),0,LGset::mainFontName.c_str());
 			if(type==0) {
-				bar(scrw/2-105,scrh-110,scrw/2+105,scrh-80);
-				xyprintf(scrw/2,scrh-95,"Click a tile to place a mountain.");
+				bar(scrw/2-zoomX(105),scrh-zoomY(110),scrw/2+zoomX(105),scrh-zoomY(80));
+				xyprintf(scrw/2,scrh-zoomY(95),"Click a tile to place a mountain.");
 			}
 			if(type==1) {
-				bar(scrw/2-105,scrh-130,scrw/2+105,scrh-80);
-				xyprintf(scrw/2,scrh-115,"Click a tile to place a swamp.");
-				xyprintf(scrw/2,scrh-95,"Swamps drain 1 army per turn.");
+				bar(scrw/2-zoomX(105),scrh-zoomY(130),scrw/2+zoomX(105),scrh-zoomY(80));
+				xyprintf(scrw/2,scrh-zoomY(115),"Click a tile to place a swamp.");
+				xyprintf(scrw/2,scrh-zoomY(95),"Swamps drain 1 army per turn.");
 			}
 			if(type==5) {
-				bar(scrw/2-95,scrh-110,scrw/2+95,scrh-80);
-				xyprintf(scrw/2,scrh-95,"Click a tile to toggle light tile.");
+				bar(scrw/2-zoomX(95),scrh-zoomY(110),scrw/2+zoomX(95),scrh-zoomY(80));
+				xyprintf(scrw/2,scrh-zoomY(95),"Click a tile to toggle light tile.");
 			}
 			if(type==6) {
-				bar(scrw/2-80,scrh-110,scrw/2+80,scrh-80);
-				xyprintf(scrw/2,scrh-95,"Click a tile to remove it.");
+				bar(scrw/2-zoomX(80),scrh-zoomY(110),scrw/2+zoomX(80),scrh-zoomY(80));
+				xyprintf(scrw/2,scrh-zoomY(95),"Click a tile to remove it.");
 			}
 			if(type==3) {
 				citynumBox.visible(true);
-				bar(scrw/2-85,scrh-110,scrw/2+5,scrh-80);
-				xyprintf(scrw/2-40,scrh-95,"City Strength:");
+				bar(scrw/2-zoomX(85),scrh-zoomY(110),scrw/2+zoomX(5),scrh-zoomY(80));
+				xyprintf(scrw/2-zoomX(40),scrh-zoomY(95),"City Strength:");
 				char s[10];
 				citynumBox.gettext(sizeof(s),s);
 				sscanf(s,"%d",&citynum);
 			} else citynumBox.visible(false);
 			if(type==4) {
 				plainnumBox.visible(true);
-				bar(scrw/2-115,scrh-110,scrw/2+35,scrh-80);
-				xyprintf(scrw/2-40,scrh-95,"Neutral Army Strength:");
+				bar(scrw/2-zoomX(115),scrh-zoomY(110),scrw/2+zoomX(35),scrh-zoomY(80));
+				xyprintf(scrw/2-zoomX(40),scrh-zoomY(95),"Neutral Army Strength:");
 				char s[10];
 				plainnumBox.gettext(sizeof(s),s);
 				sscanf(s,"%d",&plainnum);
 			} else plainnumBox.visible(false);
 			setfillcolor(WHITE);
 			setcolor(BLACK);
-			setfont(30,0,LGset::mainFontName.c_str());
-			bar(scrw/2-200,10,scrw/2-20,40);
-			xyprintf(scrw/2-110,25,"Height: %d",mapH);
-			xyprintf(scrw/2-185,25,"-");
-			xyprintf(scrw/2-35,25,"+");
-			bar(scrw/2+20,10,scrw/2+200,40);
-			xyprintf(scrw/2+110,25,"Width: %d",mapW);
-			xyprintf(scrw/2+35,25,"-");
-			xyprintf(scrw/2+185,25,"+");
-			bar(scrw/2-155,scrh-70,scrw/2+155,scrh-10);
+			setfont(zoomY(30),0,LGset::mainFontName.c_str());
+			bar(scrw/2-zoomX(200),zoomY(10),scrw/2-zoomX(20),zoomY(40));
+			xyprintf(scrw/2-zoomX(110),zoomY(25),"Height: %d",mapH);
+			xyprintf(scrw/2-zoomX(185),zoomY(25),"-");
+			xyprintf(scrw/2-zoomX(35),zoomY(25),"+");
+			bar(scrw/2+zoomX(20),zoomY(10),scrw/2+zoomX(200),zoomY(40));
+			xyprintf(scrw/2+zoomX(110),zoomY(25),"Width: %d",mapW);
+			xyprintf(scrw/2+zoomX(35),zoomY(25),"-");
+			xyprintf(scrw/2+zoomX(185),zoomY(25),"+");
+			bar(scrw/2-zoomX(155),scrh-zoomY(70),scrw/2+zoomX(155),scrh-zoomY(10));
 			setfillcolor(mainColor);
 			setcolor(WHITE);
-			setfont(40,0,LGset::mainFontName.c_str());
-			bar(scrw/2-145,scrh-60,scrw/2-5,scrh-20);
-			xyprintf(scrw/2-75,scrh-40,"Save map");
-			bar(scrw/2+5,scrh-60,scrw/2+145,scrh-20);
-			xyprintf(scrw/2+75,scrh-40,"Load map");
+			setfont(zoomY(40),0,LGset::mainFontName.c_str());
+			bar(scrw/2-zoomX(145),scrh-zoomY(60),scrw/2-zoomX(5),scrh-zoomY(20));
+			xyprintf(scrw/2-zoomX(75),scrh-zoomY(40),"Save map");
+			bar(scrw/2+zoomX(5),scrh-zoomY(60),scrw/2+zoomX(145),scrh-zoomY(20));
+			xyprintf(scrw/2+zoomX(75),scrh-zoomY(40),"Load map");
 			settextjustify(LEFT_TEXT, TOP_TEXT);
 		}
 	}
@@ -1765,6 +1768,16 @@ namespace LGGraphics {
 		tmp.info.cBText->bgColor = LGGraphics::bgColor;
 		tmp.info.cBText->boxText.push_back(singleTextS(WHITE,L"Silent War",LGset::mainFontName,-zoomY(20),0));
 		tmp.info.cBText->checkBox.size(zoomX(20),zoomY(20)).frame(2).variable(&LGset::modifier::SilentWar).bgcolor(bgColor).fillcolor(WHITE).framecolor(WHITE);
+		tmp.info.cBText->blankWidth = zoomX(10);
+		p_settings.addItem(tmp);
+		tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
+		tmp.info.cBText = new rCBOXtextS;
+		tmp.locX = zoomX(800);
+		tmp.locY = zoomY(350);
+		tmp.downLoc();
+		tmp.info.cBText->bgColor = LGGraphics::bgColor;
+		tmp.info.cBText->boxText.push_back(singleTextS(WHITE,L"Neutral Resist",LGset::mainFontName,-zoomY(20),0));
+		tmp.info.cBText->checkBox.size(zoomX(20),zoomY(20)).frame(2).variable(&LGset::modifier::NeutralResist).bgcolor(bgColor).fillcolor(WHITE).framecolor(WHITE);
 		tmp.info.cBText->blankWidth = zoomX(10);
 		p_settings.addItem(tmp);
 	}

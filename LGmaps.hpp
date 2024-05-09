@@ -173,24 +173,24 @@ void createOptions(int type, int h) {
 	for(int i=1; i<=8; ++i) {
 		npimg[i] = newimage();
 		images::copyImage(npimg[i],pimg[i]);
-		images::zoomImage(npimg[i],40,40);
+		images::zoomImage(npimg[i],LGGraphics::zoomX(40),LGGraphics::zoomY(40));
 	}
 	setcolor(WHITE);
-	setfont(14, 0, "Segoe UI");
+	setfont(LGGraphics::zoomY(14), 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	setfillcolor(col);
-	bar(0,h,40,h+280);
+	bar(0,h,LGGraphics::zoomX(40),h+LGGraphics::zoomY(280));
 	setfillcolor(selcol);
-	bar(0,h+type*40,40,h+40+type*40);
+	bar(0,h+type*LGGraphics::zoomY(40),LGGraphics::zoomX(40),h+LGGraphics::zoomY(40)+type*LGGraphics::zoomY(40));
 	setfillcolor(plcol);
-	bar(5,h+165,35,h+195);
+	bar(LGGraphics::zoomX(5),h+LGGraphics::zoomY(165),LGGraphics::zoomX(35),h+LGGraphics::zoomY(195));
 	putimage_withalpha(NULL,npimg[3],0,h);
-	putimage_withalpha(NULL,npimg[4],0,h+40);
-	putimage_withalpha(NULL,npimg[2],0,h+80);
-	putimage_withalpha(NULL,npimg[1],0,h+120);
-	putimage_withalpha(NULL,npimg[8],0,h+200);
-	putimage_withalpha(NULL,npimg[7],0,h+240);
-	xyprintf(20,h+180,"40");
+	putimage_withalpha(NULL,npimg[4],0,h+LGGraphics::zoomY(40));
+	putimage_withalpha(NULL,npimg[2],0,h+LGGraphics::zoomY(80));
+	putimage_withalpha(NULL,npimg[1],0,h+LGGraphics::zoomY(120));
+	putimage_withalpha(NULL,npimg[8],0,h+LGGraphics::zoomY(200));
+	putimage_withalpha(NULL,npimg[7],0,h+LGGraphics::zoomY(240));
+	xyprintf(LGGraphics::zoomX(20),h+LGGraphics::zoomY(180),"40");
 	for(int i=1; i<=8; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }

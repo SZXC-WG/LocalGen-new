@@ -164,29 +164,55 @@ void LGgame::updateMap() {
 	++LGgame::curTurn;
 	for(int i = 1; i <= mapH; ++i) {
 		for(int j = 1; j <= mapW; ++j) {
-			if(gameMap[i][j].player == 0) continue;
-			switch(gameMap[i][j].type) {
-				case 0: {
-					/* plain */
-					if(LGgame::curTurn % LGset::plainRate[LGset::gameMode] == 0) ++gameMap[i][j].army;
-					break;
+			if(gameMap[i][j].player != 0) {
+				switch(gameMap[i][j].type) {
+					case 0: {
+						/* plain */
+						if(LGgame::curTurn % LGset::plainRate[LGset::gameMode] == 0) ++gameMap[i][j].army;
+						break;
+					}
+					case 1: {
+						/* swamp */
+						if(gameMap[i][j].army > 0) if(!(--gameMap[i][j].army)) gameMap[i][j].player = 0;
+						break;
+					}
+					case 2:	   /* mountain */
+						break; /* ??? */
+					case 3: {
+						/* general */
+						++gameMap[i][j].army;
+						break;
+					}
+					case 4: {
+						/* city */
+						++gameMap[i][j].army;
+						break;
+					}
 				}
-				case 1: {
-					/* swamp */
-					if(gameMap[i][j].army > 0) if(!(--gameMap[i][j].army)) gameMap[i][j].player = 0;
-					break;
-				}
-				case 2:	   /* mountain */
-					break; /* ??? */
-				case 3: {
-					/* general */
-					++gameMap[i][j].army;
-					break;
-				}
-				case 4: {
-					/* city */
-					++gameMap[i][j].army;
-					break;
+			} else if(LGset::game::modifier::NeutralResist) {
+				switch(gameMap[i][j].type) {
+					case 0: {
+						/* plain */
+						if(LGgame::curTurn % (2*LGset::plainRate[LGset::gameMode]) == 0) ++gameMap[i][j].army;
+						break;
+					}
+					case 1: {
+						/* swamp */
+						if(gameMap[i][j].army > 0) if(!(--gameMap[i][j].army)) gameMap[i][j].player = 0;
+						break;
+					}
+					case 2:	   /* mountain */
+						break; /* ??? */
+					case 3: {
+						/* general */
+						++gameMap[i][j].army;
+						break;
+					}
+					case 4: {
+						/* city */
+						if(LGgame::curTurn % max(2,LGset::plainRate[LGset::gameMode]+1) == 0) ++gameMap[i][j].army;
+						break;
+					}
 				}
 			}
 		}

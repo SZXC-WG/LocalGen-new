@@ -50,6 +50,9 @@ namespace LGset {
 			buf.push_back(modifier::CityState);
 			buf.push_back(modifier::MistyVeil);
 			buf.push_back(modifier::SilentWar);
+			buf.push_back(modifier::SuburbPlain);
+			buf.push_back(modifier::DeepSwamp);
+			buf.push_back(modifier::NeutralResist);
 			buf.push_back(L'\n');
 			return buf;
 		}
@@ -132,6 +135,10 @@ namespace LGset {
 			modifier::CityState = buf[i++];
 			modifier::MistyVeil = buf[i++];
 			modifier::SilentWar = buf[i++];
+			if(rdBuild<=2746) return; // build 2746+ settings
+			modifier::SuburbPlain = buf[i++];
+			modifier::DeepSwamp = buf[i++];
+			modifier::NeutralResist = buf[i++];
 			buf[i++]; // L'\n'
 		}
 		inline void write() {

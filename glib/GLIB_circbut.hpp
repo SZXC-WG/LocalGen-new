@@ -150,7 +150,7 @@ inline namespace button {
 	}
 	inline bool circBUTTON::detect(mouse_msg _mouse) {
 		_mouse.x -= locationX; _mouse.y -= locationY;
-		if(hypot(_mouse.x, _mouse.y) <= buttonRadius) return status = 0, false;
+		if(hypot(_mouse.x, _mouse.y) > buttonRadius) return status = 0, false;
 		if(_mouse.is_left() && _mouse.is_down()) status = 2;
 		else status = 1;
 		return true;

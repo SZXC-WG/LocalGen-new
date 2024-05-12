@@ -418,34 +418,12 @@ namespace LGGraphics {
 					} break;
 				}
 			}
-			// setcolor(WHITE);
-			// settextjustify(CENTER_TEXT, BOTTOM_TEXT);
-			// setfont(-50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
-			// xyprintf(800 * windowData.zoomX, 75 * windowData.zoomY, L"Settings");
-			// setlinewidth(2);
-			// line(0, 100 * windowData.zoomY, 1600 * windowData.zoomX, 100 * windowData.zoomY);
-			// setfont(-20 * windowData.zoomY, 0, LGset::mainFontName.c_str());
-			// settextjustify(LEFT_TEXT, CENTER_TEXT);
-			// xyprintf(100 * windowData.zoomX, 125 * windowData.zoomY, L"Setting File: ./%s", LGset::settingFile.c_str());
-			// xyprintf(100 * windowData.zoomX, 150 * windowData.zoomY, L"Username: %ls", LGset::userName.c_str());
-			// xyprintf(100 * windowData.zoomX, 175 * windowData.zoomY, L"God Power: %s", (LGset::enableGodPower?"Enabled":"Disabled"));
-			// xyprintf(100 * windowData.zoomX, 200 * windowData.zoomY, L"Player Count (default): %d", LGset::defaultPlayerNum);
-			// xyprintf(100 * windowData.zoomX, 225 * windowData.zoomY, L"Game Speed (default): %d", LGset::defaultSpeed);
-			// xyprintf(100 * windowData.zoomX, 250 * windowData.zoomY, L"User ID in game (default): %d (%s)", LGset::defaultUserId, playerInfo[LGset::defaultUserId].name.c_str());
-			// xyprintf(100 * windowData.zoomX, 275 * windowData.zoomY, L"Gong Sound: %s", (LGset::enableGongSound?"Enabled":"Disabled"));
-			// xyprintf(100 * windowData.zoomX, 300 * windowData.zoomY, L"Replay File: %ls", LGset::replayFileName.c_str());
-			// xyprintf(100 * windowData.zoomX, 325 * windowData.zoomY, L"Beta Tag: %s", (LGset::enableBetaTag?"Enabled":"Disabled"));
-			// xyprintf(100 * windowData.zoomX, 350 * windowData.zoomY, L"Web Socket Port: %d", LGset::socketPort);
-			// xyprintf(100 * windowData.zoomX, 375 * windowData.zoomY, L"General Font: %ls", LGset::mainFontName.c_str());
-			// xyprintf(100 * windowData.zoomX, 400 * windowData.zoomY, L"Block Font Size Range: [%d, %d]", LGset::blockMinFontSize, LGset::blockMaxFontSize);
-			// setfont(-40 * windowData.zoomY, 0, LGset::mainFontName.c_str());
-			// xyprintf(100 * windowData.zoomX, 450 * windowData.zoomY, L"General Game Mode: %d", LGset::gameMode);
-			// setfont(-20 * windowData.zoomY, 0, LGset::mainFontName.c_str());
-			// switch(LGset::gameMode) {
-			// 	case 0: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(normal generals.io)"); break;
-			// 	case 1: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(city state)"); break;
-			// 	case 2: xyprintf(100 * windowData.zoomX, 500 * windowData.zoomY, L"(land state)"); break;
-			// }
+			setcolor(WHITE);
+			settextjustify(CENTER_TEXT, BOTTOM_TEXT);
+			setfont(-50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
+			xyprintf(800 * windowData.zoomX, 75 * windowData.zoomY, L"Settings");
+			setlinewidth(2);
+			line(0, 100 * windowData.zoomY, 1600 * windowData.zoomX, 100 * windowData.zoomY);
 		}
 	}
 
@@ -1712,17 +1690,40 @@ namespace LGGraphics {
 		tmp.locY = zoomY(210);
 		tmp.downLoc();
 		p_settings.addItem(tmp);
-		// tmp.iType = ITEM_CIRCBUTTON;
-		// tmp.info.cButton = new circBUTTON(zoomY(10));
-		// tmp.locX = zoomX(130);
-		// tmp.locY = zoomY(220); // centre
-		// tmp.downLoc();
-		// tmp.info.cButton->addtext(L"0").bgcolor(LGGraphics::mainColor).textcolor(WHITE).fontsize(-zoomY(20),0).textalign(CENTER_TEXT,CENTER_TEXT).fontname(LGset::mainFontName);
-		// tmp.info.cButton->enableShadow = true;
-		// tmp.info.cButton->enableTextShadow = false;
-		// tmp.info.cButton->enableButtonShadow = false;
-		// tmp.info.cButton->event([&]()->void{LGset::game::gameMode=2;});
-		// p_settings.addItem(tmp);
+		tmp.iType = ITEM_CIRCBUTTON;
+		tmp.info.cButton = new circBUTTON;
+		tmp.locX = zoomX(260);
+		tmp.locY = zoomY(225); // centre
+		tmp.downLoc();
+		tmp.info.cButton->radius(zoomY(15));
+		tmp.info.cButton->addtext(L"0").bgcolor(LGGraphics::mainColor).textcolor(WHITE).fontsize(zoomY(20),0).textalign(CENTER_TEXT,CENTER_TEXT).fontname(LGset::mainFontName);
+		tmp.info.cButton->enableShadow = true;
+		tmp.info.cButton->enableTextShadow = false;
+		tmp.info.cButton->enableButtonShadow = false;
+		tmp.info.cButton->event([&]()->void{LGset::game::gameMode=0;});
+		p_settings.addItem(tmp);
+		tmp.info.cButton = new circBUTTON;
+		tmp.locX = zoomX(300);
+		tmp.locY = zoomY(225); // centre
+		tmp.downLoc();
+		tmp.info.cButton->radius(zoomY(15));
+		tmp.info.cButton->addtext(L"1").bgcolor(LGGraphics::mainColor).textcolor(WHITE).fontsize(zoomY(20),0).textalign(CENTER_TEXT,CENTER_TEXT).fontname(LGset::mainFontName);
+		tmp.info.cButton->enableShadow = true;
+		tmp.info.cButton->enableTextShadow = false;
+		tmp.info.cButton->enableButtonShadow = false;
+		tmp.info.cButton->event([&]()->void{LGset::game::gameMode=1;});
+		p_settings.addItem(tmp);
+		tmp.info.cButton = new circBUTTON;
+		tmp.locX = zoomX(340);
+		tmp.locY = zoomY(225); // centre
+		tmp.downLoc();
+		tmp.info.cButton->radius(zoomY(15));
+		tmp.info.cButton->addtext(L"2").bgcolor(LGGraphics::mainColor).textcolor(WHITE).fontsize(zoomY(20),0).textalign(CENTER_TEXT,CENTER_TEXT).fontname(LGset::mainFontName);
+		tmp.info.cButton->enableShadow = true;
+		tmp.info.cButton->enableTextShadow = false;
+		tmp.info.cButton->enableButtonShadow = false;
+		tmp.info.cButton->event([&]()->void{LGset::game::gameMode=2;});
+		p_settings.addItem(tmp);
 		tmp.iType = ITEM_LINETEXT;
 		tmp.info.lText = new lineTextS;
 		tmp.locX = zoomX(800);

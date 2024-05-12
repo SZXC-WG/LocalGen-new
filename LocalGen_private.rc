@@ -11,8 +11,8 @@ A ICON "LocalGen.ico"
 // TO CHANGE VERSION INFORMATION, EDIT PROJECT OPTIONS...
 //
 1 VERSIONINFO
-FILEVERSION 4,2,5,2783
-PRODUCTVERSION 4,2,5,2783
+FILEVERSION 4,2,5,2785
+PRODUCTVERSION 4,2,5,2785
 FILETYPE VFT_APP
 {
   BLOCK "StringFileInfo"
@@ -20,14 +20,14 @@ FILETYPE VFT_APP
     BLOCK "040904E4"
     {
       VALUE "CompanyName", "SZXC Work Group"
-      VALUE "FileVersion", "4.2.5.2783"
+      VALUE "FileVersion", "4.2.5.2785"
       VALUE "FileDescription", "Local Generals.io"
       VALUE "InternalName", ""
       VALUE "LegalCopyright", "Copyright (c) 2023 SZXC Work Group"
       VALUE "LegalTrademarks", ""
       VALUE "OriginalFilename", ""
       VALUE "ProductName", "Local Generals.io"
-      VALUE "ProductVersion", "4.2.5.2783"
+      VALUE "ProductVersion", "4.2.5.2785"
     }
   }
   BLOCK "VarFileInfo"

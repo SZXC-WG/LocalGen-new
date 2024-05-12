@@ -418,12 +418,6 @@ namespace LGGraphics {
 					} break;
 				}
 			}
-			setcolor(WHITE);
-			settextjustify(CENTER_TEXT, BOTTOM_TEXT);
-			setfont(-50 * windowData.zoomY, 0, LGset::mainFontName.c_str());
-			xyprintf(800 * windowData.zoomX, 75 * windowData.zoomY, L"Settings");
-			setlinewidth(2);
-			line(0, 100 * windowData.zoomY, 1600 * windowData.zoomX, 100 * windowData.zoomY);
 		}
 	}
 

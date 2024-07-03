@@ -552,15 +552,15 @@ namespace LGlocal {
 		std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 		LGgame::robotId[1] = -100;
 		for(int i = 2; i <= LGgame::playerCnt; ++i) {
-			// LGgame::robotId[i] = mtrd() % 500;
+			LGgame::robotId[i] = mtrd() % 400;
 			// LGgame::robotId[i] = mtrd() % 200 + 300;
 			// LGgame::robotId[i] = mtrd() % 100 + 400;
-			LGgame::robotId[i] = mtrd() % 100 + 300;
+			// LGgame::robotId[i] = mtrd() % 100 + 300;
 			while(((LGset::gameMode == 1 || LGset::gameMode == 2)
 			       && (200 <= LGgame::robotId[i] && LGgame::robotId[i] < 300)))
-				// LGgame::robotId[i] = mtrd() % 400;
+				LGgame::robotId[i] = mtrd() % 400;
 				// LGgame::robotId[i] = mtrd() % 200 + 300;
-				LGgame::robotId[i] = mtrd() % 100 + 300;
+				// LGgame::robotId[i] = mtrd() % 100 + 300;
 			if(300 <= LGgame::robotId[i] && LGgame::robotId[i] < 400) zlyBot::initBot(i);
 			if(400 <= LGgame::robotId[i] && LGgame::robotId[i] < 500) zlyBot_v2::initBot(i);
 		}

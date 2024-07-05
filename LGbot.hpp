@@ -29,7 +29,7 @@ string botName[] = {
 	"xrzBot",
 	"xiaruizeBot",
 	"zlyBot",
-	"zlyBot V2",
+	"gjrBot",
 };
 
 #endif

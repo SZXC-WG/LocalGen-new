@@ -39,8 +39,8 @@ void printBlockNum(bool visible, long long army, int player, int curx, int cury)
 	if(textwidth(out.c_str()) <= blockWidth - 2)
 		outtextxy(luX + blockWidth / 2, luY + blockHeight / 2, out.c_str());
 	else {
-		while(out.size()>1ull && textwidth((out+".."s).c_str()) > blockWidth - 2) out.pop_back();
-		outtextxy(luX + blockWidth / 2, luY + blockHeight / 2, (out+".."s).c_str());
+		while(out.size() > 1ull && textwidth((out + ".."s).c_str()) > blockWidth - 2) out.pop_back();
+		outtextxy(luX + blockWidth / 2, luY + blockHeight / 2, (out + ".."s).c_str());
 	}
 }
 
@@ -57,17 +57,17 @@ void printMap(int Code, coordS coo) {
 	setfont(-blockFontSize, 0, LGset::mainFontName.c_str());
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	PIMAGE npimg[9];
-	for(int i=1; i<=6; ++i) {
+	for(int i = 1; i <= 6; ++i) {
 		npimg[i] = newimage();
-		images::copyImage(npimg[i],pimg[i]);
-		images::zoomImage(npimg[i],blockWidth,blockHeight);
+		images::copyImage(npimg[i], pimg[i]);
+		images::zoomImage(npimg[i], blockWidth, blockHeight);
 	}
-	npimg[7]=newimage();
-	images::copyImage(npimg[7],pimg[8]);
-	images::zoomImage(npimg[7],blockWidth/3,blockHeight/3);
-	npimg[8]=newimage();
-	images::copyImage(npimg[8],pimg[8]);
-	images::zoomImage(npimg[8],blockWidth,blockHeight);
+	npimg[7] = newimage();
+	images::copyImage(npimg[7], pimg[8]);
+	images::zoomImage(npimg[7], blockWidth / 3, blockHeight / 3);
+	npimg[8] = newimage();
+	images::copyImage(npimg[8], pimg[8]);
+	images::zoomImage(npimg[8], blockWidth, blockHeight);
 	for(int curx = 1; curx <= mapH; curx++) {
 		for(int cury = 1; cury <= mapW; cury++) {
 			if(isVisible(curx, cury, Code)) {
@@ -144,8 +144,8 @@ void printMap(int Code, coordS coo) {
 					break;
 				}
 			}
-			if(LGgame::inCreate&&gameMap[curx][cury].lit) {
-				if(gameMap[curx][cury].type==0&&gameMap[curx][cury].army==0) {
+			if(LGgame::inCreate && gameMap[curx][cury].lit) {
+				if(gameMap[curx][cury].type == 0 && gameMap[curx][cury].army == 0) {
 					putimage_withalpha(NULL, npimg[8],
 					                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
 					                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
@@ -157,11 +157,11 @@ void printMap(int Code, coordS coo) {
 			}
 		}
 	}
-	if((~coo.x)||(~coo.y))
+	if((~coo.x) || (~coo.y))
 		putimage_withalpha(NULL, npimg[6],
 		                   LGGraphics::windowData.maplocX + blockWidth * (coo.y - 1),
 		                   LGGraphics::windowData.maplocY + blockHeight * (coo.x - 1));
-	for(int i=1; i<=8; ++i) delimage(npimg[i]);
+	for(int i = 1; i <= 8; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 
@@ -170,28 +170,28 @@ void createOptions(int type, int h) {
 	                     plcol = 0xff3c3c3c,
 	                     selcol = 0xff008080;
 	PIMAGE npimg[9];
-	for(int i=1; i<=8; ++i) {
+	for(int i = 1; i <= 8; ++i) {
 		npimg[i] = newimage();
-		images::copyImage(npimg[i],pimg[i]);
-		images::zoomImage(npimg[i],LGGraphics::zoomX(40),LGGraphics::zoomY(40));
+		images::copyImage(npimg[i], pimg[i]);
+		images::zoomImage(npimg[i], LGGraphics::zoomX(40), LGGraphics::zoomY(40));
 	}
 	setcolor(WHITE);
 	setfont(LGGraphics::zoomY(14), 0, "Segoe UI");
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
 	setfillcolor(col);
-	bar(0,h,LGGraphics::zoomX(40),h+LGGraphics::zoomY(280));
+	bar(0, h, LGGraphics::zoomX(40), h + LGGraphics::zoomY(280));
 	setfillcolor(selcol);
-	bar(0,h+type*LGGraphics::zoomY(40),LGGraphics::zoomX(40),h+LGGraphics::zoomY(40)+type*LGGraphics::zoomY(40));
+	bar(0, h + type * LGGraphics::zoomY(40), LGGraphics::zoomX(40), h + LGGraphics::zoomY(40) + type * LGGraphics::zoomY(40));
 	setfillcolor(plcol);
-	bar(LGGraphics::zoomX(5),h+LGGraphics::zoomY(165),LGGraphics::zoomX(35),h+LGGraphics::zoomY(195));
-	putimage_withalpha(NULL,npimg[3],0,h);
-	putimage_withalpha(NULL,npimg[4],0,h+LGGraphics::zoomY(40));
-	putimage_withalpha(NULL,npimg[2],0,h+LGGraphics::zoomY(80));
-	putimage_withalpha(NULL,npimg[1],0,h+LGGraphics::zoomY(120));
-	putimage_withalpha(NULL,npimg[8],0,h+LGGraphics::zoomY(200));
-	putimage_withalpha(NULL,npimg[7],0,h+LGGraphics::zoomY(240));
-	xyprintf(LGGraphics::zoomX(20),h+LGGraphics::zoomY(180),"40");
-	for(int i=1; i<=8; ++i) delimage(npimg[i]);
+	bar(LGGraphics::zoomX(5), h + LGGraphics::zoomY(165), LGGraphics::zoomX(35), h + LGGraphics::zoomY(195));
+	putimage_withalpha(NULL, npimg[3], 0, h);
+	putimage_withalpha(NULL, npimg[4], 0, h + LGGraphics::zoomY(40));
+	putimage_withalpha(NULL, npimg[2], 0, h + LGGraphics::zoomY(80));
+	putimage_withalpha(NULL, npimg[1], 0, h + LGGraphics::zoomY(120));
+	putimage_withalpha(NULL, npimg[8], 0, h + LGGraphics::zoomY(200));
+	putimage_withalpha(NULL, npimg[7], 0, h + LGGraphics::zoomY(240));
+	xyprintf(LGGraphics::zoomX(20), h + LGGraphics::zoomY(180), "40");
+	for(int i = 1; i <= 8; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 
@@ -304,65 +304,72 @@ void createStandardMap(int crtH = -1, int crtW = -1) {
 }
 void createMazeMap(int crtH, int crtW, int ringTYPE, int routeTYPE = 0) {
 	mapH = crtH, mapW = crtW;
-	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].army = 0;
-	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].type = 2;
-	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].lit = false;
-	for(int i=1; i<=crtH; ++i) for(int j=1; j<=crtW; ++j) gameMap[i][j].player = 0;
+	for(int i = 1; i <= crtH; ++i)
+		for(int j = 1; j <= crtW; ++j) gameMap[i][j].army = 0;
+	for(int i = 1; i <= crtH; ++i)
+		for(int j = 1; j <= crtW; ++j) gameMap[i][j].type = 2;
+	for(int i = 1; i <= crtH; ++i)
+		for(int j = 1; j <= crtW; ++j) gameMap[i][j].lit = false;
+	for(int i = 1; i <= crtH; ++i)
+		for(int j = 1; j <= crtW; ++j) gameMap[i][j].player = 0;
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 	static coordS p[10005];
-	static std::function<bool(int,int)> adjacent = [](int i,int j)->bool{ return (abs(p[i].x-p[j].x)+abs(p[i].y-p[j].y)==2); };
-	static int c,m,f[10005];
-	static std::function<int(int)> getf = [](int u)->int{ return f[u]=(f[u]==u?u:getf(f[u])); };
-	static std::function<void(int,int)> unite = [](int u,int v)->void{ int x=getf(u),y=getf(v); f[x]=(x==y?f[x]:y); };
-	static struct edge { int u,v; } e[10005];
-	static int ec[10005],mec[10005];
+	static std::function<bool(int, int)> adjacent = [](int i, int j) -> bool { return (abs(p[i].x - p[j].x) + abs(p[i].y - p[j].y) == 2); };
+	static int c, m, f[10005];
+	static std::function<int(int)> getf = [](int u) -> int { return f[u] = (f[u] == u ? u : getf(f[u])); };
+	static std::function<void(int, int)> unite = [](int u, int v) -> void { int x=getf(u),y=getf(v); f[x]=(x==y?f[x]:y); };
+	static struct edge {
+		int u, v;
+	} e[10005];
+	static int ec[10005], mec[10005];
 	static bool vs[10005][10005];
-	c=0;
-	for(int i=1; i<=crtH; i+=2)
-		for(int j=1; j<=crtW; j+=2) {
-			p[++c]=coordS{i,j};
-			mec[c]=4;
-			if(i-2<0) --mec[c];
-			if(i+2>crtH) --mec[c];
-			if(j-2<0) --mec[c];
-			if(j+2>crtW) --mec[c];
-			ec[c]=0;
-			gameMap[i][j].type=0;
+	c = 0;
+	for(int i = 1; i <= crtH; i += 2)
+		for(int j = 1; j <= crtW; j += 2) {
+			p[++c] = coordS{ i, j };
+			mec[c] = 4;
+			if(i - 2 < 0) --mec[c];
+			if(i + 2 > crtH) --mec[c];
+			if(j - 2 < 0) --mec[c];
+			if(j + 2 > crtW) --mec[c];
+			ec[c] = 0;
+			gameMap[i][j].type = 0;
 		}
-	for(int i=1; i<=c; ++i) for(int j=1; j<=c; ++j) vs[i][j]=false;
-	m=c-1;
-	if(ringTYPE==1) ++m;
-	if(ringTYPE==2) m+=crtH+crtW;
-	std::iota(f+1,f+c+1,1);
-	for(int i=1; i<c; ++i) {
-		int u,v;
+	for(int i = 1; i <= c; ++i)
+		for(int j = 1; j <= c; ++j) vs[i][j] = false;
+	m = c - 1;
+	if(ringTYPE == 1) ++m;
+	if(ringTYPE == 2) m += crtH + crtW;
+	std::iota(f + 1, f + c + 1, 1);
+	for(int i = 1; i < c; ++i) {
+		int u, v;
 		while(1) {
-			u=mtrd()%c+1,v=mtrd()%c+1;
-			if(adjacent(u,v)&&getf(u)!=getf(v)) break;
+			u = mtrd() % c + 1, v = mtrd() % c + 1;
+			if(adjacent(u, v) && getf(u) != getf(v)) break;
 		}
-		unite(u,v);
-		e[i]=edge{u,v};
-		++ec[u],++ec[v];
-		vs[u][v]=vs[v][u]=true;
+		unite(u, v);
+		e[i] = edge{ u, v };
+		++ec[u], ++ec[v];
+		vs[u][v] = vs[v][u] = true;
 	}
-	for(int i=c; i<=m; ++i) {
-		int u,v;
+	for(int i = c; i <= m; ++i) {
+		int u, v;
 		while(1) {
-			u=mtrd()%c+1,v=mtrd()%c+1;
-			if(adjacent(u,v)&&!vs[u][v]) break;
+			u = mtrd() % c + 1, v = mtrd() % c + 1;
+			if(adjacent(u, v) && !vs[u][v]) break;
 		}
-		e[i]=edge{u,v};
-		++ec[u],++ec[v];
+		e[i] = edge{ u, v };
+		++ec[u], ++ec[v];
 	}
-	for(int i=1; i<=m; ++i) {
-		coordS a=p[e[i].u],b=p[e[i].v];
-		coordS coo = coordS{(a.x+b.x)>>1,(a.y+b.y)>>1};
+	for(int i = 1; i <= m; ++i) {
+		coordS a = p[e[i].u], b = p[e[i].v];
+		coordS coo = coordS{ (a.x + b.x) >> 1, (a.y + b.y) >> 1 };
 		gameMap[coo.x][coo.y].type = 4;
 		gameMap[coo.x][coo.y].army = 40;
 	}
-	for(int i=1; i<=c; ++i) {
+	for(int i = 1; i <= c; ++i) {
 		gameMap[p[i].x][p[i].y].type = routeTYPE;
-		if(ec[i]==1) gameMap[p[i].x][p[i].y].type = 3;
+		if(ec[i] == 1) gameMap[p[i].x][p[i].y].type = 3;
 	}
 }
 void createFullCityMap(int crtH, int crtW, long long armyMN, long long armyMX, int plCnt) {
@@ -398,7 +405,7 @@ void createFullPlainMap(int crtH, int crtW, int plCnt) {
 	}
 }
 
-void getAllFiles(string path, std::vector<string>& files, string fileExt)  {
+void getAllFiles(string path, std::vector<string>& files, string fileExt) {
 	long hFile = 0;
 	struct _finddata_t fileinfo;
 	string p;
@@ -415,17 +422,17 @@ struct MapInfoS { int id; string chiname; string engname; string auth; int hei; 
 */
 void initMaps() {
 	mapNum = 8;
-	mapInfo[1] = MapInfoS {1, L"随机", L"Random", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[2] = MapInfoS {2, L"标准", L"Standard", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[3] = MapInfoS {3, L"单路（无环）迷宫", L"Single-Path Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[4] = MapInfoS {4, L"多环迷宫", L"Multi-Ring Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[5] = MapInfoS {5, L"单路（无环）沼泽迷宫", L"Single-Path Swamp Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[6] = MapInfoS {6, L"多环沼泽迷宫", L"Multi-Ring Swamp Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string()};
-	mapInfo[7] = MapInfoS {7, L"全塔", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string()};
-	mapInfo[8] = MapInfoS {8, L"大平原", L"Great Plains", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string()};
+	mapInfo[1] = MapInfoS{ 1, L"随机", L"Random", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string() };
+	mapInfo[2] = MapInfoS{ 2, L"标准", L"Standard", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string() };
+	mapInfo[3] = MapInfoS{ 3, L"单路（无环）迷宫", L"Single-Path Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string() };
+	mapInfo[4] = MapInfoS{ 4, L"多环迷宫", L"Multi-Ring Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string() };
+	mapInfo[5] = MapInfoS{ 5, L"单路（无环）沼泽迷宫", L"Single-Path Swamp Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string() };
+	mapInfo[6] = MapInfoS{ 6, L"多环沼泽迷宫", L"Multi-Ring Swamp Maze", L"LocalGen", 50, 50, 2500, 2500, 2500, 2500, 2500, string() };
+	mapInfo[7] = MapInfoS{ 7, L"全塔", L"Full Tower/City", L"LocalGen", 50, 50, 2500, 0, 2500, 0, 0, string() };
+	mapInfo[8] = MapInfoS{ 8, L"大平原", L"Great Plains", L"LocalGen", 50, 50, 2500, 0, 0, 0, 2500, string() };
 	std::vector<string> files;
 	getAllFiles("maps", files, ".ini");
-	for(auto iniFile : files) {
+	for(auto iniFile: files) {
 		string s = iniFile.substr(0, iniFile.size() - 4);
 		wstring chin;
 		wstring engn, auth;
@@ -446,8 +453,8 @@ void initMaps() {
 		lgFS.close();
 		deZip();
 		mapInfo[mapNum].height = mapH, mapInfo[mapNum].width = mapW;
-		for(int i=1; i<=mapH; ++i) {
-			for(int j=1; j<=mapW; ++j) {
+		for(int i = 1; i <= mapH; ++i) {
+			for(int j = 1; j <= mapW; ++j) {
 				switch(gameMap[i][j].type) {
 					case 0: ++mapInfo[mapNum].plaincnt; break;
 					case 1: ++mapInfo[mapNum].swampcnt; break;
@@ -465,6 +472,6 @@ void readMap(int mid) {
 	deZip();
 }
 
-#undef ll // long long
+#undef ll  // long long
 
-#endif // __LGMAPS_HPP
+#endif  // __LGMAPS_HPP

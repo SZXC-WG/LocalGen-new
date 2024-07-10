@@ -21,7 +21,7 @@
 void LGgame::capture(int p1, int p2) {
 	if(p2 == 1) {
 		std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
-		if((!inReplay)&&(!inServer)) MessageBoxW(nullptr, wstring(L"YOU ARE KILLED BY PLAYER " + playerInfo[p1].name + L" AT TURN " + to_wstring(LGgame::curTurn) + L".").c_str(), L"", MB_OK | MB_SYSTEMMODAL);
+		if((!inReplay) && (!inServer)) MessageBoxW(nullptr, wstring(L"YOU ARE KILLED BY PLAYER " + playerInfo[p1].name + L" AT TURN " + to_wstring(LGgame::curTurn) + L".").c_str(), L"", MB_OK | MB_SYSTEMMODAL);
 		std::chrono::nanoseconds ed = std::chrono::steady_clock::now().time_since_epoch();
 		LGgame::beginTime += ed - bg;
 	}
@@ -41,7 +41,7 @@ void LGgame::capture(int p1, int p2) {
 		gmt(genCoo[p2]) = 3;
 		genCoo[p1] = genCoo[p2];
 	}
-	lastTurn[p2] = coordS{-1, -1};
+	lastTurn[p2] = coordS{ -1, -1 };
 }
 
 // movement analyzer
@@ -54,10 +54,10 @@ int LGgame::analyzeMove(int id, int mv, coordS& coo) {
 			lastTurn[id] = coo;
 			break;
 		case 1 ... 4: {
-			coordS newCoo{coo.x + dx[mv], coo.y + dy[mv]};
+			coordS newCoo{ coo.x + dx[mv], coo.y + dy[mv] };
 			if(newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW || gameMap[newCoo.x][newCoo.y].type == 2)
 				return 1;
-			moveS insMv {
+			moveS insMv{
 				id,
 				true,
 				coo,
@@ -69,7 +69,7 @@ int LGgame::analyzeMove(int id, int mv, coordS& coo) {
 			break;
 		}
 		case 5 ... 8: {
-			coordS newCoo{coo.x + dx[mv - 4], coo.y + dy[mv - 4]};
+			coordS newCoo{ coo.x + dx[mv - 4], coo.y + dy[mv - 4] };
 			if(newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW)
 				return 1;
 			coo = newCoo;
@@ -88,7 +88,7 @@ int LGgame::checkMove(moveS mv) {
 	if(mv.to.x < 1 || mv.to.x > mapH || mv.to.y < 1 || mv.to.y > mapW) return 2;
 	if(gameMap[mv.from.x][mv.from.y].type == 2 && mv.takeArmy) return 2;
 	if(gameMap[mv.to.x][mv.to.y].type == 2 && mv.takeArmy) return 2;
-	if(abs(mv.to.x - mv.from.x) + abs(mv.to.y - mv.from.y) > 1 && mv.takeArmy) return 3; // focus change
+	if(abs(mv.to.x - mv.from.x) + abs(mv.to.y - mv.from.y) > 1 && mv.takeArmy) return 3;  // focus change
 	return 0;
 }
 // flush existing movements
@@ -120,7 +120,8 @@ void LGgame::flushMove() {
 					// gameMap[cur.to.x][cur.to.y].type = 4; // move to function capture(int,int)
 					/* for(auto& mv : LGgame::inlineMove)
 						if(mv.id == p)
-							mv.id = cur.id; */ // useless and cause bugs
+							mv.id = cur.id; */
+					// useless and cause bugs
 				}
 			}
 		}
@@ -133,13 +134,13 @@ void LGgame::initGenerals(coordS coos[]) {
 	for(int i = 1; i <= mapH; ++i)
 		for(int j = 1; j <= mapW; ++j)
 			if(gameMap[i][j].type == 3)
-				gens.push_back(coordS{i, j});
+				gens.push_back(coordS{ i, j });
 	while(gens.size() < LGgame::playerCnt) {
 		std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
 		int x, y;
 		do x = p() % mapH + 1, y = p() % mapW + 1;
 		while(gameMap[x][y].type != 0);
-		gens.push_back(coordS{x, y});
+		gens.push_back(coordS{ x, y });
 		gameMap[x][y].type = 3;
 		gameMap[x][y].army = 0;
 	}
@@ -173,10 +174,11 @@ void LGgame::updateMap() {
 					}
 					case 1: {
 						/* swamp */
-						if(gameMap[i][j].army > 0) if(!(--gameMap[i][j].army)) gameMap[i][j].player = 0;
+						if(gameMap[i][j].army > 0)
+							if(!(--gameMap[i][j].army)) gameMap[i][j].player = 0;
 						break;
 					}
-					case 2:	   /* mountain */
+					case 2:    /* mountain */
 						break; /* ??? */
 					case 3: {
 						/* general */
@@ -193,15 +195,16 @@ void LGgame::updateMap() {
 				switch(gameMap[i][j].type) {
 					case 0: {
 						/* plain */
-						if(LGgame::curTurn % (2*LGset::plainRate[LGset::gameMode]) == 0) ++gameMap[i][j].army;
+						if(LGgame::curTurn % (2 * LGset::plainRate[LGset::gameMode]) == 0) ++gameMap[i][j].army;
 						break;
 					}
 					case 1: {
 						/* swamp */
-						if(gameMap[i][j].army > 0) if(!(--gameMap[i][j].army)) gameMap[i][j].player = 0;
+						if(gameMap[i][j].army > 0)
+							if(!(--gameMap[i][j].army)) gameMap[i][j].player = 0;
 						break;
 					}
-					case 2:	   /* mountain */
+					case 2:    /* mountain */
 						break; /* ??? */
 					case 3: {
 						/* general */
@@ -220,26 +223,26 @@ void LGgame::updateMap() {
 }
 
 void LGgame::statistics() {
-	for(int i=1; i<=LGgame::playerCnt; ++i) gameStats[i].push_back(turnStatS());
-	for(int i=1; i<=LGgame::playerCnt; ++i) gameStats[i].back().id = i;
-	for(int i=1; i<=LGgame::playerCnt; ++i) gameStats[i].back().focus = LGgame::playerFocus[i];
-	for(int i=1; i<=LGgame::playerCnt; ++i) gameStats[i].back().coo = LGgame::playerCoo[i];
-	for(int i=1; i<=mapH; ++i) {
-		for(int j=1; j<=mapW; ++j) {
-			if(gmp(i,j) == 0) continue;
-			gameStats[gmp(i,j)].back().army += gma(i,j);
-			if(gmt(i,j) == 0) gameStats[gmp(i,j)].back().plain += 1;
-			else if(gmt(i,j) == 1) gameStats[gmp(i,j)].back().swamp += 1;
-			else if(gmt(i,j) == 2) gameStats[gmp(i,j)].back().mount += 1;
-			else if(gmt(i,j) == 3) gameStats[gmp(i,j)].back().city += 1;
-			else if(gmt(i,j) == 4) gameStats[gmp(i,j)].back().city += 1;
+	for(int i = 1; i <= LGgame::playerCnt; ++i) gameStats[i].push_back(turnStatS());
+	for(int i = 1; i <= LGgame::playerCnt; ++i) gameStats[i].back().id = i;
+	for(int i = 1; i <= LGgame::playerCnt; ++i) gameStats[i].back().focus = LGgame::playerFocus[i];
+	for(int i = 1; i <= LGgame::playerCnt; ++i) gameStats[i].back().coo = LGgame::playerCoo[i];
+	for(int i = 1; i <= mapH; ++i) {
+		for(int j = 1; j <= mapW; ++j) {
+			if(gmp(i, j) == 0) continue;
+			gameStats[gmp(i, j)].back().army += gma(i, j);
+			if(gmt(i, j) == 0) gameStats[gmp(i, j)].back().plain += 1;
+			else if(gmt(i, j) == 1) gameStats[gmp(i, j)].back().swamp += 1;
+			else if(gmt(i, j) == 2) gameStats[gmp(i, j)].back().mount += 1;
+			else if(gmt(i, j) == 3) gameStats[gmp(i, j)].back().city += 1;
+			else if(gmt(i, j) == 4) gameStats[gmp(i, j)].back().city += 1;
 		}
 	}
 }
 
 // ranklist printings
 void LGgame::ranklist(bool print) {
-	bool printBot = !(LGgame::inReplay|LGgame::inServer|LGgame::inClient);
+	bool printBot = !(LGgame::inReplay | LGgame::inServer | LGgame::inClient);
 	bool printAIH = !(LGgame::inReplay);
 	setfont(20 * LGGraphics::windowData.zoomY, 0, LGset::mainFontName.c_str());
 	static int nlen = -10, alen = -10, plen = -10, clen = -10, tlen = -10, inclen = -10, aihlen = -10, botlen = -10;
@@ -279,7 +282,7 @@ void LGgame::ranklist(bool print) {
 		if(!LGset::modifier::SilentWar) tlen = max(tlen, textwidth(to_string(rklst[i].tot).c_str()));
 		if(!LGset::modifier::SilentWar) inclen = max(inclen, textwidth(to_string(rklst[i].inc).c_str()));
 		if(!LGset::modifier::SilentWar && printAIH) aihlen = max(aihlen, textwidth(to_string(rklst[i].armyInHand).c_str()));
-		if(printBot) botlen = max(botlen, textwidth(botName[LGgame::robotId[rklst[i].id]/100+1].c_str()));
+		if(printBot) botlen = max(botlen, textwidth(botName[LGgame::robotId[rklst[i].id] / 100 + 1].c_str()));
 	}
 	int ed = 1600 * LGGraphics::windowData.zoomX;
 	int s8 = ed - botlen - 10;
@@ -303,14 +306,14 @@ void LGgame::ranklist(bool print) {
 	rectangle(s6, prhei, s7, prhei + prhei);
 	rectangle(s7, prhei, s8, prhei + prhei);
 	rectangle(s8, prhei, ed, prhei + prhei);
-	xyprintf((s1+s2)/2, prhei, L"PLAYER");
-	if(!LGset::modifier::SilentWar) xyprintf((s2+s3)/2, prhei, L"ARMY");
-	if(!LGset::modifier::SilentWar) xyprintf((s3+s4)/2, prhei, L"PLAIN");
-	if(!LGset::modifier::SilentWar) xyprintf((s4+s5)/2, prhei, L"CITY");
-	if(!LGset::modifier::SilentWar) xyprintf((s5+s6)/2, prhei, L"TOT");
-	if(!LGset::modifier::SilentWar) xyprintf((s6+s7)/2, prhei, L"INC");
-	if(!LGset::modifier::SilentWar && printAIH) xyprintf((s7+s8)/2, prhei, L"AIH");
-	if(printBot) xyprintf((s8+ed)/2, prhei, L"BOT NAME");
+	xyprintf((s1 + s2) / 2, prhei, L"PLAYER");
+	if(!LGset::modifier::SilentWar) xyprintf((s2 + s3) / 2, prhei, L"ARMY");
+	if(!LGset::modifier::SilentWar) xyprintf((s3 + s4) / 2, prhei, L"PLAIN");
+	if(!LGset::modifier::SilentWar) xyprintf((s4 + s5) / 2, prhei, L"CITY");
+	if(!LGset::modifier::SilentWar) xyprintf((s5 + s6) / 2, prhei, L"TOT");
+	if(!LGset::modifier::SilentWar) xyprintf((s6 + s7) / 2, prhei, L"INC");
+	if(!LGset::modifier::SilentWar && printAIH) xyprintf((s7 + s8) / 2, prhei, L"AIH");
+	if(printBot) xyprintf((s8 + ed) / 2, prhei, L"BOT NAME");
 	for(int i = 1; i <= LGgame::playerCnt; i++) {
 		setfillcolor(playerInfo[rklst[i].id].color);
 		if(!LGgame::isAlive[rklst[i].id]) setfillcolor(0xff808080);
@@ -323,29 +326,29 @@ void LGgame::ranklist(bool print) {
 		if(!LGset::modifier::SilentWar) rectangle(s6, prhei * (i + 1), s7, prhei * (i + 2));
 		if(!LGset::modifier::SilentWar && printAIH) rectangle(s7, prhei * (i + 1), s8, prhei * (i + 2));
 		if(printBot) rectangle(s8, prhei * (i + 1), ed, prhei * (i + 2));
-		xyprintf((s1+s2)/2, prhei * (i + 1), playerInfo[rklst[i].id].name.c_str());
-		if(!LGset::modifier::SilentWar) xyprintf((s2+s3)/2, prhei * (i + 1), to_string(rklst[i].army).c_str());
-		if(!LGset::modifier::SilentWar) xyprintf((s3+s4)/2, prhei * (i + 1), to_string(rklst[i].plain).c_str());
-		if(!LGset::modifier::SilentWar) xyprintf((s4+s5)/2, prhei * (i + 1), to_string(rklst[i].city).c_str());
-		if(!LGset::modifier::SilentWar) xyprintf((s5+s6)/2, prhei * (i + 1), to_string(rklst[i].tot).c_str());
-		if(!LGset::modifier::SilentWar) xyprintf((s6+s7)/2, prhei * (i + 1), to_string(rklst[i].inc).c_str());
-		if(!LGset::modifier::SilentWar && printAIH) xyprintf((s7+s8)/2, prhei * (i + 1), to_string(rklst[i].armyInHand).c_str());
-		if(printBot) xyprintf((s8+ed)/2, prhei * (i + 1), botName[LGgame::robotId[rklst[i].id]/100+1].c_str());
+		xyprintf((s1 + s2) / 2, prhei * (i + 1), playerInfo[rklst[i].id].name.c_str());
+		if(!LGset::modifier::SilentWar) xyprintf((s2 + s3) / 2, prhei * (i + 1), to_string(rklst[i].army).c_str());
+		if(!LGset::modifier::SilentWar) xyprintf((s3 + s4) / 2, prhei * (i + 1), to_string(rklst[i].plain).c_str());
+		if(!LGset::modifier::SilentWar) xyprintf((s4 + s5) / 2, prhei * (i + 1), to_string(rklst[i].city).c_str());
+		if(!LGset::modifier::SilentWar) xyprintf((s5 + s6) / 2, prhei * (i + 1), to_string(rklst[i].tot).c_str());
+		if(!LGset::modifier::SilentWar) xyprintf((s6 + s7) / 2, prhei * (i + 1), to_string(rklst[i].inc).c_str());
+		if(!LGset::modifier::SilentWar && printAIH) xyprintf((s7 + s8) / 2, prhei * (i + 1), to_string(rklst[i].armyInHand).c_str());
+		if(printBot) xyprintf((s8 + ed) / 2, prhei * (i + 1), botName[LGgame::robotId[rklst[i].id] / 100 + 1].c_str());
 	}
 }
 void LGgame::printAnalysis() {
-#define _log(b,x) (((x)!=-1)?(((x)==0)?(0):(log(x)/log(b)+1)):-1)
+#define _log(b, x) (((x) != -1) ? (((x) == 0) ? (0) : (log(x) / log(b) + 1)) : -1)
 	static constexpr double lB = 1.00001;
 	static int XTurn = 1, XTurnINC = 1;
 	static int YMaxLand = 50;
 	static int YMaxArmy = 1;
 	static int YMaxCity = 1;
 	static double landX[64], landY[64],
-	       armyX[64], armyY[64],
-	       cityX[64], cityY[64];
+	    armyX[64], armyY[64],
+	    cityX[64], cityY[64];
 	static PIMAGE landI = newimage(600 * LGGraphics::windowData.zoomX, 200 * LGGraphics::windowData.zoomY),
-	       armyI = newimage(600 * LGGraphics::windowData.zoomX, 200 * LGGraphics::windowData.zoomY),
-	       cityI = newimage(600 * LGGraphics::windowData.zoomX, 200 * LGGraphics::windowData.zoomY);
+	              armyI = newimage(600 * LGGraphics::windowData.zoomX, 200 * LGGraphics::windowData.zoomY),
+	              cityI = newimage(600 * LGGraphics::windowData.zoomX, 200 * LGGraphics::windowData.zoomY);
 	setbkcolor(LGGraphics::bgColor, landI);
 	setbkcolor(LGGraphics::bgColor, armyI);
 	setbkcolor(LGGraphics::bgColor, cityI);
@@ -353,102 +356,102 @@ void LGgame::printAnalysis() {
 	setbkcolor_f(LGGraphics::bgColor, armyI);
 	setbkcolor_f(LGGraphics::bgColor, cityI);
 	const int graphRDX = 600 * LGGraphics::windowData.zoomX, graphRDY = 200 * LGGraphics::windowData.zoomY;
-	static const auto ulLand = [&]()->long long {
+	static const auto ulLand = [&]() -> long long {
 		long long upperLimit = 0;
-		for(int i=LGgame::playerCnt; i>=1; --i)
-			for(auto x : gameStats[i])
+		for(int i = LGgame::playerCnt; i >= 1; --i)
+			for(auto x: gameStats[i])
 				upperLimit = max(upperLimit, (long long)x.gtot());
 		return upperLimit;
 	};
-	static const auto ulArmy = [&]()->long long {
+	static const auto ulArmy = [&]() -> long long {
 		long long upperLimit = 0;
-		for(int i=LGgame::playerCnt; i>=1; --i)
-			for(auto x : gameStats[i])
+		for(int i = LGgame::playerCnt; i >= 1; --i)
+			for(auto x: gameStats[i])
 				upperLimit = max(upperLimit, x.army);
 		return upperLimit;
 	};
-	static const auto ulCity = [&]()->long long {
+	static const auto ulCity = [&]() -> long long {
 		long long upperLimit = 0;
-		for(int i=LGgame::playerCnt; i>=1; --i)
-			for(auto x : gameStats[i])
-				upperLimit = max(upperLimit, (long long)(x.city+x.plain/LGset::plainRate[LGset::gameMode]));
+		for(int i = LGgame::playerCnt; i >= 1; --i)
+			for(auto x: gameStats[i])
+				upperLimit = max(upperLimit, (long long)(x.city + x.plain / LGset::plainRate[LGset::gameMode]));
 		return upperLimit;
 	};
-	static const auto redrawLand = [&]()->void {
+	static const auto redrawLand = [&]() -> void {
 		cleardevice(landI);
 		// settextjustify(LEFT_TEXT,CENTER_TEXT);
 		// xyprintf(0,800 * LGGraphics::windowData.zoomY,"upperLimit: %lld",upperLimit);
-		setlinewidth(2,landI);
-		setcolor(0xffffffff,landI);
-		rectangle(0,0,graphRDX,graphRDY,landI);
-		setlinewidth(1,landI);
-		for(int i=LGgame::playerCnt; i>=1; --i) {
-			setcolor(playerInfo[i].color,landI);
-			double cx=0,cy=0;
-			long long ca=0;
-			for(int j=0; j<=curTurn; ++j) {
+		setlinewidth(2, landI);
+		setcolor(0xffffffff, landI);
+		rectangle(0, 0, graphRDX, graphRDY, landI);
+		setlinewidth(1, landI);
+		for(int i = LGgame::playerCnt; i >= 1; --i) {
+			setcolor(playerInfo[i].color, landI);
+			double cx = 0, cy = 0;
+			long long ca = 0;
+			for(int j = 0; j <= curTurn; ++j) {
 				int ct = j;
 				long long a;
-				a=gameStats[i][j].gtot();
-				double nx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
-				double ny=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxLand);
-				if(nx-cx<=1&&!(ny==0&&cy!=0)) continue;
-				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,landI);
-				cx=nx,cy=ny,ca=a;
+				a = gameStats[i][j].gtot();
+				double nx = _log(lB, ct) * (graphRDX - 0) * 1.0 / _log(lB, XTurn);
+				double ny = _log(lB, a) * (graphRDY - 0) * 1.0 / _log(lB, YMaxLand);
+				if(nx - cx <= 1 && !(ny == 0 && cy != 0)) continue;
+				line(0 + cx, graphRDY - cy, 0 + nx, graphRDY - ny, landI);
+				cx = nx, cy = ny, ca = a;
 			}
-			landX[i]=cx,landY[i]=cy;
+			landX[i] = cx, landY[i] = cy;
 			// xyprintf(0,(800-15*(LGgame::playerCnt-i+1)) * LGGraphics::windowData.zoomY,"%ls - army:%lld cx:%.1f cy:%.1f ca:%.1f",playerInfo[i].name.c_str(),historyArmy[i].back().second,cx,cy,ca);
 		}
 	};
-	static const auto redrawArmy = [&]()->void {
+	static const auto redrawArmy = [&]() -> void {
 		cleardevice(armyI);
 		// settextjustify(LEFT_TEXT,CENTER_TEXT);
 		// xyprintf(0,800 * LGGraphics::windowData.zoomY,"upperLimit: %lld",upperLimit);
-		setlinewidth(2,armyI);
-		setcolor(0xffffffff,armyI);
-		rectangle(0,0,graphRDX,graphRDY,armyI);
-		setlinewidth(1,armyI);
-		for(int i=LGgame::playerCnt; i>=1; --i) {
-			setcolor(playerInfo[i].color,armyI);
-			double cx=0,cy=0;
-			long long ca=0;
-			for(int j=0; j<=curTurn; ++j) {
+		setlinewidth(2, armyI);
+		setcolor(0xffffffff, armyI);
+		rectangle(0, 0, graphRDX, graphRDY, armyI);
+		setlinewidth(1, armyI);
+		for(int i = LGgame::playerCnt; i >= 1; --i) {
+			setcolor(playerInfo[i].color, armyI);
+			double cx = 0, cy = 0;
+			long long ca = 0;
+			for(int j = 0; j <= curTurn; ++j) {
 				int ct = j;
 				long long a;
-				a=gameStats[i][j].army;
-				double nx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
-				double ny=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxArmy);
-				if(nx-cx<=1&&!(ny==0&&cy!=0)) continue;
-				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,armyI);
-				cx=nx,cy=ny,ca=a;
+				a = gameStats[i][j].army;
+				double nx = _log(lB, ct) * (graphRDX - 0) * 1.0 / _log(lB, XTurn);
+				double ny = _log(lB, a) * (graphRDY - 0) * 1.0 / _log(lB, YMaxArmy);
+				if(nx - cx <= 1 && !(ny == 0 && cy != 0)) continue;
+				line(0 + cx, graphRDY - cy, 0 + nx, graphRDY - ny, armyI);
+				cx = nx, cy = ny, ca = a;
 			}
-			armyX[i]=cx,armyY[i]=cy;
+			armyX[i] = cx, armyY[i] = cy;
 			// xyprintf(0,(800-15*(LGgame::playerCnt-i+1)) * LGGraphics::windowData.zoomY,"%ls - army:%lld cx:%.1f cy:%.1f ca:%.1f",playerInfo[i].name.c_str(),historyArmy[i].back().second,cx,cy,ca);
 		}
 	};
-	static auto redrawCity = [&]()->void {
+	static auto redrawCity = [&]() -> void {
 		cleardevice(cityI);
 		// settextjustify(LEFT_TEXT,CENTER_TEXT);
 		// xyprintf(0,800 * LGGraphics::windowData.zoomY,"upperLimit: %lld",upperLimit);
-		setlinewidth(2,cityI);
-		setcolor(0xffffffff,cityI);
-		rectangle(0,0,graphRDX,graphRDY,cityI);
-		setlinewidth(1,cityI);
-		for(int i=LGgame::playerCnt; i>=1; --i) {
-			setcolor(playerInfo[i].color,cityI);
-			double cx=0,cy=0;
-			long long ca=0;
-			for(int j=0; j<=curTurn; ++j) {
+		setlinewidth(2, cityI);
+		setcolor(0xffffffff, cityI);
+		rectangle(0, 0, graphRDX, graphRDY, cityI);
+		setlinewidth(1, cityI);
+		for(int i = LGgame::playerCnt; i >= 1; --i) {
+			setcolor(playerInfo[i].color, cityI);
+			double cx = 0, cy = 0;
+			long long ca = 0;
+			for(int j = 0; j <= curTurn; ++j) {
 				int ct = j;
 				long long a;
-				a=gameStats[i][j].city+gameStats[i][j].plain/LGset::plainRate[LGset::gameMode];
-				double nx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
-				double ny=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxCity);
-				if(nx-cx<=1&&!(ny==0&&cy!=0)) continue;
-				line(0+cx,graphRDY-cy,0+nx,graphRDY-ny,cityI);
-				cx=nx,cy=ny,ca=a;
+				a = gameStats[i][j].city + gameStats[i][j].plain / LGset::plainRate[LGset::gameMode];
+				double nx = _log(lB, ct) * (graphRDX - 0) * 1.0 / _log(lB, XTurn);
+				double ny = _log(lB, a) * (graphRDY - 0) * 1.0 / _log(lB, YMaxCity);
+				if(nx - cx <= 1 && !(ny == 0 && cy != 0)) continue;
+				line(0 + cx, graphRDY - cy, 0 + nx, graphRDY - ny, cityI);
+				cx = nx, cy = ny, ca = a;
 			}
-			cityX[i]=cx,cityY[i]=cy;
+			cityX[i] = cx, cityY[i] = cy;
 			// xyprintf(0,(800-15*(LGgame::playerCnt-i+1)) * LGGraphics::windowData.zoomY,"%ls - army:%lld cx:%.1f cy:%.1f ca:%.1f",playerInfo[i].name.c_str(),historyArmy[i].back().second,cx,cy,ca);
 		}
 	};
@@ -473,44 +476,47 @@ void LGgame::printAnalysis() {
 	}
 	if(flagLand) redrawLand();
 	else {
-		for(int i=LGgame::playerCnt; i>=1; --i) {
-			setcolor(playerInfo[i].color,landI);
-			double cx=0,cy=0;
-			int ct = curTurn; long long a;
+		for(int i = LGgame::playerCnt; i >= 1; --i) {
+			setcolor(playerInfo[i].color, landI);
+			double cx = 0, cy = 0;
+			int ct = curTurn;
+			long long a;
 			a = gameStats[i].back().gtot();
-			cx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
-			cy=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxLand);
-			if(cx-landX[i]<=1&&!(cy==0&&landY[i]!=0)) continue;
-			line(0+landX[i],graphRDY-landY[i],0+cx,graphRDY-cy,landI);
-			landX[i]=cx,landY[i]=cy;
+			cx = _log(lB, ct) * (graphRDX - 0) * 1.0 / _log(lB, XTurn);
+			cy = _log(lB, a) * (graphRDY - 0) * 1.0 / _log(lB, YMaxLand);
+			if(cx - landX[i] <= 1 && !(cy == 0 && landY[i] != 0)) continue;
+			line(0 + landX[i], graphRDY - landY[i], 0 + cx, graphRDY - cy, landI);
+			landX[i] = cx, landY[i] = cy;
 		}
 	}
 	if(flagArmy) redrawArmy();
 	else {
-		for(int i=LGgame::playerCnt; i>=1; --i) {
-			setcolor(playerInfo[i].color,armyI);
-			double cx=0,cy=0;
-			int ct = curTurn; long long a;
+		for(int i = LGgame::playerCnt; i >= 1; --i) {
+			setcolor(playerInfo[i].color, armyI);
+			double cx = 0, cy = 0;
+			int ct = curTurn;
+			long long a;
 			a = gameStats[i].back().army;
-			cx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
-			cy=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxArmy);
-			if(cx-armyX[i]<=1&&!(cy==0&&armyY[i]!=0)) continue;
-			line(0+armyX[i],graphRDY-armyY[i],0+cx,graphRDY-cy,armyI);
-			armyX[i]=cx,armyY[i]=cy;
+			cx = _log(lB, ct) * (graphRDX - 0) * 1.0 / _log(lB, XTurn);
+			cy = _log(lB, a) * (graphRDY - 0) * 1.0 / _log(lB, YMaxArmy);
+			if(cx - armyX[i] <= 1 && !(cy == 0 && armyY[i] != 0)) continue;
+			line(0 + armyX[i], graphRDY - armyY[i], 0 + cx, graphRDY - cy, armyI);
+			armyX[i] = cx, armyY[i] = cy;
 		}
 	}
 	if(flagcity) redrawCity();
 	else {
-		for(int i=LGgame::playerCnt; i>=1; --i) {
-			setcolor(playerInfo[i].color,cityI);
-			double cx=0,cy=0;
-			int ct = curTurn; long long a;
-			a = gameStats[i].back().city+gameStats[i].back().plain/LGset::plainRate[LGset::gameMode];
-			cx=_log(lB,ct)*(graphRDX-0)*1.0/_log(lB,XTurn);
-			cy=_log(lB,a)*(graphRDY-0)*1.0/_log(lB,YMaxCity);
-			if(cx-cityX[i]<=1&&!(cy==0&&cityY[i]!=0)) continue;
-			line(0+cityX[i],graphRDY-cityY[i],0+cx,graphRDY-cy,cityI);
-			cityX[i]=cx,cityY[i]=cy;
+		for(int i = LGgame::playerCnt; i >= 1; --i) {
+			setcolor(playerInfo[i].color, cityI);
+			double cx = 0, cy = 0;
+			int ct = curTurn;
+			long long a;
+			a = gameStats[i].back().city + gameStats[i].back().plain / LGset::plainRate[LGset::gameMode];
+			cx = _log(lB, ct) * (graphRDX - 0) * 1.0 / _log(lB, XTurn);
+			cy = _log(lB, a) * (graphRDY - 0) * 1.0 / _log(lB, YMaxCity);
+			if(cx - cityX[i] <= 1 && !(cy == 0 && cityY[i] != 0)) continue;
+			line(0 + cityX[i], graphRDY - cityY[i], 0 + cx, graphRDY - cy, cityI);
+			cityX[i] = cx, cityY[i] = cy;
 		}
 	}
 	putimage(1000 * LGGraphics::windowData.zoomX, 300 * LGGraphics::windowData.zoomY, landI);
@@ -528,7 +534,7 @@ namespace LGgame {
 		inCreate = false;
 		for(register int i = 1; i <= pC; ++i) isAlive[i] = 1;
 	}
-};
+};  // namespace LGgame
 
 namespace LGlocal {
 	int GAME() {
@@ -538,7 +544,7 @@ namespace LGlocal {
 			gongsound.OpenFile("sound/gong.mp3");
 			if(gongsound.IsOpen()) {
 				gongsound.Play();
-				while(gongsound.GetPlayStatus()==MUSIC_MODE_PLAY);
+				while(gongsound.GetPlayStatus() == MUSIC_MODE_PLAY);
 				gongsound.Close();
 			}
 		}
@@ -556,11 +562,10 @@ namespace LGlocal {
 			// LGgame::robotId[i] = mtrd() % 200 + 300;
 			// LGgame::robotId[i] = mtrd() % 100 + 400;
 			// LGgame::robotId[i] = mtrd() % 100 + 300;
-			while(((LGset::gameMode == 1 || LGset::gameMode == 2)
-			       && (200 <= LGgame::robotId[i] && LGgame::robotId[i] < 300)))
+			while(((LGset::gameMode == 1 || LGset::gameMode == 2) && (200 <= LGgame::robotId[i] && LGgame::robotId[i] < 300)))
 				LGgame::robotId[i] = mtrd() % 400;
-				// LGgame::robotId[i] = mtrd() % 200 + 300;
-				// LGgame::robotId[i] = mtrd() % 100 + 300;
+			// LGgame::robotId[i] = mtrd() % 200 + 300;
+			// LGgame::robotId[i] = mtrd() % 100 + 300;
 			if(300 <= LGgame::robotId[i] && LGgame::robotId[i] < 400) zlyBot::initBot(i);
 			if(400 <= LGgame::robotId[i] && LGgame::robotId[i] < 500) zlyBot_v2::initBot(i);
 		}
@@ -580,9 +585,10 @@ namespace LGlocal {
 		flushkey();
 		flushmouse();
 		int midact = 0;
-		LGGraphics::windowData.maplocX = - (LGgame::genCoo[1].y) * blockWidth + 800 * LGGraphics::windowData.zoomX;
-		LGGraphics::windowData.maplocY = - (LGgame::genCoo[1].x) * blockHeight + 450 * LGGraphics::windowData.zoomY;
-		int smsx = 0, smsy = 0; bool moved = false;
+		LGGraphics::windowData.maplocX = -(LGgame::genCoo[1].y) * blockWidth + 800 * LGGraphics::windowData.zoomX;
+		LGGraphics::windowData.maplocY = -(LGgame::genCoo[1].x) * blockHeight + 450 * LGGraphics::windowData.zoomY;
+		int smsx = 0, smsy = 0;
+		bool moved = false;
 		std::chrono::steady_clock::duration prsttm;
 		bool toNextTurn = true, gamePaused = false;
 		std::chrono::nanoseconds pauseBeginTime, pauseEndTime;
@@ -607,7 +613,8 @@ namespace LGlocal {
 					if(midact == 1) {
 						LGGraphics::windowData.maplocX += msg.x - smsx;
 						LGGraphics::windowData.maplocY += msg.y - smsy;
-						smsx = msg.x, smsy = msg.y; moved = true;
+						smsx = msg.x, smsy = msg.y;
+						moved = true;
 					}
 				} else if(msg.is_left()) {
 					if(msg.is_down()) {
@@ -625,7 +632,9 @@ namespace LGlocal {
 							   msg.y <= LGGraphics::windowData.maplocY + blockHeight * mapH) {
 								int lin = (msg.y + blockHeight - 1 - LGGraphics::windowData.maplocY) / blockHeight;
 								int col = (msg.x + blockWidth - 1 - LGGraphics::windowData.maplocX) / blockWidth;
-								moveS mv { 1, false, LGgame::playerFocus[1], coordS{lin,col} };
+								moveS mv{
+									1, false, LGgame::playerFocus[1], coordS{ lin, col }
+								};
 								if(!LGgame::checkMove(mv)) {
 									LGgame::inlineMove.push_back(mv);
 									LGgame::playerFocus[1] = mv.to;
@@ -654,33 +663,37 @@ namespace LGlocal {
 				if(ch.msg == key_msg_up)
 					continue;
 				switch(ch.key) {
-					case int('w'): case key_up: { /*[UP]*/
-						coordS to = coordS{LGgame::playerFocus[1].x+dx[1],LGgame::playerFocus[1].y+dy[1]};
-						moveS mv = moveS{1, !shiftPressed, LGgame::playerFocus[1], to};
+					case int('w'):
+					case key_up: { /*[UP]*/
+						coordS to = coordS{ LGgame::playerFocus[1].x + dx[1], LGgame::playerFocus[1].y + dy[1] };
+						moveS mv = moveS{ 1, !shiftPressed, LGgame::playerFocus[1], to };
 						if(!LGgame::checkMove(mv)) {
 							movement.push_back(mv);
 							LGgame::playerFocus[1] = to;
 						}
 					} break;
-					case int('a'): case key_left: { /*[LEFT]*/
-						coordS to = coordS{LGgame::playerFocus[1].x+dx[2],LGgame::playerFocus[1].y+dy[2]};
-						moveS mv = moveS{1, !shiftPressed, LGgame::playerFocus[1], to};
+					case int('a'):
+					case key_left: { /*[LEFT]*/
+						coordS to = coordS{ LGgame::playerFocus[1].x + dx[2], LGgame::playerFocus[1].y + dy[2] };
+						moveS mv = moveS{ 1, !shiftPressed, LGgame::playerFocus[1], to };
 						if(!LGgame::checkMove(mv)) {
 							movement.push_back(mv);
 							LGgame::playerFocus[1] = to;
 						}
 					} break;
-					case int('s'): case key_down: { /*[DOWN]*/
-						coordS to = coordS{LGgame::playerFocus[1].x+dx[3],LGgame::playerFocus[1].y+dy[3]};
-						moveS mv = moveS{1, !shiftPressed, LGgame::playerFocus[1], to};
+					case int('s'):
+					case key_down: { /*[DOWN]*/
+						coordS to = coordS{ LGgame::playerFocus[1].x + dx[3], LGgame::playerFocus[1].y + dy[3] };
+						moveS mv = moveS{ 1, !shiftPressed, LGgame::playerFocus[1], to };
 						if(!LGgame::checkMove(mv)) {
 							movement.push_back(mv);
 							LGgame::playerFocus[1] = to;
 						}
 					} break;
-					case int('d'): case key_right: { /*[RIGHT]*/
-						coordS to = coordS{LGgame::playerFocus[1].x+dx[4],LGgame::playerFocus[1].y+dy[4]};
-						moveS mv = moveS{1, !shiftPressed, LGgame::playerFocus[1], to};
+					case int('d'):
+					case key_right: { /*[RIGHT]*/
+						coordS to = coordS{ LGgame::playerFocus[1].x + dx[4], LGgame::playerFocus[1].y + dy[4] };
+						moveS mv = moveS{ 1, !shiftPressed, LGgame::playerFocus[1], to };
 						if(!LGgame::checkMove(mv)) {
 							movement.push_back(mv);
 							LGgame::playerFocus[1] = to;
@@ -688,7 +701,7 @@ namespace LGlocal {
 					} break;
 
 					case int('g'): {
-						movement.push_back({1, false, LGgame::playerFocus[1], LGgame::genCoo[1]});
+						movement.push_back({ 1, false, LGgame::playerFocus[1], LGgame::genCoo[1] });
 						LGgame::playerFocus[1] = LGgame::playerCoo[1] = LGgame::genCoo[1];
 						movement.clear();
 					} break;
@@ -727,7 +740,7 @@ namespace LGlocal {
 								}
 							}
 						}
-						lastTurn[1] = coordS{-1, -1};
+						lastTurn[1] = coordS{ -1, -1 };
 						break;
 					}
 				}
@@ -736,12 +749,12 @@ namespace LGlocal {
 			if(toNextTurn) {
 				LGgame::updateMap();
 				LGreplay::wreplay.newTurn();
-				coordS tmpcoo=LGgame::playerFocus[1];
+				coordS tmpcoo = LGgame::playerFocus[1];
 				moveS mv;
 				while(!movement.empty() && LGgame::checkMove(movement.front()))
-					movement.pop_front(),tmpcoo=LGgame::playerFocus[1];
+					movement.pop_front(), tmpcoo = LGgame::playerFocus[1];
 				if(!movement.empty()) {
-					mv=movement.front();
+					mv = movement.front();
 					LGreplay::Movement mov(mv);
 					LGreplay::wreplay.newMove(mov);
 					LGgame::inlineMove.push_back(mv);
@@ -751,10 +764,10 @@ namespace LGlocal {
 				for(int i = 2; i <= LGgame::playerCnt; ++i) {
 					if(!LGgame::isAlive[i])
 						continue;
-					tmpcoo=LGgame::playerFocus[i];
+					tmpcoo = LGgame::playerFocus[i];
 					switch(LGgame::robotId[i]) {
 						case 0 ... 99:
-							mv=smartRandomBot::calcNextMove(i, LGgame::playerFocus[i]);
+							mv = smartRandomBot::calcNextMove(i, LGgame::playerFocus[i]);
 							if(!LGgame::checkMove(mv)) {
 								LGreplay::Movement mov(mv);
 								LGreplay::wreplay.newMove(mov);
@@ -763,7 +776,7 @@ namespace LGlocal {
 							}
 							break;
 						case 100 ... 199:
-							mv=xrzBot::calcNextMove(i, LGgame::playerFocus[i]);
+							mv = xrzBot::calcNextMove(i, LGgame::playerFocus[i]);
 							if(!LGgame::checkMove(mv)) {
 								LGreplay::Movement mov(mv);
 								LGreplay::wreplay.newMove(mov);
@@ -772,7 +785,7 @@ namespace LGlocal {
 							}
 							break;
 						case 200 ... 299:
-							mv=xiaruizeBot::calcNextMove(i, LGgame::playerFocus[i]);
+							mv = xiaruizeBot::calcNextMove(i, LGgame::playerFocus[i]);
 							if(!LGgame::checkMove(mv)) {
 								LGreplay::Movement mov(mv);
 								LGreplay::wreplay.newMove(mov);
@@ -781,7 +794,7 @@ namespace LGlocal {
 							}
 							break;
 						case 300 ... 399:
-							mv=zlyBot::calcNextMove(i, LGgame::playerFocus[i]);
+							mv = zlyBot::calcNextMove(i, LGgame::playerFocus[i]);
 							if(!LGgame::checkMove(mv)) {
 								LGreplay::Movement mov(mv);
 								LGreplay::wreplay.newMove(mov);
@@ -790,7 +803,7 @@ namespace LGlocal {
 							}
 							break;
 						case 400 ... 499:
-							mv=zlyBot_v2::calcNextMove(i, LGgame::playerFocus[i]);
+							mv = zlyBot_v2::calcNextMove(i, LGgame::playerFocus[i]);
 							if(!LGgame::checkMove(mv)) {
 								LGreplay::Movement mov(mv);
 								LGreplay::wreplay.newMove(mov);
@@ -804,15 +817,17 @@ namespace LGlocal {
 				LGgame::statistics();
 				if(LGset::gameMode != 0) {
 					if(LGset::gameMode == 1) {
-						for(int id=1; id<=LGgame::playerCnt; ++id) {
-							if(LGgame::gameStats[id].back().city<=0) {
+						for(int id = 1; id <= LGgame::playerCnt; ++id) {
+							if(LGgame::gameStats[id].back().city <= 0) {
 								LGgame::isAlive[id] = 0;
-								for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) if(gmp(i,j)==id) gmp(i,j)=0;
+								for(int i = 1; i <= mapH; ++i)
+									for(int j = 1; j <= mapW; ++j)
+										if(gmp(i, j) == id) gmp(i, j) = 0;
 							}
 						}
 					} else if(LGset::gameMode == 2) {
-						for(int id=1; id<=LGgame::playerCnt; ++id) {
-							if(LGgame::gameStats[id].back().gtot()<=0) LGgame::isAlive[id] = 0;
+						for(int id = 1; id <= LGgame::playerCnt; ++id) {
+							if(LGgame::gameStats[id].back().gtot() <= 0) LGgame::isAlive[id] = 0;
 						}
 					}
 				}
@@ -842,7 +857,7 @@ namespace LGlocal {
 					            (L"PLAYER " + playerInfo[std::__lg(ed)].name + L" WON!" + L"\n" +
 					             L"THE GAME WILL CONTINUE." + L"\n" +
 					             L"YOU CAN PRESS [ESC] TO EXIT.")
-					            .c_str(),
+					                .c_str(),
 					            L"GAME END", MB_OK | MB_SYSTEMMODAL);
 					std::chrono::nanoseconds eed = std::chrono::steady_clock::now().time_since_epoch();
 					LGgame::beginTime += eed - bg;
@@ -856,12 +871,12 @@ namespace LGlocal {
 				std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 				int needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
 				int lackTurn = needFlushToTurn - LGgame::curTurn;
-				if(lackTurn<=0||gamePaused) {
+				if(lackTurn <= 0 || gamePaused) {
 					cleardevice();
 					printMap(LGgame::cheatCode, LGgame::playerFocus[1]);
 				}
-				LGgame::ranklist(lackTurn<=0||gamePaused);
-				if(lackTurn<=0||gamePaused) {
+				LGgame::ranklist(lackTurn <= 0 || gamePaused);
+				if(lackTurn <= 0 || gamePaused) {
 					if(LGset::enableAnalysisInGame) LGgame::printAnalysis();
 					int screenszr = 1600 * LGGraphics::windowData.zoomX;
 					static int fpslen;
@@ -873,7 +888,8 @@ namespace LGlocal {
 					timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
 					fpslen = textwidth((L"FPS: " + to_wstring(getfps())).c_str());
 					turnlen = textwidth((L"Turn " + to_wstring(LGgame::curTurn) + L".").c_str());
-					rspeedlen = textwidth((L"Real Speed: " + to_wstring(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());				setfillcolor(RED);
+					rspeedlen = textwidth((L"Real Speed: " + to_wstring(LGgame::curTurn * 1.0L / (timePassed.count() / 1'000'000'000.0L))).c_str());
+					setfillcolor(RED);
 					setfillcolor(GREEN);
 					bar(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
 					rectangle(screenszr - rspeedlen - 10, 0, screenszr, 20 * LGGraphics::windowData.zoomY);
@@ -896,6 +912,6 @@ namespace LGlocal {
 		}
 		return 0;
 	}
-}
+}  // namespace LGlocal
 
-#endif // __LGGAME_HPP__
+#endif  // __LGGAME_HPP__

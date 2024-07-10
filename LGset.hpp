@@ -22,9 +22,9 @@ namespace LGset {
 	inline namespace file {
 		inline vector<wchar_t> getBuf() {
 			vector<wchar_t> buf;
-			buf.push_back(VER_BUILD>>16);
-			buf.push_back(VER_BUILD&((1u<<16)-1u));
-			for(wchar_t wch : userName) buf.push_back(wch);
+			buf.push_back(VER_BUILD >> 16);
+			buf.push_back(VER_BUILD & ((1u << 16) - 1u));
+			for(wchar_t wch: userName) buf.push_back(wch);
 			buf.push_back(L'\n');
 			buf.push_back(enableGodPower);
 			buf.push_back(defaultPlayerNum);
@@ -32,12 +32,12 @@ namespace LGset {
 			buf.push_back(defaultUserId);
 			buf.push_back(enableGongSound);
 			buf.push_back(L'\n');
-			for(wchar_t wch : replayFileName) buf.push_back(wch);
+			for(wchar_t wch: replayFileName) buf.push_back(wch);
 			buf.push_back(L'\n');
 			buf.push_back(enableBetaTag);
 			buf.push_back(socketPort);
 			buf.push_back(L'\n');
-			for(wchar_t wch : mainFontName) buf.push_back(wch);
+			for(wchar_t wch: mainFontName) buf.push_back(wch);
 			buf.push_back(L'\n');
 			// build 2365+ settings
 			buf.push_back(blockMinFontSize);
@@ -59,7 +59,7 @@ namespace LGset {
 		inline bool check() {
 			/* CHECK WHETHER THE SETTING FILE EXISTS */ {
 				WIN32_FIND_DATAW FileData;
-				HANDLE FileHandle = FindFirstFileW(settingFile.c_str(),&FileData);
+				HANDLE FileHandle = FindFirstFileW(settingFile.c_str(), &FileData);
 				if(FileHandle == INVALID_HANDLE_VALUE && GetLastError() == ERROR_FILE_NOT_FOUND) {
 					HANDLE hFile =
 					    CreateFileW(settingFile.c_str(),
@@ -86,8 +86,8 @@ namespace LGset {
 			                           FILE_ATTRIBUTE_HIDDEN,
 			                           NULL);
 			if(hFile == INVALID_HANDLE_VALUE)
-				MessageBoxW(getHWnd(),(L"Open File Failed: CODE "+to_wstring(GetLastError())).c_str(),L"ERROR",MB_OK);
-			vector<wchar_t> buf(settingLength*2);
+				MessageBoxW(getHWnd(), (L"Open File Failed: CODE " + to_wstring(GetLastError())).c_str(), L"ERROR", MB_OK);
+			vector<wchar_t> buf(settingLength * 2);
 			DWORD dwReadedSize;
 			bool f = ReadFile(hFile,
 			                  buf.data(),
@@ -101,45 +101,45 @@ namespace LGset {
 				            MB_HELP);
 			}
 			CloseHandle(hFile);
-			int i=0,rdBuild=0;
-			rdBuild=(buf[0]<<16)|buf[1];
-			i=2;
+			int i = 0, rdBuild = 0;
+			rdBuild = (buf[0] << 16) | buf[1];
+			i = 2;
 			userName.clear();
-			while(buf[i++]!=L'\n') userName.push_back(buf[i-1]);
+			while(buf[i++] != L'\n') userName.push_back(buf[i - 1]);
 			userName.resize(16);
 			enableGodPower = buf[i++];
 			defaultPlayerNum = buf[i++];
 			defaultSpeed = buf[i++];
 			defaultUserId = buf[i++];
 			enableGongSound = buf[i++];
-			buf[i++]; // L'\n'
+			buf[i++];  // L'\n'
 			replayFileName.clear();
-			while(buf[i++]!=L'\n') replayFileName.push_back(buf[i-1]);
+			while(buf[i++] != L'\n') replayFileName.push_back(buf[i - 1]);
 			replayFileName.resize(50);
 			enableBetaTag = buf[i++];
 			socketPort = buf[i++];
-			buf[i++]; // L'\n'
+			buf[i++];  // L'\n'
 			mainFontName.clear();
-			while(buf[i++]!=L'\n') mainFontName.push_back(buf[i-1]);
+			while(buf[i++] != L'\n') mainFontName.push_back(buf[i - 1]);
 			mainFontName.resize(30);
-			if(rdBuild<=2365) return; // build 2365+ settings
+			if(rdBuild <= 2365) return;  // build 2365+ settings
 			blockMinFontSize = buf[i++];
 			blockMaxFontSize = buf[i++];
-			if(rdBuild<=2619) return; // build 2619+ settings
-			buf[i++]; // L'\n'
+			if(rdBuild <= 2619) return;  // build 2619+ settings
+			buf[i++];                    // L'\n'
 			enableAnalysisInGame = buf[i++];
 			gameMode = buf[i++];
-			if(rdBuild<=2630) return; // build 2630+ settings
-			buf[i++]; // L'\n'
+			if(rdBuild <= 2630) return;  // build 2630+ settings
+			buf[i++];                    // L'\n'
 			modifier::Leapfrog = buf[i++];
 			modifier::CityState = buf[i++];
 			modifier::MistyVeil = buf[i++];
 			modifier::SilentWar = buf[i++];
-			if(rdBuild<=2746) return; // build 2746+ settings
+			if(rdBuild <= 2746) return;  // build 2746+ settings
 			modifier::SuburbPlain = buf[i++];
 			modifier::DeepSwamp = buf[i++];
 			modifier::NeutralResist = buf[i++];
-			buf[i++]; // L'\n'
+			buf[i++];  // L'\n'
 		}
 		inline void write() {
 			vector<wchar_t> buf = getBuf();
@@ -151,7 +151,7 @@ namespace LGset {
 			                           FILE_ATTRIBUTE_HIDDEN,
 			                           NULL);
 			if(hFile == INVALID_HANDLE_VALUE)
-				MessageBoxW(getHWnd(),(L"Open File Failed: CODE "+to_wstring(GetLastError())).c_str(),L"ERROR",MB_OK);
+				MessageBoxW(getHWnd(), (L"Open File Failed: CODE " + to_wstring(GetLastError())).c_str(), L"ERROR", MB_OK);
 			SetFilePointer(hFile, 0, 0, FILE_BEGIN);
 			DWORD dwWritedDataSize;
 			bool f = WriteFile(hFile,
@@ -167,8 +167,8 @@ namespace LGset {
 			}
 			CloseHandle(hFile);
 		}
-	} // inline namespace file
+	}  // namespace file
 
-} // namespace LGset
+}  // namespace LGset
 
-#endif // __LGSET_HPP__
+#endif  // __LGSET_HPP__

@@ -29,8 +29,10 @@ inline namespace button {
 		frameWidth = 1;
 		status = 0;
 		enableAutoFrameColor = true;
-		enableTextShadow = true; textShadowWeight = 1;
-		enableShadow = true; enableButtonShadow = true;
+		enableTextShadow = true;
+		textShadowWeight = 1;
+		enableShadow = true;
+		enableButtonShadow = true;
 	}
 	circBUTTON::~circBUTTON() {
 		delimage(buttonImage);
@@ -69,8 +71,8 @@ inline namespace button {
 		setfillcolor(backgroundColor, buttonImage);
 		fillellipse(buttonRadius, buttonRadius, buttonRadius, buttonRadius, buttonImage);
 		if(backgroundImage != nullptr) {
-			if(getwidth(backgroundImage)!=backgroundImageWidth||getheight(backgroundImage)!=backgroundImageHeight) images::zoomImage(backgroundImage,backgroundImageWidth,backgroundImageHeight);
-			putimage_withalpha(buttonImage,backgroundImage,buttonRadius-backgroundImageWidth/2,buttonRadius-backgroundImageHeight/2);
+			if(getwidth(backgroundImage) != backgroundImageWidth || getheight(backgroundImage) != backgroundImageHeight) images::zoomImage(backgroundImage, backgroundImageWidth, backgroundImageHeight);
+			putimage_withalpha(buttonImage, backgroundImage, buttonRadius - backgroundImageWidth / 2, buttonRadius - backgroundImageHeight / 2);
 		}
 		setfont(-fontHeight, fontWidth, fontName.c_str(), buttonImage);
 		settextjustify(walign, halign, buttonImage);
@@ -81,10 +83,10 @@ inline namespace button {
 		if(halign == TOP_TEXT) oy = 0;
 		else if(halign == CENTER_TEXT) oy = (buttonRadius * 2 - fontHeight * (text.size() - 1)) / 2;
 		else oy = buttonRadius * 2 - fontHeight * (text.size() - 1) - 1;
-		for(auto s:text) {
+		for(auto s: text) {
 			if(enableShadow && enableTextShadow) {
 				setcolor(0xff008080, buttonImage);
-				outtextxy(ox+textShadowWeight, oy+textShadowWeight, s.c_str(), buttonImage);
+				outtextxy(ox + textShadowWeight, oy + textShadowWeight, s.c_str(), buttonImage);
 			}
 			setcolor(textColor, buttonImage);
 			outtextxy(ox, oy, s.c_str(), buttonImage);
@@ -109,55 +111,98 @@ inline namespace button {
 		putimage(pimg, locationX - buttonRadius, locationY - buttonRadius, buttonImage);
 		return *this;
 	}
-	inline circBUTTON& circBUTTON::radius(int _radius) { buttonRadius = _radius; return *this; }
-	inline circBUTTON& circBUTTON::bgcolor(color_t _color) { backgroundColor = _color; return *this; }
-	inline circBUTTON& circBUTTON::textcolor(color_t _color) { textColor = _color; return *this; }
-	inline circBUTTON& circBUTTON::addtext(wstring _text) { text.push_back(_text); return *this; }
-	inline circBUTTON& circBUTTON::poptext() { if(!text.empty()) text.pop_back(); return *this; }
-	inline circBUTTON& circBUTTON::cleartext() { text.clear(); return *this; }
-	inline circBUTTON& circBUTTON::fontname(wstring _fontName) { fontName = _fontName; return *this; }
-	inline circBUTTON& circBUTTON::fontsize(int _fontHeight, int _fontWidth) { fontHeight = _fontHeight; fontWidth = _fontWidth; return *this; }
-	inline circBUTTON& circBUTTON::move(int _X, int _Y) { locationY = _Y, locationX = _X; return *this; }
+	inline circBUTTON& circBUTTON::radius(int _radius) {
+		buttonRadius = _radius;
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::bgcolor(color_t _color) {
+		backgroundColor = _color;
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::textcolor(color_t _color) {
+		textColor = _color;
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::addtext(wstring _text) {
+		text.push_back(_text);
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::poptext() {
+		if(!text.empty()) text.pop_back();
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::cleartext() {
+		text.clear();
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::fontname(wstring _fontName) {
+		fontName = _fontName;
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::fontsize(int _fontHeight, int _fontWidth) {
+		fontHeight = _fontHeight;
+		fontWidth = _fontWidth;
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::move(int _X, int _Y) {
+		locationY = _Y, locationX = _X;
+		return *this;
+	}
 	inline circBUTTON& circBUTTON::textalign(int _walign, int _halign) {
 		if(~_walign) walign = _walign;
 		if(~_halign) halign = _halign;
 		return *this;
 	}
-	inline circBUTTON& circBUTTON::event(std::function<void()> event) { clickEvent = event; return *this; }
-	inline circBUTTON& circBUTTON::frame(int _width) { frameWidth = _width; return *this; }
-	inline circBUTTON& circBUTTON::framecolor(bool _enableAuto, color_t _color) { enableAutoFrameColor = _enableAuto, frameColor = _color; return *this; }
+	inline circBUTTON& circBUTTON::event(std::function<void()> event) {
+		clickEvent = event;
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::frame(int _width) {
+		frameWidth = _width;
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::framecolor(bool _enableAuto, color_t _color) {
+		enableAutoFrameColor = _enableAuto, frameColor = _color;
+		return *this;
+	}
 	inline circBUTTON& circBUTTON::bgimage(PIMAGE _img) {
 		if(backgroundImage == nullptr) backgroundImage = newimage();
-		images::copyImage(backgroundImage,_img);
+		images::copyImage(backgroundImage, _img);
 		backgroundImageWidth = getwidth(backgroundImage);
 		backgroundImageHeight = getheight(backgroundImage);
 		return *this;
 	}
-	inline circBUTTON& circBUTTON::bgsize(int _width,int _height) { backgroundImageWidth = _width,backgroundImageHeight = _height; return *this; }
-	inline circBUTTON& circBUTTON::delbgimage() { backgroundImage = nullptr; return *this; }
+	inline circBUTTON& circBUTTON::bgsize(int _width, int _height) {
+		backgroundImageWidth = _width, backgroundImageHeight = _height;
+		return *this;
+	}
+	inline circBUTTON& circBUTTON::delbgimage() {
+		backgroundImage = nullptr;
+		return *this;
+	}
 	inline circBUTTON& circBUTTON::detect() {
 		POINT mousePos;
 		GetCursorPos(&mousePos);
 		ScreenToClient(getHWnd(), &mousePos);
 		double dist = hypot(mousePos.x - locationX, mousePos.y - locationY);
-		if(dist > buttonRadius) return status = 0, * this;
+		if(dist > buttonRadius) return status = 0, *this;
 		while(mousemsg()) {
 			mouse_msg msg = getmouse();
-			if(hypot(msg.x - locationX, msg.y - locationY) <= buttonRadius
-			   && msg.is_left() && msg.is_down()) return status = 2, * this;
+			if(hypot(msg.x - locationX, msg.y - locationY) <= buttonRadius && msg.is_left() && msg.is_down()) return status = 2, *this;
 		}
-		return status = 1, * this;
+		return status = 1, *this;
 	}
 	inline bool circBUTTON::detect(mouse_msg _mouse) {
-		_mouse.x -= locationX; _mouse.y -= locationY;
+		_mouse.x -= locationX;
+		_mouse.y -= locationY;
 		if(hypot(_mouse.x, _mouse.y) > buttonRadius) return status = 0, false;
 		if(_mouse.is_left() && _mouse.is_down()) status = 2;
 		else status = 1;
 		return true;
 	}
 
-}
+}  // namespace button
 
 _GLIB_NAMESPACE_TAIL
 
-#endif // __LG_GLIB_CIRCBUT_HPP__
+#endif  // __LG_GLIB_CIRCBUT_HPP__

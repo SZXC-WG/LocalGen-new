@@ -28,16 +28,17 @@ using std::string;
 using std::wstring;
 using std::to_string;
 using std::to_wstring;
-using std::min; using std::max;
-using std::vector; using std::deque;
+using std::min;
+using std::max;
+using std::vector;
+using std::deque;
 
 #include <graphics.h>
 
 #include "../LGdef.hpp"
 
 /* quick function for window visibility */
-inline __attribute__((always_inline))
-bool windowIsVisible() { return (::GetWindowLong(getHWnd(), GWL_STYLE) & WS_VISIBLE) != 0; }
+inline __attribute__((always_inline)) bool windowIsVisible() { return (::GetWindowLong(getHWnd(), GWL_STYLE) & WS_VISIBLE) != 0; }
 
 _GLIB_NAMESPACE_HEAD
 
@@ -66,7 +67,7 @@ namespace images {
 	 */
 	void setWindowTransparent(bool enable, int alpha = 0xFF);
 
-} // namespace images
+}  // namespace images
 
 /**
  * @brief Inline namespace for texts.
@@ -81,13 +82,20 @@ inline namespace text {
 		color_t color;
 		wstring text, font;
 		int fontHeight, fontWidth;
-		singleTextS() {};
-		singleTextS(color_t _color, wstring _text) : color(_color), text(_text) {};
-		singleTextS(color_t _color, wstring _text, wstring _font, int _fH, int _fW = 0)
-			: color(_color), text(_text), font(_font), fontHeight(_fH), fontWidth(_fW) {};
+		singleTextS(){};
+		singleTextS(color_t _color, wstring _text) :
+		    color(_color), text(_text){};
+		singleTextS(color_t _color, wstring _text, wstring _font, int _fH, int _fW = 0) :
+		    color(_color), text(_text), font(_font), fontHeight(_fH), fontWidth(_fW){};
 
-		int width(PIMAGE _pimg = NULL) { setfont(fontHeight, fontWidth, font.c_str(), _pimg); return textwidth(text.c_str(), _pimg); }
-		int height(PIMAGE _pimg = NULL) { setfont(fontHeight, fontWidth, font.c_str(), _pimg); return textheight(text.c_str(), _pimg); }
+		int width(PIMAGE _pimg = NULL) {
+			setfont(fontHeight, fontWidth, font.c_str(), _pimg);
+			return textwidth(text.c_str(), _pimg);
+		}
+		int height(PIMAGE _pimg = NULL) {
+			setfont(fontHeight, fontWidth, font.c_str(), _pimg);
+			return textheight(text.c_str(), _pimg);
+		}
 
 		void print(int _X, int _Y, PIMAGE _pimg = NULL) {
 			setcolor(color, _pimg);
@@ -106,20 +114,29 @@ inline namespace text {
 		wstring sbText;
 		wstring font;
 		int fontHeight, fontWidth;
-		varIntTextS() {};
-		varIntTextS(int* _var) : var(_var) {};
-		varIntTextS(int* _var, color_t _color) : var(_var), color(_color) {};
-		varIntTextS(int* _var, color_t _color, wstring _sbText) : var(_var), color(_color), sbText(_sbText) {};
-		varIntTextS(int* _var, color_t _color, wstring _sbText, wstring _font, int _fH, int _fW = 0)
-			: var(_var), color(_color), sbText(_sbText), font(_font), fontHeight(_fH), fontWidth(_fW) {};
+		varIntTextS(){};
+		varIntTextS(int* _var) :
+		    var(_var){};
+		varIntTextS(int* _var, color_t _color) :
+		    var(_var), color(_color){};
+		varIntTextS(int* _var, color_t _color, wstring _sbText) :
+		    var(_var), color(_color), sbText(_sbText){};
+		varIntTextS(int* _var, color_t _color, wstring _sbText, wstring _font, int _fH, int _fW = 0) :
+		    var(_var), color(_color), sbText(_sbText), font(_font), fontHeight(_fH), fontWidth(_fW){};
 
-		int width(PIMAGE _pimg = NULL) { setfont(fontHeight, fontWidth, font.c_str(), _pimg); return textwidth(to_wstring(*var).c_str(), _pimg); }
-		int height(PIMAGE _pimg = NULL) { setfont(fontHeight, fontWidth, font.c_str(), _pimg); return textheight(to_wstring(*var).c_str(), _pimg); }
+		int width(PIMAGE _pimg = NULL) {
+			setfont(fontHeight, fontWidth, font.c_str(), _pimg);
+			return textwidth(to_wstring(*var).c_str(), _pimg);
+		}
+		int height(PIMAGE _pimg = NULL) {
+			setfont(fontHeight, fontWidth, font.c_str(), _pimg);
+			return textheight(to_wstring(*var).c_str(), _pimg);
+		}
 
 		void print(int _X, int _Y, PIMAGE _pimg = NULL) {
 			setcolor(color, _pimg);
 			setfont(fontHeight, fontWidth, font.c_str(), _pimg);
-			outtextxy(_X, _Y, (sbText+to_wstring(*var)).c_str(), _pimg);
+			outtextxy(_X, _Y, (sbText + to_wstring(*var)).c_str(), _pimg);
 		}
 	};
 
@@ -129,61 +146,64 @@ inline namespace text {
 	 */
 	struct lineTextS {
 		deque<singleTextS> text;
-		lineTextS() {};
-		lineTextS(deque<singleTextS> _text) : text(_text) {};
+		lineTextS(){};
+		lineTextS(deque<singleTextS> _text) :
+		    text(_text){};
 
 		void push_front(singleTextS _stext) { text.push_front(_stext); }
-		void push_front(color_t _color, wstring _stext) { text.emplace_front(_color,_stext); }
+		void push_front(color_t _color, wstring _stext) { text.emplace_front(_color, _stext); }
 		void push_back(singleTextS _stext) { text.push_back(_stext); }
-		void push_back(color_t _color, wstring _stext) { text.emplace_back(_color,_stext); }
+		void push_back(color_t _color, wstring _stext) { text.emplace_back(_color, _stext); }
 		void pop_front() { text.pop_front(); }
 		void pop_back() { text.pop_back(); }
 
 		int width(PIMAGE _pimg = NULL) {
-			int ret=0;
-			for(auto& t:text) ret += t.width(_pimg);
+			int ret = 0;
+			for(auto& t: text) ret += t.width(_pimg);
 			return ret;
 		}
 		int height(PIMAGE _pimg = NULL) {
-			int ret=0;
-			for(auto& t:text) ret = max(ret, t.height(_pimg));
+			int ret = 0;
+			for(auto& t: text) ret = max(ret, t.height(_pimg));
 			return ret;
 		}
 
 		void print(int _X, int _Y, PIMAGE _pimg = NULL) {
-			int x=_X, y=_Y;
-			for(auto& t:text) {
+			int x = _X, y = _Y;
+			for(auto& t: text) {
 				t.print(x, y, _pimg);
 				x += t.width();
 			}
 		}
 	};
 
-} // inline namespace text
+}  // namespace text
 
 inline namespace button {
 
 	class rectBUTTON {
-	  private:
-		PIMAGE buttonImage; // image info
-		PIMAGE backgroundImage; // background image
+	   private:
+		PIMAGE buttonImage;      // image info
+		PIMAGE backgroundImage;  // background image
 		int backgroundImageWidth, backgroundImageHeight;
-		int buttonWidth, buttonHeight; // width & height
-		color_t backgroundColor; // background color
-		color_t textColor; // text color
-		vector<wstring> text; // text
-		wstring fontName; // font face name
-		int fontHeight, fontWidth; // font height & width
+		int buttonWidth, buttonHeight;  // width & height
+		color_t backgroundColor;        // background color
+		color_t textColor;              // text color
+		vector<wstring> text;           // text
+		wstring fontName;               // font face name
+		int fontHeight, fontWidth;      // font height & width
 		int frameWidth;
-		bool enableAutoFrameColor; color_t frameColor;
-		int walign, halign; // align method
-		int locationX, locationY; // location on screen
-	  public:
-		bool enableTextShadow; int textShadowWeight;
+		bool enableAutoFrameColor;
+		color_t frameColor;
+		int walign, halign;        // align method
+		int locationX, locationY;  // location on screen
+	   public:
+		bool enableTextShadow;
+		int textShadowWeight;
 		bool enableShadow;
 		bool enableButtonShadow;
-		int status; // button status: free(0) / cursor-on(1) / clicked(2)
-		std::function<void()> clickEvent; // event when clicked
+		int status;                        // button status: free(0) / cursor-on(1) / clicked(2)
+		std::function<void()> clickEvent;  // event when clicked
 		explicit rectBUTTON();
 		~rectBUTTON();
 		rectBUTTON(int _width, int _height);
@@ -205,33 +225,35 @@ inline namespace button {
 		inline rectBUTTON& frame(int _width);
 		inline rectBUTTON& framecolor(bool _enableAuto = 1, color_t _color = 0xffffffff);
 		inline rectBUTTON& bgimage(PIMAGE _img);
-		inline rectBUTTON& bgsize(int _width,int _height);
+		inline rectBUTTON& bgsize(int _width, int _height);
 		inline rectBUTTON& delbgimage();
 		[[deprecated]] inline rectBUTTON& detect();
 		inline bool detect(mouse_msg _mouse);
 	};
 
 	class circBUTTON {
-	  private:
-		PIMAGE buttonImage; // image info
+	   private:
+		PIMAGE buttonImage;  // image info
 		PIMAGE backgroundImage;
 		int backgroundImageWidth, backgroundImageHeight;
-		int buttonRadius; // radius
-		color_t backgroundColor; // background color
-		color_t textColor; // text color
-		vector<wstring> text; // text
-		wstring fontName; // font face name
-		int fontHeight, fontWidth; // font height & width
+		int buttonRadius;           // radius
+		color_t backgroundColor;    // background color
+		color_t textColor;          // text color
+		vector<wstring> text;       // text
+		wstring fontName;           // font face name
+		int fontHeight, fontWidth;  // font height & width
 		int frameWidth;
-		bool enableAutoFrameColor; color_t frameColor;
-		int walign, halign; // align method
-		int locationX, locationY; // location on screen
-	  public:
-		bool enableTextShadow; int textShadowWeight;
+		bool enableAutoFrameColor;
+		color_t frameColor;
+		int walign, halign;        // align method
+		int locationX, locationY;  // location on screen
+	   public:
+		bool enableTextShadow;
+		int textShadowWeight;
 		bool enableShadow;
 		bool enableButtonShadow;
-		int status; // button status: free(0) / cursor-on(1) / clicked(2)
-		std::function<void()> clickEvent; // event when clicked
+		int status;                        // button status: free(0) / cursor-on(1) / clicked(2)
+		std::function<void()> clickEvent;  // event when clicked
 		explicit circBUTTON();
 		~circBUTTON();
 		circBUTTON(int _radius);
@@ -253,17 +275,17 @@ inline namespace button {
 		inline circBUTTON& frame(int _width);
 		inline circBUTTON& framecolor(bool _enableAuto = 1, color_t _color = 0xffffffff);
 		inline circBUTTON& bgimage(PIMAGE _img);
-		inline circBUTTON& bgsize(int _width,int _height);
+		inline circBUTTON& bgsize(int _width, int _height);
 		inline circBUTTON& delbgimage();
 		[[deprecated]] inline circBUTTON& detect();
 		inline bool detect(mouse_msg _mouse);
 	};
-} // inline namespace button
+}  // namespace button
 
 inline namespace checkbox {
 
 	class rectCBOX {
-	  private:
+	   private:
 		PIMAGE boxImage;
 		int boxWidth, boxHeight;
 		int locationX, locationY;
@@ -271,7 +293,7 @@ inline namespace checkbox {
 		color_t frameColor;
 		int frameWidth;
 		color_t fillColor;
-	  public:
+	   public:
 		bool pressed;
 		int status; /* button status: free(0) / cursor-on(1) / clicked(2) */
 		bool* varPtr;
@@ -282,7 +304,7 @@ inline namespace checkbox {
 		inline rectCBOX& display(PIMAGE pimg = NULL);
 		inline int gwidth();
 		inline int gheight();
-		inline std::pair<int,int> gsize();
+		inline std::pair<int, int> gsize();
 		inline rectCBOX& size(int _width, int _height);
 		inline rectCBOX& bgcolor(color_t _color);
 		inline rectCBOX& move(int _X, int _Y);
@@ -315,7 +337,7 @@ inline namespace checkbox {
 		inline rCBOXtextS& display(int _X, int _Y, PIMAGE pimg = NULL);
 	};
 
-} // inline namespace checkbox
+}  // namespace checkbox
 
 inline namespace page {
 
@@ -349,8 +371,10 @@ inline namespace page {
 		} info;
 
 		inline itemS() = default;
-		inline itemS(decltype(iType) _iType) : iType(_iType) {};
-		inline itemS(decltype(iType) _iType, int _locX, int _locY) : iType(_iType), locX(_locX), locY(_locY) {};
+		inline itemS(decltype(iType) _iType) :
+		    iType(_iType){};
+		inline itemS(decltype(iType) _iType, int _locX, int _locY) :
+		    iType(_iType), locX(_locX), locY(_locY){};
 
 		inline void move(int _X, int _Y);
 		inline void downLoc();
@@ -375,34 +399,38 @@ inline namespace page {
 	};
 
 	class pageS {
-	  public:
+	   public:
 		// specify class types
 		typedef itemS item_t;
 		typedef vector<item_t> ctn_t;
 		typedef scrBarS scroll_t;
-	  private:
+	   private:
 		PIMAGE pageImage;
 		pageS* parentPage;
 		int sizeX, sizeY;
 		color_t bgColor;
 		int locX, locY;
-		struct { int lX,lY; } dispSize;
+		struct {
+			int lX, lY;
+		} dispSize;
 		ctn_t content;
 		scroll_t scrBarV, scrBarH;
 		bool enableVBar, enableHBar;
-	  public:
-		pageS() : pageImage(newimage()), parentPage(NULL) {};
-		pageS(pageS* _parent) : pageImage(newimage()), parentPage(_parent) {};
+	   public:
+		pageS() :
+		    pageImage(newimage()), parentPage(NULL){};
+		pageS(pageS* _parent) :
+		    pageImage(newimage()), parentPage(_parent){};
 		pageS(pageS* _parent,
 		      int _sizeX,
 		      int _sizeY,
 		      int _locX,
-		      int _locY)
-			: sizeX(_sizeX),
-			  sizeY(_sizeY),
-			  locX(_locX),
-			  locY(_locY),
-			  dispSize(decltype(dispSize) {_sizeX,_sizeY}) {
+		      int _locY) :
+		    sizeX(_sizeX),
+		    sizeY(_sizeY),
+		    locX(_locX),
+		    locY(_locY),
+		    dispSize(decltype(dispSize){ _sizeX, _sizeY }) {
 			pageImage = newimage(_sizeX, _sizeY);
 			parentPage = _parent;
 		};
@@ -447,11 +475,11 @@ inline namespace page {
 		// get a specific page item (its iterator)
 		inline ctn_t::iterator getItemIt(int _pos);
 
-		inline __attribute__((always_inline)) void run(); // todo)) how to run?
+		inline __attribute__((always_inline)) void run();  // todo)) how to run?
 	};
 
-} // inline namespace page
+}  // namespace page
 
-_GLIB_NAMESPACE_TAIL // inline namespace glib
+_GLIB_NAMESPACE_TAIL  // inline namespace glib
 
-#endif // __LG_GLIB_HEAD_HPP__
+#endif  // __LG_GLIB_HEAD_HPP__

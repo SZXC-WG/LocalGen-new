@@ -23,7 +23,7 @@ namespace images {
 
 	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
 		if(dstimg == NULL || srcimg == NULL) return;
-		getimage(dstimg,srcimg,0,0,getwidth(srcimg),getheight(srcimg));
+		getimage(dstimg, srcimg, 0, 0, getwidth(srcimg), getheight(srcimg));
 	}
 	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
 		if((pimg == NULL) || (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
@@ -45,8 +45,8 @@ namespace images {
 		SetLayeredWindowAttributes(egeHwnd, 0, alpha, LWA_ALPHA);
 	}
 
-}
+}  // namespace images
 
 _GLIB_NAMESPACE_TAIL
 
-#endif // __LG_GLIB_IMAGE_HPP__
+#endif  // __LG_GLIB_IMAGE_HPP__

@@ -18,6 +18,8 @@
 #	define UNICODE
 #endif
 
+// This file is due to be splited. It's too long and contains too many things.
+
 /**** OVERALL HEADERS ****/
 
 /** C/C++ file operations **/
@@ -67,9 +69,96 @@ using std::max;
 using namespace std::literals;
 
 /** definitions **/
-#define _LG_DEPRECATED [[deprecated]]
+#define _LG_DEPRECATED        [[deprecated]]
+#define _LG_DEPRECATED_S(str) [[deprecated(str)]]
 
-/**** constant variables ****/
+/** BASIC TYPE SPECIFICATIONS **/
+
+/* integer types  */
+using i8 = int8_t;
+using i16 = int16_t;
+using i32 = int32_t;
+using i64 = int64_t;
+using i128 = __int128_t;
+using u8 = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
+using u128 = __uint128_t;
+/* floatint-point types */
+#if __cplusplus < 202302L
+// using f32 = float;
+using f32 = double;  // float is rubbish
+using f64 = double;
+using f80 = long double;
+#else
+using f16 = float16_t;
+using f32 = float32_t;
+using f64 = float64_t;
+using f128 = float128_t;
+#endif
+
+/* format strings */
+/* printf series */
+// signed decimal (d/i)
+#define Pd8  "%" PRId8
+#define Pd16 "%" PRId16
+#define Pd32 "%" PRId32
+#define Pd64 "%" PRId64
+#define Pi8  "%" PRId8
+#define Pi16 "%" PRId16
+#define P32  "%" PRId32
+#define Pi64 "%" PRId64
+// unsigned decimal (u)
+#define Pu8  "%" PRIu8
+#define Pu16 "%" PRIu16
+#define Pu32 "%" PRIu32
+#define Pu64 "%" PRIu64
+// octal (o)
+#define Po8  "%" PRIo8
+#define Po16 "%" PRIo16
+#define Po32 "%" PRIo32
+#define Po64 "%" PRIo64
+// hexadecimal (x)
+#define Px8  "%" PRIx8
+#define Px16 "%" PRIx16
+#define Px32 "%" PRIx32
+#define Px64 "%" PRIx64
+#define PX8  "%" PRIX8
+#define PX16 "%" PRIX16
+#define PX32 "%" PRIX32
+#define PX64 "%" PRIX64
+/* scanf series */
+// signed decimal (d/i)
+#define Sd8  "%" SCNd8
+#define Sd16 "%" SCNd16
+#define Sd32 "%" SCNd32
+#define Sd64 "%" SCNd64
+#define Si8  "%" SCNd8
+#define Si16 "%" SCNd16
+#define S32  "%" SCNd32
+#define Si64 "%" SCNd64
+// unsigned decimal (u)
+#define Su8  "%" SCNu8
+#define Su16 "%" SCNu16
+#define Su32 "%" SCNu32
+#define Su64 "%" SCNu64
+// octal (o)
+#define So8  "%" SCNo8
+#define So16 "%" SCNo16
+#define So32 "%" SCNo32
+#define So64 "%" SCNo64
+// hexadecimal (x)
+#define Sx8  "%" SCNx8
+#define Sx16 "%" SCNx16
+#define Sx32 "%" SCNx32
+#define Sx64 "%" SCNx64
+#define SX8  "%" SCNX8
+#define SX16 "%" SCNX16
+#define SX32 "%" SCNX32
+#define SX64 "%" SCNX64
+
+/**** constants ****/
 
 constexpr int dx[5] = { 0, -1, 0, 1, 0 };
 constexpr int dy[5] = { 0, 0, -1, 0, 1 };
@@ -199,7 +288,7 @@ PIMAGE pimg[55];                 // software used images
 MapInfoS mapInfo[5005];          // storing all imported maps
 Block gameMap[505][505];         /* current game map; maximum 500*500 */
 playerS playerInfo[64] = {
-  // player information (default written)
+	// player information (default written)
 	{  L"White", 0xffffffff },
 	{    L"Red", 0xffff0000 },
 	{   L"Aqua", 0xff4363d8 },
@@ -453,7 +542,7 @@ namespace LGgame {
 
 	void init(int chtC, int pC, int gS);
 	void capture(int p1, int p2);
-	[[deprecated("This function will be deleted since v5.0.")]]
+	_LG_DEPRECATED_S("Will be deleted in ver.5.")
 	int analyzeMove(int id, int mv, coordS& coo);
 	int checkMove(moveS coo);
 	void flushMove();

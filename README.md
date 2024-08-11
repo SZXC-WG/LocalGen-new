@@ -8,36 +8,35 @@
 
 ## Intro
 
-Welcome to the project of Local Generals.io!
+Welcome to the project of Local Generals.io (LocalGen)!
 
-Here you can play [generals.io](http://generals.io) on your computer **without connecting the internet**!
+Here you can play [generals.io](http://generals.io) **completely offline**!
 
-You can play with robots or **play with your friends** connecting the same WLAN.
+Enjoy playing with **out-of-the-box** robots or your friends (same LAN)!
 
-Interested? Then go to [the release page](http://github.com/SZXC-WG/LocalGen-new/releases) to download!
+Interested? Download LocalGen on [the release page](http://github.com/SZXC-WG/LocalGen-new/releases).
 
-If you have an idea or find bugs, you can also take part in contributing to the project! Just **create an issue** to tell us or **fork the project and create a pull request** to modify the codes.
-
-## Weak robots in game! I want to write a new one!
-
-Go see [issue #31](../../issues/31).
+New idea? Old bugs? Contribute to the project! Simply **create an issue or a pull request**, and we'll reach out to you soon.
 
 ## [Releases (Changelog)](http://github.com/SZXC-WG/LocalGen-new/releases)
 
+## Weak robots! Write a new one?
+
+Certainly! We appreciate any form of contribution. See the instructions at [#31](../../issues/31).
+
 ## Contributing
 
-Currently, Local Generals.io (LocalGen) is split into three branches.
+LocalGen is currently split into three branches:
 
-- **`release`**: This branch is the main branch, shown in the project homepage.  
-  The branch is used to publish new releases and save history releases. Maps and fonts are also stored in this branch.
-- **`v5-EGE`**: The current main developing branch.  
-  We use [EGE Graphics](http://xege.org) for LocalGen in our versions 2 to 5. Version 5 will be our last major version using EGE Graphics.  
-  It is still developing, as we are building an object-oriented system based on the EGE Graphics.  
-  The releases published under this branch are for Windows users only, as EGE Graphics is built on Windows.
-- **`v6`** : The future new-generation developing branch.  
-  We will use Qt to reconstruct our program in our version 6. We aim to give our users a better software performance.
+- **`release`**: The main branch, shown in the project homepage. Used for saving releases and storing map/font data.
+- **`v5-EGE`**: Main branch of version 5, under active development.
+  LocalGen versions 2 to 5 is built with [EGE Graphics](http://xege.org).
+  We are trying to build an object-oriented system based on EGE.
+  The releases published under this branch are **Windows only** for the limitations of EGE.
+- **`v6`**: Main branch of version 6. **Starting from v6, we will migrate our UI to the Qt library.**
+  This version hopefully gives optimized performance and cross-platform support.
 
-To contribute to our project, please fork our `v5-EGE` branch and create a pull request. Thanks.
+To contribute to our project, please create a pull request on the `v5-EGE` branch. Thanks.
 
 ## Star History
 

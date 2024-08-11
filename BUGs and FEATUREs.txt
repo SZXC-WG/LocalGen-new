@@ -1,3 +1,0 @@
-Written by chrhaa.
-
-1. When you use WEB, make sure it's at least SP2.

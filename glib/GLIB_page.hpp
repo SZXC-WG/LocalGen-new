@@ -71,7 +71,7 @@ inline namespace page {
 	template <typename _Ftn_t,
 	          typename _Rtn_t>
 	inline _Rtn_t itemS::workRet(_Ftn_t _ftn) {
-		register _Rtn_t ret;
+		_Rtn_t ret;
 		switch(iType) {
 			case ITEM_SUBPAGE: {
 				ret = _ftn(*info.subPage);

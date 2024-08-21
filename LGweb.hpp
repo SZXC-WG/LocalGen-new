@@ -31,7 +31,7 @@ bool initSock() {
 }
 
 void LGserver::zipSendBuf() {
-	register int p = 0, i, j;
+	int p = 0, i, j;
 	long long k1 = LGgame::curTurn, k2;
 	sendBuf[p++] = 44;
 	sendBuf[p++] = LGgame::playerCnt + CHAR_AD;
@@ -394,7 +394,7 @@ int LGserver::GAME() {
 }
 
 void LGclient::dezipRecvBuf() {
-	register int p = 1, i, j, k;
+	int p = 1, i, j, k;
 	LGgame::playerCnt = recvBuf[p++] - CHAR_AD;
 	LGgame::gameSpeed = recvBuf[p++] - CHAR_AD;
 	LGgame::curTurn = recvBuf[p++] - CHAR_AD;
@@ -744,7 +744,7 @@ int LGclient::GAME() {
 				                .c_str(),
 				            L"GAME END", MB_OK | MB_SYSTEMMODAL);
 				gameEnd = 1;
-				register int winnerNum = std::__lg(ed);
+				int winnerNum = std::__lg(ed);
 				LGgame::cheatCode = 1048575;
 			}
 		}

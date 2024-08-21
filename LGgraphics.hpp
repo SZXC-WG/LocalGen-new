@@ -83,7 +83,7 @@ namespace LGGraphics {
 		settextjustify(LEFT_TEXT, TOP_TEXT);
 		rectBUTTON scrsz[10];
 		for(int i = 200; i <= 500; i += 100) {
-			register int p = i / 100 - 2;
+			int p = i / 100 - 2;
 			scrsz[p].size(400, 50);
 			scrsz[p].bgcolor(bgColor);
 			scrsz[p].textcolor(WHITE);
@@ -97,7 +97,7 @@ namespace LGGraphics {
 		}
 		{
 			int i = 600;
-			register int p = i / 100 - 2;
+			int p = i / 100 - 2;
 			scrsz[p].size(400, 50);
 			scrsz[p].bgcolor(bgColor);
 			scrsz[p].textcolor(WHITE);
@@ -111,7 +111,7 @@ namespace LGGraphics {
 		}
 		for(; is_run(); delay_fps(60)) {
 			for(int i = 200; i <= 600; i += 100) {
-				register int p = i / 100 - 2;
+				int p = i / 100 - 2;
 				scrsz[p].detect();
 				scrsz[p].display();
 				if(scrsz[p].status == 2) scrsz[p].clickEvent(), changeMade = false;

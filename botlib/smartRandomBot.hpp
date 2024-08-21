@@ -32,7 +32,7 @@ namespace smartRandomBot {
 		node p[5];
 		int pl = 0;
 		for(int i = 1; i <= 4; ++i) {
-			register int nx = coo.x + dx[i], ny = coo.y + dy[i];
+			int nx = coo.x + dx[i], ny = coo.y + dy[i];
 			if(nx < 1 || nx > mapH || ny < 1 || ny > mapW || gameMap[nx][ny].type == 2)
 				continue;
 			p[++pl] = {

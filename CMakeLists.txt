@@ -25,5 +25,3 @@ target_link_libraries(${TARGET_NAME} -static-libgcc -mwindows graphics gdi32 gdi
 
 # set cxx standard
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_14)
-
-target_include_directories(${TARGET_NAME} PUBLIC ${PROJECT_BINARY_DIR})

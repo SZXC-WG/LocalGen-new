@@ -208,10 +208,11 @@ namespace LGGraphics {
 		// initname();
 		cleardevice();
 		PIMAGE zfavi = newimage();
-		getimage_pngfile(zfavi, "img/favicon.png");
+		getimage(zfavi, "PNG", "IMAGE_FAVICON");
 		images::zoomImage(zfavi, getwidth(zfavi) * 1.8 * windowData.zoomX, getheight(zfavi) * 1.8 * windowData.zoomY);
 		putimage_withalpha(NULL, zfavi, 100 * windowData.zoomX, 50 * windowData.zoomY,
 		                   0, 0, getwidth(zfavi), getheight(zfavi));
+		delimage(zfavi);
 		settextjustify(CENTER_TEXT, TOP_TEXT);
 		setfont(150 * windowData.zoomY, 0, LGset::mainFontName.c_str(), 0, 0, FW_BOLD, 0, 0, 0);
 		setcolor(WHITE);

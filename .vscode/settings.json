@@ -1,7 +1,7 @@
 {
 	"[cpp]": {
 		"editor.defaultFormatter": "ms-vscode.cpptools",
-		"editor.formatOnSave": true
+		"editor.formatOnSave": false
 	},
 	"cmake.generator": "MinGW Makefiles"
 }

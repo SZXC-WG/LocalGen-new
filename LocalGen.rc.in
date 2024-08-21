@@ -1,0 +1,39 @@
+IMAGE_FAVICON	PNG	"../img/favicon.png"
+IMAGE_CITY		PNG	"../img/city.png"
+IMAGE_CROWN		PNG	"../img/crown.png"
+IMAGE_MOUNTAIN	PNG	"../img/mountain.png"
+IMAGE_SWAMP		PNG	"../img/swamp.png"
+IMAGE_OBSTACLE	PNG	"../img/obstacle.png"
+IMAGE_CURRENTON	PNG	"../img/currentOn.png"
+IMAGE_ERASE		PNG	"../img/erase.png"
+IMAGE_LIGHT		PNG	"../img/light.png"
+IMAGE_OPTIONS	PNG	"../img/options.png"
+IMAGE_GITHUB	PNG	"../img/github.png"
+
+A ICON "../LocalGen.ico"
+
+1 VERSIONINFO
+FILEVERSION ${PROJECT_VERSION_MAJOR},${PROJECT_VERSION_MINOR},${PROJECT_VERSION_PATCH},${BUILD_NUMBER}
+PRODUCTVERSION ${PROJECT_VERSION_MAJOR},${PROJECT_VERSION_MINOR},${PROJECT_VERSION_PATCH},${BUILD_NUMBER}
+
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904b0"
+    BEGIN
+      VALUE "CompanyName", "SZXC Work Group"
+      VALUE "FileVersion", "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}.${BUILD_NUMBER}"
+      VALUE "FileDescription", "Local Generals.io"
+      VALUE "InternalName", ""
+      VALUE "LegalCopyright", "Copyright (c) ${CURRENT_YEAR} SZXC Work Group"
+      VALUE "LegalTrademarks", ""
+      VALUE "OriginalFilename", ""
+      VALUE "ProductName", "Local Generals.io"
+      VALUE "ProductVersion", "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}.${BUILD_NUMBER}"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END

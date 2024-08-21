@@ -55,7 +55,7 @@
 #include <ege/sys_edit.h>  // text boxes of EGE
 #include "glib/GLIB_HEAD.hpp"
 /** project header **/
-#include "LocalGen_private.h"  // project information
+#include "verinfo.h"  // project information
 
 /** using **/
 using std::vector;

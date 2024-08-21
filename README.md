@@ -15,6 +15,12 @@ GUI here is built with [EGE Graphics library](http://xege.org).
 
 To contribute to this project, please create an issue or create a pull request. **Thank you for supporting LocalGen.**
 
+## Building within VS Code
+
+We've recently migrated to the CMake build system. The best way to build the project is to use VS Code with the [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) extension.
+
+`settings.json` is already configured to build with MinGW Makefile. Please manually select the `GCC` compiler kit and set variant to `Release` for compilation.
+
 ## Known issues
 
 - Web mode may not work when using speed 1. Try 2 or higher.

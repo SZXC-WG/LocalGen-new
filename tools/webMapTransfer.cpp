@@ -33,7 +33,7 @@ inline long long PMod(long long& x) {
 }
 
 void Zip() {
-	register int p = 0, i, j;
+	int p = 0, i, j;
 	long long k1 = mapH, k2 = mapW;
 	strZip[p++] = PMod(k1) + CHAR_AD;
 	strZip[p++] = PMod(k1) + CHAR_AD;

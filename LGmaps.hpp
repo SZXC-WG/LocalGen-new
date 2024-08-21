@@ -197,7 +197,7 @@ void createOptions(int type, int h) {
 
 void createRandomMap(int crtH = -1, int crtW = -1) {
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-	register int i, j;
+	int i, j;
 
 	if(crtH < 0)
 		mapH = mtrd() % 50 + 1;
@@ -248,7 +248,7 @@ void createStandardMap(int crtH = -1, int crtW = -1) {
 	// 7/8 mountain 1/2 swamp 9 plain 1 city 1 general
 	// 1/2 swamp 16/17 plain 1 city 1 general
 	std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
-	register int i, j;
+	int i, j;
 
 	if(crtH < 0)
 		mapH = mtrd() % 50 + 1;

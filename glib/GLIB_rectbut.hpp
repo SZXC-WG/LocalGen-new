@@ -76,7 +76,7 @@ inline namespace button {
 		}
 		setfont(-fontHeight, fontWidth, fontName.c_str(), buttonImage);
 		settextjustify(walign, halign, buttonImage);
-		register int ox, oy;
+		int ox, oy;
 		if(walign == LEFT_TEXT) ox = 0;
 		else if(walign == CENTER_TEXT) ox = buttonWidth / 2;
 		else ox = buttonWidth - 1;

@@ -532,7 +532,7 @@ namespace LGgame {
 		gameSpeed = gS;
 		inReplay = false;
 		inCreate = false;
-		for(register int i = 1; i <= pC; ++i) isAlive[i] = 1;
+		for(int i = 1; i <= pC; ++i) isAlive[i] = 1;
 	}
 };  // namespace LGgame
 
@@ -862,7 +862,7 @@ namespace LGlocal {
 					std::chrono::nanoseconds eed = std::chrono::steady_clock::now().time_since_epoch();
 					LGgame::beginTime += eed - bg;
 					gameEnd = 1;
-					register int winnerNum = std::__lg(ed);
+					int winnerNum = std::__lg(ed);
 					LGgame::cheatCode = 1048575;
 				}
 			}

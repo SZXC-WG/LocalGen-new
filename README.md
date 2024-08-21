@@ -19,7 +19,7 @@ To contribute to this project, please create an issue or create a pull request. 
 
 We've recently migrated to the CMake build system. The best way to build the project is to use VS Code with the [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) extension.
 
-`settings.json` is already configured to build with MinGW Makefile. Please manually select the `GCC` compiler kit and set variant to `Release` for compilation.
+`settings.json` is already configured to build with MinGW Makefiles. Please manually select the `GCC` compiler kit and set variant to `Release` for compilation.
 
 ## Known issues
 

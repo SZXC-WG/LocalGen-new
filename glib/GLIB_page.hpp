@@ -158,6 +158,7 @@ inline namespace page {
 				default: break;  // nothing
 			}
 		}
+		return *this;
 	}
 	inline bool pageS::detect(mouse_msg _mouse) {
 		_mouse.x -= locX;
@@ -222,11 +223,13 @@ inline namespace page {
 				} break;
 			}
 		}
+		return *this;
 	}
 	inline pageS& pageS::display(PIMAGE pimg) {
 		draw();
 		putimage(pimg, locX, locY, dispSize.lX, dispSize.lY,
 		         pageImage, 0, 0, sizeX, sizeY);
+		return *this;
 	}
 
 	inline pageS::ctn_t& pageS::gContent() { return content; }

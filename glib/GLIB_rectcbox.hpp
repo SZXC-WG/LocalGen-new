@@ -148,10 +148,12 @@ inline namespace checkbox {
 		checkBox.move(0, totH / 2 - checkBox.gheight() / 2);
 		checkBox.display(textImage);
 		boxText.print(checkBox.gwidth() + blankWidth, totH / 2 - boxText.height(textImage) / 2, textImage);
+		return *this;
 	}
 	inline rCBOXtextS& rCBOXtextS::display(int _X, int _Y, PIMAGE pimg) {
 		draw();
 		putimage(pimg, _X, _Y, textImage);
+		return *this;
 	}
 
 }  // namespace checkbox

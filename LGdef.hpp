@@ -69,8 +69,8 @@ using std::max;
 using namespace std::literals;
 
 /** definitions **/
-#define _LG_DEPRECATED        [[deprecated]]
-#define _LG_DEPRECATED_S(str) [[deprecated(str)]]
+#define LG_DEPRECATED        [[deprecated]]
+#define LG_DEPRECATED_S(str) [[deprecated(str)]]
 
 /** BASIC TYPE SPECIFICATIONS **/
 
@@ -87,7 +87,6 @@ using u64 = uint64_t;
 using u128 = __uint128_t;
 /* floatint-point types */
 #if __cplusplus < 202302L
-// using f32 = float;
 using f32 = double;  // float is rubbish
 using f64 = double;
 using f80 = long double;
@@ -107,7 +106,7 @@ using f128 = float128_t;
 #define Pd64 "%" PRId64
 #define Pi8  "%" PRId8
 #define Pi16 "%" PRId16
-#define P32  "%" PRId32
+#define Pi32 "%" PRId32
 #define Pi64 "%" PRId64
 // unsigned decimal (u)
 #define Pu8  "%" PRIu8
@@ -188,6 +187,26 @@ const int CTMonth = __MTON[string(__DATE__).substr(0, 3)];
 const int CTDay = atoi(&__DATE__[4]);
 const int CTYear = atoi(&__DATE__[7]);
 
+enum block_type_e {
+	BLOCK_PLAIN = 0,
+	BLOCK_SWAMP = 1,
+	BLOCK_MOUNTAIN = 2,
+	BLOCK_GENERAL = 3,
+	BLOCK_CITY = 4,
+	BLOCK_OBSTACLE = 5,  // obstacle: unseen mountain or city
+};
+
+enum special_map_id_e {
+	MAP_RANDOM_ID = 1,
+	MAP_STANDARD_ID = 2,
+	MAP_SP_MAZE_ID = 3,
+	MAP_MR_MAZE_ID = 4,
+	MAP_SP_SMAZE_ID = 5,
+	MAP_MR_SMAZE_ID = 6,
+	MAP_CITY_ID = 7,
+	MAP_PLAIN_ID = 8,
+};
+
 /**** structures ****/
 
 /**
@@ -210,17 +229,6 @@ struct MapInfoS {
 	~MapInfoS() = default;
 };
 
-enum special_map_id {
-	MAP_RANDOM_ID = 1,
-	MAP_STANDARD_ID = 2,
-	MAP_SP_MAZE_ID = 3,
-	MAP_MR_MAZE_ID = 4,
-	MAP_SP_SMAZE_ID = 5,
-	MAP_MR_SMAZE_ID = 6,
-	MAP_CITY_ID = 7,
-	MAP_PLAIN_ID = 8,
-};
-
 /**
  * @brief Struct saving a player move (in replay).
  */
@@ -239,7 +247,7 @@ struct coordS {
 	int x, y;
 	coordS() = default;
 	coordS(int x, int y) :
-	    x(x), y(y){};
+	    x(x), y(y) {};
 };
 bool operator==(coordS a, coordS b) { return a.x == b.x && a.y == b.y; }
 bool operator!=(coordS a, coordS b) { return a.x != b.x || a.y != b.y; }
@@ -283,10 +291,10 @@ struct moveS {
 
 //====value====//
 
-_LG_DEPRECATED string username;  // game user's name
-PIMAGE pimg[55];                 // software used images
-MapInfoS mapInfo[5005];          // storing all imported maps
-Block gameMap[505][505];         /* current game map; maximum 500*500 */
+LG_DEPRECATED string username;  // game user's name
+PIMAGE pimg[55];                // software used images
+MapInfoS mapInfo[5005];         // storing all imported maps
+Block gameMap[505][505];        /* current game map; maximum 500*500 */
 playerS playerInfo[64] = {
 	// player information (default written)
 	{  L"White", 0xffffffff },
@@ -415,7 +423,7 @@ namespace LGset {
 	wstring replayFileName((L"replay.lgr"s + wstring(50, 0)).c_str(), 50);
 	bool enableBetaTag = true;          // currently no change allowed
 	unsigned short socketPort = 14514;  // no change allowed
-	wstring mainFontName((L"MiSans"s + wstring(30, 0)).c_str(), 30);
+	wstring mainFontName((L"Quicksand"s + wstring(30, 0)).c_str(), 30);
 	unsigned short blockMinFontSize = 8;
 	unsigned short blockMaxFontSize = 18;
 	bool enableAnalysisInGame = true;
@@ -469,7 +477,7 @@ namespace LGGraphics {
 	constexpr color_t errorColor = 0xfffbbbbb;  // error color
 	PIMAGE iconImg;                             // favicon image
 	string fileName;                            // ???
-	_LG_DEPRECATED int stDel = 1;               // temporary variable for speed (deprecated)
+	LG_DEPRECATED int stDel = 1;                // temporary variable for speed (deprecated)
 	int plCnt = 0;                              // temporary variable for count of players
 	int mapSelected = 0;                        // ID of the map selected
 	int cheatCode = 0;                          // binary code of visibility in game
@@ -542,7 +550,7 @@ namespace LGgame {
 
 	void init(int chtC, int pC, int gS);
 	void capture(int p1, int p2);
-	_LG_DEPRECATED_S("Will be deleted in ver.5.")
+	LG_DEPRECATED_S("Will be deleted in ver.5.")
 	int analyzeMove(int id, int mv, coordS& coo);
 	int checkMove(moveS coo);
 	void flushMove();

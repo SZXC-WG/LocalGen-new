@@ -2,9 +2,9 @@
 #define __BOT_XIARUIZE__
 
 namespace xiaruizeBot {
-	const int dx[5] = {0, -1, 0, 1, 0};
-	const int dy[5] = {0, 0, -1, 0, 1};
-	int checkOrder[5] = {0, 1, 2, 3, 4};
+	const int dx[5] = { 0, -1, 0, 1, 0 };
+	const int dy[5] = { 0, 0, -1, 0, 1 };
+	int checkOrder[5] = { 0, 1, 2, 3, 4 };
 	int otherRobotProtection[20];
 	std::vector<int> operation[20];
 	bool vis[20][505][505];
@@ -105,39 +105,50 @@ namespace xiaruizeBot {
 			backCountCnt[id] = 1;
 			otherRobotProtection[id] = std::max(0, std::min((int)operation[id].size() - 10, (int)mtrd() % 10));
 			sendArmyProcess[id] = 1;
-			return moveS { id, false, coord, LGgame::genCoo[id] };
+			return moveS{ id, false, coord, LGgame::genCoo[id] };
 		}
 		if(sendArmyProcess[id]) {
 			if(sendArmyProcess[id] > operation[id].size()) {
 				sendArmyProcess[id] = 0;
-				return moveS { id, false, coordS{-1,-1}, coordS{-1,-1} };
+				return moveS{
+					id, false, coordS{ -1, -1 },
+                      coordS{ -1, -1 }
+				};
 			}
 			sendArmyProcess[id]++;
 			if(otherRobotProtection[id]) {
 				otherRobotProtection[id]--;
-				return moveS { id, false, coord,
-				               coordS { coord.x + dx[operation[id][sendArmyProcess[id]-2]],
-				                        coord.y + dy[operation[id][sendArmyProcess[id]-2]] } };
+				return moveS{
+					id, false, coord,
+					coordS{ coord.x + dx[operation[id][sendArmyProcess[id] - 2]],
+                           coord.y + dy[operation[id][sendArmyProcess[id] - 2]] }
+				};
 			} else
-				return moveS { id, true, coord,
-				               coordS { coord.x + dx[operation[id][sendArmyProcess[id]-2]],
-				                        coord.y + dy[operation[id][sendArmyProcess[id]-2]] } };
+				return moveS{
+					id, true, coord,
+					coordS{ coord.x + dx[operation[id][sendArmyProcess[id] - 2]],
+                           coord.y + dy[operation[id][sendArmyProcess[id] - 2]] }
+				};
 		}
 		vis[id][coord.x][coord.y] = true;
 		int returnValue = dfs(id, coord);
 		if(returnValue != -1) {
 			backCountCnt[id] = 1;
 			sendArmyProcess[id] = 0;
-			return moveS { id, true, coord,
-			               coordS { coord.x + dx[returnValue],
-			                        coord.y + dy[returnValue] } };
+			return moveS{
+				id, true, coord,
+				coordS{ coord.x + dx[returnValue],
+                       coord.y + dy[returnValue] }
+			};
 		} else {
 			int res;
 			changeDirection(operation[id][operation[id].size() - 1], res);
 			operation[id].pop_back();
-			return moveS { id, true, coord, coordS { coord.x + dx[res], coord.y + dy[res] } };
+			return moveS{
+				id, true, coord, coordS{ coord.x + dx[res], coord.y + dy[res] }
+			};
 		}
 	}
-}
+}  // namespace xiaruizeBot
 
-#endif // __BOT_XIARUIZE__
+#endif  // __BOT_XIARUIZE__

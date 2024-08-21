@@ -2,8 +2,8 @@
 #define __BOT_SMARTRANDOM__
 
 namespace smartRandomBot {
-	const int dx[5] = {0, -1, 0, 1, 0};
-	const int dy[5] = {0, 0, -1, 0, 1};
+	const int dx[5] = { 0, -1, 0, 1, 0 };
+	const int dy[5] = { 0, 0, -1, 0, 1 };
 
 	moveS calcNextMove(int id, coordS coo) {
 		static std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
@@ -16,12 +16,12 @@ namespace smartRandomBot {
 					if(gameMap[i][j].player == id) {
 						if(gameMap[i][j].army > mxArmy) {
 							mxArmy = gameMap[i][j].army;
-							mxCoo = coordS{i,j};
+							mxCoo = coordS{ i, j };
 						}
 					}
 				}
 			}
-			return moveS { id, false, coo, mxCoo };
+			return moveS{ id, false, coo, mxCoo };
 		}
 		struct node {
 			int type, team;
@@ -37,7 +37,7 @@ namespace smartRandomBot {
 				continue;
 			p[++pl] = {
 				gameMap[nx][ny].type, gameMap[nx][ny].player, gameMap[nx][ny].army, i,
-				std::find(lastCoord[id].rbegin(), lastCoord[id].rend(), coordS{nx, ny}) - lastCoord[id].rbegin()
+				std::find(lastCoord[id].rbegin(), lastCoord[id].rend(), coordS{ nx, ny }) - lastCoord[id].rbegin()
 			};
 		}
 		bool rdret = mtrd() % 2;
@@ -63,8 +63,10 @@ namespace smartRandomBot {
 		std::sort(p + 1, p + pl + 1, cmp);
 		lastCoord[id].push_back(coo);
 		if(lastCoord[id].size() > 100) lastCoord[id].pop_front();
-		return moveS { id, true, coo, coordS{coo.x+dx[p[1].dir],coo.y+dy[p[1].dir]} };
+		return moveS{
+			id, true, coo, coordS{ coo.x + dx[p[1].dir], coo.y + dy[p[1].dir] }
+		};
 	}
-}
+}  // namespace smartRandomBot
 
-#endif // __BOT_SMARTRANDOM__
+#endif  // __BOT_SMARTRANDOM__

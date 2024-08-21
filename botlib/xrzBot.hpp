@@ -2,10 +2,10 @@
 #define __BOT_XRZ__
 
 namespace xrzBot {
-	const int dx[5] = {0, -1, 0, 1, 0};
-	const int dy[5] = {0, 0, -1, 0, 1};
+	const int dx[5] = { 0, -1, 0, 1, 0 };
+	const int dy[5] = { 0, 0, -1, 0, 1 };
 	static int armyNow;
-	int checkOrder[5] = {0, 1, 2, 3, 4};
+	int checkOrder[5] = { 0, 1, 2, 3, 4 };
 	coordS previousPos[17];
 	static int visitTime[17][505][505];
 	static int turnCount[17];
@@ -27,12 +27,12 @@ namespace xrzBot {
 					if(gameMap[i][j].player == id) {
 						if(gameMap[i][j].army > mxArmy) {
 							mxArmy = gameMap[i][j].army;
-							mxCoo = coordS{i,j};
+							mxCoo = coordS{ i, j };
 						}
 					}
 				}
 			}
-			return moveS { id, false, player, mxCoo };
+			return moveS{ id, false, player, mxCoo };
 		}
 		struct node {
 			int x, y;
@@ -60,11 +60,15 @@ namespace xrzBot {
 			des.teamOnIt = gameMap[des.x][des.y].player;
 			if(gameMap[des.x][des.y].player != id && gameMap[des.x][des.y].type == 3) {
 				previousPos[id] = player;
-				return moveS { id, true, player, coordS { player.x + dx[i], player.y + dy[i] } };
+				return moveS{
+					id, true, player, coordS{ player.x + dx[i], player.y + dy[i] }
+				};
 			}
 			if(des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt != id) {
 				previousPos[id] = player;
-				return moveS { id, true, player, coordS { player.x + dx[i], player.y + dy[i] } };
+				return moveS{
+					id, true, player, coordS{ player.x + dx[i], player.y + dy[i] }
+				};
 			}
 		}
 		int i;
@@ -83,9 +87,13 @@ namespace xrzBot {
 			des.Army = gameMap[des.x][des.y].army;
 			des.teamOnIt = gameMap[des.x][des.y].player;
 			if(gameMap[des.x][des.y].player != id && gameMap[des.x][des.y].type == 3)
-				return moveS { id, true, player, coordS { player.x + dx[i], player.y + dy[i] } };
+				return moveS{
+					id, true, player, coordS{ player.x + dx[i], player.y + dy[i] }
+				};
 			if(des.type == 4 && des.Army <= gameMap[player.x][player.y].army && des.teamOnIt == 0)
-				return moveS { id, true, player, coordS { player.x + dx[i], player.y + dy[i] } };
+				return moveS{
+					id, true, player, coordS{ player.x + dx[i], player.y + dy[i] }
+				};
 			int cnt = 4;
 			if(des.x == previousPos[id].x && des.y == previousPos[id].y)
 				cnt += turnCount[id] * 10;
@@ -102,11 +110,15 @@ namespace xrzBot {
 			cnt += std::max(0, visitTime[id][des.x][des.y] * 10);
 			if(mtrd() % cnt == 0) {
 				previousPos[id] = player;
-				return moveS { id, true, player, coordS { player.x + dx[i], player.y + dy[i] } };
+				return moveS{
+					id, true, player, coordS{ player.x + dx[i], player.y + dy[i] }
+				};
 			}
 		}
-		return moveS { id, true, player, coordS { player.x + dx[okDir], player.y + dy[okDir] } };
+		return moveS{
+			id, true, player, coordS{ player.x + dx[okDir], player.y + dy[okDir] }
+		};
 	}
-}
+}  // namespace xrzBot
 
-#endif // __BOT_XRZ__
+#endif  // __BOT_XRZ__

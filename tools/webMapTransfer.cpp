@@ -10,14 +10,14 @@ using namespace std;
 using uint = unsigned;
 using ll = long long;
 using ull = unsigned long long;
-using pii = pair<int,int>;
-using pll = pair<ll,int>;
+using pii = pair<int, int>;
+using pll = pair<ll, int>;
 
 struct Block {
-	int player; /* the team who holds this block */
-	int type; /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
-	long long army;  /* count of army on this block */
-	bool lit; /* whether the block is lighted(lit) */
+	int player;     /* the team who holds this block */
+	int type;       /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
+	long long army; /* count of army on this block */
+	bool lit;       /* whether the block is lighted(lit) */
 };
 
 const int LEN_ZIP = 100005, CHAR_AD = 48, LEN_MOVE = 30005, replaySorter = 2000;
@@ -60,21 +60,25 @@ void Zip() {
 
 signed main() {
 	string filename;
-	cout<<"input file name: "; cin>>filename;
+	cout << "input file name: ";
+	cin >> filename;
 	ifstream ifs(filename);
-	ifs>>mapH>>mapW;
-	for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) ifs>>gameMap[i][j].type;
-	for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) ifs>>gameMap[i][j].army;
-	for(int i=1; i<=mapH; ++i) for(int j=1; j<=mapW; ++j) {
-		int t; ifs>>t;
-		gameMap[i][j].lit = t;
-	}
+	ifs >> mapH >> mapW;
+	for(int i = 1; i <= mapH; ++i)
+		for(int j = 1; j <= mapW; ++j) ifs >> gameMap[i][j].type;
+	for(int i = 1; i <= mapH; ++i)
+		for(int j = 1; j <= mapW; ++j) ifs >> gameMap[i][j].army;
+	for(int i = 1; i <= mapH; ++i)
+		for(int j = 1; j <= mapW; ++j) {
+			int t;
+			ifs >> t;
+			gameMap[i][j].lit = t;
+		}
 	ifs.close();
-	cout<<mapH<<" "<<mapW<<endl;
+	cout << mapH << " " << mapW << endl;
 	Zip();
 	ofstream ofs("output.lg");
-	ofs<<strZip<<endl;
+	ofs << strZip << endl;
 	ofs.close();
 	return 0;
 }
-

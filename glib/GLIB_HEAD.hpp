@@ -82,11 +82,11 @@ inline namespace text {
 		color_t color;
 		wstring text, font;
 		int fontHeight, fontWidth;
-		singleTextS(){};
+		singleTextS() {};
 		singleTextS(color_t _color, wstring _text) :
-		    color(_color), text(_text){};
+		    color(_color), text(_text) {};
 		singleTextS(color_t _color, wstring _text, wstring _font, int _fH, int _fW = 0) :
-		    color(_color), text(_text), font(_font), fontHeight(_fH), fontWidth(_fW){};
+		    color(_color), text(_text), font(_font), fontHeight(_fH), fontWidth(_fW) {};
 
 		int width(PIMAGE _pimg = NULL) {
 			setfont(fontHeight, fontWidth, font.c_str(), _pimg);
@@ -114,15 +114,15 @@ inline namespace text {
 		wstring sbText;
 		wstring font;
 		int fontHeight, fontWidth;
-		varIntTextS(){};
+		varIntTextS() {};
 		varIntTextS(int* _var) :
-		    var(_var){};
+		    var(_var) {};
 		varIntTextS(int* _var, color_t _color) :
-		    var(_var), color(_color){};
+		    var(_var), color(_color) {};
 		varIntTextS(int* _var, color_t _color, wstring _sbText) :
-		    var(_var), color(_color), sbText(_sbText){};
+		    var(_var), color(_color), sbText(_sbText) {};
 		varIntTextS(int* _var, color_t _color, wstring _sbText, wstring _font, int _fH, int _fW = 0) :
-		    var(_var), color(_color), sbText(_sbText), font(_font), fontHeight(_fH), fontWidth(_fW){};
+		    var(_var), color(_color), sbText(_sbText), font(_font), fontHeight(_fH), fontWidth(_fW) {};
 
 		int width(PIMAGE _pimg = NULL) {
 			setfont(fontHeight, fontWidth, font.c_str(), _pimg);
@@ -146,9 +146,9 @@ inline namespace text {
 	 */
 	struct lineTextS {
 		deque<singleTextS> text;
-		lineTextS(){};
+		lineTextS() {};
 		lineTextS(deque<singleTextS> _text) :
-		    text(_text){};
+		    text(_text) {};
 
 		void push_front(singleTextS _stext) { text.push_front(_stext); }
 		void push_front(color_t _color, wstring _stext) { text.emplace_front(_color, _stext); }
@@ -372,9 +372,9 @@ inline namespace page {
 
 		inline itemS() = default;
 		inline itemS(decltype(iType) _iType) :
-		    iType(_iType){};
+		    iType(_iType) {};
 		inline itemS(decltype(iType) _iType, int _locX, int _locY) :
-		    iType(_iType), locX(_locX), locY(_locY){};
+		    iType(_iType), locX(_locX), locY(_locY) {};
 
 		inline void move(int _X, int _Y);
 		inline void downLoc();
@@ -418,9 +418,9 @@ inline namespace page {
 		bool enableVBar, enableHBar;
 	   public:
 		pageS() :
-		    pageImage(newimage()), parentPage(NULL){};
+		    pageImage(newimage()), parentPage(NULL) {};
 		pageS(pageS* _parent) :
-		    pageImage(newimage()), parentPage(_parent){};
+		    pageImage(newimage()), parentPage(_parent) {};
 		pageS(pageS* _parent,
 		      int _sizeX,
 		      int _sizeY,

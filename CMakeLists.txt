@@ -4,7 +4,7 @@ project(LocalGen VERSION 4.2.5)
 
 # constants
 set(TARGET_NAME LGen)
-set(BUILD_NUMBER 2812)
+set(BUILD_NUMBER 2813)
 set(VERSIONINFO_OUTPUT_RC "LocalGen.rc")
 string(TIMESTAMP CURRENT_YEAR "%Y")
 

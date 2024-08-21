@@ -10,7 +10,7 @@ string(TIMESTAMP CURRENT_YEAR "%Y")
 
 # configure files
 configure_file(LocalGen.rc.in ${VERSIONINFO_OUTPUT_RC})
-configure_file(verinfo.h.in verinfo.h)
+configure_file(verinfo.h.in ${CMAKE_SOURCE_DIR}/verinfo.h)
 
 # add resource file to project
 set_source_files_properties(${PROJECT_BINARY_DIR}/${VERSIONINFO_OUTPUT_RC} PROPERTIES LANGUAGE RC)

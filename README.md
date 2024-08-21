@@ -9,11 +9,35 @@
 
 Welcome to Local Generals.io, branch `v5-EGE`.
 
-This branch contains the source code and (some) documentation of LocalGen Version 5. 
+This branch contains the source code and (some) documentation of LocalGen Version 5.
 
 GUI here is built with [EGE Graphics library](http://xege.org).
 
 To contribute to this project, please create an issue or create a pull request. **Thank you for supporting LocalGen.**
+
+## How to build the project
+
+We now use CMake to build the project. Make sure you have CMake installed on your system before processing the following commands.
+
+Make sure MinGW-w64 is installed on your computer and added to the system path before building the project.
+
+Clone the project and switch to its directory in the terminal.
+
+Then, run the following command to initialize:
+
+```bash
+mkdir build
+cd build
+cmake .. -G "MinGW Makefiles"
+```
+
+You don't need to initialize again after your first build, unless `CMakeLists.txt` is changed.
+
+After that, run the following command to build the executable `LGen.exe`:
+
+```bash
+cmake --build .
+```
 
 ## Building within VS Code
 

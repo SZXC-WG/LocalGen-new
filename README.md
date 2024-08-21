@@ -17,9 +17,11 @@ To contribute to this project, please create an issue or create a pull request. 
 
 ## How to build the project
 
-We now use CMake to build the project. Make sure you have CMake installed on your system before processing the following commands.
+We now use CMake to build the project. Make sure you have [CMake](https://cmake.org/) installed on your system before building the project.
 
-Make sure MinGW-w64 is installed on your computer and added to the system path before building the project.
+### Building through command lines
+
+Make sure [MinGW-w64](https://mingw-w64.org/) is installed on your computer and added to the system path before processing the following commands.
 
 Clone the project and switch to its directory in the terminal.
 
@@ -39,9 +41,9 @@ After that, run the following command to build the executable `LGen.exe`:
 cmake --build .
 ```
 
-## Building within VS Code
+### If you use VS Code...
 
-We've recently migrated to the CMake build system. The best way to build the project is to use VS Code with the [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) extension.
+You can use the VS Code extension [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) to build the project too.
 
 `settings.json` is already configured to build with MinGW Makefiles. Please manually select the `GCC` compiler kit and set variant to `Release` for compilation.
 

@@ -567,7 +567,6 @@ namespace LGlocal {
 			// LGgame::robotId[i] = mtrd() % 200 + 300;
 			// LGgame::robotId[i] = mtrd() % 100 + 300;
 			if(300 <= LGgame::robotId[i] && LGgame::robotId[i] < 400) zlyBot::initBot(i);
-			if(400 <= LGgame::robotId[i] && LGgame::robotId[i] < 500) zlyBot_v2::initBot(i);
 		}
 
 		// init generals
@@ -795,15 +794,6 @@ namespace LGlocal {
 							break;
 						case 300 ... 399:
 							mv = zlyBot::calcNextMove(i, LGgame::playerFocus[i]);
-							if(!LGgame::checkMove(mv)) {
-								LGreplay::Movement mov(mv);
-								LGreplay::wreplay.newMove(mov);
-								LGgame::inlineMove.push_back(mv);
-								LGgame::playerFocus[i] = mv.to;
-							}
-							break;
-						case 400 ... 499:
-							mv = zlyBot_v2::calcNextMove(i, LGgame::playerFocus[i]);
 							if(!LGgame::checkMove(mv)) {
 								LGreplay::Movement mov(mv);
 								LGreplay::wreplay.newMove(mov);

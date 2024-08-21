@@ -227,7 +227,7 @@ inline namespace button {
 		inline rectBUTTON& bgimage(PIMAGE _img);
 		inline rectBUTTON& bgsize(int _width, int _height);
 		inline rectBUTTON& delbgimage();
-		[[deprecated]] inline rectBUTTON& detect();
+		LG_DEPRECATED inline rectBUTTON& detect();
 		inline bool detect(mouse_msg _mouse);
 	};
 
@@ -277,7 +277,7 @@ inline namespace button {
 		inline circBUTTON& bgimage(PIMAGE _img);
 		inline circBUTTON& bgsize(int _width, int _height);
 		inline circBUTTON& delbgimage();
-		[[deprecated]] inline circBUTTON& detect();
+		LG_DEPRECATED inline circBUTTON& detect();
 		inline bool detect(mouse_msg _mouse);
 	};
 }  // namespace button
@@ -312,7 +312,7 @@ inline namespace checkbox {
 		inline rectCBOX& frame(int _width);
 		inline rectCBOX& framecolor(color_t _color);
 		inline rectCBOX& fillcolor(color_t _color);
-		[[deprecated]] inline rectCBOX& detect();
+		LG_DEPRECATED inline rectCBOX& detect();
 		inline bool detect(mouse_msg _mouse);
 		inline rectCBOX& variable(bool* _varPtr);
 		inline rectCBOX& changeState();
@@ -331,7 +331,7 @@ inline namespace checkbox {
 
 		inline rCBOXtextS& move(int _X, int _Y);
 
-		[[deprecated]] inline rCBOXtextS& detect();
+		LG_DEPRECATED inline rCBOXtextS& detect();
 		inline bool detect(mouse_msg _mouse);
 		inline rCBOXtextS& draw();
 		inline rCBOXtextS& display(int _X, int _Y, PIMAGE pimg = NULL);
@@ -447,7 +447,7 @@ inline namespace page {
 
 		// overall mouse & keyboard detect (for interactive items, e.g.buttons)
 		// this mode of message collecting is deprecated, and will be removed.
-		inline pageS& detect();
+		LG_DEPRECATED inline pageS& detect();
 		// overall mouse & keyboard detect (for interactive items, e.g.buttons)
 		// right implementation.
 		inline bool detect(mouse_msg _mouse);

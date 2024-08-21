@@ -50,6 +50,11 @@
 /** Win32 library **/
 #include <windows.h>
 #include <io.h>
+
+/** definitions **/
+#define LG_DEPRECATED        [[deprecated]]
+#define LG_DEPRECATED_S(str) [[deprecated(str)]]
+
 /** EGE Graphics library **/
 #include <graphics.h>      // main file of EGE
 #include <ege/sys_edit.h>  // text boxes of EGE
@@ -67,10 +72,6 @@ using std::to_wstring;
 using std::min;
 using std::max;
 using namespace std::literals;
-
-/** definitions **/
-#define LG_DEPRECATED        [[deprecated]]
-#define LG_DEPRECATED_S(str) [[deprecated(str)]]
 
 /** BASIC TYPE SPECIFICATIONS **/
 

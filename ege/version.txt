@@ -1,0 +1,1 @@
+current EGE version: EGE 24.04

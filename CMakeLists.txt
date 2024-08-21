@@ -16,8 +16,8 @@ configure_file(verinfo.h.in ${CMAKE_SOURCE_DIR}/verinfo.h)
 set_source_files_properties(${PROJECT_BINARY_DIR}/${VERSIONINFO_OUTPUT_RC} PROPERTIES LANGUAGE RC)
 
 # set include & link directories
-include_directories(${CMAKE_SOURCE_DIR}/include)
-link_directories(${CMAKE_SOURCE_DIR}/lib)
+include_directories(${CMAKE_SOURCE_DIR}/ege/include)
+link_directories(${CMAKE_SOURCE_DIR}/ege/lib)
 
 # add executable target
 add_executable(${TARGET_NAME} LGmain.cpp ${PROJECT_BINARY_DIR}/${VERSIONINFO_OUTPUT_RC})

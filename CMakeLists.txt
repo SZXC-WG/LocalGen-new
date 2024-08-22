@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(LocalGen VERSION 4.2.5)
+project(LocalGen VERSION 4.2.5 LANGUAGES CXX)
 
 # constants
 set(TARGET_NAME LGen)

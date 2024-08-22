@@ -1,6 +1,6 @@
 /* This is GLIB_rectcbox.hpp file of SZXC-WG EGE graphics lib.           */
 /* Thanks to EGE: http://xege.org/                                       */
-/* Copyright (c) 2023 SZXC Work Group; All rights reserved.              */
+/* Copyright (c) 2024 SZXC Work Group; All rights reserved.              */
 /* Developers: http://github.com/SZXC-WG                                 */
 /* Project: http://github.com/SZXC-WG/LocalGen-new                       */
 /*                                                                       */

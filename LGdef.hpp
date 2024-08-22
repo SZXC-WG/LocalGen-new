@@ -1,5 +1,5 @@
 /* This is LGdef.hpp file of LocalGen.                                   */
-/* Copyright (c) 2023 SZXC Work Group; All rights reserved.              */
+/* Copyright (c) 2024 SZXC Work Group; All rights reserved.              */
 /* Developers: http://github.com/SZXC-WG                                 */
 /* Project: http://github.com/SZXC-WG/LocalGen-new                       */
 /*                                                                       */

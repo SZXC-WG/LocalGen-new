@@ -406,7 +406,7 @@ void createFullPlainMap(int crtH, int crtW, int plCnt) {
 }
 
 void getAllFiles(string path, std::vector<string>& files, string fileExt) {
-	long hFile = 0;
+	intptr_t hFile = 0;
 	struct _finddata_t fileinfo;
 	string p;
 	if((hFile = _findfirst(p.assign(path).append("\\*" + fileExt).c_str(), &fileinfo)) != -1) {

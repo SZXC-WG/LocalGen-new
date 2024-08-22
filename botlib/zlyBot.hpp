@@ -195,6 +195,7 @@ namespace zlyBot {
 			// db.close();
 			return ret;
 		}
+		return moveS{ id, false, coo, coo };
 	}
 }  // namespace zlyBot
 

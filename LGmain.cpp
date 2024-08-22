@@ -16,10 +16,10 @@
 
 #if __cplusplus < 201300L
 #	error This program should be compiled under the C++14\
-	standard. If you use the C++ standard under it,\
-	please use a standard greater. In G++, you can\
-	compile with option -std=c++14 or -std=gnu++14 to\
-	use the C++14 standard.
+standard or higher. If you use the C++ standard under\
+it, please use a standard greater. In G++, you can\
+compile with option -std=c++14 or -std=gnu++14 to\
+use the C++14 standard.
 #endif  // < C++14
 
 /*************** header files ***************/

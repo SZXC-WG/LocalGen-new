@@ -14,7 +14,7 @@
 #ifndef __LGMAIN_CPP__
 #define __LGMAIN_CPP__
 
-#if __cplusplus < 201300L
+#if __cplusplus < 201402L
 #	error This program should be compiled under the C++14\
 standard or higher. If you use the C++ standard under\
 it, please use a standard greater. In G++, you can\

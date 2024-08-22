@@ -11,6 +11,9 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
+#ifndef LGENCODING_HPP_
+#define LGENCODING_HPP_
+
 #include "LGdef.hpp"
 
 std::wstring wcharTransfer(const wstring& ws) {
@@ -27,3 +30,5 @@ std::wstring wcharTransfer(const wstring& ws) {
 	}
 	return res;
 }
+
+#endif  // LGENCODING_HPP_

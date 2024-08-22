@@ -11,8 +11,8 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
-#ifndef __LGDEF_HPP__
-#define __LGDEF_HPP__
+#ifndef LGDEF_HPP_
+#define LGDEF_HPP_
 
 #ifndef UNICODE
 #	define UNICODE

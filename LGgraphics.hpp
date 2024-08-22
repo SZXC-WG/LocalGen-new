@@ -11,8 +11,8 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
-#ifndef __LGGRAPHICS_HPP__
-#define __LGGRAPHICS_HPP__
+#ifndef LGGRAPHICS_HPP_
+#define LGGRAPHICS_HPP_
 
 #include "LGdef.hpp"
 #include "glib/GLIB_HEAD.hpp"
@@ -1803,4 +1803,4 @@ inline int getHeightPerBlock() { return LGGraphics::windowData.heightPerBlock; }
 
 inline int getWidthPerBlock() { return LGGraphics::windowData.widthPerBlock; }
 
-#endif  // __LGGRAPHICS_HPP__
+#endif  // LGGRAPHICS_HPP_

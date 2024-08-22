@@ -11,8 +11,8 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
-#ifndef __LGGAME_HPP__
-#define __LGGAME_HPP__
+#ifndef LGGAME_HPP_
+#define LGGAME_HPP_
 
 #include "LGdef.hpp"
 #include "LGbot.hpp"
@@ -904,4 +904,4 @@ namespace LGlocal {
 	}
 }  // namespace LGlocal
 
-#endif  // __LGGAME_HPP__
+#endif  // LGGAME_HPP_

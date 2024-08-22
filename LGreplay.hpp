@@ -11,8 +11,8 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
-#ifndef __LGREPLAY_HPP__
-#define __LGREPLAY_HPP__
+#ifndef LGREPLAY_HPP_
+#define LGREPLAY_HPP_
 
 #include "LGdef.hpp"
 
@@ -257,4 +257,4 @@ namespace LGreplay {
 	}
 }  // namespace LGreplay
 
-#endif
+#endif  // LGREPLAY_HPP_

@@ -11,8 +11,8 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/LocalGen-dev/LocalGen-new/blob/main/LICENSE.md      */
 
-#ifndef __LGBOT_HPP__
-#define __LGBOT_HPP__
+#ifndef LGBOT_HPP_
+#define LGBOT_HPP_
 
 // Bots
 // #include "botlib/ktqBot.hpp"
@@ -30,4 +30,4 @@ string botName[] = {
 	"gjrBot",
 };
 
-#endif
+#endif  // LGBOT_HPP_

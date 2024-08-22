@@ -11,8 +11,8 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
-#ifndef __LGMAIN_CPP__
-#define __LGMAIN_CPP__
+#ifndef LGMAIN_CPP_
+#define LGMAIN_CPP_
 
 #if __cplusplus < 201402L
 #	error This program should be compiled under the C++14\
@@ -51,4 +51,4 @@ int main(int argc, char** argv) {
 	exitExe();   // exit program
 }
 
-#endif  // __LGMAIN_CPP__
+#endif  // LGMAIN_CPP_

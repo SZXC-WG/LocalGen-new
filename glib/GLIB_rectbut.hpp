@@ -12,8 +12,8 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
-#ifndef __LG_GLIB_RECTBUT_HPP__
-#define __LG_GLIB_RECTBUT_HPP__
+#ifndef LG_GLIB_RECTBUT_HPP_
+#define LG_GLIB_RECTBUT_HPP_
 
 #include "GLIB_HEAD.hpp"
 
@@ -206,4 +206,4 @@ inline namespace button {
 
 _GLIB_NAMESPACE_TAIL
 
-#endif  // __LG_GLIB_RECTBUT_HPP__
+#endif  // LG_GLIB_RECTBUT_HPP_

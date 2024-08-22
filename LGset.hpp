@@ -11,8 +11,8 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
-#ifndef __LGSET_HPP__
-#define __LGSET_HPP__
+#ifndef LGSET_HPP_
+#define LGSET_HPP_
 
 #include "LGdef.hpp"
 
@@ -171,4 +171,4 @@ namespace LGset {
 
 }  // namespace LGset
 
-#endif  // __LGSET_HPP__
+#endif  // LGSET_HPP_

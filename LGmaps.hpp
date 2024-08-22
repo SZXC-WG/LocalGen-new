@@ -11,8 +11,8 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
-#ifndef __LGMAPS_HPP__
-#define __LGMAPS_HPP__
+#ifndef LGMAPS_HPP_
+#define LGMAPS_HPP_
 
 #include "LGdef.hpp"
 #include "glib/GLIB_HEAD.hpp"
@@ -474,4 +474,4 @@ void readMap(int mid) {
 
 #undef ll  // long long
 
-#endif  // __LGMAPS_HPP
+#endif  // LGMAPS_HPP_

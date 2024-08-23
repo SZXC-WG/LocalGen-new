@@ -40,15 +40,14 @@ Finally, build the executable `LGen.exe`:
 cmake --build . --config Release
 ```
 
-> [!IMPORTANT] 
+> [!IMPORTANT]
 >
-> **For devs**
+> **For developers**  
 > Please test in debug mode after making changes to the source code:
 >
 > ```bash
 > cmake --build .
 > ```
-
 
 ### If you use VS Code...
 

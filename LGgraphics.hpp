@@ -52,7 +52,7 @@ namespace LGGraphics {
 		return;
 	}
 	void initWindowSize() {
-		initgraph(800, 600);
+		initgraph(800, 600, INIT_RENDERMANUAL | INIT_UNICODE);
 		ege_enable_aa(true, NULL);
 		setcaption(L"LocalGen v" VER_STRING " Window Size Selection");
 		setbkcolor(bgColor);

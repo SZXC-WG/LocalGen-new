@@ -199,6 +199,9 @@ inline namespace page {
 		setbkcolor_f(bgColor, pageImage);
 		for(auto& it: content) {
 			switch(it.iType) {
+				case ITEM_SUBIMAGE: {
+					putimage(pageImage, it.locX, it.locY, it.info.subImage);
+				} break;
 				case ITEM_SUBPAGE: {
 					it.info.subPage->display(pageImage);
 				} break;

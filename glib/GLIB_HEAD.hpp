@@ -346,7 +346,8 @@ inline namespace page {
 
 	// Enum to specify type of a page item.
 	enum item_type {
-		ITEM_SUBPAGE = 0,
+		ITEM_SUBIMAGE,
+		ITEM_SUBPAGE,
 		ITEM_VARINTTEXT,
 		ITEM_LINETEXT,
 		ITEM_CONDTEXT,
@@ -360,6 +361,7 @@ inline namespace page {
 		item_type iType;
 		int locX, locY;
 		union {
+			PIMAGE subImage;
 			pageS* subPage;
 			varIntTextS* vIText;
 			lineTextS* lText;

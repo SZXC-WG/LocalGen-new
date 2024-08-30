@@ -218,7 +218,7 @@ namespace LGGraphics {
 		setcolor(WHITE);
 		xyprintf(330 * windowData.zoomX, 500 * windowData.zoomY, "Local");
 		xyprintf(330 * windowData.zoomX, 600 * windowData.zoomY, "generals.io");
-		setfont(30, 0, "Lucida Fax");
+		setfont(zoomY(30), 0, "Lucida Fax");
 		xyprintf(330 * windowData.zoomX, 750 * windowData.zoomY, "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
 		rectBUTTON local, web, replay, createmap;
 		rectBUTTON donate;

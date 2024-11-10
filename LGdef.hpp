@@ -298,19 +298,23 @@ MapInfoS mapInfo[5005];         // storing all imported maps
 Block gameMap[505][505];        /* current game map; maximum 500*500 */
 playerS playerInfo[64] = {
 	// player information (default written)
-	{  L"White", 0xffffffff },
-	{    L"Red", 0xffff0000 },
-	{   L"Aqua", 0xff4363d8 },
-	{  L"Green", 0xff008000 },
-	{   L"Teal", 0xff008080 },
-	{ L"Orange", 0xfff58231 },
-	{   L"Pink", 0xfff032e6 },
-	{ L"Purple", 0xff800080 },
-	{ L"Maroon", 0xff800000 },
-	{ L"Yellow", 0xffb09f30 },
-	{  L"Brown", 0xff9a6324 },
-	{   L"Blue", 0xff0000ff },
-	{ L"Indigo", 0xff483d8b },
+	{  L"White", EGERGB(255, 255, 255) },
+	{    L"Red", EGERGB(255,   0,   0) },
+	{   L"Aqua",  EGERGB(39, 146, 255) },
+	{  L"Green",   EGERGB(0, 128,   0) },
+	{   L"Teal",   EGERGB(0, 128, 128) },
+	{ L"Orange", EGERGB(255, 117,  21) },
+	{   L"Pink", EGERGB(240,  50, 230) },
+	{ L"Purple", EGERGB(128,   0, 128) },
+	{ L"Maroon", EGERGB(155,   1,   1) },
+	{ L"Yellow", EGERGB(179, 172,  50) },
+	{  L"Brown", EGERGB(154,  94,  36) },
+	{   L"Blue",  EGERGB(16,  49, 255) },
+	{ L"Indigo",  EGERGB(89,  76, 165) },
+	{     L"13", EGERGB(133, 169,  28) },
+	{     L"14", EGERGB(248, 115, 117) },
+	{     L"15", EGERGB(180, 127, 202) },
+	{     L"16", EGERGB(180, 153, 113) },
 };
 
 int mapH, mapW;               // height and width of map

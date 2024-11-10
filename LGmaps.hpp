@@ -32,8 +32,8 @@ bool isVisible(int x, int y, int Code) {
 	return false;
 }
 void printBlockNum(bool visible, long long army, int player, int curx, int cury) {
-	int luX = LGGraphics::windowData.maplocX + blockWidth * (cury - 1);
-	int luY = LGGraphics::windowData.maplocY + blockHeight * (curx - 1);
+	int luX = LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1);
+	int luY = LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1);
 	string out = to_string(army);
 	if(!visible) return;
 	if(textwidth(out.c_str()) <= blockWidth - 2)
@@ -88,79 +88,90 @@ void printMap(int Code, coordS coo) {
 					setfillcolor(playerInfo[gameMap[curx][cury].player].color);
 			} else
 				setfillcolor(unseen);
-			bar(LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
-			    LGGraphics::windowData.maplocY + blockHeight * (curx - 1),
-			    LGGraphics::windowData.maplocX + blockWidth * cury,
-			    LGGraphics::windowData.maplocY + blockHeight * curx);
+			bar(LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+			    LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1),
+			    LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * cury - LGGraphics::zoomX(2),
+			    LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * curx - LGGraphics::zoomX(2));
 			// ege_fillrect(widthPerBlock * (cury - 1), heightPerBlock * (curx - 1), widthPerBlock, heightPerBlock);
 			switch(gameMap[curx][cury].type) {
 				case 0: {
 					/* plain */
 					if(gameMap[curx][cury].army != 0)
-						printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
+						printBlockNum(isVisible(curx, cury, Code),
+						              gameMap[curx][cury].army,
+						              gameMap[curx][cury].player,
+						              curx, cury);
 					break;
 				}
 				case 1: {
 					/* swamp */
 					putimage_withalpha(NULL, npimg[4],
-					                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
-					                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
+					                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+					                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
 					if(gameMap[curx][cury].army != 0)
-						printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
+						printBlockNum(isVisible(curx, cury, Code),
+						              gameMap[curx][cury].army,
+						              gameMap[curx][cury].player,
+						              curx, cury);
 					break;
 				}
 				case 2: {
 					/* mountain */
 					if(isVisible(curx, cury, Code))
 						putimage_withalpha(NULL, npimg[3],
-						                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
-						                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
+						                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+						                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
 					else
 						putimage_withalpha(NULL, npimg[5],
-						                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
-						                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
+						                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+						                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
 					break;
 				}
 				case 3: {
 					/* general */
 					if(isVisible(curx, cury, Code))
 						putimage_withalpha(NULL, npimg[2],
-						                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
-						                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
-					printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
+						                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+						                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
+					printBlockNum(isVisible(curx, cury, Code),
+					              gameMap[curx][cury].army,
+					              gameMap[curx][cury].player,
+					              curx, cury);
 					break;
 				}
 				case 4: {
 					/* city */
 					if(isVisible(curx, cury, Code))
 						putimage_withalpha(NULL, npimg[1],
-						                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
-						                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
+						                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+						                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
 					else
 						putimage_withalpha(NULL, npimg[5],
-						                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
-						                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
-					printBlockNum(isVisible(curx, cury, Code), gameMap[curx][cury].army, gameMap[curx][cury].player, curx, cury);
+						                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+						                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
+					printBlockNum(isVisible(curx, cury, Code),
+					              gameMap[curx][cury].army, gameMap[curx][cury].player,
+					              curx, cury);
 					break;
 				}
 			}
 			if(LGgame::inCreate && gameMap[curx][cury].lit) {
 				if(gameMap[curx][cury].type == 0 && gameMap[curx][cury].army == 0) {
 					putimage_withalpha(NULL, npimg[8],
-					                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
-					                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
+					                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+					                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
 				} else {
 					putimage_withalpha(NULL, npimg[7],
-					                   LGGraphics::windowData.maplocX + blockWidth * (cury - 1),
-					                   LGGraphics::windowData.maplocY + blockHeight * (curx - 1));
+					                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+					                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
 				}
 			}
 		}
 	}
 	if((~coo.x) || (~coo.y))
 		putimage_withalpha(NULL, npimg[6],
-		                   LGGraphics::windowData.maplocX + blockWidth * (coo.y - 1),
-		                   LGGraphics::windowData.maplocY + blockHeight * (coo.x - 1));
+		                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (coo.y - 1),
+		                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomX(2)) * (coo.x - 1));
 	for(int i = 1; i <= 8; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }

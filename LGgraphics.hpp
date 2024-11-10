@@ -189,14 +189,16 @@ namespace LGGraphics {
 		{
 			std::wifstream pnfin("_players.ini");
 			if(!pnfin.fail()) {
-				for(int i = 1; i <= 12; ++i) {
+				for(int i = 1; i <= 16; ++i) {
 					wstring name, col;
 					getline(pnfin, name);
+					if(pnfin.fail()) break;
 					name = wcharTransfer(name);
 					playerInfo[i].name = name;
 					getline(pnfin, col);
 					color_t c = std::stoul(col, nullptr, 0);
 					playerInfo[i].color = c;
+					if(pnfin.fail()) break;
 				}
 				pnfin.close();
 			}

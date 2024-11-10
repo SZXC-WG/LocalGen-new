@@ -28,7 +28,7 @@ Certainly! We appreciate any form of contribution. See the instructions at [#31]
 
 LocalGen is currently split into three branches:
 
-- **`release`**: The main branch, shown in the project homepage. Used for saving releases and storing map/font data.
+- **`release`**: The main branch, shown in the project homepage. Used for saving past ver. 1-4 releases and storing map/font data.
 - **`v5-EGE`**: Main branch of version 5, under active development.
   LocalGen versions 2 to 5 is built with [EGE Graphics](http://xege.org).
   We are trying to build an object-oriented system based on EGE.

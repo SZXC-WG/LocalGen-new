@@ -1453,8 +1453,8 @@ namespace LGGraphics {
 	void importGameSettings() {
 		sys_edit speedBox;
 		rectBUTTON speedSubmit;
-		rectBUTTON plCntBox[15]; /* 2~12 */
-		rectBUTTON checkBox[15]; /* 2~12 */
+		rectBUTTON plCntBox[20]; /* 2~16 */
+		rectBUTTON checkBox[20]; /* 2~16 */
 		rectBUTTON checkOA;
 		rectBUTTON gameBox;
 		plCnt = LGset::defaultPlayerNum;
@@ -1464,7 +1464,7 @@ namespace LGGraphics {
 		xyprintf(250 * windowData.zoomX, 350 * windowData.zoomY,
 		         "Choose Player Count");
 		setlinewidth(1);
-		for(int i = 2; i <= 12; ++i) {
+		for(int i = 2; i <= 16; ++i) {
 			int rowNum = (i - 2) / 4;
 			int colNum = (i - 2) % 4;
 			rectangle(55 * windowData.zoomX + 100 * windowData.zoomX * colNum,
@@ -1510,8 +1510,8 @@ namespace LGGraphics {
 		         "Current Speed: %d", stDel);
 		xyprintf(1350 * windowData.zoomX, 350 * windowData.zoomY,
 		         "Choose Visible Players:");
-		cheatCode = 0b0000000000010;
-		for(int i = 1; i <= 12; ++i) {
+		cheatCode = 0b00000000000000010;
+		for(int i = 1; i <= 16; ++i) {
 			int rowNum = (i - 1) / 4;
 			int colNum = (i - 1) % 4;
 			checkBox[i]
@@ -1546,7 +1546,7 @@ namespace LGGraphics {
 		    .textcolor(mainColor);
 		delay_ms(0);
 		for(; is_run(); delay_fps(120)) {
-			for(int i = 2; i <= 12; ++i) {
+			for(int i = 2; i <= 16; ++i) {
 				plCntBox[i].detect().display();
 				if(plCntBox[i].status == 2) plCnt = i;
 			}

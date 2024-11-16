@@ -72,6 +72,9 @@ CMakeLists.txt.user*
 *.dll
 *.exe
 
+# build folder
+build
+
 # LocalGen Files
 *.lgsts
 _*

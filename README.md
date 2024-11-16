@@ -51,7 +51,7 @@ cmake --build . --config Release
 
 ### If you use VS Code...
 
-We have the [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) extension as an alternative for building the project.
+There is the [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) extension as an alternative for building the project.
 
 `settings.json` is already configured to build with MinGW Makefiles. Please manually select the `GCC` compiler kit and set variant to `Release` for compilation.
 

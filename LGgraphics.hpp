@@ -1526,7 +1526,7 @@ namespace LGGraphics {
 			checkBox[i].enableTextShadow = false;
 		}
 		checkOA
-		    .size(400 * windowData.zoomX - 1 * 2, 100 * windowData.zoomY - 1 * 2)
+		    .size(500 * windowData.zoomX - 1 * 2, 100 * windowData.zoomY - 1 * 2)
 		    .move(1150 * windowData.zoomX + 1, 700 * windowData.zoomY + 1)
 		    .addtext(L"Crystal Clear")
 		    .textalign(CENTER_TEXT, CENTER_TEXT)

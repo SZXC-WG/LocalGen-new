@@ -1484,7 +1484,7 @@ namespace LGGraphics {
 			plCntBox[i].enableButtonShadow = false;
 			plCntBox[i].display();
 		}
-		xyprintf(250 * windowData.zoomX, 750 * windowData.zoomY,
+		xyprintf(250 * windowData.zoomX, 850 * windowData.zoomY,
 		         "Current Count: %d", plCnt);
 		xyprintf(800 * windowData.zoomX, 350 * windowData.zoomY,
 		         "Input Game Speed");
@@ -1526,8 +1526,8 @@ namespace LGGraphics {
 			checkBox[i].enableTextShadow = false;
 		}
 		checkOA
-		    .size(500 * windowData.zoomX - 1 * 2, 100 * windowData.zoomY - 1 * 2)
-		    .move(1150 * windowData.zoomX + 1, 700 * windowData.zoomY + 1)
+		    .size(400 * windowData.zoomX - 1 * 2, 100 * windowData.zoomY - 1 * 2)
+		    .move(1150 * windowData.zoomX + 1, 800 * windowData.zoomY + 1)
 		    .addtext(L"Crystal Clear")
 		    .textalign(CENTER_TEXT, CENTER_TEXT)
 		    .fontname(LGset::mainFontName.c_str())
@@ -1552,9 +1552,9 @@ namespace LGGraphics {
 			}
 			plCnt = min(plCnt, mapInfo[mapSelected].generalcnt + mapInfo[mapSelected].plaincnt);
 			setfillcolor(bgColor);
-			bar(55 * windowData.zoomX, 701 * windowData.zoomY,
-			    455 * windowData.zoomX, 800 * windowData.zoomY);
-			xyprintf(250 * windowData.zoomX, 750 * windowData.zoomY,
+			bar(55 * windowData.zoomX, 801 * windowData.zoomY,
+			    455 * windowData.zoomX, 900 * windowData.zoomY);
+			xyprintf(250 * windowData.zoomX, 850 * windowData.zoomY,
 			         "Current Count: %d", plCnt);
 			speedSubmit.detect().display();
 			if(speedSubmit.status == 2) {
@@ -1607,8 +1607,8 @@ namespace LGGraphics {
 				    .bgcolor(bgColor)
 				    .textcolor(mainColor);
 			}
-			rectangle(1150 * windowData.zoomX, 700 * windowData.zoomY,
-			          1550 * windowData.zoomX, 800 * windowData.zoomY);
+			rectangle(1150 * windowData.zoomX, 800 * windowData.zoomY,
+			          1550 * windowData.zoomX, 900 * windowData.zoomY);
 			checkOA.detect().display();
 			if(checkOA.status == 2) {
 				if(cheatCode != 1048575) cheatCode = 1048575;

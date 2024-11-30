@@ -4,8 +4,8 @@
  * LocalGen Library: coordinates
  * 
  * Coordinates play an important role in LocalGen. They are used in various
- * situations, tile positions, and so on. LocalGen therefore specifies a 
- * coordinate system that is used throughout the project.
+ * situations, (e.g. tile positions). LocalGen therefore specifies
+ * a common coordinate system that is used throughout the project.
  */
 
 #ifndef LGEN_LIB_COORD
@@ -34,6 +34,7 @@ struct Coord {
 /// Comparison operators for %Coord.
 /// `operator==` and (before C++2a) `operator!=` are defined as usual.
 /// `operator<` series acts like std::pair of convenience for sorting and containers like std::set and std::map.
+
 bool operator==(const Coord& a, const Coord& b) { return (a.x == b.x && a.y == b.y); }
 #if __cplusplus < 202002L
 bool operator!=(const Coord& a, const Coord& b) { return !(a == b); }
@@ -45,6 +46,7 @@ bool operator>=(const Coord& a, const Coord& b) { return !(a < b); }
 
 /// Calculation operators for %Coord.
 /// Only `operator+` and `operator-` for coordinates can only do this.
+
 Coord operator+(const Coord& a, const Coord& b) { return Coord(a.x + b.x, a.y + b.y); }
 Coord operator-(const Coord& a, const Coord& b) { return Coord(a.x - b.x, a.y - b.y); }
 

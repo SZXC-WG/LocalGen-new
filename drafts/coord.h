@@ -4,8 +4,8 @@
  * LocalGen Library: coordinates
  * 
  * Coordinates play an important role in LocalGen. They are used in various
- * situations, tile positions, screen positions, and so on. LocalGen therefore
- * specifies a coordinate system that is used throughout the project.
+ * situations, tile positions, and so on. LocalGen therefore specifies a 
+ * coordinate system that is used throughout the project.
  */
 
 #ifndef LGEN_LIB_COORD

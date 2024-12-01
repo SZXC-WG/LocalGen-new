@@ -19,11 +19,11 @@ using pos_t = int32_t;
 ///
 /// Avoid using `COORD` as windows.h defines it.
 struct Coord {
-	pos_t x, y;
-	Coord() :
-	    x(0), y(0) {}
-	Coord(pos_t _x, pos_t _y) :
-	    x(_x), y(_y) {}
+    pos_t x, y;
+    Coord() :
+        x(0), y(0) {}
+    Coord(pos_t _x, pos_t _y) :
+        x(_x), y(_y) {}
 };
 
 // Sometimes we need to pass a %Coord through two parameters or something.

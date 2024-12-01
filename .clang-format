@@ -90,6 +90,6 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: c++14
 TabWidth: 4
-UseTab: ForIndentation
+UseTab: Never
 ---
 

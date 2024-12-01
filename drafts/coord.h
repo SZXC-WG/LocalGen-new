@@ -13,7 +13,7 @@
 
 #include <cstdint>
 
-typedef int32_t pos_t;
+using pos_t = int32_t;
 
 /// @brief Struct for Coordinates, %Coord.
 ///

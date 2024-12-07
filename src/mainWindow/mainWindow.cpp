@@ -5,7 +5,7 @@
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    // connect signals and slots
+    // connect slots
     connect(ui->btnLocalGame, &QPushButton::clicked, this, &MainWindow::on_btnLocalGame_clicked);
 }
 
@@ -14,6 +14,10 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::on_btnLocalGame_clicked() {
-    LocalGameDialog dialog(this);
-    dialog.exec();
+    LocalGameDialog* dialog = new LocalGameDialog(this);
+    int result = dialog->exec();
+    if(result == QDialog::Accepted) {
+        // TODO
+    }
+    delete dialog;
 }

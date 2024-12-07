@@ -16,6 +16,10 @@ class LocalGameDialog : public QDialog {
     LocalGameDialog(QWidget* parent = nullptr);
     ~LocalGameDialog();
 
+    // slots
+    void on_btnStartGame_clicked();
+    void on_btnCancel_clicked();
+
    private:
     Ui::LocalGameDialog* ui;
 };

@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="images">
+    <file>img/github.png</file>
+    <file>img/options.png</file>
     <file>img/favicon.png</file>
   </qresource>
 </RCC>

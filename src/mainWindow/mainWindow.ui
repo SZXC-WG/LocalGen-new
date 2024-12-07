@@ -19,7 +19,7 @@
    <string>LocalGen 6.0.0</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res.qrc">
+   <iconset resource="../../res/res.qrc">
     <normaloff>:/images/img/favicon.png</normaloff>:/images/img/favicon.png</iconset>
   </property>
   <property name="styleSheet">
@@ -58,7 +58,7 @@
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap resource="res.qrc">:/images/img/favicon.png</pixmap>
+         <pixmap resource="../../res/res.qrc">:/images/img/favicon.png</pixmap>
         </property>
         <property name="alignment">
          <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -293,7 +293,8 @@
   </widget>
  </widget>
  <resources>
-  <include location="res.qrc"/>
+  <include location="../../res/res.qrc"/>
+  <include location="../../res/res.qrc"/>
  </resources>
  <connections/>
 </ui>

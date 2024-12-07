@@ -17,6 +17,9 @@ set(PROJECT_SOURCES
         src/mainWindow/mainWindow.cpp
         src/mainWindow/mainWindow.h
         src/mainWindow/mainWindow.ui
+        src/localGameDialog/localGameDialog.cpp
+        src/localGameDialog/localGameDialog.h
+        src/localGameDialog/localGameDialog.ui
         res/res.qrc
 )
 

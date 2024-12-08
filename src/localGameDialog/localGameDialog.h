@@ -16,9 +16,10 @@ class LocalGameDialog : public QDialog {
     LocalGameDialog(QWidget* parent = nullptr);
     ~LocalGameDialog();
 
-    // slots
+   public slots:
     void on_btnStartGame_clicked();
     void on_btnCancel_clicked();
+    void on_spinBox_numPlayers_valueChanged(int);
 
    private:
     Ui::LocalGameDialog* ui;

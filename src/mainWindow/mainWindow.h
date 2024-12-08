@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow {
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-    // slots
+   public slots:
     void on_btnLocalGame_clicked();
 
    private:

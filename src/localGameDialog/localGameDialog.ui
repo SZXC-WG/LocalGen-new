@@ -176,7 +176,7 @@
             <property name="font">
              <font>
               <family>Quicksand</family>
-              <pointsize>15</pointsize>
+              <pointsize>13</pointsize>
              </font>
             </property>
             <property name="styleSheet">
@@ -325,7 +325,7 @@
                <number>2</number>
               </property>
               <property name="maximum">
-               <number>1000</number>
+               <number>12</number>
               </property>
              </widget>
             </item>

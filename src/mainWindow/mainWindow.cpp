@@ -5,8 +5,6 @@
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    // connect slots
-    connect(ui->btnLocalGame, &QPushButton::clicked, this, &MainWindow::on_btnLocalGame_clicked);
 }
 
 MainWindow::~MainWindow() {

@@ -29,7 +29,7 @@ struct Coord {
 // Sometimes we need to pass a %Coord through two parameters or something.
 // This macro is used to make it available.
 // windows.h `COORD` have uppercase members X and Y, so it's not compatible.
-#define SEPARATE(coo) (coo).x, (coo).y
+#define SEPA(coo) (coo).x, (coo).y
 
 /// Comparison operators for %Coord.
 /// `operator==` and (before C++2a) `operator!=` are defined as usual.

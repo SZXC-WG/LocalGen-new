@@ -21,7 +21,7 @@ class Player {
     Player(const std::string& name) :
         name(name) {}
     virtual ~Player() {}
-    virtual Move step(const BoardView& view) {}
+    // virtual Move step(const BoardView& view) {}
 };
 
 #endif  // LGEN_MODULE_GE_PLAYER

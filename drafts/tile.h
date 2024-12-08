@@ -35,7 +35,7 @@ enum tile_type_e {
     TILE_OBSTACLE = -1,
 };
 
-// Some tiles have some properties. Some tiles have aliases. Make them macros.
+// Some tiles types have same properties. Some tiles have aliases. Make them macros.
 #define TILE_GENERAL TILE_SPAWN
 #define TILE_PLAIN   TILE_BLANK
 #define TILE_NEUTRAL TILE_BLANK
@@ -47,6 +47,44 @@ struct Tile {
     army_t army;
     // Light is a tile attribute, not a tile type.
     bool light;
+};
+
+/// View of a %Tile.
+/// Why do we need this? In game, players need more information of a tile than just the tile itself.
+struct TileView {
+    /// For a player in game, whether a tile is visible or not is very important.
+    bool visible;
+    Player* occupier;
+    tile_type_e type;
+    army_t army;
+    /// Light has no importance in game, and will not be displayed.
+    // bool light;
+
+    TileView() {}
+    TileView(const Tile& tile, bool vis) :
+        visible(vis) {
+        if(vis) {
+            occupier = tile.occupier;
+            type = tile.type;
+            army = tile.army;
+        } else {
+            occupier = nullptr;
+            switch(tile.type) {
+                case TILE_SPAWN:
+                    type = TILE_BLANK;
+                    break;
+                case TILE_MOUNTAIN:
+                case TILE_CITY:
+                case TILE_LOOKOUT:
+                case TILE_OBSERVATORY:
+                    type = TILE_OBSTACLE;
+                    break;
+                default:
+                    type = tile.type;
+            }
+            army = 0;
+        }
+    }
 };
 
 #endif  // LGEN_MODULE_GE_TILE

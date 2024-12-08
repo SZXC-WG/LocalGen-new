@@ -39,6 +39,7 @@ class Board {
     /// Check whether the %Tile at (x,y) is visible to a %Player.
     bool visible(pos_t x, pos_t y, Player* player) const {
         // TODO))
+        return false;
     }
     /// Same as above, but using %Coord.
     bool visible(Coord coo, Player* player) { return visible(SEPA(coo), player); }

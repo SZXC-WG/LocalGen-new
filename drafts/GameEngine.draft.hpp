@@ -11,12 +11,12 @@
 #ifndef LGEN_MODULE_GAMEENGINE_DRAFT
 #define LGEN_MODULE_GAMEENGINE_DRAFT 1
 
-#include "coord.h"  // lib coord
+#include "coord.hpp"  // lib coord
 
-#include "player.h"  // players
+#include "player.hpp"  // players
 
-#include "tile.h"  // tiles
+#include "tile.hpp"  // tiles
 
-#include "board.h"  // boards
+#include "board.hpp"  // boards
 
 #endif  // LGEN_MODULE_GAMEENGINE_DRAFT

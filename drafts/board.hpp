@@ -11,10 +11,10 @@
 #include <cassert>
 #include <vector>
 
-#include "coord.h"
+#include "coord.hpp"
 
-#include "player.h"
-#include "tile.h"
+#include "player.hpp"
+#include "tile.hpp"
 
 /// Game map board. Zoomable.
 /// The %Board is a complex thing. Many systems are part of it (e.g. vision system).

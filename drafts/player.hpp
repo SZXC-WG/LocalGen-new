@@ -12,7 +12,6 @@
 #define LGEN_MODULE_GE_PLAYER 1
 
 #include <string>
-#include "board.h"
 
 /// Base struct for players.
 class Player {

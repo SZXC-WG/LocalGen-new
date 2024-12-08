@@ -13,7 +13,7 @@
 
 #include <cstdint>
 
-#include "player.h"
+#include "player.hpp"
 
 using army_t = int64_t;
 

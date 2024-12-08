@@ -28,8 +28,7 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
     // Bot names from v5, for demonstration only.
     const QStringList botNames = { "ktqBot", "lcwBot", "smartRandomBot", "xrzBot", "zlyBot" };
     const QFont& font = ui->labNumPlayers->font();
-    QFont comboFont = font;
-    comboFont.setPointSize(comboFont.pointSize() - 2);
+    const QFont& comboFont = ui->comboBox_gameMap->font();
     while(layout->count() < requiredCount) {
         QLabel* playerLabel = new QLabel(tr("Player %1").arg(layout->count()));
         playerLabel->setFont(font);

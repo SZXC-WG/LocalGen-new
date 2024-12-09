@@ -43,7 +43,7 @@ Here you can play [generals.io](http://generals.io) **completely offline**!
 
 Enjoy playing with **out-of-the-box** robots or your friends (same LAN)!
 
-Interested? Download LocalGen on [the release page](http://github.com/SZXC-WG/LocalGen-new/releases).
+Interested? Download LocalGen on [the releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
 
 New idea? Old bugs? Contribute to the project! Simply **create an issue or a pull request**, and we'll reach out to you soon.
 
@@ -68,6 +68,14 @@ LocalGen is currently split into three types of branches:
 - **`release`**: Used for saving releases of older versions (v1-v4) and storing map/fonts. **Releases for newer versions can be found in the releases page.**
 
 To contribute to our project, please create a pull request on the `v5.0` branch. Thanks.
+
+> [!CAUTION]
+>
+> You are currently viewing the `master` branch, for v6. This new version is still in development and not ready yet.
+>
+> Please download older versions for the full game from the [the releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
+>
+> If you'd like to build the project by yourself, visit a `v5.x` branch. Enjoy!
 
 ## Star History
 

@@ -601,7 +601,7 @@ namespace LGreplay {
 	struct RReplay {
 		string Filename;
 		FILE* file;
-		int totTurn, turnPos[10005], seekPos, replaySize, curTurn;
+		int totTurn, turnPos[1000005], seekPos, replaySize, curTurn;
 		Block startMap[505][505];
 		vector<replayMap> midStates;
 		char* readBuf = new char[256];

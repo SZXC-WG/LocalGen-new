@@ -940,6 +940,7 @@ namespace LGGraphics {
 			settextjustify(CENTER_TEXT, TOP_TEXT);
 			xyprintf(screenszr - fpslen / 2 - 5, 0, "FPS: %f", getfps());
 			xyprintf(screenszr - fpslen - 10 - turnlen / 2 - 5, 0, "Turn %d.", LGreplay::rreplay.curTurn);
+			LGgame::statistics();
 			LGgame::ranklist(true);
 			jumpbut.display();
 			jumpsmbut.detect().display();

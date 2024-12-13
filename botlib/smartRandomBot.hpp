@@ -1,6 +1,8 @@
 #ifndef __BOT_SMARTRANDOM__
 #define __BOT_SMARTRANDOM__
 
+#include "../LGdef.hpp"
+
 namespace smartRandomBot {
 	const int dx[5] = { 0, -1, 0, 1, 0 };
 	const int dy[5] = { 0, 0, -1, 0, 1 };
@@ -21,7 +23,8 @@ namespace smartRandomBot {
 					}
 				}
 			}
-			return moveS{ id, false, coo, mxCoo };
+			// return moveS{ id, false, coo, mxCoo };
+			coo = mxCoo;
 		}
 		struct node {
 			int type, team;

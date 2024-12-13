@@ -153,7 +153,8 @@ namespace zlyBot {
 			}
 			// db << "Turn " << LGgame::curTurn << " from (" << coo.x << "," << coo.y << ") to (" << mxCoo.x << "," << mxCoo.y << ")" << std::endl;
 			// db.close();
-			return moveS{ id, false, coo, mxCoo };
+			// return moveS{ id, false, coo, mxCoo };
+			coo = mxCoo;
 		}
 		botMode[id] = BOT_MODE_EXPLORE;
 		int goalGeneralId = -1;

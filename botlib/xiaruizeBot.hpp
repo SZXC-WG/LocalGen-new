@@ -1,6 +1,8 @@
 #ifndef __BOT_XIARUIZE__
 #define __BOT_XIARUIZE__
 
+#include "../LGdef.hpp"
+
 namespace xiaruizeBot {
 	const int dx[5] = { 0, -1, 0, 1, 0 };
 	const int dy[5] = { 0, 0, -1, 0, 1 };
@@ -105,14 +107,15 @@ namespace xiaruizeBot {
 			backCountCnt[id] = 1;
 			otherRobotProtection[id] = std::max(0, std::min((int)operation[id].size() - 10, (int)mtrd() % 10));
 			sendArmyProcess[id] = 1;
-			return moveS{ id, false, coord, LGgame::genCoo[id] };
+			// return moveS{ id, false, coord, LGgame::genCoo[id] };
+			coord = LGgame::genCoo[id];
 		}
 		if(sendArmyProcess[id]) {
 			if(sendArmyProcess[id] > operation[id].size()) {
 				sendArmyProcess[id] = 0;
 				return moveS{
 					id, false, coordS{ -1, -1 },
-                      coordS{ -1, -1 }
+					coordS{ -1, -1 }
 				};
 			}
 			sendArmyProcess[id]++;

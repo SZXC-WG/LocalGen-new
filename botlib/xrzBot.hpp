@@ -1,6 +1,8 @@
 #ifndef __BOT_XRZ__
 #define __BOT_XRZ__
 
+#include "../LGdef.hpp"
+
 namespace xrzBot {
 	const int dx[5] = { 0, -1, 0, 1, 0 };
 	const int dy[5] = { 0, 0, -1, 0, 1 };
@@ -32,7 +34,8 @@ namespace xrzBot {
 					}
 				}
 			}
-			return moveS{ id, false, player, mxCoo };
+			// return moveS{ id, false, player, mxCoo };
+			player = mxCoo;
 		}
 		struct node {
 			int x, y;

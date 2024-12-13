@@ -859,7 +859,7 @@ namespace LGlocal {
 			if(1) {
 				toNextTurn = true;
 				std::chrono::nanoseconds timePassed = std::chrono::steady_clock::now().time_since_epoch() - LGgame::beginTime;
-				int needFlushToTurn = ceil(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
+				int needFlushToTurn = ceill(timePassed.count() / 1'000'000'000.0L * LGgame::gameSpeed);
 				int lackTurn = needFlushToTurn - LGgame::curTurn;
 				if(lackTurn <= 0 || gamePaused) {
 					cleardevice();

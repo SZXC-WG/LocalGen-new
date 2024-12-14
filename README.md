@@ -57,11 +57,11 @@ Certainly! We appreciate any form of contribution. See the instructions at [#31]
 
 LocalGen is currently split into three types of branches:
 
-- **`master`|`v6.x`**: With `master` being the main branch, these branches contains source files for version 6.
+- **`master`|`v6.x`**: With `master` being the main branch, these branches contain source files for version 6.
   **Starting from v6, we will migrate our UI to the Qt library.**
   This version hopefully gives optimized performance and cross-platform support. The source code will be refactored as well.
-- **`v5.x`**: The branches for version 5, which is **~~under active development~~ going to long-term**.
-  LocalGen versions 2 to 5 is built with [EGE Graphics](http://xege.org).
+- **`v5.x`**: The branches for version 5, which is **~~under active development~~ going to long-term maintenance**.
+  LocalGen versions 2 to 5 are built with [EGE Graphics](http://xege.org).
   We are trying to build an object-oriented system based on EGE.
   The releases published under this branch are **Windows only** for the limitations of EGE.
   [**Wine**](https://www.winehq.org) may be an option if you really want to run it on Linux/macOS systems.

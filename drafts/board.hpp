@@ -79,5 +79,5 @@ class Board {
     }
 };
 
-/// Declare Alias for convenience.
+/// Declare alias for convenience.
 using BoardView = Board::BoardView;

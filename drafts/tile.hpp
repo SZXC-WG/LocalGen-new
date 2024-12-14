@@ -57,11 +57,12 @@ struct TileView {
     Player* occupier;
     tile_type_e type;
     army_t army;
-    /// Light has no importance in game, and will not be displayed.
+    /// Light has no importance in game, and will not be given.
     // bool light;
 
     TileView() {}
-    TileView(const Tile& tile, bool vis) :
+    /// Constructor using a %Tile and its visibility.
+    TileView(const Tile& tile, const bool& vis) :
         visible(vis) {
         if(vis) {
             occupier = tile.occupier;

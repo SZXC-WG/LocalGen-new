@@ -15,8 +15,7 @@
 
 using pos_t = int32_t;
 
-/// @brief Struct for Coordinates, %Coord.
-///
+/// Struct for Coordinates, %Coord.
 /// Avoid using `COORD` as windows.h defines it.
 struct Coord {
     pos_t x, y;

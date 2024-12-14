@@ -20,6 +20,8 @@ set(PROJECT_SOURCES
         src/localGameDialog/localGameDialog.cpp
         src/localGameDialog/localGameDialog.h
         src/localGameDialog/localGameDialog.ui
+        src/mapWidget/mapWidget.cpp
+        src/mapWidget/mapWidget.h
         res/res.qrc
 )
 

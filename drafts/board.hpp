@@ -19,7 +19,7 @@
 /// Game map board. Zoomable.
 /// The %Board is a complex thing. Many systems are part of it (e.g. vision system).
 class Board {
-   private:
+   protected:
     pos_t row, col;
     std::vector<std::vector<Tile>> tiles;
 
@@ -79,5 +79,5 @@ class Board {
     }
 };
 
-/// Declare Alias for convenience.
+/// Declare alias for convenience.
 using BoardView = Board::BoardView;

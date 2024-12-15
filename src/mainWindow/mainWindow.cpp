@@ -1,6 +1,7 @@
 #include "mainWindow.h"
 #include "ui_mainWindow.h"
 #include "../localGameDialog/localGameDialog.h"
+#include "../localGameWindow/localGameWindow.h"
 
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -15,7 +16,7 @@ void MainWindow::on_btnLocalGame_clicked() {
     LocalGameDialog* dialog = new LocalGameDialog(this);
     int result = dialog->exec();
     if(result == QDialog::Accepted) {
-        // TODO
+        LocalGameWindow* window = new LocalGameWindow(this);
+        window->exec();
     }
-    delete dialog;
 }

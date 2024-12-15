@@ -23,6 +23,7 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     for(int i = 0; i < width; ++i) {
         for(int j = 0; j < height; ++j) {
             QRectF cell(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
+            painter.fillRect(cell, QColor(220, 220, 220));
             painter.drawRect(cell);
 
             int randomNumber = QRandomGenerator::global()->bounded(10);

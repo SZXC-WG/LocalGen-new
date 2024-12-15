@@ -1,10 +1,10 @@
 #include "localGameWindow.h"
 #include <QVBoxLayout>
 
-LocalGameWindow::LocalGameWindow(QWidget* parent) :
-    QDialog(parent), gameMap(nullptr) {
+LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config) :
+    QDialog(parent) {
     setWindowTitle("Local Game");
-    gameMap = new MapWidget(this);
+    gameMap = new MapWidget(this, config.mapWidth, config.mapHeight);
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(gameMap);
     setLayout(layout);

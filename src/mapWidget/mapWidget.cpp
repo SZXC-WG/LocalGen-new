@@ -4,9 +4,8 @@
 #include <QRandomGenerator>
 #include <QMouseEvent>
 
-MapWidget::MapWidget(QWidget* parent) :
-    QWidget(parent), scale(1.0), offset(0, 0), isDragging(false) {
-    // setFixedSize(800, 600);
+MapWidget::MapWidget(QWidget* parent, int w, int h) :
+    QWidget(parent), scale(1.0), offset(0, 0), isDragging(false), width(w), height(h) {
     setMouseTracking(true);
 }
 
@@ -19,12 +18,11 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     painter.translate(offset);
     painter.scale(scale, scale);
 
-    const int gridSize = 20;
-    const qreal cellSize = 300.0 / gridSize;
+    const qreal cellWidth = 300.0 / width, cellHeight = 300.0 / height;
 
-    for(int i = 0; i < gridSize; ++i) {
-        for(int j = 0; j < gridSize; ++j) {
-            QRectF cell(i * cellSize, j * cellSize, cellSize, cellSize);
+    for(int i = 0; i < width; ++i) {
+        for(int j = 0; j < height; ++j) {
+            QRectF cell(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
             painter.drawRect(cell);
 
             int randomNumber = QRandomGenerator::global()->bounded(10);

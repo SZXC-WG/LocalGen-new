@@ -11,6 +11,26 @@ LocalGameDialog::~LocalGameDialog() {
     delete ui;
 }
 
+LocalGameConfig LocalGameDialog::config() const {
+    LocalGameConfig config;
+    config.gameSpeed = ui->spinBox_gameSpeed->value();
+    config.enableSounds = ui->checkBox_enableSounds->isChecked();
+    config.showAnalysis = ui->checkBox_showAnalysis->isChecked();
+    config.mapName = ui->comboBox_gameMap->currentText();
+    config.mapWidth = ui->spinBox_mapWidth->value();
+    config.mapHeight = ui->spinBox_mapHeight->value();
+    int numPlayers = ui->spinBox_numPlayers->value();
+    auto& players = config.players;
+    players.resize(numPlayers);
+    QLayout* layout = ui->groupBox_players->layout();
+    for(int i = 0; i < numPlayers; ++i) {
+        QWidget* playerWidget = layout->itemAt(i + 1)->widget();
+        players[i].name = playerWidget->findChild<QComboBox*>()->currentText();
+        players[i].visible = playerWidget->findChild<QCheckBox*>()->isChecked();
+    }
+    return config;
+}
+
 void LocalGameDialog::on_btnStartGame_clicked() {
     this->done(QDialog::Accepted);
 }

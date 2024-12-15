@@ -8,8 +8,9 @@ class MapWidget : public QWidget {
     Q_OBJECT
 
    public:
-    explicit MapWidget(QWidget* parent = nullptr);
+    explicit MapWidget(QWidget* parent, int w, int h);
     ~MapWidget();
+    const int width, height;
 
    protected:
     void paintEvent(QPaintEvent* event) override;

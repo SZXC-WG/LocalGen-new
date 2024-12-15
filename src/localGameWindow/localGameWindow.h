@@ -3,12 +3,13 @@
 
 #include <QDialog>
 #include "../mapWidget/mapWidget.h"
+#include "../localGameDialog/localGameDialog.h"
 
 class LocalGameWindow : public QDialog {
     Q_OBJECT
 
    public:
-    LocalGameWindow(QWidget* parent = nullptr);
+    explicit LocalGameWindow(QWidget* parent, const LocalGameConfig& config);
     ~LocalGameWindow();
 
    private:

@@ -25,9 +25,13 @@ class MapWidget : public QWidget {
         zoomFactor = 1.1,
         paddingFactor = 0.109375;
 
+    int focusX, focusY;
+
+    QPoint mapToGrid(const QPoint& pos);
+
     qreal scale;
     QPointF offset;
-    bool isDragging;
+    bool mouseDown, isDragging;
     QPoint lastMousePos;
 };
 

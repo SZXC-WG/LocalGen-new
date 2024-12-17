@@ -5,7 +5,7 @@
 #include <QMouseEvent>
 
 MapWidget::MapWidget(QWidget* parent, int w, int h) :
-    QWidget(parent), scale(1.0), offset(0, 0), isDragging(false), width(w), height(h) {
+    QWidget(parent), scale(1.0), offset(0, 0), mouseDown(false), isDragging(false), width(w), height(h), focusX(-1), focusY(-1) {
     setMouseTracking(true);
 }
 
@@ -36,6 +36,7 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     const QPixmap pixmaps[] = { pixmap_city, pixmap_general, pixmap_desert, pixmap_lookout,
                                 pixmap_mountain, pixmap_observatory, pixmap_obstacle, pixmap_swamp };
 
+    painter.setPen(QPen(Qt::black, 1));
     for(int i = 0; i < width; ++i) {
         for(int j = 0; j < height; ++j) {
             QRectF cell(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
@@ -50,6 +51,12 @@ void MapWidget::paintEvent(QPaintEvent* event) {
                 painter.drawPixmap(imgRect, pixmap, pixmap.rect());
             }
         }
+    }
+
+    if(focusX != -1) {
+        painter.setPen(QPen(Qt::white, 1.5));
+        QRectF cell(focusX * cellWidth, focusY * cellHeight, cellWidth, cellHeight);
+        painter.drawRect(cell);
     }
 }
 
@@ -66,14 +73,17 @@ void MapWidget::wheelEvent(QWheelEvent* event) {
 
 void MapWidget::mousePressEvent(QMouseEvent* event) {
     if(event->button() == Qt::LeftButton) {
-        isDragging = true;
+        mouseDown = true;
         lastMousePos = event->pos();
-        setCursor(Qt::ClosedHandCursor);
     }
 }
 
 void MapWidget::mouseMoveEvent(QMouseEvent* event) {
-    if(isDragging) {
+    if(mouseDown) {
+        if(!isDragging) {
+            isDragging = true;
+            setCursor(Qt::ClosedHandCursor);
+        }
         QPoint delta = event->pos() - lastMousePos;
         offset += delta;
         lastMousePos = event->pos();
@@ -83,7 +93,26 @@ void MapWidget::mouseMoveEvent(QMouseEvent* event) {
 
 void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
     if(event->button() == Qt::LeftButton) {
-        isDragging = false;
-        setCursor(Qt::ArrowCursor);
+        mouseDown = false;
+        if(isDragging) {
+            isDragging = false;
+            setCursor(Qt::ArrowCursor);
+        } else {
+            QPoint gridPos = mapToGrid(event->pos());
+            if(gridPos.x() >= 0 && gridPos.x() < width && gridPos.y() >= 0 && gridPos.y() < height) {
+                focusX = gridPos.x();
+                focusY = gridPos.y();
+            } else {
+                focusX = focusY = -1;
+            }
+            update();
+        }
     }
+}
+
+QPoint MapWidget::mapToGrid(const QPoint& pos) {
+    QPointF scaledPos = (pos - offset) / scale;
+    int gridX = static_cast<int>(scaledPos.x() / (defaultSize / width));
+    int gridY = static_cast<int>(scaledPos.y() / (defaultSize / height));
+    return QPoint(gridX, gridY);
 }

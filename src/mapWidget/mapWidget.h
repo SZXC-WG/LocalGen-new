@@ -20,6 +20,11 @@ class MapWidget : public QWidget {
     void mouseReleaseEvent(QMouseEvent* event) override;
 
    private:
+    static constexpr qreal
+        defaultSize = 430.0,
+        zoomFactor = 1.1,
+        paddingFactor = 0.109375;
+
     qreal scale;
     QPointF offset;
     bool isDragging;

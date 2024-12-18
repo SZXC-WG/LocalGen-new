@@ -23,6 +23,14 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         cellHeight = defaultSize / height,
         paddingW = cellWidth * paddingFactor, paddingH = cellHeight * paddingFactor;
 
+    static const QColor bg(220, 220, 220);
+    static const QColor playerColors[] = {
+        QColor(255, 0, 0),
+        QColor(255, 112, 16),
+        QColor(0, 128, 0),
+        QColor(16, 49, 255)
+    };
+
     static QPixmap
         pixmap_city(":/images/img/city.png"),
         pixmap_general(":/images/img/crown.png"),
@@ -36,14 +44,15 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     const QPixmap pixmaps[] = { pixmap_city, pixmap_general, pixmap_desert, pixmap_lookout,
                                 pixmap_mountain, pixmap_observatory, pixmap_obstacle, pixmap_swamp };
 
+    QRandomGenerator* rand = QRandomGenerator::global();
+
     painter.setPen(QPen(Qt::black, 1));
     for(int i = 0; i < width; ++i) {
         for(int j = 0; j < height; ++j) {
             QRectF cell(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
-            painter.fillRect(cell, QColor(220, 220, 220));
+            painter.fillRect(cell, rand->bounded(2) == 0 ? bg : playerColors[rand->bounded(4)]);
             painter.drawRect(cell);
-
-            int k = QRandomGenerator::global()->bounded(15);
+            int k = rand->bounded(15);
             if(k < 8) {
                 QRectF imgRect(i * cellWidth + paddingW, j * cellHeight + paddingH,
                                cellWidth - paddingW * 2, cellHeight - paddingH * 2);

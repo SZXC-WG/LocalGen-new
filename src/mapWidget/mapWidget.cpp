@@ -15,6 +15,8 @@ MapWidget::~MapWidget() {
 void MapWidget::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
     painter.translate(offset);
     painter.scale(scale, scale);
 

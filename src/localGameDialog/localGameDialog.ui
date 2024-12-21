@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>597</width>
-    <height>405</height>
+    <width>600</width>
+    <height>371</height>
    </rect>
   </property>
   <property name="font">
@@ -29,7 +29,7 @@
     <number>20</number>
    </property>
    <item>
-    <spacer name="verticalSpacer">
+    <spacer name="spacer_1">
      <property name="orientation">
       <enum>Qt::Orientation::Vertical</enum>
      </property>
@@ -42,11 +42,11 @@
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="settingsLayout">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_left">
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="groupBox_basicSettings">
          <property name="font">
           <font>
            <family>Quicksand</family>
@@ -61,7 +61,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <layout class="QHBoxLayout" name="gameSpeedLayout">
             <item>
              <widget class="QLabel" name="labGameSpeed">
               <property name="font">
@@ -273,10 +273,23 @@
          </layout>
         </widget>
        </item>
+       <item>
+        <spacer name="leftSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <layout class="QVBoxLayout" name="verticalLayout_right">
        <item>
         <widget class="QGroupBox" name="groupBox_players">
          <property name="font">
@@ -341,7 +354,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_2">
+        <spacer name="rightSpacer">
          <property name="orientation">
           <enum>Qt::Orientation::Vertical</enum>
          </property>
@@ -358,7 +371,7 @@
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer_3">
+    <spacer name="spacer_2">
      <property name="orientation">
       <enum>Qt::Orientation::Vertical</enum>
      </property>
@@ -371,7 +384,7 @@
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="buttonLayout">
      <item>
       <widget class="QPushButton" name="btnStartGame">
        <property name="font">
@@ -411,7 +424,7 @@ background-color: white;</string>
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer_4">
+    <spacer name="spacer_3">
      <property name="orientation">
       <enum>Qt::Orientation::Vertical</enum>
      </property>

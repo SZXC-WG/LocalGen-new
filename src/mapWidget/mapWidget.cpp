@@ -3,10 +3,12 @@
 #include <QWheelEvent>
 #include <QRandomGenerator>
 #include <QMouseEvent>
+#include <QKeyEvent>
 
 MapWidget::MapWidget(QWidget* parent, int w, int h) :
     QWidget(parent), scale(1.0), offset(0, 0), mouseDown(false), isDragging(false), width(w), height(h), focusX(-1), focusY(-1) {
     setMouseTracking(true);
+    setFocusPolicy(Qt::StrongFocus);
 }
 
 MapWidget::~MapWidget() {
@@ -126,4 +128,29 @@ QPoint MapWidget::mapToGrid(const QPoint& pos) {
     int gridX = static_cast<int>(scaledPos.x() / (defaultSize / width));
     int gridY = static_cast<int>(scaledPos.y() / (defaultSize / height));
     return QPoint(gridX, gridY);
+}
+
+void MapWidget::keyPressEvent(QKeyEvent* event) {
+    if(focusX != -1 && focusY != -1) {
+        switch(event->key()) {
+            case Qt::Key_Left:
+                if(focusX > 0) focusX--;
+                break;
+            case Qt::Key_Right:
+                if(focusX < width - 1) focusX++;
+                break;
+            case Qt::Key_Up:
+                if(focusY > 0) focusY--;
+                break;
+            case Qt::Key_Down:
+                if(focusY < height - 1) focusY++;
+                break;
+            default:
+                QWidget::keyPressEvent(event);
+                return;
+        }
+        update();
+    } else {
+        QWidget::keyPressEvent(event);
+    }
 }

@@ -5,10 +5,10 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
-MapWidget::MapWidget(QWidget* parent, int w, int h) :
+MapWidget::MapWidget(QWidget* parent, int w, int h, bool focusEnabled) :
     QWidget(parent), scale(1.0), offset(0, 0), mouseDown(false), isDragging(false), width(w), height(h), focusX(-1), focusY(-1) {
     setMouseTracking(true);
-    setFocusPolicy(Qt::StrongFocus);
+    setFocusEnabled(focusEnabled);
 }
 
 MapWidget::~MapWidget() {
@@ -110,7 +110,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
         if(isDragging) {
             isDragging = false;
             setCursor(Qt::ArrowCursor);
-        } else {
+        } else if(focusPolicy() != Qt::NoFocus) {
             QPoint gridPos = mapToGrid(event->pos());
             if(gridPos.x() >= 0 && gridPos.x() < width && gridPos.y() >= 0 && gridPos.y() < height) {
                 focusX = gridPos.x();
@@ -128,6 +128,16 @@ QPoint MapWidget::mapToGrid(const QPoint& pos) {
     int gridX = static_cast<int>(scaledPos.x() / (defaultSize / width));
     int gridY = static_cast<int>(scaledPos.y() / (defaultSize / height));
     return QPoint(gridX, gridY);
+}
+
+void MapWidget::setFocusEnabled(bool enabled) {
+    if(enabled) {
+        setFocusPolicy(Qt::StrongFocus);
+    } else {
+        setFocusPolicy(Qt::NoFocus);
+        focusX = focusY = -1;
+        update();
+    }
 }
 
 void MapWidget::keyPressEvent(QKeyEvent* event) {

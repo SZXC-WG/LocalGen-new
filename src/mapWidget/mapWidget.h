@@ -8,9 +8,10 @@ class MapWidget : public QWidget {
     Q_OBJECT
 
    public:
-    explicit MapWidget(QWidget* parent, int w, int h);
+    explicit MapWidget(QWidget* parent, int w, int h, bool focusEnabled = true);
     ~MapWidget();
     const int width, height;
+    void setFocusEnabled(bool enabled);
 
    protected:
     void paintEvent(QPaintEvent* event) override;

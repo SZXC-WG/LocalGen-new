@@ -81,6 +81,10 @@ To contribute to our project, please create a pull request on the `v5.0` branch.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=SZXC-WG/LocalGen-new&type=Date)](https://star-history.com/#SZXC-WG/LocalGen-new&Date)
 
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/SZXC-WG/LocalGen-new.svg?variant=adaptive)](https://starchart.cc/SZXC-WG/LocalGen-new)
+
 <!--
 ## Donate Please! (WeChat Pay and AliPay)
 

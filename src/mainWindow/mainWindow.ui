@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>750</width>
+    <height>464</height>
    </rect>
   </property>
   <property name="font">
@@ -38,9 +38,9 @@
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="faviconLayout">
       <item>
-       <spacer name="verticalSpacer_2">
+       <spacer name="faviconSpacer1">
         <property name="orientation">
          <enum>Qt::Orientation::Vertical</enum>
         </property>
@@ -105,7 +105,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="verticalSpacer">
+       <spacer name="faviconSpacer2">
         <property name="orientation">
          <enum>Qt::Orientation::Vertical</enum>
         </property>
@@ -120,7 +120,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QVBoxLayout" name="menuLayout">
       <property name="leftMargin">
        <number>15</number>
       </property>
@@ -128,7 +128,7 @@
        <number>35</number>
       </property>
       <item>
-       <spacer name="verticalSpacer_3">
+       <spacer name="menuSpacer1">
         <property name="orientation">
          <enum>Qt::Orientation::Vertical</enum>
         </property>
@@ -265,7 +265,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="verticalSpacer_4">
+       <spacer name="menuSpacer2">
         <property name="orientation">
          <enum>Qt::Orientation::Vertical</enum>
         </property>
@@ -286,14 +286,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>750</width>
      <height>33</height>
     </rect>
    </property>
   </widget>
  </widget>
  <resources>
-  <include location="../../res/res.qrc"/>
   <include location="../../res/res.qrc"/>
  </resources>
  <connections/>

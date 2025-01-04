@@ -1,5 +1,5 @@
 /**
- * @file coord.h
+ * @file coord.hpp
  * 
  * LocalGen Library: coordinates
  * 

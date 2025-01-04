@@ -1,5 +1,5 @@
 /**
- * @file board.h
+ * @file board.hpp
  * 
  * LocalGen Module: GameEngine
  * 

@@ -49,6 +49,8 @@ New idea? Old bugs? Contribute to the project! Simply **create an issue or a pul
 
 ## [Releases (Changelog)](http://github.com/SZXC-WG/LocalGen-new/releases)
 
+We have to say that we currently recommend that you should download the latest pre-releases (the top one in the overall release page) instead of the so-called "Latest Release". The latest stable release (`v4.1.0`) is far too outdated due to the enormous amount of code changes since `v4.2.0`. Now many functions in the new releases are not compatible with functions in release `v4.1.0`. Further information can be seen from the changelogs.
+
 ## Weak robots! Write a new one?
 
 Certainly! We appreciate any form of contribution. See the instructions at [#31](../../issues/31).

@@ -54,7 +54,8 @@ struct Tile {
 struct TileView {
     /// For a player in game, whether a tile is visible or not is very important.
     bool visible;
-    Player* occupier;
+    /// We cannot provide direct %Player pointers in a %TileView for a pointer gives access to some sacred things.
+    Player::index_t occupier;
     tile_type_e type;
     army_t army;
     /// Light has no importance in game, and will not be given.
@@ -65,11 +66,11 @@ struct TileView {
     TileView(const Tile& tile, const bool& vis) :
         visible(vis) {
         if(vis) {
-            occupier = tile.occupier;
+            occupier = tile.occupier->index;
             type = tile.type;
             army = tile.army;
         } else {
-            occupier = nullptr;
+            occupier = 0;
             switch(tile.type) {
                 case TILE_SPAWN:
                     type = TILE_BLANK;

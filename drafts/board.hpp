@@ -37,7 +37,7 @@ class Board {
     // Here should lie the vision system. Someone come and write it for me!
 
     /// Check whether the %Tile at (x,y) is visible to a %Player.
-    bool visible(pos_t x, pos_t y, Player* player) const {
+    virtual bool visible(pos_t x, pos_t y, Player* player) const {
         // TODO))
         return false;
     }

@@ -37,11 +37,13 @@ class Board {
     // Here should lie the vision system. Someone come and write it for me!
 
     /// Check whether the %Tile at (x,y) is visible to a %Player.
+    /// Declare this function as *virtual* for we'll declare a different function in-game.
     virtual bool visible(pos_t x, pos_t y, Player* player) const {
         // TODO))
         return false;
     }
     /// Same as above, but using %Coord.
+    /// This is not declared as *virtual* for redefining it is unnecessary.
     bool visible(Coord coo, Player* player) { return visible(SEPA(coo), player); }
 
    public:

@@ -22,11 +22,17 @@ class Player {
    public:
     const std::string name;
     index_t index;
-    
+    index_t teamId;
+
     Player(const std::string& name) :
         name(name) {}
     virtual ~Player() {}
     // virtual Move step(const BoardView& view) {}
 };
+
+inline bool inSameTeam(Player* p1, Player* p2) {
+    if(p1 == nullptr || p2 == nullptr) return false;
+    return p1->teamId == p2->teamId;
+}
 
 #endif  // LGEN_MODULE_GE_PLAYER

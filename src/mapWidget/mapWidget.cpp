@@ -22,10 +22,7 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     painter.translate(offset);
     painter.scale(scale, scale);
 
-    const qreal
-        cellWidth = defaultSize / width,
-        cellHeight = defaultSize / height,
-        paddingW = cellWidth * paddingFactor, paddingH = cellHeight * paddingFactor;
+    const qreal padding = cellSize * paddingFactor;
 
     static const QColor bg(220, 220, 220);
     static const QColor playerColors[] = {
@@ -53,13 +50,13 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     painter.setPen(QPen(Qt::black, 1));
     for(int i = 0; i < width; ++i) {
         for(int j = 0; j < height; ++j) {
-            QRectF cell(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
+            QRectF cell(i * cellSize, j * cellSize, cellSize, cellSize);
             painter.fillRect(cell, rand->bounded(2) == 0 ? bg : playerColors[rand->bounded(4)]);
             painter.drawRect(cell);
             int k = rand->bounded(15);
             if(k < 8) {
-                QRectF imgRect(i * cellWidth + paddingW, j * cellHeight + paddingH,
-                               cellWidth - paddingW * 2, cellHeight - paddingH * 2);
+                QRectF imgRect(i * cellSize + padding, j * cellSize + padding,
+                               cellSize - padding * 2, cellSize - padding * 2);
                 const QPixmap& pixmap = pixmaps[k];
                 painter.drawPixmap(imgRect, pixmap, pixmap.rect());
             }
@@ -68,7 +65,7 @@ void MapWidget::paintEvent(QPaintEvent* event) {
 
     if(focusX != -1) {
         painter.setPen(QPen(Qt::white, 1.5));
-        QRectF cell(focusX * cellWidth, focusY * cellHeight, cellWidth, cellHeight);
+        QRectF cell(focusX * cellSize, focusY * cellSize, cellSize, cellSize);
         painter.drawRect(cell);
     }
 }
@@ -125,8 +122,8 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
 
 QPoint MapWidget::mapToGrid(const QPoint& pos) {
     QPointF scaledPos = (pos - offset) / scale;
-    int gridX = static_cast<int>(scaledPos.x() / (defaultSize / width));
-    int gridY = static_cast<int>(scaledPos.y() / (defaultSize / height));
+    int gridX = static_cast<int>(scaledPos.x() / cellSize);
+    int gridY = static_cast<int>(scaledPos.y() / cellSize);
     return QPoint(gridX, gridY);
 }
 

@@ -23,7 +23,7 @@ class MapWidget : public QWidget {
 
    private:
     static constexpr qreal
-        defaultSize = 430.0,
+        cellSize = 20.0,
         zoomFactor = 1.1,
         paddingFactor = 0.109375;
 

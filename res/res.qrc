@@ -12,5 +12,13 @@
     <file>img/github.png</file>
     <file>img/options.png</file>
     <file>img/favicon.png</file>
+    <file>svg/city.svg</file>
+    <file>svg/crown.svg</file>
+    <file>svg/desert.svg</file>
+    <file>svg/lookout.svg</file>
+    <file>svg/mountain.svg</file>
+    <file>svg/observatory.svg</file>
+    <file>svg/obstacle.svg</file>
+    <file>svg/swamp.svg</file>
   </qresource>
 </RCC>

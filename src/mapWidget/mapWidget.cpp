@@ -4,6 +4,7 @@
 #include <QRandomGenerator>
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QSvgRenderer>
 
 MapWidget::MapWidget(QWidget* parent, int w, int h, bool focusEnabled) :
     QWidget(parent), scale(1.0), offset(0, 0), mouseDown(false), isDragging(false), width(w), height(h), focusX(-1), focusY(-1) {
@@ -32,18 +33,20 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         QColor(16, 49, 255)
     };
 
-    static QPixmap
-        pixmap_city(":/images/img/city.png"),
-        pixmap_general(":/images/img/crown.png"),
-        pixmap_desert(":/images/img/desert.png"),
-        pixmap_lookout(":/images/img/lookout.png"),
-        pixmap_mountain(":/images/img/mountain.png"),
-        pixmap_observatory(":/images/img/observatory.png"),
-        pixmap_obstacle(":/images/img/obstacle.png"),
-        pixmap_swamp(":/images/img/swamp.png");
+    static QSvgRenderer
+        renderer_city(QString(":/images/svg/city.svg")),
+        renderer_general(QString(":/images/svg/crown.svg")),
+        renderer_desert(QString(":/images/svg/desert.svg")),
+        renderer_lookout(QString(":/images/svg/lookout.svg")),
+        renderer_mountain(QString(":/images/svg/mountain.svg")),
+        renderer_observatory(QString(":/images/svg/observatory.svg")),
+        renderer_obstacle(QString(":/images/svg/obstacle.svg")),
+        renderer_swamp(QString(":/images/svg/swamp.svg"));
 
-    const QPixmap pixmaps[] = { pixmap_city, pixmap_general, pixmap_desert, pixmap_lookout,
-                                pixmap_mountain, pixmap_observatory, pixmap_obstacle, pixmap_swamp };
+    QSvgRenderer* renderers[] = {
+        &renderer_city, &renderer_general, &renderer_desert, &renderer_lookout,
+        &renderer_mountain, &renderer_observatory, &renderer_obstacle, &renderer_swamp
+    };
 
     QRandomGenerator* rand = QRandomGenerator::global();
 
@@ -57,8 +60,8 @@ void MapWidget::paintEvent(QPaintEvent* event) {
             if(k < 8) {
                 QRectF imgRect(i * cellSize + padding, j * cellSize + padding,
                                cellSize - padding * 2, cellSize - padding * 2);
-                const QPixmap& pixmap = pixmaps[k];
-                painter.drawPixmap(imgRect, pixmap, pixmap.rect());
+                QSvgRenderer* renderer = renderers[k];
+                renderer->render(&painter, imgRect);
             }
         }
     }

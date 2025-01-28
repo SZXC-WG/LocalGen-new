@@ -52,7 +52,6 @@ endif()
 
 target_include_directories(LocalGen-new PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-# target_link_libraries(LocalGen-new PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(LocalGen-new PRIVATE Qt6::Widgets Qt6::Svg)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

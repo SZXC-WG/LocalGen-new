@@ -11,6 +11,6 @@
 #ifndef LGEN_MODULE_GE_MOVE
 #define LGEN_MODULE_GE_MOVE 1
 
-#include "coord.hpp"
+#include "lib/coord.hpp"
 
 #endif  // LGEN_MODULE_GE_MOVE

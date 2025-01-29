@@ -30,7 +30,7 @@ class Player {
     // virtual Move step(const BoardView& view) {}
 };
 
-inline bool inSameTeam(Player* p1, Player* p2) {
+inline bool in_same_team(Player* p1, Player* p2) {
     if(p1 == nullptr || p2 == nullptr) return false;
     return p1->teamId == p2->teamId;
 }

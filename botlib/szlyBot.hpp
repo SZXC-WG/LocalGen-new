@@ -4,6 +4,8 @@
 #include "../LGdef.hpp"
 #include <unordered_map>
 #include <array>
+#include <queue>
+#include <random>
 
 namespace szlyBot {
 
@@ -16,6 +18,9 @@ namespace szlyBot {
 		BOT_MODE_DEFEND,
 	};
 
+	constexpr int dx[] = { -1, 0, 1, 0 };
+	constexpr int dy[] = { 0, -1, 0, 1 };
+
 	class Bot {
 	   private:
 		int id;  // Current bot's identifier
@@ -26,8 +31,18 @@ namespace szlyBot {
 		ll eval[256][256];
 		coordS par[256][256];
 		int dist[256][256];
+		// 0->plain, 1->swamp, 2->mountain, 3->general, 4->city, 5->unknown
 		int blockType[256][256];
 		bool knownBlockType[256][256];
+		std::mt19937 rnd;
+
+		static inline bool isValidPosition(int x, int y) {
+			return x >= 1 && x <= mapH && y >= 1 && y <= mapW && gameMap[x][y].type != 2;
+		}
+
+		static inline int approxDist(coordS st, coordS dest) {
+			return std::abs(st.x - dest.x) + std::abs(st.y - dest.y);
+		}
 
 		inline int getType(int x, int y) {
 			int type = gameMap[x][y].type;
@@ -40,15 +55,12 @@ namespace szlyBot {
 		void computeRoutes(coordS st) {
 			static const ll typeValues[] = { -5, -10, -INF, -5, -40, -200 };
 			auto gv = [&](int x, int y) -> ll {
-				if(x < 1 || x > mapH || y < 1 || y > mapW) return -INF;
-				if(blockType[x][y] == 2) return -INF;
+				if(!isValidPosition(x, y)) return -INF;
 				if(gameMap[x][y].player == id) return gameMap[x][y].army;
 				if(isVisible(x, y, 1 << id)) return -gameMap[x][y].army;
 				return typeValues[blockType[x][y]];
 			};
 
-			constexpr int dx[] = { -1, 0, 1, 0 };
-			constexpr int dy[] = { 0, -1, 0, 1 };
 			memset(dist, 0x3f, sizeof(dist));
 			memset(eval, -0x3f, sizeof(eval));
 
@@ -65,7 +77,7 @@ namespace szlyBot {
 
 				for(int i = 0; i < 4; ++i) {
 					int nx = x + dx[i], ny = y + dy[i];
-					if(nx < 1 || nx > mapH || ny < 1 || ny > mapW || blockType[nx][ny] == 2) continue;
+					if(!isValidPosition(nx, ny)) continue;
 					int nd = curDist + 1;
 					if(nd < dist[nx][ny]) {
 						dist[nx][ny] = nd, eval[nx][ny] = curEval, par[nx][ny] = cur;
@@ -90,7 +102,33 @@ namespace szlyBot {
 			return dest;
 		}
 
+		moveS smartMove(coordS st, coordS dest, float P = 0.7) {
+			coordS fastestMove = moveTowards(st, dest);
+			coordS gatherPos = coordS(-1, -1);
+			double maxWeight = -1e18;
+			for(int i = 0; i < 4; ++i) {
+				int nx = st.x + dx[i], ny = st.y + dy[i];
+				if(!isValidPosition(nx, ny)) continue;
+				coordS nc(nx, ny);
+				if(nc != fastestMove && gameMap[nx][ny].player == id && gameMap[nx][ny].army > 2) {
+					double weight = gameMap[nx][ny].army - 250. / approxDist(nc, seenGeneral[id]);
+					if(blockType[nx][ny] == 1) weight++;
+					else if(blockType[nx][ny] == 3) weight *= 0.5;
+					else if(blockType[nx][ny] == 4) weight *= 0.75;
+					if(weight > maxWeight) maxWeight = weight, gatherPos = nc;
+				}
+			}
+			static std::uniform_real_distribution<float> dis(-1, 1);
+			if(gatherPos == coordS(-1, -1) || dis(rnd) > P * std::tanh(maxWeight / 75.)) {
+				return { id, true, st, fastestMove };
+			}
+			return { id, true, gatherPos, st };
+		}
+
 	   public:
+		Bot() :
+		    rnd(std::random_device()()) {}
+
 		void init(int botId) {
 			id = botId;
 			blockValueWeight = { 30 - LGset::plainRate[LGset::gameMode] + 1, -1500, -INF, 5, 30, 30 };
@@ -102,7 +140,7 @@ namespace szlyBot {
 			// Update seen generals
 			for(int i = 1; i <= mapH; ++i)
 				for(int j = 1; j <= mapW; ++j)
-					if(isVisible(i, j, 1 << id) && gameMap[i][j].player != id && gameMap[i][j].type == 3)
+					if(isVisible(i, j, 1 << id) && gameMap[i][j].type == 3)
 						seenGeneral[gameMap[i][j].player] = coordS(i, j);
 
 			// Update block types
@@ -116,9 +154,16 @@ namespace szlyBot {
 				ll maxArmy = 0;
 				coordS maxCoo = LGgame::genCoo[id];
 				for(int i = 1; i <= mapH; ++i)
-					for(int j = 1; j <= mapW; ++j)
-						if(gameMap[i][j].player == id && gameMap[i][j].army > maxArmy)
-							maxArmy = gameMap[i][j].army, maxCoo = { i, j };
+					for(int j = 1; j <= mapW; ++j) {
+						if(gameMap[i][j].player == id) {
+							ll weightedArmy = gameMap[i][j].army;
+							if(blockType[i][j] == 0) weightedArmy -= weightedArmy / 4;
+							else if(blockType[i][j] == 4) weightedArmy -= weightedArmy / 5;
+							if(weightedArmy > maxArmy)
+								maxArmy = weightedArmy, maxCoo = { i, j };
+						}
+					}
+
 				coo = maxCoo;
 			}
 
@@ -127,7 +172,7 @@ namespace szlyBot {
 			ll minArmy = INF;
 			int targetId = -1;
 			for(int i = 1; i <= LGgame::playerCnt; ++i) {
-				if(seenGeneral[i] != coordS(-1, -1) && LGgame::isAlive[i]) {
+				if(i != id && seenGeneral[i] != coordS(-1, -1) && LGgame::isAlive[i]) {
 					mode = BOT_MODE_ATTACK;
 					if(LGgame::gameStats[i].back().army < minArmy) {
 						minArmy = LGgame::gameStats[i].back().army;
@@ -138,7 +183,7 @@ namespace szlyBot {
 
 			computeRoutes(coo);
 			if(mode == BOT_MODE_ATTACK) {
-				return { id, true, coo, moveTowards(coo, seenGeneral[targetId]) };
+				return smartMove(coo, seenGeneral[targetId], 0.85);
 			}
 
 			coordS targetPos;
@@ -148,7 +193,7 @@ namespace szlyBot {
 					if(blockValue[i][j] > maxBlockValue)
 						maxBlockValue = blockValue[i][j], targetPos = { i, j };
 
-			return { id, true, coo, moveTowards(coo, targetPos) };
+			return smartMove(coo, targetPos, 0.7);
 		}
 	};
 
@@ -163,6 +208,5 @@ namespace szlyBot {
 	}
 
 }  // namespace szlyBot
-// ...
 
 #endif  // __BOT_SZLY__

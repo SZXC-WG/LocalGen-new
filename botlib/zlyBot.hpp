@@ -60,7 +60,7 @@ namespace zlyBot {
 		for(int i = 1; i <= mapH; ++i) {
 			for(int j = 1; j <= mapW; ++j) {
 				if(gameMap[i][j].player == id) blockValue[id][i][j] = -INF;
-				else blockValue[id][i][j] = blockValueWeight[id][gameMap[i][j].type] - dist[id][i][j];
+				else blockValue[id][i][j] = blockValueWeight[id][getType(id, i, j)] - dist[id][i][j];
 			}
 		}
 	}

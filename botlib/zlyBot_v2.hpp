@@ -119,7 +119,7 @@ namespace zlyBot_v2 {
 			}
 		};
 		auto UnitedInc = [&](int x, int y) -> ll {
-			return DisInc * 100 + ArmyInc(x, y) + TypeInc(x, y);
+			return DisInc * 1000 + ArmyInc(x, y) + TypeInc(x, y);
 		};
 		constexpr int dx[] = { -1, 0, 1, 0 };
 		constexpr int dy[] = { 0, -1, 0, 1 };

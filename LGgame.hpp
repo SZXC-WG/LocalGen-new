@@ -558,8 +558,8 @@ namespace LGlocal {
 		std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
 		LGgame::robotId[1] = -100;
 		for(int i = 2; i <= LGgame::playerCnt; ++i) {
-			// LGgame::robotId[i] = mtrd() % 100 + 300 + (i % 3) * 100;
-			LGgame::robotId[i] = mtrd() % 600;
+			LGgame::robotId[i] = mtrd() % 100 + 300 + (i % 3) * 100;
+			// LGgame::robotId[i] = mtrd() % 600;
 			// LGgame::robotId[i] = mtrd() % 200 + 300;
 			// LGgame::robotId[i] = mtrd() % 100 + 400;
 			// LGgame::robotId[i] = mtrd() % 100 + 300;

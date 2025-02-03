@@ -102,7 +102,7 @@ namespace szlyBot {
 			return dest;
 		}
 
-		moveS smartMove(coordS st, coordS dest, float P = 0.7) {
+		moveS smartMove(coordS st, coordS dest, double P = 0.7) {
 			coordS fastestMove = moveTowards(st, dest);
 			if(blockType[st.x][st.y] == 1)
 				return { id, true, st, fastestMove };
@@ -120,7 +120,7 @@ namespace szlyBot {
 					if(weight > maxWeight) maxWeight = weight, gatherPos = nc;
 				}
 			}
-			static std::uniform_real_distribution<float> dis(-1, 1);
+			static std::uniform_real_distribution<double> dis(-1, 1);
 			if(gatherPos == coordS(-1, -1) || dis(rnd) > P * std::tanh(maxWeight * 0.015)) {
 				return { id, true, st, fastestMove };
 			}
@@ -184,8 +184,9 @@ namespace szlyBot {
 			}
 
 			computeRoutes(coo);
+			double P_multiplier = std::max(0.7, std::pow(0.85, LGgame::curTurn / 1000.0));
 			if(mode == BOT_MODE_ATTACK) {
-				return smartMove(coo, seenGeneral[targetId], 0.85);
+				return smartMove(coo, seenGeneral[targetId], P_multiplier);
 			}
 
 			coordS targetPos;
@@ -195,7 +196,7 @@ namespace szlyBot {
 					if(blockValue[i][j] > maxBlockValue)
 						maxBlockValue = blockValue[i][j], targetPos = { i, j };
 
-			return smartMove(coo, targetPos, 0.7);
+			return smartMove(coo, targetPos, 0.85 * P_multiplier);
 		}
 	};
 

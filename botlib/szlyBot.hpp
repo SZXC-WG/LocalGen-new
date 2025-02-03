@@ -92,7 +92,7 @@ namespace szlyBot {
 				for(int j = 1; j <= mapW; ++j) {
 					blockValue[i][j] = (gameMap[i][j].player == id)
 					                       ? -INF
-					                       : blockValueWeight[gameMap[i][j].type] - dist[i][j];
+					                       : blockValueWeight[blockType[i][j]] - dist[i][j];
 				}
 			}
 		}
@@ -104,6 +104,8 @@ namespace szlyBot {
 
 		moveS smartMove(coordS st, coordS dest, float P = 0.7) {
 			coordS fastestMove = moveTowards(st, dest);
+			if(blockType[st.x][st.y] == 1)
+				return { id, true, st, fastestMove };
 			coordS gatherPos = coordS(-1, -1);
 			double maxWeight = -1e18;
 			for(int i = 0; i < 4; ++i) {
@@ -111,15 +113,15 @@ namespace szlyBot {
 				if(!isValidPosition(nx, ny)) continue;
 				coordS nc(nx, ny);
 				if(nc != fastestMove && gameMap[nx][ny].player == id && gameMap[nx][ny].army > 2) {
-					double weight = gameMap[nx][ny].army - 250. / approxDist(nc, seenGeneral[id]);
+					double weight = gameMap[nx][ny].army - (seenGeneral[id] == coordS(-1, -1) ? 3 : 250. / (approxDist(nc, seenGeneral[id]) + 0.5));
 					if(blockType[nx][ny] == 1) weight++;
-					else if(blockType[nx][ny] == 3) weight *= 0.5;
-					else if(blockType[nx][ny] == 4) weight *= 0.75;
+					else if(blockType[nx][ny] == 3) weight *= 0.6;
+					else if(blockType[nx][ny] == 4) weight *= 0.8;
 					if(weight > maxWeight) maxWeight = weight, gatherPos = nc;
 				}
 			}
 			static std::uniform_real_distribution<float> dis(-1, 1);
-			if(gatherPos == coordS(-1, -1) || dis(rnd) > P * std::tanh(maxWeight / 75.)) {
+			if(gatherPos == coordS(-1, -1) || dis(rnd) > P * std::tanh(maxWeight * 0.015)) {
 				return { id, true, st, fastestMove };
 			}
 			return { id, true, gatherPos, st };
@@ -131,7 +133,7 @@ namespace szlyBot {
 
 		void init(int botId) {
 			id = botId;
-			blockValueWeight = { 30 - LGset::plainRate[LGset::gameMode] + 1, -1500, -INF, 5, 30, 30 };
+			blockValueWeight = { 31 - LGset::plainRate[LGset::gameMode], -1000, -INF, 6, 35, 25 };
 			memset(knownBlockType, 0, sizeof(knownBlockType));
 			for(auto& gen: seenGeneral) gen = coordS(-1, -1);
 		}
@@ -158,7 +160,7 @@ namespace szlyBot {
 						if(gameMap[i][j].player == id) {
 							ll weightedArmy = gameMap[i][j].army;
 							if(blockType[i][j] == 0) weightedArmy -= weightedArmy / 4;
-							else if(blockType[i][j] == 4) weightedArmy -= weightedArmy / 5;
+							else if(blockType[i][j] == 4) weightedArmy -= weightedArmy / 6;
 							if(weightedArmy > maxArmy)
 								maxArmy = weightedArmy, maxCoo = { i, j };
 						}

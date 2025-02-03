@@ -254,6 +254,10 @@ bool operator==(coordS a, coordS b) { return a.x == b.x && a.y == b.y; }
 bool operator!=(coordS a, coordS b) { return a.x != b.x || a.y != b.y; }
 coordS operator+(coordS a, coordS b) { return coordS(a.x + b.x, a.y + b.y); }
 coordS operator-(coordS a, coordS b) { return coordS(a.x - b.x, a.y - b.y); }
+bool operator<(coordS a, coordS b) { return a.x < b.x || (a.x == b.x && a.y < b.y); }
+bool operator>(coordS a, coordS b) { return a.x > b.x || (a.x == b.x && a.y > b.y); }
+bool operator<=(coordS a, coordS b) { return a.x < b.x || (a.x == b.x && a.y <= b.y); }
+bool operator>=(coordS a, coordS b) { return a.x > b.x || (a.x == b.x && a.y >= b.y); }
 
 /**
  * @brief Struct saving player's passing info.

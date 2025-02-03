@@ -47,6 +47,8 @@ int main(int argc, char** argv) {
 	initMaps();
 	LGset::read();
 	LGset::write();
+	// init_console();
+	// show_console();
 	MainPage();  // start main page
 	exitExe();   // exit program
 }

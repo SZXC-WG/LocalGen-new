@@ -22,6 +22,7 @@
 #include "botlib/zlyBot.hpp"
 #include "botlib/szlyBot.hpp"
 #include "botlib/zlyBot_v2.hpp"
+#include "botlib/gcBot.hpp"
 
 string botName[] = {
 	"",
@@ -31,6 +32,7 @@ string botName[] = {
 	"zlyBot",
 	"szlyBot",
 	"zlyBot v2",
+	"gcBot",
 	"gjrBot",
 };
 

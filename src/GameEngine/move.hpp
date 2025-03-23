@@ -11,11 +11,11 @@
 #ifndef LGEN_MODULE_GE_MOVE
 #define LGEN_MODULE_GE_MOVE 1
 
-#include "lib/coord.hpp"
-
+#include "utils/coord.hpp"
 #include "player.hpp"
-
 #include "board.hpp"
+
+#include <unordered_map>
 
 /// Move Container.
 /// A %Move is a basic operation of a player in a game.
@@ -57,6 +57,21 @@ class Move {
 
         return true;
     }
+};
+
+/// Move Processor used by games.
+/// A %MoveProcessor is used to contain and process moves.
+class MoveProcessor {
+   protected:
+    std::vector<Move> in_queue_raw_moves;
+    std::unordered_map<pos_t, Tile> normal_ether;  // normal two-tile ether
+
+    // std::unordered_map<pos_t, Tile> four_tile_ether; // TODO; random-ether modifier
+
+   public:
+    Board* board;
+
+    MoveProcessor() {}
 };
 
 #endif  // LGEN_MODULE_GE_MOVE

@@ -23,6 +23,9 @@ struct Coord {
         x(0), y(0) {}
     Coord(pos_t _x, pos_t _y) :
         x(_x), y(_y) {}
+
+    static const pos_t COORD_INDEX = 1000;
+    inline pos_t index() const { return x * COORD_INDEX + y; }
 };
 
 // Sometimes we need to pass a %Coord through two parameters or something.
@@ -31,8 +34,8 @@ struct Coord {
 #define SEPA(coo) (coo).x, (coo).y
 
 /// Comparison operators for %Coord.
-/// `operator==` and (before C++2a) `operator!=` are defined as usual.
-/// `operator<` series acts like std::pair of convenience for sorting and containers like std::set and std::map.
+/// `operator==` and `operator!=` are defined as usual.
+/// `operator<` series acts like std::pair of convenience for sorting and comparison-relying containers like std::set and std::map.
 
 bool operator==(const Coord& a, const Coord& b) { return (a.x == b.x && a.y == b.y); }
 #if __cplusplus < 202002L

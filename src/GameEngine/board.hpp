@@ -11,7 +11,7 @@
 #include <cassert>
 #include <vector>
 
-#include "lib/coord.hpp"
+#include "utils/coord.hpp"
 
 #include "player.hpp"
 #include "tile.hpp"

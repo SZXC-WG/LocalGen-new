@@ -8,7 +8,12 @@
  * Container of maps.
  */
 
+#ifndef LGEN_MODULE_GE_BOARD
+#define LGEN_MODULE_GE_BOARD 1
+
 #include <cassert>
+#include <deque>
+#include <map>
 #include <vector>
 
 #include "utils/coord.hpp"
@@ -46,7 +51,7 @@ class Board {
     /// Check whether the %Tile at (x,y) is visible to a %Player.
     /// Declare this function as *virtual* for we'll declare a different function in-game.
     virtual bool visible(pos_t x, pos_t y, Player* player) const {
-        // invalid check
+        // invalidity check
         if(player == nullptr) return false;
         if(x < 1 || x > col || y < 1 || y > row) return false;
 
@@ -156,7 +161,96 @@ class Board {
     TileView view(Player* player, Coord pos) {
         return TileView(tiles[pos.x][pos.y], visible(pos, player));
     }
+
+   public:
+    /// Move Container.
+    /// A %Move is a basic operation of a player in a game.
+    /// Basically, it consists of two coordinates, representing the `from` and `to`.
+    /// Note that players shouldn't access other players' moves in game.
+    class Move {
+       public:
+        Player* player;  // whether we should use direct pointer or its index is still unknown.
+        Coord from, to;
+
+       public:
+        Move() :
+            player(nullptr) {}
+        Move(Player* _player, Coord _from, Coord _to) :
+            player(_player), from(_from), to(_to) {}
+
+        /// Check whether a %Move is available on a certain Board.
+        bool available(Board* board) {
+            if(!board->is_invalid_coord(from) || !board->is_invalid_coord(to)) return false;
+
+            if(!board->visible(from, player) || !board->visible(to, player)) return false;
+
+            auto fromTile = board->view(player, from);
+            switch(fromTile.type) {
+                case TILE_MOUNTAIN:
+                case TILE_LOOKOUT:
+                case TILE_OBSERVATORY:
+                    return false;
+            }
+            if(fromTile.occupier != player->index) return false;
+
+            auto toTile = board->view(player, to);
+            switch(toTile.type) {
+                case TILE_MOUNTAIN:
+                case TILE_LOOKOUT:
+                case TILE_OBSERVATORY:
+                    return false;
+            }
+
+            return true;
+        }
+    };
+
+   public:
+    friend class MoveProcessor;
+    /// Move Processor used by games.
+    /// A %MoveProcessor is used to contain and process moves.
+    class MoveProcessor {
+       protected:
+        std::deque<Move> in_queue_raw_moves;
+        std::map<pos_t, Move> normal_edge;
+
+       protected:
+        Board* board;
+
+        /// Constructors.
+        /// The default constructor is deleted, for a %MoveProcessor must be linked to a %Board.
+       public:
+        MoveProcessor(Board* _board) :
+            board(_board) {}
+
+       public:
+        /// Add a %Move to the waiting-to-be-processed queue.
+        inline void add_move(Move move) {
+            if(move.available(board))
+                in_queue_raw_moves.emplace_back(move);
+        }
+        /// Flush all in-queue %Moves to the edge buffer.
+        inline void flush_move() {
+            while(!in_queue_raw_moves.empty()) {
+                const Move& cur_move = in_queue_raw_moves.front();
+                in_queue_raw_moves.pop_front();
+                pos_t from_index = cur_move.from.index();
+                pos_t to_index = cur_move.to.index();
+            }
+        }
+    };
+
+   protected:
+    MoveProcessor move_processor{ this };
 };
 
 /// Declare alias for convenience.
 using BoardView = Board::BoardView;
+
+/// Comparisons of (%Move)s. Defined to make usage of comparison-based containers like std::set and std::map more convenient.
+bool operator<(const Board::Move& a, const Board::Move& b) { return (a.from != b.from ? a.from < b.from : a.to < b.to); }
+bool operator>(const Board::Move& a, const Board::Move& b) { return b < a; }
+bool operator<=(const Board::Move& a, const Board::Move& b) { return !(b < a); }
+bool operator>=(const Board::Move& a, const Board::Move& b) { return !(a < b); }
+
+#endif  // LGEN_MODULE_GE_BOARD

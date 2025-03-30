@@ -51,33 +51,35 @@ Got a new idea or discovered a bug? We welcome contributions! Simply **open an i
 
 We strongly recommend downloading the latest pre-release version (the top option on the overall release page) rather than the "Latest Release." The current stable release (v4.1.0) is significantly outdated, as there have been substantial code changes since v4.2.0. Many of the new features in the latest releases are not compatible with the functionalities in v4.1.0. For a more detailed overview of these changes, please refer to the changelogs.
 
-## Weak robots! Write a new one?
+## Weak Robots? Time to Write a New One!
 
-Certainly! We appreciate any form of contribution. See the instructions at [#31](../../issues/31).
+Absolutely! We welcome any form of contribution. Check out the instructions at [#31](../../issues/31) for more details.
 
 ## Contributing
 
-LocalGen is currently split into three types of branches:
+LocalGen’s development is organized across three groups of branches:
 
-- **`master`|`v6.x`**: With `master` being the main branch, these branches contain source files for version 6.
-  **Starting from v6, we will migrate our UI to the Qt library.**
-  This version hopefully gives optimized performance and cross-platform support. The source code will be refactored as well.
-- **`v5.x`**: The branches for version 5, which is **~~under active development~~ going to long-term maintenance**.
-  LocalGen versions 2 to 5 are built with [EGE Graphics](http://xege.org).
-  We are trying to build an object-oriented system based on EGE.
-  The releases published under this branch are **Windows only** for the limitations of EGE.
-  [**Wine**](https://www.winehq.org) may be an option if you really want to run it on Linux/macOS systems.
-- **`release`**: Used for saving releases of older versions (v1-v4) and storing map/fonts. **Releases for newer versions can be found in the releases page.**
+- **`master` | `v6.x`**:  
+  The `master` branch serves as the main development branch for version 6.  
+  **Starting from v6, we will be migrating the UI to the Qt library**, aiming for better performance and cross-platform support. The source code will also undergo a significant refactor to improve maintainability.
+  
+- **`v5.x`**:  
+  This branch covers version 5, which is now going to **long-term maintenance** (formerly under active development).  
+  Versions 2 to 5 of LocalGen are built with [EGE Graphics](http://xege.org), and we’re working on creating an object-oriented system based on EGE.  
+  **Note:** Releases for this branch are **Windows-only** due to EGE’s limitations. However, if you want to run it on Linux or macOS, [**Wine**](https://www.winehq.org) might be an option.
 
-To contribute to our project, please create a pull request on the `v5.0` branch. Thanks.
+- **`release`**:  
+  This branch is used to store older version releases (v1-v4) and related resources like maps and fonts. For newer version releases, head over to the [releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
 
-> [!CAUTION]
->
-> You are currently viewing the `master` branch, for v6. This new version is still in development and not ready yet.
->
-> Please download older versions for the full game from the [the releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
->
-> If you'd like to build the project by yourself, visit a `v5.x` branch. Enjoy!
+If you'd like to contribute, please submit a pull request to the `v5.0` branch. We appreciate your help!
+
+> [!CAUTION]  
+>  
+> You’re currently viewing the `master` branch, which is dedicated to v6. This version is still under active development and not yet finished.  
+>  
+> To download older, stable versions of the game, head to the [releases page](http://github.com/SZXC-WG/LocalGen-new/releases).  
+>  
+> If you want to build the project yourself, please visit one of the `v5.x` branches. Enjoy!
 
 ## Star History
 

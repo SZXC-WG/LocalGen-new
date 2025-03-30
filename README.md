@@ -37,15 +37,15 @@
 
 ## Intro
 
-Welcome to the project of Local Generals.io (LocalGen)!
+Welcome to the **Local Generals.io (LocalGen)** project!
 
-Here you can play [generals.io](http://generals.io) **completely offline**!
+With LocalGen, you can now play **[generals.io](http://generals.io)** **entirely offline**!
 
-Enjoy playing with **out-of-the-box** robots or your friends (same LAN)!
+Enjoy the game with **ready-to-use** bots or challenge your friends over the **same LAN** network!
 
-Interested? Download LocalGen on [the releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
+Interested? Get started by downloading **LocalGen** from the [releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
 
-New idea? Old bugs? Contribute to the project! Simply **create an issue or a pull request**, and we'll reach out to you soon.
+Got a new idea or discovered a bug? We welcome contributions! Simply **open an issue or submit a pull request**, and we’ll get back to you as soon as possible.
 
 ## [Releases (Changelog)](http://github.com/SZXC-WG/LocalGen-new/releases)
 

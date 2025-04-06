@@ -14,6 +14,7 @@
 #include <cassert>
 #include <deque>
 #include <map>
+#include <unordered_map>
 #include <vector>
 
 #include "utils/coord.hpp"
@@ -171,12 +172,13 @@ class Board {
        public:
         Player* player;  // whether we should use direct pointer or its index is still unknown.
         Coord from, to;
+        army_t taken_army;
 
        public:
         Move() :
             player(nullptr) {}
-        Move(Player* _player, Coord _from, Coord _to) :
-            player(_player), from(_from), to(_to) {}
+        Move(Player* _player, Coord _from, Coord _to, army_t _taken_army) :
+            player(_player), from(_from), to(_to), taken_army(_taken_army) {}
 
         /// Check whether a %Move is available on a certain Board.
         bool available(Board* board) {
@@ -192,6 +194,7 @@ class Board {
                     return false;
             }
             if(fromTile.occupier != player->index) return false;
+            if(fromTile.army <= taken_army) return false;
 
             auto toTile = board->view(player, to);
             switch(toTile.type) {
@@ -206,13 +209,14 @@ class Board {
     };
 
    public:
-    friend class MoveProcessor;
+    class MoveProcessor;
+    friend class Board::MoveProcessor;
     /// Move Processor used by games.
     /// A %MoveProcessor is used to contain and process moves.
     class MoveProcessor {
        protected:
         std::deque<Move> in_queue_raw_moves;
-        std::map<pos_t, Move> normal_edge;
+        std::unordered_map<pos_t, Move> edge_map;
 
        protected:
         Board* board;
@@ -229,13 +233,21 @@ class Board {
             if(move.available(board))
                 in_queue_raw_moves.emplace_back(move);
         }
-        /// Flush all in-queue %Moves to the edge buffer.
-        inline void flush_move() {
+        /// Convert all %Moves in the move buffer to edges and move them into the edge buffer.
+        inline void convert_to_edge() {
             while(!in_queue_raw_moves.empty()) {
-                const Move& cur_move = in_queue_raw_moves.front();
+                Move cur_move = in_queue_raw_moves.front();
                 in_queue_raw_moves.pop_front();
-                pos_t from_index = cur_move.from.index();
-                pos_t to_index = cur_move.to.index();
+                pos_t edge_index = biindex(cur_move.from, cur_move.to);
+                pos_t edge_rev_index = biindex(cur_move.to, cur_move.from);
+                if(edge_map.find(edge_rev_index) != edge_map.end()) {
+                    Move rev_move = edge_map[edge_rev_index];
+                    edge_map.erase(edge_rev_index);
+                    if(rev_move.taken_army == cur_move.taken_army) continue;
+                    if(rev_move.taken_army > cur_move.taken_army) std::swap(cur_move, rev_move), std::swap(edge_index, edge_rev_index);
+                    cur_move.taken_army -= rev_move.taken_army;
+                }
+                edge_map[edge_index] = cur_move;
             }
         }
     };

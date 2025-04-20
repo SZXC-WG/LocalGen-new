@@ -1124,10 +1124,10 @@ namespace LGGraphics {
 								}
 							} else if(msg.x >= LGGraphics::windowData.maplocX &&
 							          msg.y >= LGGraphics::windowData.maplocY &&
-							          msg.x <= LGGraphics::windowData.maplocX + blockWidth * mapW &&
-							          msg.y <= LGGraphics::windowData.maplocY + blockHeight * mapH) {
-								int lin = (msg.y + blockHeight - 1 - LGGraphics::windowData.maplocY) / blockHeight;
-								int col = (msg.x + blockWidth - 1 - LGGraphics::windowData.maplocX) / blockWidth;
+							          msg.x <= LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * mapW &&
+							          msg.y <= LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * mapH) {
+								int lin = (msg.y + blockHeight + LGGraphics::zoomX(2) - 1 - LGGraphics::windowData.maplocY) / int(blockHeight + LGGraphics::zoomX(2));
+								int col = (msg.x + blockWidth + LGGraphics::zoomY(2) - 1 - LGGraphics::windowData.maplocX) / int(blockWidth + LGGraphics::zoomY(2));
 								switch(type) {
 									case 0:
 										gameMap[lin][col].player = 0;

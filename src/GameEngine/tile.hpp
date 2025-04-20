@@ -46,10 +46,10 @@ struct Tile {
     tile_type_e type;
     army_t army;
     // Light is a tile attribute, not a tile type.
-    bool light;
+    bool lit;
 
     Tile() :
-        occupier(nullptr), type(TILE_BLANK), army(0), light(false) {}
+        occupier(nullptr), type(TILE_BLANK), army(0), lit(false) {}
 };
 
 /// View of a %Tile.

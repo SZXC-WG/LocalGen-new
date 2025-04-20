@@ -48,10 +48,110 @@ class Board {
     /// Check whether a %Coord indicating a tile position is invalid.
     bool is_invalid_coord(Coord coord) const { return !is_valid_coord(coord); }
 
+   private:
+    /// Map coding system derived from v5.
+    /// LocalGen v6 is compatible with v5, so we saved this system.
+
+    inline intmax_t v5coding_pmod(intmax_t& x) {
+        intmax_t res = x & 63;  // 63 = 0b111111
+        x >>= 6;
+        return res;
+    }
+
+#define PMod    v5coding_pmod
+#define CHAR_AD 48
+
+    inline std::string v5coding_zip() {
+        std::string strZip;
+        int i, j;
+        intmax_t k1 = row, k2 = col;
+        strZip.push_back(PMod(k1) + CHAR_AD);
+        strZip.push_back(PMod(k1) + CHAR_AD);
+        strZip.push_back(PMod(k2) + CHAR_AD);
+        strZip.push_back(PMod(k2) + CHAR_AD);
+
+        for(i = 1; i <= row; i++)
+            for(j = 1; j <= col; j++) {
+                strZip.push_back(0 + CHAR_AD);  // we have to make the occupier undefined.
+
+                int type = 0;
+                switch(tiles[i][j].type) {
+                    case TILE_BLANK: type = 0; break;
+                    case TILE_SWAMP: type = 1; break;
+                    case TILE_MOUNTAIN: type = 2; break;
+                    case TILE_SPAWN: type = 3; break;
+                    case TILE_CITY: type = 4; break;
+                    case TILE_DESERT: type = 5; break;
+                    case TILE_LOOKOUT: type = 6; break;
+                    case TILE_OBSERVATORY: type = 7; break;
+                    default: break;
+                }
+
+                char ch = (type << 2) + (tiles[i][j].lit << 1);
+                k1 = tiles[i][j].army;
+
+                if(k1 < 0) {
+                    k1 = -k1;
+                    strZip.push_back(ch += CHAR_AD + 1);
+                } else
+                    strZip.push_back(ch += CHAR_AD);
+
+                for(k2 = 1; k2 <= 8; k2++)
+                    strZip.push_back(PMod(k1) + CHAR_AD);
+            }
+        // strZip[p] = '\0'; // not necessary
+        return strZip;
+    }
+    inline void v5coding_unzip(std::string strdeZip) {
+        strdeZip.push_back('\0');
+
+        int i, j, k = 4;
+        int f, p = 0;
+
+        for(; strdeZip[p] != '\0'; p++)
+            strdeZip[p] -= CHAR_AD;
+
+        row = (strdeZip[1] << 6) + strdeZip[0];
+        col = (strdeZip[3] << 6) + strdeZip[2];
+        tiles.resize(row + 2, std::vector<Tile>(col + 2, Tile()));
+
+        for(i = 1; i <= row; i++)
+            for(j = 1; j <= col; j++) {
+                tiles[i][j].occupier = (strdeZip[k++], nullptr);
+                bool f = strdeZip[k] & 1;
+                strdeZip[k] >>= 1;
+                tiles[i][j].lit = strdeZip[k] & 1;
+                strdeZip[k] >>= 1;
+                int type = strdeZip[k++];
+                tiles[i][j].army = 0;
+
+                switch(type) {
+                    case 0: tiles[i][j].type = TILE_BLANK; break;
+                    case 1: tiles[i][j].type = TILE_SWAMP; break;
+                    case 2: tiles[i][j].type = TILE_MOUNTAIN; break;
+                    case 3: tiles[i][j].type = TILE_SPAWN; break;
+                    case 4: tiles[i][j].type = TILE_CITY; break;
+                    case 5: tiles[i][j].type = TILE_DESERT; break;
+                    case 6: tiles[i][j].type = TILE_LOOKOUT; break;
+                    case 7: tiles[i][j].type = TILE_OBSERVATORY; break;
+                    default: break;
+                }
+
+                for(p = 7; p >= 0; p--)
+                    tiles[i][j].army = (tiles[i][j].army << 6) + strdeZip[k + p];
+                k += 8;
+                tiles[i][j].army = f ? (-tiles[i][j].army) : tiles[i][j].army;
+            }
+    }
+
+#undef PMod
+#undef CHAR_AD
+
    public:
     /// Check whether the %Tile at (x,y) is visible to a %Player.
     /// Declare this function as *virtual* for we'll declare a different function in-game.
-    virtual bool visible(pos_t x, pos_t y, Player* player) const {
+    virtual bool
+    visible(pos_t x, pos_t y, Player* player) const {
         // invalidity check
         if(player == nullptr) return false;
         if(x < 1 || x > col || y < 1 || y > row) return false;

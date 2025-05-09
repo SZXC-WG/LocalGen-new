@@ -56,18 +56,14 @@ void printMap(int Code, coordS coo) {
 	//          "block font size: %d px\n", blockFontSize);
 	setfont(-blockFontSize, 0, LGset::mainFontName.c_str());
 	settextjustify(CENTER_TEXT, CENTER_TEXT);
-	PIMAGE npimg[9];
-	for(int i = 1; i <= 6; ++i) {
+	PIMAGE npimg[14];
+	for(int i = 1; i <= 13; ++i) {
 		npimg[i] = newimage();
 		images::copyImage(npimg[i], pimg[i]);
 		images::zoomImage(npimg[i], blockWidth, blockHeight);
 	}
-	npimg[7] = newimage();
 	images::copyImage(npimg[7], pimg[8]);
 	images::zoomImage(npimg[7], blockWidth / 3, blockHeight / 3);
-	npimg[8] = newimage();
-	images::copyImage(npimg[8], pimg[8]);
-	images::zoomImage(npimg[8], blockWidth, blockHeight);
 	for(int curx = 1; curx <= mapH; curx++) {
 		for(int cury = 1; cury <= mapW; cury++) {
 			if(isVisible(curx, cury, Code)) {
@@ -84,6 +80,14 @@ void printMap(int Code, coordS coo) {
 						setfillcolor(LGGraphics::mainColor);
 					else if(gameMap[curx][cury].type == 4)
 						setfillcolor(cscol);
+					else if(gameMap[curx][cury].type == 5 && gameMap[curx][cury].army == 0)
+						setfillcolor(plcol);
+					else if(gameMap[curx][cury].type == 5)
+						setfillcolor(cscol);
+					else if(gameMap[curx][cury].type == 6)
+						setfillcolor(mtcol);
+					else if(gameMap[curx][cury].type == 7)
+						setfillcolor(mtcol);
 				} else
 					setfillcolor(playerInfo[gameMap[curx][cury].player].color);
 			} else
@@ -154,6 +158,42 @@ void printMap(int Code, coordS coo) {
 					              curx, cury);
 					break;
 				}
+				case 5: {
+					/* swamp */
+					putimage_withalpha(NULL, npimg[11],
+					                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+					                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
+					if(gameMap[curx][cury].army != 0)
+						printBlockNum(isVisible(curx, cury, Code),
+						              gameMap[curx][cury].army,
+						              gameMap[curx][cury].player,
+						              curx, cury);
+					break;
+				}
+				case 6: {
+					/* lookout */
+					if(isVisible(curx, cury, Code))
+						putimage_withalpha(NULL, npimg[12],
+						                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+						                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
+					else
+						putimage_withalpha(NULL, npimg[5],
+						                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+						                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
+					break;
+				}
+				case 7: {
+					/* observatory */
+					if(isVisible(curx, cury, Code))
+						putimage_withalpha(NULL, npimg[13],
+						                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+						                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
+					else
+						putimage_withalpha(NULL, npimg[5],
+						                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (cury - 1),
+						                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomY(2)) * (curx - 1));
+					break;
+				}
 			}
 			if(LGgame::inCreate && gameMap[curx][cury].lit) {
 				if(gameMap[curx][cury].type == 0 && gameMap[curx][cury].army == 0) {
@@ -172,7 +212,7 @@ void printMap(int Code, coordS coo) {
 		putimage_withalpha(NULL, npimg[6],
 		                   LGGraphics::windowData.maplocX + int(blockWidth + LGGraphics::zoomX(2)) * (coo.y - 1),
 		                   LGGraphics::windowData.maplocY + int(blockHeight + LGGraphics::zoomX(2)) * (coo.x - 1));
-	for(int i = 1; i <= 8; ++i) delimage(npimg[i]);
+	for(int i = 1; i <= 13; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);
 }
 

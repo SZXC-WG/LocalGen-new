@@ -1042,8 +1042,8 @@ namespace LGGraphics {
 						midact = 0;
 						std::chrono::steady_clock::duration now = std::chrono::steady_clock::now().time_since_epoch();
 						if(!moved && now - prsttm < 200ms) {
-							if(msg.x < zoomX(40) && msg.y >= scrh / 2 - zoomY(140) && msg.y < scrh / 2 + zoomY(140))
-								type = (msg.y - (scrh / 2 - zoomY(140))) / zoomY(40);
+							if(msg.x < zoomX(40) && msg.y >= scrh / 2 - zoomY(200) && msg.y < scrh / 2 + zoomY(200))
+								type = (msg.y - (scrh / 2 - zoomY(200))) / zoomY(40);
 							else if(msg.x >= scrw / 2 - zoomX(145) && msg.x < scrw / 2 - zoomX(5) && msg.y >= scrh - zoomY(60) && msg.y < scrh - zoomY(20)) {
 								settextjustify(CENTER_TEXT, CENTER_TEXT);
 								setfillcolor(WHITE);
@@ -1155,9 +1155,24 @@ namespace LGGraphics {
 										gameMap[lin][col].army = plainnum;
 										break;
 									case 5:
-										gameMap[lin][col].lit = !gameMap[lin][col].lit;
+										gameMap[lin][col].player = 0;
+										gameMap[lin][col].type = 5;
+										gameMap[lin][col].army = 0;
 										break;
 									case 6:
+										gameMap[lin][col].player = 0;
+										gameMap[lin][col].type = 6;
+										gameMap[lin][col].army = 0;
+										break;
+									case 7:
+										gameMap[lin][col].player = 0;
+										gameMap[lin][col].type = 7;
+										gameMap[lin][col].army = 0;
+										break;
+									case 8:
+										gameMap[lin][col].lit = !gameMap[lin][col].lit;
+										break;
+									default:
 										gameMap[lin][col].player = 0;
 										gameMap[lin][col].type = 0;
 										gameMap[lin][col].army = 0;
@@ -1170,7 +1185,7 @@ namespace LGGraphics {
 			}
 			cleardevice();
 			printMap(1048575, { -1, -1 });
-			createOptions(type, scrh / 2 - zoomY(140));
+			createOptions(type, scrh / 2 - zoomY(200));
 			settextjustify(CENTER_TEXT, CENTER_TEXT);
 			setcolor(BLACK);
 			setfillcolor(WHITE);
@@ -1184,11 +1199,11 @@ namespace LGGraphics {
 				xyprintf(scrw / 2, scrh - zoomY(115), "Click a tile to place a swamp.");
 				xyprintf(scrw / 2, scrh - zoomY(95), "Swamps drain 1 army per turn.");
 			}
-			if(type == 5) {
+			if(type == 8) {
 				bar(scrw / 2 - zoomX(95), scrh - zoomY(110), scrw / 2 + zoomX(95), scrh - zoomY(80));
 				xyprintf(scrw / 2, scrh - zoomY(95), "Click a tile to toggle light tile.");
 			}
-			if(type == 6) {
+			if(type == 9) {
 				bar(scrw / 2 - zoomX(80), scrh - zoomY(110), scrw / 2 + zoomX(80), scrh - zoomY(80));
 				xyprintf(scrw / 2, scrh - zoomY(95), "Click a tile to remove it.");
 			}
@@ -1653,6 +1668,12 @@ namespace LGGraphics {
 		getimage(pimg[9], "PNG", "IMAGE_OPTIONS");
 		pimg[10] = newimage();
 		getimage(pimg[10], "PNG", "IMAGE_GITHUB");
+		pimg[11] = newimage();
+		getimage(pimg[11], "PNG", "IMAGE_DESERT");
+		pimg[12] = newimage();
+		getimage(pimg[12], "PNG", "IMAGE_LOOKOUT");
+		pimg[13] = newimage();
+		getimage(pimg[13], "PNG", "IMAGE_OBSERVATORY");
 		for(int i = 1; i <= 10; i++) ege_enable_aa(true, pimg[i]);
 		ege_enable_aa(true);
 		setbkcolor(0xff222222);

@@ -9,6 +9,9 @@ IMAGE_ERASE		PNG	"../img/erase.png"
 IMAGE_LIGHT		PNG	"../img/light.png"
 IMAGE_OPTIONS	PNG	"../img/options.png"
 IMAGE_GITHUB	PNG	"../img/github.png"
+IMAGE_DESERT	PNG	"../img/desert.png"
+IMAGE_LOOKOUT	PNG	"../img/lookout.png"
+IMAGE_OBSERVATORY	PNG	"../img/observatory.png"
 
 A ICON "../LocalGen.ico"
 

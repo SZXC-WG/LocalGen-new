@@ -18,6 +18,10 @@
 #include "LGbot.hpp"
 #include "LGreplay.hpp"
 
+inline bool LGgame::unpassable(int t) {
+	return t == 2 || t == 6 || t == 7;
+}
+
 void LGgame::capture(int p1, int p2) {
 	if(p2 == 1) {
 		std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
@@ -55,7 +59,7 @@ int LGgame::analyzeMove(int id, int mv, coordS& coo) {
 			break;
 		case 1 ... 4: {
 			coordS newCoo{ coo.x + dx[mv], coo.y + dy[mv] };
-			if(newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW || gameMap[newCoo.x][newCoo.y].type == 2)
+			if(newCoo.x < 1 || newCoo.x > mapH || newCoo.y < 1 || newCoo.y > mapW || unpassable(gameMap[newCoo.x][newCoo.y].type))
 				return 1;
 			moveS insMv{
 				id,
@@ -86,8 +90,8 @@ int LGgame::checkMove(moveS mv) {
 	if(mv.from == mv.to) return 4;
 	if(mv.from.x < 1 || mv.from.x > mapH || mv.from.y < 1 || mv.from.y > mapW) return 2;
 	if(mv.to.x < 1 || mv.to.x > mapH || mv.to.y < 1 || mv.to.y > mapW) return 2;
-	if(gameMap[mv.from.x][mv.from.y].type == 2 && mv.takeArmy) return 2;
-	if(gameMap[mv.to.x][mv.to.y].type == 2 && mv.takeArmy) return 2;
+	if(unpassable(gameMap[mv.from.x][mv.from.y].type) && mv.takeArmy) return 2;
+	if(unpassable(gameMap[mv.to.x][mv.to.y].type) && mv.takeArmy) return 2;
 	if(abs(mv.to.x - mv.from.x) + abs(mv.to.y - mv.from.y) > 1 && mv.takeArmy) return 3;  // focus change
 	return 0;
 }
@@ -216,6 +220,7 @@ void LGgame::updateMap() {
 						if(LGgame::curTurn % 3 == 0) ++gameMap[i][j].army;
 						break;
 					}
+					default: break;
 				}
 			}
 		}
@@ -236,6 +241,7 @@ void LGgame::statistics() {
 			else if(gmt(i, j) == 2) gameStats[gmp(i, j)].back().mount += 1;
 			else if(gmt(i, j) == 3) gameStats[gmp(i, j)].back().city += 1;
 			else if(gmt(i, j) == 4) gameStats[gmp(i, j)].back().city += 1;
+			else if(gmt(i, j) == 5) gameStats[gmp(i, j)].back().desert += 1;
 		}
 	}
 }

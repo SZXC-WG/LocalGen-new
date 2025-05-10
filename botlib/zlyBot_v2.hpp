@@ -49,7 +49,7 @@ namespace zlyBot_v2 {
 	}
 
 	inline void initBot(int botId) {
-		blockValueWeight[botId] = { 30 - LGset::plainRate[LGset::gameMode] + 1, -1500, -INF, 5, 30, 30 };
+		blockValueWeight[botId] = { 30 - LGset::plainRate[LGset::gameMode] + 1, -1500, -INF, 5, 30, 1, -INF, -INF, 30 };
 		for(int playerId = 1; playerId <= LGgame::playerCnt; ++playerId) seenGenerals[botId][playerId] = coordS(-1, -1);
 		memset(blockTypeRem[botId], -1, sizeof(blockTypeRem[botId]));
 		memset(blockArmyRem[botId], 0, sizeof(blockArmyRem[botId]));
@@ -82,7 +82,7 @@ namespace zlyBot_v2 {
 			for(int i = 0; i < 4; ++i) {
 				coordS next = current + coordS(delta_x[i], delta_y[i]);
 				if(next.x < 1 || next.x > mapH || next.y < 1 || next.y > mapW) continue;
-				if(getType(playerId, next.x, next.y) == 2) continue;
+				if(unpassable(getType(playerId, next.x, next.y))) continue;
 				if(dist[playerId][next.x][next.y] != 0x3f3f3f3f3f3f3f3f) continue;
 				dist[playerId][next.x][next.y] = currentDist + 1;
 				// if(getType(playerId,next.x,next.y)==5) continue;
@@ -103,7 +103,7 @@ namespace zlyBot_v2 {
 		auto DisInc = 1;
 		auto ArmyInc = [&](int x, int y) -> ll {
 			if(x < 1 || x > mapH || y < 1 || y > mapW) return INF;
-			if(getType(playerId, x, y) == 2) return INF;
+			if(unpassable(getType(playerId, x, y))) return INF;
 			if(gameMap[x][y].player == playerId) return -gameMap[x][y].army;
 			else return getArmy(playerId, x, y);
 		};
@@ -114,7 +114,10 @@ namespace zlyBot_v2 {
 				case 2: return INF;
 				case 3: return 0;
 				case 4: return 1;
-				case 5: return 5;
+				case 5: return 0;
+				case 6: return INF;
+				case 7: return INF;
+				case 8: return 5;
 				default: return INF;
 			}
 		};
@@ -142,7 +145,7 @@ namespace zlyBot_v2 {
 			for(int i = 0; i < 4; ++i) {
 				coordS next = current + coordS(dx[i], dy[i]);
 				if(next.x < 1 || next.x > mapH || next.y < 1 || next.y > mapW) continue;
-				if(getType(playerId, next.x, next.y) == 2) continue;
+				if(unpassable(getType(playerId, next.x, next.y))) continue;
 				if(vis[next.x][next.y]) continue;
 				if(inPreviousMoves[playerId][next.x][next.y]) continue;
 				ll nextVal = currentVal + UnitedInc(next.x, next.y);
@@ -299,7 +302,7 @@ namespace zlyBot_v2 {
 		if(botModes[playerId] == BOT_MODE_ATTACK) {
 			// db << "Desti: " << seenGenerals[playerId][targetGeneralId].x << "," << seenGenerals[playerId][targetGeneralId].y << std::endl;
 			findRoute(playerId, currentPos, seenGenerals[playerId][targetGeneralId]);
-			recordNewMove(playerId, stackedMoves[playerId].front());
+			// recordNewMove(playerId, stackedMoves[playerId].front());
 			moveS ret = moveS{ playerId, true, currentPos, stackedMoves[playerId].front() };
 			// db << "stackedMoves size: " << stackedMoves[playerId].size() << std::endl;
 			stackedMoves[playerId].pop_front();

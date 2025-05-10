@@ -53,7 +53,7 @@ namespace xrzBot {
 			des.direction = i;
 			des.x = player.x + dx[i];
 			des.y = player.y + dy[i];
-			if(gameMap[des.x][des.y].type == 2)
+			if(unpassable(gameMap[des.x][des.y].type))
 				continue;
 			if(des.x < 1 || des.x > mapH || des.y < 1 || des.y > mapW)
 				continue;
@@ -82,7 +82,7 @@ namespace xrzBot {
 			des.direction = i;
 			des.x = player.x + dx[i];
 			des.y = player.y + dy[i];
-			if(gameMap[des.x][des.y].type == 2)
+			if(unpassable(gameMap[des.x][des.y].type))
 				continue;
 			if(des.x < 1 || des.x > mapH || des.y < 1 || des.y > mapW)
 				continue;

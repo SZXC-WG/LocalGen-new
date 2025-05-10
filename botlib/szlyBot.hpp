@@ -37,7 +37,7 @@ namespace szlyBot {
 		std::mt19937 rnd;
 
 		static inline bool isValidPosition(int x, int y) {
-			return x >= 1 && x <= mapH && y >= 1 && y <= mapW && gameMap[x][y].type != 2;
+			return x >= 1 && x <= mapH && y >= 1 && y <= mapW && !unpassable(gameMap[x][y].type);
 		}
 
 		static inline int approxDist(coordS st, coordS dest) {
@@ -47,13 +47,13 @@ namespace szlyBot {
 		inline int getType(int x, int y) {
 			int type = gameMap[x][y].type;
 			if(isVisible(x, y, 1 << id)) return knownBlockType[x][y] = true, type;
-			if(type == 2 || type == 4) return 5;
+			if(unpassable(type) || type == 4) return 5;
 			if(type == 3) return 0;
 			return type;
 		}
 
 		void computeRoutes(coordS st) {
-			static const ll typeValues[] = { -5, -10, -INF, -5, -40, -200 };
+			static const ll typeValues[] = { -5, -10, -INF, -5, -40, 0, -INF, -INF, -200 };
 			auto gv = [&](int x, int y) -> ll {
 				if(!isValidPosition(x, y)) return -INF;
 				if(gameMap[x][y].player == id) return gameMap[x][y].army;

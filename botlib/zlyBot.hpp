@@ -24,13 +24,13 @@ namespace zlyBot {
 	inline int getType(int id, int x, int y) {
 		if(blockTypeRem[id][x][y] != -1) return blockTypeRem[id][x][y];
 		else if(isVisible(x, y, 1 << id)) return blockTypeRem[id][x][y] = gameMap[x][y].type;
-		else if(gameMap[x][y].type == 2 || gameMap[x][y].type == 4) return 5;
+		else if(unpassable(gameMap[x][y].type) || gameMap[x][y].type == 4) return 8;
 		else if(gameMap[x][y].type == 3) return 0;
 		else return gameMap[x][y].type;
 	}
 
 	inline void initBot(int id) {
-		blockValueWeight[id] = { 30 - LGset::plainRate[LGset::gameMode] + 1, -1500, -INF, 5, 30, 30 };
+		blockValueWeight[id] = { 30 - LGset::plainRate[LGset::gameMode] + 1, -1500, -INF, 5, 30, 1, -INF, -INF, 30 };
 		for(int i = 1; i <= LGgame::playerCnt; ++i) seenGeneral[id][i] = coordS(-1, -1);
 		memset(blockTypeRem[id], -1, sizeof(blockTypeRem[id]));
 		// std::ofstream db("player_"s+to_string(id)+"_debug.txt");
@@ -50,7 +50,7 @@ namespace zlyBot {
 			for(int i = 0; i < 4; ++i) {
 				coordS next = cur + coordS(dx[i], dy[i]);
 				if(next.x < 1 || next.x > mapH || next.y < 1 || next.y > mapW) continue;
-				if(getType(id, next.x, next.y) == 2) continue;
+				if(unpassable(getType(id, next.x, next.y))) continue;
 				if(dist[id][next.x][next.y] != 0x3f3f3f3f3f3f3f3f) continue;
 				dist[id][next.x][next.y] = curDist + 1;
 				// if(getType(id,next.x,next.y)==5) continue;
@@ -77,7 +77,7 @@ namespace zlyBot {
 		vector<vector<vector<coordS>>> pr;
 		auto gv = [&](int x, int y) -> ll {
 			if(x < 1 || x > mapH || y < 1 || y > mapW) return -INF;
-			if(getType(id, x, y) == 2) return -INF;
+			if(unpassable(getType(id, x, y))) return -INF;
 			if(gameMap[x][y].player == id) return gameMap[x][y].army;
 			else {
 				if(isVisible(x, y, 1 << id)) return -gameMap[x][y].army;
@@ -106,7 +106,7 @@ namespace zlyBot {
 					for(int j = 0; j < 4; ++j) {
 						int nx = x + dx[j], ny = y + dy[j];
 						if(nx < 1 || nx > mapH || ny < 1 || ny > mapW) continue;
-						if(getType(id, nx, ny) == 2) continue;
+						if(unpassable(getType(id, nx, ny))) continue;
 						ll nv = dp[i - 1][x][y] + gv(nx, ny);
 						if(nv > dp[i][nx][ny]) {
 							pr[i][nx][ny] = coordS(x, y);

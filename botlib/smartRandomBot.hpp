@@ -36,7 +36,7 @@ namespace smartRandomBot {
 		int pl = 0;
 		for(int i = 1; i <= 4; ++i) {
 			int nx = coo.x + dx[i], ny = coo.y + dy[i];
-			if(nx < 1 || nx > mapH || ny < 1 || ny > mapW || gameMap[nx][ny].type == 2)
+			if(nx < 1 || nx > mapH || ny < 1 || ny > mapW || unpassable(gameMap[nx][ny].type))
 				continue;
 			p[++pl] = {
 				gameMap[nx][ny].type, gameMap[nx][ny].player, gameMap[nx][ny].army, i,

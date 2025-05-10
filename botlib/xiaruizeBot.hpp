@@ -41,7 +41,7 @@ namespace xiaruizeBot {
 			int ToY = coord.y + dy[x];
 			if(ToX < 1 || ToX > mapH || ToY < 1 || ToY > mapW)
 				continue;
-			if(gameMap[ToX][ToY].type == 2)
+			if(unpassable(gameMap[ToX][ToY].type))
 				continue;
 			if(gameMap[ToX][ToY].type == 3 && gameMap[ToX][ToY].player != id) {
 				operation[id].push_back(x);
@@ -60,7 +60,7 @@ namespace xiaruizeBot {
 			int ToY = coord.y + dy[x];
 			if(ToX < 1 || ToX > mapH || ToY < 1 || ToY > mapW)
 				continue;
-			if(gameMap[ToX][ToY].type == 2)
+			if(unpassable(gameMap[ToX][ToY].type))
 				continue;
 			if(gameMap[ToX][ToY].type == 4 && gameMap[ToX][ToY].army <= gameMap[coord.x][coord.y].army && gameMap[ToX][ToY].player != id) {
 				operation[id].push_back(x);
@@ -75,7 +75,7 @@ namespace xiaruizeBot {
 			int ToY = coord.y + dy[x];
 			if(ToX < 1 || ToX > mapH || ToY < 1 || ToY > mapW)
 				continue;
-			if(gameMap[ToX][ToY].type == 2)
+			if(unpassable(gameMap[ToX][ToY].type))
 				continue;
 			if(vis[id][ToX][ToY])
 				continue;
@@ -90,7 +90,7 @@ namespace xiaruizeBot {
 			int ToY = coord.y + dy[x];
 			if(ToX < 1 || ToX > mapH || ToY < 1 || ToY > mapW)
 				continue;
-			if(gameMap[ToX][ToY].type == 2)
+			if(unpassable(gameMap[ToX][ToY].type))
 				continue;
 			if(previousPos[id].x == ToX && previousPos[id].y == ToY)
 				continue;

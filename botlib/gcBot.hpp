@@ -31,7 +31,7 @@ namespace gcBot {
 		std::mt19937 rnd;
 
 		static inline bool isValidPosition(int x, int y) {
-			return x >= 1 && x <= mapH && y >= 1 && y <= mapW && gameMap[x][y].type != 2;
+			return x >= 1 && x <= mapH && y >= 1 && y <= mapW && !unpassable(gameMap[x][y].type);
 		}
 
 		static inline int approxDist(coordS st, coordS dest) {
@@ -41,13 +41,13 @@ namespace gcBot {
 		inline int getType(int x, int y) {
 			int type = gameMap[x][y].type;
 			if(isVisible(x, y, 1 << id)) return knownBlockType[x][y] = true, type;
-			if(type == 2 || type == 4) return 5;
+			if(unpassable(type) || type == 4) return 5;
 			if(type == 3) return 0;
 			return type;
 		}
 
 		void evaluateRouteCosts(coordS st) {
-			static const ll typeValues[] = { -5, -10, -INF, -5, -40, -200 };
+			static const ll typeValues[] = { -5, -10, -INF, -5, -40, 0, -INF, -INF, -200 };
 			auto gv = [&](int x, int y) -> ll {
 				if(blockType[x][y] == 1) return -1;
 				if(blockType[x][y] == 5) return -20;
@@ -157,13 +157,13 @@ namespace gcBot {
 				ll maxBlockValue = -INF;
 				for(int i = 1; i <= mapH; ++i)
 					for(int j = 1; j <= mapW; ++j)
-						if(gameMap[i][j].player != id && blockType[i][j] != 2) {
+						if(gameMap[i][j].player != id && !unpassable(blockType[i][j])) {
 							ll blockValue = blockValueWeight[blockType[i][j]] - dist[i][j] - army[i][j] / 11;
 							if(blockValue > maxBlockValue)
 								maxBlockValue = blockValue, targetPos = { i, j };
 						}
 				int x = prevTarget.x, y = prevTarget.y;
-				if(x != -1 && gameMap[x][y].player != id && blockType[x][y] != 2) {
+				if(x != -1 && gameMap[x][y].player != id && !unpassable(blockType[x][y])) {
 					ll prevBlockValue = blockValueWeight[blockType[x][y]] - dist[x][y] - army[x][y] / 11;
 					if(std::abs(prevBlockValue - maxBlockValue) < 25)
 						targetPos = prevTarget;

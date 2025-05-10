@@ -550,10 +550,10 @@ namespace LGgame {
 	std::chrono::nanoseconds beginTime;
 	struct turnStatS {
 		int id;
-		int plain, city, mount, swamp;
+		int plain, city, mount, swamp, desert;
 		long long army;
 		coordS focus, coo;
-		inline int gtot() { return plain + city + mount + swamp; }
+		inline int gtot() { return plain + city + mount + swamp + desert; }
 		inline long long gaih() {
 			if(gmp(coo) != id) return 0;
 			return gma(coo);
@@ -562,6 +562,7 @@ namespace LGgame {
 	vector<turnStatS> gameStats[64];
 
 	void init(int chtC, int pC, int gS);
+	bool unpassable(int t);
 	void capture(int p1, int p2);
 	LG_DEPRECATED_S("Will be deleted in ver.5.")
 	int analyzeMove(int id, int mv, coordS& coo);
@@ -573,6 +574,7 @@ namespace LGgame {
 	void ranklist(bool print);
 	void printAnalysis();
 }  // namespace LGgame
+using LGgame::unpassable;
 
 namespace LGreplay {
 	const string replayFileName = "replay.lgr";

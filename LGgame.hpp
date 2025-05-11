@@ -622,10 +622,13 @@ namespace LGlocal {
 				}
 				if(msg.is_move()) {
 					if(midact == 1) {
-						LGGraphics::windowData.maplocX += msg.x - smsx;
-						LGGraphics::windowData.maplocY += msg.y - smsy;
-						smsx = msg.x, smsy = msg.y;
-						moved = true;
+						int delta_x = msg.x - smsx, delta_y = msg.y - smsy;
+						if(hypot(delta_x, delta_y) > 5.0) {
+							LGGraphics::windowData.maplocX += delta_x;
+							LGGraphics::windowData.maplocY += delta_y;
+							smsx = msg.x, smsy = msg.y;
+							moved = true;
+						}
 					}
 				} else if(msg.is_left()) {
 					if(msg.is_down()) {

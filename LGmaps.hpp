@@ -19,6 +19,23 @@
 
 #define ll long long
 
+int lookoutController(int x, int y) {
+	if(gameMap[x][y].type != BLOCK_LOOKOUT) return -1;
+	int ret = 0, troop = 0;
+	for(int i = -1; i <= 1; ++i) {
+		for(int j = -1; j <= 1; ++j) {
+			if(i * j == 0) {
+				if(gameMap[x + i][y + j].player != 0) {
+					if(gameMap[x + i][y + j].army > troop) {
+						troop = gameMap[x + i][y + j].army;
+						ret = gameMap[x + i][y + j].player;
+					}
+				}
+			}
+		}
+	}
+	return ret;
+}
 bool isVisible(int x, int y, int Code) {
 	if(gameMap[x][y].lit)
 		return true;
@@ -28,6 +45,27 @@ bool isVisible(int x, int y, int Code) {
 			for(int j = -1; j <= 1; ++j)
 				if(Code & (1 << gameMap[x + i][y + j].player))
 					return true;
+	}
+	for(int i = 0; i < 8; ++i) {
+		if(gameMap[x - i][y].type == BLOCK_OBSERVATORY) {
+			if(Code & (1 << gameMap[x - i - 1][y].player)) return true;
+		}
+		if(gameMap[x + i][y].type == BLOCK_OBSERVATORY) {
+			if(Code & (1 << gameMap[x + i + 1][y].player)) return true;
+		}
+		if(gameMap[x][y - i].type == BLOCK_OBSERVATORY) {
+			if(Code & (1 << gameMap[x][y - i - 1].player)) return true;
+		}
+		if(gameMap[x][y + i].type == BLOCK_OBSERVATORY) {
+			if(Code & (1 << gameMap[x][y + i + 1].player)) return true;
+		}
+	}
+	for(int i = -2; i <= 2; ++i) {
+		for(int j = -2; j <= 2; ++j) {
+			if(gameMap[x + i][y + j].type == BLOCK_LOOKOUT) {
+				if(Code & (1 << lookoutController(x + i, y + j))) return true;
+			}
+		}
 	}
 	return false;
 }

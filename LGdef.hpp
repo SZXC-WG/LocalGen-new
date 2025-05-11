@@ -195,7 +195,7 @@ enum block_type_e {
 	BLOCK_GENERAL = 3,
 	BLOCK_CITY = 4,
 	BLOCK_DESERT = 5,
-	BLOCK_LOOKKOUT = 6,
+	BLOCK_LOOKOUT = 6,
 	BLOCK_OBSERVATORY = 7,
 
 	BLOCK_OBSTACLE = -1,  // obstacle: unseen mountain or city

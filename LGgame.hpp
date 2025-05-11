@@ -143,7 +143,7 @@ void LGgame::initGenerals(coordS coos[]) {
 		std::mt19937 p(std::chrono::system_clock::now().time_since_epoch().count());
 		int x, y;
 		do x = p() % mapH + 1, y = p() % mapW + 1;
-		while(gameMap[x][y].type != 0);
+		while(gameMap[x][y].type != 0 || gameMap[x][y].army != 0);
 		gens.push_back(coordS{ x, y });
 		gameMap[x][y].type = 3;
 		gameMap[x][y].army = 0;
@@ -566,6 +566,7 @@ namespace LGlocal {
 		for(int i = 2; i <= LGgame::playerCnt; ++i) {
 			// LGgame::robotId[i] = mtrd() % 100 + 300 + (i % 3) * 100;
 			LGgame::robotId[i] = mtrd() % 700;
+			// LGgame::robotId[i] = mtrd() % 400 + 300;
 			// LGgame::robotId[i] = mtrd() % 200 + 300;
 			// LGgame::robotId[i] = mtrd() % 100 + 400;
 			// LGgame::robotId[i] = mtrd() % 100 + 300;

@@ -60,8 +60,8 @@ bool isVisible(int x, int y, int Code) {
 			if(Code & (1 << gameMap[x][y + i + 1].player)) return true;
 		}
 	}
-	for(int i = -2; i <= 2; ++i) {
-		for(int j = -2; j <= 2; ++j) {
+	for(int i = -3; i <= 3; ++i) {
+		for(int j = -3; j <= 3; ++j) {
 			if(gameMap[x + i][y + j].type == BLOCK_LOOKOUT) {
 				if(Code & (1 << lookoutController(x + i, y + j))) return true;
 			}

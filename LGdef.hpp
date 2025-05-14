@@ -461,6 +461,7 @@ namespace LGset {
 			bool MistyVeil = false;
 			// bool CrystalClear = false; // no use in LocalGen.
 			bool SilentWar = false;
+			bool Watchtower = false;
 
 			/* LocalGen Modifiers: */
 			bool DeepSwamp = false;      // [todo) swamp drain speed increase as the dist to land increase.

@@ -40,7 +40,7 @@ bool isVisible(int x, int y, int Code) {
 	if(gameMap[x][y].lit)
 		return true;
 	if(Code & (1 << gameMap[x][y].player)) return true;
-	if(!LGset::modifier::MistyVeil) {
+	if(!LGset::modifier::MistyVeil || (LGset::modifier::Watchtower && gameMap[x][y].type == BLOCK_CITY)) {
 		for(int i = -1; i <= 1; ++i)
 			for(int j = -1; j <= 1; ++j)
 				if(Code & (1 << gameMap[x + i][y + j].player))
@@ -64,6 +64,15 @@ bool isVisible(int x, int y, int Code) {
 		for(int j = -3; j <= 3; ++j) {
 			if(gameMap[x + i][y + j].type == BLOCK_LOOKOUT) {
 				if(Code & (1 << lookoutController(x + i, y + j))) return true;
+			}
+		}
+	}
+	if(LGset::modifier::Watchtower) {
+		for(int i = -4; i <= 4; ++i) {
+			for(int j = -4 + abs(i); j <= 4 - abs(i); ++j) {
+				if((gameMap[x + i][y + j].type == 3 || gameMap[x + i][y + j].type == 4)) {
+					if(Code & (1 << gameMap[x + i][y + j].player)) return true;
+				}
 			}
 		}
 	}

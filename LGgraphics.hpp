@@ -1813,6 +1813,16 @@ namespace LGGraphics {
 		tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
 		tmp.info.cBText = new rCBOXtextS;
 		tmp.locX = zoomX(800);
+		tmp.locY = zoomY(290);
+		tmp.downLoc();
+		tmp.info.cBText->bgColor = LGGraphics::bgColor;
+		tmp.info.cBText->boxText.push_back(singleTextS(WHITE, L"Watchtower", LGset::mainFontName, -zoomY(20), 0));
+		tmp.info.cBText->checkBox.size(zoomX(20), zoomY(20)).frame(2).variable(&LGset::modifier::Watchtower).bgcolor(bgColor).fillcolor(WHITE).framecolor(WHITE);
+		tmp.info.cBText->blankWidth = zoomX(10);
+		p_settings.addItem(tmp);
+		tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
+		tmp.info.cBText = new rCBOXtextS;
+		tmp.locX = zoomX(800);
 		tmp.locY = zoomY(350);
 		tmp.downLoc();
 		tmp.info.cBText->bgColor = LGGraphics::bgColor;

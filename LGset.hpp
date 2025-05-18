@@ -53,6 +53,7 @@ namespace LGset {
 			buf.push_back(modifier::SuburbPlain);
 			buf.push_back(modifier::DeepSwamp);
 			buf.push_back(modifier::NeutralResist);
+			buf.push_back(modifier::Watchtower);
 			buf.push_back(L'\n');
 			return buf;
 		}
@@ -139,6 +140,8 @@ namespace LGset {
 			modifier::SuburbPlain = buf[i++];
 			modifier::DeepSwamp = buf[i++];
 			modifier::NeutralResist = buf[i++];
+			if(rdBuild <= 2962) return;  // build 2962+ settings
+			modifier::Watchtower = buf[i++];
 			buf[i++];  // L'\n'
 		}
 		inline void write() {

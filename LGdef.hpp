@@ -502,7 +502,7 @@ namespace LGGraphics {
 		int heightPerBlock;    // block height in printing
 		int widthPerBlock;     // block width in printing
 		int height, width;     // ???
-		double zoomX, zoomY;   // window size zoom (relative to 1920x1080)
+		double zoomX, zoomY;   // window size zoom (relative to 1600x900)
 		int maplocX, maplocY;  // location of map in printing
 	} windowData;              // storing variable
 	inline __attribute__((always_inline)) double zoomX(double X) { return X * windowData.zoomX; }

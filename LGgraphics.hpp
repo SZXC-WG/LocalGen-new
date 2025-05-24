@@ -81,45 +81,45 @@ namespace LGGraphics {
 		setcolor(WHITE);
 		xyprintf(250, 250, L"Please Select Window Size:");
 		settextjustify(LEFT_TEXT, TOP_TEXT);
-		rectBUTTON scrsz[10];
-		for(int i = 200; i <= 500; i += 100) {
-			int p = i / 100 - 2;
-			scrsz[p].size(400, 50);
-			scrsz[p].bgcolor(bgColor);
-			scrsz[p].textcolor(WHITE);
-			scrsz[p].fontname(LGset::mainFontName.c_str());
-			scrsz[p].fontsize(30, 0);
-			scrsz[p].move(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext(to_wstring(i * 4) + L" × " + to_wstring(i * 9 / 4));
-			scrsz[p].clickEvent = [i]() -> void { select = i / 100; };
-			scrsz[p].textalign(CENTER_TEXT, CENTER_TEXT);
-			scrsz[p].display();
+		rectBUTTON scrsz[13];
+		constexpr int wwlen = 12, window_width[] = { 480, 640, 800, 854, 960, 1024, 1280, 1366, 1600, 1920, 2160, 3840 };
+		for(int i = 0; i < wwlen; ++i) {
+			scrsz[i].enableShadow = 0;
+			scrsz[i].size(400.0 / 3.0, 50);
+			scrsz[i].bgcolor(bgColor);
+			scrsz[i].textcolor(WHITE);
+			scrsz[i].fontname(LGset::mainFontName.c_str());
+			scrsz[i].fontsize(20, 0);
+			scrsz[i].move(50 + i % 3 * 400.0 / 3.0, 280 + i / 3 * 50);
+			scrsz[i].addtext(to_wstring(window_width[i]) + L" × " + to_wstring(window_width[i] * 9 / 16));
+			scrsz[i].clickEvent = [i]() -> void { select = i; };
+			scrsz[i].textalign(CENTER_TEXT, CENTER_TEXT);
+			scrsz[i].display();
 		}
 		{
-			int i = 600;
-			int p = i / 100 - 2;
-			scrsz[p].size(400, 50);
-			scrsz[p].bgcolor(bgColor);
-			scrsz[p].textcolor(WHITE);
-			scrsz[p].fontname(LGset::mainFontName.c_str());
-			scrsz[p].fontsize(30, 0);
-			scrsz[p].move(50, 180 + i / 4 * 2 + p * 3);
-			scrsz[p].addtext(L"Full Screen (" + to_wstring(GetSystemMetrics(SM_CXSCREEN)) + L" × " + to_wstring(GetSystemMetrics(SM_CYSCREEN)) + L")");
-			scrsz[p].clickEvent = [i]() -> void { select = i / 100; };
-			scrsz[p].textalign(CENTER_TEXT, CENTER_TEXT);
-			scrsz[p].display();
+			int i = 12;
+			scrsz[i].enableShadow = 0;
+			scrsz[i].size(400, 50);
+			scrsz[i].bgcolor(bgColor);
+			scrsz[i].textcolor(WHITE);
+			scrsz[i].fontname(LGset::mainFontName.c_str());
+			scrsz[i].fontsize(30, 0);
+			scrsz[i].move(50, 280 + i / 3 * 50);
+			scrsz[i].addtext(L"Full Screen (" + to_wstring(GetSystemMetrics(SM_CXSCREEN)) + L" × " + to_wstring(GetSystemMetrics(SM_CYSCREEN)) + L")");
+			scrsz[i].clickEvent = [i]() -> void { select = i; };
+			scrsz[i].textalign(CENTER_TEXT, CENTER_TEXT);
+			scrsz[i].display();
 		}
 		for(; is_run(); delay_fps(60)) {
-			for(int i = 200; i <= 600; i += 100) {
-				int p = i / 100 - 2;
-				scrsz[p].detect();
-				scrsz[p].display();
-				if(scrsz[p].status == 2) scrsz[p].clickEvent(), changeMade = false;
+			for(int i = 0; i <= wwlen; ++i) {
+				scrsz[i].detect();
+				scrsz[i].display();
+				if(scrsz[i].status == 2) scrsz[i].clickEvent(), changeMade = false;
 			}
 			if(!changeMade) break;
 		}
 	finishSelect:
-		if(select == 6) {
+		if(select == 12) {
 			movewindow(0, 0, false);
 			resizewindow(-1, -1);
 			FullScreen(getHWnd());
@@ -127,7 +127,7 @@ namespace LGGraphics {
 			windowData.zoomX = (double)(1.0 * (double)w / 1600.0);
 			windowData.zoomY = (double)(1.0 * (double)h / 900.0);
 		} else {
-			windowData.zoomX = windowData.zoomY = (double)select / 4.0;
+			windowData.zoomX = windowData.zoomY = (double)window_width[select] / 1600.0;
 			int nScreenWidth, nScreenHeight;
 			nScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 			nScreenHeight = GetSystemMetrics(SM_CYSCREEN);

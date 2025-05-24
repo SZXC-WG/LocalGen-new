@@ -49,7 +49,7 @@ namespace zlyBot_v2 {
 	}
 
 	inline void initBot(int botId) {
-		blockValueWeight[botId] = { 30 - LGset::plainRate[LGset::gameMode] + 1, -1500, -INF, 5, 30, 1, -INF, -INF, 30 };
+		blockValueWeight[botId] = { 300 - LGset::plainRate[LGset::gameMode] * 10 + 10, -1500000000, -INF, 10, 300, 0, -INF, -INF, 300 };
 		for(int playerId = 1; playerId <= LGgame::playerCnt; ++playerId) seenGenerals[botId][playerId] = coordS(-1, -1);
 		memset(blockTypeRem[botId], -1, sizeof(blockTypeRem[botId]));
 		memset(blockArmyRem[botId], 0, sizeof(blockArmyRem[botId]));
@@ -85,14 +85,17 @@ namespace zlyBot_v2 {
 				if(unpassable(getType(playerId, next.x, next.y))) continue;
 				if(dist[playerId][next.x][next.y] != 0x3f3f3f3f3f3f3f3f) continue;
 				dist[playerId][next.x][next.y] = currentDist + 1;
+				if(isVisible(next.x, next.y, 1 << playerId)) {
+					if(gmp(next) != playerId) dist[playerId][next.x][next.y] += gma(next) / 10;
+				} else dist[playerId][next.x][next.y] += blockArmyRem[playerId][next.x][next.y] / 10;
 				// if(getType(playerId,next.x,next.y)==5) continue;
-				queue.push({ next, currentDist + 1 });
+				queue.push({ next, dist[playerId][next.x][next.y] });
 			}
 		}
 		for(int i = 1; i <= mapH; ++i) {
 			for(int j = 1; j <= mapW; ++j) {
 				if(gameMap[i][j].player == playerId) blockValue[playerId][i][j] = -INF;
-				else blockValue[playerId][i][j] = blockValueWeight[playerId][getType(playerId, i, j)] - dist[playerId][i][j] - getArmy(playerId, i, j) / 10;
+				else blockValue[playerId][i][j] = blockValueWeight[playerId][getType(playerId, i, j)] - dist[playerId][i][j] * 10;
 			}
 		}
 	}
@@ -164,94 +167,6 @@ namespace zlyBot_v2 {
 		}
 		stackedMoves[playerId].pop_front();
 		return;
-
-		/* old
-		int unitCount = 0;
-		for(int i = 1; i <= mapH; ++i)
-			for(int j = 1; j <= mapW; ++j)
-				if(gameMap[i][j].player == playerId) ++unitCount;
-		unitCount = sqrt(unitCount) + 1;
-		if((dist[playerId][destination.x][destination.y] - unitCount) & 1) --unitCount;
-		unitCount = 1;
-		vector<vector<vector<ll>>> dp;
-		vector<vector<vector<coordS>>> prev;
-		auto getVal = [&](int x, int y) -> ll {
-			if(x < 1 || x > mapH || y < 1 || y > mapW) return -INF;
-			if(getType(playerId, x, y) == 2) return -INF;
-			if(gameMap[x][y].player == playerId) return gameMap[x][y].army;
-			else {
-				return -getArmy(playerId, x, y);
-				// if(isVisible(x, y, 1 << playerId)) return -gameMap[x][y].army;
-				// else {
-				// 	if(getType(playerId, x, y) == 0) return -5;
-				// 	if(getType(playerId, x, y) == 1) return -10;
-				// 	if(getType(playerId, x, y) == 3) return -5;
-				// 	if(getType(playerId, x, y) == 4) return -40;
-				// 	if(getType(playerId, x, y) == 5) return -200;
-				// }
-			}
-			return 0;
-		};
-		dp.push_back(vector<vector<ll>>(mapH + 1, vector<ll>(mapW + 1, -INF)));
-		prev.push_back(vector<vector<coordS>>(mapH + 1, vector<coordS>(mapW + 1, coordS(-1, -1))));
-		dp[0][start.x][start.y] = gameMap[start.x][start.y].army;
-		constexpr int dx[] = { -1, 0, 1, 0 };
-		constexpr int dy[] = { 0, -1, 0, 1 };
-		for(int i = 1; i <= unitCount; ++i) {
-			dp.push_back(vector<vector<ll>>(mapH + 1, vector<ll>(mapW + 1, -INF)));
-			prev.push_back(vector<vector<coordS>>(mapH + 1, vector<coordS>(mapW + 1, coordS(-1, -1))));
-			for(int x = 1; x <= mapH; ++x) {
-				for(int y = 1; y <= mapW; ++y) {
-					if(dp[i - 1][x][y] == -INF) continue;
-					for(int j = 0; j < 4; ++j) {
-						int nx = x + dx[j], ny = y + dy[j];
-						if(nx < 1 || nx > mapH || ny < 1 || ny > mapW) continue;
-						if(getType(playerId, nx, ny) == 2) continue;
-						ll newValue = dp[i - 1][x][y] + getVal(nx, ny);
-						if(newValue > dp[i][nx][ny]) {
-							prev[i][nx][ny] = coordS(x, y);
-							dp[i][nx][ny] = newValue;
-						}
-					}
-				}
-			}
-			if(i == unitCount && prev[i][destination.x][destination.y] == coordS(-1, -1)) ++unitCount;
-		}
-		// int additionalCount = log(unitCount);
-		// for(int i = unitCount + 1; i <= unitCount + additionalCount; ++i) {
-		// 	dp.push_back(vector<vector<ll>>(mapH + 1, vector<ll>(mapW + 1, -INF)));
-		// 	prev.push_back(vector<vector<coordS>>(mapH + 1, vector<coordS>(mapW + 1, coordS(-1, -1))));
-		// 	for(int x = 1; x <= mapH; ++x) {
-		// 		for(int y = 1; y <= mapW; ++y) {
-		// 			if(dp[i - 1][x][y] == -INF) continue;
-		// 			for(int j = 0; j < 4; ++j) {
-		// 				int nx = x + dx[j], ny = y + dy[j];
-		// 				if(nx < 1 || nx > mapH || ny < 1 || ny > mapW) continue;
-		// 				if(getType(playerId, nx, ny) == 2) continue;
-		// 				ll newValue = dp[i - 1][x][y] + getVal(nx, ny);
-		// 				if(newValue > dp[i][nx][ny]) {
-		// 					prev[i][nx][ny] = coordS(x, y);
-		// 					dp[i][nx][ny] = newValue;
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// }
-		int finalChose = unitCount;
-		ll finalChoseValue = dp[unitCount][destination.x][destination.y];
-		// for(int i = unitCount + 1; i <= unitCount + additionalCount; ++i) {
-		// 	if(dp[i][destination.x][destination.y] > finalChoseValue) {
-		// 		finalChose = i, finalChoseValue = dp[i][destination.x][destination.y];
-		// 	}
-		// }
-		stackedMoves[playerId].clear();
-		coordS pos = destination;
-		while(pos != coordS(-1, -1)) {
-			stackedMoves[playerId].push_front(pos);
-			pos = prev[finalChose--][pos.x][pos.y];
-		}
-		stackedMoves[playerId].pop_front();
-		*/
 	}
 
 	moveS calcNextMove(int playerId, coordS currentPos) {
@@ -306,7 +221,7 @@ namespace zlyBot_v2 {
 			moveS ret = moveS{ playerId, true, currentPos, stackedMoves[playerId].front() };
 			// db << "stackedMoves size: " << stackedMoves[playerId].size() << std::endl;
 			stackedMoves[playerId].pop_front();
-			leastUsage[playerId] = min((int)stackedMoves[playerId].size(), 10);
+			leastUsage[playerId] = min((int)stackedMoves[playerId].size(), 5);
 			// db << "Turn " << LGgame::curTurn << " from (" << ret.from.x << "," << ret.from.y << ") to (" << ret.to.x << "," << ret.to.y << ")" << std::endl;
 			// db.close();
 			return ret;
@@ -324,7 +239,7 @@ namespace zlyBot_v2 {
 			// db << "stackedMoves size: " << stackedMoves[playerId].size() << std::endl;
 			moveS ret = moveS{ playerId, true, currentPos, stackedMoves[playerId].front() };
 			stackedMoves[playerId].pop_front();
-			leastUsage[playerId] = min((int)stackedMoves[playerId].size(), 10);
+			leastUsage[playerId] = min((int)stackedMoves[playerId].size(), 5);
 			// db << "Turn " << LGgame::curTurn << " from (" << ret.from.x << "," << ret.from.y << ") to (" << ret.to.x << "," << ret.to.y << ")" << std::endl;
 			// db.close();
 			return ret;

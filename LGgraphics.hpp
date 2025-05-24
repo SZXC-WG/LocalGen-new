@@ -264,7 +264,7 @@ namespace LGGraphics {
 		createmap
 		    .size(600 * windowData.zoomX, 100 * windowData.zoomY)
 		    .move(700 * windowData.zoomX, 475 * windowData.zoomY)
-		    .addtext(L"create map (beta)")
+		    .addtext(L"map creator")
 		    .textalign(CENTER_TEXT, CENTER_TEXT)
 		    .bgcolor(WHITE)
 		    .textcolor(mainColor)

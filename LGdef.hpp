@@ -278,15 +278,32 @@ struct playerS {
 	color_t color; /* player color */
 };
 
+/* block type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city, 5->desert, 6->lookout, 7->observatory */
+/* only for v5 and before */
+
 /**
  * @brief Struct saving the basic information of a block.
  */
 struct Block {
 	int player;     /* the player who holds this block */
-	int type;       /* the block's type: 0->plain, 1->swamp, 2->mountain, 3->general, 4->city */
+	int type;       /* the block's type */
 	long long army; /* count of army on this block */
 	bool lit;       /* whether the block is lighted(lit) */
 };
+
+/**
+ * @brief Struct giving player correct view of a block.
+ */
+struct BlockView {
+	bool visible;   /* whether the block is visible */
+	int player;     /* the player who holds this block; -1 for not seen */
+	int type;       /* the block's type; -1 for obstacle */
+	long long army; /* count of army on this block; if not seen, set to 0 */
+	                // no lit field 'cause it's useless
+};
+
+inline BlockView view(int Code, int x, int y);
+inline BlockView view(int Code, coordS position);
 
 /**
  * @brief Struct saving a player move (in game).

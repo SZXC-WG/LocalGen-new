@@ -19,6 +19,26 @@
 
 #define ll long long
 
+inline BlockView view(int Code, int x, int y) {
+	if(isVisible(x, y, Code)) {
+		return BlockView{ true, gameMap[x][y].player, gameMap[x][y].type, gameMap[x][y].army };
+	} else {
+		BlockView ret;
+		ret.visible = false;
+		ret.player = -1;
+		if(unpassable(gameMap[x][y].type) || gameMap[x][y].type == BLOCK_CITY) {
+			ret.type = BLOCK_OBSTACLE;
+		} else if(gameMap[x][y].type == BLOCK_DESERT) {
+			ret.type = BLOCK_PLAIN;
+		} else {
+			ret.type = gameMap[x][y].type;
+		}
+		ret.army = 0;
+		return ret;
+	}
+}
+inline BlockView view(int Code, coordS position) { return view(Code, position.x, position.y); }
+
 int lookoutController(int x, int y) {
 	if(gameMap[x][y].type != BLOCK_LOOKOUT) return -1;
 	int ret = 0, troop = 0;

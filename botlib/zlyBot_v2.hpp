@@ -95,7 +95,20 @@ namespace zlyBot_v2 {
 		for(int i = 1; i <= mapH; ++i) {
 			for(int j = 1; j <= mapW; ++j) {
 				if(gameMap[i][j].player == playerId) blockValue[playerId][i][j] = -INF;
-				else blockValue[playerId][i][j] = blockValueWeight[playerId][getType(playerId, i, j)] - dist[playerId][i][j] * 10;
+				else {
+					blockValue[playerId][i][j] = blockValueWeight[playerId][getType(playerId, i, j)] - dist[playerId][i][j] * 10;
+					if(isVisible(i, j, 1 << playerId) && gameMap[i][j].player != 0) {
+						ll adjacent_minimum_same_player = INF;
+						for(int k = 0; k < 4; ++k) {
+							coordS adja = coordS(i, j) + coordS(delta_x[k], delta_y[k]);
+							if(adja.x < 1 || adja.x > mapH || adja.y < 1 || adja.y > mapW) continue;
+							if(isVisible(adja.x, adja.y, 1 << playerId && gmp(adja) == playerId))
+								adjacent_minimum_same_player = min(adjacent_minimum_same_player, dist[playerId][adja.x][adja.y]);
+						}
+						if(adjacent_minimum_same_player == INF) adjacent_minimum_same_player = gma(i, j);
+						blockValue[playerId][i][j] += gma(i, j) - adjacent_minimum_same_player;
+					}
+				}
 			}
 		}
 	}
@@ -221,7 +234,7 @@ namespace zlyBot_v2 {
 			moveS ret = moveS{ playerId, true, currentPos, stackedMoves[playerId].front() };
 			// db << "stackedMoves size: " << stackedMoves[playerId].size() << std::endl;
 			stackedMoves[playerId].pop_front();
-			leastUsage[playerId] = min((int)stackedMoves[playerId].size(), 5);
+			leastUsage[playerId] = min((int)stackedMoves[playerId].size(), (0));
 			// db << "Turn " << LGgame::curTurn << " from (" << ret.from.x << "," << ret.from.y << ") to (" << ret.to.x << "," << ret.to.y << ")" << std::endl;
 			// db.close();
 			return ret;
@@ -239,7 +252,7 @@ namespace zlyBot_v2 {
 			// db << "stackedMoves size: " << stackedMoves[playerId].size() << std::endl;
 			moveS ret = moveS{ playerId, true, currentPos, stackedMoves[playerId].front() };
 			stackedMoves[playerId].pop_front();
-			leastUsage[playerId] = min((int)stackedMoves[playerId].size(), 5);
+			leastUsage[playerId] = min((int)stackedMoves[playerId].size(), (0));
 			// db << "Turn " << LGgame::curTurn << " from (" << ret.from.x << "," << ret.from.y << ") to (" << ret.to.x << "," << ret.to.y << ")" << std::endl;
 			// db.close();
 			return ret;

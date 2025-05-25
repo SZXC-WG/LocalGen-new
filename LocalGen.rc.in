@@ -1,4 +1,4 @@
-IMAGE_FAVICON	PNG	"../img/favicon.png"
+IMAGE_FAVICON	PNG	"../img/newfavicon.png"
 IMAGE_CITY		PNG	"../img/city.png"
 IMAGE_CROWN		PNG	"../img/crown.png"
 IMAGE_MOUNTAIN	PNG	"../img/mountain.png"
@@ -13,7 +13,7 @@ IMAGE_DESERT	PNG	"../img/desert.png"
 IMAGE_LOOKOUT	PNG	"../img/lookout.png"
 IMAGE_OBSERVATORY	PNG	"../img/observatory.png"
 
-A ICON "../LocalGen.ico"
+A ICON "../LGnewIcon.ico"
 
 1 VERSIONINFO
 FILEVERSION ${PROJECT_VERSION_MAJOR},${PROJECT_VERSION_MINOR},${PROJECT_VERSION_PATCH},${BUILD_NUMBER}

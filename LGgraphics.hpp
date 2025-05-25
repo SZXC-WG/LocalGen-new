@@ -70,11 +70,12 @@ namespace LGGraphics {
 		xyprintf(252, 152, L"generals.io");
 		setcolor(WHITE);
 		xyprintf(250, 150, L"generals.io");
+		images::zoomImage(iconImg, 256, 256);
 		putimage_withalpha(NULL, iconImg, 500, 10, 0, 0, getwidth(iconImg), getheight(iconImg));
-		delimage(iconImg);
 		setfont(20, 0, "Lucida Fax");
 		xyprintf(500 + getwidth(iconImg) / 2, 10 + getheight(iconImg) + 20 / 2 + 10,
 		         L"version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD);
+		delimage(iconImg);
 		setfont(50, 0, LGset::mainFontName.c_str());
 		setcolor(mainColor);
 		xyprintf(251, 251, L"Please Select Window Size:");
@@ -211,7 +212,7 @@ namespace LGGraphics {
 		cleardevice();
 		PIMAGE zfavi = newimage();
 		getimage(zfavi, "PNG", "IMAGE_FAVICON");
-		images::zoomImage(zfavi, getwidth(zfavi) * 1.8 * windowData.zoomX, getheight(zfavi) * 1.8 * windowData.zoomY);
+		images::zoomImage(zfavi, 256 * 1.8 * windowData.zoomX, 256 * 1.8 * windowData.zoomY);
 		putimage_withalpha(NULL, zfavi, 100 * windowData.zoomX, 50 * windowData.zoomY,
 		                   0, 0, getwidth(zfavi), getheight(zfavi));
 		delimage(zfavi);

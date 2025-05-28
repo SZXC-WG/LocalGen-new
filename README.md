@@ -2,9 +2,9 @@
   <h1>Local Generals.io</h1>
   <a href="http://github.com/SZXC-WG/LocalGen-new/releases"><img alt="GitHub release" src="https://img.shields.io/github/release/SZXC-WG/LocalGen-new.svg" /></a>
   <a href="http://github.com/SZXC-WG/LocalGen-new/releases"><img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new.svg" /></a>
-  <a href="http://github.com/SZXC-WG/LocalGen-new/LICENSE.md"><img alt="License" src="https://img.shields.io/github/license/SZXC-WG/LocalGen-new.svg" /></a>
   <a href="http://github.com/SZXC-WG/LocalGen-new/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social" /></a>
-  <h2><font color="red">branch for version 5</font></h2>
+  <h2>branch for version 5</h2>
+  <h3>Note: This branch is licensed under the MIT License.</h3>
 </div>
 
 Welcome to Local Generals.io, branch for ver. 5.

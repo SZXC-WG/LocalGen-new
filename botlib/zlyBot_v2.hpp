@@ -184,6 +184,11 @@ namespace zlyBot_v2 {
 
 	moveS calcNextMove(int playerId, coordS currentPos) {
 		// printf("zlyBot v2: ID(%d), COORD(%d,%d)\n", playerId, currentPos.x, currentPos.y);
+		for(int row = 1; row <= mapH; ++row) {
+			for(int col = 1; col <= mapW; ++col) {
+				if(blockArmyRem[playerId][row][col] > 0) --blockArmyRem[playerId][row][col];
+			}
+		}
 		for(int row = 1; row <= mapH; ++row)
 			for(int col = 1; col <= mapW; ++col)
 				if(isVisible(row, col, 1 << playerId) && gameMap[row][col].player != playerId && gameMap[row][col].type == 3)

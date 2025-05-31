@@ -17,7 +17,7 @@ link_directories(${CMAKE_SOURCE_DIR}/ege/lib)
 
 # add executable target
 add_executable(${TARGET_NAME} LGmain.cpp ${VERSIONINFO_OUTPUT_RC})
-target_link_libraries(${TARGET_NAME} -static-libgcc -mwindows graphics gdi32 gdiplus ws2_32)
+target_link_libraries(${TARGET_NAME} -static -static-libgcc -mwindows graphics gdi32 gdiplus ws2_32)
 
 # set cxx standard
 target_compile_features(${TARGET_NAME} PRIVATE cxx_std_14)

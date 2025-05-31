@@ -84,14 +84,14 @@ namespace zlyBot_v2 {
 		constexpr int delta_y[] = { 0, -1, 0, 1 };
 		memset(dist[playerId], 0x3f, sizeof(dist[playerId]));
 		dist[playerId][position.x][position.y] = 0;
-		std::queue<std::pair<coordS, ll>> queue;
-		queue.push({ position, 0 });
+		std::priority_queue<std::pair<ll, coordS>, std::vector<std::pair<ll, coordS>>, std::greater<>> queue;
+		queue.push({ 0, position });
 #ifdef DEBUG_ZLY_V2
 		db << "in calcData bfs:" << std::endl;
 #endif
 		while(!queue.empty()) {
-			coordS current = queue.front().first;
-			ll currentDist = queue.front().second;
+			coordS current = queue.top().second;
+			ll currentDist = queue.top().first;
 			queue.pop();
 			if(currentDist > dist[playerId][current.x][current.y]) continue;
 			for(int i = 0; i < 4; ++i) {
@@ -105,7 +105,7 @@ namespace zlyBot_v2 {
 				if(getType(playerId, next.x, next.y) == BLOCK_SWAMP) newDist += 100;
 				if(newDist < dist[playerId][next.x][next.y]) {
 					dist[playerId][next.x][next.y] = newDist;
-					queue.push({ next, newDist });
+					queue.push({ newDist, next });
 				}
 			}
 		}

@@ -6,6 +6,8 @@
 
 #define ll long long
 
+#define DEBUG_ZLY_V2
+
 namespace zlyBot_v2 {
 	const ll INF = 10'000'000'000'000'000LL;
 	enum botModeE {
@@ -24,6 +26,10 @@ namespace zlyBot_v2 {
 	ll blockArmyRem[64][505][505];
 	deque<coordS> previousMoves[64];
 	bool inPreviousMoves[64][505][505];
+	int passedTimes[64][505][505];
+#ifdef DEBUG_ZLY_V2
+	std::wofstream db;
+#endif
 
 	inline void recordNewMove(int playerId, coordS position) {
 		previousMoves[playerId].push_back(position);
@@ -49,6 +55,7 @@ namespace zlyBot_v2 {
 	}
 
 	inline void initBot(int botId) {
+		memset(passedTimes[botId], 0, sizeof(passedTimes[botId]));
 		blockValueWeight[botId] = { 300 - LGset::plainRate[LGset::gameMode] * 10 + 10, -1500000000, -INF, 10, 300, 0, -INF, -INF, 300 };
 		for(int playerId = 1; playerId <= LGgame::playerCnt; ++playerId) seenGenerals[botId][playerId] = coordS(-1, -1);
 		memset(blockTypeRem[botId], -1, sizeof(blockTypeRem[botId]));
@@ -65,7 +72,11 @@ namespace zlyBot_v2 {
 				}
 			}
 		}
-		// std::ofstream db("player_"s+to_string(botId)+"_debug.txt");
+#ifdef DEBUG_ZLY_V2
+		std::wofstream db("player_"s + to_string(botId) + "_debug.txt");
+		db << "This is the debug file of the bot illustrating player " << botId << " (" << playerInfo[botId].name << ")." << std::endl;
+		db.close();
+#endif
 	}
 
 	inline void calcData(int playerId, coordS position) {
@@ -73,30 +84,39 @@ namespace zlyBot_v2 {
 		constexpr int delta_y[] = { 0, -1, 0, 1 };
 		memset(dist[playerId], 0x3f, sizeof(dist[playerId]));
 		dist[playerId][position.x][position.y] = 0;
-		std::queue<std::pair<coordS, int>> queue;
+		std::queue<std::pair<coordS, ll>> queue;
 		queue.push({ position, 0 });
+#ifdef DEBUG_ZLY_V2
+		db << "in calcData bfs:" << std::endl;
+#endif
 		while(!queue.empty()) {
 			coordS current = queue.front().first;
-			int currentDist = queue.front().second;
+			ll currentDist = queue.front().second;
 			queue.pop();
+			if(currentDist > dist[playerId][current.x][current.y]) continue;
 			for(int i = 0; i < 4; ++i) {
 				coordS next = current + coordS(delta_x[i], delta_y[i]);
 				if(next.x < 1 || next.x > mapH || next.y < 1 || next.y > mapW) continue;
 				if(unpassable(getType(playerId, next.x, next.y))) continue;
-				if(dist[playerId][next.x][next.y] != 0x3f3f3f3f3f3f3f3f) continue;
-				dist[playerId][next.x][next.y] = currentDist + 1;
+				ll newDist = currentDist + 10;
 				if(isVisible(next.x, next.y, 1 << playerId)) {
-					if(gmp(next) != playerId) dist[playerId][next.x][next.y] += gma(next) / 10;
-				} else dist[playerId][next.x][next.y] += blockArmyRem[playerId][next.x][next.y] / 10;
-				// if(getType(playerId,next.x,next.y)==5) continue;
-				queue.push({ next, dist[playerId][next.x][next.y] });
+					if(gmp(next) != playerId) newDist += max(gma(next), 0ll);
+				} else newDist += max(getArmy(playerId, next.x, next.y), 0ll);
+				if(getType(playerId, next.x, next.y) == BLOCK_SWAMP) newDist += 100;
+				if(newDist < dist[playerId][next.x][next.y]) {
+					dist[playerId][next.x][next.y] = newDist;
+					queue.push({ next, newDist });
+				}
 			}
 		}
+#ifdef DEBUG_ZLY_V2
+		db << "end of calcData bfs." << std::endl;
+#endif
 		for(int i = 1; i <= mapH; ++i) {
 			for(int j = 1; j <= mapW; ++j) {
 				if(gameMap[i][j].player == playerId) blockValue[playerId][i][j] = -INF;
 				else {
-					blockValue[playerId][i][j] = blockValueWeight[playerId][getType(playerId, i, j)] - dist[playerId][i][j] * 10;
+					blockValue[playerId][i][j] = blockValueWeight[playerId][getType(playerId, i, j)] - dist[playerId][i][j] - passedTimes[playerId][i][j];
 					if(isVisible(i, j, 1 << playerId) && gameMap[i][j].player != 0) {
 						ll adjacent_minimum_same_player = INF;
 						for(int k = 0; k < 4; ++k) {
@@ -138,7 +158,7 @@ namespace zlyBot_v2 {
 			}
 		};
 		auto UnitedInc = [&](int x, int y) -> ll {
-			return DisInc * 1000 + ArmyInc(x, y) + TypeInc(x, y);
+			return DisInc * 1000 + ArmyInc(x, y) + TypeInc(x, y) + passedTimes[playerId][x][y];
 		};
 		constexpr int dx[] = { -1, 0, 1, 0 };
 		constexpr int dy[] = { 0, -1, 0, 1 };
@@ -153,6 +173,7 @@ namespace zlyBot_v2 {
 			coordS current = q.top().second;
 			ll currentVal = q.top().first;
 			q.pop();
+			if(currentVal > dp[current.x][current.y]) continue;
 			// printf("zlyBot v2: (findRoute) LINE %d output: IN LOOP %d times: cur(%d,%d) VAL(%lld)\n",
 			//        __LINE__, ++cnt, current.x, current.y, currentVal);
 			if(vis[current.x][current.y]) continue;
@@ -193,7 +214,10 @@ namespace zlyBot_v2 {
 			for(int col = 1; col <= mapW; ++col)
 				if(isVisible(row, col, 1 << playerId) && gameMap[row][col].player != playerId && gameMap[row][col].type == 3)
 					seenGenerals[playerId][gameMap[row][col].player] = coordS(row, col);
-		// std::ofstream db("player_"s+to_string(playerId)+"_debug.txt"s,std::ios::app);
+#ifdef DEBUG_ZLY_V2
+		db.open("player_"s + to_string(playerId) + "_debug.txt"s, std::ios::app);
+		db << std::endl;
+#endif
 		if(gameMap[currentPos.x][currentPos.y].player != playerId || gameMap[currentPos.x][currentPos.y].army == 0) {
 			long long maxArmy = 0;
 			coordS maxCoo = LGgame::genCoo[playerId];
@@ -208,11 +232,9 @@ namespace zlyBot_v2 {
 				}
 			}
 			leastUsage[playerId] = 0;
-			// db << "Turn " << LGgame::curTurn << " from (" << currentPos.x << "," << currentPos.y << ") to (" << maxCoo.x << "," << maxCoo.y << ")" << std::endl;
-			// db.close();
-			// return moveS{ playerId, false, currentPos, maxCoo };
 			currentPos = maxCoo;
 		}
+		++passedTimes[playerId][currentPos.x][currentPos.y];
 		if(leastUsage[playerId] != 0) {
 			--leastUsage[playerId];
 			auto next = stackedMoves[playerId].front();
@@ -233,15 +255,24 @@ namespace zlyBot_v2 {
 		}
 		calcData(playerId, currentPos);
 		if(botModes[playerId] == BOT_MODE_ATTACK) {
-			// db << "Desti: " << seenGenerals[playerId][targetGeneralId].x << "," << seenGenerals[playerId][targetGeneralId].y << std::endl;
+#ifdef DEBUG_ZLY_V2
+			db << "Desti: " << seenGenerals[playerId][targetGeneralId].x << "," << seenGenerals[playerId][targetGeneralId].y << std::endl;
+#endif
 			findRoute(playerId, currentPos, seenGenerals[playerId][targetGeneralId]);
 			// recordNewMove(playerId, stackedMoves[playerId].front());
 			moveS ret = moveS{ playerId, true, currentPos, stackedMoves[playerId].front() };
-			// db << "stackedMoves size: " << stackedMoves[playerId].size() << std::endl;
+#ifdef DEBUG_ZLY_V2
+			db << "stackedMoves size: " << stackedMoves[playerId].size() << std::endl;
+			db << "stackedMoves:";
+			for(auto& i: stackedMoves[playerId]) db << " (" << i.x << "," << i.y << ")";
+			db << std::endl;
+#endif
 			stackedMoves[playerId].pop_front();
 			leastUsage[playerId] = min((int)stackedMoves[playerId].size(), (0));
-			// db << "Turn " << LGgame::curTurn << " from (" << ret.from.x << "," << ret.from.y << ") to (" << ret.to.x << "," << ret.to.y << ")" << std::endl;
-			// db.close();
+#ifdef DEBUG_ZLY_V2
+			db << "Turn " << LGgame::curTurn << " from (" << ret.from.x << "," << ret.from.y << ") to (" << ret.to.x << "," << ret.to.y << ")" << std::endl;
+			db.close();
+#endif
 			return ret;
 		} else if(botModes[playerId] == BOT_MODE_EXPLORE) {
 			struct node {
@@ -252,14 +283,27 @@ namespace zlyBot_v2 {
 			for(int row = 1; row <= mapH; ++row)
 				for(int col = 1; col <= mapW; ++col) nodes.push_back(node{ coordS(row, col), blockValue[playerId][row][col] });
 			sort(nodes.begin(), nodes.end(), [](const node& a, const node& b) { return a.value > b.value; });
-			// db << "Desti: " << nodes[0].pos.x << "," << nodes[0].pos.y << std::endl;
+#ifdef DEBUG_ZLY_V2
+			db << "Desti: " << nodes[0].pos.x << "," << nodes[0].pos.y << std::endl;
+			db << "Desti value: " << nodes[0].value << std::endl;
+			db << "Next 4 unselected nodes:";
+			for(int i = 1; i < 5; ++i) db << " (" << nodes[i].pos.x << "," << nodes[i].pos.y << ";" << nodes[i].value << ")";
+			db << std::endl;
+#endif
 			findRoute(playerId, currentPos, nodes[0].pos);
-			// db << "stackedMoves size: " << stackedMoves[playerId].size() << std::endl;
+#ifdef DEBUG_ZLY_V2
+			db << "stackedMoves size: " << stackedMoves[playerId].size() << std::endl;
+			db << "stackedMoves:";
+			for(auto& i: stackedMoves[playerId]) db << " (" << i.x << "," << i.y << ")";
+			db << std::endl;
+#endif
 			moveS ret = moveS{ playerId, true, currentPos, stackedMoves[playerId].front() };
 			stackedMoves[playerId].pop_front();
 			leastUsage[playerId] = min((int)stackedMoves[playerId].size(), (0));
-			// db << "Turn " << LGgame::curTurn << " from (" << ret.from.x << "," << ret.from.y << ") to (" << ret.to.x << "," << ret.to.y << ")" << std::endl;
-			// db.close();
+#ifdef DEBUG_ZLY_V2
+			db << "Turn " << LGgame::curTurn << " from (" << ret.from.x << "," << ret.from.y << ") to (" << ret.to.x << "," << ret.to.y << ")" << std::endl;
+			db.close();
+#endif
 			return ret;
 		}
 		return moveS{ playerId, false, currentPos, currentPos };

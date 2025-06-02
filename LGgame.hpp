@@ -732,7 +732,7 @@ namespace LGlocal {
 						LGgame::playerFocus[1] = LGgame::playerCoo[1];
 					} break;
 					case 27: { /*[ESC]*/
-						MessageBoxW(getHWnd(), wstring(L"YOU QUIT THE GAME.").c_str(), L"EXIT", MB_OK | MB_SYSTEMMODAL);
+						MessageBoxW(getHWnd(), wstring(L"YOU HAVE QUITTED THE GAME.").c_str(), L"EXIT", MB_OK | MB_SYSTEMMODAL);
 						closegraph();
 						return 0;
 					}
@@ -875,7 +875,7 @@ namespace LGlocal {
 				if(!alldead) {
 					LGgame::cheatCode = 1048575;
 					std::chrono::nanoseconds bg = std::chrono::steady_clock::now().time_since_epoch();
-					MessageBoxW(nullptr, L"ALL THE PLAYERS YOU SELECTED TO BE SEEN IS DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", L"TIP", MB_OK | MB_SYSTEMMODAL);
+					MessageBoxW(nullptr, L"ALL THE PLAYERS YOU SELECTED TO BE SEEN ARE DEAD.\nTHE OVERALL CHEAT MODE WILL BE SWITCHED ON.", L"TIP", MB_OK | MB_SYSTEMMODAL);
 					std::chrono::nanoseconds ed = std::chrono::steady_clock::now().time_since_epoch();
 					LGgame::beginTime += ed - bg;
 				}
@@ -891,7 +891,7 @@ namespace LGlocal {
 					             L"THE GAME WILL CONTINUE." + L"\n" +
 					             L"YOU CAN PRESS [ESC] TO EXIT.")
 					                .c_str(),
-					            L"GAME END", MB_OK | MB_SYSTEMMODAL);
+					            L"GAME OVER", MB_OK | MB_SYSTEMMODAL);
 					std::chrono::nanoseconds eed = std::chrono::steady_clock::now().time_since_epoch();
 					LGgame::beginTime += eed - bg;
 					gameEnd = 1;

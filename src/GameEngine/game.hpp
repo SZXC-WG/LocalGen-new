@@ -13,7 +13,6 @@
 
 #include "player.hpp"
 #include "board.hpp"
-#include "move.hpp"
 
 class BasicGame {
 };

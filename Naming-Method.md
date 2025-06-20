@@ -1,0 +1,39 @@
+## **Local Generals.io v6 (Qt) 代码命名规范**
+
+1. **类型命名 (类、结构体等)**  
+   类型名应采用**大驼峰命名法**（PascalCase）。对于简单的别名 (alias)，可以使用单个单词并加上后缀 `_t` 来命名。
+
+2. **枚举类型 (enum)**  
+   枚举类型应使用**全小写字母并用下划线分隔**（例如 `enum_type_e`），并且结尾添加 `_e` 后缀。枚举内部的常量应使用**全大写字母并用下划线分隔**（例如 `ENUM_CONSTANT`）。
+
+3. **方法和变量命名**  
+   大多数方法名和变量名应使用**小驼峰命名法**（camelCase），即首字母小写，后续每个单词首字母大写。
+
+4. **常量命名**  
+   常量应使用**全大写字母并用下划线分隔**的命名方式（例如 `MAX_VALUE`, `PI_CONSTANT`）。
+
+5. **宏定义命名**  
+   全局宏应采用**全大写字母并用下划线分隔**（例如 `#define GLOBAL_MACRO`）。对于局部宏（即在局部用 `#define` 定义并在使用后通过 `#undef` 删除的宏），命名要求较为宽松，但建议避免使用无意义的名称。
+
+6. **局部变量命名**  
+   对于极为局部的局部变量，命名要求不严格，但应避免使用如 `i`、`j` 等没有描述性的单字母命名，以确保代码的可读性。
+
+## **Local Generals.io v6 (Qt) Code Naming Conventions**
+
+1. **Type Naming (Classes, Structs, etc.)**  
+   Type names should use **PascalCase** (also known as **UpperCamelCase**). For simple aliases, a single word followed by the suffix `_t` can be used for naming.
+
+2. **Enum Types**  
+   Enum type names should be in **all lowercase with underscores** (e.g., `enum_type_e`), with the suffix `_e` added at the end. Constants defined within the enum should follow the **UPPERCASE_WITH_UNDERSCORES** style (e.g., `ENUM_CONSTANT`).
+
+3. **Function and Variable Naming**  
+   In most cases, function and variable names should use **camelCase**, starting with a lowercase letter and capitalizing the first letter of each subsequent word.
+
+4. **Constant Naming**  
+   Constants should be named in **UPPERCASE_WITH_UNDERSCORES** (e.g., `MAX_VALUE`, `PI_CONSTANT`).
+
+5. **Macro Naming**  
+   Global macros should be in **UPPERCASE_WITH_UNDERSCORES** (e.g., `#define GLOBAL_MACRO`). For local macros (defined using `#define` and later undefined with `#undef`), naming conventions are more flexible, but it's recommended to avoid using meaningless names.
+
+6. **Local Variable Naming**  
+   For highly localized variables, there are no strict naming requirements, but avoid using non-descriptive single-letter names like `i` or `j` to ensure code readability.

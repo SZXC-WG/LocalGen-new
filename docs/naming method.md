@@ -1,4 +1,4 @@
-## **Local Generals.io v6 (Qt) 代码命名规范**
+# **Local Generals.io v6 (Qt) 代码命名规范**
 
 1. **命名空间 (namespace)**
    命名空间应使用**全小写字母并用下划线分隔**（例如 `namespace local_generals`）。

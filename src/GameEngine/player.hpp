@@ -30,8 +30,8 @@ class Player {
 
     Player(const std::string& name) :
         name(name) {}
-    virtual ~Player() {}
-    // virtual Move step(const BoardView& view) {}
+    ~Player() {}
+    virtual Move step(const BoardView& view) = 0;
 };
 
 inline bool inSameTeam(Player* p1, Player* p2) {

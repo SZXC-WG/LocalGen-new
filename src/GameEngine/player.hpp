@@ -13,6 +13,9 @@
 
 #include <cstdint>
 #include <string>
+#include <deque>
+
+#include "board.hpp"
 
 /// Base struct for players.
 class Player {
@@ -23,6 +26,7 @@ class Player {
     const std::string name;
     index_t index;
     index_t teamId;
+    std::deque<Move> moveQueue;
 
     Player(const std::string& name) :
         name(name) {}
@@ -30,7 +34,7 @@ class Player {
     // virtual Move step(const BoardView& view) {}
 };
 
-inline bool in_same_team(Player* p1, Player* p2) {
+inline bool inSameTeam(Player* p1, Player* p2) {
     if(p1 == nullptr || p2 == nullptr) return false;
     return p1->teamId == p2->teamId;
 }

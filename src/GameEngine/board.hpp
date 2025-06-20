@@ -19,8 +19,9 @@
 
 #include "utils/coord.hpp"
 
-#include "player.hpp"
 #include "tile.hpp"
+
+class Player;
 
 /// Game map board. Zoomable.
 /// The %Board is a complex thing. Many systems are part of it (e.g. vision system).
@@ -42,26 +43,26 @@ class Board {
 
    public:
     /// Check whether a %Coord indicating a tile position is valid.
-    bool is_valid_coord(Coord coord) const {
+    bool isValidCoord(Coord coord) const {
         return coord.x >= 1 && coord.x <= col && coord.y >= 1 && coord.y <= row;
     }
     /// Check whether a %Coord indicating a tile position is invalid.
-    bool is_invalid_coord(Coord coord) const { return !is_valid_coord(coord); }
+    bool isInvalidCoord(Coord coord) const { return !isValidCoord(coord); }
 
    private:
     /// Map coding system derived from v5.
     /// LocalGen v6 is compatible with v5, so we saved this system.
 
-    inline intmax_t v5coding_pmod(intmax_t& x) {
+    inline intmax_t v5codingPmod(intmax_t& x) {
         intmax_t res = x & 63;  // 63 = 0b111111
         x >>= 6;
         return res;
     }
 
-#define PMod    v5coding_pmod
+#define PMod    v5codingPmod
 #define CHAR_AD 48
 
-    inline std::string v5coding_zip() {
+    inline std::string v5codingZip() {
         std::string strZip;
         int i, j;
         intmax_t k1 = row, k2 = col;
@@ -102,27 +103,27 @@ class Board {
         // strZip[p] = '\0'; // not necessary
         return strZip;
     }
-    inline void v5coding_unzip(std::string strdeZip) {
-        strdeZip.push_back('\0');
+    inline void v5codingUnzip(std::string strUnzip) {
+        strUnzip.push_back('\0');
 
         int i, j, k = 4;
         int f, p = 0;
 
-        for(; strdeZip[p] != '\0'; p++)
-            strdeZip[p] -= CHAR_AD;
+        for(; strUnzip[p] != '\0'; p++)
+            strUnzip[p] -= CHAR_AD;
 
-        row = (strdeZip[1] << 6) + strdeZip[0];
-        col = (strdeZip[3] << 6) + strdeZip[2];
+        row = (strUnzip[1] << 6) + strUnzip[0];
+        col = (strUnzip[3] << 6) + strUnzip[2];
         tiles.resize(row + 2, std::vector<Tile>(col + 2, Tile()));
 
         for(i = 1; i <= row; i++)
             for(j = 1; j <= col; j++) {
-                tiles[i][j].occupier = (strdeZip[k++], nullptr);
-                bool f = strdeZip[k] & 1;
-                strdeZip[k] >>= 1;
-                tiles[i][j].lit = strdeZip[k] & 1;
-                strdeZip[k] >>= 1;
-                int type = strdeZip[k++];
+                tiles[i][j].occupier = (strUnzip[k++], nullptr);
+                bool f = strUnzip[k] & 1;
+                strUnzip[k] >>= 1;
+                tiles[i][j].lit = strUnzip[k] & 1;
+                strUnzip[k] >>= 1;
+                int type = strUnzip[k++];
                 tiles[i][j].army = 0;
 
                 switch(type) {
@@ -138,7 +139,7 @@ class Board {
                 }
 
                 for(p = 7; p >= 0; p--)
-                    tiles[i][j].army = (tiles[i][j].army << 6) + strdeZip[k + p];
+                    tiles[i][j].army = (tiles[i][j].army << 6) + strUnzip[k + p];
                 k += 8;
                 tiles[i][j].army = f ? (-tiles[i][j].army) : tiles[i][j].army;
             }
@@ -157,21 +158,21 @@ class Board {
         if(x < 1 || x > col || y < 1 || y > row) return false;
 
         // occupier visibility
-        if(in_same_team(tiles[x][y].occupier, player)) return true;
+        if(inSameTeam(tiles[x][y].occupier, player)) return true;
         // adjacent visibility
         if(true &&  // overall check may not consider modifiers
-           (in_same_team(tiles[x - 1][y].occupier, player) ||
-            in_same_team(tiles[x + 1][y].occupier, player) ||
-            in_same_team(tiles[x][y - 1].occupier, player) ||
-            in_same_team(tiles[x][y + 1].occupier, player) ||
-            in_same_team(tiles[x - 1][y - 1].occupier, player) ||
-            in_same_team(tiles[x - 1][y + 1].occupier, player) ||
-            in_same_team(tiles[x + 1][y - 1].occupier, player) ||
-            in_same_team(tiles[x + 1][y + 1].occupier, player)))
+           (inSameTeam(tiles[x - 1][y].occupier, player) ||
+            inSameTeam(tiles[x + 1][y].occupier, player) ||
+            inSameTeam(tiles[x][y - 1].occupier, player) ||
+            inSameTeam(tiles[x][y + 1].occupier, player) ||
+            inSameTeam(tiles[x - 1][y - 1].occupier, player) ||
+            inSameTeam(tiles[x - 1][y + 1].occupier, player) ||
+            inSameTeam(tiles[x + 1][y - 1].occupier, player) ||
+            inSameTeam(tiles[x + 1][y + 1].occupier, player)))
             return true;
 
         // lookout check
-        auto find_lookout_occupier = [&](pos_t x, pos_t y) {
+        auto findLookoutOccupier = [&](pos_t x, pos_t y) {
             Player* occupier = nullptr;
             army_t maxArmy = 0;
             if(tiles[x - 1][y].army > maxArmy) occupier = tiles[x - 1][y].occupier, maxArmy = tiles[x - 1][y].army;
@@ -187,7 +188,7 @@ class Board {
         for(pos_t i = std::max(x - 3, 1); i <= std::min(x + 3, row); ++i) {
             for(pos_t j = std::max(y - 3, 1); j <= std::min(y + 3, col); ++j) {
                 if(tiles[i][j].type == TILE_LOOKOUT)
-                    if(find_lookout_occupier(i, j) == player) return true;
+                    if(findLookoutOccupier(i, j) == player) return true;
             }
         }
 
@@ -282,7 +283,7 @@ class Board {
 
         /// Check whether a %Move is available on a certain Board.
         bool available(Board* board) {
-            if(!board->is_invalid_coord(from) || !board->is_invalid_coord(to)) return false;
+            if(!board->isInvalidCoord(from) || !board->isInvalidCoord(to)) return false;
 
             if(!board->visible(from, player) || !board->visible(to, player)) return false;
 
@@ -315,7 +316,7 @@ class Board {
     /// A %MoveProcessor is used to contain and process moves.
     class MoveProcessor {
        protected:
-        std::deque<Move> in_queue_raw_moves;
+        std::deque<Move> rawMovesInQueue;
         std::unordered_map<pos_t, Move> edge_map;
 
        protected:
@@ -329,15 +330,15 @@ class Board {
 
        public:
         /// Add a %Move to the waiting-to-be-processed queue.
-        inline void add_move(Move move) {
+        inline void addMove(Move move) {
             if(move.available(board))
-                in_queue_raw_moves.emplace_back(move);
+                rawMovesInQueue.emplace_back(move);
         }
         /// Convert all %Moves in the move buffer to edges and move them into the edge buffer.
-        inline void convert_to_edge() {
-            while(!in_queue_raw_moves.empty()) {
-                Move cur_move = in_queue_raw_moves.front();
-                in_queue_raw_moves.pop_front();
+        inline void convertToEdge() {
+            while(!rawMovesInQueue.empty()) {
+                Move cur_move = rawMovesInQueue.front();
+                rawMovesInQueue.pop_front();
                 pos_t edge_index = biindex(cur_move.from, cur_move.to);
                 pos_t edge_rev_index = biindex(cur_move.to, cur_move.from);
                 if(edge_map.find(edge_rev_index) != edge_map.end()) {
@@ -353,11 +354,13 @@ class Board {
     };
 
    protected:
-    MoveProcessor move_processor{ this };
+    MoveProcessor moveProcessor{ this };
 };
 
 /// Declare alias for convenience.
 using BoardView = Board::BoardView;
+using Move = Board::Move;
+using MoveProcessor = Board::MoveProcessor;
 
 /// Comparisons of (%Move)s. Defined to make usage of comparison-based containers like std::set and std::map more convenient.
 bool operator<(const Board::Move& a, const Board::Move& b) { return (a.from != b.from ? a.from < b.from : a.to < b.to); }

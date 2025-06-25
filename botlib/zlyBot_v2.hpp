@@ -119,7 +119,7 @@ namespace zlyBot_v2 {
 				if(isVisible(i, j, 1 << playerId) || getType(playerId, i, j) == BLOCK_SWAMP) isSeenBefore[playerId][i][j] = true;
 				if(gameMap[i][j].player == playerId) blockValue[playerId][i][j] = -INF;
 				else {
-					blockValue[playerId][i][j] = blockValueWeight[playerId][getType(playerId, i, j)] - dist[playerId][i][j] - isSeenBefore[playerId][i][j] * LGgame::curTurn /*  - passedTimes[playerId][i][j] */;
+					blockValue[playerId][i][j] = blockValueWeight[playerId][getType(playerId, i, j)] - dist[playerId][i][j] - isSeenBefore[playerId][i][j] * (LGgame::curTurn - 100000.0 / LGgame::gameStats[playerId].back().army) /*  - passedTimes[playerId][i][j] */;
 					if(isVisible(i, j, 1 << playerId) && gameMap[i][j].player != 0) {
 						ll adjacent_minimum_same_player = INF;
 						for(int k = 0; k < 4; ++k) {

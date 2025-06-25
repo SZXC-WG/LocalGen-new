@@ -26,7 +26,8 @@ namespace zlyBot_v2 {
 	ll blockArmyRem[64][505][505];
 	deque<coordS> previousMoves[64];
 	bool inPreviousMoves[64][505][505];
-	int passedTimes[64][505][505];
+	bool isSeenBefore[64][505][505];
+	// int passedTimes[64][505][505];
 #ifdef DEBUG_ZLY_V2
 	std::wofstream db;
 #endif
@@ -55,7 +56,8 @@ namespace zlyBot_v2 {
 	}
 
 	inline void initBot(int botId) {
-		memset(passedTimes[botId], 0, sizeof(passedTimes[botId]));
+		// memset(passedTimes[botId], 0, sizeof(passedTimes[botId]));
+		memset(isSeenBefore[botId], 0, sizeof(isSeenBefore[botId]));
 		blockValueWeight[botId] = { 300 - LGset::plainRate[LGset::gameMode] * 10 + 10, -1500000000, -INF, 10, 300, 0, -INF, -INF, 300 };
 		for(int playerId = 1; playerId <= LGgame::playerCnt; ++playerId) seenGenerals[botId][playerId] = coordS(-1, -1);
 		memset(blockTypeRem[botId], -1, sizeof(blockTypeRem[botId]));
@@ -114,9 +116,10 @@ namespace zlyBot_v2 {
 #endif
 		for(int i = 1; i <= mapH; ++i) {
 			for(int j = 1; j <= mapW; ++j) {
+				if(isVisible(i, j, 1 << playerId) || getType(playerId, i, j) == BLOCK_SWAMP) isSeenBefore[playerId][i][j] = true;
 				if(gameMap[i][j].player == playerId) blockValue[playerId][i][j] = -INF;
 				else {
-					blockValue[playerId][i][j] = blockValueWeight[playerId][getType(playerId, i, j)] - dist[playerId][i][j] - passedTimes[playerId][i][j];
+					blockValue[playerId][i][j] = blockValueWeight[playerId][getType(playerId, i, j)] - dist[playerId][i][j] - isSeenBefore[playerId][i][j] * LGgame::curTurn /*  - passedTimes[playerId][i][j] */;
 					if(isVisible(i, j, 1 << playerId) && gameMap[i][j].player != 0) {
 						ll adjacent_minimum_same_player = INF;
 						for(int k = 0; k < 4; ++k) {
@@ -158,7 +161,7 @@ namespace zlyBot_v2 {
 			}
 		};
 		auto UnitedInc = [&](int x, int y) -> ll {
-			return DisInc * 1000 + ArmyInc(x, y) + TypeInc(x, y) + passedTimes[playerId][x][y];
+			return DisInc * 1000 + ArmyInc(x, y) + TypeInc(x, y) /*  + passedTimes[playerId][x][y] */;
 		};
 		constexpr int dx[] = { -1, 0, 1, 0 };
 		constexpr int dy[] = { 0, -1, 0, 1 };
@@ -234,7 +237,7 @@ namespace zlyBot_v2 {
 			leastUsage[playerId] = 0;
 			currentPos = maxCoo;
 		}
-		++passedTimes[playerId][currentPos.x][currentPos.y];
+		// ++passedTimes[playerId][currentPos.x][currentPos.y];
 		if(leastUsage[playerId] != 0) {
 			--leastUsage[playerId];
 			auto next = stackedMoves[playerId].front();

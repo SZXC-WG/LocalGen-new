@@ -32,6 +32,12 @@
   feat(ui): add custom skin selection option
   ```
 
+- `upd`：更新现有功能（update 的缩写）。
+  示例：
+  ```
+  upd(core): optimize game state update algorithm
+  ```
+
 - `fix`：修复 bug。
   示例：
   ```
@@ -143,61 +149,59 @@ Each commit message should follow this structure:
 
 ### 2. **Types of Commit Messages**
 
-#### - `feat`: A new feature.
+- `feat`: A new feature.
+  Example:
+  ```
+  feat(ui): add custom skin selection option
+  ```
 
-Example:
-```
-feat(ui): add custom skin selection option
-```
+- `upd`：Update an existing feature.
+  Example:
+  ```
+  upd(core): optimize game state update algorithm
+  ```
 
-#### - `fix`: A bug fix.
+- `fix`: A bug fix.
+  Example:
+  ```
+  fix(networking): resolve connection issue during login
+  ```
 
-Example:
-```
-fix(networking): resolve connection issue during login
-```
+- `docs`: Documentation changes.
+  Example:
+  ```
+  docs(readme): update installation instructions
+  ```
 
-#### - `docs`: Documentation changes.
+- `style`: Code style changes (e.g., formatting, linting).
+  Example:
+  ```
+  style(ui): improve button alignment
+  ```
 
-Example:
-```
-docs(readme): update installation instructions
-```
+- `refactor`: Refactoring code without changing functionality.
+  Example:
+  ```
+  refactor(core): simplify game state management logic
+  ```
 
-#### - `style`: Code style changes (e.g., formatting, linting).
+- `chore`: Changes to the build process, dependencies, or maintenance tasks.
+  Example:
+  ```
+  chore(deps): update Qt framework to v6.3
+  ```
 
-Example:
-```
-style(ui): improve button alignment
-```
+- `test`: Adding or updating tests.
+  Example:
+  ```
+  test(ui): add tests for player selection screen
+  ```
 
-#### - `refactor`: Refactoring code without changing functionality.
-
-Example:
-```
-refactor(core): simplify game state management logic
-```
-
-#### - `chore`: Changes to the build process, dependencies, or maintenance tasks.
-
-Example:
-```
-chore(deps): update Qt framework to v6.3
-```
-
-#### - `test`: Adding or updating tests.
-
-Example:
-```
-test(ui): add tests for player selection screen
-```
-
-#### - `ci`: Continuous Integration related changes.
-
-Example:
-```
-ci: add deployment pipeline for production
-```
+- `ci`: Continuous Integration related changes.
+  Example:
+  ```
+  ci: add deployment pipeline for production
+  ```
 
 ### 3. **Commit Subjects**
 

@@ -306,11 +306,11 @@ void createOptions(int type, int h) {
 	putimage_withalpha(NULL, npimg[4], 0, h + LGGraphics::zoomY(40));
 	putimage_withalpha(NULL, npimg[2], 0, h + LGGraphics::zoomY(80));
 	putimage_withalpha(NULL, npimg[1], 0, h + LGGraphics::zoomY(120));
-	putimage_withalpha(NULL, npimg[11], 0, h + LGGraphics::zoomY(200));
-	putimage_withalpha(NULL, npimg[12], 0, h + LGGraphics::zoomY(240));
-	putimage_withalpha(NULL, npimg[13], 0, h + LGGraphics::zoomY(280));
-	putimage_withalpha(NULL, npimg[8], 0, h + LGGraphics::zoomY(320));
-	putimage_withalpha(NULL, npimg[7], 0, h + LGGraphics::zoomY(360));
+	putimage_withalpha(NULL, npimg[8], 0, h + LGGraphics::zoomY(200));
+	putimage_withalpha(NULL, npimg[7], 0, h + LGGraphics::zoomY(240));
+	putimage_withalpha(NULL, npimg[11], 0, h + LGGraphics::zoomY(280));
+	putimage_withalpha(NULL, npimg[12], 0, h + LGGraphics::zoomY(320));
+	putimage_withalpha(NULL, npimg[13], 0, h + LGGraphics::zoomY(360));
 	xyprintf(LGGraphics::zoomX(20), h + LGGraphics::zoomY(180), "40");
 	for(int i = 1; i <= 13; ++i) delimage(npimg[i]);
 	settextjustify(LEFT_TEXT, TOP_TEXT);

@@ -1156,32 +1156,52 @@ namespace LGGraphics {
 										gameMap[lin][col].army = plainnum;
 										break;
 									case 5:
-										gameMap[lin][col].player = 0;
-										gameMap[lin][col].type = 5;
-										gameMap[lin][col].army = 0;
-										break;
-									case 6:
-										gameMap[lin][col].player = 0;
-										gameMap[lin][col].type = 6;
-										gameMap[lin][col].army = 0;
-										break;
-									case 7:
-										gameMap[lin][col].player = 0;
-										gameMap[lin][col].type = 7;
-										gameMap[lin][col].army = 0;
-										break;
-									case 8:
 										gameMap[lin][col].lit = !gameMap[lin][col].lit;
 										break;
-									default:
+									case 6:
 										gameMap[lin][col].player = 0;
 										gameMap[lin][col].type = 0;
 										gameMap[lin][col].army = 0;
 										break;
+									case 7:
+										gameMap[lin][col].player = 0;
+										gameMap[lin][col].type = 5;
+										gameMap[lin][col].army = 0;
+										break;
+									case 8:
+										gameMap[lin][col].player = 0;
+										gameMap[lin][col].type = 6;
+										gameMap[lin][col].army = 0;
+										break;
+									case 9:
+										gameMap[lin][col].player = 0;
+										gameMap[lin][col].type = 7;
+										gameMap[lin][col].army = 0;
+										break;
+									default: break;
 								}
 							}
 						}
 					}
+				}
+			}
+			while(kbmsg()) {
+				key_msg key = getkey();
+				if(key.msg != key_msg_down) continue;
+				switch(key.key) {
+					case key_f1: type = 0; break;
+					case key_f2: type = 1; break;
+					case key_f3: type = 2; break;
+					case key_f4: type = 3; break;
+					case key_f5: type = 4; break;
+					case key_f6: type = 5; break;
+					case key_f7: type = 6; break;
+					case key_f8: type = 7; break;
+					case key_f9: type = 8; break;
+					case key_f10: type = 9; break;
+					case key_up: type = (type + 9) % 10; break;
+					case key_down: type = (type + 1) % 10; break;
+					default: break;
 				}
 			}
 			cleardevice();
@@ -1200,11 +1220,11 @@ namespace LGGraphics {
 				xyprintf(scrw / 2, scrh - zoomY(115), "Click a tile to place a swamp.");
 				xyprintf(scrw / 2, scrh - zoomY(95), "Swamps drain 1 army per turn.");
 			}
-			if(type == 8) {
+			if(type == 5) {
 				bar(scrw / 2 - zoomX(95), scrh - zoomY(110), scrw / 2 + zoomX(95), scrh - zoomY(80));
 				xyprintf(scrw / 2, scrh - zoomY(95), "Click a tile to toggle light tile.");
 			}
-			if(type == 9) {
+			if(type == 6) {
 				bar(scrw / 2 - zoomX(80), scrh - zoomY(110), scrw / 2 + zoomX(80), scrh - zoomY(80));
 				xyprintf(scrw / 2, scrh - zoomY(95), "Click a tile to remove it.");
 			}

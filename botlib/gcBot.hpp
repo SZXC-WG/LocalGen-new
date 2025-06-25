@@ -14,12 +14,13 @@ namespace gcBot {
 
 	constexpr int dx[] = { -1, 0, 1, 0 };
 	constexpr int dy[] = { 0, -1, 0, 1 };
+	std::random_device rd;
 
 	class Bot {
 	   private:
 		int id;                  // Current bot's identifier
 		coordS seenGeneral[64];  // Stores last seen positions of other generals
-		std::array<ll, 6> blockValueWeight;
+		std::array<ll, 6> blockTypeValue;
 		ll eval[256][256];
 		coordS par[256][256];
 		int dist[256][256];
@@ -38,19 +39,11 @@ namespace gcBot {
 			return std::abs(st.x - dest.x) + std::abs(st.y - dest.y);
 		}
 
-		inline int getType(int x, int y) {
-			int type = gameMap[x][y].type;
-			if(isVisible(x, y, 1 << id)) return knownBlockType[x][y] = true, type;
-			if(unpassable(type) || type == 4) return 5;
-			if(type == 3) return 0;
-			return type;
-		}
-
 		void evaluateRouteCosts(coordS st) {
 			static const ll typeValues[] = { -5, -10, -INF, -5, -40, 0, -INF, -INF, -200 };
 			auto gv = [&](int x, int y) -> ll {
 				if(blockType[x][y] == 1) return -1;
-				if(blockType[x][y] == 5) return -20;
+				if(blockType[x][y] == 5) return 0;
 				if(gameMap[x][y].player == id) return army[x][y] - 1;
 				return -army[x][y];
 			};
@@ -106,11 +99,11 @@ namespace gcBot {
 
 	   public:
 		Bot() :
-		    rnd(std::random_device()()) {}
+		    rnd(rd()) {}
 
 		void init(int botId) {
 			id = botId;
-			blockValueWeight = { 31 - LGset::plainRate[LGset::gameMode], -2000, -INF, 0, 50, 25 };
+			blockTypeValue = { 60, -500, -INF, 0, 50, 25 };
 			prevTarget = coordS(-1, -1);
 			memset(knownBlockType, 0, sizeof(knownBlockType));
 			memset(army, -1, sizeof(army));
@@ -118,26 +111,36 @@ namespace gcBot {
 		}
 
 		moveS calcNextMove(coordS coo) {
-			// Update seen generals & army
+			// Update block types, seen generals & army
 			for(int i = 1; i <= mapH; ++i)
-				for(int j = 1; j <= mapW; ++j)
+				for(int j = 1; j <= mapW; ++j) {
 					if(isVisible(i, j, 1 << id)) {
-						if(gameMap[i][j].type == 3)
+						knownBlockType[i][j] = true, blockType[i][j] = gameMap[i][j].type;
+						if(blockType[i][j] == 3)
 							seenGeneral[gameMap[i][j].player] = coordS(i, j);
 						ll seenArmy = gameMap[i][j].army;
 						// Apply exponential smoothing after first seen
-						army[i][j] = (army[i][j] == -1 || gameMap[i][j].player == id) ? seenArmy : (seenArmy + army[i][j]) / 2;
+						army[i][j] = (army[i][j] < 0 || gameMap[i][j].player == id || gameMap[i][j].player == 0) ? seenArmy : (seenArmy + army[i][j]) / 2;
+					} else if(!knownBlockType[i][j]) {
+						int type = gameMap[i][j].type;
+						if(unpassable(type) || type == 4) blockType[i][j] = 5;
+						else if(type == 3) blockType[i][j] = 0;
+						else blockType[i][j] = type;
 					}
+				}
 
-			// Update block types
-			for(int i = 1; i <= mapH; ++i)
-				for(int j = 1; j <= mapW; ++j)
-					if(!knownBlockType[i][j])
-						blockType[i][j] = getType(i, j);
+			// Dynamic block values
+			if(LGgame::curTurn < 13) return { id, false, coo, coo };
+			blockTypeValue[0] = 55 + pow(LGgame::curTurn, 0.2);        // plain
+			blockTypeValue[1] = -500 * pow(LGgame::curTurn, -0.1);     // swamp
+			blockTypeValue[4] = 28 * pow(LGgame::curTurn - 12, 0.15);  // city
+			blockTypeValue[5] = 35 + 15 * pow(LGgame::curTurn, 0.15);  // unknown
 
 			// Focus disabled?
-			if(gameMap[coo.x][coo.y].player != id || gameMap[coo.x][coo.y].army == 0)
-				coo = maxArmyPos();
+			if(!isValidPosition(coo.x, coo.y) || gameMap[coo.x][coo.y].player != id || gameMap[coo.x][coo.y].army < 2)
+				coo = maxArmyPos(), prevTarget = coordS(-1, -1);
+			else if(coo == prevTarget || (prevTarget.x != -1 && gameMap[prevTarget.x][prevTarget.y].player == id))
+				prevTarget = coordS(-1, -1);
 
 			// Attack if possible
 			ll minArmy = INF;
@@ -152,29 +155,47 @@ namespace gcBot {
 
 			// Determine target
 			evaluateRouteCosts(coo);
-			coordS targetPos = coo;
-			if(targetId == -1) {
+			coordS targetPos(-1, -1);
+			static std::uniform_real_distribution<double> dis(0, 1);
+			if(targetId != -1) targetPos = seenGeneral[targetId];
+			else if(prevTarget.x == -1 || blockType[prevTarget.x][prevTarget.y] != 0 || knownBlockType[prevTarget.x][prevTarget.y]) {
 				ll maxBlockValue = -INF;
+				if(dis(rnd) < 0.02) {
+					// Exploration: find random plain with unknown type (might be a general)
+					std::vector<coordS> unknownPlains;
+					for(int i = 1; i <= mapH; ++i)
+						for(int j = 1; j <= mapW; ++j)
+							if(blockType[i][j] == 0 && !knownBlockType[i][j] && dist[i][j] < 500)
+								unknownPlains.emplace_back(i, j);
+					if(!unknownPlains.empty()) {
+						std::uniform_int_distribution<int> randIndex(0, unknownPlains.size() - 1);
+						targetPos = unknownPlains[randIndex(rnd)];
+						maxBlockValue = 1e9;
+					}
+				}
 				for(int i = 1; i <= mapH; ++i)
 					for(int j = 1; j <= mapW; ++j)
-						if(gameMap[i][j].player != id && !unpassable(blockType[i][j])) {
-							ll blockValue = blockValueWeight[blockType[i][j]] - dist[i][j] - army[i][j] / 11;
+						if(gameMap[i][j].player != id && dist[i][j] < 500 && !unpassable(blockType[i][j])) {
+							ll blockValue = blockTypeValue[blockType[i][j]] + eval[i][j] / 5 - (dist[i][j] + army[i][j] / 2);
+							if(LGset::gameMode == 0)
+								blockValue -= approxDist({ i, j }, seenGeneral[id]) * 5ll;
 							if(blockValue > maxBlockValue)
 								maxBlockValue = blockValue, targetPos = { i, j };
 						}
 				int x = prevTarget.x, y = prevTarget.y;
 				if(x != -1 && gameMap[x][y].player != id && !unpassable(blockType[x][y])) {
-					ll prevBlockValue = blockValueWeight[blockType[x][y]] - dist[x][y] - army[x][y] / 11;
+					ll prevBlockValue = blockTypeValue[blockType[x][y]] + eval[x][y] / 5 - (dist[x][y] + army[x][y] / 2);
+					if(LGset::gameMode == 0)
+						prevBlockValue -= approxDist({ x, y }, seenGeneral[id]) * 5ll;
 					if(std::abs(prevBlockValue - maxBlockValue) < 25)
 						targetPos = prevTarget;
 				}
 			} else {
-				targetPos = seenGeneral[targetId];
+				targetPos = prevTarget;
 			}
 			prevTarget = targetPos;
 
-			static std::uniform_real_distribution<double> dis(0, 1);
-			if(blockType[coo.x][coo.y] == 1 || dis(rnd) > 0.07) {
+			if(blockType[coo.x][coo.y] == 1 || dis(rnd) > 0.07 || eval[targetPos.x][targetPos.y] > 150) {
 				return { id, true, coo, moveTowards(coo, targetPos) };
 			}
 
@@ -186,7 +207,7 @@ namespace gcBot {
 			for(int i = 1; i <= mapH; ++i)
 				for(int j = 1; j <= mapW; ++j)
 					if(gameMap[i][j].player == id && army[i][j] > 1) {
-						ll weight = eval[i][j] - 50 * dist[i][j];
+						ll weight = eval[i][j] - 30 * dist[i][j];
 						if(blockType[i][j] == 3) weight -= weight / 4;
 						if(weight > maxWeight)
 							maxWeight = weight, newFocus = { i, j };

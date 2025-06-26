@@ -10,5 +10,7 @@
     "editor.insertSpaces": true,
     "files.associations": {
         "unordered_map": "cpp"
-    }
+    },
+    "cmake.options.statusBarVisibility": "visible",
+    "cmake.buildDirectory": "${workspaceFolder}/build/${buildType}"
 }

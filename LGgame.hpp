@@ -561,17 +561,18 @@ namespace LGlocal {
 		LGGraphics::init();
 
 		// init robots
-		std::mt19937 mtrd(std::chrono::system_clock::now().time_since_epoch().count());
+		std::mt19937 mtrd(std::random_device{}());
+		std::uniform_int_distribution<int> botid_dis(0, 699);
 		LGgame::robotId[1] = -100;
 		for(int i = 2; i <= LGgame::playerCnt; ++i) {
 			// LGgame::robotId[i] = mtrd() % 100 + 300 + (i % 3) * 100;
-			LGgame::robotId[i] = mtrd() % 700;
+			LGgame::robotId[i] = botid_dis(mtrd);
 			// LGgame::robotId[i] = mtrd() % 400 + 300;
 			// LGgame::robotId[i] = mtrd() % 200 + 300;
 			// LGgame::robotId[i] = mtrd() % 100 + 400;
 			// LGgame::robotId[i] = mtrd() % 100 + 300;
 			while(((LGset::gameMode == 1 || LGset::gameMode == 2) && (200 <= LGgame::robotId[i] && LGgame::robotId[i] < 300)))
-				LGgame::robotId[i] = mtrd() % 700;
+				LGgame::robotId[i] = botid_dis(mtrd);
 			// LGgame::robotId[i] = mtrd() % 100 + 400 + (i % 3) * 100;
 			// LGgame::robotId[i] = mtrd() % 100 + 400;
 			// LGgame::robotId[i] = mtrd() % 200 + 300;

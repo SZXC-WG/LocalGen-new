@@ -26,31 +26,32 @@ use the C++14 standard.
 
 #include "LGdef.hpp"
 #include "glib/GLIB_HEAD.hpp"
-#include "glib/GLIB_image.hpp"
-#include "glib/GLIB_rectbut.hpp"
-#include "glib/GLIB_circbut.hpp"
-#include "glib/GLIB_rectcbox.hpp"
-#include "glib/GLIB_page.hpp"
-#include "LGencoding.hpp"
-#include "LGset.hpp"
-#include "LGmaps.hpp"
-#include "LGgraphics.hpp"
+
 #include "LGbot.hpp"
-#include "LGzipmap.hpp"
+#include "LGencoding.hpp"
 #include "LGgame.hpp"
-#include "LGweb.hpp"
+#include "LGgraphics.hpp"
+#include "LGmaps.hpp"
 #include "LGreplay.hpp"
+#include "LGset.hpp"
+#include "LGweb.hpp"
+#include "LGzipmap.hpp"
+#include "glib/GLIB_circbut.hpp"
+#include "glib/GLIB_image.hpp"
+#include "glib/GLIB_page.hpp"
+#include "glib/GLIB_rectbut.hpp"
+#include "glib/GLIB_rectcbox.hpp"
 
 /*************** the main function ***************/
 int main(int argc, char** argv) {
-	// FreeConsole();
-	initMaps();
-	LGset::read();
-	LGset::write();
-	// init_console();
-	// show_console();
-	MainPage();  // start main page
-	exitExe();   // exit program
+    // FreeConsole();
+    initMaps();
+    LGset::read();
+    LGset::write();
+    // init_console();
+    // show_console();
+    MainPage();  // start main page
+    exitExe();   // exit program
 }
 
 #endif  // LGMAIN_CPP_

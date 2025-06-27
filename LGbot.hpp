@@ -16,24 +16,18 @@
 
 // Bots
 // #include "botlib/ktqBot.hpp"
+#include "botlib/gcBot.hpp"
+#include "botlib/smartRandomBot.hpp"
+#include "botlib/szlyBot.hpp"
 #include "botlib/xiaruizeBot.hpp"
 #include "botlib/xrzBot.hpp"
-#include "botlib/smartRandomBot.hpp"
 #include "botlib/zlyBot.hpp"
-#include "botlib/szlyBot.hpp"
 #include "botlib/zlyBot_v2.hpp"
-#include "botlib/gcBot.hpp"
+// #include "botlib/zlyBot_v3.hpp"
 
 string botName[] = {
-	"",
-	"smartRandomBot",
-	"xrzBot",
-	"xiaruizeBot",
-	"zlyBot",
-	"szlyBot",
-	"zlyBot v2",
-	"gcBot",
-	"gjrBot",
+    "",        "smartRandomBot", "xrzBot", "xiaruizeBot", "zlyBot",
+    "szlyBot", "zlyBot v2",      "gcBot",  "zlyBot v3",   "gjrBot",
 };
 
 #endif  // LGBOT_HPP_

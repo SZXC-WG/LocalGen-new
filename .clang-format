@@ -109,7 +109,6 @@ SpaceBeforeParensOptions:
 SpaceBeforeRangeBasedForLoopColon: true
 SpaceBeforeSquareBrackets: false
 SpaceInEmptyBlock: false
-SpaceBeforeSquareBrackets: false
 SpacesBeforeTrailingComments: 2
 SpacesInContainerLiterals: false
 SpacesInLineCommentPrefix:

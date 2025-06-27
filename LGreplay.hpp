@@ -84,8 +84,12 @@ Movement readMove(char* buf) {
 
 WReplay::WReplay(string Fname) { Filename = Fname; }
 void WReplay::initReplay(string Fname) {
-    Filename = Fname;
-    file = fopen(Fname.c_str(), "w");
+    Filename =
+        Fname + "_" +
+        std::to_string(
+            std::chrono::system_clock::now().time_since_epoch().count()) +
+        ".lgr";
+    file = fopen(Filename.c_str(), "w");
     string info = "";
     info += ntoc(LGgame::playerCnt);
     info += ntos(mapH, 2);

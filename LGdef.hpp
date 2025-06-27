@@ -461,7 +461,7 @@ unsigned short defaultPlayerNum = 2;
 unsigned short defaultSpeed = 1;
 unsigned short defaultUserId = 1;  // for player color
 bool enableGongSound = true;
-wstring replayFileName((L"replay.lgr"s + wstring(50, 0)).c_str(), 50);
+wstring replayFileName((L"replay"s + wstring(50, 0)).c_str(), 50);
 bool enableBetaTag = true;          // currently no change allowed
 unsigned short socketPort = 14514;  // no change allowed
 wstring mainFontName((L"Quicksand"s + wstring(30, 0)).c_str(), 30);
@@ -617,7 +617,7 @@ void printAnalysis();
 using LGgame::unpassable;
 
 namespace LGreplay {
-const string replayFileName = "replay.lgr";
+const string replayFileName = "replay";
 char ntoc(int x);
 int cton(char x);
 string ntos(int x, int len = -1);

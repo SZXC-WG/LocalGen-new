@@ -200,8 +200,8 @@ class Board {
                 maxArmy = tiles[x - 1][y].army;
             return occupier;
         };
-        for (pos_t i = std::max(x - 3, 1); i <= std::min(x + 3, row); ++i) {
-            for (pos_t j = std::max(y - 3, 1); j <= std::min(y + 3, col); ++j) {
+        for (pos_t i = std::max(x - 2, 1); i <= std::min(x + 2, row); ++i) {
+            for (pos_t j = std::max(y - 2, 1); j <= std::min(y + 2, col); ++j) {
                 if (tiles[i][j].type == TILE_LOOKOUT)
                     if (findLookoutOccupier(i, j) == player) return true;
             }

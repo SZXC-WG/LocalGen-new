@@ -4,7 +4,7 @@ BasedOnStyle: Google
 AccessModifierOffset: -1
 AlignAfterOpenBracket: Align
 AlignArrayOfStructures: Right
-AlignConsecutiveAssignments: Never
+AlignConsecutiveAssignments: None
 AlignConsecutiveDeclarations:
   Enabled: false
   AcrossEmptyLines: false

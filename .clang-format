@@ -82,7 +82,7 @@ PPIndentWidth: -1
 PointerAlignment: Left
 QualifierAlignment: Left
 ReferenceAlignment: Pointer
-ReflowComments: false
+ReflowComments: Always
 SortIncludes: true
 SortUsingDeclarations: Lexicographic
 SeparateDefinitionBlocks: Leave

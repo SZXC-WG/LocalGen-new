@@ -667,6 +667,29 @@ int GAME() {
                              std::min(900 / mapH, 900 / mapW), mapH, mapW);
     LGGraphics::init();
 
+    rectBUTTON speedUpBut, speedDownBut;
+    speedUpBut.move(LGGraphics::zoomX(0), LGGraphics::zoomY(0))
+        .size(LGGraphics::zoomX(25), LGGraphics::zoomY(25))
+        .addtext(L"∧")
+        .fontname(LGset::mainFontName)
+        .fontsize(20 * LGGraphics::windowData.zoomY, 0)
+        .textalign(CENTER_TEXT, CENTER_TEXT)
+        .bgcolor(0xffffffff)
+        .enableTextShadow = false;
+    speedUpBut.enableButtonShadow = false;
+    speedUpBut.event([]() { LGgame::gameSpeed += 1; });
+    speedDownBut.move(LGGraphics::zoomX(0), LGGraphics::zoomY(25))
+        .size(LGGraphics::zoomX(25), LGGraphics::zoomY(25))
+        .addtext(L"∨")
+        .fontname(LGset::mainFontName)
+        .fontsize(20 * LGGraphics::windowData.zoomY, 0)
+        .textalign(CENTER_TEXT, CENTER_TEXT)
+        .bgcolor(0xffffffff)
+        .enableTextShadow = false;
+    speedDownBut.enableButtonShadow = false;
+    speedDownBut.event(
+        []() { LGgame::gameSpeed = min(LGgame::gameSpeed - 1, 1); });
+
     // init robots
     std::mt19937 mtrd(std::random_device{}());
     std::uniform_int_distribution<int> botid_dis(0, 699);
@@ -788,6 +811,10 @@ int GAME() {
                     }
                 }
             }
+            speedUpBut.detect(msg);
+            speedDownBut.detect(msg);
+            if (speedUpBut.status == 2) speedUpBut.clickEvent();
+            if (speedDownBut.status == 2) speedDownBut.clickEvent();
         }
         while (kbmsg()) {
             key_msg ch = getkey();
@@ -1071,6 +1098,8 @@ int GAME() {
             }
             LGgame::ranklist(lackTurn <= 0 || gamePaused);
             if (lackTurn <= 0 || gamePaused) {
+                speedUpBut.display();
+                speedDownBut.display();
                 if (LGset::enableAnalysisInGame) LGgame::printAnalysis();
                 int screenszr = 1600 * LGGraphics::windowData.zoomX;
                 static int fpslen;

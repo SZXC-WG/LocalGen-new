@@ -2,8 +2,8 @@
 #define LOCALGAMEWINDOW_H
 
 #include <QDialog>
-#include "../mapWidget/mapWidget.h"
 #include "../localGameDialog/localGameDialog.h"
+#include "../mapWidget/mapWidget.h"
 
 class LocalGameWindow : public QDialog {
     Q_OBJECT

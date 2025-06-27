@@ -1,7 +1,8 @@
 #include "localGameWindow.h"
 #include <QVBoxLayout>
 
-LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config) :
+LocalGameWindow::LocalGameWindow(QWidget*               parent,
+                                 const LocalGameConfig& config) :
     QDialog(parent) {
     setWindowTitle("Local Game");
     QPalette pal = palette();
@@ -14,5 +15,4 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     resize(800, 600);
 }
 
-LocalGameWindow::~LocalGameWindow() {
-}
+LocalGameWindow::~LocalGameWindow() {}

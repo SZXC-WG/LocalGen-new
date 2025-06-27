@@ -1,10 +1,10 @@
 /**
  * @file player.hpp
- * 
+ *
  * LocalGen Module: GameEngine
- * 
+ *
  * Players
- * 
+ *
  * Players are basic participants of games.
  */
 
@@ -12,8 +12,8 @@
 #define LGEN_MODULE_GE_PLAYER 1
 
 #include <cstdint>
-#include <string>
 #include <deque>
+#include <string>
 
 #include "board.hpp"
 
@@ -24,18 +24,17 @@ class Player {
 
    public:
     const std::string name;
-    index_t index;
-    index_t teamId;
-    std::deque<Move> moveQueue;
+    index_t           index;
+    index_t           teamId;
+    std::deque<Move>  moveQueue;
 
-    Player(const std::string& name) :
-        name(name) {}
+    Player(const std::string& name) : name(name) {}
     ~Player() {}
     virtual Move step(const BoardView& view) = 0;
 };
 
 inline bool inSameTeam(Player* p1, Player* p2) {
-    if(p1 == nullptr || p2 == nullptr) return false;
+    if (p1 == nullptr || p2 == nullptr) return false;
     return p1->teamId == p2->teamId;
 }
 

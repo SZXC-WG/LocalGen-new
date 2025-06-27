@@ -29,13 +29,15 @@ class Board {
    protected:
     pos_t row, col;
     std::vector<std::vector<Tile>> tiles;
+    /// Get a tile using %Coord. This is a function for convenience.
+    inline Tile& getTile(Coord coord) { return tiles[coord.x][coord.y]; }
 
    public:
     Board() : row(0), col(0), tiles(0, std::vector<Tile>(0)) {}
     Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
         assert(row >= 0 && col >= 0);
         // board index starts at 1.
-        // give 1 space at borders for safety and convenience issues.
+        // give 1 index space at borders for safety and convenience issues.
         tiles.resize(_row + 2, std::vector<Tile>(_col + 2, Tile()));
     }
 
@@ -47,7 +49,7 @@ class Board {
     /// Check whether a %Coord indicating a tile position is invalid.
     bool isInvalidCoord(Coord coord) const { return !isValidCoord(coord); }
 
-   private:
+   protected:
     /// Map coding system derived from v5.
     /// LocalGen v6 is compatible with v5, so we saved this system.
 
@@ -60,6 +62,7 @@ class Board {
 #define PMod v5codingPmod
 #define CHAR_AD 48
 
+    // Zip a map using v5 coding.
     inline std::string v5codingZip() {
         std::string strZip;
         int i, j;
@@ -102,6 +105,7 @@ class Board {
         // strZip[p] = '\0'; // not necessary
         return strZip;
     }
+    /// Unzip a map with v5 coding.
     inline void v5codingUnzip(std::string strUnzip) {
         strUnzip.push_back('\0');
 
@@ -249,13 +253,13 @@ class Board {
         /// Constructor for generating a %BoardView using a %Board and a
         /// %Player. Leaving this function public is safe, for a %Player cannot
         /// get another %Player's address.
-        BoardView(const Board& board, Player* player)
-            : row(board.row), col(board.col) {
-            tiles.resize(board.row + 2, std::vector<TileView>(board.col + 2));
+        BoardView(const Board* const& board, Player* player)
+            : row(board->row), col(board->col) {
+            tiles.resize(board->row + 2, std::vector<TileView>(board->col + 2));
             for (pos_t i = 1; i <= row; ++i) {
                 for (pos_t j = 1; j <= col; ++j) {
-                    tiles[i][j] = TileView(board.tiles[i][j],
-                                           board.visible(i, j, player));
+                    tiles[i][j] = TileView(board->tiles[i][j],
+                                           board->visible(i, j, player));
                 }
             }
         }
@@ -268,7 +272,7 @@ class Board {
     /// %Player's address.
     BoardView view(Player* player) const {
         // Simply use the constructor to generate.
-        return BoardView(*this, player);
+        return BoardView(this, player);
     }
 
     /// Give a player a view of a certain tile of the %Board.
@@ -296,21 +300,23 @@ class Board {
         Player* player;  // whether we should use direct pointer or its index is
                          // still unknown.
         Coord from, to;
-        army_t taken_army;
+        bool takeHalf;
 
        public:
         Move() : player(nullptr) {}
-        Move(Player* _player, Coord _from, Coord _to, army_t _taken_army)
-            : player(_player), from(_from), to(_to), taken_army(_taken_army) {}
+        Move(Player* _player, Coord _from, Coord _to, bool _takeHalf)
+            : player(_player), from(_from), to(_to), takeHalf(_takeHalf) {}
 
         /// Check whether a %Move is available on a certain Board.
         bool available(Board* board) {
+            // coordinate validity check
             if (!board->isInvalidCoord(from) || !board->isInvalidCoord(to))
                 return false;
 
-            if (!board->visible(from, player) || !board->visible(to, player))
-                return false;
+            // visibility check
+            if (!board->visible(from, player)) return false;
 
+            // %from tile availability check
             auto fromTile = board->view(player, from);
             switch (fromTile.type) {
                 case TILE_MOUNTAIN:
@@ -318,8 +324,9 @@ class Board {
                 case TILE_OBSERVATORY: return false;
             }
             if (fromTile.occupier != player->index) return false;
-            if (fromTile.army <= taken_army) return false;
+            if (fromTile.army <= 1) return false;
 
+            // %to tile availability check
             auto toTile = board->view(player, to);
             switch (toTile.type) {
                 case TILE_MOUNTAIN:
@@ -327,64 +334,15 @@ class Board {
                 case TILE_OBSERVATORY: return false;
             }
 
+            // all passed, available move
             return true;
         }
     };
-
-   public:
-    class MoveProcessor;
-    friend class Board::MoveProcessor;
-    /// Move Processor used by games.
-    /// A %MoveProcessor is used to contain and process moves.
-    class MoveProcessor {
-       protected:
-        std::deque<Move> rawMovesInQueue;
-        std::unordered_map<pos_t, Move> edge_map;
-
-       protected:
-        Board* board;
-
-        /// Constructors.
-        /// The default constructor is deleted, for a %MoveProcessor must be
-        /// linked to a %Board.
-       public:
-        MoveProcessor(Board* _board) : board(_board) {}
-
-       public:
-        /// Add a %Move to the waiting-to-be-processed queue.
-        inline void addMove(Move move) {
-            if (move.available(board)) rawMovesInQueue.emplace_back(move);
-        }
-        /// Convert all %Moves in the move buffer to edges and move them into
-        /// the edge buffer.
-        inline void convertToEdge() {
-            while (!rawMovesInQueue.empty()) {
-                Move cur_move = rawMovesInQueue.front();
-                rawMovesInQueue.pop_front();
-                pos_t edge_index = biindex(cur_move.from, cur_move.to);
-                pos_t edge_rev_index = biindex(cur_move.to, cur_move.from);
-                if (edge_map.find(edge_rev_index) != edge_map.end()) {
-                    Move rev_move = edge_map[edge_rev_index];
-                    edge_map.erase(edge_rev_index);
-                    if (rev_move.taken_army == cur_move.taken_army) continue;
-                    if (rev_move.taken_army > cur_move.taken_army)
-                        std::swap(cur_move, rev_move),
-                            std::swap(edge_index, edge_rev_index);
-                    cur_move.taken_army -= rev_move.taken_army;
-                }
-                edge_map[edge_index] = cur_move;
-            }
-        }
-    };
-
-   protected:
-    MoveProcessor moveProcessor{this};
 };
 
 /// Declare alias for convenience.
 using BoardView = Board::BoardView;
 using Move = Board::Move;
-using MoveProcessor = Board::MoveProcessor;
 
 /// Comparisons of (%Move)s. Defined to make usage of comparison-based
 /// containers like std::set and std::map more convenient.

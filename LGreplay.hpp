@@ -217,7 +217,7 @@ int RReplay::preTurn() {
 }
 void RReplay::initReplay(string Fname) {
     LGgame::inReplay = true;
-    Filename = Fname;
+    Filename = Fname + ".lgr";
     file = fopen(Fname.c_str(), "r");
     if (!file) {
         MessageBoxW(nullptr, L"No such replay file!", L"Local Generals.io",

@@ -83,9 +83,7 @@ PointerAlignment: Left
 QualifierAlignment: Left
 ReferenceAlignment: Pointer
 ReflowComments: false
-SortIncludes:
-  Enabled: true
-  IgnoreCase: true
+SortIncludes: true
 SortUsingDeclarations: Lexicographic
 SeparateDefinitionBlocks: Leave
 SpaceAfterCStyleCast: false

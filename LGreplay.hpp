@@ -233,6 +233,10 @@ void RReplay::initReplay(string Fname) {
             gameMap[i][j] = readBlock(file), seekPos += 6;
     for (int i = 1; i <= mapH; ++i)
         for (int j = 1; j <= mapW; ++j) startMap[i][j] = gameMap[i][j];
+    for (int i = 1; i <= mapH; ++i)
+        for (int j = 1; j <= mapW; ++j)
+            if (gameMap[i][j].type == 3)
+                LGgame::genCoo[gameMap[i][j].player] = coordS(i, j);
     fseek(file, 1, SEEK_CUR);
     ++seekPos;
     totTurn = 0;

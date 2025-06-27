@@ -10,13 +10,13 @@ namespace Ui {
 QT_END_NAMESPACE
 
 struct LocalGameConfig {
-    int     gameSpeed;
-    bool    enableSounds, showAnalysis;
+    int gameSpeed;
+    bool enableSounds, showAnalysis;
     QString mapName;
-    int     mapWidth, mapHeight;
+    int mapWidth, mapHeight;
     struct PlayerConfig {
         QString name;
-        bool    visible;
+        bool visible;
     };
     QVector<PlayerConfig> players;
 };

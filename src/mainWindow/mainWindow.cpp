@@ -12,7 +12,7 @@ MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::on_btnLocalGame_clicked() {
     LocalGameDialog* dialog = new LocalGameDialog(this);
-    int              result = dialog->exec();
+    int result = dialog->exec();
     if (result == QDialog::Accepted) {
         LocalGameWindow* window = new LocalGameWindow(this, dialog->config());
         window->exec();

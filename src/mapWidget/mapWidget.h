@@ -11,7 +11,7 @@ class MapWidget : public QWidget {
     explicit MapWidget(QWidget* parent, int w, int h, bool focusEnabled = true);
     ~MapWidget();
     const int width, height;
-    void      setFocusEnabled(bool enabled);
+    void setFocusEnabled(bool enabled);
 
    protected:
     void paintEvent(QPaintEvent* event) override;
@@ -29,10 +29,10 @@ class MapWidget : public QWidget {
 
     QPoint mapToGrid(const QPoint& pos);
 
-    qreal   scale;
+    qreal scale;
     QPointF offset;
-    bool    mouseDown, isDragging;
-    QPoint  lastMousePos;
+    bool mouseDown, isDragging;
+    QPoint lastMousePos;
 };
 
 #endif  // MAPWIDGET_H

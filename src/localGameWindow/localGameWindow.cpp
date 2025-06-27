@@ -1,7 +1,7 @@
 #include "localGameWindow.h"
 #include <QVBoxLayout>
 
-LocalGameWindow::LocalGameWindow(QWidget*               parent,
+LocalGameWindow::LocalGameWindow(QWidget* parent,
                                  const LocalGameConfig& config) :
     QDialog(parent) {
     setWindowTitle("Local Game");

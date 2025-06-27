@@ -28,7 +28,7 @@ class Player;
 /// system).
 class Board {
    protected:
-    pos_t                          row, col;
+    pos_t row, col;
     std::vector<std::vector<Tile>> tiles;
 
    public:
@@ -63,8 +63,8 @@ class Board {
 
     inline std::string v5codingZip() {
         std::string strZip;
-        int         i, j;
-        intmax_t    k1 = row, k2 = col;
+        int i, j;
+        intmax_t k1 = row, k2 = col;
         strZip.push_back(PMod(k1) + CHAR_AD);
         strZip.push_back(PMod(k1) + CHAR_AD);
         strZip.push_back(PMod(k2) + CHAR_AD);
@@ -89,7 +89,7 @@ class Board {
                 }
 
                 char ch = (type << 2) + (tiles[i][j].lit << 1);
-                k1      = tiles[i][j].army;
+                k1 = tiles[i][j].army;
 
                 if (k1 < 0) {
                     k1 = -k1;
@@ -117,11 +117,11 @@ class Board {
         for (i = 1; i <= row; i++)
             for (j = 1; j <= col; j++) {
                 tiles[i][j].occupier = (strUnzip[k++], nullptr);
-                bool f               = strUnzip[k] & 1;
+                bool f = strUnzip[k] & 1;
                 strUnzip[k] >>= 1;
                 tiles[i][j].lit = strUnzip[k] & 1;
                 strUnzip[k] >>= 1;
-                int type         = strUnzip[k++];
+                int type = strUnzip[k++];
                 tiles[i][j].army = 0;
 
                 switch (type) {
@@ -173,31 +173,31 @@ class Board {
         // lookout check
         auto findLookoutOccupier = [&](pos_t x, pos_t y) {
             Player* occupier = nullptr;
-            army_t  maxArmy  = 0;
+            army_t maxArmy = 0;
             if (tiles[x - 1][y].army > maxArmy)
                 occupier = tiles[x - 1][y].occupier,
-                maxArmy  = tiles[x - 1][y].army;
+                maxArmy = tiles[x - 1][y].army;
             if (tiles[x + 1][y].army > maxArmy)
                 occupier = tiles[x + 1][y].occupier,
-                maxArmy  = tiles[x + 1][y].army;
+                maxArmy = tiles[x + 1][y].army;
             if (tiles[x][y - 1].army > maxArmy)
                 occupier = tiles[x][y - 1].occupier,
-                maxArmy  = tiles[x][y - 1].army;
+                maxArmy = tiles[x][y - 1].army;
             if (tiles[x][y + 1].army > maxArmy)
                 occupier = tiles[x][y + 1].occupier,
-                maxArmy  = tiles[x][y + 1].army;
+                maxArmy = tiles[x][y + 1].army;
             if (tiles[x - 1][y - 1].army > maxArmy)
                 occupier = tiles[x - 1][y].occupier,
-                maxArmy  = tiles[x - 1][y].army;
+                maxArmy = tiles[x - 1][y].army;
             if (tiles[x - 1][y + 1].army > maxArmy)
                 occupier = tiles[x - 1][y].occupier,
-                maxArmy  = tiles[x - 1][y].army;
+                maxArmy = tiles[x - 1][y].army;
             if (tiles[x + 1][y - 1].army > maxArmy)
                 occupier = tiles[x - 1][y].occupier,
-                maxArmy  = tiles[x - 1][y].army;
+                maxArmy = tiles[x - 1][y].army;
             if (tiles[x + 1][y + 1].army > maxArmy)
                 occupier = tiles[x - 1][y].occupier,
-                maxArmy  = tiles[x - 1][y].army;
+                maxArmy = tiles[x - 1][y].army;
             return occupier;
         };
         for (pos_t i = std::max(x - 3, 1); i <= std::min(x + 3, row); ++i) {
@@ -241,7 +241,7 @@ class Board {
        public:
         /// Here these are declared as public as this is only a view and
         /// contains no content associated to the original %Board directly.
-        pos_t                              row, col;
+        pos_t row, col;
         std::vector<std::vector<TileView>> tiles;
 
        public:
@@ -295,7 +295,7 @@ class Board {
        public:
         Player* player;  // whether we should use direct pointer or its index is
                          // still unknown.
-        Coord  from, to;
+        Coord from, to;
         army_t taken_army;
 
        public:
@@ -338,7 +338,7 @@ class Board {
     /// A %MoveProcessor is used to contain and process moves.
     class MoveProcessor {
        protected:
-        std::deque<Move>                rawMovesInQueue;
+        std::deque<Move> rawMovesInQueue;
         std::unordered_map<pos_t, Move> edge_map;
 
        protected:
@@ -361,7 +361,7 @@ class Board {
             while (!rawMovesInQueue.empty()) {
                 Move cur_move = rawMovesInQueue.front();
                 rawMovesInQueue.pop_front();
-                pos_t edge_index     = biindex(cur_move.from, cur_move.to);
+                pos_t edge_index = biindex(cur_move.from, cur_move.to);
                 pos_t edge_rev_index = biindex(cur_move.to, cur_move.from);
                 if (edge_map.find(edge_rev_index) != edge_map.end()) {
                     Move rev_move = edge_map[edge_rev_index];
@@ -382,8 +382,8 @@ class Board {
 };
 
 /// Declare alias for convenience.
-using BoardView     = Board::BoardView;
-using Move          = Board::Move;
+using BoardView = Board::BoardView;
+using Move = Board::Move;
 using MoveProcessor = Board::MoveProcessor;
 
 /// Comparisons of (%Move)s. Defined to make usage of comparison-based

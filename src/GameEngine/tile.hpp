@@ -21,13 +21,13 @@ using army_t = int64_t;
 /// Defined as enum for they're all constants.
 enum tile_type_e {
     /// Normal tile types.
-    TILE_SPAWN       = 0,
-    TILE_BLANK       = 1,
-    TILE_MOUNTAIN    = 2,
-    TILE_CITY        = 3,
-    TILE_SWAMP       = 4,
-    TILE_DESERT      = 5,
-    TILE_LOOKOUT     = 6,
+    TILE_SPAWN = 0,
+    TILE_BLANK = 1,
+    TILE_MOUNTAIN = 2,
+    TILE_CITY = 3,
+    TILE_SWAMP = 4,
+    TILE_DESERT = 5,
+    TILE_LOOKOUT = 6,
     TILE_OBSERVATORY = 7,
 
     /// Mountains, cities, lookouts, observatories will appear as 'obstacles' if
@@ -44,9 +44,9 @@ enum tile_type_e {
 
 /// Information of a single tile.
 struct Tile {
-    Player*     occupier;
+    Player* occupier;
     tile_type_e type;
-    army_t      army;
+    army_t army;
     // Light is a tile attribute, not a tile type.
     bool lit;
 
@@ -63,8 +63,8 @@ struct TileView {
     /// We cannot provide direct %Player pointers in a %TileView for a pointer
     /// gives access to some sacred things.
     Player::index_t occupier;
-    tile_type_e     type;
-    army_t          army;
+    tile_type_e type;
+    army_t army;
     /// Light has no importance in game, and will not be given.
     // bool light;
 
@@ -73,8 +73,8 @@ struct TileView {
     TileView(const Tile& tile, const bool& vis) : visible(vis) {
         if (vis) {
             occupier = tile.occupier->index;
-            type     = tile.type;
-            army     = tile.army;
+            type = tile.type;
+            army = tile.army;
         } else {
             occupier = 0;
             switch (tile.type) {

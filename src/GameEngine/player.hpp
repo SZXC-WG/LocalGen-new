@@ -24,9 +24,9 @@ class Player {
 
    public:
     const std::string name;
-    index_t           index;
-    index_t           teamId;
-    std::deque<Move>  moveQueue;
+    index_t index;
+    index_t teamId;
+    std::deque<Move> moveQueue;
 
     Player(const std::string& name) : name(name) {}
     ~Player() {}

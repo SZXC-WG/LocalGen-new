@@ -80,10 +80,10 @@ void MapWidget::paintEvent(QPaintEvent* event) {
 }
 
 void MapWidget::wheelEvent(QWheelEvent* event) {
-    int     delta          = event->angleDelta().y();
-    QPoint  globalMousePos = QCursor::pos();
-    QPoint  widgetMousePos = mapFromGlobal(globalMousePos);
-    QPointF oldMousePos    = (widgetMousePos - offset) / scale;
+    int delta = event->angleDelta().y();
+    QPoint globalMousePos = QCursor::pos();
+    QPoint widgetMousePos = mapFromGlobal(globalMousePos);
+    QPointF oldMousePos = (widgetMousePos - offset) / scale;
     if (delta > 0) scale *= zoomFactor;
     else scale /= zoomFactor;
     offset = widgetMousePos - oldMousePos * scale;
@@ -92,7 +92,7 @@ void MapWidget::wheelEvent(QWheelEvent* event) {
 
 void MapWidget::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
-        mouseDown    = true;
+        mouseDown = true;
         lastMousePos = event->pos();
     }
 }
@@ -132,8 +132,8 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
 
 QPoint MapWidget::mapToGrid(const QPoint& pos) {
     QPointF scaledPos = (pos - offset) / scale;
-    int     gridX     = static_cast<int>(scaledPos.x() / cellSize);
-    int     gridY     = static_cast<int>(scaledPos.y() / cellSize);
+    int gridX = static_cast<int>(scaledPos.x() / cellSize);
+    int gridY = static_cast<int>(scaledPos.y() / cellSize);
     return QPoint(gridX, gridY);
 }
 

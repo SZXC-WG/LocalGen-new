@@ -39,7 +39,7 @@ enum tile_type_e {
 // Some tiles types have same properties. Some tiles have aliases. Make them
 // macros.
 #define TILE_GENERAL TILE_SPAWN
-#define TILE_PLAIN   TILE_BLANK
+#define TILE_PLAIN TILE_BLANK
 #define TILE_NEUTRAL TILE_BLANK
 
 /// Information of a single tile.
@@ -78,12 +78,17 @@ struct TileView {
         } else {
             occupier = 0;
             switch (tile.type) {
-                case TILE_SPAWN:       type = TILE_BLANK; break;
+                case TILE_SPAWN:
+                    type = TILE_BLANK;
+                    break;
                 case TILE_MOUNTAIN:
                 case TILE_CITY:
                 case TILE_LOOKOUT:
-                case TILE_OBSERVATORY: type = TILE_OBSTACLE; break;
-                default:               type = tile.type;
+                case TILE_OBSERVATORY:
+                    type = TILE_OBSTACLE;
+                    break;
+                default:
+                    type = tile.type;
             }
             army = 0;
         }

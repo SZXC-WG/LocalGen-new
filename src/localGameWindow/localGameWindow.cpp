@@ -1,9 +1,9 @@
 #include "localGameWindow.h"
+
 #include <QVBoxLayout>
 
-LocalGameWindow::LocalGameWindow(QWidget* parent,
-                                 const LocalGameConfig& config) :
-    QDialog(parent) {
+LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
+    : QDialog(parent) {
     setWindowTitle("Local Game");
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(36, 36, 36));

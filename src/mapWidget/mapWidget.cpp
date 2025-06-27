@@ -1,4 +1,5 @@
 #include "mapWidget.h"
+
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPainter>
@@ -6,16 +7,16 @@
 #include <QSvgRenderer>
 #include <QWheelEvent>
 
-MapWidget::MapWidget(QWidget* parent, int w, int h, bool focusEnabled) :
-    QWidget(parent),
-    scale(1.0),
-    offset(0, 0),
-    mouseDown(false),
-    isDragging(false),
-    width(w),
-    height(h),
-    focusX(-1),
-    focusY(-1) {
+MapWidget::MapWidget(QWidget* parent, int w, int h, bool focusEnabled)
+    : QWidget(parent),
+      scale(1.0),
+      offset(0, 0),
+      mouseDown(false),
+      isDragging(false),
+      width(w),
+      height(h),
+      focusX(-1),
+      focusY(-1) {
     setMouseTracking(true);
     setFocusEnabled(focusEnabled);
 }
@@ -33,10 +34,9 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     const qreal padding = cellSize * paddingFactor;
 
     static const QColor bg(220, 220, 220);
-    static const QColor playerColors[] = { QColor(255, 0, 0),
-                                           QColor(255, 112, 16),
-                                           QColor(0, 128, 0),
-                                           QColor(16, 49, 255) };
+    static const QColor playerColors[] = {
+        QColor(255, 0, 0), QColor(255, 112, 16), QColor(0, 128, 0),
+        QColor(16, 49, 255)};
 
     static QSvgRenderer renderer_city(QString(":/images/svg/city.svg")),
         renderer_general(QString(":/images/svg/crown.svg")),
@@ -47,10 +47,10 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         renderer_obstacle(QString(":/images/svg/obstacle.svg")),
         renderer_swamp(QString(":/images/svg/swamp.svg"));
 
-    QSvgRenderer* renderers[] = { &renderer_city,     &renderer_general,
-                                  &renderer_desert,   &renderer_lookout,
-                                  &renderer_mountain, &renderer_observatory,
-                                  &renderer_obstacle, &renderer_swamp };
+    QSvgRenderer* renderers[] = {&renderer_city,     &renderer_general,
+                                 &renderer_desert,   &renderer_lookout,
+                                 &renderer_mountain, &renderer_observatory,
+                                 &renderer_obstacle, &renderer_swamp};
 
     QRandomGenerator* rand = QRandomGenerator::global();
 
@@ -84,8 +84,10 @@ void MapWidget::wheelEvent(QWheelEvent* event) {
     QPoint globalMousePos = QCursor::pos();
     QPoint widgetMousePos = mapFromGlobal(globalMousePos);
     QPointF oldMousePos = (widgetMousePos - offset) / scale;
-    if (delta > 0) scale *= zoomFactor;
-    else scale /= zoomFactor;
+    if (delta > 0)
+        scale *= zoomFactor;
+    else
+        scale /= zoomFactor;
     offset = widgetMousePos - oldMousePos * scale;
     update();
 }

@@ -2,6 +2,7 @@
 #define LOCALGAMEWINDOW_H
 
 #include <QDialog>
+
 #include "../localGameDialog/localGameDialog.h"
 #include "../mapWidget/mapWidget.h"
 

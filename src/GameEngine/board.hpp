@@ -17,9 +17,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "utils/coord.hpp"
-
 #include "tile.hpp"
+#include "utils/coord.hpp"
 
 class Player;
 
@@ -58,7 +57,7 @@ class Board {
         return res;
     }
 
-#define PMod    v5codingPmod
+#define PMod v5codingPmod
 #define CHAR_AD 48
 
     inline std::string v5codingZip() {
@@ -94,7 +93,8 @@ class Board {
                 if (k1 < 0) {
                     k1 = -k1;
                     strZip.push_back(ch += CHAR_AD + 1);
-                } else strZip.push_back(ch += CHAR_AD);
+                } else
+                    strZip.push_back(ch += CHAR_AD);
 
                 for (k2 = 1; k2 <= 8; k2++)
                     strZip.push_back(PMod(k1) + CHAR_AD);
@@ -249,8 +249,8 @@ class Board {
         /// Constructor for generating a %BoardView using a %Board and a
         /// %Player. Leaving this function public is safe, for a %Player cannot
         /// get another %Player's address.
-        BoardView(const Board& board, Player* player) :
-            row(board.row), col(board.col) {
+        BoardView(const Board& board, Player* player)
+            : row(board.row), col(board.col) {
             tiles.resize(board.row + 2, std::vector<TileView>(board.col + 2));
             for (pos_t i = 1; i <= row; ++i) {
                 for (pos_t j = 1; j <= col; ++j) {
@@ -300,8 +300,8 @@ class Board {
 
        public:
         Move() : player(nullptr) {}
-        Move(Player* _player, Coord _from, Coord _to, army_t _taken_army) :
-            player(_player), from(_from), to(_to), taken_army(_taken_army) {}
+        Move(Player* _player, Coord _from, Coord _to, army_t _taken_army)
+            : player(_player), from(_from), to(_to), taken_army(_taken_army) {}
 
         /// Check whether a %Move is available on a certain Board.
         bool available(Board* board) {
@@ -378,7 +378,7 @@ class Board {
     };
 
    protected:
-    MoveProcessor moveProcessor { this };
+    MoveProcessor moveProcessor{this};
 };
 
 /// Declare alias for convenience.

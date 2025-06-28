@@ -225,7 +225,7 @@ Each commit message should follow this structure:
 
 ### 1. **Commit Size**
 
-- **Small and Focused**: Each commit should focus on a single logical change. Keep the size manageable so that it’s easy to review and understand. 
+- **Small and Focused**: Each commit should focus on a single logical change. Keep the size manageable so that it’s easy to review and understand.
 - **Atomic Commits**: Each commit should represent a self-contained change that can be tested or reverted independently.
 - **Avoid Large, Unfocused Commits**: Avoid making commits that change multiple unrelated areas of the project at once, as this makes it harder to understand the impact of the change.
 

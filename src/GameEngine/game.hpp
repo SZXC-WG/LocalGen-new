@@ -147,6 +147,11 @@ class BasicGame {
         board.processor.execute();
     }
 
+    inline void performTurn() {
+        for (auto player : players) act(player);
+        process();
+    }
+
    public:
     virtual void run() {}
 };

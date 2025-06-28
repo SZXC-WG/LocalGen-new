@@ -74,8 +74,8 @@ class Board {
 
         for (i = 1; i <= row; i++)
             for (j = 1; j <= col; j++) {
-                strZip.push_back(
-                    0 + CHAR_AD);  // we have to make the occupier undefined.
+                strZip.push_back(0 +
+                                 CHAR_AD);  // The occupier has to be undefined.
 
                 int type = 0;
                 switch (tiles[i][j].type) {

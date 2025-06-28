@@ -29,6 +29,7 @@ class BasicGame {
     turn_t curTurn;
 
    public:
+    /// [TODO]
     /// Broadcast a game message to the game.
     /// @param message type of the message.
     /// @param associatedList the needed extra information of the message.

@@ -51,6 +51,8 @@ struct Tile {
     bool lit;
 
     Tile() : occupier(nullptr), type(TILE_BLANK), army(0), lit(false) {}
+    Tile(Player* _occupier, tile_type_e _type, army_t _army, bool _lit = false)
+        : occupier(_occupier), type(_type), army(_army), lit(_lit) {}
 };
 
 /// View of a %Tile.
@@ -66,7 +68,7 @@ struct TileView {
     tile_type_e type;
     army_t army;
     /// Light has no importance in game, and will not be given.
-    // bool light;
+    // bool lit;
 
     TileView() {}
     /// Constructor using a %Tile and its visibility.
@@ -78,17 +80,12 @@ struct TileView {
         } else {
             occupier = 0;
             switch (tile.type) {
-                case TILE_SPAWN:
-                    type = TILE_BLANK;
-                    break;
+                case TILE_SPAWN:       type = TILE_BLANK; break;
                 case TILE_MOUNTAIN:
                 case TILE_CITY:
                 case TILE_LOOKOUT:
-                case TILE_OBSERVATORY:
-                    type = TILE_OBSTACLE;
-                    break;
-                default:
-                    type = tile.type;
+                case TILE_OBSERVATORY: type = TILE_OBSTACLE; break;
+                default:               type = tile.type;
             }
             army = 0;
         }

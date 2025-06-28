@@ -31,10 +31,11 @@ class BasicGame {
    public:
     /// [TODO]
     /// Broadcast a game message to the game.
+    /// @param turn The turn number the message is dedicated to.
     /// @param message type of the message.
     /// @param associatedList the needed extra information of the message.
-    void broadcast(game_message_e message,
-                   std::initializer_list<Player*> associatedList) {}
+    void broadcast(turn_t turn, game_message_e message,
+                   std::initializer_list<Player*> associatedList);
 
     class InGameBoard : public Board {
        public:
@@ -45,6 +46,8 @@ class BasicGame {
         /// specific game object.
         InGameBoard() = delete;
         InGameBoard(BasicGame* _game) : game(_game) {}
+        InGameBoard(BasicGame* _game, Board _board)
+            : game(_game), Board(_board) {}
 
        public:
         class MoveProcessor;
@@ -91,7 +94,7 @@ class BasicGame {
                         }
                     }
                 }
-                game->broadcast(GAME_MESSAGE_CAPTURE, {p1, p2});
+                game->broadcast(game->curTurn, GAME_MESSAGE_CAPTURE, {p1, p2});
             }
             /// Execute all the in-queue moves, one by one.
             void execute() {
@@ -119,8 +122,16 @@ class BasicGame {
 
    protected:
     InGameBoard board{this};
+    std::vector<Player*> players;
 
    public:
+    BasicGame() {}
+    BasicGame(std::vector<Player*> _players, Board _board)
+        : players(_players), board(this, _board) {}
+
+   public:
+    /// Get action from a %Player. In other words, make this %Player act.
+    /// @param player The acting player.
     inline void act(Player* player) {
         while (!player->moveQueue.empty() &&
                !player->moveQueue.front().available(&board))
@@ -128,6 +139,16 @@ class BasicGame {
         if (player->moveQueue.empty()) return;
         board.processor.add(player->moveQueue.front());
     }
+
+   protected:
+    /// Process all the existing moves in the processor, make them work.
+    inline void process() {
+        board.processor.sort();
+        board.processor.execute();
+    }
+
+   public:
+    virtual void run() {}
 };
 
 #endif  // LGEN_MODULE_GE_GAME

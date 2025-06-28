@@ -8,9 +8,6 @@
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "cmake.generator": "Ninja Multi-Config",
     "editor.insertSpaces": true,
-    "files.associations": {
-        "unordered_map": "cpp"
-    },
     "cmake.options.statusBarVisibility": "visible",
     "cmake.buildDirectory": "${workspaceFolder}/build",
     "C_Cpp.clang_format_fallbackStyle": "Google"

@@ -27,11 +27,12 @@ class BasicGame {
 
    public:
     turn_t curTurn;
+    double speed;  // should be in the range of [0.25x, 256x]
 
    public:
     /// [TODO]
     /// Broadcast a game message to the game.
-    /// @param turn The turn number the message is dedicated to.
+    /// @param turn the turn number the message is dedicated to.
     /// @param message type of the message.
     /// @param associatedList the needed extra information of the message.
     void broadcast(turn_t turn, game_message_e message,

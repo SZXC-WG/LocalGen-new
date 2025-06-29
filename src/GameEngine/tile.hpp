@@ -17,6 +17,8 @@
 
 using army_t = int64_t;
 
+static constexpr int TILE_TYPE_COUNT = 8;
+
 /// Tile types.
 /// Defined as enum for they're all constants.
 enum tile_type_e {

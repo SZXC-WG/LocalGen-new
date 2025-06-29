@@ -26,8 +26,31 @@ class BasicGame {
     using turn_t = uint32_t;
 
    public:
+    /// The current turn number.
     turn_t curTurn;
-    double speed;  // should be in the range of [0.25x, 256x]
+    /// This should be in the range of [0.25x, 256x]. Actually, speeds above 16x
+    /// is not recommended.
+    /// Recommended speeds (from generals.io): 0.25x, 0.5x, 0.75x, 1x, 1.5x, 2x,
+    /// 3x, 4x.
+    double speed;
+
+    /// This integer should be in the range of (-INF, +INF).
+    /// If zero, it has no effect.
+    /// If positive, it indicates how many turns will pass for the tile troops
+    /// to self-increase 1.
+    /// If negative, it indicates how many troops of the tile will self-increase
+    /// when it passes 1 turn. It is noticeable that values 1 and -1 mean the
+    /// same things.
+    army_t increment[TILE_TYPE_COUNT];
+
+    /// This integer should be in the range of (-INF, +INF).
+    /// If zero, it has no effect.
+    /// If positive, it indicates how many turns will pass for the tile troops
+    /// to self-decrease 1.
+    /// If negative, it indicates how many troops of the tile will self-decrease
+    /// when it passes 1 turn. It is noticeable that values 1 and -1 mean the
+    /// same things.
+    army_t decrement[TILE_TYPE_COUNT];
 
    public:
     /// [TODO]
@@ -50,11 +73,40 @@ class BasicGame {
         InGameBoard(BasicGame* _game, Board _board)
             : game(_game), Board(_board) {}
 
+        inline void update(turn_t turn) {
+            for (auto& row : tiles) {
+                for (auto& tile : row) {
+                    if (tile.occupier == nullptr) {
+                        continue;
+                    }
+                    // increments
+                    if (game->increment[tile.type] > 0)
+                        tile.army += (turn % game->increment[tile.type] == 0);
+                    else if (game->increment[tile.type] < 0)
+                        tile.army += game->increment[tile.type];
+                    // decrements
+                    if (game->decrement[tile.type] > 0)
+                        tile.army -= (turn % game->decrement[tile.type] == 0);
+                    else if (game->decrement[tile.type] < 0)
+                        tile.army -= game->decrement[tile.type];
+                    // lost tiles
+                    if (tile.army == 0) {
+                        if (tile.type == TILE_SWAMP) tile.occupier = nullptr;
+                    }
+                    if (tile.army < 0) {
+                        tile.occupier = nullptr;
+                        tile.army = 0;
+                    }
+                }
+            }
+        }
+
        public:
         class MoveProcessor;
         friend class InGameBoard::MoveProcessor;
         /// Move Processor used by games.
-        /// A %MoveProcessor is used to contain and process moves.
+        /// A %MoveProcessor is used to contain and
+        /// process moves.
         class MoveProcessor {
            protected:
             std::deque<Move> movesInQueue;
@@ -64,8 +116,9 @@ class BasicGame {
             InGameBoard* board;
 
             /// Constructors.
-            /// The default constructor is deleted, for a %MoveProcessor must be
-            /// linked to a %Board.
+            /// The default constructor is deleted, for
+            /// a %MoveProcessor must be linked to a
+            /// %Board.
            public:
             MoveProcessor() = delete;
             MoveProcessor(BasicGame* _game, InGameBoard* _board)
@@ -86,8 +139,8 @@ class BasicGame {
             /// @param p1 the player that captures.
             /// @param p2 the player that is captured.
             void capture(Player* p1, Player* p2) {
-                for (auto row : board->tiles) {
-                    for (auto tile : row) {
+                for (auto& row : board->tiles) {
+                    for (auto& tile : row) {
                         if (tile.occupier == p2) {
                             tile.occupier = p1;
                             if (tile.type == TILE_GENERAL)
@@ -130,7 +183,14 @@ class BasicGame {
     BasicGame(std::vector<Player*> _players, Board _board)
         : players(_players), board(this, _board) {}
 
-   public:
+   protected:
+    /// Update the map for the turn.
+    /// What to update? For example, the self-increment of tile armies. This
+    /// function recursively let the %InGameBoard do the job due to accessment
+    /// issues.
+    inline void update() { board.update(curTurn); }
+
+   protected:
     /// Get action from a %Player. In other words, make this %Player act.
     /// @param player The acting player.
     inline void act(Player* player) {
@@ -150,6 +210,7 @@ class BasicGame {
 
     inline void performTurn() {
         for (auto player : players) act(player);
+        update();
         process();
     }
 

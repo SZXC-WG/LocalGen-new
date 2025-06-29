@@ -32,7 +32,12 @@ inline pos_t biindex(const Coord& a, const Coord& b) {
     return a.index() * Coord::COORD_INDEX * Coord::COORD_INDEX + b.index();
 }
 /// Unpacking a "biindex" to two %Coords.
-inline std::pair<Coord, Coord> unpack_biindex(const pos_t& bi) {}
+inline std::pair<Coord, Coord> unpack_biindex(const pos_t& bi) {
+    pos_t fi = bi / (Coord::COORD_INDEX * Coord::COORD_INDEX);
+    pos_t se = bi % (Coord::COORD_INDEX * Coord::COORD_INDEX);
+    return std::pair(Coord(fi / Coord::COORD_INDEX, fi % Coord::COORD_INDEX),
+                     Coord(se / Coord::COORD_INDEX, se % Coord::COORD_INDEX));
+}
 
 // Sometimes we need to pass a %Coord through two parameters or something.
 // This macro is used to make it available.

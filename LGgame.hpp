@@ -688,7 +688,7 @@ int GAME() {
         .enableTextShadow = false;
     speedDownBut.enableButtonShadow = false;
     speedDownBut.event(
-        []() { LGgame::gameSpeed = min(LGgame::gameSpeed - 1, 1); });
+        []() { LGgame::gameSpeed = max(LGgame::gameSpeed - 1, 1); });
 
     // init robots
     std::mt19937 mtrd(std::random_device{}());

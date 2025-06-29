@@ -174,7 +174,7 @@ inline void calcData(int playerId, coordS position) {
                     if (adjacent_minimum_same_player == INF)
                         adjacent_minimum_same_player = gma(i, j);
                     blockValue[playerId][i][j] +=
-                        gma(i, j) - adjacent_minimum_same_player;
+                        2 * (gma(i, j) - adjacent_minimum_same_player);
                 }
             }
         }

@@ -17,8 +17,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../utils/coord.hpp"
 #include "tile.hpp"
-#include "utils/coord.hpp"
 
 class Player;
 

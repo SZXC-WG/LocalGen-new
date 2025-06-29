@@ -4,6 +4,8 @@
 #include <QPoint>
 #include <QWidget>
 
+#include "../GameEngine/board.hpp"
+
 class MapWidget : public QWidget {
     Q_OBJECT
 

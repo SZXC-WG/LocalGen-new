@@ -25,6 +25,7 @@ set(PROJECT_SOURCES
         src/localGameWindow/localGameWindow.cpp
         src/localGameWindow/localGameWindow.h
         src/GameEngine/board.hpp
+        src/GameEngine/game.hpp
         src/GameEngine/tile.hpp
         src/GameEngine/player.hpp
         src/utils/coord.hpp

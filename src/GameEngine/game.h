@@ -70,7 +70,7 @@ class BasicGame {
     /// @param message type of the message.
     /// @param associatedList the needed extra information of the message.
     void broadcast(turn_t turn, game_message_e message,
-                   std::initializer_list<Player::index_t> associatedList);
+                   std::vector<Player::index_t> associatedList);
 
     class InGameBoard : public Board {
        public:
@@ -137,9 +137,9 @@ class BasicGame {
 
    protected:
     /// Update the map for the turn.
-    /// What to update? For example, the self-increment of tile armies. This
-    /// function recursively let the %InGameBoard do the job due to accessment
-    /// issues.
+    /// What to update? For example, the self-increment of tile armies.
+    /// This function recursively let the %InGameBoard do the job due to
+    /// accessment issues.
     inline void update();
 
    protected:

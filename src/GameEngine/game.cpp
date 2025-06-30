@@ -91,7 +91,11 @@ void BasicGame::InGameBoard::MoveProcessor::execute() {
 
 BasicGame::BasicGame() {}
 BasicGame::BasicGame(std::vector<Player*> _players, Board _board)
-    : players(_players), board(this, _board), alive(_players.size()) {}
+    : players(_players), board(this, _board), alive(_players.size()) {
+    for (decltype(_players)::size_type i = 0; i < _players.size(); ++i) {
+        _players[i]->index = i + 1;
+    }
+}
 
 inline void BasicGame::update() { board.update(curTurn); }
 

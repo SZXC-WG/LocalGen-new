@@ -24,11 +24,18 @@ set(PROJECT_SOURCES
         src/mapWidget/mapWidget.h
         src/localGameWindow/localGameWindow.cpp
         src/localGameWindow/localGameWindow.h
-        src/GameEngine/board.hpp
-        src/GameEngine/game.hpp
-        src/GameEngine/tile.hpp
-        src/GameEngine/player.hpp
-        src/utils/coord.hpp
+        src/GameEngine/board.cpp
+        src/GameEngine/board.h
+        src/GameEngine/game.cpp
+        src/GameEngine/game.h
+        src/GameEngine/move.cpp
+        src/GameEngine/move.h
+        src/GameEngine/player.cpp
+        src/GameEngine/player.h
+        src/GameEngine/tile.cpp
+        src/GameEngine/tile.h
+        src/utils/coord.cpp
+        src/utils/coord.h
         res/res.qrc
 )
 

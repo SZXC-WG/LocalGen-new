@@ -8,45 +8,25 @@
  * a common coordinate system that is used throughout the project.
  */
 
-#ifndef LGEN_LIB_COORD
-#define LGEN_LIB_COORD 1
+#ifndef LGEN_LIB_COORD_CPP
+#define LGEN_LIB_COORD_CPP 1
 
-#include <cstdint>
-#include <utility>
+#include "coord.h"
 
-using pos_t = int32_t;
+Coord::Coord() : x(0), y(0) {}
+Coord::Coord(pos_t _x, pos_t _y) : x(_x), y(_y) {}
 
-/// Struct for Coordinates, %Coord.
-struct Coord {
-    pos_t x, y;
-    Coord() : x(0), y(0) {}
-    Coord(pos_t _x, pos_t _y) : x(_x), y(_y) {}
+inline pos_t Coord::index() const { return x * COORD_INDEX + y; }
 
-    static const pos_t COORD_INDEX = 200;
-    /// Convert %Coord to a single index.
-    inline pos_t index() const { return x * COORD_INDEX + y; }
-};
-
-/// Link two %Coords together to a single "biindex".
 inline pos_t biindex(const Coord& a, const Coord& b) {
     return a.index() * Coord::COORD_INDEX * Coord::COORD_INDEX + b.index();
 }
-/// Unpacking a "biindex" to two %Coords.
 inline std::pair<Coord, Coord> unpack_biindex(const pos_t& bi) {
     pos_t fi = bi / (Coord::COORD_INDEX * Coord::COORD_INDEX);
     pos_t se = bi % (Coord::COORD_INDEX * Coord::COORD_INDEX);
     return std::pair(Coord(fi / Coord::COORD_INDEX, fi % Coord::COORD_INDEX),
                      Coord(se / Coord::COORD_INDEX, se % Coord::COORD_INDEX));
 }
-
-// Sometimes we need to pass a %Coord through two parameters or something.
-// This macro is used to make it available.
-#define SEPA(coo) (coo).x, (coo).y
-
-/// Comparison operators for %Coord.
-/// `operator==` and `operator!=` are defined as usual.
-/// `operator<` series acts like std::pair of convenience for sorting and
-/// comparison-relying containers like std::set and std::map.
 
 bool operator==(const Coord& a, const Coord& b) {
     return (a.x == b.x && a.y == b.y);
@@ -61,9 +41,6 @@ bool operator>(const Coord& a, const Coord& b) { return b < a; }
 bool operator<=(const Coord& a, const Coord& b) { return !(b < a); }
 bool operator>=(const Coord& a, const Coord& b) { return !(a < b); }
 
-/// Calculation operators for %Coord.
-/// Only `operator+` and `operator-` since coordinates can only do this.
-
 Coord operator+(const Coord& a, const Coord& b) {
     return Coord(a.x + b.x, a.y + b.y);
 }
@@ -71,4 +48,4 @@ Coord operator-(const Coord& a, const Coord& b) {
     return Coord(a.x - b.x, a.y - b.y);
 }
 
-#endif  // LGEN_LIB_COORD
+#endif  // LGEN_LIB_COORD_CPP

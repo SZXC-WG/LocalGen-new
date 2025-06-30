@@ -1,5 +1,5 @@
 /**
- * @file tile.hpp
+ * @file tile.h
  *
  * LocalGen Module: GameEngine
  *
@@ -8,12 +8,14 @@
  * Tiles are basic elements of map boards.
  */
 
-#ifndef LGEN_MODULE_GE_TILE
-#define LGEN_MODULE_GE_TILE 1
+#ifndef LGEN_MODULE_GE_TILE_H
+#define LGEN_MODULE_GE_TILE_H 1
 
 #include <cstdint>
 
-#include "player.hpp"
+#include "player.h"
+
+class Player;
 
 using army_t = int64_t;
 
@@ -46,15 +48,16 @@ enum tile_type_e {
 
 /// Information of a single tile.
 struct Tile {
-    Player* occupier;
+    Player::index_t occupier;
     tile_type_e type;
     army_t army;
     // Light is a tile attribute, not a tile type.
     bool lit;
 
-    Tile() : occupier(nullptr), type(TILE_BLANK), army(0), lit(false) {}
-    Tile(Player* _occupier, tile_type_e _type, army_t _army, bool _lit = false)
-        : occupier(_occupier), type(_type), army(_army), lit(_lit) {}
+    Tile();
+    Tile(Player* _occupier, tile_type_e _type, army_t _army, bool _lit = false);
+    Tile(Player::index_t _occupier, tile_type_e _type, army_t _army,
+         bool _lit = false);
 };
 
 /// View of a %Tile.
@@ -72,26 +75,9 @@ struct TileView {
     /// Light has no importance in game, and will not be given.
     // bool lit;
 
-    TileView() {}
+    TileView();
     /// Constructor using a %Tile and its visibility.
-    TileView(const Tile& tile, const bool& vis) : visible(vis) {
-        if (vis) {
-            occupier = tile.occupier->index;
-            type = tile.type;
-            army = tile.army;
-        } else {
-            occupier = 0;
-            switch (tile.type) {
-                case TILE_SPAWN:       type = TILE_BLANK; break;
-                case TILE_MOUNTAIN:
-                case TILE_CITY:
-                case TILE_LOOKOUT:
-                case TILE_OBSERVATORY: type = TILE_OBSTACLE; break;
-                default:               type = tile.type;
-            }
-            army = 0;
-        }
-    }
+    TileView(const Tile& tile, const bool& vis);
 };
 
-#endif  // LGEN_MODULE_GE_TILE
+#endif  // LGEN_MODULE_GE_TILE_H

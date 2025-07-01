@@ -60,7 +60,8 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         renderer_mountain(QString(":/images/svg/mountain.svg")),
         renderer_observatory(QString(":/images/svg/observatory.svg")),
         renderer_obstacle(QString(":/images/svg/obstacle.svg")),
-        renderer_swamp(QString(":/images/svg/swamp.svg"));
+        renderer_swamp(QString(":/images/svg/swamp.svg")),
+        renderer_light(QString(":/images/svg/light.svg"));
 
     painter.setFont(QFont("Quicksand", 6));
 
@@ -103,6 +104,16 @@ void MapWidget::paintEvent(QPaintEvent* event) {
                         break;
                     default: break;
                 }
+                if (tile.lightIcon) {
+                    QRectF lightRect(c * cellSize + 0.5 * padding,
+                                     r * cellSize + 0.5 * padding,
+                                     0.2 * cellSize, 0.2 * cellSize);
+                    renderer_light.render(&painter, lightRect);
+                }
+            } else if (tile.lightIcon) {
+                QRectF imgRect(c * cellSize + padding, r * cellSize + padding,
+                               cellSize - padding * 2, cellSize - padding * 2);
+                renderer_light.render(&painter, imgRect);
             }
             if (!tile.text.isEmpty()) {
                 painter.setPen(Qt::white);

@@ -49,7 +49,7 @@ void MapCreatorWindow::setupToolbar() {
         ":/images/svg/mountain.svg",    ":/images/svg/lookout.svg",
         ":/images/svg/observatory.svg", ":/images/svg/desert.svg",
         ":/images/svg/swamp.svg",       ":/images/svg/crown.svg",
-        ":/images/svg/city.svg",        ":/images/img/light.png",
+        ":/images/svg/city.svg",        ":/images/svg/light.svg",
         ":/images/img/erase.png"};
 
     for (int i = 0; i < toolIcons.size(); ++i) {
@@ -155,8 +155,9 @@ void MapCreatorWindow::onMapClicked(int r, int c) {
             break;
         case ToolType::ERASE:
             tile.type = TILE_BLANK, tile.color = QColor(220, 220, 220),
-            tile.text.clear();
+            tile.lightIcon = false, tile.text.clear();
             break;
+        case ToolType::LIGHT: tile.lightIcon = !tile.lightIcon;
     }
     map->repaint();
 }

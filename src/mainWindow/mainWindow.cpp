@@ -2,6 +2,7 @@
 
 #include "../localGameDialog/localGameDialog.h"
 #include "../localGameWindow/localGameWindow.h"
+#include "../mapCreatorWindow/mapCreatorWindow.h"
 #include "ui_mainWindow.h"
 
 MainWindow::MainWindow(QWidget* parent)
@@ -18,4 +19,9 @@ void MainWindow::on_btnLocalGame_clicked() {
         LocalGameWindow* window = new LocalGameWindow(this, dialog->config());
         window->exec();
     }
+}
+
+void MainWindow::on_btnCreateMap_clicked() {
+    MapCreatorWindow* window = new MapCreatorWindow(this);
+    window->exec();
 }

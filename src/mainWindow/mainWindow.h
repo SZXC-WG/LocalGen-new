@@ -18,6 +18,7 @@ class MainWindow : public QMainWindow {
 
    public slots:
     void on_btnLocalGame_clicked();
+    void on_btnCreateMap_clicked();
 
    private:
     Ui::MainWindow* ui;

@@ -24,6 +24,8 @@ set(PROJECT_SOURCES
         src/mapWidget/mapWidget.h
         src/localGameWindow/localGameWindow.cpp
         src/localGameWindow/localGameWindow.h
+        src/mapCreatorWindow/mapCreatorWindow.cpp
+        src/mapCreatorWindow/mapCreatorWindow.h
         src/GameEngine/board.cpp
         src/GameEngine/board.h
         src/GameEngine/game.cpp

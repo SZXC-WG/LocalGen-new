@@ -70,7 +70,7 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         for (int c = 0; c < w; ++c) {
             const DisplayTile& tile = displayTiles[r][c];
             QRectF cell(c * cellSize, r * cellSize, cellSize, cellSize);
-            painter.setPen(QPen(Qt::black, 1));
+            painter.setPen(QPen(Qt::black, 1.0 / scale));
             painter.fillRect(cell, tile.color);
             painter.drawRect(cell);
             if (tile.type != TILE_BLANK) {
@@ -112,7 +112,7 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     }
 
     if (focusRow != -1) {
-        painter.setPen(QPen(Qt::white, 1.5));
+        painter.setPen(QPen(Qt::white, 1.35 / scale));
         QRectF cell(focusCol * cellSize, focusRow * cellSize, cellSize,
                     cellSize);
         painter.drawRect(cell);

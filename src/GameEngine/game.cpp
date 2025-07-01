@@ -159,9 +159,11 @@ int BasicGame::initSpawn() {
     return 1;
 }
 
-void BasicGame::init() {
-    initSpawn();
+int BasicGame::init() {
+    int spawnReturn = initSpawn();
+    if (spawnReturn != 0) return spawnReturn;
     alive = std::vector(players.size(), true);
+    return 0;
 }
 
 void BasicGame::run() {}

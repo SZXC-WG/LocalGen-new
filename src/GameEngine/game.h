@@ -156,14 +156,20 @@ class BasicGame {
     /// Process all the existing moves in the processor, make them work.
     inline void process();
 
+    /// Perform the operations that a turn needs.
     inline void performTurn();
 
    protected:
+    /// Initialize the spawn points for the players.
+    /// @return 0 if the initialization is successful, 1 otherwise.
     int initSpawn();
 
-    void init();
+    /// Initialize the game.
+    /// @return 0 if the initialization is successful, 1 otherwise.
+    int init();
 
    public:
+    /// Run the game.
     virtual void run();
 };
 

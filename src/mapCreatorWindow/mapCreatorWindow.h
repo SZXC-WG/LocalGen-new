@@ -40,6 +40,7 @@ class MapCreatorWindow : public QDialog {
         SWAMP,
         CROWN,
         CITY,
+        NEUTRAL,
         LIGHT,
         ERASE
     };

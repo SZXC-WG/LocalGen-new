@@ -104,16 +104,16 @@ void MapWidget::paintEvent(QPaintEvent* event) {
                         break;
                     default: break;
                 }
-                if (tile.lightIcon) {
-                    QRectF lightRect(c * cellSize + 0.5 * padding,
-                                     r * cellSize + 0.5 * padding,
-                                     0.2 * cellSize, 0.2 * cellSize);
-                    renderer_light.render(&painter, lightRect);
-                }
-            } else if (tile.lightIcon) {
-                QRectF imgRect(c * cellSize + padding, r * cellSize + padding,
-                               cellSize - padding * 2, cellSize - padding * 2);
-                renderer_light.render(&painter, imgRect);
+            }
+            if (tile.lightIcon) {
+                QRectF lightRect =
+                    tile.type == TILE_BLANK && tile.text.isEmpty()
+                        ? QRectF(c * cellSize + padding, r * cellSize + padding,
+                                 cellSize - padding * 2, cellSize - padding * 2)
+                        : QRect(c * cellSize + 0.5 * padding,
+                                r * cellSize + 0.5 * padding, 0.2 * cellSize,
+                                0.2 * cellSize);
+                renderer_light.render(&painter, lightRect);
             }
             if (!tile.text.isEmpty()) {
                 painter.setPen(Qt::white);

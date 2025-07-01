@@ -49,8 +49,8 @@ void MapCreatorWindow::setupToolbar() {
         ":/images/svg/mountain.svg",    ":/images/svg/lookout.svg",
         ":/images/svg/observatory.svg", ":/images/svg/desert.svg",
         ":/images/svg/swamp.svg",       ":/images/svg/crown.svg",
-        ":/images/svg/city.svg",        ":/images/svg/light.svg",
-        ":/images/img/erase.png"};
+        ":/images/svg/city.svg",        ":/images/img/neutral.png",
+        ":/images/svg/light.svg",       ":/images/img/erase.png"};
 
     for (int i = 0; i < toolIcons.size(); ++i) {
         QPushButton* btn = new QPushButton(toolbar);
@@ -151,6 +151,10 @@ void MapCreatorWindow::onMapClicked(int r, int c) {
             break;
         case ToolType::CITY:
             tile.type = TILE_CITY, tile.color = QColor(128, 128, 128),
+            tile.text = "40";
+            break;
+        case ToolType::NEUTRAL:
+            tile.type = TILE_NEUTRAL, tile.color = QColor(128, 128, 128),
             tile.text = "40";
             break;
         case ToolType::ERASE:

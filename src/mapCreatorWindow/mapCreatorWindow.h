@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include "../mapWidget/mapWidget.h"
+
 class MapCreatorWindow : public QDialog {
     Q_OBJECT
 
@@ -10,8 +12,10 @@ class MapCreatorWindow : public QDialog {
     explicit MapCreatorWindow(QWidget* parent = nullptr);
     ~MapCreatorWindow();
 
+    void onMapClicked(int r, int c);
+
    private:
-    // Private members for the map creator window
+    MapWidget* map;
 };
 
 #endif  // MAPCREATORWINDOW_H

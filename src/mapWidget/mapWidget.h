@@ -21,13 +21,16 @@ class MapWidget : public QWidget {
     ~MapWidget();
 
     void setFocusEnabled(bool enabled);
-    DisplayTile& tileAt(int r, int c) { return displayTiles[r][c]; }
+    inline DisplayTile& tileAt(int r, int c) { return displayTiles[r][c]; }
 
-    int mapWidth() const { return displayTiles[0].size(); }
-    int mapHeight() const { return displayTiles.size(); }
+    inline int mapWidth() const { return displayTiles[0].size(); }
+    inline int mapHeight() const { return displayTiles.size(); }
 
     void setMapWidth(int w);
     void setMapHeight(int h);
+
+   signals:
+    void cellClicked(int r, int c);
 
    protected:
     void paintEvent(QPaintEvent* event) override;
@@ -38,17 +41,29 @@ class MapWidget : public QWidget {
     void keyPressEvent(QKeyEvent* event) override;
 
    private:
+    // Helper functions
+    QPoint mapToGrid(const QPoint& pos);
+
+    inline bool isValidGridPos(int x, int y) const {
+        return x >= 0 && x < mapWidth() && y >= 0 && y < mapHeight();
+    }
+    inline bool isValidGridPos(const QPoint& pos) const {
+        return isValidGridPos(pos.x(), pos.y());
+    }
+
+    // Constants
     static constexpr qreal cellSize = 20.0, zoomFactor = 1.1,
                            paddingFactor = 0.109375;
 
+    // State variables
     int focusRow, focusCol;
-
-    QPoint mapToGrid(const QPoint& pos);
 
     qreal scale;
     QPointF offset;
-    bool mouseDown, isDragging;
+    bool leftMouseDown, leftMouseDragging;
+    bool rightMouseDown, rightMouseDragging;
     QPoint lastMousePos;
+    QPoint lastRightClickGrid;
 
     std::vector<std::vector<DisplayTile>> displayTiles;
 };

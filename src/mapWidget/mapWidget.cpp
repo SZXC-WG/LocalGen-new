@@ -11,10 +11,13 @@ MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled)
     : QWidget(parent),
       scale(1.0),
       offset(0, 0),
-      mouseDown(false),
-      isDragging(false),
+      leftMouseDown(false),
+      leftMouseDragging(false),
+      rightMouseDown(false),
+      rightMouseDragging(false),
       focusRow(-1),
-      focusCol(-1) {
+      focusCol(-1),
+      lastRightClickGrid(-1, -1) {
     setMouseTracking(true);
     setFocusEnabled(focusEnabled);
     displayTiles.resize(height, std::vector<DisplayTile>(width));
@@ -131,34 +134,53 @@ void MapWidget::wheelEvent(QWheelEvent* event) {
 
 void MapWidget::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
-        mouseDown = true;
+        leftMouseDown = true;
         lastMousePos = event->pos();
+    } else if (event->button() == Qt::RightButton) {
+        rightMouseDown = true;
+        QPoint gridPos = mapToGrid(event->pos());
+        if (isValidGridPos(gridPos)) {
+            emit cellClicked(gridPos.y(), gridPos.x());
+            lastRightClickGrid = gridPos;
+        }
     }
 }
 
 void MapWidget::mouseMoveEvent(QMouseEvent* event) {
-    if (mouseDown) {
-        if (!isDragging) {
-            isDragging = true;
+    if (leftMouseDown) {
+        if (!leftMouseDragging) {
+            leftMouseDragging = true;
             setCursor(Qt::ClosedHandCursor);
         }
         QPoint delta = event->pos() - lastMousePos;
         offset += delta;
         lastMousePos = event->pos();
         update();
+    } else if (rightMouseDown) {
+        QPoint gridPos = mapToGrid(event->pos());
+        if (isValidGridPos(gridPos) && gridPos != lastRightClickGrid) {
+            emit cellClicked(gridPos.y(), gridPos.x());
+            lastRightClickGrid = gridPos;
+            rightMouseDragging = true;
+        }
     }
 }
 
 void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
-        mouseDown = false;
-        if (isDragging) {
-            isDragging = false;
+        leftMouseDown = false;
+        if (leftMouseDragging) {
+            leftMouseDragging = false;
             setCursor(Qt::ArrowCursor);
-        } else if (focusPolicy() != Qt::NoFocus) {
+        } else if (focusPolicy() == Qt::NoFocus) {
+            // When focus is disabled, emit signal for left click
             QPoint gridPos = mapToGrid(event->pos());
-            if (gridPos.x() >= 0 && gridPos.x() < mapWidth() &&
-                gridPos.y() >= 0 && gridPos.y() < mapHeight()) {
+            if (isValidGridPos(gridPos)) {
+                emit cellClicked(gridPos.y(), gridPos.x());
+            }
+        } else {
+            QPoint gridPos = mapToGrid(event->pos());
+            if (isValidGridPos(gridPos)) {
                 // important: transpose coordinates here
                 focusRow = gridPos.y();
                 focusCol = gridPos.x();
@@ -167,6 +189,10 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
             }
             update();
         }
+    } else if (event->button() == Qt::RightButton) {
+        rightMouseDown = false;
+        rightMouseDragging = false;
+        lastRightClickGrid = QPoint(-1, -1);
     }
 }
 

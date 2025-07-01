@@ -153,6 +153,8 @@ int BasicGame::initSpawn() {
             }
         }
     }
+    std::shuffle(begin(spawnCandidates) + spawnCount, end(spawnCandidates),
+                 random);
     if (spawnCount + blankCount >= playerCount) return assign(), 0;
     return 1;
 }

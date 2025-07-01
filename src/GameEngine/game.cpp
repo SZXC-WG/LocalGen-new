@@ -13,6 +13,10 @@
 
 #include "game.h"
 
+#include <algorithm>
+#include <random>
+
+#include "../utils/tools.h"
 #include "board.h"
 #include "move.h"
 #include "player.h"
@@ -117,7 +121,41 @@ inline void BasicGame::performTurn() {
     process();
 }
 
-void BasicGame::initSpawn() {}
+int BasicGame::initSpawn() {
+    std::mt19937 random{std::random_device()()};
+    int playerCount = players.size();
+    std::vector<index_t> playerSequence(players.size());
+    iota(begin(playerSequence), end(playerSequence), PLAYER_INDEX_START);
+    std::shuffle(begin(playerSequence), end(playerSequence), random);
+    std::vector<Coord> spawnCandidates;
+    auto assign = [&]() -> void {
+        for (int i = 0; i < playerCount; ++i)
+            spawnCoord[playerSequence[i]] = spawnCandidates[i];
+    };
+    int spawnCount = 0;
+    for (int i = 1; i < board.row; ++i) {
+        for (int j = 1; j < board.col; ++j) {
+            if (board.tiles[i][j].type == TILE_SPAWN) {
+                spawnCandidates.emplace_back(i, j);
+                ++spawnCount;
+            }
+        }
+    }
+    std::shuffle(begin(spawnCandidates), end(spawnCandidates), random);
+    if (spawnCount >= playerCount) return assign(), 0;
+    int blankCount = 0;
+    for (int i = 1; i < board.row; ++i) {
+        for (int j = 1; j < board.col; ++j) {
+            if (board.tiles[i][j].type == TILE_PLAIN &&
+                board.tiles[i][j].army == 0) {
+                spawnCandidates.emplace_back(i, j);
+                ++blankCount;
+            }
+        }
+    }
+    if (spawnCount + blankCount >= playerCount) return assign(), 0;
+    return 1;
+}
 
 void BasicGame::init() {
     initSpawn();

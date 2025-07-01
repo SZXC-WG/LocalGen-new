@@ -60,8 +60,10 @@ class BasicGame {
     army_t decrement[TILE_TYPE_COUNT];
 
    protected:
+    static const index_t PLAYER_INDEX_START = 1;
     std::vector<Player*> players;
     std::vector<bool> alive;
+    std::vector<Coord> spawnCoord;
 
    public:
     /// [TODO]
@@ -73,6 +75,9 @@ class BasicGame {
                    std::vector<index_t> associatedList);
 
     class InGameBoard : public Board {
+       public:
+        friend class BasicGame;
+
        public:
         BasicGame* game;
 
@@ -154,7 +159,7 @@ class BasicGame {
     inline void performTurn();
 
    protected:
-    void initSpawn();
+    int initSpawn();
 
     void init();
 

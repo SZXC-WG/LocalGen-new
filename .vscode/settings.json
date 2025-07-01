@@ -101,6 +101,14 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "valarray": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "cassert": "cpp",
+        "cerrno": "cpp",
+        "cfloat": "cpp",
+        "climits": "cpp",
+        "ciso646": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "version": "cpp"
     }
 }

@@ -38,6 +38,7 @@ set(PROJECT_SOURCES
         src/GameEngine/tile.h
         src/utils/coord.cpp
         src/utils/coord.h
+        src/utils/tools.h
         res/res.qrc
 )
 

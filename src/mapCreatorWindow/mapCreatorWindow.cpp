@@ -37,10 +37,12 @@ void MapCreatorWindow::setupToolbar() {
     toolbar = new QWidget(this);
     toolbar->setFixedWidth(50);
     toolbar->setFixedHeight(9 * 40 + 8 * 3 + 20);
-    toolbar->setStyleSheet("QWidget { background-color: white; }");
+    toolbar->setStyleSheet(
+        "QWidget { background-color: white; border-top-right-radius: 8px; "
+        "border-bottom-right-radius: 8px; }");
 
     QVBoxLayout* toolLayout = new QVBoxLayout(toolbar);
-    toolLayout->setContentsMargins(5, 10, 5, 10);
+    toolLayout->setContentsMargins(5, 5, 5, 5);
     toolLayout->setSpacing(3);
 
     QStringList toolIcons = {

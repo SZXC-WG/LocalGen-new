@@ -195,28 +195,27 @@ void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
 
 void MapCreatorWindow::setupSliders() {
     sliderContainer = new QWidget(this);
-    sliderContainer->setFixedHeight(90);
-    sliderContainer->setStyleSheet(
-        "QWidget { background-color: transparent; }");
+    sliderContainer->setFixedHeight(50);
 
     QHBoxLayout* containerLayout = new QHBoxLayout(sliderContainer);
-    containerLayout->setContentsMargins(0, 15, 0, 15);
+    containerLayout->setContentsMargins(0, 0, 0, 0);
     containerLayout->addStretch();
 
     QWidget* floatingPanel = new QWidget(sliderContainer);
     floatingPanel->setFixedSize(450, 50);
     floatingPanel->setStyleSheet(
-        "QWidget { background-color: white; border-radius: 10px; }");
+        "QWidget { background-color: white; border-bottom-left-radius: 10px; "
+        "border-bottom-right-radius: 10px; }");
 
     QHBoxLayout* mainSliderLayout = new QHBoxLayout(floatingPanel);
     mainSliderLayout->setContentsMargins(25, 15, 25, 15);
-    mainSliderLayout->setSpacing(40);
+    mainSliderLayout->setSpacing(25);
 
     QFont font("Quicksand", 10, QFont::Bold);
 
     // Width slider group
     QHBoxLayout* widthLayout = new QHBoxLayout();
-    widthLayout->setSpacing(8);
+    widthLayout->setSpacing(4);
 
     QLabel* widthLabel = new QLabel("Width:", floatingPanel);
     widthLabel->setFont(font);
@@ -246,7 +245,7 @@ void MapCreatorWindow::setupSliders() {
 
     // Height slider group
     QHBoxLayout* heightLayout = new QHBoxLayout();
-    heightLayout->setSpacing(8);
+    heightLayout->setSpacing(4);
 
     QLabel* heightLabel = new QLabel("Height:", floatingPanel);
     heightLabel->setFont(font);

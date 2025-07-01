@@ -127,4 +127,7 @@ void BasicGame::init() {
 
 void BasicGame::run() {}
 
+void BasicGame::broadcast(turn_t turn, game_message_e message,
+                          std::vector<Player::index_t> associatedList) {}
+
 #endif  // LGEN_MODULE_GE_GAME_CPP

@@ -3,8 +3,15 @@
 
 #include <QPoint>
 #include <QWidget>
+#include <vector>
 
 #include "../GameEngine/board.h"
+
+struct DisplayTile {
+    tile_type_e type = TILE_BLANK;
+    QColor color = Qt::white;
+    QString text;
+};
 
 class MapWidget : public QWidget {
     Q_OBJECT
@@ -12,8 +19,15 @@ class MapWidget : public QWidget {
    public:
     explicit MapWidget(QWidget* parent, int w, int h, bool focusEnabled = true);
     ~MapWidget();
-    const int width, height;
+
     void setFocusEnabled(bool enabled);
+    DisplayTile& tileAt(int r, int c) { return displayTiles[r][c]; }
+
+    int mapWidth() const { return displayTiles[0].size(); }
+    int mapHeight() const { return displayTiles.size(); }
+
+    void setMapWidth(int w);
+    void setMapHeight(int h);
 
    protected:
     void paintEvent(QPaintEvent* event) override;
@@ -27,7 +41,7 @@ class MapWidget : public QWidget {
     static constexpr qreal cellSize = 20.0, zoomFactor = 1.1,
                            paddingFactor = 0.109375;
 
-    int focusX, focusY;
+    int focusRow, focusCol;
 
     QPoint mapToGrid(const QPoint& pos);
 
@@ -35,6 +49,8 @@ class MapWidget : public QWidget {
     QPointF offset;
     bool mouseDown, isDragging;
     QPoint lastMousePos;
+
+    std::vector<std::vector<DisplayTile>> displayTiles;
 };
 
 #endif  // MAPWIDGET_H

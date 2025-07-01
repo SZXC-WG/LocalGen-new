@@ -7,21 +7,36 @@
 #include <QSvgRenderer>
 #include <QWheelEvent>
 
-MapWidget::MapWidget(QWidget* parent, int w, int h, bool focusEnabled)
+MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled)
     : QWidget(parent),
       scale(1.0),
       offset(0, 0),
       mouseDown(false),
       isDragging(false),
-      width(w),
-      height(h),
-      focusX(-1),
-      focusY(-1) {
+      focusRow(-1),
+      focusCol(-1) {
     setMouseTracking(true);
     setFocusEnabled(focusEnabled);
+    displayTiles.resize(height, std::vector<DisplayTile>(width));
 }
 
 MapWidget::~MapWidget() {}
+
+void MapWidget::setMapWidth(int w) {
+    if (w != mapWidth()) {
+        for (auto& row : displayTiles) {
+            row.resize(w);
+        }
+        update();
+    }
+}
+
+void MapWidget::setMapHeight(int h) {
+    if (h != mapHeight()) {
+        displayTiles.resize(h, std::vector<DisplayTile>(mapWidth()));
+        update();
+    }
+}
 
 void MapWidget::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
@@ -34,9 +49,6 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     const qreal padding = cellSize * paddingFactor;
 
     static const QColor bg(220, 220, 220);
-    static const QColor playerColors[] = {
-        QColor(255, 0, 0), QColor(255, 112, 16), QColor(0, 128, 0),
-        QColor(16, 49, 255)};
 
     static QSvgRenderer renderer_city(QString(":/images/svg/city.svg")),
         renderer_general(QString(":/images/svg/crown.svg")),
@@ -47,34 +59,59 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         renderer_obstacle(QString(":/images/svg/obstacle.svg")),
         renderer_swamp(QString(":/images/svg/swamp.svg"));
 
-    QSvgRenderer* renderers[] = {&renderer_city,     &renderer_general,
-                                 &renderer_desert,   &renderer_lookout,
-                                 &renderer_mountain, &renderer_observatory,
-                                 &renderer_obstacle, &renderer_swamp};
+    painter.setFont(QFont("Quicksand", 6));
 
-    QRandomGenerator* rand = QRandomGenerator::global();
+    int h = mapHeight(), w = mapWidth();
 
-    painter.setPen(QPen(Qt::black, 1));
-    for (int i = 0; i < width; ++i) {
-        for (int j = 0; j < height; ++j) {
-            QRectF cell(i * cellSize, j * cellSize, cellSize, cellSize);
-            painter.fillRect(cell, rand->bounded(2) == 0
-                                       ? bg
-                                       : playerColors[rand->bounded(4)]);
+    for (int r = 0; r < h; ++r) {
+        for (int c = 0; c < w; ++c) {
+            const DisplayTile& tile = displayTiles[r][c];
+            QRectF cell(c * cellSize, r * cellSize, cellSize, cellSize);
+            painter.setPen(QPen(Qt::black, 1));
+            painter.fillRect(cell, tile.color);
             painter.drawRect(cell);
-            int k = rand->bounded(15);
-            if (k < 8) {
-                QRectF imgRect(i * cellSize + padding, j * cellSize + padding,
+            if (tile.type != TILE_BLANK) {
+                QRectF imgRect(c * cellSize + padding, r * cellSize + padding,
                                cellSize - padding * 2, cellSize - padding * 2);
-                QSvgRenderer* renderer = renderers[k];
-                renderer->render(&painter, imgRect);
+                switch (tile.type) {
+                    case TILE_CITY:
+                        renderer_city.render(&painter, imgRect);
+                        break;
+                    case TILE_GENERAL:
+                        renderer_general.render(&painter, imgRect);
+                        break;
+                    case TILE_DESERT:
+                        renderer_desert.render(&painter, imgRect);
+                        break;
+                    case TILE_LOOKOUT:
+                        renderer_lookout.render(&painter, imgRect);
+                        break;
+                    case TILE_MOUNTAIN:
+                        renderer_mountain.render(&painter, imgRect);
+                        break;
+                    case TILE_OBSERVATORY:
+                        renderer_observatory.render(&painter, imgRect);
+                        break;
+                    case TILE_OBSTACLE:
+                        renderer_obstacle.render(&painter, imgRect);
+                        break;
+                    case TILE_SWAMP:
+                        renderer_swamp.render(&painter, imgRect);
+                        break;
+                    default: break;
+                }
+            }
+            if (!tile.text.isEmpty()) {
+                painter.setPen(Qt::white);
+                painter.drawText(cell, Qt::AlignCenter, tile.text);
             }
         }
     }
 
-    if (focusX != -1) {
+    if (focusRow != -1) {
         painter.setPen(QPen(Qt::white, 1.5));
-        QRectF cell(focusX * cellSize, focusY * cellSize, cellSize, cellSize);
+        QRectF cell(focusCol * cellSize, focusRow * cellSize, cellSize,
+                    cellSize);
         painter.drawRect(cell);
     }
 }
@@ -120,12 +157,13 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
             setCursor(Qt::ArrowCursor);
         } else if (focusPolicy() != Qt::NoFocus) {
             QPoint gridPos = mapToGrid(event->pos());
-            if (gridPos.x() >= 0 && gridPos.x() < width && gridPos.y() >= 0 &&
-                gridPos.y() < height) {
-                focusX = gridPos.x();
-                focusY = gridPos.y();
+            if (gridPos.x() >= 0 && gridPos.x() < mapWidth() &&
+                gridPos.y() >= 0 && gridPos.y() < mapHeight()) {
+                // important: transpose coordinates here
+                focusRow = gridPos.y();
+                focusCol = gridPos.x();
             } else {
-                focusX = focusY = -1;
+                focusRow = focusCol = -1;
             }
             update();
         }
@@ -144,25 +182,25 @@ void MapWidget::setFocusEnabled(bool enabled) {
         setFocusPolicy(Qt::StrongFocus);
     } else {
         setFocusPolicy(Qt::NoFocus);
-        focusX = focusY = -1;
+        focusRow = focusCol = -1;
         update();
     }
 }
 
 void MapWidget::keyPressEvent(QKeyEvent* event) {
-    if (focusX != -1 && focusY != -1) {
+    if (focusRow != -1 && focusCol != -1) {
         switch (event->key()) {
             case Qt::Key_Left:
-                if (focusX > 0) focusX--;
+                if (focusCol > 0) focusCol--;
                 break;
             case Qt::Key_Right:
-                if (focusX < width - 1) focusX++;
+                if (focusCol < mapWidth() - 1) focusCol++;
                 break;
             case Qt::Key_Up:
-                if (focusY > 0) focusY--;
+                if (focusRow > 0) focusRow--;
                 break;
             case Qt::Key_Down:
-                if (focusY < height - 1) focusY++;
+                if (focusRow < mapHeight() - 1) focusRow++;
                 break;
             default: QWidget::keyPressEvent(event); return;
         }

@@ -207,7 +207,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
     }
 }
 
-QPoint MapWidget::mapToGrid(const QPoint& pos) {
+QPoint MapWidget::mapToGrid(const QPoint& pos) const {
     QPointF scaledPos = (pos - offset) / scale;
     int gridX = static_cast<int>(scaledPos.x() / cellSize);
     int gridY = static_cast<int>(scaledPos.y() / cellSize);

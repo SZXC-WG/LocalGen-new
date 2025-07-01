@@ -43,7 +43,7 @@ class MapWidget : public QWidget {
 
    private:
     // Helper functions
-    QPoint mapToGrid(const QPoint& pos);
+    QPoint mapToGrid(const QPoint& pos) const;
 
     inline bool isValidGridPos(int x, int y) const {
         return x >= 0 && x < mapWidth() && y >= 0 && y < mapHeight();

@@ -9,7 +9,7 @@
 
 struct DisplayTile {
     tile_type_e type = TILE_BLANK;
-    QColor color = Qt::white;
+    QColor color = QColor(220, 220, 220);  // Default color for TILE_BLANK
     QString text;
 };
 

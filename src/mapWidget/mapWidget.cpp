@@ -30,14 +30,14 @@ void MapWidget::setMapWidth(int w) {
         for (auto& row : displayTiles) {
             row.resize(w);
         }
-        update();
+        repaint();
     }
 }
 
 void MapWidget::setMapHeight(int h) {
     if (h != mapHeight()) {
         displayTiles.resize(h, std::vector<DisplayTile>(mapWidth()));
-        update();
+        repaint();
     }
 }
 

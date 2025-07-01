@@ -1,9 +1,12 @@
 #include "mapCreatorWindow.h"
 
+#include <QFont>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QKeyEvent>
+#include <QLabel>
 #include <QPushButton>
+#include <QSlider>
 #include <QVBoxLayout>
 
 MapCreatorWindow::MapCreatorWindow(QWidget* parent)
@@ -18,12 +21,21 @@ MapCreatorWindow::MapCreatorWindow(QWidget* parent)
             &MapCreatorWindow::onMapClicked);
 
     setupToolbar();
+    setupSliders();
 
-    QHBoxLayout* mainLayout = new QHBoxLayout(this);
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
-    mainLayout->addWidget(toolbar);
-    mainLayout->addWidget(map);
+
+    mainLayout->addWidget(sliderContainer);
+
+    QHBoxLayout* contentLayout = new QHBoxLayout();
+    contentLayout->setContentsMargins(0, 0, 0, 0);
+    contentLayout->setSpacing(0);
+    contentLayout->addWidget(toolbar);
+    contentLayout->addWidget(map);
+
+    mainLayout->addLayout(contentLayout);
 
     setLayout(mainLayout);
     resize(800, 600);
@@ -179,4 +191,92 @@ void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
             break;
         default: QDialog::keyPressEvent(event); break;
     }
+}
+
+void MapCreatorWindow::setupSliders() {
+    sliderContainer = new QWidget(this);
+    sliderContainer->setFixedHeight(90);
+    sliderContainer->setStyleSheet(
+        "QWidget { background-color: transparent; }");
+
+    QHBoxLayout* containerLayout = new QHBoxLayout(sliderContainer);
+    containerLayout->setContentsMargins(0, 15, 0, 15);
+    containerLayout->addStretch();
+
+    QWidget* floatingPanel = new QWidget(sliderContainer);
+    floatingPanel->setFixedSize(450, 50);
+    floatingPanel->setStyleSheet(
+        "QWidget { background-color: white; border-radius: 10px; }");
+
+    QHBoxLayout* mainSliderLayout = new QHBoxLayout(floatingPanel);
+    mainSliderLayout->setContentsMargins(25, 15, 25, 15);
+    mainSliderLayout->setSpacing(40);
+
+    QFont font("Quicksand", 10, QFont::Bold);
+
+    // Width slider group
+    QHBoxLayout* widthLayout = new QHBoxLayout();
+    widthLayout->setSpacing(8);
+
+    QLabel* widthLabel = new QLabel("Width:", floatingPanel);
+    widthLabel->setFont(font);
+    widthLabel->setStyleSheet("color: black;");
+    widthLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    widthSlider = new QSlider(Qt::Horizontal, floatingPanel);
+    widthSlider->setRange(10, 50);
+    widthSlider->setValue(10);
+    widthSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    QLabel* widthValueLabel = new QLabel("10", floatingPanel);
+    widthValueLabel->setFont(font);
+    widthValueLabel->setStyleSheet("color: black;");
+    widthValueLabel->setMinimumWidth(30);
+    widthValueLabel->setAlignment(Qt::AlignCenter);
+    widthValueLabel->setSizePolicy(QSizePolicy::Maximum,
+                                   QSizePolicy::Preferred);
+
+    connect(widthSlider, &QSlider::valueChanged,
+            [this, widthValueLabel](int value) {
+                widthValueLabel->setText(QString::number(value));
+                map->setMapWidth(value);
+            });
+
+    widthLayout->addWidget(widthLabel);
+    widthLayout->addWidget(widthSlider);
+    widthLayout->addWidget(widthValueLabel);
+
+    // Height slider group
+    QHBoxLayout* heightLayout = new QHBoxLayout();
+    heightLayout->setSpacing(8);
+
+    QLabel* heightLabel = new QLabel("Height:", floatingPanel);
+    heightLabel->setFont(font);
+    heightLabel->setStyleSheet("color: black;");
+    heightLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    heightSlider = new QSlider(Qt::Horizontal, floatingPanel);
+    heightSlider->setRange(10, 50);
+    heightSlider->setValue(10);
+    heightSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    QLabel* heightValueLabel = new QLabel("10", floatingPanel);
+    heightValueLabel->setFont(font);
+    heightValueLabel->setStyleSheet("color: black;");
+    heightValueLabel->setMinimumWidth(30);
+    heightValueLabel->setAlignment(Qt::AlignCenter);
+    heightValueLabel->setSizePolicy(QSizePolicy::Maximum,
+                                    QSizePolicy::Preferred);
+
+    connect(heightSlider, &QSlider::valueChanged,
+            [this, heightValueLabel](int value) {
+                heightValueLabel->setText(QString::number(value));
+                map->setMapHeight(value);
+            });
+
+    heightLayout->addWidget(heightLabel);
+    heightLayout->addWidget(heightSlider);
+    heightLayout->addWidget(heightValueLabel);
+
+    mainSliderLayout->addLayout(widthLayout);
+    mainSliderLayout->addLayout(heightLayout);
+
+    containerLayout->addWidget(floatingPanel);
+    containerLayout->addStretch();
 }

@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QKeyEvent>
 #include <QPushButton>
+#include <QSlider>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <cstdint>
@@ -21,6 +22,7 @@ class MapCreatorWindow : public QDialog {
 
    private slots:
     void onToolSelected();
+    void setupSliders();
 
    private:
     void setupToolbar();
@@ -31,6 +33,9 @@ class MapCreatorWindow : public QDialog {
     QWidget* toolbar;
     QList<QPushButton*> toolButtons;
     int selectedToolIndex;
+    QWidget* sliderContainer;
+    QSlider* widthSlider;
+    QSlider* heightSlider;
 
     enum class ToolType : std::uint8_t {
         MOUNTAIN = 0,

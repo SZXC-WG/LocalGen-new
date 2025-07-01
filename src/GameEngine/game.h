@@ -70,7 +70,7 @@ class BasicGame {
     /// @param message type of the message.
     /// @param associatedList the needed extra information of the message.
     void broadcast(turn_t turn, game_message_e message,
-                   std::vector<Player::index_t> associatedList);
+                   std::vector<index_t> associatedList);
 
     class InGameBoard : public Board {
        public:
@@ -119,7 +119,7 @@ class BasicGame {
             /// Perform an action where a player captures another player.
             /// @param p1 the player that captures.
             /// @param p2 the player that is captured.
-            void capture(Player::index_t p1, Player::index_t p2);
+            void capture(index_t p1, index_t p2);
             /// Execute all the in-queue moves, one by one.
             void execute();
         };

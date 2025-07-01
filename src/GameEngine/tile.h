@@ -48,7 +48,7 @@ enum tile_type_e {
 
 /// Information of a single tile.
 struct Tile {
-    Player::index_t occupier;
+    index_t occupier;
     tile_type_e type;
     army_t army;
     // Light is a tile attribute, not a tile type.
@@ -56,8 +56,7 @@ struct Tile {
 
     Tile();
     Tile(Player* _occupier, tile_type_e _type, army_t _army, bool _lit = false);
-    Tile(Player::index_t _occupier, tile_type_e _type, army_t _army,
-         bool _lit = false);
+    Tile(index_t _occupier, tile_type_e _type, army_t _army, bool _lit = false);
 };
 
 /// View of a %Tile.
@@ -69,7 +68,7 @@ struct TileView {
     bool visible;
     /// We cannot provide direct %Player pointers in a %TileView for a pointer
     /// gives access to some sacred things.
-    Player::index_t occupier;
+    index_t occupier;
     tile_type_e type;
     army_t army;
     /// Light has no importance in game, and will not be given.

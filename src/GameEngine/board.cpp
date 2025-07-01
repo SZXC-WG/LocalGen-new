@@ -143,7 +143,7 @@ bool Board::visible(pos_t x, pos_t y, Player* player) const {
 
     // lookout check
     auto findLookoutOccupier = [&](pos_t x, pos_t y) {
-        Player::index_t occupier = -1;
+        index_t occupier = -1;
         army_t maxArmy = 0;
         if (tiles[x - 1][y].army > maxArmy)
             occupier = tiles[x - 1][y].occupier, maxArmy = tiles[x - 1][y].army;

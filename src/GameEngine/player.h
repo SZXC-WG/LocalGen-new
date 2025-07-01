@@ -18,11 +18,11 @@
 class Move;
 class BoardView;
 
+using index_t = std::uint32_t;
+
 /// Base struct for players.
 class Player {
    public:
-    using index_t = std::uint32_t;
-
    public:
     const std::string name;
     index_t index;

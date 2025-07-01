@@ -59,8 +59,7 @@ inline void BasicGame::InGameBoard::MoveProcessor::add(Move move) {
 
 void BasicGame::InGameBoard::MoveProcessor::sort() {}
 
-void BasicGame::InGameBoard::MoveProcessor::capture(Player::index_t p1,
-                                                    Player::index_t p2) {
+void BasicGame::InGameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
     for (auto& row : board->tiles) {
         for (auto& tile : row) {
             if (tile.occupier == p2) {
@@ -128,6 +127,6 @@ void BasicGame::init() {
 void BasicGame::run() {}
 
 void BasicGame::broadcast(turn_t turn, game_message_e message,
-                          std::vector<Player::index_t> associatedList) {}
+                          std::vector<index_t> associatedList) {}
 
 #endif  // LGEN_MODULE_GE_GAME_CPP

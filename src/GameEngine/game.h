@@ -11,6 +11,7 @@
 #ifndef LGEN_MODULE_GE_GAME_H
 #define LGEN_MODULE_GE_GAME_H
 
+#include <bitset>
 #include <cstdint>
 #include <vector>
 
@@ -64,6 +65,32 @@ class BasicGame {
     std::vector<Player*> players;
     std::vector<bool> alive;
     std::vector<Coord> spawnCoord;
+
+   public:
+    static constexpr uint32_t CONFIG_COUNT = 0;
+    using config_t = std::bitset<CONFIG_COUNT>;
+    /// Game configuration values.
+    struct config {
+        static constexpr config_t EXAMPLE_CONFIG1 = 0b1;
+        static constexpr config_t EXAMPLE_CONFIG2 = 0b10;
+        static constexpr config_t EXAMPLE_CONFIG3 = 0b100;
+    };
+    /// Preset values for modifiers.
+    struct modifiers {
+        static constexpr config_t EXAMPLE_MODIFIER1 = 0b1;
+        static constexpr config_t EXAMPLE_MODIFIER2 = 0b11;
+        static constexpr config_t EXAMPLE_MODIFIER3 = 0b101;
+    };
+
+   protected:
+    /// Configuration variable. Default value 0.
+    /// Placed in `protected` to avoid being modified illegally.
+    config_t conf = 0;
+
+   public:
+    /// Get game configuration value.
+    /// @return the current configuration value.
+    inline config_t getConfig() const;
 
    public:
     /// [TODO]

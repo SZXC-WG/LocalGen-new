@@ -21,6 +21,8 @@
 #include "move.h"
 #include "player.h"
 
+inline BasicGame::config_t BasicGame::getConfig() const { return conf; }
+
 BasicGame::InGameBoard::InGameBoard(BasicGame* _game) : game(_game) {}
 BasicGame::InGameBoard::InGameBoard(BasicGame* _game, Board _board)
     : game(_game), Board(_board) {}

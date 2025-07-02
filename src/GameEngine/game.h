@@ -1,5 +1,5 @@
 /**
- * @file game.hpp
+ * @file game.h
  *
  * LocalGen Module: GameEngine
  *

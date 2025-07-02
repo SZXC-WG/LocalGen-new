@@ -1,11 +1,9 @@
 /**
- * @file game.hpp
+ * @file game.cpp
  *
  * LocalGen Module: GameEngine
  *
  * Games
- *
- * Basic game operations
  */
 
 #ifndef LGEN_MODULE_GE_GAME_CPP

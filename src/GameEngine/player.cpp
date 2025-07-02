@@ -4,8 +4,6 @@
  * LocalGen Module: GameEngine
  *
  * Players
- *
- * Players are basic participants of games.
  */
 
 #ifndef LGEN_MODULE_GE_PLAYER_CPP

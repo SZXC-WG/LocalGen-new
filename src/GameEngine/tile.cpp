@@ -4,8 +4,6 @@
  * LocalGen Module: GameEngine
  *
  * Tiles
- *
- * Tiles are basic elements of map boards.
  */
 
 #ifndef LGEN_MODULE_GE_TILE_CPP

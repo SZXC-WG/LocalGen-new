@@ -4,8 +4,6 @@
  * LocalGen Module: GameEngine
  *
  * Moves
- *
- * Moves are basic operations of players.
  */
 
 #ifndef LGEN_MODULE_GE_MOVE_CPP

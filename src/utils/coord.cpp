@@ -1,11 +1,7 @@
 /**
- * @file coord.hpp
+ * @file coord.cpp
  *
  * LocalGen Library: coordinates
- *
- * Coordinates play an important role in LocalGen. They are used in various
- * situations, (e.g. tile positions). LocalGen therefore specifies
- * a common coordinate system that is used throughout the project.
  */
 
 #ifndef LGEN_LIB_COORD_CPP

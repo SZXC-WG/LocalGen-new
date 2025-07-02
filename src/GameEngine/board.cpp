@@ -4,8 +4,6 @@
  * LocalGen Module: GameEngine
  *
  * Map Boards
- *
- * Container of maps.
  */
 
 #ifndef LGEN_MODULE_GE_BOARD_CPP

@@ -19,6 +19,17 @@
 #include "move.h"
 #include "player.h"
 
+inline BasicGame::turn_t BasicGame::getCurTurn() const { return curTurn; }
+inline BasicGame::speed_t BasicGame::getSpeed() const { return speed; }
+inline std::array<army_t, TILE_TYPE_COUNT> BasicGame::getIncrement() const {
+    return increment;
+}
+inline std::array<army_t, TILE_TYPE_COUNT> BasicGame::getDecrement() const {
+    return decrement;
+}
+
+inline bool BasicGame::isAlive(index_t player) const { return alive[player]; }
+
 inline BasicGame::config_t BasicGame::getConfig() const { return conf; }
 
 BasicGame::InGameBoard::InGameBoard(BasicGame* _game) : game(_game) {}

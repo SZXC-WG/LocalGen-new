@@ -11,6 +11,7 @@
 #ifndef LGEN_MODULE_GE_GAME_H
 #define LGEN_MODULE_GE_GAME_H
 
+#include <array>
 #include <bitset>
 #include <cstdint>
 #include <vector>
@@ -32,15 +33,16 @@ class BasicGame {
    public:
     // type aliases
     using turn_t = uint32_t;
+    using speed_t = double;
 
-   public:
+   protected:
     /// The current turn number.
     turn_t curTurn;
     /// This should be in the range of [0.25x, 256x]. Actually, speeds above 16x
     /// is not recommended.
     /// Recommended speeds (from generals.io): 0.25x, 0.5x, 0.75x, 1x, 1.5x, 2x,
     /// 3x, 4x.
-    double speed;
+    speed_t speed;
 
     /// This integer should be in the range of (-INF, +INF).
     /// If zero, it has no effect.
@@ -49,7 +51,7 @@ class BasicGame {
     /// If negative, it indicates how many troops of the tile will self-increase
     /// when it passes 1 turn. It is noticeable that values 1 and -1 mean the
     /// same things.
-    army_t increment[TILE_TYPE_COUNT];
+    std::array<army_t, TILE_TYPE_COUNT> increment;
 
     /// This integer should be in the range of (-INF, +INF).
     /// If zero, it has no effect.
@@ -58,13 +60,28 @@ class BasicGame {
     /// If negative, it indicates how many troops of the tile will self-decrease
     /// when it passes 1 turn. It is noticeable that values 1 and -1 mean the
     /// same things.
-    army_t decrement[TILE_TYPE_COUNT];
+    std::array<army_t, TILE_TYPE_COUNT> decrement;
+
+   public:
+    inline turn_t getCurTurn() const;
+    inline speed_t getSpeed() const;
+    inline std::array<army_t, TILE_TYPE_COUNT> getIncrement() const;
+    inline std::array<army_t, TILE_TYPE_COUNT> getDecrement() const;
 
    protected:
-    static const index_t PLAYER_INDEX_START = 1;
+    static constexpr index_t PLAYER_INDEX_START = 1;
+    /// Players in the game.
     std::vector<Player*> players;
+    /// Alive status of the players.
     std::vector<bool> alive;
+    /// Spawn coordinates of the players.
     std::vector<Coord> spawnCoord;
+
+   public:
+    /// Check whether a player is alive.
+    /// @param player the index of the player.
+    /// @return Whether the player is alive.
+    inline bool isAlive(index_t player) const;
 
    public:
     static constexpr uint32_t CONFIG_COUNT = 0;
@@ -89,7 +106,7 @@ class BasicGame {
 
    public:
     /// Get game configuration value.
-    /// @return the current configuration value.
+    /// @return The current configuration value.
     inline config_t getConfig() const;
 
    public:

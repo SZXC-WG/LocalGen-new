@@ -339,6 +339,7 @@ void MapCreatorWindow::setupHintBar() {
     valueSpinBox = new QSpinBox(floatingPanel);
     valueSpinBox->setRange(-9999, 9999);
     valueSpinBox->setValue(40);
+    valueSpinBox->setMinimumWidth(80);
     valueSpinBox->setStyleSheet(
         "QSpinBox {"
         "    border: 1px solid #d0d0d0;"

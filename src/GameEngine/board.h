@@ -46,7 +46,7 @@ class Board {
     /// Check whether a %Coord indicating a tile position is invalid.
     bool isInvalidCoord(Coord coord) const;
 
-   protected:
+   public:
     /// Map coding system derived from v5.
     /// LocalGen v6 is compatible with v5, so we saved this system.
 

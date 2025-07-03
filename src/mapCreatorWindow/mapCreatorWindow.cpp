@@ -186,7 +186,8 @@ void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
             selectedToolIndex = (selectedToolIndex + 1) % toolButtons.size();
             updateToolButtonStyles();
             break;
-        default: QDialog::keyPressEvent(event); break;
+        case Qt::Key_C: map->fitCenter(100); break;
+        default:        QDialog::keyPressEvent(event); break;
     }
 }
 

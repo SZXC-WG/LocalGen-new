@@ -203,6 +203,20 @@ class BasicGame {
     /// Perform the operations that a turn needs.
     inline void performTurn();
 
+   public:
+    struct RankInfo {
+        index_t player;
+    };
+
+   protected:
+    /// Generate the ranklist.
+    void ranklist();
+
+   public:
+    /// Get the ranklist.
+    /// @return The ranklist.
+    std::vector<RankInfo> getRanklist();
+
    protected:
     /// Initialize the spawn points for the players.
     /// @return 0 if the initialization is successful, 1 otherwise.

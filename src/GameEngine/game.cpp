@@ -132,6 +132,10 @@ inline void BasicGame::performTurn() {
     process();
 }
 
+void BasicGame::ranklist() {}
+
+std::vector<BasicGame::RankInfo> getRanklist() {}
+
 int BasicGame::initSpawn() {
     std::mt19937 random{std::random_device()()};
     int playerCount = players.size();

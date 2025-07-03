@@ -241,7 +241,7 @@ void MapCreatorWindow::setupSliders() {
     widthLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     widthLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     widthSlider = new QSlider(Qt::Horizontal, floatingPanel);
-    widthSlider->setRange(10, 50);
+    widthSlider->setRange(1, 100);
     widthSlider->setValue(10);
     widthSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     QLabel* widthValueLabel = new QLabel("10", floatingPanel);
@@ -265,7 +265,7 @@ void MapCreatorWindow::setupSliders() {
     heightLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     heightLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     heightSlider = new QSlider(Qt::Horizontal, floatingPanel);
-    heightSlider->setRange(10, 50);
+    heightSlider->setRange(1, 100);
     heightSlider->setValue(10);
     heightSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     QLabel* heightValueLabel = new QLabel("10", floatingPanel);

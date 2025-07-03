@@ -1,6 +1,7 @@
 #include "mapCreatorWindow.h"
 
 #include <QFont>
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QKeyEvent>
@@ -189,31 +190,55 @@ void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
 
 void MapCreatorWindow::setupSliders() {
     sliderContainer = new QWidget(this);
-    sliderContainer->setFixedSize(450, 50);
+    sliderContainer->setFixedSize(530, 90);
 
     QHBoxLayout* containerLayout = new QHBoxLayout(sliderContainer);
     containerLayout->setContentsMargins(0, 0, 0, 0);
     containerLayout->addStretch();
 
     QWidget* floatingPanel = new QWidget(sliderContainer);
-    floatingPanel->setFixedSize(450, 50);
+    floatingPanel->setFixedSize(530, 90);
     floatingPanel->setStyleSheet(
         "QWidget { background-color: white; border-bottom-left-radius: 10px; "
         "border-bottom-right-radius: 10px; }");
 
-    QHBoxLayout* mainSliderLayout = new QHBoxLayout(floatingPanel);
-    mainSliderLayout->setContentsMargins(25, 15, 25, 15);
-    mainSliderLayout->setSpacing(25);
+    QGridLayout* mainSliderLayout = new QGridLayout(floatingPanel);
+    mainSliderLayout->setContentsMargins(15, 10, 15, 10);
+    mainSliderLayout->setSpacing(5);
 
     QFont font("Quicksand", 10, QFont::Bold);
 
-    // Width slider group
-    QHBoxLayout* widthLayout = new QHBoxLayout();
-    widthLayout->setSpacing(4);
+    QPushButton* openButton = new QPushButton("Open", floatingPanel);
+    QPushButton* saveButton = new QPushButton("Save", floatingPanel);
 
+    QString buttonStyle =
+        "QPushButton {"
+        "    background-color: #f0f0f0;"
+        "    border: 1px solid #d0d0d0;"
+        "    border-radius: 4px;"
+        "    padding: 4px 12px;"
+        "    font-weight: bold;"
+        "    color: black;"
+        "}"
+        "QPushButton:hover {"
+        "    background-color: #e0e0e0;"
+        "    border: 1px solid #c0c0c0;"
+        "}"
+        "QPushButton:pressed {"
+        "    background-color: #d0d0d0;"
+        "}";
+
+    openButton->setStyleSheet(buttonStyle);
+    saveButton->setStyleSheet(buttonStyle);
+    openButton->setFont(QFont("Quicksand", 9, QFont::Bold));
+    saveButton->setFont(QFont("Quicksand", 9, QFont::Bold));
+
+    // Width slider components
     QLabel* widthLabel = new QLabel("Width:", floatingPanel);
     widthLabel->setFont(font);
     widthLabel->setStyleSheet("color: black;");
+    widthLabel->setMinimumWidth(50);
+    widthLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     widthLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     widthSlider = new QSlider(Qt::Horizontal, floatingPanel);
     widthSlider->setRange(10, 50);
@@ -222,7 +247,6 @@ void MapCreatorWindow::setupSliders() {
     QLabel* widthValueLabel = new QLabel("10", floatingPanel);
     widthValueLabel->setFont(font);
     widthValueLabel->setStyleSheet("color: black;");
-    widthValueLabel->setMinimumWidth(30);
     widthValueLabel->setAlignment(Qt::AlignCenter);
     widthValueLabel->setSizePolicy(QSizePolicy::Maximum,
                                    QSizePolicy::Preferred);
@@ -233,17 +257,12 @@ void MapCreatorWindow::setupSliders() {
                 map->setMapWidth(value);
             });
 
-    widthLayout->addWidget(widthLabel);
-    widthLayout->addWidget(widthSlider);
-    widthLayout->addWidget(widthValueLabel);
-
-    // Height slider group
-    QHBoxLayout* heightLayout = new QHBoxLayout();
-    heightLayout->setSpacing(4);
-
+    // Height slider components
     QLabel* heightLabel = new QLabel("Height:", floatingPanel);
     heightLabel->setFont(font);
     heightLabel->setStyleSheet("color: black;");
+    heightLabel->setMinimumWidth(50);
+    heightLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     heightLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     heightSlider = new QSlider(Qt::Horizontal, floatingPanel);
     heightSlider->setRange(10, 50);
@@ -252,7 +271,6 @@ void MapCreatorWindow::setupSliders() {
     QLabel* heightValueLabel = new QLabel("10", floatingPanel);
     heightValueLabel->setFont(font);
     heightValueLabel->setStyleSheet("color: black;");
-    heightValueLabel->setMinimumWidth(30);
     heightValueLabel->setAlignment(Qt::AlignCenter);
     heightValueLabel->setSizePolicy(QSizePolicy::Maximum,
                                     QSizePolicy::Preferred);
@@ -263,12 +281,15 @@ void MapCreatorWindow::setupSliders() {
                 map->setMapHeight(value);
             });
 
-    heightLayout->addWidget(heightLabel);
-    heightLayout->addWidget(heightSlider);
-    heightLayout->addWidget(heightValueLabel);
-
-    mainSliderLayout->addLayout(widthLayout);
-    mainSliderLayout->addLayout(heightLayout);
+    // Add all components to grid layout
+    mainSliderLayout->addWidget(openButton, 0, 0);
+    mainSliderLayout->addWidget(widthLabel, 0, 1);
+    mainSliderLayout->addWidget(widthSlider, 0, 2);
+    mainSliderLayout->addWidget(widthValueLabel, 0, 3);
+    mainSliderLayout->addWidget(saveButton, 1, 0);
+    mainSliderLayout->addWidget(heightLabel, 1, 1);
+    mainSliderLayout->addWidget(heightSlider, 1, 2);
+    mainSliderLayout->addWidget(heightValueLabel, 1, 3);
 
     containerLayout->addWidget(floatingPanel);
     containerLayout->addStretch();

@@ -11,7 +11,17 @@
 
 #include "board.h"
 
-Tile& Board::getTile(Coord coord) { return tiles[coord.x][coord.y]; }
+#include <cassert>
+
+bool Board::isValidCoord(Coord coord) const {
+    return coord.x >= 1 && coord.x <= col && coord.y >= 1 && coord.y <= row;
+}
+bool Board::isInvalidCoord(Coord coord) const { return !isValidCoord(coord); }
+
+Tile& Board::getTile(Coord coord) {
+    assert(isValidCoord(coord));
+    return tiles[coord.x][coord.y];
+}
 
 Board::Board() : row(0), col(0), tiles(0, std::vector<Tile>(0)) {}
 Board::Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
@@ -20,11 +30,6 @@ Board::Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
     // give 1 index space at borders for safety and convenience issues.
     tiles.resize(_row + 2, std::vector<Tile>(_col + 2, Tile()));
 }
-
-bool Board::isValidCoord(Coord coord) const {
-    return coord.x >= 1 && coord.x <= col && coord.y >= 1 && coord.y <= row;
-}
-bool Board::isInvalidCoord(Coord coord) const { return !isValidCoord(coord); }
 
 inline intmax_t Board::v5codingPmod(intmax_t& x) {
     intmax_t res = x & 63;  // 63 = 0b111111

@@ -11,11 +11,7 @@
 #ifndef LGEN_MODULE_GE_BOARD_H
 #define LGEN_MODULE_GE_BOARD_H 1
 
-#include <cassert>
-#include <deque>
-#include <map>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "../utils/coord.h"
@@ -35,18 +31,18 @@ class Board {
     std::vector<std::vector<Tile>> tiles;
 
    public:
+    /// Check whether a %Coord indicating a tile position is valid.
+    bool isValidCoord(Coord coord) const;
+    /// Check whether a %Coord indicating a tile position is invalid.
+    bool isInvalidCoord(Coord coord) const;
+
+   public:
     /// Get a tile using %Coord. This is a function for convenience.
     Tile& getTile(Coord coord);
 
    public:
     Board();
     Board(pos_t _row, pos_t _col);
-
-   public:
-    /// Check whether a %Coord indicating a tile position is valid.
-    bool isValidCoord(Coord coord) const;
-    /// Check whether a %Coord indicating a tile position is invalid.
-    bool isInvalidCoord(Coord coord) const;
 
    public:
     /// Map coding system derived from v5.

@@ -202,8 +202,8 @@ void MapCreatorWindow::setupSliders() {
     QWidget* floatingPanel = new QWidget(sliderContainer);
     floatingPanel->setFixedSize(520, 80);
     floatingPanel->setStyleSheet(
-        "QWidget { background-color: white; border-bottom-left-radius: 10px; "
-        "border-bottom-right-radius: 10px; }");
+        "QWidget { background-color: white; border-bottom-left-radius: 8px; "
+        "border-bottom-right-radius: 8px; }");
 
     QGridLayout* mainSliderLayout = new QGridLayout(floatingPanel);
     mainSliderLayout->setContentsMargins(15, 10, 15, 10);

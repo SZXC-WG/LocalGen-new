@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QSlider>
+#include <QTimer>
 #include <QVBoxLayout>
 
 MapCreatorWindow::MapCreatorWindow(QWidget* parent)
@@ -32,10 +33,11 @@ MapCreatorWindow::MapCreatorWindow(QWidget* parent)
 
     setLayout(mainLayout);
     resize(800, 600);
-
     repositionFloatingElements();
 
     setFocusPolicy(Qt::StrongFocus);
+
+    QTimer::singleShot(0, [this]() { map->fitCenter(100); });
 }
 
 MapCreatorWindow::~MapCreatorWindow() {}

@@ -41,6 +41,30 @@ void MapWidget::setMapHeight(int h) {
     }
 }
 
+void MapWidget::fitCenter(int margin) {
+    qreal mapPixelWidth = mapWidth() * cellSize;
+    qreal mapPixelHeight = mapHeight() * cellSize;
+
+    qreal availableWidth = width() - 2 * margin;
+    qreal availableHeight = height() - 2 * margin;
+
+    if (availableWidth <= 0 || availableHeight <= 0) {
+        return;
+    }
+
+    qreal scaleX = availableWidth / mapPixelWidth;
+    qreal scaleY = availableHeight / mapPixelHeight;
+    scale = qMin(scaleX, scaleY);
+
+    qreal scaledMapWidth = mapPixelWidth * scale;
+    qreal scaledMapHeight = mapPixelHeight * scale;
+
+    offset.setX((width() - scaledMapWidth) / 2.0);
+    offset.setY((height() - scaledMapHeight) / 2.0);
+
+    update();
+}
+
 void MapWidget::paintEvent(QPaintEvent* event) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);

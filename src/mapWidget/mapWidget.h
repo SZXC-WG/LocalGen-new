@@ -30,6 +30,8 @@ class MapWidget : public QWidget {
     void setMapWidth(int w);
     void setMapHeight(int h);
 
+    void fitCenter(int margin);
+
    signals:
     void cellClicked(int r, int c);
 

@@ -3,8 +3,10 @@
 
 #include <QDialog>
 #include <QKeyEvent>
+#include <QLabel>
 #include <QPushButton>
 #include <QSlider>
+#include <QSpinBox>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <cstdint>
@@ -27,6 +29,8 @@ class MapCreatorWindow : public QDialog {
    private:
     void setupToolbar();
     void updateToolButtonStyles();
+    void setupHintBar();
+    void updateHintBar();
     void keyPressEvent(QKeyEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void repositionFloatingElements();
@@ -38,6 +42,10 @@ class MapCreatorWindow : public QDialog {
     QWidget* sliderContainer;
     QSlider* widthSlider;
     QSlider* heightSlider;
+    QWidget* hintContainer;
+    QLabel* hintLabel;
+    QSpinBox* valueSpinBox;
+    QLabel* valueLabel;
 
     enum class ToolType : std::uint8_t {
         MOUNTAIN = 0,

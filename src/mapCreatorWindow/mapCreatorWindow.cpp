@@ -25,6 +25,7 @@ MapCreatorWindow::MapCreatorWindow(QWidget* parent)
 
     setupToolbar();
     setupSliders();
+    setupHintBar();
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -95,6 +96,7 @@ void MapCreatorWindow::onToolSelected() {
     if (sender) {
         selectedToolIndex = sender->property("toolIndex").toInt();
         updateToolButtonStyles();
+        updateHintBar();
     }
 }
 
@@ -160,12 +162,15 @@ void MapCreatorWindow::onMapClicked(int r, int c) {
             break;
         case ToolType::CITY:
             tile.type = TILE_CITY, tile.color = QColor(128, 128, 128),
-            tile.text = "40";
+            tile.text = QString::number(valueSpinBox->value());
             break;
         case ToolType::NEUTRAL:
-            tile.type = TILE_NEUTRAL, tile.color = QColor(128, 128, 128),
-            tile.text = "40";
-            break;
+            if (valueSpinBox->value() != 0) {
+                tile.type = TILE_NEUTRAL, tile.color = QColor(128, 128, 128),
+                tile.text = QString::number(valueSpinBox->value());
+                break;
+            }  // neutral tiles of army strength 0 are equivalent to blank tiles
+            [[fallthrough]];
         case ToolType::ERASE:
             tile.type = TILE_BLANK, tile.color = QColor(220, 220, 220),
             tile.lightIcon = false, tile.text.clear();
@@ -181,10 +186,12 @@ void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
             selectedToolIndex = (selectedToolIndex - 1 + toolButtons.size()) %
                                 toolButtons.size();
             updateToolButtonStyles();
+            updateHintBar();
             break;
         case Qt::Key_Down:
             selectedToolIndex = (selectedToolIndex + 1) % toolButtons.size();
             updateToolButtonStyles();
+            updateHintBar();
             break;
         case Qt::Key_C: map->fitCenter(100); break;
         default:        QDialog::keyPressEvent(event); break;
@@ -298,17 +305,130 @@ void MapCreatorWindow::setupSliders() {
     containerLayout->addStretch();
 }
 
+void MapCreatorWindow::setupHintBar() {
+    hintContainer = new QWidget(this);
+    hintContainer->setFixedHeight(50);
+
+    QHBoxLayout* containerLayout = new QHBoxLayout(hintContainer);
+    containerLayout->setContentsMargins(0, 0, 0, 0);
+    containerLayout->addStretch();
+
+    QWidget* floatingPanel = new QWidget(hintContainer);
+    floatingPanel->setFixedHeight(50);
+    floatingPanel->setStyleSheet(
+        "QWidget { background-color: white; border-top-left-radius: 8px; "
+        "border-top-right-radius: 8px; }");
+
+    QHBoxLayout* hintLayout = new QHBoxLayout(floatingPanel);
+    hintLayout->setContentsMargins(15, 10, 15, 10);
+    hintLayout->setSpacing(10);
+
+    QFont font("Quicksand", 10, QFont::Bold);
+
+    hintLabel = new QLabel("Click a tile to place a mountain.", floatingPanel);
+    hintLabel->setFont(font);
+    hintLabel->setStyleSheet("color: black;");
+    hintLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+    valueLabel = new QLabel("City Strength:", floatingPanel);
+    valueLabel->setFont(font);
+    valueLabel->setStyleSheet("color: black;");
+    valueLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    valueLabel->setVisible(false);
+
+    valueSpinBox = new QSpinBox(floatingPanel);
+    valueSpinBox->setRange(-9999, 9999);
+    valueSpinBox->setValue(40);
+    valueSpinBox->setStyleSheet(
+        "QSpinBox {"
+        "    border: 1px solid #d0d0d0;"
+        "    border-radius: 4px;"
+        "    padding: 2px 5px;"
+        "    background-color: white;"
+        "    color: black;"
+        "}"
+        "QSpinBox:focus {"
+        "    border: 2px solid #4CAF50;"
+        "}");
+    valueSpinBox->setVisible(false);
+
+    hintLayout->addWidget(hintLabel);
+    hintLayout->addWidget(valueLabel);
+    hintLayout->addWidget(valueSpinBox);
+
+    containerLayout->addWidget(floatingPanel);
+    containerLayout->addStretch();
+
+    updateHintBar();
+}
+
+void MapCreatorWindow::updateHintBar() {
+    static const QStringList hints = {
+        "Click a tile to place a mountain.",
+        "Click a tile to place a Lookout.",
+        "Click a tile to place an Observatory.",
+        "Click a tile to place a desert. Deserts "
+        "do not gain army bonus every 25 turns.",
+        "Click a tile to place a swamp. Swamps drain 1 army per turn.",
+        "Click a tile to place a spawn.",
+        "Click a tile to place a city.",
+        "Click a tile to place neutral army.",
+        "Click a tile to toggle light tile. A light tile can be any tile, and "
+        "is visible by every player, regardless if they are adjacent to it.",
+        "Click a tile to remove it."};
+
+    bool showSpinBox =
+        (selectedToolIndex == static_cast<int>(ToolType::CITY) ||
+         selectedToolIndex == static_cast<int>(ToolType::NEUTRAL));
+
+    if (showSpinBox) {
+        hintLabel->setVisible(false);
+        valueLabel->setVisible(true);
+        valueSpinBox->setVisible(true);
+
+        if (selectedToolIndex == static_cast<int>(ToolType::CITY)) {
+            valueLabel->setText("City Strength:");
+        } else {
+            valueLabel->setText("Neutral Army Strength:");
+        }
+    } else {
+        hintLabel->setVisible(true);
+        valueLabel->setVisible(false);
+        valueSpinBox->setVisible(false);
+
+        if (selectedToolIndex >= 0 && selectedToolIndex < hints.size()) {
+            hintLabel->setText(hints[selectedToolIndex]);
+        }
+    }
+
+    QWidget* floatingPanel = hintContainer->findChild<QWidget*>();
+    if (floatingPanel) {
+        floatingPanel->adjustSize();
+        int panelWidth = floatingPanel->sizeHint().width();
+        panelWidth = qMax(panelWidth, 100);
+        floatingPanel->setFixedWidth(panelWidth);
+        hintContainer->setFixedWidth(panelWidth);
+        hintContainer->move((width() - hintContainer->width()) / 2,
+                            height() - hintContainer->height());
+        hintContainer->raise();
+    }
+}
+
 void MapCreatorWindow::resizeEvent(QResizeEvent* event) {
     QDialog::resizeEvent(event);
     repositionFloatingElements();
 }
 
 void MapCreatorWindow::repositionFloatingElements() {
-    if (sliderContainer && toolbar) {
+    if (sliderContainer && toolbar && hintContainer) {
         sliderContainer->move((width() - sliderContainer->width()) / 2, 0);
         sliderContainer->raise();
 
         toolbar->move(0, (height() - toolbar->height()) / 2);
         toolbar->raise();
+
+        hintContainer->move((width() - hintContainer->width()) / 2,
+                            height() - hintContainer->height());
+        hintContainer->raise();
     }
 }

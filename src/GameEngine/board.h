@@ -30,7 +30,7 @@ class Player;
 /// The %Board is a complex thing. Many systems are part of it (e.g. vision
 /// system).
 class Board {
-   protected:
+   public:
     pos_t row, col;
     std::vector<std::vector<Tile>> tiles;
     /// Get a tile using %Coord. This is a function for convenience.

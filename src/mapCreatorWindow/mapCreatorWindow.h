@@ -28,6 +28,8 @@ class MapCreatorWindow : public QDialog {
     void setupToolbar();
     void updateToolButtonStyles();
     void keyPressEvent(QKeyEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void repositionFloatingElements();
 
     MapWidget* map;
     QWidget* toolbar;

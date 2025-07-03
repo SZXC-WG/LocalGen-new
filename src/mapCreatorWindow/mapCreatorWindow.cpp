@@ -6,6 +6,7 @@
 #include <QKeyEvent>
 #include <QLabel>
 #include <QPushButton>
+#include <QResizeEvent>
 #include <QSlider>
 #include <QVBoxLayout>
 
@@ -26,19 +27,12 @@ MapCreatorWindow::MapCreatorWindow(QWidget* parent)
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
-
-    mainLayout->addWidget(sliderContainer);
-
-    QHBoxLayout* contentLayout = new QHBoxLayout();
-    contentLayout->setContentsMargins(0, 0, 0, 0);
-    contentLayout->setSpacing(0);
-    contentLayout->addWidget(toolbar);
-    contentLayout->addWidget(map);
-
-    mainLayout->addLayout(contentLayout);
+    mainLayout->addWidget(map);
 
     setLayout(mainLayout);
     resize(800, 600);
+
+    repositionFloatingElements();
 
     setFocusPolicy(Qt::StrongFocus);
 }
@@ -195,7 +189,7 @@ void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
 
 void MapCreatorWindow::setupSliders() {
     sliderContainer = new QWidget(this);
-    sliderContainer->setFixedHeight(50);
+    sliderContainer->setFixedSize(450, 50);
 
     QHBoxLayout* containerLayout = new QHBoxLayout(sliderContainer);
     containerLayout->setContentsMargins(0, 0, 0, 0);
@@ -278,4 +272,19 @@ void MapCreatorWindow::setupSliders() {
 
     containerLayout->addWidget(floatingPanel);
     containerLayout->addStretch();
+}
+
+void MapCreatorWindow::resizeEvent(QResizeEvent* event) {
+    QDialog::resizeEvent(event);
+    repositionFloatingElements();
+}
+
+void MapCreatorWindow::repositionFloatingElements() {
+    if (sliderContainer && toolbar) {
+        sliderContainer->move((width() - sliderContainer->width()) / 2, 0);
+        sliderContainer->raise();
+
+        toolbar->move(0, (height() - toolbar->height()) / 2);
+        toolbar->raise();
+    }
 }

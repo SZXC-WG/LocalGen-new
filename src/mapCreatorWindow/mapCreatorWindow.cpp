@@ -190,14 +190,14 @@ void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
 
 void MapCreatorWindow::setupSliders() {
     sliderContainer = new QWidget(this);
-    sliderContainer->setFixedSize(530, 90);
+    sliderContainer->setFixedSize(520, 80);
 
     QHBoxLayout* containerLayout = new QHBoxLayout(sliderContainer);
     containerLayout->setContentsMargins(0, 0, 0, 0);
     containerLayout->addStretch();
 
     QWidget* floatingPanel = new QWidget(sliderContainer);
-    floatingPanel->setFixedSize(530, 90);
+    floatingPanel->setFixedSize(520, 80);
     floatingPanel->setStyleSheet(
         "QWidget { background-color: white; border-bottom-left-radius: 10px; "
         "border-bottom-right-radius: 10px; }");

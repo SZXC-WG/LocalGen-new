@@ -29,6 +29,7 @@ class MapWidget : public QWidget {
 
     void setMapWidth(int w);
     void setMapHeight(int h);
+    void realloc(int w, int h);
 
     void fitCenter(int margin);
 

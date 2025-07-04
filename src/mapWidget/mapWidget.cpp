@@ -20,7 +20,7 @@ MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled)
       lastRightClickGrid(-1, -1) {
     setMouseTracking(true);
     setFocusEnabled(focusEnabled);
-    displayTiles.resize(height, std::vector<DisplayTile>(width));
+    realloc(width, height);
 }
 
 MapWidget::~MapWidget() {}
@@ -39,6 +39,11 @@ void MapWidget::setMapHeight(int h) {
         displayTiles.resize(h, std::vector<DisplayTile>(mapWidth()));
         repaint();
     }
+}
+
+void MapWidget::realloc(int w, int h) {
+    displayTiles.clear();
+    displayTiles.resize(h, std::vector<DisplayTile>(w));
 }
 
 void MapWidget::fitCenter(int margin) {

@@ -39,6 +39,8 @@ class Board {
    public:
     /// Get a tile using %Coord. This is a function for convenience.
     Tile& getTile(Coord coord);
+    inline int getWidth() const { return col; }
+    inline int getHeight() const { return row; }
 
    public:
     Board();
@@ -48,12 +50,12 @@ class Board {
     /// Map coding system derived from v5.
     /// LocalGen v6 is compatible with v5, so we saved this system.
 
-    inline intmax_t v5codingPmod(intmax_t& x);
+    intmax_t v5codingPmod(intmax_t& x);
 
     // Zip a map using v5 coding.
-    inline std::string v5codingZip();
+    std::string v5codingZip();
     /// Unzip a map with v5 coding.
-    inline void v5codingUnzip(std::string strUnzip);
+    void v5codingUnzip(std::string strUnzip);
 
    public:
     /// Check whether the %Tile at (x,y) is visible to a %Player.

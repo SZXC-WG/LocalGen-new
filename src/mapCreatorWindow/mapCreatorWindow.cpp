@@ -1,16 +1,20 @@
 #include "mapCreatorWindow.h"
 
+#include <QFileDialog>
 #include <QFont>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QSlider>
 #include <QTimer>
 #include <QVBoxLayout>
+
+#include "../GameEngine/board.h"
 
 MapCreatorWindow::MapCreatorWindow(QWidget* parent)
     : QDialog(parent), selectedToolIndex(static_cast<int>(ToolType::MOUNTAIN)) {
@@ -243,6 +247,12 @@ void MapCreatorWindow::setupSliders() {
     openButton->setFont(QFont("Quicksand", 9, QFont::Bold));
     saveButton->setFont(QFont("Quicksand", 9, QFont::Bold));
 
+    // 连接按钮信号槽
+    connect(openButton, &QPushButton::clicked, this,
+            &MapCreatorWindow::onOpenMap);
+    connect(saveButton, &QPushButton::clicked, this,
+            &MapCreatorWindow::onSaveMap);
+
     // Width slider components
     QLabel* widthLabel = new QLabel("Width:", floatingPanel);
     widthLabel->setFont(font);
@@ -432,4 +442,96 @@ void MapCreatorWindow::repositionFloatingElements() {
                             height() - hintContainer->height());
         hintContainer->raise();
     }
+}
+
+const QString MapCreatorWindow::mapFileFilter =
+    "All LocalGen Maps (*.lg *.lgmp);;LocalGen v5 (*.lg) - Legacy "
+    "Format;;LocalGen v6 (*.lgmp) - Current Format";
+
+void MapCreatorWindow::onOpenMap() {
+    QString filename =
+        QFileDialog::getOpenFileName(this, "Open Map", "", mapFileFilter);
+    if (filename.isEmpty()) return;
+
+    QFile mapFile(filename);
+    if (!mapFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Failed to open map file.");
+        return;
+    }
+
+    // v5 map format
+    if (filename.endsWith(".lg")) {
+        QString mapData = mapFile.readLine();
+        mapFile.close();
+        Board board;
+        board.v5codingUnzip(mapData.toStdString());
+        int width = board.getWidth(), height = board.getHeight();
+        map->realloc(width, height);
+        for (int r = 0; r < height; ++r) {
+            for (int c = 0; c < width; ++c) {
+                auto& tile = map->tileAt(r, c);
+                const auto& loadedTile = board.getTile({r + 1, c + 1});
+                tile.type = loadedTile.type;
+                switch (loadedTile.type) {
+                    case TILE_MOUNTAIN:
+                        tile.color = QColor(187, 187, 187);
+                        break;
+                    case TILE_LOOKOUT:
+                        tile.color = QColor(187, 187, 187);
+                        break;
+                    case TILE_OBSERVATORY:
+                        tile.color = QColor(187, 187, 187);
+                        break;
+                    case TILE_DESERT:  tile.color = QColor(220, 220, 220); break;
+                    case TILE_SWAMP:   tile.color = QColor(128, 128, 128); break;
+                    case TILE_CITY:    tile.color = QColor(128, 128, 128); break;
+                    case TILE_GENERAL: tile.color = Qt::darkCyan; break;
+                    default:
+                        tile.color = loadedTile.army == 0
+                                         ? QColor(220, 220, 220)
+                                         : QColor(128, 128, 128);
+                };
+                if (loadedTile.army != 0)
+                    tile.text = QString::number(loadedTile.army);
+                tile.lightIcon = loadedTile.lit;
+            }
+        }
+        map->fitCenter(100);
+        widthSlider->setValue(width);
+        heightSlider->setValue(height);
+        return;
+    }
+
+    // TODO: Implement v6 map loading
+    mapFile.close();
+}
+
+void MapCreatorWindow::onSaveMap() {
+    QString filename =
+        QFileDialog::getSaveFileName(this, "Save Map", "", mapFileFilter);
+    if (filename.isEmpty()) return;
+
+    // v5 map format
+    if (filename.endsWith(".lg")) {
+        QFile mapFile(filename);
+        if (!mapFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::critical(this, "Error", "Failed to open map file.");
+            return;
+        }
+        int width = map->mapWidth(), height = map->mapHeight();
+        Board board(height, width);
+        for (int r = 0; r < height; ++r) {
+            for (int c = 0; c < width; ++c) {
+                const auto& tile = map->tileAt(r, c);
+                auto& boardTile = board.getTile({r + 1, c + 1});
+                boardTile.type = tile.type;
+                boardTile.lit = tile.lightIcon;
+                boardTile.army = tile.text.isEmpty() ? 0 : tile.text.toInt();
+            }
+        }
+        mapFile.write(QString::fromStdString(board.v5codingZip()).toUtf8());
+        return;
+    }
+
+    // TODO: Implement v6 map saving
 }

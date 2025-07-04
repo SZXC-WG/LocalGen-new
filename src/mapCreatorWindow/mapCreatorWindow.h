@@ -2,6 +2,7 @@
 #define MAPCREATORWINDOW_H
 
 #include <QDialog>
+#include <QFileDialog>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QPushButton>
@@ -25,6 +26,8 @@ class MapCreatorWindow : public QDialog {
    private slots:
     void onToolSelected();
     void setupSliders();
+    void onOpenMap();
+    void onSaveMap();
 
    private:
     void setupToolbar();
@@ -34,6 +37,8 @@ class MapCreatorWindow : public QDialog {
     void keyPressEvent(QKeyEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void repositionFloatingElements();
+
+    static const QString mapFileFilter;
 
     MapWidget* map;
     QWidget* toolbar;

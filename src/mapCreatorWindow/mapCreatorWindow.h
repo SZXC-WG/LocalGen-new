@@ -2,13 +2,11 @@
 #define MAPCREATORWINDOW_H
 
 #include <QDialog>
-#include <QFileDialog>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QPushButton>
 #include <QSlider>
 #include <QSpinBox>
-#include <QVBoxLayout>
 #include <QWidget>
 #include <cstdint>
 

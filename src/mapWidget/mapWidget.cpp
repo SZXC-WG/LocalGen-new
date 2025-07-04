@@ -3,7 +3,6 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPainter>
-#include <QRandomGenerator>
 #include <QSvgRenderer>
 #include <QWheelEvent>
 

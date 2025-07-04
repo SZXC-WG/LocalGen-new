@@ -247,7 +247,7 @@ void MapCreatorWindow::setupSliders() {
     openButton->setFont(QFont("Quicksand", 9, QFont::Bold));
     saveButton->setFont(QFont("Quicksand", 9, QFont::Bold));
 
-    // 连接按钮信号槽
+    // Connect slots
     connect(openButton, &QPushButton::clicked, this,
             &MapCreatorWindow::onOpenMap);
     connect(saveButton, &QPushButton::clicked, this,

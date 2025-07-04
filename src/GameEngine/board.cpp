@@ -11,14 +11,32 @@
 
 #include "board.h"
 
+#include <algorithm>
 #include <cassert>
+
+Tile& Board::tileAt(Coord coord) {
+    assert(isValidCoord(coord));
+    return tiles[coord.x][coord.y];
+}
+int Board::setWidth(pos_t _col) {
+    if (_col < 0) return 1;
+    col = _col;
+    for (int i = 0; i < row + 2; i++) tiles[i].resize(_col + 2);
+    return 0;
+}
+int Board::setHeight(pos_t _row) {
+    if (_row < 0) return 1;
+    row = _row;
+    tiles.resize(_row + 2, std::vector<Tile>(col + 2, Tile()));
+    return 0;
+}
 
 bool Board::isValidCoord(Coord coord) const {
     return coord.x >= 1 && coord.x <= col && coord.y >= 1 && coord.y <= row;
 }
 bool Board::isInvalidCoord(Coord coord) const { return !isValidCoord(coord); }
 
-Tile& Board::getTile(Coord coord) {
+Tile Board::getTile(Coord coord) const {
     assert(isValidCoord(coord));
     return tiles[coord.x][coord.y];
 }
@@ -207,7 +225,19 @@ TileView Board::view(Player* player, pos_t row, pos_t col) {
     return TileView(tiles[row][col], visible(row, col, player));
 }
 TileView Board::view(Player* player, Coord pos) {
-    return TileView(tiles[pos.x][pos.y], visible(pos, player));
+    return TileView(tileAt(pos), visible(pos, player));
+}
+
+TileView& BoardView::tileAt(Coord coord) {
+    assert(isValidCoord(coord));
+    return tiles[coord.x][coord.y];
+}
+
+bool BoardView::isValidCoord(Coord coord) const {
+    return coord.x >= 1 && coord.x <= col && coord.y >= 1 && coord.y <= row;
+}
+bool BoardView::isInvalidCoord(Coord coord) const {
+    return !isValidCoord(coord);
 }
 
 BoardView::BoardView() : row(0), col(0) {}
@@ -220,6 +250,41 @@ BoardView::BoardView(const Board* const& board, Player* player)
                 TileView(board->tiles[i][j], board->visible(i, j, player));
         }
     }
+}
+
+InitBoard::InitBoard() {}
+InitBoard::InitBoard(pos_t row, pos_t col) : Board(row, col) {}
+
+int InitBoard::changeTile(Coord coord, Tile tile) {
+    if (isInvalidCoord(coord)) return 1;
+    if (tile.type == TILE_SPAWN) {
+        return setSpawn(coord, 0);
+    }
+    tileAt(coord) = tile;
+    return 0;
+}
+
+int InitBoard::setSpawn(Coord coord, unsigned team) {
+    if (isInvalidCoord(coord)) return 1;
+    if (tileAt(coord).type == TILE_SPAWN) {
+        spawns[std::lower_bound(begin(spawns), end(spawns),
+                                std::pair(coord, 0)) -
+               begin(spawns)]
+            .second = team;
+        return 0;
+    }
+    tileAt(coord).type = TILE_SPAWN;
+    spawns.emplace_back(coord, team);
+    std::sort(begin(spawns), end(spawns));
+    return 0;
+}
+
+int InitBoard::getSpawnTeam(Coord coord) {
+    if (isInvalidCoord(coord)) return -1;
+    if (tileAt(coord).type != TILE_SPAWN) return -1;
+    return spawns[std::lower_bound(begin(spawns), end(spawns), coord) -
+                  begin(spawns)]
+        .second;
 }
 
 #endif  // LGEN_MODULE_GE_BOARD_CPP

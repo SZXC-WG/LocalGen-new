@@ -88,8 +88,8 @@ void BasicGame::InGameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
 void BasicGame::InGameBoard::MoveProcessor::execute() {
     for (auto move : movesInQueue) {
         if (!move.available(board)) continue;
-        Tile& fromTile = board->getTile(move.from);
-        Tile& toTile = board->getTile(move.to);
+        Tile& fromTile = board->tileAt(move.from);
+        Tile& toTile = board->tileAt(move.to);
         army_t takenArmy = fromTile.army;
         if (move.takeHalf) takenArmy >>= 1;
         fromTile.army -= takenArmy;

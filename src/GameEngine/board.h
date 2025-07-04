@@ -30,6 +30,19 @@ class Board {
     pos_t row, col;
     std::vector<std::vector<Tile>> tiles;
 
+    /// Get a tile at a certain position.
+    /// @param coord The position of the tile.
+    /// @return A reference to the tile.
+    Tile& tileAt(Coord coord);
+    /// Change the width (col) of the %Board.
+    /// @param _col The new width.
+    /// @return 0 if the operation is successful, 1 otherwise.
+    int setWidth(pos_t _col);
+    /// Change the height (row) of the %Board.
+    /// @param _row The new height.
+    /// @return 0 if the operation is successful, 1 otherwise.
+    int setHeight(pos_t _row);
+
    public:
     /// Check whether a %Coord indicating a tile position is valid.
     bool isValidCoord(Coord coord) const;
@@ -38,7 +51,7 @@ class Board {
 
    public:
     /// Get a tile using %Coord. This is a function for convenience.
-    Tile& getTile(Coord coord);
+    Tile getTile(Coord coord) const;
     inline int getWidth() const { return col; }
     inline int getHeight() const { return row; }
 
@@ -97,12 +110,50 @@ class BoardView {
     pos_t row, col;
     std::vector<std::vector<TileView>> tiles;
 
+    /// Get a tile at a certain position.
+    /// @param coord The position of the tile.
+    /// @return A reference to the tile.
+    TileView& tileAt(Coord coord);
+
+   public:
+    /// Check whether a %Coord indicating a tile position is valid.
+    bool isValidCoord(Coord coord) const;
+    /// Check whether a %Coord indicating a tile position is invalid.
+    bool isInvalidCoord(Coord coord) const;
+
    public:
     BoardView();
     /// Constructor for generating a %BoardView using a %Board and a
     /// %Player. Leaving this function public is safe, for a %Player cannot
     /// get another %Player's address.
     BoardView(const Board* const& board, Player* player);
+};
+
+class InitBoard : public Board {
+   public:
+    InitBoard();
+    InitBoard(pos_t row, pos_t col);
+
+   public:
+    /// Tag all spawns and their team preferences.
+    std::vector<std::pair<Coord, int>> spawns;
+
+    /// Change a tile at a certain position.
+    /// @param coord The position of the tile.
+    /// @param tile The new tile.
+    /// @return 0 if the operation is successful, 1 otherwise.
+    int changeTile(Coord coord, Tile tile);
+
+    /// Set attributes of a spawn.
+    /// @param coord The position of the spawn.
+    /// @param team The team preference of the spawn.
+    /// @return 0 if the operation is successful, 1 otherwise.
+    int setSpawn(Coord coord, unsigned team);
+
+    /// Get the team preference of a spawn.
+    /// @param coord The position of the spawn.
+    /// @return The team preference of the spawn. -1 if failed.
+    int getSpawnTeam(Coord coord);
 };
 
 #endif  // LGEN_MODULE_GE_BOARD_H

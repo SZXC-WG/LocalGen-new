@@ -282,7 +282,8 @@ int InitBoard::setSpawn(Coord coord, unsigned team) {
 int InitBoard::getSpawnTeam(Coord coord) {
     if (isInvalidCoord(coord)) return -1;
     if (tileAt(coord).type != TILE_SPAWN) return -1;
-    return spawns[std::lower_bound(begin(spawns), end(spawns), coord) -
+    return spawns[std::lower_bound(begin(spawns), end(spawns),
+                                   std::pair(coord, 0)) -
                   begin(spawns)]
         .second;
 }

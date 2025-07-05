@@ -55,7 +55,7 @@ intmax_t Board::v5Pmod(intmax_t& x) {
     return res;
 }
 
-#define PMod v5codingPmod
+#define PMod v5Pmod
 #define CHAR_AD 48
 
 std::string Board::v5Zip() {

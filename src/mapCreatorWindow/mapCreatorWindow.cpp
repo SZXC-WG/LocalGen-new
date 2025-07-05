@@ -519,14 +519,15 @@ void MapCreatorWindow::onSaveMap() {
             return;
         }
         int width = map->mapWidth(), height = map->mapHeight();
-        Board board(height, width);
+        InitBoard board(height, width);
         for (int r = 0; r < height; ++r) {
             for (int c = 0; c < width; ++c) {
                 const auto& tile = map->tileAt(r, c);
-                auto& boardTile = board.getTile({r + 1, c + 1});
+                Tile boardTile;
                 boardTile.type = tile.type;
                 boardTile.lit = tile.lightIcon;
                 boardTile.army = tile.text.isEmpty() ? 0 : tile.text.toInt();
+                board.changeTile({r + 1, c + 1}, boardTile);
             }
         }
         mapFile.write(QString::fromStdString(board.v5codingZip()).toUtf8());

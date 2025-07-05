@@ -32,7 +32,7 @@ int Board::setHeight(pos_t _row) {
 }
 
 bool Board::isValidCoord(Coord coord) const {
-    return coord.x >= 1 && coord.x <= col && coord.y >= 1 && coord.y <= row;
+    return coord.x >= 1 && coord.x <= row && coord.y >= 1 && coord.y <= col;
 }
 bool Board::isInvalidCoord(Coord coord) const { return !isValidCoord(coord); }
 

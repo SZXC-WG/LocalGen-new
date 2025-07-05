@@ -1,5 +1,7 @@
 #include "mapCreatorWindow.h"
 
+#include <QBitArray>
+#include <QByteArray>
 #include <QComboBox>
 #include <QFileDialog>
 #include <QFont>
@@ -16,6 +18,8 @@
 #include <QVBoxLayout>
 
 #include "../GameEngine/board.h"
+
+#define MAGIC_6 quint32(0x4C47656E)
 
 MapCreatorWindow::MapCreatorWindow(QWidget* parent)
     : QDialog(parent), selectedTool(MOUNTAIN) {
@@ -485,14 +489,13 @@ void MapCreatorWindow::onOpenMap() {
         QFileDialog::getOpenFileName(this, "Open Map", "", mapFileFilter);
     if (filename.isEmpty()) return;
 
-    QFile mapFile(filename);
-    if (!mapFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", "Failed to open map file.");
-        return;
-    }
-
     // v5 map format
     if (filename.endsWith(".lg")) {
+        QFile mapFile(filename);
+        if (!mapFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox::critical(this, "Error", "Failed to open map file.");
+            return;
+        }
         QString mapData = mapFile.readLine();
         mapFile.close();
         Board board;
@@ -534,14 +537,102 @@ void MapCreatorWindow::onOpenMap() {
         return;
     }
 
-    // TODO: Implement v6 map loading
-    mapFile.close();
+    QFile mapFile(filename);
+    if (!mapFile.open(QIODevice::ReadOnly)) {
+        QMessageBox::critical(this, "Error", "Failed to open map file.");
+        return;
+    }
+
+    QDataStream ds(&mapFile);
+    ds.setVersion(QDataStream::Qt_6_7);
+    ds.setByteOrder(QDataStream::LittleEndian);
+
+    quint32 magic = 0;
+    ds >> magic;
+    if (magic != MAGIC_6) {
+        QMessageBox::critical(this, "Error",
+                              "Invalid map file: bad magic number.");
+        return;
+    }
+
+    quint16 w16, h16;
+    QByteArray compressed;
+    ds >> w16 >> h16 >> compressed;
+
+    if (ds.status() != QDataStream::Ok) {
+        QMessageBox::critical(this, "Error",
+                              "Invalid or corrupted map file format.");
+        return;
+    }
+
+    // decompress map data
+    const int width = w16, height = h16;
+    QByteArray raw = qUncompress(compressed);
+    if (raw.isEmpty()) {
+        QMessageBox::critical(
+            this, "Error",
+            "Failed to decompress map data. The file might be corrupted.");
+        return;
+    }
+
+    const int expectedBits = width * height * 19;
+    const int expectedBytes = (expectedBits + 7) / 8;
+    if (raw.size() != expectedBytes) {
+        QMessageBox::critical(
+            this, "Error",
+            "Decompressed data size mismatch. The file is corrupted.");
+        return;
+    }
+
+    QBitArray bits = QBitArray::fromBits(raw.constData(), expectedBits);
+
+    // unpack tile from 19 bits
+    auto unpackTile = [](quint32 p) -> DisplayTile {
+        DisplayTile tile;
+        tile.type = static_cast<tile_type_e>((p >> 16) & 0x7);
+        tile.lightIcon = ((p >> 15) & 0x1);
+        int val = (p & 0x7FFF) - 16384;
+        tile.text = val == 0 ? QString()
+                    : tile.type == TILE_SPAWN
+                        ? QString(QLatin1Char('A' + val - 1))
+                        : QString::number(val);
+        switch (tile.type) {
+            case TILE_MOUNTAIN:    tile.color = QColor(187, 187, 187); break;
+            case TILE_LOOKOUT:     tile.color = QColor(187, 187, 187); break;
+            case TILE_OBSERVATORY: tile.color = QColor(187, 187, 187); break;
+            case TILE_DESERT:      tile.color = QColor(220, 220, 220); break;
+            case TILE_SWAMP:       tile.color = QColor(128, 128, 128); break;
+            case TILE_CITY:        tile.color = QColor(128, 128, 128); break;
+            case TILE_SPAWN:       tile.color = Qt::darkCyan; break;
+            default:
+                tile.color = tile.text.isEmpty() ? QColor(220, 220, 220)
+                                                 : QColor(128, 128, 128);
+        };
+        return tile;
+    };
+
+    map->realloc(width, height);
+    int offset = 0;
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            quint32 packed = 0;
+            for (int b = 0; b < 19; ++b, ++offset)
+                if (bits.testBit(offset)) packed |= (1u << b);
+            map->tileAt(r, c) = unpackTile(packed);
+        }
+    }
+
+    map->fitCenter(100);
+    widthSlider->setValue(width);
+    heightSlider->setValue(height);
 }
 
 void MapCreatorWindow::onSaveMap() {
     QString filename =
         QFileDialog::getSaveFileName(this, "Save Map", "", mapFileFilter);
     if (filename.isEmpty()) return;
+
+    int width = map->mapWidth(), height = map->mapHeight();
 
     // v5 map format
     if (filename.endsWith(".lg")) {
@@ -550,7 +641,6 @@ void MapCreatorWindow::onSaveMap() {
             QMessageBox::critical(this, "Error", "Failed to open map file.");
             return;
         }
-        int width = map->mapWidth(), height = map->mapHeight();
         InitBoard board(height, width);
         for (int r = 0; r < height; ++r) {
             for (int c = 0; c < width; ++c) {
@@ -571,5 +661,45 @@ void MapCreatorWindow::onSaveMap() {
         return;
     }
 
-    // TODO: Implement v6 map saving
+    // v6 map format
+    // 19 bits per tile, thus packed into uint32
+    auto packTile = [](const DisplayTile& tile) -> quint32 {
+        // [18..16] type (3) | [15] lit | [14..0] army+16384
+        int type = tile.type, lit = tile.lightIcon,
+            val = tile.text.isEmpty() ? 0
+                  : tile.type == TILE_SPAWN
+                      ? tile.text.at(0).unicode() - 'A' + 1
+                      : tile.text.toInt();
+        return (type << 16) | (lit << 15) | (val + 16384);
+    };
+
+    QBitArray bits(height * width * 19);
+    int offset = 0;
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            quint32 packed = packTile(map->tileAt(r, c));
+            for (int b = 0; b < 19; ++b, ++offset) {
+                bits.setBit(offset, (packed >> b) & 1);
+            }
+        }
+    }
+
+    // deflate
+    const int byteLen = (bits.size() + 7) / 8;
+    const uchar* src = reinterpret_cast<const uchar*>(bits.bits());
+    QByteArray compressed = qCompress(src, byteLen, 9);
+
+    QFile mapFile(filename);
+    if (!mapFile.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, "Error", "Failed to open map file.");
+        return;
+    }
+
+    QDataStream ds(&mapFile);
+    ds.setVersion(QDataStream::Qt_6_7);
+    ds.setByteOrder(QDataStream::LittleEndian);
+
+    ds << MAGIC_6 << quint16(width) << quint16(height) << compressed;
+
+    mapFile.close();
 }

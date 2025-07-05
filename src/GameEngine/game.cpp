@@ -39,7 +39,7 @@ BasicGame::InGameBoard::InGameBoard(BasicGame* _game, Board _board)
 inline void BasicGame::InGameBoard::update(turn_t turn) {
     for (auto& row : tiles) {
         for (auto& tile : row) {
-            if (tile.occupier == -1) {
+            if (tile.occupier == 0) {
                 continue;
             }
             // increments
@@ -54,10 +54,10 @@ inline void BasicGame::InGameBoard::update(turn_t turn) {
                 tile.army -= game->decrement[tile.type];
             // lost tiles
             if (tile.army == 0) {
-                if (tile.type == TILE_SWAMP) tile.occupier = -1;
+                if (tile.type == TILE_SWAMP) tile.occupier = 0;
             }
             if (tile.army < 0) {
-                tile.occupier = -1;
+                tile.occupier = 0;
                 tile.army = 0;
             }
         }

@@ -13,7 +13,7 @@
 
 #include <cstdint>
 
-Tile::Tile() : occupier(-1), type(TILE_BLANK), army(0), lit(false) {}
+Tile::Tile() : occupier(0), type(TILE_BLANK), army(0), lit(false) {}
 Tile::Tile(Player* _occupier, tile_type_e _type, army_t _army, bool _lit)
     : occupier(_occupier->index), type(_type), army(_army), lit(_lit) {}
 Tile::Tile(index_t _occupier, tile_type_e _type, army_t _army, bool _lit)

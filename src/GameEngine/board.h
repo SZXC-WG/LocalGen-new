@@ -63,12 +63,12 @@ class Board {
     /// Map coding system derived from v5.
     /// LocalGen v6 is compatible with v5, so we saved this system.
 
-    intmax_t v5codingPmod(intmax_t& x);
+    intmax_t v5Pmod(intmax_t& x);
 
     // Zip a map using v5 coding.
-    std::string v5codingZip();
+    std::string v5Zip();
     /// Unzip a map with v5 coding.
-    void v5codingUnzip(std::string strUnzip);
+    void v5Unzip(std::string strUnzip);
 
    public:
     /// Check whether the %Tile at (x,y) is visible to a %Player.

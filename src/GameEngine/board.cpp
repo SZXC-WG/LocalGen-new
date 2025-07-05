@@ -49,7 +49,7 @@ Board::Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
     tiles.resize(_row + 2, std::vector<Tile>(_col + 2, Tile()));
 }
 
-intmax_t Board::v5codingPmod(intmax_t& x) {
+intmax_t Board::v5Pmod(intmax_t& x) {
     intmax_t res = x & 63;  // 63 = 0b111111
     x >>= 6;
     return res;
@@ -58,7 +58,7 @@ intmax_t Board::v5codingPmod(intmax_t& x) {
 #define PMod v5codingPmod
 #define CHAR_AD 48
 
-std::string Board::v5codingZip() {
+std::string Board::v5Zip() {
     std::string strZip;
     int i, j;
     intmax_t k1 = row, k2 = col;
@@ -98,7 +98,7 @@ std::string Board::v5codingZip() {
     // strZip[p] = '\0'; // not necessary
     return strZip;
 }
-void Board::v5codingUnzip(std::string strUnzip) {
+void Board::v5Unzip(std::string strUnzip) {
     strUnzip.push_back('\0');
 
     int i, j, k = 4;

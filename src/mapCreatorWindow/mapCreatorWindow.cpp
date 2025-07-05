@@ -499,7 +499,7 @@ void MapCreatorWindow::onOpenMap() {
         QString mapData = mapFile.readLine();
         mapFile.close();
         Board board;
-        board.v5codingUnzip(mapData.toStdString());
+        board.v5Unzip(mapData.toStdString());
         int width = board.getWidth(), height = board.getHeight();
         map->realloc(width, height);
         for (int r = 0; r < height; ++r) {
@@ -657,7 +657,7 @@ void MapCreatorWindow::onSaveMap() {
                 board.changeTile({r + 1, c + 1}, boardTile);
             }
         }
-        mapFile.write(QString::fromStdString(board.v5codingZip()).toUtf8());
+        mapFile.write(QString::fromStdString(board.v5Zip()).toUtf8());
         return;
     }
 

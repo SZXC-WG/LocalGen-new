@@ -135,6 +135,10 @@ class InitBoard : public Board {
     InitBoard(pos_t row, pos_t col);
 
    public:
+    using Board::setHeight;
+    using Board::setWidth;
+
+   public:
     /// Tag all spawns and their team preferences.
     std::vector<std::pair<Coord, int>> spawns;
 

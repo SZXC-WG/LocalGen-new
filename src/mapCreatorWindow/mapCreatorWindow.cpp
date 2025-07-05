@@ -18,7 +18,7 @@
 #include "../GameEngine/board.h"
 
 MapCreatorWindow::MapCreatorWindow(QWidget* parent)
-    : QDialog(parent), selectedToolIndex(static_cast<int>(ToolType::MOUNTAIN)) {
+    : QDialog(parent), selectedTool(MOUNTAIN) {
     setWindowTitle("Map Creator");
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(36, 36, 36));
@@ -99,7 +99,8 @@ void MapCreatorWindow::setupToolbar() {
 void MapCreatorWindow::onToolSelected() {
     QPushButton* sender = qobject_cast<QPushButton*>(this->sender());
     if (sender) {
-        selectedToolIndex = sender->property("toolIndex").toInt();
+        selectedTool =
+            static_cast<ToolType>(sender->property("toolIndex").toInt());
         updateToolButtonStyles();
         updateHintBar();
     }
@@ -108,7 +109,7 @@ void MapCreatorWindow::onToolSelected() {
 void MapCreatorWindow::updateToolButtonStyles() {
     for (int i = 0; i < toolButtons.size(); ++i) {
         QPushButton* btn = toolButtons[i];
-        if (i == selectedToolIndex) {
+        if (i == selectedTool) {
             btn->setStyleSheet(
                 "QPushButton {"
                 "    border: 2px solid #333333;"
@@ -140,47 +141,47 @@ void MapCreatorWindow::updateToolButtonStyles() {
 
 void MapCreatorWindow::onMapClicked(int r, int c) {
     auto& tile = map->tileAt(r, c);
-    switch (static_cast<ToolType>(selectedToolIndex)) {
-        case ToolType::MOUNTAIN:
+    switch (selectedTool) {
+        case MOUNTAIN:
             tile.type = TILE_MOUNTAIN, tile.color = QColor(187, 187, 187),
             tile.text.clear();
             break;
-        case ToolType::LOOKOUT:
+        case LOOKOUT:
             tile.type = TILE_LOOKOUT, tile.color = QColor(187, 187, 187),
             tile.text.clear();
             break;
-        case ToolType::OBSERVATORY:
+        case OBSERVATORY:
             tile.type = TILE_OBSERVATORY, tile.color = QColor(187, 187, 187),
             tile.text.clear();
             break;
-        case ToolType::DESERT:
+        case DESERT:
             tile.type = TILE_DESERT, tile.color = QColor(220, 220, 220),
             tile.text.clear();
             break;
-        case ToolType::SWAMP:
+        case SWAMP:
             tile.type = TILE_SWAMP, tile.color = QColor(128, 128, 128),
             tile.text.clear();
             break;
-        case ToolType::SPAWN:
+        case SPAWN:
             tile.type = TILE_SPAWN, tile.color = Qt::darkCyan;
             tile.text = teamComboBox->currentText();
             break;
-        case ToolType::CITY:
+        case CITY:
             tile.type = TILE_CITY, tile.color = QColor(128, 128, 128),
             tile.text = QString::number(valueSpinBox->value());
             break;
-        case ToolType::NEUTRAL:
+        case NEUTRAL:
             if (valueSpinBox->value() != 0) {
                 tile.type = TILE_NEUTRAL, tile.color = QColor(128, 128, 128),
                 tile.text = QString::number(valueSpinBox->value());
                 break;
             }  // neutral tiles of army strength 0 are equivalent to blank tiles
             [[fallthrough]];
-        case ToolType::ERASE:
+        case ERASE:
             tile.type = TILE_BLANK, tile.color = QColor(220, 220, 220),
             tile.lightIcon = false, tile.text.clear();
             break;
-        case ToolType::LIGHT: tile.lightIcon = !tile.lightIcon;
+        case LIGHT: tile.lightIcon = !tile.lightIcon;
     }
     map->repaint();
 }
@@ -188,13 +189,14 @@ void MapCreatorWindow::onMapClicked(int r, int c) {
 void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
     switch (event->key()) {
         case Qt::Key_Up:
-            selectedToolIndex = (selectedToolIndex - 1 + toolButtons.size()) %
-                                toolButtons.size();
+            selectedTool = static_cast<ToolType>(
+                (selectedTool - 1 + toolButtons.size()) % toolButtons.size());
             updateToolButtonStyles();
             updateHintBar();
             break;
         case Qt::Key_Down:
-            selectedToolIndex = (selectedToolIndex + 1) % toolButtons.size();
+            selectedTool =
+                static_cast<ToolType>((selectedTool + 1) % toolButtons.size());
             updateToolButtonStyles();
             updateHintBar();
             break;
@@ -417,24 +419,18 @@ void MapCreatorWindow::updateHintBar() {
         "is visible by every player, regardless if they are adjacent to it.",
         "Click a tile to remove it."};
 
-    bool showSpinBox =
-        (selectedToolIndex == static_cast<int>(ToolType::CITY) ||
-         selectedToolIndex == static_cast<int>(ToolType::NEUTRAL));
-
-    bool showTeamBox = (selectedToolIndex == static_cast<int>(ToolType::SPAWN));
-
-    if (showSpinBox) {
+    if (selectedTool == CITY || selectedTool == NEUTRAL) {
         hintLabel->setVisible(false);
         valueLabel->setVisible(true);
         valueSpinBox->setVisible(true);
         teamComboBox->setVisible(false);
 
-        if (selectedToolIndex == static_cast<int>(ToolType::CITY)) {
+        if (selectedTool == CITY) {
             valueLabel->setText("City Strength:");
         } else {
             valueLabel->setText("Neutral Army Strength:");
         }
-    } else if (showTeamBox) {
+    } else if (selectedTool == SPAWN) {
         hintLabel->setVisible(false);
         valueLabel->setVisible(true);
         valueSpinBox->setVisible(false);
@@ -445,10 +441,7 @@ void MapCreatorWindow::updateHintBar() {
         valueLabel->setVisible(false);
         valueSpinBox->setVisible(false);
         teamComboBox->setVisible(false);
-
-        if (selectedToolIndex >= 0 && selectedToolIndex < hints.size()) {
-            hintLabel->setText(hints[selectedToolIndex]);
-        }
+        hintLabel->setText(hints[selectedTool]);
     }
 
     QWidget* floatingPanel = hintContainer->findChild<QWidget*>();

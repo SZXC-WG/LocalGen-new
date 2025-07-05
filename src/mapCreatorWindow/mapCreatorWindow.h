@@ -42,7 +42,7 @@ class MapCreatorWindow : public QDialog {
     MapWidget* map;
     QWidget* toolbar;
     QList<QPushButton*> toolButtons;
-    int selectedToolIndex;
+
     QWidget* sliderContainer;
     QSlider* widthSlider;
     QSlider* heightSlider;
@@ -52,7 +52,7 @@ class MapCreatorWindow : public QDialog {
     QLabel* valueLabel;
     QComboBox* teamComboBox;
 
-    enum class ToolType : std::uint8_t {
+    enum ToolType {
         MOUNTAIN = 0,
         LOOKOUT,
         OBSERVATORY,
@@ -63,7 +63,7 @@ class MapCreatorWindow : public QDialog {
         NEUTRAL,
         LIGHT,
         ERASE
-    };
+    } selectedTool;
 };
 
 #endif  // MAPCREATORWINDOW_H

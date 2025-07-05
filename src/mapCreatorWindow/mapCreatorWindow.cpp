@@ -43,6 +43,8 @@ MapCreatorWindow::MapCreatorWindow(QWidget* parent)
 
     setLayout(mainLayout);
     resize(800, 600);
+    setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint |
+                   Qt::WindowMinimizeButtonHint);
     repositionFloatingElements();
 
     setFocusPolicy(Qt::StrongFocus);

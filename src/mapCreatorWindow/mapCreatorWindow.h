@@ -1,6 +1,7 @@
 #ifndef MAPCREATORWINDOW_H
 #define MAPCREATORWINDOW_H
 
+#include <QComboBox>
 #include <QDialog>
 #include <QKeyEvent>
 #include <QLabel>
@@ -49,6 +50,7 @@ class MapCreatorWindow : public QDialog {
     QLabel* hintLabel;
     QSpinBox* valueSpinBox;
     QLabel* valueLabel;
+    QComboBox* teamComboBox;
 
     enum class ToolType : std::uint8_t {
         MOUNTAIN = 0,
@@ -56,7 +58,7 @@ class MapCreatorWindow : public QDialog {
         OBSERVATORY,
         DESERT,
         SWAMP,
-        CROWN,
+        SPAWN,
         CITY,
         NEUTRAL,
         LIGHT,

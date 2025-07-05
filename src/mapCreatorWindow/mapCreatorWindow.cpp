@@ -1,5 +1,6 @@
 #include "mapCreatorWindow.h"
 
+#include <QComboBox>
 #include <QFileDialog>
 #include <QFont>
 #include <QGridLayout>
@@ -160,9 +161,9 @@ void MapCreatorWindow::onMapClicked(int r, int c) {
             tile.type = TILE_SWAMP, tile.color = QColor(128, 128, 128),
             tile.text.clear();
             break;
-        case ToolType::CROWN:
-            tile.type = TILE_GENERAL, tile.color = Qt::darkCyan,
-            tile.text.clear();
+        case ToolType::SPAWN:
+            tile.type = TILE_SPAWN, tile.color = Qt::darkCyan;
+            tile.text = teamComboBox->currentText();
             break;
         case ToolType::CITY:
             tile.type = TILE_CITY, tile.color = QColor(128, 128, 128),
@@ -363,9 +364,37 @@ void MapCreatorWindow::setupHintBar() {
         "}");
     valueSpinBox->setVisible(false);
 
+    teamComboBox = new QComboBox(floatingPanel);
+    teamComboBox->addItem("");
+    for (char c = 'A'; c <= 'Z'; ++c) {
+        teamComboBox->addItem(QString(c));
+    }
+    teamComboBox->setMinimumWidth(30);
+    teamComboBox->setStyleSheet(
+        "QComboBox {"
+        "    border: 1px solid #d0d0d0;"
+        "    border-radius: 4px;"
+        "    padding: 2px 5px;"
+        "    background-color: white;"
+        "    color: black;"
+        "}"
+        "QComboBox:focus {"
+        "    border: 2px solid #4CAF50;"
+        "}"
+        "QComboBox::drop-down {"
+        "    border: none;"
+        "}"
+
+        "QComboBox::down-arrow {"
+        "    image: none;"
+        "    border: none;"
+        "}");
+    teamComboBox->setVisible(false);
+
     hintLayout->addWidget(hintLabel);
     hintLayout->addWidget(valueLabel);
     hintLayout->addWidget(valueSpinBox);
+    hintLayout->addWidget(teamComboBox);
 
     containerLayout->addWidget(floatingPanel);
     containerLayout->addStretch();
@@ -392,20 +421,30 @@ void MapCreatorWindow::updateHintBar() {
         (selectedToolIndex == static_cast<int>(ToolType::CITY) ||
          selectedToolIndex == static_cast<int>(ToolType::NEUTRAL));
 
+    bool showTeamBox = (selectedToolIndex == static_cast<int>(ToolType::SPAWN));
+
     if (showSpinBox) {
         hintLabel->setVisible(false);
         valueLabel->setVisible(true);
         valueSpinBox->setVisible(true);
+        teamComboBox->setVisible(false);
 
         if (selectedToolIndex == static_cast<int>(ToolType::CITY)) {
             valueLabel->setText("City Strength:");
         } else {
             valueLabel->setText("Neutral Army Strength:");
         }
+    } else if (showTeamBox) {
+        hintLabel->setVisible(false);
+        valueLabel->setVisible(true);
+        valueSpinBox->setVisible(false);
+        teamComboBox->setVisible(true);
+        valueLabel->setText("General Team:");
     } else {
         hintLabel->setVisible(true);
         valueLabel->setVisible(false);
         valueSpinBox->setVisible(false);
+        teamComboBox->setVisible(false);
 
         if (selectedToolIndex >= 0 && selectedToolIndex < hints.size()) {
             hintLabel->setText(hints[selectedToolIndex]);
@@ -482,10 +521,10 @@ void MapCreatorWindow::onOpenMap() {
                     case TILE_OBSERVATORY:
                         tile.color = QColor(187, 187, 187);
                         break;
-                    case TILE_DESERT:  tile.color = QColor(220, 220, 220); break;
-                    case TILE_SWAMP:   tile.color = QColor(128, 128, 128); break;
-                    case TILE_CITY:    tile.color = QColor(128, 128, 128); break;
-                    case TILE_GENERAL: tile.color = Qt::darkCyan; break;
+                    case TILE_DESERT: tile.color = QColor(220, 220, 220); break;
+                    case TILE_SWAMP:  tile.color = QColor(128, 128, 128); break;
+                    case TILE_CITY:   tile.color = QColor(128, 128, 128); break;
+                    case TILE_SPAWN:  tile.color = Qt::darkCyan; break;
                     default:
                         tile.color = loadedTile.army == 0
                                          ? QColor(220, 220, 220)
@@ -526,7 +565,12 @@ void MapCreatorWindow::onSaveMap() {
                 Tile boardTile;
                 boardTile.type = tile.type;
                 boardTile.lit = tile.lightIcon;
-                boardTile.army = tile.text.isEmpty() ? 0 : tile.text.toInt();
+                // v5 encoding does not support general teams,
+                // so this field is ignored for now
+                // TODO: add warning if team is set
+                boardTile.army = tile.text.isEmpty() || tile.type == TILE_SPAWN
+                                     ? 0
+                                     : tile.text.toInt();
                 board.changeTile({r + 1, c + 1}, boardTile);
             }
         }

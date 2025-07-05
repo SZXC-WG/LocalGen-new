@@ -90,6 +90,12 @@ class BasicGame {
     /// @param player the index of the player.
     /// @return Whether the player is alive.
     inline bool isAlive(index_t player) const { return alive[player]; };
+    inline index_t getTeam(index_t player) const {
+        return players[player]->teamId;
+    };
+    inline bool inSameTeam(index_t player1, index_t player2) const {
+        return getTeam(player1) == getTeam(player2);
+    };
 
    public:
     static constexpr uint32_t CONFIG_COUNT = 0;
@@ -139,7 +145,9 @@ class BasicGame {
         /// specific game object.
         InGameBoard() = delete;
         InGameBoard(BasicGame* _game);
-        InGameBoard(BasicGame* _game, Board _board);
+        InGameBoard(BasicGame* _game, Board* _board);
+
+        bool visible(Player* player, pos_t row, pos_t col);
 
         void update(turn_t turn);
 
@@ -189,6 +197,10 @@ class BasicGame {
    protected:
     InGameBoard board{this};
 
+    inline BoardView getBoard(Player* player) {
+        return BoardView(&board, player);
+    }
+
    public:
     BasicGame() = delete;
     BasicGame(Player* _god, std::vector<Player*> _players, InitBoard _board,
@@ -214,8 +226,11 @@ class BasicGame {
     void performTurn();
 
    public:
-    struct RankInfo {
+    class RankInfo {
+       private:
         index_t player;
+        army_t army;
+        pos_t land[TILE_TYPE_COUNT];
     };
 
    protected:
@@ -246,6 +261,8 @@ class BasicGame {
    public:
     inline void setInitialBoard(InitBoard board) { initialBoard = board; };
     inline InitBoard getInitialBoard() { return initialBoard; };
+
+   protected:
     struct ReplayUnit {};
     std::vector<ReplayUnit> replay;
 };

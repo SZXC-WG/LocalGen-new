@@ -48,6 +48,8 @@ Board::Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
     // give 1 index space at borders for safety and convenience issues.
     tiles.resize(_row + 2, std::vector<Tile>(_col + 2, Tile()));
 }
+Board::Board(Board* _board)
+    : row(_board->row), col(_board->col), tiles(_board->tiles) {}
 
 intmax_t Board::v5Pmod(intmax_t& x) {
     intmax_t res = x & 63;  // 63 = 0b111111

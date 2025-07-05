@@ -58,6 +58,7 @@ class Board {
    public:
     Board();
     Board(pos_t _row, pos_t _col);
+    Board(Board* _board);
 
    public:
     /// Map coding system derived from v5.

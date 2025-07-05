@@ -20,7 +20,7 @@
 #include "player.h"
 
 BasicGame::InGameBoard::InGameBoard(BasicGame* _game) : game(_game) {}
-BasicGame::InGameBoard::InGameBoard(BasicGame* _game, Board _board)
+BasicGame::InGameBoard::InGameBoard(BasicGame* _game, Board* _board)
     : game(_game), Board(_board) {}
 
 void BasicGame::InGameBoard::update(turn_t turn) {
@@ -93,7 +93,7 @@ BasicGame::BasicGame(Player* _god, std::vector<Player*> _players,
                      InitBoard _board, speed_t _speed)
     : god(_god),
       players(_players),
-      board(this, _board),
+      board(this, &_board),
       alive(_players.size()),
       speed(_speed) {
     for (decltype(_players)::size_type i = 0; i < _players.size(); ++i) {
@@ -124,7 +124,7 @@ void BasicGame::performTurn() {
 
 void BasicGame::ranklist() {}
 
-std::vector<BasicGame::RankInfo> getRanklist() {}
+std::vector<BasicGame::RankInfo> BasicGame::getRanklist() {}
 
 int BasicGame::initSpawn() {
     std::mt19937 random{std::random_device()()};

@@ -19,24 +19,11 @@
 #include "move.h"
 #include "player.h"
 
-inline BasicGame::turn_t BasicGame::getCurTurn() const { return curTurn; }
-inline BasicGame::speed_t BasicGame::getSpeed() const { return speed; }
-inline std::array<army_t, TILE_TYPE_COUNT> BasicGame::getIncrement() const {
-    return increment;
-}
-inline std::array<army_t, TILE_TYPE_COUNT> BasicGame::getDecrement() const {
-    return decrement;
-}
-
-inline bool BasicGame::isAlive(index_t player) const { return alive[player]; }
-
-inline BasicGame::config_t BasicGame::getConfig() const { return conf; }
-
 BasicGame::InGameBoard::InGameBoard(BasicGame* _game) : game(_game) {}
 BasicGame::InGameBoard::InGameBoard(BasicGame* _game, Board _board)
     : game(_game), Board(_board) {}
 
-inline void BasicGame::InGameBoard::update(turn_t turn) {
+void BasicGame::InGameBoard::update(turn_t turn) {
     for (auto& row : tiles) {
         for (auto& tile : row) {
             if (tile.occupier == 0) {
@@ -68,7 +55,7 @@ BasicGame::InGameBoard::MoveProcessor::MoveProcessor(BasicGame* _game,
                                                      InGameBoard* _board)
     : game(_game), board(_board) {}
 
-inline void BasicGame::InGameBoard::MoveProcessor::add(Move move) {
+void BasicGame::InGameBoard::MoveProcessor::add(Move move) {
     if (move.available(board)) movesInQueue.emplace_back(move);
 }
 
@@ -102,18 +89,21 @@ void BasicGame::InGameBoard::MoveProcessor::execute() {
         }
     }
 }
-
-BasicGame::BasicGame() {}
-BasicGame::BasicGame(std::vector<Player*> _players, Board _board)
-    : players(_players), board(this, _board), alive(_players.size()) {
+BasicGame::BasicGame(Player* _god, std::vector<Player*> _players,
+                     InitBoard _board, speed_t _speed)
+    : god(_god),
+      players(_players),
+      board(this, _board),
+      alive(_players.size()),
+      speed(_speed) {
     for (decltype(_players)::size_type i = 0; i < _players.size(); ++i) {
         _players[i]->index = i + 1;
     }
 }
 
-inline void BasicGame::update() { board.update(curTurn); }
+void BasicGame::update() { board.update(curTurn); }
 
-inline void BasicGame::act(Player* player) {
+void BasicGame::act(Player* player) {
     while (!player->moveQueue.empty() &&
            !player->moveQueue.front().available(&board))
         player->moveQueue.pop_front();
@@ -121,12 +111,12 @@ inline void BasicGame::act(Player* player) {
     board.processor.add(player->moveQueue.front());
 }
 
-inline void BasicGame::process() {
+void BasicGame::process() {
     board.processor.sort();
     board.processor.execute();
 }
 
-inline void BasicGame::performTurn() {
+void BasicGame::performTurn() {
     for (auto player : players) act(player);
     update();
     process();

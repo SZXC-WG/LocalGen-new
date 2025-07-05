@@ -129,6 +129,7 @@ class BoardView {
     BoardView(const Board* const& board, Player* player);
 };
 
+/// Derived class for initial boards (pre-game boards).
 class InitBoard : public Board {
    public:
     InitBoard();

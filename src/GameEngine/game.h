@@ -63,10 +63,18 @@ class BasicGame {
     std::array<army_t, TILE_TYPE_COUNT> decrement;
 
    public:
-    inline turn_t getCurTurn() const;
-    inline speed_t getSpeed() const;
-    inline std::array<army_t, TILE_TYPE_COUNT> getIncrement() const;
-    inline std::array<army_t, TILE_TYPE_COUNT> getDecrement() const;
+    inline turn_t getCurTurn() const { return curTurn; }
+    inline speed_t getSpeed() const { return speed; }
+    inline std::array<army_t, TILE_TYPE_COUNT> getIncrement() const {
+        return increment;
+    };
+    inline std::array<army_t, TILE_TYPE_COUNT> getDecrement() const {
+        return decrement;
+    };
+
+   protected:
+    /// The God of the game. Has full control of the game.
+    Player* god;
 
    protected:
     static constexpr index_t PLAYER_INDEX_START = 1;
@@ -81,7 +89,7 @@ class BasicGame {
     /// Check whether a player is alive.
     /// @param player the index of the player.
     /// @return Whether the player is alive.
-    inline bool isAlive(index_t player) const;
+    inline bool isAlive(index_t player) const { return alive[player]; };
 
    public:
     static constexpr uint32_t CONFIG_COUNT = 0;
@@ -107,7 +115,7 @@ class BasicGame {
    public:
     /// Get game configuration value.
     /// @return The current configuration value.
-    inline config_t getConfig() const;
+    inline config_t getConfig() const { return conf; }
 
    public:
     /// [TODO]
@@ -118,6 +126,7 @@ class BasicGame {
     void broadcast(turn_t turn, game_message_e message,
                    std::vector<index_t> associatedList);
 
+   public:
     class InGameBoard : public Board {
        public:
         friend class BasicGame;
@@ -132,7 +141,7 @@ class BasicGame {
         InGameBoard(BasicGame* _game);
         InGameBoard(BasicGame* _game, Board _board);
 
-        inline void update(turn_t turn);
+        void update(turn_t turn);
 
        public:
         class MoveProcessor;
@@ -159,7 +168,7 @@ class BasicGame {
            public:
             /// Add a %Move to the waiting-to-be-processed queue.
             /// @param move added %Move.
-            inline void add(Move move);
+            void add(Move move);
 
             /// Sort the in-queue moves according to their priority.
             /// May not be implemented.
@@ -181,27 +190,28 @@ class BasicGame {
     InGameBoard board{this};
 
    public:
-    BasicGame();
-    BasicGame(std::vector<Player*> _players, Board _board);
+    BasicGame() = delete;
+    BasicGame(Player* _god, std::vector<Player*> _players, InitBoard _board,
+              speed_t _speed);
 
    protected:
     /// Update the map for the turn.
     /// What to update? For example, the self-increment of tile armies.
     /// This function recursively let the %InGameBoard do the job due to
     /// accessment issues.
-    inline void update();
+    void update();
 
    protected:
     /// Get action from a %Player. In other words, make this %Player act.
     /// @param player The acting player.
-    inline void act(Player* player);
+    void act(Player* player);
 
    protected:
     /// Process all the existing moves in the processor, make them work.
-    inline void process();
+    void process();
 
     /// Perform the operations that a turn needs.
-    inline void performTurn();
+    void performTurn();
 
    public:
     struct RankInfo {
@@ -229,6 +239,15 @@ class BasicGame {
    public:
     /// Run the game.
     virtual void run();
+
+   protected:
+    InitBoard initialBoard;
+
+   public:
+    inline void setInitialBoard(InitBoard board) { initialBoard = board; };
+    inline InitBoard getInitialBoard() { return initialBoard; };
+    struct ReplayUnit {};
+    std::vector<ReplayUnit> replay;
 };
 
 #endif  // LGEN_MODULE_GE_GAME_H

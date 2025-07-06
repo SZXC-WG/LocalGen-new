@@ -355,6 +355,7 @@ void LGgame::ranklist(bool print) {
     setcolor(WHITE);
     settextjustify(CENTER_TEXT, TOP_TEXT);
     setfillcolor(LGGraphics::bgColor);
+    setlinewidth(1);
     bar(s1, prhei * 1, ed, prhei * 2);
     rectangle(s1, prhei, s2, prhei + prhei);
     rectangle(s2, prhei, s3, prhei + prhei);

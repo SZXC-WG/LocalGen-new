@@ -354,13 +354,53 @@ void printMap(int Code, coordS coo) {
             }
         }
     }
-    if ((~coo.x) || (~coo.y))
-        putimage_withalpha(
-            NULL, npimg[6],
-            LGGraphics::windowData.maplocX +
-                int(blockWidth + LGGraphics::zoomX(2)) * (coo.y - 1),
-            LGGraphics::windowData.maplocY +
-                int(blockHeight + LGGraphics::zoomX(2)) * (coo.x - 1));
+    if ((~coo.x) || (~coo.y)) {
+        setcolor(WHITE);
+        setlinewidth(2);
+        rectangle(LGGraphics::windowData.maplocX +
+                      int(blockWidth + LGGraphics::zoomX(2)) * (coo.y - 1) - 1,
+                  LGGraphics::windowData.maplocY +
+                      int(blockHeight + LGGraphics::zoomY(2)) * (coo.x - 1) - 1,
+                  LGGraphics::windowData.maplocX +
+                      int(blockWidth + LGGraphics::zoomX(2)) * coo.y - 1,
+                  LGGraphics::windowData.maplocY +
+                      int(blockHeight + LGGraphics::zoomY(2)) * coo.x - 1);
+        setfillcolor(0x80000000);
+        if (coo.x > 1)
+            ege_fillrect(
+                LGGraphics::windowData.maplocX +
+                    int(blockWidth + LGGraphics::zoomX(2)) * (coo.y - 1),
+                LGGraphics::windowData.maplocY +
+                    int(blockHeight + LGGraphics::zoomY(2)) * (coo.x - 2),
+                int(blockWidth), int(blockHeight));
+        if (coo.y > 1)
+            ege_fillrect(
+                LGGraphics::windowData.maplocX +
+                    int(blockWidth + LGGraphics::zoomX(2)) * (coo.y - 2),
+                LGGraphics::windowData.maplocY +
+                    int(blockHeight + LGGraphics::zoomY(2)) * (coo.x - 1),
+                int(blockWidth), int(blockHeight));
+        if (coo.x < mapH)
+            ege_fillrect(
+                LGGraphics::windowData.maplocX +
+                    int(blockWidth + LGGraphics::zoomX(2)) * (coo.y - 1),
+                LGGraphics::windowData.maplocY +
+                    int(blockHeight + LGGraphics::zoomY(2)) * coo.x,
+                int(blockWidth), int(blockHeight));
+        if (coo.y < mapW)
+            ege_fillrect(
+                LGGraphics::windowData.maplocX +
+                    int(blockWidth + LGGraphics::zoomX(2)) * coo.y,
+                LGGraphics::windowData.maplocY +
+                    int(blockHeight + LGGraphics::zoomY(2)) * (coo.x - 1),
+                int(blockWidth), int(blockHeight));
+        // putimage_withalpha(
+        //     NULL, npimg[6],
+        //     LGGraphics::windowData.maplocX +
+        //         int(blockWidth + LGGraphics::zoomX(2)) * (coo.y - 1),
+        //     LGGraphics::windowData.maplocY +
+        //         int(blockHeight + LGGraphics::zoomX(2)) * (coo.x - 1));
+    }
     for (int i = 1; i <= 13; ++i) delimage(npimg[i]);
     settextjustify(LEFT_TEXT, TOP_TEXT);
 }

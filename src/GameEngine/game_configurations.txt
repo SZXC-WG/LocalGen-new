@@ -1,0 +1,12 @@
+RanklistShowLand
+RanklistShowArmy
+RanklistShowPlayerIndex
+RanklistShowPlayerName
+RanklistShowTeamIndex
+RanklistShowColor
+RanklistShowPlainCount
+RanklistShowCityCount
+RanklistShowDesertCount
+RanklistShowIncrement
+RanklistShowRobotName
+RanklistShowMovingArmy

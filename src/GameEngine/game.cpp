@@ -93,6 +93,7 @@ BasicGame::BasicGame(Player* _god, std::vector<Player*> _players,
                      InitBoard _board, speed_t _speed)
     : god(_god),
       players(_players),
+      initialBoard(_board),
       board(this, &_board),
       alive(_players.size()),
       speed(_speed) {
@@ -122,7 +123,16 @@ void BasicGame::performTurn() {
     process();
 }
 
-void BasicGame::ranklist() {}
+void BasicGame::ranklist() {
+    rank.clear();
+    rank.resize(players.size());
+    for (auto& row : board.tiles) {
+        for (auto& tile : row) {
+            if (tile.occupier == 0) continue;
+            rank[tile.occupier].army += tile.army;
+        }
+    }
+}
 
 std::vector<BasicGame::RankInfo> BasicGame::getRanklist() {}
 

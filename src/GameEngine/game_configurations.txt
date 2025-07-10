@@ -10,3 +10,10 @@ RanklistShowDesertCount
 RanklistShowIncrement
 RanklistShowRobotName
 RanklistShowMovingArmy
+OverallVisionRange
+TilePlainVisionType
+TilePlainVisionRange
+TileCityVisionRange
+TileDesertVisionRange
+TileLookoutRange
+TileObservatoryRange

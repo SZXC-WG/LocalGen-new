@@ -26,14 +26,18 @@ class Player;
 
 namespace game {
 
-inline namespace config {
+/// The namespace for game configuration.
+namespace config {
 
+/// Vision modes.
 enum class VisionMode : uint8_t {
-    VISION_TYPE_NEARSIGHTED_8,
-    VISION_TYPE_NEARSIGHTED_4
+    NEAR8,
+    NEAR4,
 };
 
-#define GAME_CONFIG_FIELD_LIST(F)          \
+/// List of game configuration units. Edit the items here to add/remove/change
+/// game configuration units.
+#define GAME_CONFIG_UNIT_LIST(F)           \
     F(int, CityVisionRange, 1)             \
     F(int, SpawnVisionRange, 1)            \
     F(bool, RanklistShowLand, true)        \
@@ -42,52 +46,82 @@ enum class VisionMode : uint8_t {
     F(bool, RanklistShowPlayerName, true)  \
     F(bool, RanklistShowTeamIndex, true)   \
     F(bool, RanklistShowColor, true)       \
-    F(VisionMode, OverallVisionMode, VISION_TYPE_NEARSIGHTED_8)
+    F(VisionMode, OverallVisionMode, VisionMode::NEAR8)
 
+/// Hard-code Config Type.
 struct Config {
 #define DECL(type, name, def) type name = def;
-    GAME_CONFIG_FIELD_LIST(DECL)
+    GAME_CONFIG_UNIT_LIST(DECL)
 #undef DECL
 };
 
+/// Patch of Config. Contains only some values, used for editing config.
 struct ConfigPatch {
 #define DECL(type, name, ...) std::optional<type> name;
-    GAME_CONFIG_FIELD_LIST(DECL)
+    GAME_CONFIG_UNIT_LIST(DECL)
 #undef DECL
 };
 
-#define BUILDER(type, name, ...)         \
+namespace unit {
+/// Construct directly-used configuration units.
+#define UNIT(type, name, ...)            \
     constexpr ConfigPatch name(type v) { \
-        ConfigPatch p{.name = v};        \
+        ConfigPatch p;                   \
+        p.name = v;                      \
         return p;                        \
     }
-GAME_CONFIG_FIELD_LIST(BUILDER)
-#undef BUILDER
+GAME_CONFIG_UNIT_LIST(UNIT)
+#undef UNIT
+}  // namespace unit
 
 #define IF_ASSIGN(type, name, ...) \
-    if (latt.name) {               \
-        form.name = latt.name;     \
+    if (rhs.name) {                \
+        res.name = rhs.name;       \
     }
-#define IF_ASSIGN_VALUE(type, name, ...) \
-    if (latt.name) {                     \
-        form.name = *latt.name;          \
-    }
-inline bool operator|(ConfigPatch form, ConfigPatch latt) {
-    GAME_CONFIG_FIELD_LIST(IF_ASSIGN);
+/// Merge operator. Merges two patches. If some conflict, use the latter.
+/// @param lhs Former patch.
+/// @param rhs Latter patch, determining values.
+/// @return The merged patch.
+constexpr ConfigPatch operator|(const ConfigPatch& lhs,
+                                const ConfigPatch& rhs) {
+    ConfigPatch res = lhs;
+    GAME_CONFIG_UNIT_LIST(IF_ASSIGN)
+    return res;
 }
-inline bool operator|(Config form, ConfigPatch latt) {
-    GAME_CONFIG_FIELD_LIST(IF_ASSIGN_VALUE)
-}
-inline bool operator|(ConfigPatch form, Config latt) { return latt | form; }
 #undef IF_ASSIGN
+
+#define IF_ASSIGN_VALUE(type, name, ...) \
+    if (rhs.name) {                      \
+        res.name = *rhs.name;            \
+    }
+/// Apply operator. Applies a patch to a specific config. If some conflict,
+/// follow the patch.
+/// @param lhs The to-be-applied config.
+/// @param rhs The patch.
+/// @return The applied config.
+constexpr Config operator|(const Config& lhs, const ConfigPatch& rhs) {
+    Config res = lhs;
+    GAME_CONFIG_UNIT_LIST(IF_ASSIGN_VALUE)
+    return res;
+}
+constexpr Config operator|(const ConfigPatch& lhs, const Config& rhs) {
+    return rhs | lhs;
+}
 #undef IF_ASSIGN_VALUE
 
-#define GAME_MODIFIER_FIELD_LIST(F) \
-    F(Watchtower, CityVisionRange(3) | SpawnVisionRange(3))
+/// List of game modifiers. Edit the items here to add/remove/change game
+/// modifiers / their unit sets.
+#define GAME_CONFIG_MODIFIER_LIST(F) \
+    F(Watchtower, unit::CityVisionRange(3) | unit::SpawnVisionRange(3))
 
-const Config defaultConf{};
+namespace modifier {
+/// Construct directly-used modifier sets.
+#define MODIFIER(name, value) constexpr ConfigPatch type = value;
+GAME_CONFIG_MODIFIER_LIST(MODIFIER)
+#undef MODIFIER
+}  // namespace modifier
 
-// #undef GAME_CONFIG_FIELD_LIST // Why #undef this? It's useful.
+constexpr Config defaultConf;
 
 }  // namespace config
 
@@ -165,7 +199,7 @@ class BasicGame {
    protected:
     /// Configuration variable. Default value 0.
     /// Placed in `protected` to avoid being modified illegally.
-    config::Config conf = defaultConf;
+    config::Config conf = config::defaultConf;
 
    public:
     /// Get game configuration value.

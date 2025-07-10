@@ -24,7 +24,9 @@ class Board;
 class Move;
 class Player;
 
-namespace game_conf {
+namespace game {
+
+inline namespace config {
 
 enum class VisionMode : uint8_t {
     VISION_TYPE_NEARSIGHTED_8,
@@ -87,7 +89,7 @@ const Config defaultConf{};
 
 // #undef GAME_CONFIG_FIELD_LIST // Why #undef this? It's useful.
 
-}  // namespace game_conf
+}  // namespace config
 
 enum class game_message_e {
     GAME_MESSAGE_WIN,
@@ -166,12 +168,12 @@ class BasicGame {
    protected:
     /// Configuration variable. Default value 0.
     /// Placed in `protected` to avoid being modified illegally.
-    config_t conf = defaultConf;
+    game::config::Config conf = defaultConf;
 
    public:
     /// Get game configuration value.
     /// @return The current configuration value.
-    inline config_t getConfig() const { return conf; }
+    inline game::config::Config getConfig() const { return conf; }
 
    public:
     /// [TODO]
@@ -320,5 +322,7 @@ class BasicGame {
     struct ReplayUnit {};
     std::vector<ReplayUnit> replay;
 };
+
+}  // namespace game
 
 #endif  // LGEN_MODULE_GE_GAME_H

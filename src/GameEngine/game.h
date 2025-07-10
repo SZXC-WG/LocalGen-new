@@ -30,10 +30,7 @@ namespace game {
 namespace config {
 
 /// Vision modes.
-enum class VisionMode : uint8_t {
-    NEAR8,
-    NEAR4,
-};
+enum class VisionMode : uint8_t { NEAR8, NEAR4 };
 
 /// List of game configuration units. Edit the items here to add/remove/change
 /// game configuration units.
@@ -125,12 +122,7 @@ constexpr Config defaultConf;
 
 }  // namespace config
 
-enum class GameMessageType : uint8_t {
-    WIN,
-    CAPTURE,
-    SURRENDER,
-    TEXT,
-};
+enum class GameMessageType : uint8_t { WIN, CAPTURE, SURRENDER, TEXT };
 
 class BasicGame {
    public:

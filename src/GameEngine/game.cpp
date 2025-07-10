@@ -19,11 +19,13 @@
 #include "move.h"
 #include "player.h"
 
-BasicGame::InGameBoard::InGameBoard(BasicGame* _game) : game(_game) {}
-BasicGame::InGameBoard::InGameBoard(BasicGame* _game, Board* _board)
+namespace game {
+
+BasicGame::GameBoard::GameBoard(BasicGame* _game) : game(_game) {}
+BasicGame::GameBoard::GameBoard(BasicGame* _game, Board* _board)
     : game(_game), Board(_board) {}
 
-void BasicGame::InGameBoard::update(turn_t turn) {
+void BasicGame::GameBoard::update(turn_t turn) {
     for (auto& row : tiles) {
         for (auto& tile : row) {
             if (tile.occupier == 0) {
@@ -51,17 +53,17 @@ void BasicGame::InGameBoard::update(turn_t turn) {
     }
 }
 
-BasicGame::InGameBoard::MoveProcessor::MoveProcessor(BasicGame* _game,
-                                                     InGameBoard* _board)
+BasicGame::GameBoard::MoveProcessor::MoveProcessor(BasicGame* _game,
+                                                   GameBoard* _board)
     : game(_game), board(_board) {}
 
-void BasicGame::InGameBoard::MoveProcessor::add(Move move) {
+void BasicGame::GameBoard::MoveProcessor::add(Move move) {
     if (move.available(board)) movesInQueue.emplace_back(move);
 }
 
-void BasicGame::InGameBoard::MoveProcessor::sort() {}
+void BasicGame::GameBoard::MoveProcessor::sort() {}
 
-void BasicGame::InGameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
+void BasicGame::GameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
     for (auto& row : board->tiles) {
         for (auto& tile : row) {
             if (tile.occupier == p2) {
@@ -72,7 +74,7 @@ void BasicGame::InGameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
     }
     game->broadcast(game->curTurn, GAME_MESSAGE_CAPTURE, {p1, p2});
 }
-void BasicGame::InGameBoard::MoveProcessor::execute() {
+void BasicGame::GameBoard::MoveProcessor::execute() {
     for (auto move : movesInQueue) {
         if (!move.available(board)) continue;
         Tile& fromTile = board->tileAt(move.from);
@@ -185,5 +187,7 @@ void BasicGame::run() {}
 
 void BasicGame::broadcast(turn_t turn, game_message_e message,
                           std::vector<index_t> associatedList) {}
+
+}  // namespace game
 
 #endif  // LGEN_MODULE_GE_GAME_CPP

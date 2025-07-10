@@ -185,7 +185,7 @@ class BasicGame {
                    std::vector<index_t> associatedList);
 
    public:
-    class InGameBoard : public Board {
+    class GameBoard : public Board {
        public:
         friend class BasicGame;
 
@@ -193,11 +193,11 @@ class BasicGame {
         BasicGame* game;
 
        public:
-        /// The default constructor is deleted, for an %InGameBoard relies on a
+        /// The default constructor is deleted, for an %GameBoard relies on a
         /// specific game object.
-        InGameBoard() = delete;
-        InGameBoard(BasicGame* _game);
-        InGameBoard(BasicGame* _game, Board* _board);
+        GameBoard() = delete;
+        GameBoard(BasicGame* _game);
+        GameBoard(BasicGame* _game, Board* _board);
 
         bool visible(Player* player, pos_t row, pos_t col);
 
@@ -205,7 +205,7 @@ class BasicGame {
 
        public:
         class MoveProcessor;
-        friend class InGameBoard::MoveProcessor;
+        friend class GameBoard::MoveProcessor;
         /// Move Processor used by games.
         /// A %MoveProcessor is used to contain and
         /// process moves.
@@ -215,7 +215,7 @@ class BasicGame {
 
            protected:
             BasicGame* game;
-            InGameBoard* board;
+            GameBoard* board;
 
             /// Constructors.
             /// The default constructor is deleted, for
@@ -223,7 +223,7 @@ class BasicGame {
             /// %Board.
            public:
             MoveProcessor() = delete;
-            MoveProcessor(BasicGame* _game, InGameBoard* _board);
+            MoveProcessor(BasicGame* _game, GameBoard* _board);
 
            public:
             /// Add a %Move to the waiting-to-be-processed queue.
@@ -247,7 +247,7 @@ class BasicGame {
     };
 
    protected:
-    InGameBoard board{this};
+    GameBoard board{this};
 
     inline BoardView getBoard(Player* player) {
         return BoardView(&board, player);
@@ -261,7 +261,7 @@ class BasicGame {
    protected:
     /// Update the map for the turn.
     /// What to update? For example, the self-increment of tile armies.
-    /// This function recursively let the %InGameBoard do the job due to
+    /// This function recursively let the %GameBoard do the job due to
     /// accessment issues.
     void update();
 

@@ -91,10 +91,11 @@ const Config defaultConf{};
 
 }  // namespace config
 
-enum class game_message_e {
-    GAME_MESSAGE_WIN,
-    GAME_MESSAGE_CAPTURE,
-    GAME_MESSAGE_SURRENDER,
+enum class GameMessageType : uint8_t {
+    WIN,
+    CAPTURE,
+    SURRENDER,
+    TEXT,
 };
 
 class BasicGame {
@@ -141,10 +142,6 @@ class BasicGame {
     };
 
    protected:
-    /// The God of the game. Has full control of the game.
-    Player* god;
-
-   protected:
     static constexpr index_t PLAYER_INDEX_START = 1;
     /// Players in the game.
     std::vector<Player*> players;
@@ -168,12 +165,12 @@ class BasicGame {
    protected:
     /// Configuration variable. Default value 0.
     /// Placed in `protected` to avoid being modified illegally.
-    game::config::Config conf = defaultConf;
+    config::Config conf = defaultConf;
 
    public:
     /// Get game configuration value.
     /// @return The current configuration value.
-    inline game::config::Config getConfig() const { return conf; }
+    inline config::Config getConfig() const { return conf; }
 
    public:
     /// [TODO]
@@ -181,7 +178,7 @@ class BasicGame {
     /// @param turn the turn number the message is dedicated to.
     /// @param message type of the message.
     /// @param associatedList the needed extra information of the message.
-    void broadcast(turn_t turn, game_message_e message,
+    void broadcast(turn_t turn, GameMessageType message,
                    std::vector<index_t> associatedList);
 
    public:
@@ -255,8 +252,7 @@ class BasicGame {
 
    public:
     BasicGame() = delete;
-    BasicGame(Player* _god, std::vector<Player*> _players, InitBoard _board,
-              speed_t _speed);
+    BasicGame(std::vector<Player*> _players, InitBoard _board, speed_t _speed);
 
    protected:
     /// Update the map for the turn.

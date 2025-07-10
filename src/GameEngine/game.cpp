@@ -72,7 +72,7 @@ void BasicGame::GameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
             }
         }
     }
-    game->broadcast(game->curTurn, GAME_MESSAGE_CAPTURE, {p1, p2});
+    game->broadcast(game->curTurn, GameMessageType::CAPTURE, {p1, p2});
 }
 void BasicGame::GameBoard::MoveProcessor::execute() {
     for (auto move : movesInQueue) {
@@ -91,10 +91,9 @@ void BasicGame::GameBoard::MoveProcessor::execute() {
         }
     }
 }
-BasicGame::BasicGame(Player* _god, std::vector<Player*> _players,
-                     InitBoard _board, speed_t _speed)
-    : god(_god),
-      players(_players),
+BasicGame::BasicGame(std::vector<Player*> _players, InitBoard _board,
+                     speed_t _speed)
+    : players(_players),
       initialBoard(_board),
       board(this, &_board),
       alive(_players.size()),
@@ -185,7 +184,7 @@ int BasicGame::init() {
 
 void BasicGame::run() {}
 
-void BasicGame::broadcast(turn_t turn, game_message_e message,
+void BasicGame::broadcast(turn_t turn, GameMessageType message,
                           std::vector<index_t> associatedList) {}
 
 }  // namespace game

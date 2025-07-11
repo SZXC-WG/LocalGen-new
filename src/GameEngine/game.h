@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "board.h"
+#include "player.h"
 #include "tile.h"
 
 class Board;
@@ -71,10 +72,8 @@ GAME_CONFIG_UNIT_LIST(UNIT)
 #undef UNIT
 }  // namespace unit
 
-#define IF_ASSIGN(type, name, ...) \
-    if (rhs.name) {                \
-        res.name = rhs.name;       \
-    }
+#define IF_ASSIGN(type, name, ...)     \
+    if (rhs.name) res.name = rhs.name; \
 /// Merge operator. Merges two patches. If some conflict, use the latter.
 /// @param lhs Former patch.
 /// @param rhs Latter patch, determining values.
@@ -88,9 +87,7 @@ constexpr ConfigPatch operator|(const ConfigPatch& lhs,
 #undef IF_ASSIGN
 
 #define IF_ASSIGN_VALUE(type, name, ...) \
-    if (rhs.name) {                      \
-        res.name = *rhs.name;            \
-    }
+    if (rhs.name) res.name = *rhs.name;  \
 /// Apply operator. Applies a patch to a specific config. If some conflict,
 /// follow the patch.
 /// @param lhs The to-be-applied config.
@@ -101,6 +98,11 @@ constexpr Config operator|(const Config& lhs, const ConfigPatch& rhs) {
     GAME_CONFIG_UNIT_LIST(IF_ASSIGN_VALUE)
     return res;
 }
+/// Apply operator. Applies a patch to a specific config. If some conflict,
+/// follow the patch.
+/// @param lhs The patch.
+/// @param rhs The to-be-applied config.
+/// @return The applied config.
 constexpr Config operator|(const ConfigPatch& lhs, const Config& rhs) {
     return rhs | lhs;
 }
@@ -273,7 +275,7 @@ class BasicGame {
     GameBoard board{this};
 
     inline BoardView getBoard(Player* player) {
-        return BoardView(&board, player);
+        return BoardView(&board, player->index);
     }
 
    public:

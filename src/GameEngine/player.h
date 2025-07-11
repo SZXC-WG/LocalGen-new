@@ -32,7 +32,9 @@ class Player {
     Player(const std::string& name);
     ~Player();
 
-    virtual Move step(const BoardView& view) = 0;
+    void surrender();
+
+    virtual Move act() = 0;
 };
 
 #endif  // LGEN_MODULE_GE_PLAYER_H

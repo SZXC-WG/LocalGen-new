@@ -13,9 +13,9 @@
 
 #include <cstdint>
 
-#include "player.h"
-
 class Player;
+
+using index_t = uint32_t;
 
 using army_t = int64_t;
 
@@ -55,7 +55,6 @@ struct Tile {
     bool lit;
 
     Tile();
-    Tile(Player* _occupier, tile_type_e _type, army_t _army, bool _lit = false);
     Tile(index_t _occupier, tile_type_e _type, army_t _army, bool _lit = false);
 };
 

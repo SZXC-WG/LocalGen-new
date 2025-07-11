@@ -22,6 +22,8 @@ class TileView;
 
 class Player;
 
+class BoardView;
+
 /// Game map board. Zoomable.
 /// The %Board is a complex thing. Many systems are part of it (e.g. vision
 /// system).
@@ -75,10 +77,10 @@ class Board {
     /// Check whether the %Tile at (x,y) is visible to a %Player.
     /// Declare this function as *virtual* for we'll declare a different
     /// function in-game.
-    virtual bool visible(pos_t x, pos_t y, Player* player) const;
+    virtual bool visible(pos_t x, pos_t y, index_t player) const;
     /// Same as above, but using %Coord.
     /// This is not declared as *virtual* for redefining it is unnecessary.
-    bool visible(const Coord& coord, Player* player) const;
+    bool visible(const Coord& coord, index_t player) const;
 
    public:
     friend class BoardView;
@@ -88,18 +90,18 @@ class Board {
     /// Returns a %BoardView.
     /// Leaving this function public is safe, for a %Player cannot get another
     /// %Player's address.
-    BoardView view(Player* player) const;
+    BoardView view(index_t player) const;
 
     /// Give a player a view of a certain tile of the %Board.
     /// Returns a %TileView.
     /// Leaving this function public is safe, for a %Player cannot get another
     /// %Player's address.
-    TileView view(Player* player, pos_t row, pos_t col);
+    TileView view(index_t player, pos_t row, pos_t col);
     /// Give a player a view of a certain tile of the %Board.
     /// Returns a %TileView.
     /// Leaving this function public is safe, for a %Player cannot get another
     /// %Player's address.
-    TileView view(Player* player, Coord pos);
+    TileView view(index_t player, Coord pos);
 };
 
 /// A view for a %Board, accessible to a player.
@@ -127,7 +129,7 @@ class BoardView {
     /// Constructor for generating a %BoardView using a %Board and a
     /// %Player. Leaving this function public is safe, for a %Player cannot
     /// get another %Player's address.
-    BoardView(const Board* const& board, Player* player);
+    BoardView(const Board* const& board, index_t player);
 };
 
 /// Derived class for initial boards (pre-game boards).

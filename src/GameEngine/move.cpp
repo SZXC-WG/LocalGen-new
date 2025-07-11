@@ -15,37 +15,43 @@
 #include "player.h"
 
 Move::Move() : player(nullptr) {}
-Move::Move(Player* _player, Coord _from, Coord _to, bool _takeHalf)
-    : player(_player), from(_from), to(_to), takeHalf(_takeHalf) {}
+Move::Move(MoveType _type, Player* _player) : type(_type), player(_player) {}
+Move::Move(MoveType _type, Player* _player, Coord _from, Coord _to,
+           bool _takeHalf)
+    : type(_type), player(_player), from(_from), to(_to), takeHalf(_takeHalf) {}
 
 bool Move::available(Board* board) {
-    // coordinate validity check
-    if (!board->isInvalidCoord(from) || !board->isInvalidCoord(to))
-        return false;
+    if (type == MoveType::SURRENDER) return true;
+    if (type == MoveType::MOVE_ARMY) {
+        // coordinate validity check
+        if (!board->isInvalidCoord(from) || !board->isInvalidCoord(to))
+            return false;
 
-    // visibility check
-    if (!board->visible(from, player)) return false;
+        // visibility check
+        if (!board->visible(from, player->index)) return false;
 
-    // %from tile availability check
-    auto fromTile = board->view(player, from);
-    switch (fromTile.type) {
-        case TILE_MOUNTAIN:
-        case TILE_LOOKOUT:
-        case TILE_OBSERVATORY: return false;
+        // %from tile availability check
+        auto fromTile = board->view(player->index, from);
+        switch (fromTile.type) {
+            case TILE_MOUNTAIN:
+            case TILE_LOOKOUT:
+            case TILE_OBSERVATORY: return false;
+        }
+        if (fromTile.occupier != player->index) return false;
+        if (fromTile.army <= 1) return false;
+
+        // %to tile availability check
+        auto toTile = board->view(player->index, to);
+        switch (toTile.type) {
+            case TILE_MOUNTAIN:
+            case TILE_LOOKOUT:
+            case TILE_OBSERVATORY: return false;
+        }
+
+        // all passed, available move
+        return true;
     }
-    if (fromTile.occupier != player->index) return false;
-    if (fromTile.army <= 1) return false;
-
-    // %to tile availability check
-    auto toTile = board->view(player, to);
-    switch (toTile.type) {
-        case TILE_MOUNTAIN:
-        case TILE_LOOKOUT:
-        case TILE_OBSERVATORY: return false;
-    }
-
-    // all passed, available move
-    return true;
+    return false;
 }
 
 bool operator<(const Move& a, const Move& b) {

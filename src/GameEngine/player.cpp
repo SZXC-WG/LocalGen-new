@@ -16,4 +16,9 @@
 Player::Player(const std::string& name) : name(name) {}
 Player::~Player() {}
 
+void Player::surrender() {
+    moveQueue.clear();
+    moveQueue.emplace_back(MoveType::SURRENDER, this);
+}
+
 #endif  // LGEN_MODULE_GE_PLAYER_CPP

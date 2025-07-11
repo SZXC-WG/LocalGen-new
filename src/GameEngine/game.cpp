@@ -77,17 +77,23 @@ void BasicGame::GameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
 void BasicGame::GameBoard::MoveProcessor::execute() {
     for (auto move : movesInQueue) {
         if (!move.available(board)) continue;
-        Tile& fromTile = board->tileAt(move.from);
-        Tile& toTile = board->tileAt(move.to);
-        army_t takenArmy = fromTile.army;
-        if (move.takeHalf) takenArmy >>= 1;
-        fromTile.army -= takenArmy;
-        toTile.army -= takenArmy;
-        if (toTile.army < 0) {
-            toTile.army = -toTile.army;
-            if (toTile.type == TILE_GENERAL)
-                capture(move.player->index, toTile.occupier);
-            toTile.occupier = move.player->index;
+        if (move.type == MoveType::MOVE_ARMY) {
+            Tile& fromTile = board->tileAt(move.from);
+            Tile& toTile = board->tileAt(move.to);
+            army_t takenArmy = fromTile.army;
+            if (move.takeHalf) takenArmy >>= 1;
+            fromTile.army -= takenArmy;
+            toTile.army -= takenArmy;
+            if (toTile.army < 0) {
+                toTile.army = -toTile.army;
+                if (toTile.type == TILE_GENERAL)
+                    capture(move.player->index, toTile.occupier);
+                toTile.occupier = move.player->index;
+            }
+        } else if (move.type == MoveType::SURRENDER) {
+            game->alive[move.player->index] = false;
+            game->broadcast(game->curTurn, GameMessageType::SURRENDER,
+                            {move.player->index});
         }
     }
 }

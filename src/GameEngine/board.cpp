@@ -145,23 +145,22 @@ void Board::v5Unzip(std::string strUnzip) {
 #undef PMod
 #undef CHAR_AD
 
-bool Board::visible(pos_t x, pos_t y, Player* player) const {
+bool Board::visible(pos_t x, pos_t y, index_t player) const {
     // invalidity check
-    if (player == nullptr) return false;
     if (x < 1 || x > col || y < 1 || y > row) return false;
 
     // occupier visibility
-    if (tiles[x][y].occupier == player->index) return true;
+    if (tiles[x][y].occupier == player) return true;
     // adjacent visibility
     if (true &&  // overall check may not consider modifiers
-        (tiles[x - 1][y].occupier == player->index ||
-         tiles[x + 1][y].occupier == player->index ||
-         tiles[x][y - 1].occupier == player->index ||
-         tiles[x][y + 1].occupier == player->index ||
-         tiles[x - 1][y - 1].occupier == player->index ||
-         tiles[x - 1][y + 1].occupier == player->index ||
-         tiles[x + 1][y - 1].occupier == player->index ||
-         tiles[x + 1][y + 1].occupier == player->index))
+        (tiles[x - 1][y].occupier == player ||
+         tiles[x + 1][y].occupier == player ||
+         tiles[x][y - 1].occupier == player ||
+         tiles[x][y + 1].occupier == player ||
+         tiles[x - 1][y - 1].occupier == player ||
+         tiles[x - 1][y + 1].occupier == player ||
+         tiles[x + 1][y - 1].occupier == player ||
+         tiles[x + 1][y + 1].occupier == player))
         return true;
 
     // lookout check
@@ -189,44 +188,44 @@ bool Board::visible(pos_t x, pos_t y, Player* player) const {
     for (pos_t i = std::max(x - 2, 1); i <= std::min(x + 2, row); ++i) {
         for (pos_t j = std::max(y - 2, 1); j <= std::min(y + 2, col); ++j) {
             if (tiles[i][j].type == TILE_LOOKOUT)
-                if (findLookoutOccupier(i, j) == player->index) return true;
+                if (findLookoutOccupier(i, j) == player) return true;
         }
     }
 
     // observatory check
     for (pos_t i = std::max(x - 8, 1); i < x; ++i) {
         if (tiles[i][y].type == TILE_OBSERVATORY)
-            if (tiles[i - 1][y].occupier == player->index) return true;
+            if (tiles[i - 1][y].occupier == player) return true;
     }
     for (pos_t i = x + 1; i <= std::min(x + 8, row); ++i) {
         if (tiles[i][y].type == TILE_OBSERVATORY)
-            if (tiles[i + 1][y].occupier == player->index) return true;
+            if (tiles[i + 1][y].occupier == player) return true;
     }
     for (pos_t j = std::max(y - 8, 1); j < y; ++j) {
         if (tiles[x][j].type == TILE_OBSERVATORY)
-            if (tiles[x][j - 1].occupier == player->index) return true;
+            if (tiles[x][j - 1].occupier == player) return true;
     }
     for (pos_t j = y + 1; j <= std::min(y + 8, col); ++j) {
         if (tiles[x][j].type == TILE_OBSERVATORY)
-            if (tiles[x][j + 1].occupier == player->index) return true;
+            if (tiles[x][j + 1].occupier == player) return true;
     }
 
     // none matches, not visible
     return false;
 }
-bool Board::visible(const Coord& coord, Player* player) const {
+bool Board::visible(const Coord& coord, index_t player) const {
     return visible(SEPA(coord), player);
 }
 
-BoardView Board::view(Player* player) const {
+BoardView Board::view(index_t player) const {
     // Simply use the constructor to generate.
     return BoardView(this, player);
 }
 
-TileView Board::view(Player* player, pos_t row, pos_t col) {
+TileView Board::view(index_t player, pos_t row, pos_t col) {
     return TileView(tiles[row][col], visible(row, col, player));
 }
-TileView Board::view(Player* player, Coord pos) {
+TileView Board::view(index_t player, Coord pos) {
     return TileView(tileAt(pos), visible(pos, player));
 }
 
@@ -243,7 +242,7 @@ bool BoardView::isInvalidCoord(Coord coord) const {
 }
 
 BoardView::BoardView() : row(0), col(0) {}
-BoardView::BoardView(const Board* const& board, Player* player)
+BoardView::BoardView(const Board* const& board, index_t player)
     : row(board->row), col(board->col) {
     tiles.resize(board->row + 2, std::vector<TileView>(board->col + 2));
     for (pos_t i = 1; i <= row; ++i) {

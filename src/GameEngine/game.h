@@ -216,6 +216,7 @@ class BasicGame {
 
        public:
         BasicGame* game;
+        std::vector<std::vector<std::vector<int>>> visibility;
 
        public:
         /// The default constructor is deleted, for an %GameBoard relies on a

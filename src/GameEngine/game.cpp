@@ -23,7 +23,15 @@ namespace game {
 
 BasicGame::GameBoard::GameBoard(BasicGame* _game) : game(_game) {}
 BasicGame::GameBoard::GameBoard(BasicGame* _game, Board* _board)
-    : game(_game), Board(_board) {}
+    : game(_game),
+      Board(_board),
+      visibility(_game->players.size(),
+                 std::vector(_board->getHeight() + 2,
+                             std::vector(_board->getWidth() + 2, 0))) {}
+
+bool BasicGame::GameBoard::visible(Player* player, pos_t row, pos_t col) {
+    return visibility[player->index][row][col] != 0;
+}
 
 void BasicGame::GameBoard::update(turn_t turn) {
     for (auto& row : tiles) {

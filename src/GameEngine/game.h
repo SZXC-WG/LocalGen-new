@@ -135,28 +135,29 @@ class BasicGame {
    protected:
     /// The current turn number.
     turn_t curTurn;
-    /// This should be in the range of [0.25x, 256x]. Actually, speeds above 16x
-    /// is not recommended.
-    /// Recommended speeds (from generals.io): 0.25x, 0.5x, 0.75x, 1x, 1.5x, 2x,
-    /// 3x, 4x.
+    /// Normally, this should be in the range of [0.25x, 256x]. Actually, speeds
+    /// above 16x are not recommended. Recommended speeds (from generals.io):
+    /// 0.25x, 0.5x, 0.75x, 1x, 1.5x, 2x, 3x, 4x.
+    /// [TODO] If set to 0, the game will run as fast as possible, but the
+    /// robots will block the game from running until their finished
+    /// calculating. In other words, the game runs as a simulator, with the
+    /// purpose of generating a replay.
     speed_t speed;
 
-    /// This integer should be in the range of (-INF, +INF).
-    /// If zero, it has no effect.
-    /// If positive, it indicates how many turns will pass for the tile troops
-    /// to self-increase 1.
-    /// If negative, it indicates how many troops of the tile will self-increase
-    /// when it passes 1 turn. It is noticeable that values 1 and -1 mean the
-    /// same things.
+    /// These integers should be in the range of (-INF, +INF).
+    /// If zero, no effect.
+    /// If positive, pass |the number| turns per troop increased.
+    /// If negative, increase |the number| troops per turn.
+    /// Number are specific for each tile type.
+    /// It is noticeable that values 1 and -1 mean the same things.
     std::array<army_t, TILE_TYPE_COUNT> increment;
 
-    /// This integer should be in the range of (-INF, +INF).
-    /// If zero, it has no effect.
-    /// If positive, it indicates how many turns will pass for the tile troops
-    /// to self-decrease 1.
-    /// If negative, it indicates how many troops of the tile will self-decrease
-    /// when it passes 1 turn. It is noticeable that values 1 and -1 mean the
-    /// same things.
+    /// These integers should be in the range of (-INF, +INF).
+    /// If zero, no effect.
+    /// If positive, pass |the number| turns per troop decreased.
+    /// If negative, decrease |the number| troops per turn.
+    /// Number are specific for each tile type.
+    /// It is noticeable that values 1 and -1 mean the same things.
     std::array<army_t, TILE_TYPE_COUNT> decrement;
 
    public:
@@ -183,9 +184,16 @@ class BasicGame {
     /// @param player the index of the player.
     /// @return Whether the player is alive.
     inline bool isAlive(index_t player) const { return alive[player]; };
+    /// Get the team ID of a player.
+    /// @param player the index of the player.
+    /// @return The team ID of the player.
     inline index_t getTeam(index_t player) const {
         return players[player]->teamId;
     };
+    /// Check whether two players are in the same team.
+    /// @param player1 the index of the first player.
+    /// @param player2 the index of the second player.
+    /// @return Whether the two players are in the same team.
     inline bool inSameTeam(index_t player1, index_t player2) const {
         return getTeam(player1) == getTeam(player2);
     };
@@ -232,6 +240,7 @@ class BasicGame {
        public:
         class MoveProcessor;
         friend class GameBoard::MoveProcessor;
+
         /// Move Processor used by games.
         /// A %MoveProcessor is used to contain and
         /// process moves.
@@ -246,7 +255,7 @@ class BasicGame {
             /// Constructors.
             /// The default constructor is deleted, for
             /// a %MoveProcessor must be linked to a
-            /// %Board.
+            /// %GameBoard.
            public:
             MoveProcessor() = delete;
             MoveProcessor(BasicGame* _game, GameBoard* _board);
@@ -275,6 +284,10 @@ class BasicGame {
    protected:
     GameBoard board{this};
 
+    /// Get a view of the %GameBoard, using privilege of a %Player.
+    /// Remember: this function is used to get "views"!
+    /// @param player The player that views the %GameBoard.
+    /// @return The view of the %GameBoard.
     inline BoardView getBoard(Player* player) {
         return BoardView(&board, player->index);
     }
@@ -303,6 +316,7 @@ class BasicGame {
     void performTurn();
 
    public:
+    /// Sub-class to store real-time ranklists in game.
     class RankInfo {
        private:
         index_t player;

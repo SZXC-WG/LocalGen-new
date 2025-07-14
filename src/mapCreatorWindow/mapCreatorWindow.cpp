@@ -528,7 +528,7 @@ void MapCreatorWindow::onOpenMap() {
                                          ? QColor(220, 220, 220)
                                          : QColor(128, 128, 128);
                 };
-                if (loadedTile.army != 0)
+                if (loadedTile.army != 0 || loadedTile.type == TILE_CITY)
                     tile.text = QString::number(loadedTile.army);
                 tile.lightIcon = loadedTile.lit;
             }
@@ -594,7 +594,8 @@ void MapCreatorWindow::onOpenMap() {
         tile.type = static_cast<tile_type_e>((p >> 16) & 0x7);
         tile.lightIcon = ((p >> 15) & 0x1);
         int val = (p & 0x7FFF) - 16384;
-        tile.text = val == 0 ? QString()
+        tile.text = tile.type == TILE_CITY ? QString::number(val)
+                    : val == 0             ? QString()
                     : tile.type == TILE_SPAWN
                         ? QString(QLatin1Char('A' + val - 1))
                         : QString::number(val);

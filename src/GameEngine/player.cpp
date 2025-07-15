@@ -14,7 +14,6 @@
 #include "move.h"
 
 Player::Player(const std::string& name) : name(name) {}
-Player::~Player() {}
 
 void Player::surrender() {
     moveQueue.clear();

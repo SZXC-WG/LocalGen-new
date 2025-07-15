@@ -23,14 +23,19 @@ using index_t = std::uint32_t;
 /// Base struct for players.
 class Player {
    public:
-   public:
     const std::string name;
     index_t index;
     index_t teamId;
     std::deque<Move> moveQueue;
 
+   public:
+    // Here should be some variable storing the current game state, which will
+    // be modified by the game.
+
+   public:
+    Player() = default;
     Player(const std::string& name);
-    ~Player();
+    ~Player() = default;
 
     void surrender();
 

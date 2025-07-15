@@ -29,8 +29,9 @@ BasicGame::GameBoard::GameBoard(BasicGame* _game, Board* _board)
                  std::vector(_board->getHeight() + 2,
                              std::vector(_board->getWidth() + 2, 0))) {}
 
-bool BasicGame::GameBoard::visible(Player* player, pos_t row, pos_t col) {
-    return visibility[player->index][row][col] != 0;
+bool BasicGame::GameBoard::visible(pos_t row, pos_t col, index_t player) {
+    // Use the parent class's visible function temporarily.
+    return Board::visible(row, col, player);
 }
 
 void BasicGame::GameBoard::update(turn_t turn) {
@@ -149,8 +150,6 @@ void BasicGame::ranklist() {
     }
 }
 
-std::vector<BasicGame::RankInfo> BasicGame::getRanklist() {}
-
 int BasicGame::initSpawn() {
     std::mt19937 random{std::random_device()()};
     int playerCount = players.size();
@@ -195,8 +194,6 @@ int BasicGame::init() {
     alive = std::vector(players.size(), true);
     return 0;
 }
-
-void BasicGame::run() {}
 
 void BasicGame::broadcast(turn_t turn, GameMessageType message,
                           std::vector<index_t> associatedList) {}

@@ -5,7 +5,7 @@
  *
  * Games
  *
- * Basic game operations
+ * Core game operations
  */
 
 #ifndef LGEN_MODULE_GE_GAME_H
@@ -27,41 +27,60 @@ class Player;
 
 namespace game {
 
-/// The namespace for game configuration.
+/// Namespace that contains all game-related configuration.
 namespace config {
 
-/// Vision modes.
+/// Supported vision modes.
 enum class VisionMode : uint8_t { NEAR8, NEAR4 };
 
-/// List of game configuration units. Edit the items here to add/remove/change
-/// game configuration units.
-#define GAME_CONFIG_UNIT_LIST(F)           \
-    F(int, CityVisionRange, 1)             \
-    F(int, SpawnVisionRange, 1)            \
-    F(bool, RanklistShowLand, true)        \
-    F(bool, RanklistShowArmy, true)        \
-    F(bool, RanklistShowPlayerIndex, true) \
-    F(bool, RanklistShowPlayerName, true)  \
-    F(bool, RanklistShowTeamIndex, true)   \
-    F(bool, RanklistShowColor, true)       \
-    F(VisionMode, OverallVisionMode, VisionMode::NEAR8)
+/// List of configuration items.
+/// To add / remove / modify items, edit this macro list.
+#define GAME_CONFIG_UNIT_LIST(F)                        \
+    F(bool, RanklistShowLand, true)                     \
+    F(bool, RanklistShowArmy, true)                     \
+    F(bool, RanklistShowPlayerIndex, true)              \
+    F(bool, RanklistShowPlayerName, true)               \
+    F(bool, RanklistShowTeamIndex, true)                \
+    F(bool, RanklistShowColor, true)                    \
+    F(VisionMode, OverallVisionMode, VisionMode::NEAR8) \
+    F(int, OverallVisionRange, 1)                       \
+    F(int, CityVisionRange, 1)                          \
+    F(int, SpawnVisionRange, 1)
 
-/// Hard-code Config Type.
+/// Strongly-typed configuration structure with defaults.
 struct Config {
 #define DECL(type, name, def) type name = def;
     GAME_CONFIG_UNIT_LIST(DECL)
 #undef DECL
 };
 
-/// Patch of Config. Contains only some values, used for editing config.
+#define IF_EQUAL(type, name, ...) \
+    if (lhs.name != rhs.name) return false;
+constexpr inline bool operator==(const Config& lhs, const Config& rhs) {
+    GAME_CONFIG_UNIT_LIST(IF_EQUAL)
+    return true;
+}
+#undef IF_EQUAL
+
+/// A partial configuration patch.
+/// Only the specified fields will be overridden.
 struct ConfigPatch {
 #define DECL(type, name, ...) std::optional<type> name;
     GAME_CONFIG_UNIT_LIST(DECL)
 #undef DECL
 };
 
+#define IF_EQUAL(type, name, ...) \
+    if (lhs.name != rhs.name) return false;
+constexpr inline bool operator==(const ConfigPatch& lhs,
+                                 const ConfigPatch& rhs) {
+    GAME_CONFIG_UNIT_LIST(IF_EQUAL)
+    return true;
+}
+#undef IF_EQUAL
+
 namespace unit {
-/// Construct directly-used configuration units.
+/// Helper constructors for frequently-used configuration units.
 #define UNIT(type, name, ...)            \
     constexpr ConfigPatch name(type v) { \
         ConfigPatch p;                   \
@@ -72,14 +91,16 @@ GAME_CONFIG_UNIT_LIST(UNIT)
 #undef UNIT
 }  // namespace unit
 
-#define IF_ASSIGN(type, name, ...)     \
-    if (rhs.name) res.name = rhs.name; \
-/// Merge operator. Merges two patches. If some conflict, use the latter.
-/// @param lhs Former patch.
-/// @param rhs Latter patch, determining values.
-/// @return The merged patch.
-constexpr ConfigPatch operator|(const ConfigPatch& lhs,
-                                const ConfigPatch& rhs) {
+#define IF_ASSIGN(type, name, ...) \
+    if (rhs.name) res.name = rhs.name;
+/// Merge operator.
+/// Merge two patches.
+/// When conflicts occur, values from the right-hand side prevail.
+/// @param lhs Former patch
+/// @param rhs Latter patch; its values take precedence
+/// @return    Merged patch
+constexpr inline ConfigPatch operator|(const ConfigPatch& lhs,
+                                       const ConfigPatch& rhs) {
     ConfigPatch res = lhs;
     GAME_CONFIG_UNIT_LIST(IF_ASSIGN)
     return res;
@@ -87,43 +108,95 @@ constexpr ConfigPatch operator|(const ConfigPatch& lhs,
 #undef IF_ASSIGN
 
 #define IF_ASSIGN_VALUE(type, name, ...) \
-    if (rhs.name) res.name = *rhs.name;  \
-/// Apply operator. Applies a patch to a specific config. If some conflict,
-/// follow the patch.
-/// @param lhs The to-be-applied config.
-/// @param rhs The patch.
-/// @return The applied config.
-constexpr Config operator|(const Config& lhs, const ConfigPatch& rhs) {
+    if (rhs.name) res.name = *rhs.name;
+/// Apply operator.
+/// Apply a patch to an existing configuration.
+/// Fields present in the patch override those in the base config.
+/// @param lhs Base configuration
+/// @param rhs Patch to apply
+/// @return    Resulting configuration
+constexpr inline Config operator|(const Config& lhs, const ConfigPatch& rhs) {
     Config res = lhs;
     GAME_CONFIG_UNIT_LIST(IF_ASSIGN_VALUE)
     return res;
 }
-/// Apply operator. Applies a patch to a specific config. If some conflict,
-/// follow the patch.
-/// @param lhs The patch.
-/// @param rhs The to-be-applied config.
-/// @return The applied config.
-constexpr Config operator|(const ConfigPatch& lhs, const Config& rhs) {
+/// Same as above, but with operands reversed for convenience.
+constexpr inline Config operator|(const ConfigPatch& lhs, const Config& rhs) {
     return rhs | lhs;
 }
 #undef IF_ASSIGN_VALUE
 
-/// List of game modifiers. Edit the items here to add/remove/change game
-/// modifiers / their unit sets.
-#define GAME_CONFIG_MODIFIER_LIST(F) \
-    F(Watchtower, unit::CityVisionRange(3) | unit::SpawnVisionRange(3))
+#define IF_ASSIGN_OPTIONAL(type, name, ...) \
+    if (rhs.name) res.name = lhs.name;
+/// Intersection operator.
+/// Creates a new ConfigPatch that keeps only the fields specified in `rhs`,
+/// while taking the *current* values from the full `lhs` Config.
+/// @param lhs Full configuration to sample values from.
+/// @param rhs Mask patch that decides which keys survive.
+/// @return    A ConfigPatch containing lhs values for keys present in rhs.
+constexpr inline ConfigPatch operator&(const Config& lhs,
+                                       const ConfigPatch& rhs) {
+    ConfigPatch res;
+    GAME_CONFIG_UNIT_LIST(IF_ASSIGN_OPTIONAL);
+    return res;
+}
+/// Same as above, but with operands reversed for convenience.
+constexpr inline ConfigPatch operator&(const ConfigPatch& lhs,
+                                       const Config& rhs) {
+    return rhs & lhs;
+}
+#undef IF_ASSIGN_OPTIONAL
+
+/// List of predefined game modifiers.
+/// Modify the list to add / remove / update modifiers.
+#define GAME_CONFIG_MODIFIER_LIST(F)                                    \
+    F(Watchtower, unit::CityVisionRange(3) | unit::SpawnVisionRange(3)) \
+    F(MistyVeil, unit::OverallVisionRange(0))
 
 namespace modifier {
-/// Construct directly-used modifier sets.
-#define MODIFIER(name, value) constexpr ConfigPatch type = value;
+/// Concrete modifier instances.
+#define MODIFIER(name, value) constexpr ConfigPatch name = value;
 GAME_CONFIG_MODIFIER_LIST(MODIFIER)
 #undef MODIFIER
 }  // namespace modifier
 
+/// Default configuration instance.
 constexpr Config defaultConf;
+
+/// Relationship between a ConfigPatch and a Config.
+///
+/// Legend per *edited* field (patch != defaultConf):
+///   P – config == patch       (enabled)
+///   D – config == defaultConf (disabled)
+///   M – otherwise             (over-written elsewhere)
+enum class PatchStatus : uint8_t {
+    FULLY_ENABLED,      // All edited fields are P      (P>0, D=0, M=0)
+    PARTIALLY_ENABLED,  // P>0 with at least one D or M (mixed)
+    DISABLED,           // No P, only D                 (P=0, D>0, M=0)
+    OVERRIDDEN          // No P, at least one M         (P=0, M>0)
+};
+
+/// Evaluate how a ConfigPatch is represented in a given Config.
+/// For more, see @ref PatchStatus.
+/// @param config Current configuration.
+/// @param patch  Patch to evaluate (guaranteed to contain ≥1 edited field).
+/// @return       PatchStatus describing the result.
+constexpr inline PatchStatus patchStatus(const Config& config,
+                                         const ConfigPatch& patch) {
+    ConfigPatch confPatch = config & patch;
+    ConfigPatch defPatch = defaultConf & patch;
+    if (confPatch == patch) return PatchStatus::FULLY_ENABLED;
+    if (confPatch == defPatch) return PatchStatus::DISABLED;
+#define IF_MIXED(type, name, ...) \
+    if (confPatch.name == patch.name) return PatchStatus::PARTIALLY_ENABLED;
+    GAME_CONFIG_UNIT_LIST(IF_MIXED)
+#undef IF_MIXED
+    return PatchStatus::OVERRIDDEN;
+}
 
 }  // namespace config
 
+/// Types of in-game broadcast messages.
 enum class GameMessageType : uint8_t { WIN, CAPTURE, SURRENDER, TEXT };
 
 class BasicGame {
@@ -133,32 +206,28 @@ class BasicGame {
     using speed_t = double;
 
    protected:
-    /// The current turn number.
-    turn_t curTurn;
-    /// Normally, this should be in the range of [0.25x, 256x]. Actually, speeds
-    /// above 16x are not recommended. Recommended speeds (from generals.io):
-    /// 0.25x, 0.5x, 0.75x, 1x, 1.5x, 2x, 3x, 4x.
-    /// [TODO] If set to 0, the game will run as fast as possible, but the
-    /// robots will block the game from running until their finished
-    /// calculating. In other words, the game runs as a simulator, with the
-    /// purpose of generating a replay.
-    speed_t speed;
+    /// Current turn index.
+    turn_t curTurn{};
+    /// Playback / simulation speed.
+    /// Valid range: [0.25×, 256×] (values >16× are not recommended).
+    /// Suggested presets (from generals.io):
+    ///   0.25×, 0.5×, 0.75×, 1×, 1.5×, 2×, 3×, 4×
+    /// [TODO] If set to 0, the game runs as fast as possible; however,
+    /// robots still block until they finish computing. Effectively
+    /// becomes a headless replay generator.
+    speed_t speed{1.0};
 
-    /// These integers should be in the range of (-INF, +INF).
-    /// If zero, no effect.
-    /// If positive, pass |the number| turns per troop increased.
-    /// If negative, increase |the number| troops per turn.
-    /// Number are specific for each tile type.
-    /// It is noticeable that values 1 and -1 mean the same things.
-    std::array<army_t, TILE_TYPE_COUNT> increment;
+    /// Self-increment parameters per tile type.
+    /// Positive value  N: 1 troop every N turns.
+    /// Negative value -N: N troops every turn.
+    /// Note: +1 and −1 behave identically.
+    std::array<army_t, TILE_TYPE_COUNT> increment{};
 
-    /// These integers should be in the range of (-INF, +INF).
-    /// If zero, no effect.
-    /// If positive, pass |the number| turns per troop decreased.
-    /// If negative, decrease |the number| troops per turn.
-    /// Number are specific for each tile type.
-    /// It is noticeable that values 1 and -1 mean the same things.
-    std::array<army_t, TILE_TYPE_COUNT> decrement;
+    /// Self-decrement parameters per tile type.
+    /// Positive value  N: 1 troop decays every N turns.
+    /// Negative value -N: N troops decays every turn.
+    /// Note: +1 and −1 behave identically.
+    std::array<army_t, TILE_TYPE_COUNT> decrement{};
 
    public:
     inline turn_t getCurTurn() const { return curTurn; }
@@ -172,48 +241,42 @@ class BasicGame {
 
    protected:
     static constexpr index_t PLAYER_INDEX_START = 1;
-    /// Players in the game.
+    /// All players participating in the game.
     std::vector<Player*> players;
-    /// Alive status of the players.
+    /// Per-player alive status.
     std::vector<bool> alive;
-    /// Spawn coordinates of the players.
+    /// Each player’s spawn coordinate.
     std::vector<Coord> spawnCoord;
 
    public:
-    /// Check whether a player is alive.
-    /// @param player the index of the player.
-    /// @return Whether the player is alive.
+    /// Check whether a player is still alive.
     inline bool isAlive(index_t player) const { return alive[player]; };
-    /// Get the team ID of a player.
-    /// @param player the index of the player.
-    /// @return The team ID of the player.
+
+    /// Retrieve a player’s team ID.
     inline index_t getTeam(index_t player) const {
         return players[player]->teamId;
     };
-    /// Check whether two players are in the same team.
-    /// @param player1 the index of the first player.
-    /// @param player2 the index of the second player.
-    /// @return Whether the two players are in the same team.
+
+    /// Determine whether two players belong to the same team.
     inline bool inSameTeam(index_t player1, index_t player2) const {
         return getTeam(player1) == getTeam(player2);
     };
 
    protected:
-    /// Configuration variable. Default value 0.
-    /// Placed in `protected` to avoid being modified illegally.
+    /// Game configuration (protected to prevent accidental modification).
     config::Config conf = config::defaultConf;
 
    public:
-    /// Get game configuration value.
-    /// @return The current configuration value.
+    /// Get current game configuration.
     inline config::Config getConfig() const { return conf; }
+    /// Set game configuration.
+    inline void setConfig(config::ConfigPatch patch) { conf = conf | patch; }
 
    public:
-    /// [TODO]
-    /// Broadcast a game message to the game.
-    /// @param turn the turn number the message is dedicated to.
-    /// @param message type of the message.
-    /// @param associatedList the needed extra information of the message.
+    /// [TODO] Broadcast a message to all players.
+    /// @param turn           Turn when the message should appear
+    /// @param message        Message type
+    /// @param associatedList Extra information (e.g., involved player IDs)
     void broadcast(turn_t turn, GameMessageType message,
                    std::vector<index_t> associatedList);
 
@@ -222,28 +285,29 @@ class BasicGame {
        public:
         friend class BasicGame;
 
-       public:
+       protected:
         BasicGame* game;
+        /// 3-dimensional visibility map
+        /// visibility[p][r][c] counts the number of sources
         std::vector<std::vector<std::vector<int>>> visibility;
 
        public:
-        /// The default constructor is deleted, for an %GameBoard relies on a
-        /// specific game object.
+        /// Deleted default constructor: a GameBoard must belong to a game.
         GameBoard() = delete;
         GameBoard(BasicGame* _game);
         GameBoard(BasicGame* _game, Board* _board);
 
-        bool visible(Player* player, pos_t row, pos_t col);
+        /// Check if a tile is visible to a given player.
+        bool visible(pos_t row, pos_t col, index_t player);
 
+        /// Update board state for the specified turn.
         void update(turn_t turn);
 
        public:
         class MoveProcessor;
         friend class GameBoard::MoveProcessor;
 
-        /// Move Processor used by games.
-        /// A %MoveProcessor is used to contain and
-        /// process moves.
+        /// Container & executor for pending moves.
         class MoveProcessor {
            protected:
             std::deque<Move> movesInQueue;
@@ -252,28 +316,21 @@ class BasicGame {
             BasicGame* game;
             GameBoard* board;
 
-            /// Constructors.
-            /// The default constructor is deleted, for
-            /// a %MoveProcessor must be linked to a
-            /// %GameBoard.
            public:
+            /// Deleted default constructor.
             MoveProcessor() = delete;
             MoveProcessor(BasicGame* _game, GameBoard* _board);
 
            public:
-            /// Add a %Move to the waiting-to-be-processed queue.
-            /// @param move added %Move.
+            /// Enqueue a move for later execution.
             void add(Move move);
 
-            /// Sort the in-queue moves according to their priority.
-            /// May not be implemented.
+            /// Sort queued moves by priority.
             void sort();
 
-            /// Perform an action where a player captures another player.
-            /// @param p1 the player that captures.
-            /// @param p2 the player that is captured.
+            /// Handle a capture event: p1 captures p2.
             void capture(index_t p1, index_t p2);
-            /// Execute all the in-queue moves, one by one.
+            /// Execute all queued moves in order.
             void execute();
         };
 
@@ -284,10 +341,8 @@ class BasicGame {
    protected:
     GameBoard board{this};
 
-    /// Get a view of the %GameBoard, using privilege of a %Player.
-    /// Remember: this function is used to get "views"!
-    /// @param player The player that views the %GameBoard.
-    /// @return The view of the %GameBoard.
+    /// Obtain a player-specific view of the board.
+    /// NOTE: This returns a “view”, not the raw board.
     inline BoardView getBoard(Player* player) {
         return BoardView(&board, player->index);
     }
@@ -297,26 +352,23 @@ class BasicGame {
     BasicGame(std::vector<Player*> _players, InitBoard _board, speed_t _speed);
 
    protected:
-    /// Update the map for the turn.
-    /// What to update? For example, the self-increment of tile armies.
-    /// This function recursively let the %GameBoard do the job due to
-    /// accessment issues.
+    /// Update map state at the start of each turn.
+    /// (e.g., automatic troop growth)
     void update();
 
    protected:
-    /// Get action from a %Player. In other words, make this %Player act.
-    /// @param player The acting player.
+    /// Request an action from a player.
     void act(Player* player);
 
-   protected:
-    /// Process all the existing moves in the processor, make them work.
+    /// Process all queued moves.
     void process();
 
-    /// Perform the operations that a turn needs.
+   public:
+    /// Execute all per-turn operations in correct order.
     void performTurn();
 
    public:
-    /// Sub-class to store real-time ranklists in game.
+    /// Run-time ranking information for each player.
     class RankInfo {
        private:
         index_t player;
@@ -329,26 +381,23 @@ class BasicGame {
 
    protected:
     std::vector<RankInfo> rank;
-    /// Generate the ranklist.
+
+   public:
+    /// Recompute ranking information.
     void ranklist();
 
-   public:
-    /// Get the ranklist.
-    /// @return The ranklist.
-    std::vector<RankInfo> getRanklist();
+    /// Retrieve the current rank list.
+    /// Make sure the ranklist is already computed using ranklist() before
+    /// calling this function.
+    inline std::vector<RankInfo> getRanklist() { return rank; };
 
-   protected:
-    /// Initialize the spawn points for the players.
-    /// @return 0 if the initialization is successful, 1 otherwise.
+   public:
+    /// Initialize player spawn positions.
+    /// @return 0 on success, non-zero on failure
     int initSpawn();
 
-    /// Initialize the game.
-    /// @return 0 if the initialization is successful, 1 otherwise.
+    /// Perform overall game initialization.
     int init();
-
-   public:
-    /// Run the game.
-    virtual void run();
 
    protected:
     InitBoard initialBoard;
@@ -360,6 +409,8 @@ class BasicGame {
    protected:
     struct ReplayUnit {};
     std::vector<ReplayUnit> replay;
+
+   public:
 };
 
 }  // namespace game

@@ -15,7 +15,7 @@
 #include <cassert>
 
 Tile& Board::tileAt(Coord coord) {
-    assert(isValidCoord(coord));
+    assert(isValidPos(coord));
     return tiles[coord.x][coord.y];
 }
 int Board::setWidth(pos_t _col) {
@@ -31,14 +31,14 @@ int Board::setHeight(pos_t _row) {
     return 0;
 }
 
-bool Board::isValidCoord(Coord coord) const {
-    return coord.x >= 1 && coord.x <= row && coord.y >= 1 && coord.y <= col;
+bool Board::isValidPos(Coord pos) const {
+    return pos.x >= 1 && pos.x <= row && pos.y >= 1 && pos.y <= col;
 }
-bool Board::isInvalidCoord(Coord coord) const { return !isValidCoord(coord); }
+bool Board::isInvalidPos(Coord pos) const { return !isValidPos(pos); }
 
-Tile Board::getTile(Coord coord) const {
-    assert(isValidCoord(coord));
-    return tiles[coord.x][coord.y];
+Tile Board::getTile(Coord pos) const {
+    assert(isValidPos(pos));
+    return tiles[pos.x][pos.y];
 }
 
 Board::Board() : row(0), col(0), tiles(0, std::vector<Tile>(0)) {}
@@ -213,12 +213,49 @@ bool Board::visible(pos_t x, pos_t y, index_t player) const {
     // none matches, not visible
     return false;
 }
-bool Board::visible(const Coord& coord, index_t player) const {
-    return visible(SEPA(coord), player);
+bool Board::visible(const Coord& pos, index_t player) const {
+    return visible(SEPA(pos), player);
+}
+
+bool Board::available(index_t player, Move move) {
+    MoveType& type = move.type;
+    if (type == MoveType::EMPTY) return false;
+    if (type == MoveType::SURRENDER) return true;
+    Coord& from = move.from;
+    Coord& to = move.to;
+    if (type == MoveType::MOVE_ARMY) {
+        // coordinate validity check
+        if (!isInvalidPos(from) || !isInvalidPos(to)) return false;
+
+        // visibility check
+        if (!visible(from, player)) return false;
+
+        // %from tile availability check
+        auto fromTile = view(player, from);
+        switch (fromTile.type) {
+            case TILE_MOUNTAIN:
+            case TILE_LOOKOUT:
+            case TILE_OBSERVATORY: return false;
+        }
+        if (fromTile.occupier != player) return false;
+        if (fromTile.army <= 1) return false;
+
+        // %to tile availability check
+        auto toTile = view(player, to);
+        switch (toTile.type) {
+            case TILE_MOUNTAIN:
+            case TILE_LOOKOUT:
+            case TILE_OBSERVATORY: return false;
+        }
+
+        // all passed, available move
+        return true;
+    }
+    return false;
 }
 
 BoardView Board::view(index_t player) const {
-    // Simply use the constructor to generate.
+    // Simply use the constructor to generate it.
     return BoardView(this, player);
 }
 
@@ -229,17 +266,15 @@ TileView Board::view(index_t player, Coord pos) {
     return TileView(tileAt(pos), visible(pos, player));
 }
 
-TileView& BoardView::tileAt(Coord coord) {
-    assert(isValidCoord(coord));
-    return tiles[coord.x][coord.y];
+TileView& BoardView::tileAt(Coord pos) {
+    assert(isValidPos(pos));
+    return tiles[pos.x][pos.y];
 }
 
-bool BoardView::isValidCoord(Coord coord) const {
-    return coord.x >= 1 && coord.x <= col && coord.y >= 1 && coord.y <= row;
+bool BoardView::isValidPos(Coord pos) const {
+    return pos.x >= 1 && pos.x <= col && pos.y >= 1 && pos.y <= row;
 }
-bool BoardView::isInvalidCoord(Coord coord) const {
-    return !isValidCoord(coord);
-}
+bool BoardView::isInvalidPos(Coord pos) const { return !isValidPos(pos); }
 
 BoardView::BoardView() : row(0), col(0) {}
 BoardView::BoardView(const Board* const& board, index_t player)
@@ -256,35 +291,34 @@ BoardView::BoardView(const Board* const& board, index_t player)
 InitBoard::InitBoard() {}
 InitBoard::InitBoard(pos_t row, pos_t col) : Board(row, col) {}
 
-int InitBoard::changeTile(Coord coord, Tile tile) {
-    if (isInvalidCoord(coord)) return 1;
+int InitBoard::changeTile(Coord pos, Tile tile) {
+    if (isInvalidPos(pos)) return 1;
     if (tile.type == TILE_SPAWN) {
-        return setSpawn(coord, 0);
+        return setSpawn(pos, 0);
     }
-    tileAt(coord) = tile;
+    tileAt(pos) = tile;
     return 0;
 }
 
-int InitBoard::setSpawn(Coord coord, unsigned team) {
-    if (isInvalidCoord(coord)) return 1;
-    if (tileAt(coord).type == TILE_SPAWN) {
-        spawns[std::lower_bound(begin(spawns), end(spawns),
-                                std::pair(coord, 0)) -
+int InitBoard::setSpawn(Coord pos, unsigned team) {
+    if (isInvalidPos(pos)) return 1;
+    if (tileAt(pos).type == TILE_SPAWN) {
+        spawns[std::lower_bound(begin(spawns), end(spawns), std::pair(pos, 0)) -
                begin(spawns)]
             .second = team;
         return 0;
     }
-    tileAt(coord).type = TILE_SPAWN;
-    spawns.emplace_back(coord, team);
+    tileAt(pos).type = TILE_SPAWN;
+    spawns.emplace_back(pos, team);
     std::sort(begin(spawns), end(spawns));
     return 0;
 }
 
-int InitBoard::getSpawnTeam(Coord coord) {
-    if (isInvalidCoord(coord)) return -1;
-    if (tileAt(coord).type != TILE_SPAWN) return -1;
+int InitBoard::getSpawnTeam(Coord pos) {
+    if (isInvalidPos(pos)) return -1;
+    if (tileAt(pos).type != TILE_SPAWN) return -1;
     return spawns[std::lower_bound(begin(spawns), end(spawns),
-                                   std::pair(coord, 0)) -
+                                   std::pair(pos, 0)) -
                   begin(spawns)]
         .second;
 }

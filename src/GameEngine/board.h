@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "../utils/coord.h"
+#include "move.h"
 #include "tile.h"
 
 class Tile;
@@ -33,27 +34,20 @@ class Board {
     std::vector<std::vector<Tile>> tiles;
 
     /// Get a tile at a certain position.
-    /// @param coord The position of the tile.
-    /// @return A reference to the tile.
-    Tile& tileAt(Coord coord);
+    Tile& tileAt(Coord pos);
     /// Change the width (col) of the %Board.
-    /// @param _col The new width.
     /// @return 0 if the operation is successful, 1 otherwise.
     int setWidth(pos_t _col);
     /// Change the height (row) of the %Board.
-    /// @param _row The new height.
     /// @return 0 if the operation is successful, 1 otherwise.
     int setHeight(pos_t _row);
 
    public:
-    /// Check whether a %Coord indicating a tile position is valid.
-    bool isValidCoord(Coord coord) const;
-    /// Check whether a %Coord indicating a tile position is invalid.
-    bool isInvalidCoord(Coord coord) const;
+    bool isValidPos(Coord pos) const;
+    bool isInvalidPos(Coord pos) const;
 
    public:
-    /// Get a tile using %Coord. This is a function for convenience.
-    Tile getTile(Coord coord) const;
+    Tile getTile(Coord pos) const;
     inline int getWidth() const { return col; }
     inline int getHeight() const { return row; }
 
@@ -68,39 +62,25 @@ class Board {
 
     intmax_t v5Pmod(intmax_t& x);
 
-    // Zip a map using v5 coding.
     std::string v5Zip();
-    /// Unzip a map with v5 coding.
     void v5Unzip(std::string strUnzip);
 
    public:
     /// Check whether the %Tile at (x,y) is visible to a %Player.
-    /// Declare this function as *virtual* for we'll declare a different
-    /// function in-game.
     virtual bool visible(pos_t x, pos_t y, index_t player) const;
     /// Same as above, but using %Coord.
-    /// This is not declared as *virtual* for redefining it is unnecessary.
-    bool visible(const Coord& coord, index_t player) const;
+    bool visible(const Coord& pos, index_t player) const;
+
+   public:
+    bool available(index_t player, Move move);
 
    public:
     friend class BoardView;
 
    public:
-    /// Give a player a view of the %Board.
-    /// Returns a %BoardView.
-    /// Leaving this function public is safe, for a %Player cannot get another
-    /// %Player's address.
     BoardView view(index_t player) const;
 
-    /// Give a player a view of a certain tile of the %Board.
-    /// Returns a %TileView.
-    /// Leaving this function public is safe, for a %Player cannot get another
-    /// %Player's address.
     TileView view(index_t player, pos_t row, pos_t col);
-    /// Give a player a view of a certain tile of the %Board.
-    /// Returns a %TileView.
-    /// Leaving this function public is safe, for a %Player cannot get another
-    /// %Player's address.
     TileView view(index_t player, Coord pos);
 };
 
@@ -108,27 +88,17 @@ class Board {
 /// Declared as class for it may access direct information of the %Board.
 class BoardView {
    public:
-    /// Here these are declared as public as this is only a view and
-    /// contains no content associated to the original %Board directly.
     pos_t row, col;
     std::vector<std::vector<TileView>> tiles;
 
-    /// Get a tile at a certain position.
-    /// @param coord The position of the tile.
-    /// @return A reference to the tile.
-    TileView& tileAt(Coord coord);
+    TileView& tileAt(Coord pos);
 
    public:
-    /// Check whether a %Coord indicating a tile position is valid.
-    bool isValidCoord(Coord coord) const;
-    /// Check whether a %Coord indicating a tile position is invalid.
-    bool isInvalidCoord(Coord coord) const;
+    bool isValidPos(Coord pos) const;
+    bool isInvalidPos(Coord pos) const;
 
    public:
     BoardView();
-    /// Constructor for generating a %BoardView using a %Board and a
-    /// %Player. Leaving this function public is safe, for a %Player cannot
-    /// get another %Player's address.
     BoardView(const Board* const& board, index_t player);
 };
 
@@ -139,29 +109,25 @@ class InitBoard : public Board {
     InitBoard(pos_t row, pos_t col);
 
    public:
+    using Board::getTile;
     using Board::setHeight;
     using Board::setWidth;
 
    public:
-    /// Tag all spawns and their team preferences.
+    /// Use this to tag all spawns and their team preferences.
     std::vector<std::pair<Coord, int>> spawns;
 
-    /// Change a tile at a certain position.
-    /// @param coord The position of the tile.
-    /// @param tile The new tile.
     /// @return 0 if the operation is successful, 1 otherwise.
-    int changeTile(Coord coord, Tile tile);
+    int changeTile(Coord pos, Tile tile);
 
     /// Set attributes of a spawn.
-    /// @param coord The position of the spawn.
     /// @param team The team preference of the spawn.
     /// @return 0 if the operation is successful, 1 otherwise.
-    int setSpawn(Coord coord, unsigned team);
+    int setSpawn(Coord pos, unsigned team);
 
     /// Get the team preference of a spawn.
-    /// @param coord The position of the spawn.
     /// @return The team preference of the spawn. -1 if failed.
-    int getSpawnTeam(Coord coord);
+    int getSpawnTeam(Coord pos);
 };
 
 #endif  // LGEN_MODULE_GE_BOARD_H

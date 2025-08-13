@@ -66,8 +66,8 @@ BasicGame::GameBoard::MoveProcessor::MoveProcessor(BasicGame* _game,
                                                    GameBoard* _board)
     : game(_game), board(_board) {}
 
-void BasicGame::GameBoard::MoveProcessor::add(Move move) {
-    if (move.available(board)) movesInQueue.emplace_back(move);
+void BasicGame::GameBoard::MoveProcessor::add(index_t player, Move move) {
+    if (board->available(player, move)) movesInQueue.emplace_back(player, move);
 }
 
 void BasicGame::GameBoard::MoveProcessor::sort() {}
@@ -84,8 +84,8 @@ void BasicGame::GameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
     game->broadcast(game->curTurn, GameMessageType::CAPTURE, {p1, p2});
 }
 void BasicGame::GameBoard::MoveProcessor::execute() {
-    for (auto move : movesInQueue) {
-        if (!move.available(board)) continue;
+    for (auto [player, move] : movesInQueue) {
+        if (board->available(player, move)) continue;
         if (move.type == MoveType::MOVE_ARMY) {
             Tile& fromTile = board->tileAt(move.from);
             Tile& toTile = board->tileAt(move.to);
@@ -96,36 +96,34 @@ void BasicGame::GameBoard::MoveProcessor::execute() {
             if (toTile.army < 0) {
                 toTile.army = -toTile.army;
                 if (toTile.type == TILE_GENERAL)
-                    capture(move.player->index, toTile.occupier);
-                toTile.occupier = move.player->index;
+                    capture(player, toTile.occupier);
+                toTile.occupier = player;
             }
         } else if (move.type == MoveType::SURRENDER) {
-            game->alive[move.player->index] = false;
+            game->alive[player] = false;
             game->broadcast(game->curTurn, GameMessageType::SURRENDER,
-                            {move.player->index});
+                            {player});
         }
     }
 }
-BasicGame::BasicGame(std::vector<Player*> _players, InitBoard _board,
-                     speed_t _speed)
-    : players(_players),
-      initialBoard(_board),
+BasicGame::BasicGame(std::vector<Player*> _players, std::vector<index_t> _teams,
+                     InitBoard _board, speed_t _speed)
+    : initialBoard(_board),
       board(this, &_board),
       alive(_players.size()),
       speed(_speed) {
-    for (decltype(_players)::size_type i = 0; i < _players.size(); ++i) {
-        _players[i]->index = i + 1;
+    for (auto i = PLAYER_INDEX_START; i--;)
+        players.push_back(nullptr);  // Player ID starts from 1
+    std::shuffle(players.begin(), players.end(), random);
+    for (std::size_t i = 0; i < players.size(); ++i) {
+        indexMap[players[i]] = i + PLAYER_INDEX_START;
     }
 }
 
 void BasicGame::update() { board.update(curTurn); }
 
 void BasicGame::act(Player* player) {
-    while (!player->moveQueue.empty() &&
-           !player->moveQueue.front().available(&board))
-        player->moveQueue.pop_front();
-    if (player->moveQueue.empty()) return;
-    board.processor.add(player->moveQueue.front());
+    board.processor.add(indexMap[player], player->step());
 }
 
 void BasicGame::process() {

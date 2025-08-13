@@ -15,6 +15,8 @@
 #include <bitset>
 #include <cstdint>
 #include <optional>
+#include <random>
+#include <unordered_map>
 #include <vector>
 
 #include "board.h"
@@ -206,6 +208,9 @@ class BasicGame {
     using speed_t = double;
 
    protected:
+    std::mt19937 random{std::random_device()()};
+
+   protected:
     /// Current turn index.
     turn_t curTurn{};
     /// Playback / simulation speed.
@@ -242,34 +247,33 @@ class BasicGame {
    protected:
     static constexpr index_t PLAYER_INDEX_START = 1;
     /// All players participating in the game.
+    /// Their indices are their player IDs.
     std::vector<Player*> players;
+    /// Map from Player* to index_t.
+    /// This is used to quickly find the player ID from a Player* pointer.
+    std::unordered_map<Player*, index_t> indexMap;
+    /// The team id for each player.
+    /// Use player IDs as indices.
+    std::vector<index_t> teams;
     /// Per-player alive status.
     std::vector<bool> alive;
     /// Each player’s spawn coordinate.
     std::vector<Coord> spawnCoord;
 
    public:
-    /// Check whether a player is still alive.
     inline bool isAlive(index_t player) const { return alive[player]; };
+    inline index_t getTeam(index_t player) const { return teams[player]; };
 
-    /// Retrieve a player’s team ID.
-    inline index_t getTeam(index_t player) const {
-        return players[player]->teamId;
-    };
-
-    /// Determine whether two players belong to the same team.
     inline bool inSameTeam(index_t player1, index_t player2) const {
         return getTeam(player1) == getTeam(player2);
     };
 
    protected:
-    /// Game configuration (protected to prevent accidental modification).
+    /// Game configuration.
     config::Config conf = config::defaultConf;
 
    public:
-    /// Get current game configuration.
     inline config::Config getConfig() const { return conf; }
-    /// Set game configuration.
     inline void setConfig(config::ConfigPatch patch) { conf = conf | patch; }
 
    public:
@@ -289,6 +293,8 @@ class BasicGame {
         BasicGame* game;
         /// 3-dimensional visibility map
         /// visibility[p][r][c] counts the number of sources
+        /// [Is that what we need?]
+        /// Functions unimplemented.
         std::vector<std::vector<std::vector<int>>> visibility;
 
        public:
@@ -297,7 +303,6 @@ class BasicGame {
         GameBoard(BasicGame* _game);
         GameBoard(BasicGame* _game, Board* _board);
 
-        /// Check if a tile is visible to a given player.
         bool visible(pos_t row, pos_t col, index_t player);
 
         /// Update board state for the specified turn.
@@ -310,7 +315,7 @@ class BasicGame {
         /// Container & executor for pending moves.
         class MoveProcessor {
            protected:
-            std::deque<Move> movesInQueue;
+            std::deque<std::pair<index_t, Move>> movesInQueue;
 
            protected:
             BasicGame* game;
@@ -323,7 +328,7 @@ class BasicGame {
 
            public:
             /// Enqueue a move for later execution.
-            void add(Move move);
+            void add(index_t player, Move move);
 
             /// Sort queued moves by priority.
             void sort();
@@ -344,12 +349,13 @@ class BasicGame {
     /// Obtain a player-specific view of the board.
     /// NOTE: This returns a “view”, not the raw board.
     inline BoardView getBoard(Player* player) {
-        return BoardView(&board, player->index);
+        return BoardView(&board, indexMap[player]);
     }
 
    public:
     BasicGame() = delete;
-    BasicGame(std::vector<Player*> _players, InitBoard _board, speed_t _speed);
+    BasicGame(std::vector<Player*> _players, std::vector<index_t> _teams,
+              InitBoard _board, speed_t _speed);
 
    protected:
     /// Update map state at the start of each turn.

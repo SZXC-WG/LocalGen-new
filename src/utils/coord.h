@@ -19,8 +19,8 @@ using pos_t = int32_t;
 /// Struct for Coordinates, %Coord.
 struct Coord {
     pos_t x, y;
-    Coord();
-    Coord(pos_t _x, pos_t _y);
+    constexpr Coord() : x(0), y(0) {}
+    constexpr Coord(pos_t _x, pos_t _y) : x(_x), y(_y) {}
 
     static const pos_t COORD_INDEX = 200;
     /// Convert %Coord to a single index.

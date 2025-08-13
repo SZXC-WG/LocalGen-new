@@ -14,6 +14,9 @@
 #include <cstdint>
 #include <deque>
 #include <string>
+#include <vector>
+
+#include "move.h"
 
 class Move;
 class BoardView;
@@ -22,24 +25,28 @@ using index_t = std::uint32_t;
 
 /// Base struct for players.
 class Player {
-   public:
-    const std::string name;
-    index_t index;
-    index_t teamId;
+   protected:
     std::deque<Move> moveQueue;
 
    public:
-    // Here should be some variable storing the current game state, which will
-    // be modified by the game.
-
-   public:
     Player() = default;
-    Player(const std::string& name);
     ~Player() = default;
 
-    void surrender();
+   protected:
+    inline void surrender() {
+        moveQueue.clear();
+        moveQueue.emplace_back(MoveType::SURRENDER);
+    }
 
-    virtual Move act() = 0;
+   public:
+    virtual Move init(index_t playerId, std::vector<index_t> teamIds) = 0;
+    virtual void requestMove(BoardView& boardView) = 0;
+    inline Move step() {
+        if (moveQueue.empty()) return Move();
+        Move move = moveQueue.front();
+        moveQueue.pop_front();
+        return move;
+    }
 };
 
 #endif  // LGEN_MODULE_GE_PLAYER_H

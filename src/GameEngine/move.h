@@ -13,10 +13,9 @@
 
 #include "../utils/coord.h"
 
-class Player;
 class Board;
 
-enum class MoveType { MOVE_ARMY, SURRENDER };
+enum class MoveType { EMPTY, MOVE_ARMY, SURRENDER };
 
 /// Move Container.
 /// A %Move is a basic operation of a player in a game.
@@ -25,20 +24,21 @@ enum class MoveType { MOVE_ARMY, SURRENDER };
 class Move {
    public:
     MoveType type;
-    Player* player;  // whether we should use direct pointer or its index is
-                     // still unknown.
     Coord from, to;
     bool takeHalf;
 
    public:
-    Move();
-    Move(MoveType _type, Player* _player);
-    Move(MoveType _type, Player* _player, Coord _from, Coord _to,
-         bool _takeHalf);
+    constexpr Move()
+        : type(MoveType::EMPTY), from(0, 0), to(0, 0), takeHalf(false) {}
 
-    /// Check whether a %Move is available on a certain Board.
-    bool available(Board* board);
+    constexpr Move(MoveType _type)
+        : type(_type), from(0, 0), to(0, 0), takeHalf(false) {}
+    constexpr Move(MoveType _type, Coord _from, Coord _to, bool _takeHalf)
+        : type(_type), from(_from), to(_to), takeHalf(_takeHalf) {}
 };
+
+/// A pure empty move.
+#define EMPTY_MOVE (Move(MoveType::EMPTY))
 
 /// Comparisons of (%Move)s. Defined to make usage of comparison-based
 /// containers like std::set and std::map more convenient.

@@ -9,9 +9,6 @@
 
 #include "coord.h"
 
-Coord::Coord() : x(0), y(0) {}
-Coord::Coord(pos_t _x, pos_t _y) : x(_x), y(_y) {}
-
 inline pos_t Coord::index() const { return x * COORD_INDEX + y; }
 
 inline pos_t biindex(const Coord& a, const Coord& b) {

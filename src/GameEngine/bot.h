@@ -33,27 +33,31 @@ class BotFactory {
    public:
     using Creator = std::function<std::unique_ptr<BasicBot>()>;
 
-    // Get global registry (lazy-init).
-    static std::vector<Creator>& registry() {
-        static std::vector<Creator> list;
-        return list;
-    }
+    static std::vector<Creator> list;
+    static std::vector<std::string> nameList;
 
-    // Helper: create all registered bots.
-    static std::vector<std::unique_ptr<BasicBot>> createAll() {
-        std::vector<std::unique_ptr<BasicBot>> bots;
-        for (auto& make : registry()) bots.emplace_back(make());
-        return bots;
+    // Get global registry (lazy-init).
+    static inline std::vector<Creator>& registry() { return list; }
+    static inline std::vector<std::string>& names() { return nameList; }
+
+    // Helper: create a bot by its indice.
+    static inline std::unique_ptr<BasicBot> create(std::size_t indice) {
+        return registry()[indice]();
+    }
+    // Helper: get bot name by its indice.
+    static inline std::string nameOf(std::size_t indice) {
+        return names()[indice];
     }
 };
 
-/// Registration macro
+/// Registration macro.
 #define REGISTER_BOT(ClassName, BotNameStr)                              \
     namespace {                                                          \
     struct ClassName##__registrar {                                      \
         ClassName##__registrar() {                                       \
             BotFactory::registry().emplace_back(                         \
                 [] { return std::make_unique<ClassName>(BotNameStr); }); \
+            BotFactory::names().emplace_back(BotNameStr);                \
         }                                                                \
     };                                                                   \
     static ClassName##__registrar ClassName##__registrar_instance;       \

@@ -22,6 +22,7 @@ Before submitting a bot to this folder, make sure it meets all of the following 
 4. The source file includes the header `src/GameEngine/bot.h`.
 5. Your bot class:
 
+   - Has a unique name (from existing bots).
    - Inherits from `BasicBot`.
    - Overrides the `compute` method.
 

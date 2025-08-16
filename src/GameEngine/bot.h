@@ -25,7 +25,6 @@ class BasicBot : public Player {
 
    public:
     virtual void compute() = 0;
-    virtual ~BasicBot() = default;
 };
 
 /// Factory / Registry

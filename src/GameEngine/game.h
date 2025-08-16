@@ -303,7 +303,7 @@ class BasicGame {
         GameBoard(BasicGame* _game);
         GameBoard(BasicGame* _game, Board* _board);
 
-        bool visible(pos_t row, pos_t col, index_t player);
+        bool visible(pos_t row, pos_t col, index_t player) const override;
 
         /// Update board state for the specified turn.
         void update(turn_t turn);

@@ -29,7 +29,7 @@ BasicGame::GameBoard::GameBoard(BasicGame* _game, Board* _board)
                  std::vector(_board->getHeight() + 2,
                              std::vector(_board->getWidth() + 2, 0))) {}
 
-bool BasicGame::GameBoard::visible(pos_t row, pos_t col, index_t player) {
+bool BasicGame::GameBoard::visible(pos_t row, pos_t col, index_t player) const {
     // Use the parent class's visible function temporarily.
     return Board::visible(row, col, player);
 }

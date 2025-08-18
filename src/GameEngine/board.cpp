@@ -263,10 +263,11 @@ TileView Board::view(index_t player, Coord pos) {
     return TileView(tileAt(pos), visible(pos, player));
 }
 
-TileView& BoardView::tileAt(Coord pos) {
-    assert(isValidPos(pos));
-    return tiles[pos.x][pos.y];
+TileView& BoardView::tileAt(pos_t x, pos_t y) {
+    assert(isValidPos(x, y));
+    return tiles[x][y];
 }
+TileView& BoardView::tileAt(Coord pos) { return tileAt(SEPA(pos)); }
 
 BoardView::BoardView() : row(0), col(0) {}
 BoardView::BoardView(const Board* const& board, index_t player)

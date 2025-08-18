@@ -14,10 +14,11 @@
 #include <algorithm>
 #include <cassert>
 
-Tile& Board::tileAt(Coord coord) {
-    assert(isValidPos(coord));
-    return tiles[coord.x][coord.y];
+Tile& Board::tileAt(pos_t x, pos_t y) {
+    assert(isValidPos(x, y));
+    return tiles[x][y];
 }
+Tile& Board::tileAt(Coord pos) { return tileAt(SEPA(pos)); }
 int Board::setWidth(pos_t _col) {
     if (_col < 0) return 1;
     col = _col;
@@ -31,15 +32,11 @@ int Board::setHeight(pos_t _row) {
     return 0;
 }
 
-bool Board::isValidPos(Coord pos) const {
-    return pos.x >= 1 && pos.x <= row && pos.y >= 1 && pos.y <= col;
+Tile Board::getTile(pos_t x, pos_t y) const {
+    assert(isValidPos(x, y));
+    return tiles[x][y];
 }
-bool Board::isInvalidPos(Coord pos) const { return !isValidPos(pos); }
-
-Tile Board::getTile(Coord pos) const {
-    assert(isValidPos(pos));
-    return tiles[pos.x][pos.y];
-}
+Tile Board::getTile(Coord pos) const { return getTile(SEPA(pos)); }
 
 Board::Board() : row(0), col(0), tiles(0, std::vector<Tile>(0)) {}
 Board::Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
@@ -270,11 +267,6 @@ TileView& BoardView::tileAt(Coord pos) {
     assert(isValidPos(pos));
     return tiles[pos.x][pos.y];
 }
-
-bool BoardView::isValidPos(Coord pos) const {
-    return pos.x >= 1 && pos.x <= col && pos.y >= 1 && pos.y <= row;
-}
-bool BoardView::isInvalidPos(Coord pos) const { return !isValidPos(pos); }
 
 BoardView::BoardView() : row(0), col(0) {}
 BoardView::BoardView(const Board* const& board, index_t player)

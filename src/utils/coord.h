@@ -33,7 +33,7 @@ inline pos_t biindex(const Coord& a, const Coord& b);
 inline std::pair<Coord, Coord> unpack_biindex(const pos_t& bi);
 
 // Sometimes we need to pass a %Coord through two parameters or something.
-// This macro is used to make it available.
+// This macro is used to make it easier.
 #define SEPA(coo) (coo).x, (coo).y
 
 /// Comparison operators for %Coord.

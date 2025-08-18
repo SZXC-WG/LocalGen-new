@@ -33,7 +33,7 @@ class Board {
     pos_t row, col;
     std::vector<std::vector<Tile>> tiles;
 
-    /// Get a tile at a certain position.
+    Tile& tileAt(pos_t x, pos_t y);
     Tile& tileAt(Coord pos);
     /// Change the width (col) of the %Board.
     /// @return 0 if the operation is successful, 1 otherwise.
@@ -43,10 +43,17 @@ class Board {
     int setHeight(pos_t _row);
 
    public:
-    bool isValidPos(Coord pos) const;
-    bool isInvalidPos(Coord pos) const;
+    inline bool isValidPos(pos_t x, pos_t y) const {
+        return x >= 1 && x <= row && y >= 1 && y <= col;
+    }
+    inline bool isValidPos(Coord pos) const { return isValidPos(SEPA(pos)); }
+    inline bool isInvalidPos(pos_t x, pos_t y) const {
+        return !isValidPos(x, y);
+    }
+    inline bool isInvalidPos(Coord pos) const { return !isValidPos(pos); }
 
    public:
+    Tile getTile(pos_t x, pos_t y) const;
     Tile getTile(Coord pos) const;
     inline int getWidth() const { return col; }
     inline int getHeight() const { return row; }
@@ -91,11 +98,18 @@ class BoardView {
     pos_t row, col;
     std::vector<std::vector<TileView>> tiles;
 
+    TileView& tileAt(pos_t x, pos_t y);
     TileView& tileAt(Coord pos);
 
    public:
-    bool isValidPos(Coord pos) const;
-    bool isInvalidPos(Coord pos) const;
+    inline bool isValidPos(pos_t x, pos_t y) const {
+        return x >= 1 && x <= row && y >= 1 && y <= col;
+    }
+    inline bool isValidPos(Coord pos) const { return isValidPos(SEPA(pos)); }
+    inline bool isInvalidPos(pos_t x, pos_t y) const {
+        return !isValidPos(x, y);
+    }
+    inline bool isInvalidPos(Coord pos) { return !isValidPos(pos); }
 
    public:
     BoardView();

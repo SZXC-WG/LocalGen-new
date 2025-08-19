@@ -21,13 +21,12 @@ Before submitting a bot to this folder, make sure it satisfies **all** of the fo
 3. The entire implementation lives in a single source file (`*.cpp`).
 4. That source file includes the header `src/GameEngine/bot.h`.
 5. Your bot class
-
    - Has a unique name (i.e., does not clash with existing bots).
    - Inherits from `BasicBot`.
    - Overrides the `compute` method.
-
-   See `DummyBot.cpp` for a reference implementation.
 6. The bot is registered via the `REGISTER_BOT` macro.
+
+See `DummyBot.cpp` for a reference implementation.
 
 ---
 

@@ -369,6 +369,7 @@ class BasicGame {
     BasicGame() = delete;
     BasicGame(std::vector<Player*> _players, std::vector<index_t> _teams,
               InitBoard _board, speed_t _speed);
+    ~BasicGame();
 
    protected:
     /// Update map state at the start of each turn.

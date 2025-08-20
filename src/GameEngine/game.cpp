@@ -118,6 +118,9 @@ BasicGame::BasicGame(std::vector<Player*> _players, std::vector<index_t> _teams,
         indexMap[players[i]] = i + PLAYER_INDEX_START;
     }
 }
+BasicGame::~BasicGame() {
+    for (auto player : players) delete player;
+}
 
 void BasicGame::update() { board.update(curTurn); }
 

@@ -10,8 +10,8 @@
 #define LGEN_MODULE_GE_BOT_H 1
 
 #include <functional>
-#include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "player.h"
@@ -21,7 +21,7 @@ class BasicBot : public Player {};
 /// Factory / Registry
 class BotFactory {
    public:
-    using Creator = std::function<std::unique_ptr<BasicBot>()>;
+    using Creator = std::function<BasicBot*()>;
 
     static BotFactory& instance() {
         static BotFactory f;
@@ -40,7 +40,7 @@ class BotFactory {
         return names;
     }
 
-    std::unique_ptr<BasicBot> create(const std::string& name) const {
+    BasicBot* create(const std::string& name) const {
         auto it = creators.find(name);
         return it == creators.end() ? nullptr : it->second();
     }
@@ -52,7 +52,8 @@ class BotFactory {
 template <typename T>
 struct BotRegistrar {
     BotRegistrar(const std::string& name) {
-        BotFactory::instance().registerBot(name, std::make_unique<T>);
+        BotFactory::instance().registerBot(
+            name, []() -> BasicBot* { return new T(); });
     }
 };
 

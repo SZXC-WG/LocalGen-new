@@ -105,17 +105,23 @@ void BasicGame::GameBoard::MoveProcessor::execute() {
         }
     }
 }
-BasicGame::BasicGame(std::vector<Player*> _players, std::vector<index_t> _teams,
-                     InitBoard _board, speed_t _speed)
+BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
+                     std::vector<index_t> _teams, std::vector<std::string> name,
+                     InitBoard _board)
     : initialBoard(_board),
+      players(PLAYER_INDEX_START + _players.size()),
+      names(PLAYER_INDEX_START + _players.size()),
+      teams(PLAYER_INDEX_START + _players.size()),
       board(this, &_board),
-      alive(_players.size()),
-      speed(_speed) {
-    for (auto i = PLAYER_INDEX_START; i--;)
-        players.push_back(nullptr);  // Player ID starts from 1
-    std::shuffle(players.begin(), players.end(), rng);
+      alive(PLAYER_INDEX_START + _players.size()) {
+    std::vector<index_t> randId(_players.size());
+    iota(begin(randId), end(randId), PLAYER_INDEX_START);
+    if (!remainIndex) std::shuffle(begin(randId), end(randId), rng);
     for (std::size_t i = 0; i < players.size(); ++i) {
-        indexMap[players[i]] = i + PLAYER_INDEX_START;
+        players[randId[i]] = _players[i];
+        names[randId[i]] = name[i];
+        teams[randId[i]] = _teams[i];
+        indexMap[players[randId[i]]] = randId[i];
     }
 }
 BasicGame::~BasicGame() {
@@ -192,6 +198,7 @@ int BasicGame::init() {
     int spawnReturn = initSpawn();
     if (spawnReturn != 0) return spawnReturn;
     alive = std::vector(players.size(), true);
+    for (std::size_t i = 0; i < PLAYER_INDEX_START; ++i) alive[i] = false;
     return 0;
 }
 

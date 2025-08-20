@@ -226,6 +226,9 @@ class BasicGame {
    protected:
     /// Current turn index.
     turn_t curTurn{};
+
+    /// This variable should not be in game, but saved its comments here as a
+    /// reference for docs.
     /// Playback / simulation speed.
     /// Valid range: [0.25×, 256×] (values >16× are not recommended).
     /// Suggested presets (from generals.io):
@@ -233,7 +236,7 @@ class BasicGame {
     /// [TODO] If set to 0, the game runs as fast as possible; however,
     /// robots still block until they finish computing, effectively
     /// becoming a headless replay generator.
-    speed_t speed{1.0};
+    /* speed_t speed{1.0}; */
 
     /// Self-increment parameters per tile type.
     /// Positive value  N: 1 troop every N turns.
@@ -249,7 +252,6 @@ class BasicGame {
 
    public:
     inline turn_t getCurTurn() const { return curTurn; }
-    inline speed_t getSpeed() const { return speed; }
     inline std::array<army_t, TILE_TYPE_COUNT> getIncrement() const {
         return increment;
     };
@@ -265,6 +267,9 @@ class BasicGame {
     /// Map from Player* to index_t.
     /// This is used to quickly find the player ID from a Player* pointer.
     std::unordered_map<Player*, index_t> indexMap;
+    /// The name of each player.
+    /// Use player IDs as indices.
+    std::vector<std::string> names;
     /// The team id for each player.
     /// Use player IDs as indices.
     std::vector<index_t> teams;
@@ -276,6 +281,9 @@ class BasicGame {
    public:
     inline bool isAlive(index_t player) const { return alive[player]; };
     inline index_t getTeam(index_t player) const { return teams[player]; };
+    inline std::vector<index_t> getTeams() const { return teams; };
+    inline std::string getName(index_t player) const { return names[player]; };
+    inline std::vector<std::string> getNames() const { return names; };
 
     inline bool inSameTeam(index_t player1, index_t player2) const {
         return getTeam(player1) == getTeam(player2);
@@ -367,8 +375,9 @@ class BasicGame {
 
    public:
     BasicGame() = delete;
-    BasicGame(std::vector<Player*> _players, std::vector<index_t> _teams,
-              InitBoard _board, speed_t _speed);
+    BasicGame(bool remainIndex, std::vector<Player*> _players,
+              std::vector<index_t> _teams, std::vector<std::string> name,
+              InitBoard _board);
     ~BasicGame();
 
    protected:

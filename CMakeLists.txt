@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 project(LocalGen-new VERSION 0.1 LANGUAGES CXX)
 
@@ -38,7 +38,6 @@ set(PROJECT_SOURCES
         src/GameEngine/tile.h
         src/utils/coord.cpp
         src/utils/coord.h
-        src/utils/tools.h
         res/res.qrc
 )
 

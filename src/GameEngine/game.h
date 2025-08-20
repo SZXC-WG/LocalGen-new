@@ -37,6 +37,7 @@ enum class VisionMode : uint8_t { NEAR8, NEAR4 };
 
 /// List of configuration items.
 /// To add / remove / modify items, edit this macro list.
+/// Macro format: F(type, name, default_value)
 #define GAME_CONFIG_UNIT_LIST(F)                        \
     F(bool, RanklistShowLand, true)                     \
     F(bool, RanklistShowArmy, true)                     \
@@ -82,7 +83,7 @@ constexpr inline bool operator==(const ConfigPatch& lhs,
 #undef IF_EQUAL
 
 namespace unit {
-/// Helper constructors for frequently-used configuration units.
+/// Helper constructors for configuration units.
 #define UNIT(type, name, ...)            \
     constexpr ConfigPatch name(type v) { \
         ConfigPatch p;                   \
@@ -151,6 +152,7 @@ constexpr inline ConfigPatch operator&(const ConfigPatch& lhs,
 
 /// List of predefined game modifiers.
 /// Modify the list to add / remove / update modifiers.
+/// Macro format: F(name, config_patch_value)
 #define GAME_CONFIG_MODIFIER_LIST(F)                                    \
     F(Watchtower, unit::CityVisionRange(3) | unit::SpawnVisionRange(3)) \
     F(MistyVeil, unit::OverallVisionRange(0))
@@ -201,6 +203,17 @@ constexpr inline PatchStatus patchStatus(const Config& config,
 /// Types of in-game broadcast messages.
 enum class GameMessageType : uint8_t { WIN, CAPTURE, SURRENDER, TEXT };
 
+/// Struct to hold game constants.
+/// Used to initialize players.
+struct GameConstantsPack {
+    pos_t mapHeight, mapWidth;
+    index_t playerCount;
+    std::vector<index_t> teams;
+    std::array<army_t, TILE_TYPE_COUNT> increment;
+    std::array<army_t, TILE_TYPE_COUNT> decrement;
+    config::Config config;
+};
+
 class BasicGame {
    public:
     // type aliases
@@ -208,7 +221,7 @@ class BasicGame {
     using speed_t = double;
 
    protected:
-    std::mt19937 random{std::random_device()()};
+    std::mt19937 rng{std::random_device()()};
 
    protected:
     /// Current turn index.
@@ -218,8 +231,8 @@ class BasicGame {
     /// Suggested presets (from generals.io):
     ///   0.25×, 0.5×, 0.75×, 1×, 1.5×, 2×, 3×, 4×
     /// [TODO] If set to 0, the game runs as fast as possible; however,
-    /// robots still block until they finish computing. Effectively
-    /// becomes a headless replay generator.
+    /// robots still block until they finish computing, effectively
+    /// becoming a headless replay generator.
     speed_t speed{1.0};
 
     /// Self-increment parameters per tile type.

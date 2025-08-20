@@ -23,6 +23,10 @@ class BoardView;
 
 using index_t = std::uint32_t;
 
+namespace game {
+struct GameConstantsPack;
+}  // namespace game
+
 /// Base struct for players.
 class Player {
    protected:
@@ -39,7 +43,9 @@ class Player {
     }
 
    public:
-    virtual Move init(index_t playerId, std::vector<index_t> teamIds) = 0;
+    virtual void init(index_t playerId,
+                      const game::GameConstantsPack& constants) = 0;
+
     virtual void requestMove(BoardView& boardView) = 0;
     inline Move step() {
         if (moveQueue.empty()) return Move();

@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <random>
 
-#include "../utils/tools.h"
 #include "board.h"
 #include "move.h"
 #include "player.h"

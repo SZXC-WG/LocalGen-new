@@ -27,19 +27,24 @@
 // WORK. AND SO, CHOOSE YOUR BOT NAME CAREFULLY, IT SHOULD BE UNIQUE.
 
 class DummyBot : public BasicBot {
-   protected:
-    explicit DummyBot() : BasicBot("DummyBot") {}
+   public:
+    explicit DummyBot() = default;
 
-   protected:
-    // You can put whatever you want, whatever you need here.
-    // Don't define non-const static variables, they may cause thread problems.
-    std::mt19937 rng{std::random_device{}()};
+   private:
+    // Store anything you need here. Be aware of threading issues.
+    index_t id;
 
    public:
-    void compute() override {}
+    void init(index_t playerId, std::vector<index_t> teamIds) override {
+        // Bot initializer - typically useful to remember these data
+        id = playerId;
+    }
+    void requestMove(BoardView& boardView) override {
+        // Implement your bot's move logic here.
+    }
 };
 
 // Do not forget to register your bot.
-REGISTER_BOT(DummyBot, "DummyBot")
+static BotRegistrar<DummyBot> dummyBot_reg("DummyBot");
 
 #endif  // LGEN_BOTS_DUMMYBOT

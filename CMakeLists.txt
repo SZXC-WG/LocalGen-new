@@ -26,8 +26,10 @@ set(PROJECT_SOURCES
         src/localGameWindow/localGameWindow.h
         src/mapCreatorWindow/mapCreatorWindow.cpp
         src/mapCreatorWindow/mapCreatorWindow.h
+        src/bots/DummyBot.cpp
         src/GameEngine/board.cpp
         src/GameEngine/board.h
+        src/GameEngine/bot.h
         src/GameEngine/game.cpp
         src/GameEngine/game.h
         src/GameEngine/move.cpp

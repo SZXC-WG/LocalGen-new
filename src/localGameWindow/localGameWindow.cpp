@@ -15,6 +15,8 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     layout->addWidget(gameMap);
     setLayout(layout);
     resize(800, 600);
+    setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint |
+                   Qt::WindowMinimizeButtonHint);
 
     QTimer::singleShot(0, [this]() { gameMap->fitCenter(25); });
 }

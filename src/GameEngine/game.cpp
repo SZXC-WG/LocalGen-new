@@ -113,7 +113,7 @@ BasicGame::BasicGame(std::vector<Player*> _players, std::vector<index_t> _teams,
       speed(_speed) {
     for (auto i = PLAYER_INDEX_START; i--;)
         players.push_back(nullptr);  // Player ID starts from 1
-    std::shuffle(players.begin(), players.end(), random);
+    std::shuffle(players.begin(), players.end(), rng);
     for (std::size_t i = 0; i < players.size(); ++i) {
         indexMap[players[i]] = i + PLAYER_INDEX_START;
     }

@@ -19,6 +19,7 @@
 // Remember to include the bot header file.
 // Without this, you can't define your bot class, and the registry won't work.
 #include "../GameEngine/bot.h"
+#include "../GameEngine/game.h"
 
 // You can include additional headers you need.
 #include <random>
@@ -60,24 +61,24 @@ class DummyBot : public BasicBot {
 
    public:
     // Remember to override the `init` method to process game constants.
-    void init(index_t playerCnt, index_t playerId, pos_t mapHeight,
-              pos_t mapWidth, std::vector<index_t> teamIds) override {
+    void init(index_t playerId,
+              const game::GameConstantsPack& constants) override {
         // This method is called when the game starts.
         // Game constants are sent via this method.
         // You can use this method to initialize your bot's state.
         // For example, you can store the player ID and team IDs.
-        cnt = playerCnt;
+        cnt = constants.playerCount;
         id = playerId;
-        team = teamIds[playerId];
-        teamIds = teamIds;
-        height = mapHeight;
-        width = mapWidth;
+        team = constants.teams[playerId];
+        teamIds = constants.teams;
+        height = constants.mapHeight;
+        width = constants.mapWidth;
     }
 
     // Edit the `compute` method to implement your bot's main logic.
     // This method will be called **every turn**. Make that into your bot's
     // logic.
-    void compute(BoardView& boardView) override {
+    void requestMove(BoardView& boardView) override {
         // This DummyBot uses a derivative of the smartRandomBot from LG v5.
         // As LG v6 removed the outdated "focus" feature, this bot will choose a
         // maximum tile every time.

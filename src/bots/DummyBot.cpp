@@ -95,6 +95,6 @@ class DummyBot : public BasicBot {
 };
 
 // Do not forget to register your bot.
-REGISTER_BOT(DummyBot, "DummyBot")
+static BotRegistrar<DummyBot> dummyBot_reg("DummyBot");
 
 #endif  // LGEN_BOTS_DUMMYBOT

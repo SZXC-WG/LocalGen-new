@@ -1,8 +1,10 @@
 #include "localGameDialog.h"
+
+#include "../GameEngine/bot.h"
 #include "ui_localGameDialog.h"
 
-LocalGameDialog::LocalGameDialog(QWidget* parent) :
-    QDialog(parent), ui(new Ui::LocalGameDialog) {
+LocalGameDialog::LocalGameDialog(QWidget* parent)
+    : QDialog(parent), ui(new Ui::LocalGameDialog) {
     ui->setupUi(this);
     on_spinBox_numPlayers_valueChanged(ui->spinBox_numPlayers->value());
 }
@@ -35,15 +37,22 @@ void LocalGameDialog::on_btnStartGame_clicked() {
 
 void LocalGameDialog::on_btnCancel_clicked() { this->done(QDialog::Rejected); }
 
+// Helper: vector<string> -> QStringList
+QStringList toQStringList(const std::vector<std::string>& vec) {
+    QStringList list;
+    for (const auto& str : vec) {
+        list.append(QString::fromStdString(str));
+    }
+    return list;
+}
+
 void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
     QLayout* layout = ui->groupBox_players->layout();
     int requiredCount = numPlayers + 1;
     while (layout->count() > requiredCount) {
         layout->takeAt(layout->count() - 1)->widget()->deleteLater();
     }
-    // Bot names from v5, for demonstration only.
-    const QStringList botNames = { "ktqBot", "lcwBot", "smartRandomBot",
-                                   "xrzBot", "zlyBot" };
+    const QStringList botNames = toQStringList(BotFactory::instance().list());
     const QFont& font = ui->labNumPlayers->font();
     const QFont& comboFont = ui->comboBox_gameMap->font();
     while (layout->count() < requiredCount) {

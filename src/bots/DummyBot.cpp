@@ -75,6 +75,11 @@ class DummyBot : public BasicBot {
         width = constants.mapWidth;
     }
 
+    bool unpassable(tile_type_e type) {
+        return type == TILE_MOUNTAIN || type == TILE_LOOKOUT ||
+               type == TILE_OBSERVATORY;
+    }
+
     // Edit the `compute` method to implement your bot's main logic.
     // This method will be called **every turn**. Make that into your bot's
     // logic.
@@ -82,6 +87,7 @@ class DummyBot : public BasicBot {
         // This DummyBot uses a derivative of the smartRandomBot from LG v5.
         // As LG v6 removed the outdated "focus" feature, this bot will choose a
         // maximum tile every time.
+        static std::deque<Coord> lastCoord[20];
         Coord start = Coord(1, 1);
         for (std::size_t r = 1; r <= height; ++r) {
             for (std::size_t c = 1; c <= width; ++c) {
@@ -92,6 +98,44 @@ class DummyBot : public BasicBot {
                 }
             }
         }
+        struct node {
+            int type;
+            unsigned team;
+            long long army;
+            int dir;
+            std::ptrdiff_t lastCount;
+        };
+        node p[5];
+        int pl = 0;
+        for (int i = 1; i <= 4; ++i) {
+            int nx = start.x + deltaX[i], ny = start.y + deltaY[i];
+            if (nx < 1 || nx > height || ny < 1 || ny > width ||
+                unpassable(boardView.tileAt(nx, ny).type))
+                continue;
+            p[++pl] = {boardView.tileAt(nx, ny).type,
+                       boardView.tileAt(nx, ny).occupier,
+                       boardView.tileAt(nx, ny).army, i,
+                       std::find(lastCoord[id].rbegin(), lastCoord[id].rend(),
+                                 Coord(nx, ny)) -
+                           lastCoord[id].rbegin()};
+        }
+        bool rdret = rng() % 2;
+        auto cmp = [&](node a, node b) -> bool {
+            if (a.lastCount != b.lastCount) return a.lastCount > b.lastCount;
+            if (a.type == 3 && a.team != id) return true;
+            if (b.type == 3 && b.team != id) return false;
+            if (a.team == 0) return rdret;
+            if (b.team == 0) return !rdret;
+            if (a.team == id && b.team != id) return false;
+            if (a.team != id && b.team == id) return true;
+            if (a.team == id && b.team == id) return a.army > b.army;
+            return a.army < b.army;
+        };
+        std::sort(p + 1, p + pl + 1, cmp);
+        moveQueue.emplace_back(
+            MoveType::MOVE_ARMY, start,
+            Coord(start.x + deltaX[p[1].dir], start.y + deltaY[p[1].dir]),
+            true);
     }
 };
 

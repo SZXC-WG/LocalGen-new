@@ -109,13 +109,13 @@ BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
                      std::vector<index_t> _teams, std::vector<std::string> name,
                      InitBoard _board)
     : initialBoard(_board),
-      players(PLAYER_INDEX_START + _players.size()),
-      names(PLAYER_INDEX_START + _players.size()),
-      teams(PLAYER_INDEX_START + _players.size()),
+      players(_players.size()),
+      names(_players.size()),
+      teams(_players.size()),
       board(this, &_board),
-      alive(PLAYER_INDEX_START + _players.size()) {
+      alive(_players.size()) {
     std::vector<index_t> randId(_players.size());
-    iota(begin(randId), end(randId), PLAYER_INDEX_START);
+    iota(begin(randId), end(randId), 0);
     if (!remainIndex) std::shuffle(begin(randId), end(randId), rng);
     for (std::size_t i = 0; i < players.size(); ++i) {
         players[randId[i]] = _players[i];
@@ -160,7 +160,7 @@ int BasicGame::initSpawn() {
     std::mt19937 random{std::random_device()()};
     int playerCount = players.size();
     std::vector<index_t> playerSequence(players.size());
-    iota(begin(playerSequence), end(playerSequence), PLAYER_INDEX_START);
+    iota(begin(playerSequence), end(playerSequence), 0);
     std::shuffle(begin(playerSequence), end(playerSequence), random);
     std::vector<Coord> spawnCandidates;
     auto assign = [&]() -> void {
@@ -198,7 +198,6 @@ int BasicGame::init() {
     int spawnReturn = initSpawn();
     if (spawnReturn != 0) return spawnReturn;
     alive = std::vector(players.size(), true);
-    for (std::size_t i = 0; i < PLAYER_INDEX_START; ++i) alive[i] = false;
     return 0;
 }
 

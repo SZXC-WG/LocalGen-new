@@ -260,7 +260,6 @@ class BasicGame {
     };
 
    protected:
-    static constexpr index_t PLAYER_INDEX_START = 1;
     /// All players participating in the game.
     /// Their indices are their player IDs.
     std::vector<Player*> players;

@@ -24,9 +24,6 @@
 // You can include additional headers you need.
 #include <random>
 
-// DO NOT PUT YOUR BOT CODE IN ANY NAMESPACE. THAT WILL MAKE THE REGISTRY NOT
-// WORK. AND SO, CHOOSE YOUR BOT NAME CAREFULLY, IT SHOULD BE UNIQUE.
-
 class DummyBot : public BasicBot {
     // Do not define any constructors.
     // Destructors can be defined if necessary.
@@ -80,7 +77,7 @@ class DummyBot : public BasicBot {
                type == TILE_OBSERVATORY;
     }
 
-    // Edit the `compute` method to implement your bot's main logic.
+    // Edit the `requestMove` method to implement your bot's main logic.
     // This method will be called **every turn**. Make that into your bot's
     // logic.
     void requestMove(BoardView& boardView) override {

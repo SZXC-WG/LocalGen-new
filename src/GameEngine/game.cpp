@@ -113,7 +113,8 @@ BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
       names(_players.size()),
       teams(_players.size()),
       board(this, &_board),
-      alive(_players.size()) {
+      alive(_players.size()),
+      spawnCoord(_players.size()) {
     std::vector<index_t> randId(_players.size());
     iota(begin(randId), end(randId), 0);
     if (!remainIndex) std::shuffle(begin(randId), end(randId), rng);

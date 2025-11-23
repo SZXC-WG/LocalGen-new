@@ -222,7 +222,7 @@ bool Board::available(index_t player, Move move) {
     Coord& to = move.to;
     if (type == MoveType::MOVE_ARMY) {
         // coordinate validity check
-        if (!isInvalidPos(from) || !isInvalidPos(to)) return false;
+        if (isInvalidPos(from) || isInvalidPos(to)) return false;
 
         // visibility check
         if (!visible(from, player)) return false;

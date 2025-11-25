@@ -72,6 +72,7 @@ void BasicGame::GameBoard::MoveProcessor::add(index_t player, Move move) {
 void BasicGame::GameBoard::MoveProcessor::sort() {}
 
 void BasicGame::GameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
+    game->alive[p2] = false;
     for (auto& row : board->tiles) {
         for (auto& tile : row) {
             if (tile.occupier == p2) {

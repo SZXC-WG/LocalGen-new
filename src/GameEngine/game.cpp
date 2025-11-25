@@ -84,19 +84,23 @@ void BasicGame::GameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
 }
 void BasicGame::GameBoard::MoveProcessor::execute() {
     for (auto [player, move] : movesInQueue) {
-        if (board->available(player, move)) continue;
+        if (!board->available(player, move)) continue;
         if (move.type == MoveType::MOVE_ARMY) {
             Tile& fromTile = board->tileAt(move.from);
             Tile& toTile = board->tileAt(move.to);
             army_t takenArmy = fromTile.army;
             if (move.takeHalf) takenArmy >>= 1;
             fromTile.army -= takenArmy;
-            toTile.army -= takenArmy;
-            if (toTile.army < 0) {
-                toTile.army = -toTile.army;
-                if (toTile.type == TILE_GENERAL)
-                    capture(player, toTile.occupier);
-                toTile.occupier = player;
+            if (toTile.occupier == player) {
+                toTile.army += takenArmy;
+            } else {
+                toTile.army -= takenArmy;
+                if (toTile.army < 0) {
+                    toTile.army = -toTile.army;
+                    if (toTile.type == TILE_GENERAL)
+                        capture(player, toTile.occupier);
+                    toTile.occupier = player;
+                }
             }
         } else if (move.type == MoveType::SURRENDER) {
             game->alive[player] = false;

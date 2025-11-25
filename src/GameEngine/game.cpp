@@ -88,8 +88,10 @@ void BasicGame::GameBoard::MoveProcessor::execute() {
         if (move.type == MoveType::MOVE_ARMY) {
             Tile& fromTile = board->tileAt(move.from);
             Tile& toTile = board->tileAt(move.to);
-            army_t takenArmy = fromTile.army;
-            if (move.takeHalf) takenArmy >>= 1;
+
+            army_t takenArmy =
+                move.takeHalf ? (fromTile.army >> 1) : (fromTile.army - 1);
+
             fromTile.army -= takenArmy;
             if (toTile.occupier == player) {
                 toTile.army += takenArmy;

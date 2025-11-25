@@ -311,37 +311,23 @@ void MapWidget::setFocusEnabled(bool enabled) {
 
 void MapWidget::keyPressEvent(QKeyEvent* event) {
     if (focusRow != -1 && focusCol != -1) {
-        int oldRow = focusRow;
-        int oldCol = focusCol;
-        bool moved = false;
+        int oldRow = focusRow, oldCol = focusCol;
         switch (event->key()) {
             case Qt::Key_Left:
-                if (focusCol > 0) {
-                    focusCol--;
-                    moved = true;
-                }
+                if (focusCol > 0) focusCol--;
                 break;
             case Qt::Key_Right:
-                if (focusCol < mapWidth() - 1) {
-                    focusCol++;
-                    moved = true;
-                }
+                if (focusCol < mapWidth() - 1) focusCol++;
                 break;
             case Qt::Key_Up:
-                if (focusRow > 0) {
-                    focusRow--;
-                    moved = true;
-                }
+                if (focusRow > 0) focusRow--;
                 break;
             case Qt::Key_Down:
-                if (focusRow < mapHeight() - 1) {
-                    focusRow++;
-                    moved = true;
-                }
+                if (focusRow < mapHeight() - 1) focusRow++;
                 break;
             default: QWidget::keyPressEvent(event); return;
         }
-        if (moved && moveQueue) {
+        if (moveQueue) {
             // TODO: align with official keys (Z for 50%)
             bool takeHalf = (event->modifiers() & Qt::ControlModifier);
             moveQueue->emplace_back(

@@ -310,10 +310,8 @@ int InitBoard::setSpawn(Coord pos, unsigned team) {
 int InitBoard::getSpawnTeam(Coord pos) {
     if (isInvalidPos(pos)) return -1;
     if (tileAt(pos).type != TILE_SPAWN) return -1;
-    return spawns[std::lower_bound(begin(spawns), end(spawns),
-                                   std::pair(pos, 0)) -
-                  begin(spawns)]
-        .second;
+    return std::lower_bound(begin(spawns), end(spawns), std::pair(pos, 0))
+        ->second;
 }
 
 #endif  // LGEN_MODULE_GE_BOARD_CPP

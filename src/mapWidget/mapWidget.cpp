@@ -3,8 +3,10 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPainterPath>
 #include <QSvgRenderer>
 #include <QWheelEvent>
+#include <cmath>
 
 MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled)
     : QWidget(parent),
@@ -67,6 +69,47 @@ void MapWidget::fitCenter(int margin) {
     offset.setY((height() - scaledMapHeight) / 2.0);
 
     update();
+}
+
+static void drawArrow(QPainter& painter, const QPointF& p1, const QPointF& p2,
+                      qreal length, qreal width) {
+    // 1. Calculate geometry
+    auto angle = std::atan2(p2.y() - p1.y(), p2.x() - p1.x());
+    QPointF arrowEnd =
+        p1 + QPointF(std::cos(angle) * length, std::sin(angle) * length);
+
+    qreal arrowHeadLen = length / 3.0;
+    QPointF left =
+        arrowEnd - QPointF(std::cos(angle + M_PI / 4) * arrowHeadLen,
+                           std::sin(angle + M_PI / 4) * arrowHeadLen);
+    QPointF right =
+        arrowEnd - QPointF(std::cos(angle - M_PI / 4) * arrowHeadLen,
+                           std::sin(angle - M_PI / 4) * arrowHeadLen);
+
+    QPainterPath path;
+    path.moveTo(p1);
+    path.lineTo(arrowEnd);
+    path.moveTo(left);
+    path.lineTo(arrowEnd);
+    path.lineTo(right);
+
+    // 2. Draw Outline
+    QPen outlinePen(QColor(0, 0, 0, 80));
+    outlinePen.setWidthF(width * 2.0);
+    outlinePen.setCapStyle(Qt::RoundCap);
+    outlinePen.setJoinStyle(Qt::RoundJoin);
+
+    painter.setPen(outlinePen);
+    painter.drawPath(path);
+
+    // 3. Draw Main Body (Foreground)
+    QPen mainPen(Qt::white);
+    mainPen.setWidthF(width);
+    mainPen.setCapStyle(Qt::RoundCap);
+    mainPen.setJoinStyle(Qt::RoundJoin);
+
+    painter.setPen(mainPen);
+    painter.drawPath(path);
 }
 
 void MapWidget::paintEvent(QPaintEvent* event) {
@@ -155,6 +198,20 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         QRectF cell(focusCol * cellSize, focusRow * cellSize, cellSize,
                     cellSize);
         painter.drawRect(cell);
+    }
+
+    if (moveQueue == nullptr || moveQueue->empty()) return;
+
+    for (const auto& move : *moveQueue) {
+        if (move.type == MoveType::MOVE_ARMY) {
+            int r1 = move.from.x - 1, c1 = move.from.y - 1;
+            int r2 = move.to.x - 1, c2 = move.to.y - 1;
+
+            QPointF p1((c1 + 0.5) * cellSize, (r1 + 0.5) * cellSize);
+            QPointF p2((c2 + 0.5) * cellSize, (r2 + 0.5) * cellSize);
+
+            drawArrow(painter, p1, p2, cellSize * 0.3, 1.5 / scale);
+        }
     }
 }
 
@@ -254,23 +311,50 @@ void MapWidget::setFocusEnabled(bool enabled) {
 
 void MapWidget::keyPressEvent(QKeyEvent* event) {
     if (focusRow != -1 && focusCol != -1) {
+        int oldRow = focusRow;
+        int oldCol = focusCol;
+        bool moved = false;
         switch (event->key()) {
             case Qt::Key_Left:
-                if (focusCol > 0) focusCol--;
+                if (focusCol > 0) {
+                    focusCol--;
+                    moved = true;
+                }
                 break;
             case Qt::Key_Right:
-                if (focusCol < mapWidth() - 1) focusCol++;
+                if (focusCol < mapWidth() - 1) {
+                    focusCol++;
+                    moved = true;
+                }
                 break;
             case Qt::Key_Up:
-                if (focusRow > 0) focusRow--;
+                if (focusRow > 0) {
+                    focusRow--;
+                    moved = true;
+                }
                 break;
             case Qt::Key_Down:
-                if (focusRow < mapHeight() - 1) focusRow++;
+                if (focusRow < mapHeight() - 1) {
+                    focusRow++;
+                    moved = true;
+                }
                 break;
             default: QWidget::keyPressEvent(event); return;
+        }
+        if (moved && moveQueue) {
+            // TODO: align with official keys (Z for 50%)
+            bool takeHalf = (event->modifiers() & Qt::ControlModifier);
+            moveQueue->emplace_back(
+                MoveType::MOVE_ARMY, Coord(oldRow + 1, oldCol + 1),
+                Coord(focusRow + 1, focusCol + 1), takeHalf);
         }
         update();
     } else {
         QWidget::keyPressEvent(event);
     }
+}
+
+void MapWidget::bindMoveQueue(std::deque<Move>* queue) {
+    moveQueue = queue;
+    update();
 }

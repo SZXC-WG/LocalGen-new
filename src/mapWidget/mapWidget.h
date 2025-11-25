@@ -3,9 +3,11 @@
 
 #include <QPoint>
 #include <QWidget>
+#include <deque>
 #include <vector>
 
 #include "../GameEngine/board.h"
+#include "../GameEngine/move.h"
 
 struct DisplayTile {
     tile_type_e type = TILE_BLANK;
@@ -32,6 +34,8 @@ class MapWidget : public QWidget {
     void realloc(int w, int h);
 
     void fitCenter(int margin);
+
+    void bindMoveQueue(std::deque<Move>* queue);
 
    signals:
     void cellClicked(int r, int c);
@@ -70,6 +74,7 @@ class MapWidget : public QWidget {
     QPoint lastRightClickGrid;
 
     std::vector<std::vector<DisplayTile>> displayTiles;
+    std::deque<Move>* moveQueue = nullptr;
 };
 
 #endif  // MAPWIDGET_H

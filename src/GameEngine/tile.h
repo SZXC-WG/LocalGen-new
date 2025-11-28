@@ -48,7 +48,7 @@ enum tile_type_e {
 
 /// Information of a single tile.
 struct Tile {
-    index_t occupier;
+    index_t occupier;  // If set to -1, the tile is unoccupied.
     tile_type_e type;
     army_t army;
     // Light is a tile attribute, not a tile type.

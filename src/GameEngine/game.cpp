@@ -40,15 +40,16 @@ void BasicGame::GameBoard::update(turn_t turn) {
                 continue;
             }
             // increments
-            if (game->increment[tile.type] > 0)
-                tile.army += (turn % game->increment[tile.type] == 0);
-            else if (game->increment[tile.type] < 0)
-                tile.army += game->increment[tile.type];
-            // decrements
-            if (game->decrement[tile.type] > 0)
-                tile.army -= (turn % game->decrement[tile.type] == 0);
-            else if (game->decrement[tile.type] < 0)
-                tile.army -= game->decrement[tile.type];
+            switch (tile.type) {
+                case TILE_CITY:
+                case TILE_GENERAL: ++tile.army;
+                case TILE_BLANK:
+                    if (game->curTurn % 25 == 0) ++tile.army;
+                    break;
+                case TILE_SWAMP:
+                    if (tile.army > 0) --tile.army;
+                    break;
+            }
             // lost tiles
             if (tile.army == 0) {
                 if (tile.type == TILE_SWAMP) tile.occupier = 0;

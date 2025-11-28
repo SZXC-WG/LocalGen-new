@@ -238,26 +238,8 @@ class BasicGame {
     /// becoming a headless replay generator.
     /* speed_t speed{1.0}; */
 
-    /// Self-increment parameters per tile type.
-    /// Positive value  N: 1 troop every N turns.
-    /// Negative value -N: N troops every turn.
-    /// Note: +1 and −1 behave identically.
-    std::array<army_t, TILE_TYPE_COUNT> increment{};
-
-    /// Self-decrement parameters per tile type.
-    /// Positive value  N: 1 troop decays every N turns.
-    /// Negative value -N: N troops decays every turn.
-    /// Note: +1 and −1 behave identically.
-    std::array<army_t, TILE_TYPE_COUNT> decrement{};
-
    public:
     inline turn_t getCurTurn() const { return curTurn; }
-    inline std::array<army_t, TILE_TYPE_COUNT> getIncrement() const {
-        return increment;
-    };
-    inline std::array<army_t, TILE_TYPE_COUNT> getDecrement() const {
-        return decrement;
-    };
 
    protected:
     /// All players participating in the game.

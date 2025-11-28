@@ -208,6 +208,12 @@ int BasicGame::init() {
     int spawnReturn = initSpawn();
     if (spawnReturn != 0) return spawnReturn;
     alive = std::vector(players.size(), true);
+    for (index_t i = 0; i < players.size(); ++i) {
+        players[i]->init(
+            i, GameConstantsPack{board.getHeight(), board.getWidth(),
+                                 static_cast<index_t>(players.size()), teams,
+                                 conf});
+    }
     return 0;
 }
 

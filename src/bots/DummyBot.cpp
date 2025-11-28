@@ -97,7 +97,7 @@ class DummyBot : public BasicBot {
         }
         struct node {
             int type;
-            unsigned team;
+            index_t team;
             long long army;
             int dir;
             std::ptrdiff_t lastCount;

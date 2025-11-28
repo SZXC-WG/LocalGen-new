@@ -209,8 +209,6 @@ struct GameConstantsPack {
     pos_t mapHeight, mapWidth;
     index_t playerCount;
     std::vector<index_t> teams;
-    std::array<army_t, TILE_TYPE_COUNT> increment;
-    std::array<army_t, TILE_TYPE_COUNT> decrement;
     config::Config config;
 };
 

@@ -15,7 +15,7 @@
 
 class Player;
 
-using index_t = uint32_t;
+using index_t = int32_t;
 
 using army_t = int64_t;
 

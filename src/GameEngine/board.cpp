@@ -224,9 +224,6 @@ bool Board::available(index_t player, Move move) {
         // coordinate validity check
         if (isInvalidPos(from) || isInvalidPos(to)) return false;
 
-        // visibility check
-        if (!visible(from, player)) return false;
-
         // %from tile availability check
         auto fromTile = view(player, from);
         switch (fromTile.type) {

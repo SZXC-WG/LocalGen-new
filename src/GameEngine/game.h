@@ -227,7 +227,7 @@ class BasicGame {
     /// Current turn index.
     turn_t curTurn{};
 
-    /// This variable should not be in game, but saved its comments here as a
+    /// This variable should not be in %Game, but saved its comments here as a
     /// reference for docs.
     /// Playback / simulation speed.
     /// Valid range: [0.25×, 256×] (values >16× are not recommended).

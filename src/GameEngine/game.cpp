@@ -94,7 +94,8 @@ void BasicGame::GameBoard::MoveProcessor::execute() {
                 move.takeHalf ? (fromTile.army >> 1) : (fromTile.army - 1);
 
             fromTile.army -= takenArmy;
-            if (toTile.occupier == player) {
+            if (game->inSameTeam(toTile.occupier, player)) {
+                toTile.occupier = player;
                 toTile.army += takenArmy;
             } else {
                 toTile.army -= takenArmy;

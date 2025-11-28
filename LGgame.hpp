@@ -209,11 +209,19 @@ void LGgame::updateMap() {
                     case 3: {
                         /* general */
                         ++gameMap[i][j].army;
+                        if (LGgame::curTurn %
+                                LGset::plainRate[LGset::gameMode] ==
+                            0)
+                            ++gameMap[i][j].army;
                         break;
                     }
                     case 4: {
                         /* city */
                         ++gameMap[i][j].army;
+                        if (LGgame::curTurn %
+                                LGset::plainRate[LGset::gameMode] ==
+                            0)
+                            ++gameMap[i][j].army;
                         break;
                     }
                 }

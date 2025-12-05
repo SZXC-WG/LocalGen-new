@@ -185,13 +185,18 @@ inline void calcData(int playerId) {
 #ifdef DEBUG_ZLY_V2_1
     db << "in calcData bfs (dist to spawn):" << std::endl;
 #endif
-    auto defenseDist = min(20, int(LGgame::gameStats[playerId].back().gtot() / 15.0));
+    auto defenseDist =
+        min(20, max(3, int(LGgame::gameStats[playerId].back().gtot() / 15.0)));
     while (!queue.empty()) {
         coordS current = queue.top().second;
         ll currentDist = queue.top().first;
         queue.pop();
         if (currentDist > distToSpawn[playerId][current.x][current.y]) continue;
-        if (currentDist <= defenseDist && !(getType(playerId, current.x, current.y) == BLOCK_SWAMP && (!isVisible(current.x, current.y, 1 << playerId) || gmp(current) == 0))) homeZone[playerId].emplace_back(current);
+        if (currentDist <= defenseDist &&
+            !(getType(playerId, current.x, current.y) == BLOCK_SWAMP &&
+              (!isVisible(current.x, current.y, 1 << playerId) ||
+               gmp(current) == 0)))
+            homeZone[playerId].emplace_back(current);
         for (int i = 0; i < 4; ++i) {
             coordS next = current + coordS(delta_x[i], delta_y[i]);
             if (next.x < 1 || next.x > mapH || next.y < 1 || next.y > mapW)
@@ -221,7 +226,7 @@ inline void calcData(int playerId) {
                 blockValue[playerId][i][j] -= dist0[playerId][i][j];
                 blockValue[playerId][i][j] -= getArmy(playerId, i, j);
                 blockDanger[playerId][i][j] =
-                    - blockValueWeight[playerId][getType(playerId, i, j)];
+                    -blockValueWeight[playerId][getType(playerId, i, j)];
                 blockDanger[playerId][i][j] -= distToSpawn[playerId][i][j] * 2;
                 blockDanger[playerId][i][j] -= dist1[playerId][i][j];
                 if (LGset::gameMode == 0)
@@ -231,7 +236,7 @@ inline void calcData(int playerId) {
                          100000.0 / LGgame::gameStats[playerId].back().army);
                 // blockValue -= passedTimes[playerId][i][j];
                 if (isVisible(i, j, 1 << playerId)) {
-                    if(gameMap[i][j].player != 0) {
+                    if (gameMap[i][j].player != 0) {
                         ll adjacent_minimum_same_player = INF;
                         for (int k = 0; k < 4; ++k) {
                             coordS adja =
@@ -239,8 +244,9 @@ inline void calcData(int playerId) {
                             if (adja.x < 1 || adja.x > mapH || adja.y < 1 ||
                                 adja.y > mapW)
                                 continue;
-                            if (isVisible(adja.x, adja.y,
-                                        1 << playerId && gmp(adja) == playerId))
+                            if (isVisible(
+                                    adja.x, adja.y,
+                                    1 << playerId && gmp(adja) == playerId))
                                 adjacent_minimum_same_player =
                                     min(adjacent_minimum_same_player,
                                         dist0[playerId][adja.x][adja.y]);
@@ -250,9 +256,10 @@ inline void calcData(int playerId) {
                         blockValue[playerId][i][j] +=
                             2 * (gma(i, j) - adjacent_minimum_same_player);
                     }
-                    if(gameMap[i][j].player != 0)
+                    if (gameMap[i][j].player != 0)
                         blockDanger[playerId][i][j] += 2 * gma(i, j);
-                    else blockDanger[playerId][i][j] -= gma(i, j) / 2;
+                    else
+                        blockDanger[playerId][i][j] -= gma(i, j) / 2;
                 }
             }
         }
@@ -357,7 +364,8 @@ moveS calcNextMove(int playerId, coordS currentPos) {
     db.open("player_"s + to_string(playerId) + "_debug.txt"s, std::ios::app);
     db << std::endl;
 #endif
-    if (gameMap[focus[playerId][0].x][focus[playerId][0].y].player != playerId ||
+    if (gameMap[focus[playerId][0].x][focus[playerId][0].y].player !=
+            playerId ||
         gameMap[focus[playerId][0].x][focus[playerId][0].y].army == 0) {
         long long maxArmy = 0;
         coordS maxCoo = LGgame::genCoo[playerId];
@@ -374,12 +382,14 @@ moveS calcNextMove(int playerId, coordS currentPos) {
         leastUsage[playerId] = 0;
         focus[playerId][0] = maxCoo;
     }
-    if (gameMap[focus[playerId][1].x][focus[playerId][1].y].player != playerId ||
+    if (gameMap[focus[playerId][1].x][focus[playerId][1].y].player !=
+            playerId ||
         gameMap[focus[playerId][1].x][focus[playerId][1].y].army == 0) {
         long long maxArmy = 0;
         coordS maxCoo = LGgame::genCoo[playerId];
         for (auto pos : homeZone[playerId]) {
-            if (isVisible(pos.x, pos.y, 1 << playerId) && gmp(pos) == playerId) {
+            if (isVisible(pos.x, pos.y, 1 << playerId) &&
+                gmp(pos) == playerId) {
                 if (gma(pos) > maxArmy) {
                     maxArmy = gma(pos);
                     maxCoo = pos;
@@ -406,31 +416,37 @@ moveS calcNextMove(int playerId, coordS currentPos) {
             }
         }
     }
-    if(targetGeneralId == -1 && botModes[playerId] == BOT_MODE_ATTACK) botModes[playerId] = BOT_MODE_EXPLORE;
+    if (targetGeneralId == -1 && botModes[playerId] == BOT_MODE_ATTACK)
+        botModes[playerId] = BOT_MODE_EXPLORE;
     calcData(playerId);
     bool homeZoneThreat = false;
     ll homeZoneDanger = 0;
     for (auto pos : homeZone[playerId]) {
-        if(!isVisible(pos.x, pos.y, 1 << playerId) || (gmp(pos) != playerId)) {
+        if (!isVisible(pos.x, pos.y, 1 << playerId) || (gmp(pos) != playerId)) {
             homeZoneDanger += blockDanger[playerId][pos.x][pos.y] + 10;
         }
-        if(isVisible(pos.x, pos.y, 1 << playerId) && gmp(pos) != 0 && gmp(pos) != playerId && gma(pos) > gma(LGgame::genCoo[playerId]))
+        if (isVisible(pos.x, pos.y, 1 << playerId) && gmp(pos) != 0 &&
+            gmp(pos) != playerId && gma(pos) > gma(LGgame::genCoo[playerId]))
             homeZoneThreat = true;
     }
     ll homeZoneDangerAver = homeZoneDanger / (ll)(homeZone[playerId].size());
 #ifdef DEBUG_ZLY_V2_1
     db << "ARR: homeZone = ";
-    for(auto pos : homeZone[playerId]) db << "(" << pos.x << "," << pos.y << ")";
+    for (auto pos : homeZone[playerId])
+        db << "(" << pos.x << "," << pos.y << ")";
     db << std::endl;
     db << "VAR: homeZoneDanger = " << homeZoneDanger << std::endl;
     db << "VALUE: homeZoneDangerAver = " << homeZoneDangerAver << std::endl;
 #endif
-    if ((botModes[playerId] == BOT_MODE_ATTACK && homeZoneDangerAver > 5) || (botModes[playerId] == BOT_MODE_EXPLORE && homeZoneDangerAver > 0) || homeZoneThreat) {
+    if ((botModes[playerId] == BOT_MODE_ATTACK && homeZoneDangerAver > 5) ||
+        (botModes[playerId] == BOT_MODE_EXPLORE && homeZoneDangerAver > 0) ||
+        homeZoneThreat) {
         botModes[playerId] = BOT_MODE_DEFEND;
         long long maxArmy = 0;
         coordS maxCoo = LGgame::genCoo[playerId];
         for (auto pos : homeZone[playerId]) {
-            if (isVisible(pos.x, pos.y, 1 << playerId) && gmp(pos) == playerId) {
+            if (isVisible(pos.x, pos.y, 1 << playerId) &&
+                gmp(pos) == playerId) {
                 if (gma(pos) > maxArmy) {
                     maxArmy = gma(pos);
                     maxCoo = pos;
@@ -442,7 +458,9 @@ moveS calcNextMove(int playerId, coordS currentPos) {
         botModes[playerId] = BOT_MODE_EXPLORE;
     }
 #ifdef DEBUG_ZLY_V2_1
-    db << "FOCUS: [0](" << focus[playerId][0].x << "," << focus[playerId][0].y << ") [1](" << focus[playerId][1].x << "," << focus[playerId][1].y << ")" << std::endl;
+    db << "FOCUS: [0](" << focus[playerId][0].x << "," << focus[playerId][0].y
+       << ") [1](" << focus[playerId][1].x << "," << focus[playerId][1].y << ")"
+       << std::endl;
 #endif
     if (botModes[playerId] == BOT_MODE_ATTACK) {
 #ifdef DEBUG_ZLY_V2_1
@@ -455,8 +473,8 @@ moveS calcNextMove(int playerId, coordS currentPos) {
         findRoute(playerId, focus[playerId][0],
                   seenGenerals[playerId][targetGeneralId]);
         // recordNewMove(playerId, stackedMoves[playerId].front());
-        moveS ret =
-            moveS{playerId, true, focus[playerId][0], stackedMoves[playerId].front()};
+        moveS ret = moveS{playerId, true, focus[playerId][0],
+                          stackedMoves[playerId].front()};
 #ifdef DEBUG_ZLY_V2_1
         db << "stackedMoves size: " << stackedMoves[playerId].size()
            << std::endl;
@@ -486,7 +504,7 @@ moveS calcNextMove(int playerId, coordS currentPos) {
         vector<node> nodes;
         for (int row = 1; row <= mapH; ++row)
             for (int col = 1; col <= mapW; ++col)
-                if(!unpassable(getType(playerId, row, col)))
+                if (!unpassable(getType(playerId, row, col)))
                     nodes.push_back(
                         node{coordS(row, col), blockValue[playerId][row][col]});
         sort(nodes.begin(), nodes.end(),
@@ -509,8 +527,8 @@ moveS calcNextMove(int playerId, coordS currentPos) {
             db << " (" << i.x << "," << i.y << ")";
         db << std::endl;
 #endif
-        moveS ret =
-            moveS{playerId, true, focus[playerId][0], stackedMoves[playerId].front()};
+        moveS ret = moveS{playerId, true, focus[playerId][0],
+                          stackedMoves[playerId].front()};
         focus[playerId][0] = stackedMoves[playerId].front();
         stackedMoves[playerId].pop_front();
         leastUsage[playerId] = min((int)stackedMoves[playerId].size(), (0));
@@ -521,7 +539,7 @@ moveS calcNextMove(int playerId, coordS currentPos) {
         db.close();
 #endif
         return ret;
-    } else if(botModes[playerId] == BOT_MODE_DEFEND) {
+    } else if (botModes[playerId] == BOT_MODE_DEFEND) {
 #ifdef DEBUG_ZLY_V2_1
         db << "--- MODE: DEFEND ---" << std::endl;
 #endif
@@ -531,8 +549,7 @@ moveS calcNextMove(int playerId, coordS currentPos) {
         };
         vector<node> nodes;
         for (auto pos : homeZone[playerId])
-            nodes.push_back(
-                node{pos, blockDanger[playerId][pos.x][pos.y]});
+            nodes.push_back(node{pos, blockDanger[playerId][pos.x][pos.y]});
         sort(nodes.begin(), nodes.end(),
              [](const node& a, const node& b) { return a.value > b.value; });
 #ifdef DEBUG_ZLY_V2_1
@@ -553,8 +570,8 @@ moveS calcNextMove(int playerId, coordS currentPos) {
             db << " (" << i.x << "," << i.y << ")";
         db << std::endl;
 #endif
-        moveS ret =
-            moveS{playerId, true, focus[playerId][1], stackedMoves[playerId].front()};
+        moveS ret = moveS{playerId, true, focus[playerId][1],
+                          stackedMoves[playerId].front()};
         focus[playerId][1] = stackedMoves[playerId].front();
         stackedMoves[playerId].pop_front();
         leastUsage[playerId] = min((int)stackedMoves[playerId].size(), (0));

@@ -22,12 +22,13 @@
 #include "botlib/xiaruizeBot.hpp"
 #include "botlib/xrzBot.hpp"
 #include "botlib/zlyBot.hpp"
+#include "botlib/zlyBot_v2.1.hpp"
 #include "botlib/zlyBot_v2.hpp"
 // #include "botlib/zlyBot_v3.hpp"
 
 string botName[] = {
     "",        "smartRandomBot", "xrzBot", "xiaruizeBot", "zlyBot",
-    "szlyBot", "zlyBot v2",      "gcBot",  "zlyBot v3",   "gjrBot",
+    "szlyBot", "zlyBot v2",      "gcBot",  "zlyBot v2.1", "gjrBot",
 };
 
 #endif  // LGBOT_HPP_

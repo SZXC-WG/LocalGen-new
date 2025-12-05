@@ -701,7 +701,7 @@ int GAME() {
 
     // init robots
     std::mt19937 mtrd(std::random_device{}());
-    std::uniform_int_distribution<int> botid_dis(0, 699);
+    std::uniform_int_distribution<int> botid_dis(0, 799);
     LGgame::robotId[1] = -100;
     for (int i = 2; i <= LGgame::playerCnt; ++i) {
         // LGgame::robotId[i] = mtrd() % 100 + 300 + (i % 3) * 100;
@@ -725,6 +725,8 @@ int GAME() {
             zlyBot_v2::initBot(i);
         if (600 <= LGgame::robotId[i] && LGgame::robotId[i] < 700)
             gcBot::initBot(i);
+        if (700 <= LGgame::robotId[i] && LGgame::robotId[i] < 800)
+            zlyBot_v2_1::initBot(i);
     }
 
     // init generals
@@ -1023,6 +1025,16 @@ int GAME() {
                         break;
                     case 600 ... 699:
                         mv = gcBot::calcNextMove(i, LGgame::playerFocus[i]);
+                        if (!LGgame::checkMove(mv)) {
+                            LGreplay::Movement mov(mv);
+                            LGreplay::wreplay.newMove(mov);
+                            LGgame::inlineMove.push_back(mv);
+                            LGgame::playerFocus[i] = mv.to;
+                        }
+                        break;
+                    case 700 ... 799:
+                        mv = zlyBot_v2_1::calcNextMove(i,
+                                                       LGgame::playerFocus[i]);
                         if (!LGgame::checkMove(mv)) {
                             LGreplay::Movement mov(mv);
                             LGreplay::wreplay.newMove(mov);

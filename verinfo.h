@@ -1,5 +1,5 @@
-#define VER_STRING "4.3.3.3100"
+#define VER_STRING "4.3.3.3113"
 #define VER_MAJOR   4
 #define VER_MINOR   3
 #define VER_RELEASE	3
-#define VER_BUILD   3100
+#define VER_BUILD   3113

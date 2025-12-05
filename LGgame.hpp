@@ -711,7 +711,9 @@ int GAME() {
         // LGgame::robotId[i] = mtrd() % 100 + 400;
         // LGgame::robotId[i] = mtrd() % 100 + 300;
         while (((LGset::gameMode == 1 || LGset::gameMode == 2) &&
-                (200 <= LGgame::robotId[i] && LGgame::robotId[i] < 300)))
+                (200 <= LGgame::robotId[i] && LGgame::robotId[i] < 300)) ||
+               (LGset::gameMode != 0 &&
+                (700 <= LGgame::robotId[i] && LGgame::robotId[i] < 800)))
             LGgame::robotId[i] = botid_dis(mtrd);
         // LGgame::robotId[i] = mtrd() % 100 + 400 + (i % 3) * 100;
         // LGgame::robotId[i] = mtrd() % 100 + 400;

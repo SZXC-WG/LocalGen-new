@@ -107,8 +107,14 @@ int LGgame::checkMove(moveS mv) {
 // flush existing movements
 void LGgame::flushMove() {
     while (!LGgame::inlineMove.empty()) {
-        moveS cur = LGgame::inlineMove.front();
-        LGgame::inlineMove.pop_front();
+        moveS cur;
+        if (LGgame::curTurn & 1) {
+            cur = LGgame::inlineMove.front();
+            LGgame::inlineMove.pop_front();
+        } else {
+            cur = LGgame::inlineMove.back();
+            LGgame::inlineMove.pop_back();
+        }
         if (!cur.takeArmy) {
             LGgame::playerCoo[cur.id] = cur.to;
             continue;

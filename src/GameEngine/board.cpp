@@ -14,10 +14,7 @@
 #include <algorithm>
 #include <cassert>
 
-Tile& Board::tileAt(pos_t x, pos_t y) {
-    assert(isValidPos(x, y));
-    return tiles[x][y];
-}
+Tile& Board::tileAt(pos_t x, pos_t y) { return tiles.at(x).at(y); }
 Tile& Board::tileAt(Coord pos) { return tileAt(pos.x, pos.y); }
 int Board::setWidth(pos_t _col) {
     if (_col < 0) return 1;
@@ -249,8 +246,16 @@ bool Board::available(index_t player, Move move) {
 }
 
 BoardView Board::view(index_t player) const {
-    // Simply use the constructor to generate it.
-    return BoardView(this, player);
+    BoardView boardView;
+    auto& tileViews = boardView.tiles;
+    boardView.row = row, boardView.col = col;
+    tileViews.resize(row + 2, std::vector<TileView>(col + 2));
+    for (pos_t i = 1; i <= row; ++i) {
+        for (pos_t j = 1; j <= col; ++j) {
+            tileViews[i][j].fromTile(tiles[i][j], visible(i, j, player));
+        }
+    }
+    return boardView;
 }
 
 TileView Board::view(index_t player, pos_t row, pos_t col) {
@@ -260,23 +265,8 @@ TileView Board::view(index_t player, Coord pos) {
     return TileView(tileAt(pos), visible(pos, player));
 }
 
-TileView& BoardView::tileAt(pos_t x, pos_t y) {
-    assert(isValidPos(x, y));
-    return tiles[x][y];
-}
+TileView& BoardView::tileAt(pos_t x, pos_t y) { return tiles.at(x).at(y); }
 TileView& BoardView::tileAt(Coord pos) { return tileAt(pos.x, pos.y); }
-
-BoardView::BoardView() : row(0), col(0) {}
-BoardView::BoardView(const Board* const& board, index_t player)
-    : row(board->row), col(board->col) {
-    tiles.resize(board->row + 2, std::vector<TileView>(board->col + 2));
-    for (pos_t i = 1; i <= row; ++i) {
-        for (pos_t j = 1; j <= col; ++j) {
-            tiles[i][j].fromTile(board->tiles[i][j],
-                                 board->visible(i, j, player));
-        }
-    }
-}
 
 InitBoard::InitBoard() {}
 InitBoard::InitBoard(pos_t row, pos_t col) : Board(row, col) {}

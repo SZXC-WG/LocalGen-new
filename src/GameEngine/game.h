@@ -346,8 +346,8 @@ class BasicGame {
 
     /// Obtain a player-specific view of the board.
     /// NOTE: This returns a “view”, not the raw board.
-    inline BoardView getBoard(Player* player) {
-        return BoardView(&board, indexMap[player]);
+    inline BoardView view(Player* player) {
+        return board.view(indexMap[player]);
     }
 
    public:

@@ -27,10 +27,9 @@ enum tile_type_e {
     TILE_LOOKOUT = 6,
     TILE_OBSERVATORY = 7,
 
-    /// Mountains, cities, lookouts, observatories appear as 'obstacles' if
-    /// not visible.
-    /// Give it a specific number. It may appear as tile type return values.
-    TILE_OBSTACLE = -1,
+    /// Mountains, cities, lookouts, and observatories
+    /// appear as 'obstacles' if not visible.
+    TILE_OBSTACLE = 8,
 
     /// Tile aliases
     TILE_GENERAL = TILE_SPAWN,

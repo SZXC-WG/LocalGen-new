@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "../GameEngine/board.h"
-#include "../GameEngine/move.h"
+#include "../GameEngine/move.hpp"
 
 struct DisplayTile {
     tile_type_e type = TILE_BLANK;

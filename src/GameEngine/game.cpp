@@ -15,7 +15,7 @@
 #include <random>
 
 #include "board.h"
-#include "move.h"
+#include "move.hpp"
 #include "player.h"
 
 namespace game {

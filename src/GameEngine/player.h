@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "move.h"
+#include "move.hpp"
 #include "utils.hpp"
 
 class Move;

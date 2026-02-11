@@ -32,8 +32,7 @@ set(PROJECT_SOURCES
         src/GameEngine/bot.h
         src/GameEngine/game.cpp
         src/GameEngine/game.h
-        src/GameEngine/move.cpp
-        src/GameEngine/move.h
+        src/GameEngine/move.hpp
         src/GameEngine/player.cpp
         src/GameEngine/player.h
         src/GameEngine/tile.hpp

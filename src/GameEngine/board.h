@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include "move.h"
+#include "move.hpp"
 #include "tile.hpp"
 #include "utils.hpp"
 

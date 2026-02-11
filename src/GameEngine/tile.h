@@ -8,8 +8,8 @@
  * Tiles are basic elements of map boards.
  */
 
-#ifndef LGEN_MODULE_GE_TILE_H
-#define LGEN_MODULE_GE_TILE_H 1
+#ifndef LGEN_GAMEENGINE_TILE_H
+#define LGEN_GAMEENGINE_TILE_H
 
 #include <cstdint>
 
@@ -78,4 +78,4 @@ struct TileView {
     TileView(const Tile& tile, const bool& vis);
 };
 
-#endif  // LGEN_MODULE_GE_TILE_H
+#endif  // LGEN_GAMEENGINE_TILE_H

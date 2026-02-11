@@ -8,8 +8,8 @@
  * Moves are basic operations of players.
  */
 
-#ifndef LGEN_MODULE_GE_MOVE_H
-#define LGEN_MODULE_GE_MOVE_H 1
+#ifndef LGEN_GAMEENGINE_MOVE_H
+#define LGEN_GAMEENGINE_MOVE_H
 
 #include "../utils/coord.h"
 
@@ -47,4 +47,4 @@ bool operator>(const Move& a, const Move& b);
 bool operator<=(const Move& a, const Move& b);
 bool operator>=(const Move& a, const Move& b);
 
-#endif  // LGEN_MODULE_GE_MOVE_H
+#endif  // LGEN_GAMEENGINE_MOVE_H

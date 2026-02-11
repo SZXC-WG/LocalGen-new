@@ -8,8 +8,8 @@
  * Container of maps.
  */
 
-#ifndef LGEN_MODULE_GE_BOARD_H
-#define LGEN_MODULE_GE_BOARD_H 1
+#ifndef LGEN_GAMEENGINE_BOARD_H
+#define LGEN_GAMEENGINE_BOARD_H
 
 #include <string>
 #include <vector>
@@ -144,4 +144,4 @@ class InitBoard : public Board {
     int getSpawnTeam(Coord pos);
 };
 
-#endif  // LGEN_MODULE_GE_BOARD_H
+#endif  // LGEN_GAMEENGINE_BOARD_H

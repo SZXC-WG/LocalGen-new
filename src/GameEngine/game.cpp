@@ -6,8 +6,8 @@
  * Games
  */
 
-#ifndef LGEN_MODULE_GE_GAME_CPP
-#define LGEN_MODULE_GE_GAME_CPP
+#ifndef LGEN_GAMEENGINE_GAME_CPP
+#define LGEN_GAMEENGINE_GAME_CPP
 
 #include "game.h"
 
@@ -222,4 +222,4 @@ void BasicGame::broadcast(turn_t turn, GameMessageType message,
 
 }  // namespace game
 
-#endif  // LGEN_MODULE_GE_GAME_CPP
+#endif  // LGEN_GAMEENGINE_GAME_CPP

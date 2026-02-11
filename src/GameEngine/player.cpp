@@ -6,9 +6,9 @@
  * Players
  */
 
-#ifndef LGEN_MODULE_GE_PLAYER_CPP
-#define LGEN_MODULE_GE_PLAYER_CPP 1
+#ifndef LGEN_GAMEENGINE_PLAYER_CPP
+#define LGEN_GAMEENGINE_PLAYER_CPP
 
 #include "player.h"
 
-#endif  // LGEN_MODULE_GE_PLAYER_CPP
+#endif  // LGEN_GAMEENGINE_PLAYER_CPP

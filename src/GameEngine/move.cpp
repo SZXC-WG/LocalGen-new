@@ -6,8 +6,8 @@
  * Moves
  */
 
-#ifndef LGEN_MODULE_GE_MOVE_CPP
-#define LGEN_MODULE_GE_MOVE_CPP 1
+#ifndef LGEN_GAMEENGINE_MOVE_CPP
+#define LGEN_GAMEENGINE_MOVE_CPP
 
 #include "move.h"
 
@@ -21,4 +21,4 @@ bool operator>(const Move& a, const Move& b) { return b < a; }
 bool operator<=(const Move& a, const Move& b) { return !(b < a); }
 bool operator>=(const Move& a, const Move& b) { return !(a < b); }
 
-#endif  // LGEN_MODULE_GE_MOVE_CPP
+#endif  // LGEN_GAMEENGINE_MOVE_CPP

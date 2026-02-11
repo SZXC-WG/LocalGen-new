@@ -8,8 +8,8 @@
  * Core game operations
  */
 
-#ifndef LGEN_MODULE_GE_GAME_H
-#define LGEN_MODULE_GE_GAME_H
+#ifndef LGEN_GAMEENGINE_GAME_H
+#define LGEN_GAMEENGINE_GAME_H
 
 #include <array>
 #include <bitset>
@@ -423,4 +423,4 @@ class BasicGame {
 
 }  // namespace game
 
-#endif  // LGEN_MODULE_GE_GAME_H
+#endif  // LGEN_GAMEENGINE_GAME_H

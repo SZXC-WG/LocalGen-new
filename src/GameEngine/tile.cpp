@@ -6,8 +6,8 @@
  * Tiles
  */
 
-#ifndef LGEN_MODULE_GE_TILE_CPP
-#define LGEN_MODULE_GE_TILE_CPP 1
+#ifndef LGEN_GAMEENGINE_TILE_CPP
+#define LGEN_GAMEENGINE_TILE_CPP
 
 #include "tile.h"
 
@@ -38,4 +38,4 @@ TileView::TileView(const Tile& tile, const bool& vis) : visible(vis) {
     }
 }
 
-#endif  // LGEN_MODULE_GE_TILE_CPP
+#endif  // LGEN_GAMEENGINE_TILE_CPP

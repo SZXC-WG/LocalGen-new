@@ -9,7 +9,7 @@
  */
 
 #ifndef LGEN_LIB_COORD_H
-#define LGEN_LIB_COORD_H 1
+#define LGEN_LIB_COORD_H
 
 #include <cstdint>
 #include <utility>

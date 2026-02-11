@@ -6,8 +6,8 @@
  * Basic bot infrastructure: abstract class + static factory/registry.
  */
 
-#ifndef LGEN_MODULE_GE_BOT_H
-#define LGEN_MODULE_GE_BOT_H 1
+#ifndef LGEN_GAMEENGINE_BOT_H
+#define LGEN_GAMEENGINE_BOT_H
 
 #include <functional>
 #include <string>
@@ -57,4 +57,4 @@ struct BotRegistrar {
     }
 };
 
-#endif  // LGEN_MODULE_GE_BOT_H
+#endif  // LGEN_GAMEENGINE_BOT_H

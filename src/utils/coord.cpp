@@ -5,7 +5,7 @@
  */
 
 #ifndef LGEN_LIB_COORD_CPP
-#define LGEN_LIB_COORD_CPP 1
+#define LGEN_LIB_COORD_CPP
 
 #include "coord.h"
 

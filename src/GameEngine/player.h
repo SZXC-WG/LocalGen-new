@@ -8,8 +8,8 @@
  * Players are basic participants of games.
  */
 
-#ifndef LGEN_MODULE_GE_PLAYER_H
-#define LGEN_MODULE_GE_PLAYER_H 1
+#ifndef LGEN_GAMEENGINE_PLAYER_H
+#define LGEN_GAMEENGINE_PLAYER_H
 
 #include <cstdint>
 #include <deque>
@@ -55,4 +55,4 @@ class Player {
     }
 };
 
-#endif  // LGEN_MODULE_GE_PLAYER_H
+#endif  // LGEN_GAMEENGINE_PLAYER_H

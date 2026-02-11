@@ -6,8 +6,8 @@
  * Map Boards
  */
 
-#ifndef LGEN_MODULE_GE_BOARD_CPP
-#define LGEN_MODULE_GE_BOARD_CPP 1
+#ifndef LGEN_GAMEENGINE_BOARD_CPP
+#define LGEN_GAMEENGINE_BOARD_CPP
 
 #include "board.h"
 
@@ -311,4 +311,4 @@ int InitBoard::getSpawnTeam(Coord pos) {
         ->second;
 }
 
-#endif  // LGEN_MODULE_GE_BOARD_CPP
+#endif  // LGEN_GAMEENGINE_BOARD_CPP

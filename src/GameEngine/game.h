@@ -25,9 +25,6 @@
 #include "tile.hpp"
 #include "utils.hpp"
 
-class Board;
-class Player;
-
 namespace game {
 
 /// Namespace that contains all game-related configuration.

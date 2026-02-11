@@ -16,10 +16,9 @@
 #include <string>
 #include <vector>
 
+#include "board.h"
 #include "move.hpp"
 #include "utils.hpp"
-
-class BoardView;
 
 namespace game {
 struct GameConstantsPack;

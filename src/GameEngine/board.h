@@ -18,8 +18,6 @@
 #include "tile.hpp"
 #include "utils.hpp"
 
-class Player;
-
 class BoardView;
 
 /// Game map board. Zoomable.

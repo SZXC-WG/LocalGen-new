@@ -323,6 +323,11 @@ class BasicGame {
             /// Enqueue a move for later execution.
             void add(index_t player, Move move);
 
+            /// Sort queued moves by player index
+            ///     odd  - ascending
+            ///     even - descending
+            /// Act as a basic sorter.
+            void sortBasic();
             /// Sort queued moves by priority.
             void sort();
 

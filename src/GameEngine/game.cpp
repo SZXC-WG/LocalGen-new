@@ -70,7 +70,23 @@ void BasicGame::GameBoard::MoveProcessor::add(index_t player, Move move) {
     if (board->available(player, move)) movesInQueue.emplace_back(player, move);
 }
 
-void BasicGame::GameBoard::MoveProcessor::sort() {}
+void BasicGame::GameBoard::MoveProcessor::sortBasic() {
+    using value_t = decltype(movesInQueue)::value_type;
+    auto&& ascending = [](value_t a, value_t b) -> bool {
+        return a.first < b.first;
+    };
+    auto&& descending = [](value_t a, value_t b) -> bool {
+        return a.first > b.first;
+    };
+    if (game->curTurn & 1)
+        std::sort(begin(movesInQueue), end(movesInQueue), ascending);
+    else
+        std::sort(begin(movesInQueue), end(movesInQueue), descending);
+}
+void BasicGame::GameBoard::MoveProcessor::sort() {
+    // [TODO] priority system
+    sortBasic();
+}
 
 void BasicGame::GameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
     game->alive[p2] = false;

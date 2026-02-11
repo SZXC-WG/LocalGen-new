@@ -11,8 +11,8 @@
 #ifndef LGEN_GAMEENGINE_BOARD_HPP
 #define LGEN_GAMEENGINE_BOARD_HPP
 
-#include <algorithm>
 #include <cassert>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -324,34 +324,27 @@ class InitBoard : public Board {
 
    public:
     /// Spawns and team preferences
-    std::vector<std::pair<Coord, int>> spawns;
+    std::map<Coord, unsigned> spawns;
 
     inline void changeTile(Coord pos, Tile tile) {
         assert(isValidPos(pos));
-        setSpawn(pos, 0);
         tileAt(pos) = tile;
+        if (tile.type == TILE_SPAWN) setSpawn(pos, 0);
     };
 
     /// Set attributes of a spawn.
     /// @param team The team preference of the spawn.
     inline void setSpawn(Coord pos, unsigned team) {
         assert(isValidPos(pos));
-        if (tileAt(pos).type != TILE_SPAWN) {
-            tileAt(pos).type = TILE_SPAWN;
-            spawns.emplace_back(pos, team);
-            return;
-        }
-        std::sort(spawns.begin(), spawns.end());
-        std::lower_bound(spawns.begin(), spawns.end(), std::pair(pos, 0))
-            ->second = team;
+        if (tileAt(pos).type != TILE_SPAWN) tileAt(pos).type = TILE_SPAWN;
+        spawns[pos] = team;
     };
 
     /// Get the team preference of a spawn.
     /// @return The team preference of the spawn.
-    inline int getSpawnTeam(Coord pos) {
+    inline unsigned getSpawnTeam(Coord pos) {
         assert(isValidPos(pos) && tileAt(pos).type == TILE_SPAWN);
-        return std::lower_bound(spawns.begin(), spawns.end(), std::pair(pos, 0))
-            ->second;
+        return spawns.at(pos);
     };
 };
 

@@ -11,7 +11,7 @@
 #ifndef LGEN_GAMEENGINE_MOVE_H
 #define LGEN_GAMEENGINE_MOVE_H
 
-#include "../utils/coord.h"
+#include "utils.hpp"
 
 class Board;
 

@@ -22,6 +22,7 @@
 #include "board.h"
 #include "player.h"
 #include "tile.h"
+#include "utils.hpp"
 
 class Board;
 class Move;
@@ -213,11 +214,6 @@ struct GameConstantsPack {
 };
 
 class BasicGame {
-   public:
-    // type aliases
-    using turn_t = uint32_t;
-    using speed_t = double;
-
    protected:
     std::mt19937 rng{std::random_device()()};
 

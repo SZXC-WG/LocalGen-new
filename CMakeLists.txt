@@ -38,8 +38,7 @@ set(PROJECT_SOURCES
         src/GameEngine/player.h
         src/GameEngine/tile.cpp
         src/GameEngine/tile.h
-        src/utils/coord.cpp
-        src/utils/coord.h
+        src/GameEngine/utils.hpp
         res/res.qrc
 )
 

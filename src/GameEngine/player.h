@@ -17,11 +17,10 @@
 #include <vector>
 
 #include "move.h"
+#include "utils.hpp"
 
 class Move;
 class BoardView;
-
-using index_t = std::uint32_t;
 
 namespace game {
 struct GameConstantsPack;

@@ -14,9 +14,9 @@
 #include <string>
 #include <vector>
 
-#include "../utils/coord.h"
 #include "move.h"
 #include "tile.h"
+#include "utils.hpp"
 
 class Tile;
 class TileView;
@@ -46,7 +46,7 @@ class Board {
     inline bool isValidPos(pos_t x, pos_t y) const {
         return x >= 1 && x <= row && y >= 1 && y <= col;
     }
-    inline bool isValidPos(Coord pos) const { return isValidPos(SEPA(pos)); }
+    inline bool isValidPos(Coord pos) const { return isValidPos(pos.x, pos.y); }
     inline bool isInvalidPos(pos_t x, pos_t y) const {
         return !isValidPos(x, y);
     }
@@ -105,7 +105,7 @@ class BoardView {
     inline bool isValidPos(pos_t x, pos_t y) const {
         return x >= 1 && x <= row && y >= 1 && y <= col;
     }
-    inline bool isValidPos(Coord pos) const { return isValidPos(SEPA(pos)); }
+    inline bool isValidPos(Coord pos) const { return isValidPos(pos.x, pos.y); }
     inline bool isInvalidPos(pos_t x, pos_t y) const {
         return !isValidPos(x, y);
     }

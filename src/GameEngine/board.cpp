@@ -18,7 +18,7 @@ Tile& Board::tileAt(pos_t x, pos_t y) {
     assert(isValidPos(x, y));
     return tiles[x][y];
 }
-Tile& Board::tileAt(Coord pos) { return tileAt(SEPA(pos)); }
+Tile& Board::tileAt(Coord pos) { return tileAt(pos.x, pos.y); }
 int Board::setWidth(pos_t _col) {
     if (_col < 0) return 1;
     col = _col;
@@ -36,7 +36,7 @@ Tile Board::getTile(pos_t x, pos_t y) const {
     assert(isValidPos(x, y));
     return tiles[x][y];
 }
-Tile Board::getTile(Coord pos) const { return getTile(SEPA(pos)); }
+Tile Board::getTile(Coord pos) const { return getTile(pos.x, pos.y); }
 
 Board::Board() : row(0), col(0), tiles(0, std::vector<Tile>(0)) {}
 Board::Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
@@ -211,7 +211,7 @@ bool Board::visible(pos_t x, pos_t y, index_t player) const {
     return false;
 }
 bool Board::visible(const Coord& pos, index_t player) const {
-    return visible(SEPA(pos), player);
+    return visible(pos.x, pos.y, player);
 }
 
 bool Board::available(index_t player, Move move) {
@@ -264,7 +264,7 @@ TileView& BoardView::tileAt(pos_t x, pos_t y) {
     assert(isValidPos(x, y));
     return tiles[x][y];
 }
-TileView& BoardView::tileAt(Coord pos) { return tileAt(SEPA(pos)); }
+TileView& BoardView::tileAt(Coord pos) { return tileAt(pos.x, pos.y); }
 
 BoardView::BoardView() : row(0), col(0) {}
 BoardView::BoardView(const Board* const& board, index_t player)

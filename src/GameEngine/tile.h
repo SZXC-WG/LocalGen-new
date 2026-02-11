@@ -13,11 +13,9 @@
 
 #include <cstdint>
 
+#include "utils.hpp"
+
 class Player;
-
-using index_t = int32_t;
-
-using army_t = int64_t;
 
 static constexpr int TILE_TYPE_COUNT = 8;
 

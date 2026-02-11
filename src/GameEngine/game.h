@@ -20,12 +20,12 @@
 #include <vector>
 
 #include "board.h"
+#include "move.hpp"
 #include "player.hpp"
 #include "tile.hpp"
 #include "utils.hpp"
 
 class Board;
-class Move;
 class Player;
 
 namespace game {

@@ -16,7 +16,7 @@
 enum class MoveType { EMPTY, MOVE_ARMY, SURRENDER };
 
 /// Stores a single move: `from` -> `to`.
-class Move {
+struct Move {
    public:
     MoveType type = MoveType::EMPTY;
     Coord from, to;

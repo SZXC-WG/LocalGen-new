@@ -30,6 +30,9 @@ enum tile_type_e {
     /// Mountains, cities, lookouts, and observatories
     /// appear as 'obstacles' if not visible.
     TILE_OBSTACLE = 8,
+    /// Once a general is captured, it will turn into a city while still
+    /// displayed blank.
+    TILE_CAPTURED_GENERAL = 9,
 
     /// Tile aliases
     TILE_GENERAL = TILE_SPAWN,
@@ -57,10 +60,10 @@ struct TileView {
     army_t army = 0;
 
     TileView() = default;
-    TileView(const Tile& tile, bool vis) { fromTile(tile, vis); }
+    TileView(const Tile& tile, bool vis) { updateFrom(tile, vis); }
 
     /// Tile information + visibility -> TileView
-    inline void fromTile(const Tile& tile, bool vis) {
+    inline void updateFrom(const Tile& tile, bool vis) {
         visible = vis;
         if (vis) {
             occupier = tile.occupier;
@@ -70,12 +73,13 @@ struct TileView {
             occupier = -1;
             switch (tile.type) {
                 case TILE_SPAWN:
-                case TILE_DESERT:      type = TILE_BLANK; break;
+                case TILE_CAPTURED_GENERAL:
+                case TILE_DESERT:           type = TILE_BLANK; break;
                 case TILE_MOUNTAIN:
                 case TILE_CITY:
                 case TILE_LOOKOUT:
-                case TILE_OBSERVATORY: type = TILE_OBSTACLE; break;
-                default:               type = tile.type;
+                case TILE_OBSERVATORY:      type = TILE_OBSTACLE; break;
+                default:                    type = tile.type;
             }
             army = 0;
         }

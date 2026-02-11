@@ -42,7 +42,8 @@ void BasicGame::GameBoard::update(turn_t turn) {
             // increments
             switch (tile.type) {
                 case TILE_CITY:
-                case TILE_GENERAL: ++tile.army;
+                case TILE_GENERAL:
+                case TILE_CAPTURED_GENERAL: ++tile.army;
                 case TILE_BLANK:
                     if (game->curTurn % 25 == 0) ++tile.army;
                     break;
@@ -94,7 +95,8 @@ void BasicGame::GameBoard::MoveProcessor::capture(index_t p1, index_t p2) {
         for (auto& tile : row) {
             if (tile.occupier == p2) {
                 tile.occupier = p1;
-                if (tile.type == TILE_GENERAL) tile.type = TILE_CITY;
+                if (tile.type == TILE_GENERAL)
+                    tile.type = TILE_CAPTURED_GENERAL;
             }
         }
     }

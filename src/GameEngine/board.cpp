@@ -272,8 +272,8 @@ BoardView::BoardView(const Board* const& board, index_t player)
     tiles.resize(board->row + 2, std::vector<TileView>(board->col + 2));
     for (pos_t i = 1; i <= row; ++i) {
         for (pos_t j = 1; j <= col; ++j) {
-            tiles[i][j].fromTile(board->tiles[i][j],
-                                 board->visible(i, j, player));
+            tiles[i][j].updateFrom(board->tiles[i][j],
+                                   board->visible(i, j, player));
         }
     }
 }

@@ -38,18 +38,16 @@ class Board {
     inline Tile& tileAt(pos_t x, pos_t y) { return tiles.at(x).at(y); };
     inline Tile& tileAt(Coord pos) { return tileAt(pos.x, pos.y); };
 
-    int setWidth(pos_t _col) {
-        if (_col < 0) return 1;
+    void setWidth(pos_t _col) {
+        assert(_col >= 0);
         col = _col;
         for (int i = 0; i < row + 2; i++) tiles[i].resize(_col + 2);
-        return 0;
     }
 
-    int setHeight(pos_t _row) {
-        if (_row < 0) return 1;
+    void setHeight(pos_t _row) {
+        assert(_row >= 0);
         row = _row;
         tiles.resize(_row + 2, std::vector<Tile>(col + 2, Tile()));
-        return 0;
     }
 
    public:
@@ -328,40 +326,31 @@ class InitBoard : public Board {
     /// Spawns and team preferences
     std::vector<std::pair<Coord, int>> spawns;
 
-    /// @return 0 if the operation is successful, 1 otherwise.
-    int changeTile(Coord pos, Tile tile) {
-        if (isInvalidPos(pos)) return 1;
-        if (tile.type == TILE_SPAWN) {
-            return setSpawn(pos, 0);
-        }
+    inline void changeTile(Coord pos, Tile tile) {
+        assert(isValidPos(pos));
+        setSpawn(pos, 0);
         tileAt(pos) = tile;
-        return 0;
     };
 
     /// Set attributes of a spawn.
     /// @param team The team preference of the spawn.
-    /// @return 0 if the operation is successful, 1 otherwise.
-    int setSpawn(Coord pos, unsigned team) {
-        if (isInvalidPos(pos)) return 1;
-        if (tileAt(pos).type == TILE_SPAWN) {
-            spawns[std::lower_bound(begin(spawns), end(spawns),
-                                    std::pair(pos, 0)) -
-                   begin(spawns)]
-                .second = team;
-            return 0;
+    inline void setSpawn(Coord pos, unsigned team) {
+        assert(isValidPos(pos));
+        if (tileAt(pos).type != TILE_SPAWN) {
+            tileAt(pos).type = TILE_SPAWN;
+            spawns.emplace_back(pos, team);
+            return;
         }
-        tileAt(pos).type = TILE_SPAWN;
-        spawns.emplace_back(pos, team);
-        std::sort(begin(spawns), end(spawns));
-        return 0;
+        std::sort(spawns.begin(), spawns.end());
+        std::lower_bound(spawns.begin(), spawns.end(), std::pair(pos, 0))
+            ->second = team;
     };
 
     /// Get the team preference of a spawn.
-    /// @return The team preference of the spawn. -1 if failed.
-    int getSpawnTeam(Coord pos) {
-        if (isInvalidPos(pos)) return -1;
-        if (tileAt(pos).type != TILE_SPAWN) return -1;
-        return std::lower_bound(begin(spawns), end(spawns), std::pair(pos, 0))
+    /// @return The team preference of the spawn.
+    inline int getSpawnTeam(Coord pos) {
+        assert(isValidPos(pos) && tileAt(pos).type == TILE_SPAWN);
+        return std::lower_bound(spawns.begin(), spawns.end(), std::pair(pos, 0))
             ->second;
     };
 };

@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <random>
 
-#include "board.h"
+#include "board.hpp"
 #include "move.hpp"
 #include "player.hpp"
 
@@ -23,7 +23,7 @@ namespace game {
 BasicGame::GameBoard::GameBoard(BasicGame* _game) : game(_game) {}
 BasicGame::GameBoard::GameBoard(BasicGame* _game, Board* _board)
     : game(_game),
-      Board(_board),
+      Board(*_board),
       visibility(_game->players.size(),
                  std::vector(_board->getHeight() + 2,
                              std::vector(_board->getWidth() + 2, 0))) {}

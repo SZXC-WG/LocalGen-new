@@ -17,7 +17,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
-#include "../GameEngine/board.h"
+#include "../GameEngine/board.hpp"
 
 #define MAGIC_6 quint32(0x4C47656E)
 

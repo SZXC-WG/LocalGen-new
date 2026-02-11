@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "board.h"
+#include "board.hpp"
 #include "move.hpp"
 #include "utils.hpp"
 

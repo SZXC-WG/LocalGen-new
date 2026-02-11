@@ -6,7 +6,7 @@
 #include <deque>
 #include <vector>
 
-#include "../GameEngine/board.h"
+#include "../GameEngine/board.hpp"
 #include "../GameEngine/move.hpp"
 
 struct DisplayTile {

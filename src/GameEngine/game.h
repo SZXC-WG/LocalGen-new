@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "board.h"
+#include "board.hpp"
 #include "move.hpp"
 #include "player.hpp"
 #include "tile.hpp"

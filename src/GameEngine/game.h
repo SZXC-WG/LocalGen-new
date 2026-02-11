@@ -21,7 +21,7 @@
 
 #include "board.h"
 #include "player.h"
-#include "tile.h"
+#include "tile.hpp"
 #include "utils.hpp"
 
 class Board;

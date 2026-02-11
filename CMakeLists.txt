@@ -36,8 +36,7 @@ set(PROJECT_SOURCES
         src/GameEngine/move.h
         src/GameEngine/player.cpp
         src/GameEngine/player.h
-        src/GameEngine/tile.cpp
-        src/GameEngine/tile.h
+        src/GameEngine/tile.hpp
         src/GameEngine/utils.hpp
         res/res.qrc
 )

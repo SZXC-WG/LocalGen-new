@@ -15,11 +15,8 @@
 #include <vector>
 
 #include "move.h"
-#include "tile.h"
+#include "tile.hpp"
 #include "utils.hpp"
-
-class Tile;
-class TileView;
 
 class Player;
 

@@ -67,7 +67,7 @@ struct TileView {
         visible = vis;
         if (vis) {
             occupier = tile.occupier;
-            type = tile.type;
+            type = tile.type == TILE_CAPTURED_GENERAL ? TILE_CITY : tile.type;
             army = tile.army;
         } else {
             occupier = -1;

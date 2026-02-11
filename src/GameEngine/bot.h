@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "player.h"
+#include "player.hpp"
 
 class BasicBot : public Player {};
 

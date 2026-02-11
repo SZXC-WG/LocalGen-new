@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "board.h"
-#include "player.h"
+#include "player.hpp"
 #include "tile.hpp"
 #include "utils.hpp"
 

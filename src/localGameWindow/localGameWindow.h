@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "../GameEngine/player.h"
+#include "../GameEngine/player.hpp"
 #include "../localGameDialog/localGameDialog.h"
 #include "../mapWidget/mapWidget.h"
 

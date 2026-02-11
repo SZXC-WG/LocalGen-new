@@ -1,5 +1,5 @@
 /**
- * @file player.h
+ * @file player.hpp
  *
  * LocalGen Module: GameEngine
  *
@@ -8,8 +8,8 @@
  * Players are basic participants of games.
  */
 
-#ifndef LGEN_GAMEENGINE_PLAYER_H
-#define LGEN_GAMEENGINE_PLAYER_H
+#ifndef LGEN_GAMEENGINE_PLAYER_HPP
+#define LGEN_GAMEENGINE_PLAYER_HPP
 
 #include <cstdint>
 #include <deque>
@@ -19,7 +19,6 @@
 #include "move.hpp"
 #include "utils.hpp"
 
-class Move;
 class BoardView;
 
 namespace game {
@@ -54,4 +53,4 @@ class Player {
     }
 };
 
-#endif  // LGEN_GAMEENGINE_PLAYER_H
+#endif  // LGEN_GAMEENGINE_PLAYER_HPP

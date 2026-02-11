@@ -16,7 +16,7 @@
 
 #include "board.h"
 #include "move.hpp"
-#include "player.h"
+#include "player.hpp"
 
 namespace game {
 

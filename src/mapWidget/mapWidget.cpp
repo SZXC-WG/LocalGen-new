@@ -314,16 +314,20 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
         int oldRow = focusRow, oldCol = focusCol;
         switch (event->key()) {
             case Qt::Key_Left:
-                if (focusCol > 0) focusCol--;
+                if (focusCol == 0) return;
+                focusCol--;
                 break;
             case Qt::Key_Right:
-                if (focusCol < mapWidth() - 1) focusCol++;
+                if (focusCol == mapWidth() - 1) return;
+                focusCol++;
                 break;
             case Qt::Key_Up:
-                if (focusRow > 0) focusRow--;
+                if (focusRow == 0) return;
+                focusRow--;
                 break;
             case Qt::Key_Down:
-                if (focusRow < mapHeight() - 1) focusRow++;
+                if (focusRow == mapHeight() - 1) return;
+                focusRow++;
                 break;
             default: QWidget::keyPressEvent(event); return;
         }

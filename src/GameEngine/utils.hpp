@@ -6,8 +6,8 @@
  * Utility functions and definitions
  */
 
-#ifndef LGEN_GAMEENGINE_UTILS_H
-#define LGEN_GAMEENGINE_UTILS_H
+#ifndef LGEN_GAMEENGINE_UTILS_HPP
+#define LGEN_GAMEENGINE_UTILS_HPP
 
 #include <cstdint>
 
@@ -36,4 +36,4 @@ struct Coord {
     }
 };
 
-#endif  // LGEN_GAMEENGINE_UTILS_H
+#endif  // LGEN_GAMEENGINE_UTILS_HPP

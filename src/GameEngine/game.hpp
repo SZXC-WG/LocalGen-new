@@ -171,9 +171,11 @@ class BasicGame {
    protected:
     std::mt19937 rng{std::random_device()()};
     turn_t curTurn{};
+    uint8_t curHalfTurnPhase{};
 
    public:
     inline turn_t getCurTurn() const { return curTurn; }
+    inline uint8_t getHalfTurnPhase() const { return curHalfTurnPhase; }
 
    protected:
     std::vector<Player*> players;
@@ -191,10 +193,20 @@ class BasicGame {
     inline bool isAlive(index_t player) const {
         return isValidPlayer(player) && alive[player];
     }
+    inline index_t getPlayerCount() const {
+        return static_cast<index_t>(players.size());
+    }
     inline index_t getTeam(index_t player) const { return teams[player]; }
     inline std::vector<index_t> getTeams() const { return teams; }
     inline std::string getName(index_t player) const { return names[player]; }
     inline std::vector<std::string> getNames() const { return names; }
+
+    inline BoardView view(index_t player) {
+        if (!isValidPlayer(player)) {
+            throw std::out_of_range("Invalid player index for view");
+        }
+        return board.view(player);
+    }
 
     inline bool inSameTeam(index_t player1, index_t player2) const {
         if (!isValidPlayer(player1) || !isValidPlayer(player2)) return false;
@@ -236,10 +248,7 @@ class BasicGame {
         return board.view(indexMap[player]);
     }
 
-    void enqueueMove(index_t player, const Move& move);
-    void sortMoves();
     void capture(index_t p1, index_t p2);
-    void executeMoves();
 
    public:
     BasicGame() = delete;
@@ -249,12 +258,10 @@ class BasicGame {
     ~BasicGame();
 
    protected:
-    void update();
-    void act(Player* player);
-    void process();
+    void executeMoves();
 
    public:
-    void performTurn();
+    void step();
 
    public:
     class RankInfo {
@@ -277,6 +284,15 @@ class BasicGame {
    public:
     int initSpawn();
     int init();
+
+   public:
+    std::vector<index_t> getAlivePlayers() const {
+        std::vector<index_t> res;
+        for (index_t i = 0; i < static_cast<index_t>(alive.size()); ++i) {
+            if (alive[i]) res.push_back(i);
+        }
+        return res;
+    }
 
    protected:
     InitBoard initialBoard;
@@ -329,25 +345,6 @@ inline void BasicGame::GameBoard::update(turn_t turn) {
     }
 }
 
-inline void BasicGame::enqueueMove(index_t player, const Move& move) {
-    if (board.available(player, move)) movesInQueue.emplace_back(player, move);
-}
-
-inline void BasicGame::sortMoves() {
-    using value_t = decltype(movesInQueue)::value_type;
-    auto&& ascending = [](value_t a, value_t b) -> bool {
-        return a.first < b.first;
-    };
-    auto&& descending = [](value_t a, value_t b) -> bool {
-        return a.first > b.first;
-    };
-    if (curTurn & 1) {
-        std::sort(movesInQueue.begin(), movesInQueue.end(), ascending);
-    } else {
-        std::sort(movesInQueue.begin(), movesInQueue.end(), descending);
-    }
-}
-
 inline void BasicGame::capture(index_t p1, index_t p2) {
     alive[p2] = false;
     for (auto& row : board.tiles) {
@@ -361,39 +358,6 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
         }
     }
     broadcast(curTurn, GameMessageType::CAPTURE, {p1, p2});
-}
-
-inline void BasicGame::executeMoves() {
-    for (auto [player, move] : movesInQueue) {
-        if (!board.available(player, move)) continue;
-        if (move.type == MoveType::MOVE_ARMY) {
-            Tile& fromTile = board.tileAt(move.from);
-            Tile& toTile = board.tileAt(move.to);
-
-            army_t takenArmy =
-                move.takeHalf ? (fromTile.army >> 1) : (fromTile.army - 1);
-
-            fromTile.army -= takenArmy;
-            if (isValidPlayer(toTile.occupier) &&
-                inSameTeam(toTile.occupier, player)) {
-                toTile.occupier = player;
-                toTile.army += takenArmy;
-            } else {
-                toTile.army -= takenArmy;
-                if (toTile.army < 0) {
-                    toTile.army = -toTile.army;
-                    if (toTile.type == TILE_GENERAL) {
-                        capture(player, toTile.occupier);
-                    }
-                    toTile.occupier = player;
-                }
-            }
-        } else if (move.type == MoveType::SURRENDER) {
-            alive[player] = false;
-            broadcast(curTurn, GameMessageType::SURRENDER, {player});
-        }
-    }
-    movesInQueue.clear();
 }
 
 inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
@@ -435,27 +399,63 @@ inline BasicGame::~BasicGame() {
     for (auto player : players) delete player;
 }
 
-inline void BasicGame::update() { board.update(curTurn); }
+inline void BasicGame::executeMoves() {
+    // sort
+    std::sort(movesInQueue.begin(), movesInQueue.end(),
+              [](const std::pair<index_t, Move>& lhs,
+                 const std::pair<index_t, Move>& rhs) {
+                  return lhs.first < rhs.first;
+              });
+    if (curHalfTurnPhase == 1)
+        std::reverse(movesInQueue.begin(), movesInQueue.end());
 
-inline void BasicGame::act(Player* player) {
-    index_t playerIndex = indexMap[player];
-    if (!isAlive(playerIndex)) return;
+    // execute
+    for (auto [player, move] : movesInQueue) {
+        if (!board.available(player, move)) continue;
+        if (move.type == MoveType::MOVE_ARMY) {
+            Tile& fromTile = board.tileAt(move.from);
+            Tile& toTile = board.tileAt(move.to);
 
-    BoardView boardView = view(player);
-    player->requestMove(boardView);
-    enqueueMove(playerIndex, player->step());
+            army_t takenArmy =
+                move.takeHalf ? (fromTile.army >> 1) : (fromTile.army - 1);
+
+            fromTile.army -= takenArmy;
+            if (isValidPlayer(toTile.occupier) &&
+                inSameTeam(toTile.occupier, player)) {
+                toTile.occupier = player;
+                toTile.army += takenArmy;
+            } else {
+                toTile.army -= takenArmy;
+                if (toTile.army < 0) {
+                    toTile.army = -toTile.army;
+                    if (toTile.type == TILE_GENERAL) {
+                        capture(player, toTile.occupier);
+                    }
+                    toTile.occupier = player;
+                }
+            }
+        } else if (move.type == MoveType::SURRENDER) {
+            alive[player] = false;
+            broadcast(curTurn, GameMessageType::SURRENDER, {player});
+        }
+    }
+    movesInQueue.clear();
 }
 
-inline void BasicGame::process() {
-    sortMoves();
+inline void BasicGame::step() {
+    for (index_t i : getAlivePlayers()) {
+        Player* player = players[i];
+        BoardView playerView = board.view(i);
+        player->requestMove(playerView);
+        Move move;
+        while ((move = player->step()).type != MoveType::EMPTY &&
+               !board.available(i, move));
+        if (move.type != MoveType::EMPTY) movesInQueue.emplace_back(i, move);
+    }
+    if (curHalfTurnPhase == 0) board.update(curTurn);
     executeMoves();
-}
-
-inline void BasicGame::performTurn() {
-    for (auto player : players) act(player);
-    update();
-    process();
-    ++curTurn;
+    curTurn += curHalfTurnPhase;
+    curHalfTurnPhase ^= 1;
 }
 
 inline void BasicGame::ranklist() {
@@ -464,7 +464,8 @@ inline void BasicGame::ranklist() {
          ++player) {
         rank[player].player = player;
         rank[player].army = 0;
-        std::fill(std::begin(rank[player].land), std::end(rank[player].land), 0);
+        std::fill(std::begin(rank[player].land), std::end(rank[player].land),
+                  0);
     }
 
     for (auto& row : board.tiles) {
@@ -481,10 +482,11 @@ inline void BasicGame::ranklist() {
         }
     }
 
-    std::sort(rank.begin(), rank.end(), [](const RankInfo& lhs, const RankInfo& rhs) {
-        if (lhs.army != rhs.army) return lhs.army > rhs.army;
-        return lhs.player < rhs.player;
-    });
+    std::sort(rank.begin(), rank.end(),
+              [](const RankInfo& lhs, const RankInfo& rhs) {
+                  if (lhs.army != rhs.army) return lhs.army > rhs.army;
+                  return lhs.player < rhs.player;
+              });
 }
 
 inline int BasicGame::initSpawn() {

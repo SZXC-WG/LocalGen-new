@@ -348,6 +348,8 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
                 tile.occupier = p1;
                 if (tile.type == TILE_GENERAL) {
                     tile.type = TILE_CAPTURED_GENERAL;
+                } else if (tile.army > 1) {
+                    tile.army >>= 1;
                 }
             }
         }

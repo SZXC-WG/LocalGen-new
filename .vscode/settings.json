@@ -11,5 +11,8 @@
     "editor.insertSpaces": true,
     "cmake.options.statusBarVisibility": "visible",
     "cmake.buildDirectory": "${workspaceFolder}/build",
-    "C_Cpp.clang_format_fallbackStyle": "Google"
+    "C_Cpp.clang_format_fallbackStyle": "Google",
+    "chat.tools.terminal.autoApprove": {
+        "cmake": true
+    }
 }

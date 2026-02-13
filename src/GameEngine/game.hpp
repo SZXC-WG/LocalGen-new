@@ -18,6 +18,7 @@
 #include <numeric>
 #include <optional>
 #include <random>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -405,6 +406,20 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
       board(this, &_board),
       alive(_players.size()),
       spawnCoord(_players.size()) {
+    if (_players.empty()) {
+        throw std::invalid_argument("BasicGame requires at least one player");
+    }
+    if (_players.size() != _teams.size() || _players.size() != name.size()) {
+        throw std::invalid_argument(
+            "BasicGame players/teams/names size mismatch");
+    }
+    for (auto* player : _players) {
+        if (player == nullptr) {
+            throw std::invalid_argument(
+                "BasicGame received null player pointer");
+        }
+    }
+
     std::vector<index_t> randId(_players.size());
     std::iota(randId.begin(), randId.end(), 0);
     if (!remainIndex) std::shuffle(randId.begin(), randId.end(), rng);
@@ -444,14 +459,32 @@ inline void BasicGame::performTurn() {
 }
 
 inline void BasicGame::ranklist() {
-    rank.clear();
-    rank.resize(players.size());
+    rank.assign(players.size(), RankInfo{});
+    for (index_t player = 0; player < static_cast<index_t>(players.size());
+         ++player) {
+        rank[player].player = player;
+        rank[player].army = 0;
+        std::fill(std::begin(rank[player].land), std::end(rank[player].land), 0);
+    }
+
     for (auto& row : board.tiles) {
         for (auto& tile : row) {
-            if (tile.occupier == -1) continue;
+            if (!isValidPlayer(tile.occupier)) continue;
             rank[tile.occupier].army += tile.army;
+            tile_type_e tileType = tile.type;
+            if (tileType == TILE_CAPTURED_GENERAL) {
+                tileType = TILE_CITY;
+            }
+            if (tileType >= 0 && tileType < TILE_TYPE_COUNT) {
+                ++rank[tile.occupier].land[tileType];
+            }
         }
     }
+
+    std::sort(rank.begin(), rank.end(), [](const RankInfo& lhs, const RankInfo& rhs) {
+        if (lhs.army != rhs.army) return lhs.army > rhs.army;
+        return lhs.player < rhs.player;
+    });
 }
 
 inline int BasicGame::initSpawn() {
@@ -466,8 +499,8 @@ inline int BasicGame::initSpawn() {
             spawnCoord[playerSequence[i]] = spawnCandidates[i];
     };
     int spawnCount = 0;
-    for (int i = 1; i < board.row; ++i) {
-        for (int j = 1; j < board.col; ++j) {
+    for (int i = 1; i <= board.row; ++i) {
+        for (int j = 1; j <= board.col; ++j) {
             if (board.tiles[i][j].type == TILE_SPAWN) {
                 spawnCandidates.emplace_back(i, j);
                 ++spawnCount;
@@ -478,8 +511,8 @@ inline int BasicGame::initSpawn() {
     if (spawnCount >= playerCount) return assign(), 0;
 
     int blankCount = 0;
-    for (int i = 1; i < board.row; ++i) {
-        for (int j = 1; j < board.col; ++j) {
+    for (int i = 1; i <= board.row; ++i) {
+        for (int j = 1; j <= board.col; ++j) {
             if (board.tiles[i][j].type == TILE_PLAIN &&
                 board.tiles[i][j].army == 0) {
                 spawnCandidates.emplace_back(i, j);
@@ -498,6 +531,13 @@ inline int BasicGame::init() {
     if (spawnReturn != 0) return spawnReturn;
 
     alive = std::vector(players.size(), true);
+    for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
+        Tile& spawnTile = board.tileAt(spawnCoord[i]);
+        spawnTile.occupier = i;
+        spawnTile.type = TILE_GENERAL;
+        if (spawnTile.army <= 0) spawnTile.army = 1;
+    }
+
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         players[i]->init(
             i, GameConstantsPack{board.getHeight(), board.getWidth(),

@@ -31,7 +31,7 @@ class Player {
 
    public:
     Player() = default;
-    ~Player() = default;
+    virtual ~Player() = default;
 
    protected:
     inline void surrender() {

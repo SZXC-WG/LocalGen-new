@@ -174,7 +174,7 @@ class Board {
     /// Check whether the %Tile at (x,y) is visible to a %Player.
     virtual bool visible(pos_t x, pos_t y, index_t player) const {
         // invalidity check
-        if (x < 1 || x > col || y < 1 || y > row) return false;
+        if (x < 1 || x > row || y < 1 || y > col) return false;
 
         // occupier visibility
         if (tiles[x][y].occupier == player) return true;
@@ -207,17 +207,17 @@ class Board {
                 occupier = tiles[x][y + 1].occupier,
                 maxArmy = tiles[x][y + 1].army;
             if (tiles[x - 1][y - 1].army > maxArmy)
-                occupier = tiles[x - 1][y].occupier,
-                maxArmy = tiles[x - 1][y].army;
+                occupier = tiles[x - 1][y - 1].occupier,
+                maxArmy = tiles[x - 1][y - 1].army;
             if (tiles[x - 1][y + 1].army > maxArmy)
-                occupier = tiles[x - 1][y].occupier,
-                maxArmy = tiles[x - 1][y].army;
+                occupier = tiles[x - 1][y + 1].occupier,
+                maxArmy = tiles[x - 1][y + 1].army;
             if (tiles[x + 1][y - 1].army > maxArmy)
-                occupier = tiles[x - 1][y].occupier,
-                maxArmy = tiles[x - 1][y].army;
+                occupier = tiles[x + 1][y - 1].occupier,
+                maxArmy = tiles[x + 1][y - 1].army;
             if (tiles[x + 1][y + 1].army > maxArmy)
-                occupier = tiles[x - 1][y].occupier,
-                maxArmy = tiles[x - 1][y].army;
+                occupier = tiles[x + 1][y + 1].occupier,
+                maxArmy = tiles[x + 1][y + 1].army;
             return occupier;
         };
         for (pos_t i = std::max(x - 2, 1); i <= std::min(x + 2, row); ++i) {
@@ -265,8 +265,15 @@ class Board {
             // coordinate validity check
             if (isInvalidPos(from) || isInvalidPos(to)) return false;
 
+            // adjacency check (orthogonal 4-neighborhood)
+            bool isAdjacent = ((from.x == to.x) &&
+                               (from.y + 1 == to.y || from.y - 1 == to.y)) ||
+                              ((from.y == to.y) &&
+                               (from.x + 1 == to.x || from.x - 1 == to.x));
+            if (!isAdjacent) return false;
+
             // %from tile availability check
-            auto fromTile = view(player, from);
+            auto fromTile = getTile(from);
             switch (fromTile.type) {
                 case TILE_MOUNTAIN:
                 case TILE_LOOKOUT:
@@ -276,7 +283,7 @@ class Board {
             if (fromTile.army <= 1) return false;
 
             // %to tile availability check
-            auto toTile = view(player, to);
+            auto toTile = getTile(to);
             switch (toTile.type) {
                 case TILE_MOUNTAIN:
                 case TILE_LOOKOUT:

@@ -174,78 +174,60 @@ class Board {
     /// Check whether the %Tile at (x,y) is visible to a %Player.
     virtual bool visible(pos_t x, pos_t y, index_t player) const {
         // invalidity check
-        if (x < 1 || x > row || y < 1 || y > col) return false;
+        if (isInvalidPos(x, y)) return false;
 
-        // occupier visibility
-        if (tiles[x][y].occupier == player) return true;
-        // adjacent visibility
-        if (true &&  // overall check may not consider modifiers
-            (tiles[x - 1][y].occupier == player ||
-             tiles[x + 1][y].occupier == player ||
-             tiles[x][y - 1].occupier == player ||
-             tiles[x][y + 1].occupier == player ||
-             tiles[x - 1][y - 1].occupier == player ||
-             tiles[x - 1][y + 1].occupier == player ||
-             tiles[x + 1][y - 1].occupier == player ||
-             tiles[x + 1][y + 1].occupier == player))
-            return true;
+        // occupier & adjacent check
+        for (int dx = -1; dx <= 1; ++dx)
+            for (int dy = -1; dy <= 1; ++dy)
+                if (tiles[x + dx][y + dy].occupier == player) return true;
 
         // lookout check
-        auto findLookoutOccupier = [&](pos_t x, pos_t y) {
+        auto getLookoutOccupier = [&](pos_t x, pos_t y) {
             index_t occupier = -1;
             army_t maxArmy = 0;
-            if (tiles[x - 1][y].army > maxArmy)
-                occupier = tiles[x - 1][y].occupier,
-                maxArmy = tiles[x - 1][y].army;
-            if (tiles[x + 1][y].army > maxArmy)
-                occupier = tiles[x + 1][y].occupier,
-                maxArmy = tiles[x + 1][y].army;
-            if (tiles[x][y - 1].army > maxArmy)
-                occupier = tiles[x][y - 1].occupier,
-                maxArmy = tiles[x][y - 1].army;
-            if (tiles[x][y + 1].army > maxArmy)
-                occupier = tiles[x][y + 1].occupier,
-                maxArmy = tiles[x][y + 1].army;
-            if (tiles[x - 1][y - 1].army > maxArmy)
-                occupier = tiles[x - 1][y - 1].occupier,
-                maxArmy = tiles[x - 1][y - 1].army;
-            if (tiles[x - 1][y + 1].army > maxArmy)
-                occupier = tiles[x - 1][y + 1].occupier,
-                maxArmy = tiles[x - 1][y + 1].army;
-            if (tiles[x + 1][y - 1].army > maxArmy)
-                occupier = tiles[x + 1][y - 1].occupier,
-                maxArmy = tiles[x + 1][y - 1].army;
-            if (tiles[x + 1][y + 1].army > maxArmy)
-                occupier = tiles[x + 1][y + 1].occupier,
-                maxArmy = tiles[x + 1][y + 1].army;
+            for (int dx = -1; dx <= 1; ++dx)
+                for (int dy = -1; dy <= 1; ++dy) {
+                    const auto& tile = tiles[x + dx][y + dy];
+                    if (tile.army > maxArmy) {
+                        occupier = tile.occupier;
+                        maxArmy = tile.army;
+                    }
+                }
             return occupier;
         };
-        for (pos_t i = std::max(x - 2, 1); i <= std::min(x + 2, row); ++i) {
-            for (pos_t j = std::max(y - 2, 1); j <= std::min(y + 2, col); ++j) {
-                if (tiles[i][j].type == TILE_LOOKOUT)
-                    if (findLookoutOccupier(i, j) == player) return true;
+        for (pos_t i = std::max(x - 2, 1), r = std::min(x + 2, row); i <= r;
+             ++i) {
+            for (pos_t j = std::max(y - 2, 1), c = std::min(y + 2, col); j <= c;
+                 ++j) {
+                if (tiles[i][j].type == TILE_LOOKOUT &&
+                    getLookoutOccupier(i, j) == player)
+                    return true;
             }
         }
 
         // observatory check
         for (pos_t i = std::max(x - 8, 1); i < x; ++i) {
-            if (tiles[i][y].type == TILE_OBSERVATORY)
-                if (tiles[i - 1][y].occupier == player) return true;
+            if (tiles[i][y].type == TILE_OBSERVATORY &&
+                tiles[i - 1][y].occupier == player)
+                return true;
         }
-        for (pos_t i = x + 1; i <= std::min(x + 8, row); ++i) {
-            if (tiles[i][y].type == TILE_OBSERVATORY)
-                if (tiles[i + 1][y].occupier == player) return true;
+        for (pos_t i = x + 1, r = std::min(x + 8, row); i <= r; ++i) {
+            if (tiles[i][y].type == TILE_OBSERVATORY &&
+                tiles[i + 1][y].occupier == player)
+                return true;
         }
         for (pos_t j = std::max(y - 8, 1); j < y; ++j) {
-            if (tiles[x][j].type == TILE_OBSERVATORY)
-                if (tiles[x][j - 1].occupier == player) return true;
+            if (tiles[x][j].type == TILE_OBSERVATORY &&
+                tiles[x][j - 1].occupier == player)
+                return true;
         }
-        for (pos_t j = y + 1; j <= std::min(y + 8, col); ++j) {
-            if (tiles[x][j].type == TILE_OBSERVATORY)
-                if (tiles[x][j + 1].occupier == player) return true;
+        for (pos_t j = y + 1, c = std::min(y + 8, col); j <= c; ++j) {
+            if (tiles[x][j].type == TILE_OBSERVATORY &&
+                tiles[x][j + 1].occupier == player)
+                return true;
         }
 
-        // none matches, not visible
+        // No match - not visible
         return false;
     };
 

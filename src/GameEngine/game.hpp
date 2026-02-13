@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <deque>
 #include <numeric>
 #include <optional>
 #include <random>
@@ -242,7 +241,6 @@ class BasicGame {
 
    protected:
     GameBoard board{this};
-    std::deque<std::pair<index_t, Move>> movesInQueue;
 
     inline BoardView view(Player* player) {
         return board.view(indexMap[player]);
@@ -256,9 +254,6 @@ class BasicGame {
               std::vector<index_t> _teams, std::vector<std::string> name,
               InitBoard _board);
     ~BasicGame();
-
-   protected:
-    void executeMoves();
 
    public:
     void step();
@@ -399,19 +394,32 @@ inline BasicGame::~BasicGame() {
     for (auto player : players) delete player;
 }
 
-inline void BasicGame::executeMoves() {
-    // sort
-    std::sort(movesInQueue.begin(), movesInQueue.end(),
-              [](const std::pair<index_t, Move>& lhs,
-                 const std::pair<index_t, Move>& rhs) {
-                  return lhs.first < rhs.first;
-              });
-    if (curHalfTurnPhase == 1)
-        std::reverse(movesInQueue.begin(), movesInQueue.end());
+inline void BasicGame::step() {
+    auto alivePlayers = getAlivePlayers();
 
-    // execute
-    for (auto [player, move] : movesInQueue) {
-        if (!board.available(player, move)) continue;
+    // request moves
+    for (index_t i : alivePlayers) {
+        BoardView playerView = board.view(i);
+        players[i]->requestMove(playerView);
+    }
+
+    // collect moves
+    std::vector<std::pair<index_t, Move>> moves;
+    for (index_t i : alivePlayers) {
+        Player* player = players[i];
+        Move move;
+        while ((move = player->step()).type != MoveType::EMPTY &&
+               !board.available(i, move));
+        if (move.type != MoveType::EMPTY) moves.emplace_back(i, move);
+    }
+
+    // sort moves
+    // phase 0 - ascending (already in order)
+    // phase 1 - descending (need to reverse)
+    if (curHalfTurnPhase == 1) std::reverse(moves.begin(), moves.end());
+
+    // execute moves
+    for (auto [player, move] : moves) {
         if (move.type == MoveType::MOVE_ARMY) {
             Tile& fromTile = board.tileAt(move.from);
             Tile& toTile = board.tileAt(move.to);
@@ -439,21 +447,9 @@ inline void BasicGame::executeMoves() {
             broadcast(curTurn, GameMessageType::SURRENDER, {player});
         }
     }
-    movesInQueue.clear();
-}
 
-inline void BasicGame::step() {
-    for (index_t i : getAlivePlayers()) {
-        Player* player = players[i];
-        BoardView playerView = board.view(i);
-        player->requestMove(playerView);
-        Move move;
-        while ((move = player->step()).type != MoveType::EMPTY &&
-               !board.available(i, move));
-        if (move.type != MoveType::EMPTY) movesInQueue.emplace_back(i, move);
-    }
+    // update board
     if (curHalfTurnPhase == 0) board.update(curTurn);
-    executeMoves();
     curTurn += curHalfTurnPhase;
     curHalfTurnPhase ^= 1;
 }

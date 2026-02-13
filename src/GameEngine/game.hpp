@@ -422,6 +422,7 @@ inline void BasicGame::step() {
 
     // execute moves
     for (auto [player, move] : moves) {
+        if (!alive[player]) continue;  // skip just-captured players
         if (move.type == MoveType::MOVE_ARMY) {
             Tile& fromTile = board.tileAt(move.from);
             Tile& toTile = board.tileAt(move.to);

@@ -318,7 +318,10 @@ class InitBoard : public Board {
     inline void changeTile(Coord pos, Tile tile) {
         assert(isValidPos(pos));
         tileAt(pos) = tile;
-        if (tile.type == TILE_SPAWN) setSpawn(pos, 0);
+        if (tile.type == TILE_SPAWN)
+            setSpawn(pos, 0);
+        else
+            spawns.erase(pos);
     };
 
     /// Set attributes of a spawn.

@@ -322,7 +322,7 @@ inline void BasicGame::GameBoard::update(turn_t turn) {
                 case TILE_GENERAL:
                 case TILE_CAPTURED_GENERAL: ++tile.army;
                 case TILE_BLANK:
-                    if (turn % 25 == 0) ++tile.army;
+                    if (turn > 0 && turn % 25 == 0) ++tile.army;
                     break;
                 case TILE_SWAMP:
                     if (tile.army > 0) --tile.army;
@@ -533,7 +533,7 @@ inline int BasicGame::init() {
         Tile& spawnTile = board.tileAt(spawnCoord[i]);
         spawnTile.occupier = i;
         spawnTile.type = TILE_GENERAL;
-        if (spawnTile.army <= 0) spawnTile.army = 1;
+        spawnTile.army = 0;  // will be updated in the first turn
     }
 
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {

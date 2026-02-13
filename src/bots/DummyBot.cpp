@@ -19,7 +19,7 @@
 // Remember to include the bot header file.
 // Without this, you can't define your bot class, and the registry won't work.
 #include "../GameEngine/bot.h"
-#include "../GameEngine/game.h"
+#include "../GameEngine/game.hpp"
 
 // You can include additional headers you need.
 #include <random>

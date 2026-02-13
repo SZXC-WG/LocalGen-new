@@ -29,8 +29,7 @@ set(PROJECT_SOURCES
         src/bots/DummyBot.cpp
         src/GameEngine/board.hpp
         src/GameEngine/bot.h
-        src/GameEngine/game.cpp
-        src/GameEngine/game.h
+        src/GameEngine/game.hpp
         src/GameEngine/move.hpp
         src/GameEngine/player.hpp
         src/GameEngine/tile.hpp

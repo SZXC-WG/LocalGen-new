@@ -19,7 +19,8 @@ class HumanPlayer : public Player {
    public:
     void init(index_t playerId,
               const game::GameConstantsPack& constants) override;
-    void requestMove(const BoardView& boardView) override;
+    void requestMove(const BoardView& boardView,
+                     const std::vector<game::RankItem>& rank) override;
     std::deque<Move>* getMoveQueue() { return &moveQueue; }
     void setBoardViewHandler(
         std::function<void(const BoardView&)> boardViewHandler);

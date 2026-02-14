@@ -166,7 +166,7 @@ struct GameConstantsPack {
     config::Config config;
 };
 
-struct RankInfo {
+struct RankItem {
     index_t player = -1;
     army_t army = 0;
     pos_t land[TILE_TYPE_COUNT] = {0};
@@ -247,7 +247,7 @@ class BasicGame {
     void step();
 
    public:
-    std::vector<RankInfo> ranklist();
+    std::vector<RankItem> ranklist();
 
    public:
     int initSpawn();
@@ -386,13 +386,14 @@ inline void BasicGame::step() {
     curHalfTurnPhase ^= 1;
 
     // request moves (for next turn)
+    std::vector<RankItem> rank = ranklist();
     for (index_t i : getAlivePlayers()) {
-        players[i]->requestMove(board.view(i));
+        players[i]->requestMove(board.view(i), rank);
     }
 }
 
-inline std::vector<RankInfo> BasicGame::ranklist() {
-    std::vector<RankInfo> rank(players.size());
+inline std::vector<RankItem> BasicGame::ranklist() {
+    std::vector<RankItem> rank(players.size());
     for (auto& row : board.tiles) {
         for (auto& tile : row) {
             if (!isValidPlayer(tile.occupier)) continue;
@@ -408,7 +409,7 @@ inline std::vector<RankInfo> BasicGame::ranklist() {
     }
 
     std::sort(rank.begin(), rank.end(),
-              [](const RankInfo& lhs, const RankInfo& rhs) {
+              [](const RankItem& lhs, const RankItem& rhs) {
                   if (lhs.army != rhs.army) return lhs.army > rhs.army;
                   return lhs.player < rhs.player;
               });

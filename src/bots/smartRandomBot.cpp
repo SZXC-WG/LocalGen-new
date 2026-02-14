@@ -51,7 +51,8 @@ class SmartRandomBot : public BasicBot {
         this->playerId = playerId;
     }
 
-    void requestMove(const BoardView& boardView) override {
+    void requestMove(const BoardView& boardView,
+                     const std::vector<game::RankItem>& rank) override {
         moveQueue.clear();
         // The concept of "focus" does not exist any more in v6.
         // We will refer to `lastCoords.back()`, and try to move from it.

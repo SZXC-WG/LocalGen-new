@@ -14,7 +14,8 @@ void HumanPlayer::init(index_t playerId,
     this->playerId = playerId;
 }
 
-void HumanPlayer::requestMove(const BoardView& boardView) {
+void HumanPlayer::requestMove(const BoardView& boardView,
+                              const std::vector<game::RankItem>& rank) {
     if (boardViewHandler) {
         boardViewHandler(boardView);
     }

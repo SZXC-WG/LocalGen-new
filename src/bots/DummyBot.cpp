@@ -80,7 +80,8 @@ class DummyBot : public BasicBot {
     // Edit the `requestMove` method to implement your bot's main logic.
     // This method will be called **every turn**. Make that into your bot's
     // logic.
-    void requestMove(const BoardView& boardView) override {
+    void requestMove(const BoardView& boardView,
+                     const std::vector<game::RankItem>& rank) override {
         // This DummyBot uses a derivative of the smartRandomBot from LG v5.
         // As LG v6 removed the outdated "focus" feature, this bot will choose a
         // maximum tile every time.

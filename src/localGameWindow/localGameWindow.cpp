@@ -154,6 +154,18 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint |
                    Qt::WindowMinimizeButtonHint);
 
+    turnLabel = new QLabel("Turn 0", this);
+    turnLabel->setFont(parent->font());
+    turnLabel->setStyleSheet(
+        "QLabel { background-color: rgba(0, 0, 0, 180); "
+        "color: white; padding: 8px 16px; "
+        "font-size: 18px; font-weight: bold; "
+        "border-radius: 4px; }");
+    turnLabel->setMinimumWidth(120);
+    turnLabel->setAlignment(Qt::AlignCenter);
+    turnLabel->move(10, 10);
+    turnLabel->raise();
+
     if (humanPlayer != nullptr)
         gameMap->bindMoveQueue(humanPlayer->getMoveQueue());
 
@@ -200,6 +212,15 @@ void LocalGameWindow::runHalfTurn() {
     if (humanPlayer == nullptr || !game->isAlive(humanPlayer->playerId)) {
         updateView(game->fullView());
     }
+
+    turn_t curTurn = game->getCurTurn();
+    uint8_t curHalfTurnPhase = game->getHalfTurnPhase();
+    if (curHalfTurnPhase == 0) {
+        turnLabel->setText(QString("Turn %1.").arg(curTurn - 1));
+    } else {
+        turnLabel->setText(QString("Turn %1").arg(curTurn));
+    }
+
     double elapsedMs = static_cast<double>(elapsedTimer.nsecsElapsed()) / 1e6;
 
     if (game->getAlivePlayers().size() <= 1) {

@@ -2,6 +2,7 @@
 #define LOCALGAMEWINDOW_H
 
 #include <QDialog>
+#include <QLabel>
 #include <QTimer>
 #include <functional>
 
@@ -46,6 +47,7 @@ class LocalGameWindow : public QDialog {
     HumanPlayer* humanPlayer = nullptr;
     game::BasicGame* game = nullptr;
     QTimer* halfTurnTimer = nullptr;
+    QLabel* turnLabel = nullptr;
     bool gameRunning = false;
     double halfTurnDurationMs = 500.0;
 };

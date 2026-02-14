@@ -391,7 +391,7 @@ inline void BasicGame::step() {
     }
 }
 
-std::vector<RankInfo> BasicGame::ranklist() {
+inline std::vector<RankInfo> BasicGame::ranklist() {
     std::vector<RankInfo> rank(players.size());
     for (auto& row : board.tiles) {
         for (auto& tile : row) {

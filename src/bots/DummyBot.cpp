@@ -41,7 +41,7 @@ class DummyBot : public BasicBot {
     // starts.
     // You can choose to ignore them, though. It is your choice.
     index_t cnt;                   // Player count
-    index_t id;                    // My index
+    index_t playerId;              // My index
     index_t team;                  // My team index
     std::vector<index_t> teamIds;  // Team IDs
     pos_t height, width;           // Map height and width
@@ -58,15 +58,15 @@ class DummyBot : public BasicBot {
 
    public:
     // Remember to override the `init` method to process game constants.
-    void init(index_t playerId,
+    void init(index_t _playerId,
               const game::GameConstantsPack& constants) override {
         // This method is called when the game starts.
         // Game constants are sent via this method.
         // You can use this method to initialize your bot's state.
         // For example, you can store the player ID and team IDs.
         cnt = constants.playerCount;
-        id = playerId;
-        team = constants.teams[playerId];
+        playerId = _playerId;
+        team = constants.teams[_playerId];
         teamIds = constants.teams;
         height = constants.mapHeight;
         width = constants.mapWidth;
@@ -85,21 +85,21 @@ class DummyBot : public BasicBot {
         // This DummyBot uses a derivative of the smartRandomBot from LG v5.
         // As LG v6 removed the outdated "focus" feature, this bot will choose a
         // maximum tile every time.
-        static std::deque<Coord> lastCoord[20];
+
         Coord start = Coord(1, 1);
         for (std::size_t r = 1; r <= height; ++r) {
             for (std::size_t c = 1; c <= width; ++c) {
                 auto& tile = boardView.tileAt(r, c);
-                if (tile.occupier != id) continue;
+                if (tile.occupier != playerId) continue;
                 if (tile.army > boardView.tileAt(start).army) {
                     start = Coord(r, c);
                 }
             }
         }
         struct node {
-            int type;
+            tile_type_e type;
             index_t team;
-            long long army;
+            army_t army;
             int dir;
             std::ptrdiff_t lastCount;
         };
@@ -110,23 +110,23 @@ class DummyBot : public BasicBot {
             if (nx < 1 || nx > height || ny < 1 || ny > width ||
                 unpassable(boardView.tileAt(nx, ny).type))
                 continue;
-            p[++pl] = {boardView.tileAt(nx, ny).type,
-                       boardView.tileAt(nx, ny).occupier,
-                       boardView.tileAt(nx, ny).army, i,
-                       std::find(lastCoord[id].rbegin(), lastCoord[id].rend(),
-                                 Coord(nx, ny)) -
-                           lastCoord[id].rbegin()};
+            p[++pl] = {
+                boardView.tileAt(nx, ny).type,
+                boardView.tileAt(nx, ny).occupier,
+                boardView.tileAt(nx, ny).army,
+                i,
+            };
         }
         bool rdret = rng() % 2;
         auto cmp = [&](node a, node b) -> bool {
-            if (a.lastCount != b.lastCount) return a.lastCount > b.lastCount;
-            if (a.type == 3 && a.team != id) return true;
-            if (b.type == 3 && b.team != id) return false;
-            if (a.team == 0) return rdret;
-            if (b.team == 0) return !rdret;
-            if (a.team == id && b.team != id) return false;
-            if (a.team != id && b.team == id) return true;
-            if (a.team == id && b.team == id) return a.army > b.army;
+            if (a.type == TILE_GENERAL && a.team != playerId) return true;
+            if (b.type == TILE_GENERAL && b.team != playerId) return false;
+            if (a.team == -1) return rdret;
+            if (b.team == -1) return !rdret;
+            if (a.team == playerId && b.team != playerId) return false;
+            if (a.team != playerId && b.team == playerId) return true;
+            if (a.team == playerId && b.team == playerId)
+                return a.army > b.army;
             return a.army < b.army;
         };
         std::sort(p + 1, p + pl + 1, cmp);

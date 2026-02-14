@@ -1,16 +1,7 @@
 /**
- * @file dummyBot.cpp
+ * @file template.cpp
  *
- * PLEASE READ THIS COMMENT AND THIS FILE CAREFULLY BEFORE YOU START TO
- * IMPLEMENT YOUR OWN BOT.
- *
- * This "DummyBot" is a simple example of how to create a bot.
- * Developers can refer to this file when implementing their own bots.
- * The bot implemented a pretty basic algorithm, just being an example.
- *
- * Like this file, bot codes should be put into the `src/bots` folder.
- *
- * @copyright Copyright (c) SZXC Work Group.
+ * This is a template file.
  */
 
 #ifndef /* LGEN_BOTS_%BOTNAME% */

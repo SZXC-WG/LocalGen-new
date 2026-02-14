@@ -168,21 +168,13 @@ class Board {
 
             // %from tile availability check
             auto fromTile = getTile(from);
-            switch (fromTile.type) {
-                case TILE_MOUNTAIN:
-                case TILE_LOOKOUT:
-                case TILE_OBSERVATORY: return false;
-            }
+            if (isImpassableTile(fromTile.type)) return false;
             if (fromTile.occupier != player) return false;
             if (fromTile.army <= 1) return false;
 
             // %to tile availability check
             auto toTile = getTile(to);
-            switch (toTile.type) {
-                case TILE_MOUNTAIN:
-                case TILE_LOOKOUT:
-                case TILE_OBSERVATORY: return false;
-            }
+            if (isImpassableTile(toTile.type)) return false;
 
             // all passed, available move
             return true;

@@ -72,11 +72,6 @@ class DummyBot : public BasicBot {
         width = constants.mapWidth;
     }
 
-    bool unpassable(tile_type_e type) {
-        return type == TILE_MOUNTAIN || type == TILE_LOOKOUT ||
-               type == TILE_OBSERVATORY;
-    }
-
     // Edit the `requestMove` method to implement your bot's main logic.
     // This method will be called **every turn**. Make that into your bot's
     // logic.
@@ -108,7 +103,7 @@ class DummyBot : public BasicBot {
         for (int i = 1; i <= 4; ++i) {
             int nx = start.x + deltaX[i], ny = start.y + deltaY[i];
             if (nx < 1 || nx > height || ny < 1 || ny > width ||
-                unpassable(boardView.tileAt(nx, ny).type))
+                isImpassableTile(boardView.tileAt(nx, ny).type))
                 continue;
             p[++pl] = {
                 boardView.tileAt(nx, ny).type,

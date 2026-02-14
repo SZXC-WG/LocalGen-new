@@ -25,11 +25,6 @@ class SmartRandomBot : public BasicBot {
     std::deque<Coord> lastCoords;
     index_t playerId = -1;
 
-    static inline bool unpassable(tile_type_e type) {
-        return type == TILE_MOUNTAIN || type == TILE_LOOKOUT ||
-               type == TILE_OBSERVATORY;
-    }
-
     inline Coord determineMaxArmyPos(const BoardView& boardView) {
         Coord maxArmyPos(-1, -1);
         army_t maxArmy = 0;
@@ -83,7 +78,7 @@ class SmartRandomBot : public BasicBot {
             if (nx < 1 || nx > boardView.row || ny < 1 || ny > boardView.col)
                 continue;
             const TileView& tile = boardView.tileAt(nx, ny);
-            if (unpassable(tile.type)) continue;
+            if (isImpassableTile(tile.type)) continue;
             p.push_back(node{tile.type, tile.occupier, tile.army, i,
                              std::find(lastCoords.rbegin(), lastCoords.rend(),
                                        Coord(nx, ny)) -

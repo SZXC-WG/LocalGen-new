@@ -1,16 +1,28 @@
 #include "localGameWindow.h"
 
+#include <QElapsedTimer>
+#include <QMessageBox>
 #include <QRandomGenerator>
 #include <QTimer>
 #include <QVBoxLayout>
 
+#include "../GameEngine/bot.h"
+#include "../GameEngine/game.hpp"
+
 void HumanPlayer::init(index_t playerId,
                        const game::GameConstantsPack& constants) {
-    // TODO: HumanPlayer initialization
+    this->playerId = playerId;
 }
 
-void HumanPlayer::requestMove(BoardView& boardView) {
-    // TODO: send boardView to UI
+void HumanPlayer::requestMove(const BoardView& boardView) {
+    if (boardViewHandler) {
+        boardViewHandler(boardView);
+    }
+}
+
+void HumanPlayer::setBoardViewHandler(
+    std::function<void(const BoardView&)> boardViewHandler) {
+    this->boardViewHandler = std::move(boardViewHandler);
 }
 
 namespace {
@@ -87,14 +99,53 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     setPalette(pal);
 
     gameMap = new MapWidget(this, config.mapWidth, config.mapHeight);
-    // testing configuration
-    BoardView view =
-        createRandomBoard(config.mapWidth, config.mapHeight).view(0);
-    for (int r = 0; r < config.mapHeight; r++) {
-        for (int c = 0; c < config.mapWidth; c++) {
-            gameMap->tileAt(r, c) = toDisplayTile(view.tileAt(r + 1, c + 1));
+    halfTurnTimer = new QTimer(this);
+    halfTurnTimer->setSingleShot(true);
+    halfTurnTimer->setTimerType(Qt::PreciseTimer);
+    connect(halfTurnTimer, &QTimer::timeout, this,
+            &LocalGameWindow::runHalfTurn);
+
+    halfTurnDurationMs =
+        500.0 / static_cast<double>(std::max(config.gameSpeed, 1));
+
+    std::vector<Player*> players;
+    std::vector<index_t> teams;
+    std::vector<std::string> names;
+
+    players.reserve(config.players.size() + 1);
+    teams.reserve(config.players.size() + 1);
+    names.reserve(config.players.size() + 1);
+
+    for (const auto& playerConfig : config.players) {
+        if (playerConfig.name == "Human") {
+            humanPlayer = new HumanPlayer();
+            humanPlayer->setBoardViewHandler(
+                [this](const BoardView& boardView) { updateView(boardView); });
+            players.push_back(humanPlayer);
+            teams.push_back(static_cast<index_t>(teams.size()));
+            names.push_back("Human");
+            continue;
         }
+        BasicBot* bot =
+            BotFactory::instance().create(playerConfig.name.toStdString());
+        if (bot == nullptr) {
+            continue;
+        }
+        players.push_back(bot);
+        teams.push_back(static_cast<index_t>(teams.size()));
+        names.push_back(playerConfig.name.toStdString());
     }
+
+    InitBoard initialBoard =
+        createRandomBoard(config.mapWidth, config.mapHeight);
+    game = new game::BasicGame(true, players, teams, names, initialBoard);
+    if (game->init() != 0) {
+        QMessageBox::critical(this, "Local Game",
+                              "Failed to initialize local game.");
+        delete game;
+        game = nullptr;
+    }
+
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(gameMap);
@@ -103,10 +154,76 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint |
                    Qt::WindowMinimizeButtonHint);
 
-    humanPlayer = new HumanPlayer();
-    gameMap->bindMoveQueue(humanPlayer->getMoveQueue());
+    if (humanPlayer != nullptr)
+        gameMap->bindMoveQueue(humanPlayer->getMoveQueue());
 
     QTimer::singleShot(0, [this]() { gameMap->fitCenter(25); });
+    if (game != nullptr) {
+        gameRunning = true;
+        scheduleNextHalfTurn(0.0);
+    }
 }
 
-LocalGameWindow::~LocalGameWindow() { delete humanPlayer; }
+LocalGameWindow::~LocalGameWindow() {
+    stopGameLoop();
+    if (game != nullptr) {
+        delete game;
+        game = nullptr;
+        humanPlayer = nullptr;
+    }
+}
+
+void LocalGameWindow::updateView(const BoardView& boardView) {
+    int height = gameMap->mapHeight();
+    int width = gameMap->mapWidth();
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            gameMap->tileAt(r, c) =
+                toDisplayTile(boardView.tileAt(r + 1, c + 1));
+        }
+    }
+    gameMap->update();
+}
+
+void LocalGameWindow::runHalfTurn() {
+    if (!gameRunning || game == nullptr) {
+        return;
+    }
+    if (game->getAlivePlayers().size() <= 1) {
+        stopGameLoop();
+        return;
+    }
+
+    QElapsedTimer elapsedTimer;
+    elapsedTimer.start();
+    game->step();
+    if (humanPlayer == nullptr || !game->isAlive(humanPlayer->playerId)) {
+        updateView(game->fullView());
+    }
+    double elapsedMs = static_cast<double>(elapsedTimer.nsecsElapsed()) / 1e6;
+
+    if (game->getAlivePlayers().size() <= 1) {
+        stopGameLoop();
+        return;
+    }
+
+    double waitMs = halfTurnDurationMs - elapsedMs;
+    scheduleNextHalfTurn(waitMs > 0.0 ? waitMs : 0.0);
+}
+
+void LocalGameWindow::scheduleNextHalfTurn(double delayMs) {
+    if (!gameRunning || halfTurnTimer == nullptr) {
+        return;
+    }
+    int waitMs = static_cast<int>(std::lround(delayMs));
+    if (waitMs < 0) waitMs = 0;
+    halfTurnTimer->start(waitMs);
+}
+
+void LocalGameWindow::stopGameLoop() {
+    gameRunning = false;
+    if (halfTurnTimer != nullptr && halfTurnTimer->isActive()) {
+        halfTurnTimer->stop();
+    }
+    gameMap->bindMoveQueue(nullptr);
+}

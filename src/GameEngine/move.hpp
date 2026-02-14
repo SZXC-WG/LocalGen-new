@@ -17,12 +17,10 @@ enum class MoveType { EMPTY, MOVE_ARMY, SURRENDER };
 
 /// Stores a single move: `from` -> `to`.
 struct Move {
-   public:
     MoveType type = MoveType::EMPTY;
     Coord from, to;
     bool takeHalf = false;
 
-   public:
     constexpr Move() = default;
     constexpr Move(MoveType _type) : type(_type) {}
     constexpr Move(MoveType _type, Coord _from, Coord _to, bool _takeHalf)

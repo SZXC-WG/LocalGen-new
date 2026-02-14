@@ -40,7 +40,7 @@ enum tile_type_e {
     TILE_NEUTRAL = TILE_BLANK
 };
 
-bool isImpassableTile(tile_type_e type) {
+inline bool isImpassableTile(tile_type_e type) {
     return type == TILE_MOUNTAIN || type == TILE_LOOKOUT ||
            type == TILE_OBSERVATORY;
 }

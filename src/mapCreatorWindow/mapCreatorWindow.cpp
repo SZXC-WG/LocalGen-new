@@ -149,23 +149,23 @@ void MapCreatorWindow::onMapClicked(int r, int c) {
     auto& tile = map->tileAt(r, c);
     switch (selectedTool) {
         case MOUNTAIN:
-            tile.type = TILE_MOUNTAIN, tile.color = QColor(187, 187, 187),
+            tile.type = TILE_MOUNTAIN, tile.color.setRgb(187, 187, 187),
             tile.text.clear();
             break;
         case LOOKOUT:
-            tile.type = TILE_LOOKOUT, tile.color = QColor(187, 187, 187),
+            tile.type = TILE_LOOKOUT, tile.color.setRgb(187, 187, 187),
             tile.text.clear();
             break;
         case OBSERVATORY:
-            tile.type = TILE_OBSERVATORY, tile.color = QColor(187, 187, 187),
+            tile.type = TILE_OBSERVATORY, tile.color.setRgb(187, 187, 187),
             tile.text.clear();
             break;
         case DESERT:
-            tile.type = TILE_DESERT, tile.color = QColor(220, 220, 220),
+            tile.type = TILE_DESERT, tile.color.setRgb(220, 220, 220),
             tile.text.clear();
             break;
         case SWAMP:
-            tile.type = TILE_SWAMP, tile.color = QColor(128, 128, 128),
+            tile.type = TILE_SWAMP, tile.color.setRgb(128, 128, 128),
             tile.text.clear();
             break;
         case SPAWN:
@@ -173,18 +173,18 @@ void MapCreatorWindow::onMapClicked(int r, int c) {
             tile.text = teamComboBox->currentText();
             break;
         case CITY:
-            tile.type = TILE_CITY, tile.color = QColor(128, 128, 128),
+            tile.type = TILE_CITY, tile.color.setRgb(128, 128, 128),
             tile.text = QString::number(valueSpinBox->value());
             break;
         case NEUTRAL:
             if (valueSpinBox->value() != 0) {
-                tile.type = TILE_NEUTRAL, tile.color = QColor(128, 128, 128),
+                tile.type = TILE_NEUTRAL, tile.color.setRgb(128, 128, 128),
                 tile.text = QString::number(valueSpinBox->value());
                 break;
             }  // neutral tiles of army strength 0 are equivalent to blank tiles
             [[fallthrough]];
         case ERASE:
-            tile.type = TILE_BLANK, tile.color = QColor(220, 220, 220),
+            tile.type = TILE_BLANK, tile.color.setRgb(220, 220, 220),
             tile.lightIcon = false, tile.text.clear();
             break;
         case LIGHT: tile.lightIcon = !tile.lightIcon;
@@ -511,17 +511,13 @@ void MapCreatorWindow::onOpenMap() {
                 tile.type = loadedTile.type;
                 switch (loadedTile.type) {
                     case TILE_MOUNTAIN:
-                        tile.color = QColor(187, 187, 187);
-                        break;
-                    case TILE_LOOKOUT:
-                        tile.color = QColor(187, 187, 187);
-                        break;
+                    case TILE_LOOKOUT:  tile.color.setRgb(187, 187, 187); break;
                     case TILE_OBSERVATORY:
-                        tile.color = QColor(187, 187, 187);
+                        tile.color.setRgb(187, 187, 187);
                         break;
-                    case TILE_DESERT: tile.color = QColor(220, 220, 220); break;
-                    case TILE_SWAMP:  tile.color = QColor(128, 128, 128); break;
-                    case TILE_CITY:   tile.color = QColor(128, 128, 128); break;
+                    case TILE_DESERT: tile.color.setRgb(220, 220, 220); break;
+                    case TILE_SWAMP:
+                    case TILE_CITY:   tile.color.setRgb(128, 128, 128); break;
                     case TILE_SPAWN:  tile.color = Qt::darkCyan; break;
                     default:
                         tile.color = loadedTile.army == 0
@@ -600,12 +596,12 @@ void MapCreatorWindow::onOpenMap() {
                         ? QString(QLatin1Char('A' + val - 1))
                         : QString::number(val);
         switch (tile.type) {
-            case TILE_MOUNTAIN:    tile.color = QColor(187, 187, 187); break;
-            case TILE_LOOKOUT:     tile.color = QColor(187, 187, 187); break;
-            case TILE_OBSERVATORY: tile.color = QColor(187, 187, 187); break;
-            case TILE_DESERT:      tile.color = QColor(220, 220, 220); break;
-            case TILE_SWAMP:       tile.color = QColor(128, 128, 128); break;
-            case TILE_CITY:        tile.color = QColor(128, 128, 128); break;
+            case TILE_MOUNTAIN:
+            case TILE_LOOKOUT:
+            case TILE_OBSERVATORY: tile.color.setRgb(187, 187, 187); break;
+            case TILE_DESERT:      tile.color.setRgb(220, 220, 220); break;
+            case TILE_SWAMP:
+            case TILE_CITY:        tile.color.setRgb(128, 128, 128); break;
             case TILE_SPAWN:       tile.color = Qt::darkCyan; break;
             default:
                 tile.color = tile.text.isEmpty() ? QColor(220, 220, 220)

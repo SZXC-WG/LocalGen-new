@@ -356,6 +356,14 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
                 break;
             default: QWidget::keyPressEvent(event); return;
         }
+        switch (displayTiles[focusRow][focusCol].type) {
+            case TILE_MOUNTAIN:
+            case TILE_LOOKOUT:
+            case TILE_OBSERVATORY:
+                focusRow = oldRow;
+                focusCol = oldCol;
+                return;
+        }
         if (moveQueue) {
             // TODO: align with official keys (Z for 50%)
             bool takeHalf = (event->modifiers() & Qt::ControlModifier);

@@ -1,13 +1,156 @@
 #include "localGameWindow.h"
 
 #include <QElapsedTimer>
+#include <QFont>
+#include <QFontMetrics>
 #include <QMessageBox>
+#include <QPaintEvent>
+#include <QPainter>
 #include <QRandomGenerator>
+#include <QResizeEvent>
 #include <QTimer>
 #include <QVBoxLayout>
+#include <algorithm>
 
 #include "../GameEngine/bot.h"
 #include "../GameEngine/game.hpp"
+
+FloatingLeaderboardWidget::FloatingLeaderboardWidget(QWidget* parent)
+    : QWidget(parent) {
+    setFont(QFont("Quicksand", 10, QFont::Medium));
+    setAttribute(Qt::WA_TranslucentBackground, true);
+}
+
+void FloatingLeaderboardWidget::setColumns(std::vector<Column> columns) {
+    this->columns = std::move(columns);
+    updateFixedSize();
+    update();
+}
+
+void FloatingLeaderboardWidget::setRows(std::vector<LeaderboardRow> rows) {
+    this->rows = std::move(rows);
+    updateFixedSize();
+    update();
+}
+
+void FloatingLeaderboardWidget::paintEvent(QPaintEvent* event) {
+    Q_UNUSED(event);
+    if (columns.empty()) {
+        return;
+    }
+
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, false);
+    painter.setRenderHint(QPainter::TextAntialiasing, true);
+
+    QPen borderPen(Qt::black);
+    borderPen.setWidth(2);
+    painter.setPen(borderPen);
+
+    std::vector<int> columnWidths = computeColumnWidths();
+
+    QFont headerFont = font();
+    headerFont.setBold(true);
+
+    int x = 0;
+    for (size_t i = 0; i < columns.size(); ++i) {
+        const auto& column = columns[i];
+        QRect cellRect(x, 0, columnWidths[i], headerHeight);
+        painter.fillRect(cellRect, Qt::white);
+        painter.drawRect(cellRect);
+        painter.setFont(headerFont);
+        painter.setPen(Qt::black);
+        painter.drawText(cellRect, Qt::AlignCenter, column.title);
+        painter.setPen(borderPen);
+        x += columnWidths[i];
+    }
+
+    QFont bodyFont = font();
+    bodyFont.setBold(false);
+    painter.setFont(bodyFont);
+    QFontMetrics metrics(bodyFont);
+
+    int y = headerHeight;
+    for (const auto& row : rows) {
+        int rowX = 0;
+        for (size_t i = 0; i < columns.size(); ++i) {
+            const auto& column = columns[i];
+            QRect cellRect(rowX, y, columnWidths[i], rowHeight);
+            QColor background = Qt::white;
+            QColor foreground = Qt::black;
+            QString text;
+
+            if (column.backgroundProvider) {
+                background = column.backgroundProvider(row);
+            }
+            if (column.foregroundProvider) {
+                foreground = column.foregroundProvider(row);
+            }
+            if (column.textProvider) {
+                text = column.textProvider(row);
+            }
+
+            painter.fillRect(cellRect, background);
+            painter.setPen(borderPen);
+            painter.drawRect(cellRect);
+            painter.setPen(foreground);
+
+            QString displayText = metrics.elidedText(
+                text, Qt::ElideRight, cellRect.width() - horizontalPadding);
+            painter.drawText(cellRect, Qt::AlignCenter, displayText);
+
+            painter.setPen(borderPen);
+            rowX += columnWidths[i];
+        }
+        y += rowHeight;
+    }
+
+    QPen outerBorderPen(Qt::black);
+    outerBorderPen.setWidth(3);
+    painter.setPen(outerBorderPen);
+    painter.setBrush(Qt::NoBrush);
+    painter.drawRect(rect().adjusted(1, 1, -1, -1));
+}
+
+std::vector<int> FloatingLeaderboardWidget::computeColumnWidths() const {
+    std::vector<int> widths;
+    widths.reserve(columns.size());
+
+    QFontMetrics metrics(font());
+    for (const auto& column : columns) {
+        int width = column.width;
+        if (width <= 0) {
+            int maxTextWidth = metrics.horizontalAdvance(column.title);
+            if (column.textProvider) {
+                for (const auto& row : rows) {
+                    maxTextWidth = std::max(
+                        maxTextWidth,
+                        metrics.horizontalAdvance(column.textProvider(row)));
+                }
+            }
+            width = maxTextWidth + horizontalPadding * 2;
+        }
+
+        if (column.minWidth > 0) {
+            width = std::max(width, column.minWidth);
+        }
+        if (column.maxWidth > 0) {
+            width = std::min(width, column.maxWidth);
+        }
+        widths.push_back(width);
+    }
+
+    return widths;
+}
+
+void FloatingLeaderboardWidget::updateFixedSize() {
+    int totalWidth = 0;
+    for (int columnWidth : computeColumnWidths()) {
+        totalWidth += columnWidth;
+    }
+    int height = headerHeight + static_cast<int>(rows.size()) * rowHeight;
+    setFixedSize(totalWidth, height);
+}
 
 void HumanPlayer::init(index_t playerId,
                        const game::GameConstantsPack& constants) {
@@ -156,7 +299,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
                    Qt::WindowMinimizeButtonHint);
 
     turnLabel = new QLabel("Turn 0", this);
-    turnLabel->setFont(parent->font());
+    turnLabel->setFont(QFont("Quicksand", 18, QFont::Bold));
     turnLabel->setStyleSheet(
         "QLabel { background-color: rgba(0, 0, 0, 180); "
         "color: white; padding: 8px 16px; "
@@ -167,11 +310,28 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     turnLabel->move(10, 10);
     turnLabel->raise();
 
+    leaderboardWidget = new FloatingLeaderboardWidget(this);
+    leaderboardWidget->setColumns(
+        {{"Player", 0, 140, 260,
+          [](const LeaderboardRow& row) { return row.playerName; },
+          [](const LeaderboardRow& row) { return row.playerColor; },
+          [](const LeaderboardRow&) { return QColor(Qt::white); }},
+         {"Army", 72, 0, 0,
+          [](const LeaderboardRow& row) { return QString::number(row.army); },
+          [](const LeaderboardRow&) { return QColor(Qt::white); },
+          [](const LeaderboardRow&) { return QColor(Qt::black); }},
+         {"Land", 72, 0, 0,
+          [](const LeaderboardRow& row) { return QString::number(row.land); },
+          [](const LeaderboardRow&) { return QColor(Qt::white); },
+          [](const LeaderboardRow&) { return QColor(Qt::black); }}});
+
     if (humanPlayer != nullptr)
         gameMap->bindMoveQueue(humanPlayer->getMoveQueue());
 
     QTimer::singleShot(0, [this]() { gameMap->fitCenter(25); });
     if (game != nullptr) {
+        updateLeaderboard(game->ranklist());
+        positionFloatingWidgets();
         gameRunning = true;
         scheduleNextHalfTurn(0.0);
     }
@@ -213,6 +373,7 @@ void LocalGameWindow::runHalfTurn() {
     if (humanPlayer == nullptr || !game->isAlive(humanPlayer->playerId)) {
         updateView(game->fullView());
     }
+    updateLeaderboard(game->ranklist());
 
     turn_t curTurn = game->getCurTurn();
     uint8_t curHalfTurnPhase = game->getHalfTurnPhase();
@@ -248,4 +409,57 @@ void LocalGameWindow::stopGameLoop() {
         halfTurnTimer->stop();
     }
     gameMap->bindMoveQueue(nullptr);
+}
+
+void LocalGameWindow::updateLeaderboard(
+    const std::vector<game::RankItem>& rank) {
+    if (leaderboardWidget == nullptr || game == nullptr) {
+        return;
+    }
+
+    std::vector<LeaderboardRow> rows;
+    rows.reserve(rank.size());
+    for (const auto& item : rank) {
+        if (!game->isAlive(item.player)) {
+            continue;
+        }
+
+        int totalLand = 0;
+        for (int i = 0; i < TILE_TYPE_COUNT; ++i) {
+            totalLand += item.land[i];
+        }
+
+        LeaderboardRow row;
+        row.playerId = item.player;
+        row.playerName = QString::fromStdString(game->getName(item.player));
+        row.army = item.army;
+        row.land = totalLand;
+        row.playerColor = playerColor(item.player);
+        rows.push_back(std::move(row));
+    }
+
+    leaderboardWidget->setRows(std::move(rows));
+    positionFloatingWidgets();
+}
+
+void LocalGameWindow::positionFloatingWidgets() {
+    const int margin = 6;
+
+    if (leaderboardWidget != nullptr) {
+        int x = width() - leaderboardWidget->width() - margin;
+        if (x < margin) {
+            x = margin;
+        }
+        leaderboardWidget->move(x, margin);
+        leaderboardWidget->raise();
+    }
+
+    if (turnLabel != nullptr) {
+        turnLabel->raise();
+    }
+}
+
+void LocalGameWindow::resizeEvent(QResizeEvent* event) {
+    QDialog::resizeEvent(event);
+    positionFloatingWidgets();
 }

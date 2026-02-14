@@ -32,7 +32,7 @@ class /*%BotClass%*/ : public BasicBot {
     void init(index_t playerId,
               const game::GameConstantsPack& constants) override {}
 
-    void requestMove(BoardView& boardView) override {}
+    void requestMove(const BoardView& boardView) override {}
 };
 
 // Do not forget to register your bot.

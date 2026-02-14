@@ -26,7 +26,14 @@ struct BoardView {
     std::vector<std::vector<TileView>> tiles;
 
     inline TileView& tileAt(pos_t x, pos_t y) { return tiles.at(x).at(y); };
+    inline const TileView& tileAt(pos_t x, pos_t y) const {
+        return tiles.at(x).at(y);
+    };
+
     inline TileView& tileAt(Coord pos) { return tileAt(pos.x, pos.y); };
+    inline const TileView& tileAt(Coord pos) const {
+        return tileAt(pos.x, pos.y);
+    };
 };
 
 /// Game map board.
@@ -287,6 +294,19 @@ class Board {
         for (pos_t i = 1; i <= row; ++i) {
             for (pos_t j = 1; j <= col; ++j) {
                 tileViews[i][j].updateFrom(tiles[i][j], visible(i, j, player));
+            }
+        }
+        return boardView;
+    }
+
+    BoardView fullView() const {
+        BoardView boardView;
+        auto& tileViews = boardView.tiles;
+        boardView.row = row, boardView.col = col;
+        tileViews.resize(row + 2, std::vector<TileView>(col + 2));
+        for (pos_t i = 1; i <= row; ++i) {
+            for (pos_t j = 1; j <= col; ++j) {
+                tileViews[i][j].updateFrom(tiles[i][j], true);
             }
         }
         return boardView;

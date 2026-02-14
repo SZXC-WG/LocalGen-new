@@ -200,12 +200,14 @@ class BasicGame {
     inline std::string getName(index_t player) const { return names[player]; }
     inline std::vector<std::string> getNames() const { return names; }
 
-    inline BoardView view(index_t player) {
+    inline BoardView view(index_t player) const {
         if (!isValidPlayer(player)) {
             throw std::out_of_range("Invalid player index for view");
         }
         return board.view(player);
     }
+
+    inline BoardView fullView() const { return board.fullView(); }
 
     inline bool inSameTeam(index_t player1, index_t player2) const {
         if (!isValidPlayer(player1) || !isValidPlayer(player2)) return false;
@@ -241,10 +243,6 @@ class BasicGame {
 
    protected:
     GameBoard board{this};
-
-    inline BoardView view(Player* player) {
-        return board.view(indexMap[player]);
-    }
 
     void capture(index_t p1, index_t p2);
 
@@ -451,8 +449,7 @@ inline void BasicGame::step() {
 
     // request moves (for next turn)
     for (index_t i : getAlivePlayers()) {
-        BoardView playerView = board.view(i);
-        players[i]->requestMove(playerView);
+        players[i]->requestMove(board.view(i));
     }
 }
 

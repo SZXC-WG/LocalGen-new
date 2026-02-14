@@ -43,7 +43,7 @@ class Player {
     virtual void init(index_t playerId,
                       const game::GameConstantsPack& constants) = 0;
 
-    virtual void requestMove(BoardView& boardView) = 0;
+    virtual void requestMove(const BoardView& boardView) = 0;
     inline Move step() {
         if (moveQueue.empty()) return Move();
         Move move = moveQueue.front();

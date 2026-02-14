@@ -167,9 +167,9 @@ struct GameConstantsPack {
 };
 
 struct RankInfo {
-    index_t player;
-    army_t army;
-    pos_t land[TILE_TYPE_COUNT];
+    index_t player = -1;
+    army_t army = 0;
+    pos_t land[TILE_TYPE_COUNT] = {0};
 };
 
 class BasicGame {
@@ -246,12 +246,8 @@ class BasicGame {
    public:
     void step();
 
-   protected:
-    std::vector<RankInfo> rank;
-
    public:
-    void ranklist();
-    inline std::vector<RankInfo> getRanklist() { return rank; }
+    std::vector<RankInfo> ranklist();
 
    public:
     int initSpawn();
@@ -395,16 +391,8 @@ inline void BasicGame::step() {
     }
 }
 
-inline void BasicGame::ranklist() {
-    rank.assign(players.size(), RankInfo{});
-    for (index_t player = 0; player < static_cast<index_t>(players.size());
-         ++player) {
-        rank[player].player = player;
-        rank[player].army = 0;
-        std::fill(std::begin(rank[player].land), std::end(rank[player].land),
-                  0);
-    }
-
+std::vector<RankInfo> BasicGame::ranklist() {
+    std::vector<RankInfo> rank(players.size());
     for (auto& row : board.tiles) {
         for (auto& tile : row) {
             if (!isValidPlayer(tile.occupier)) continue;
@@ -424,6 +412,7 @@ inline void BasicGame::ranklist() {
                   if (lhs.army != rhs.army) return lhs.army > rhs.army;
                   return lhs.player < rhs.player;
               });
+    return rank;
 }
 
 inline int BasicGame::initSpawn() {

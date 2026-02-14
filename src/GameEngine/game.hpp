@@ -397,17 +397,9 @@ inline BasicGame::~BasicGame() {
 }
 
 inline void BasicGame::step() {
-    auto alivePlayers = getAlivePlayers();
-
-    // request moves
-    for (index_t i : alivePlayers) {
-        BoardView playerView = board.view(i);
-        players[i]->requestMove(playerView);
-    }
-
     // collect moves
     std::vector<std::pair<index_t, Move>> moves;
-    for (index_t i : alivePlayers) {
+    for (index_t i : getAlivePlayers()) {
         Player* player = players[i];
         Move move;
         while ((move = player->step()).type != MoveType::EMPTY &&
@@ -456,6 +448,12 @@ inline void BasicGame::step() {
     if (curHalfTurnPhase == 0) board.update(curTurn);
     curTurn += curHalfTurnPhase;
     curHalfTurnPhase ^= 1;
+
+    // request moves (for next turn)
+    for (index_t i : getAlivePlayers()) {
+        BoardView playerView = board.view(i);
+        players[i]->requestMove(playerView);
+    }
 }
 
 inline void BasicGame::ranklist() {

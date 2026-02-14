@@ -1,5 +1,6 @@
 #include "mapWidget.h"
 
+#include <QApplication>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPainter>
@@ -231,7 +232,7 @@ void MapWidget::wheelEvent(QWheelEvent* event) {
 void MapWidget::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
         leftMouseDown = true;
-        lastMousePos = event->pos();
+        leftMousePressPos = lastMousePos = event->pos();
     } else if (event->button() == Qt::RightButton) {
         rightMouseDown = true;
         QPoint gridPos = mapToGrid(event->pos());
@@ -245,8 +246,14 @@ void MapWidget::mousePressEvent(QMouseEvent* event) {
 void MapWidget::mouseMoveEvent(QMouseEvent* event) {
     if (leftMouseDown) {
         if (!leftMouseDragging) {
-            leftMouseDragging = true;
-            setCursor(Qt::ClosedHandCursor);
+            static const int dragThreshold = QApplication::startDragDistance();
+            if ((event->pos() - leftMousePressPos).manhattanLength() >=
+                dragThreshold) {
+                leftMouseDragging = true;
+                setCursor(Qt::ClosedHandCursor);
+                lastMousePos = event->pos();
+            }
+            return;
         }
         QPoint delta = event->pos() - lastMousePos;
         offset += delta;

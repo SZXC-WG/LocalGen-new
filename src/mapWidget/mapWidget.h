@@ -70,7 +70,7 @@ class MapWidget : public QWidget {
     QPointF offset;
     bool leftMouseDown, leftMouseDragging;
     bool rightMouseDown, rightMouseDragging;
-    QPoint lastMousePos;
+    QPoint leftMousePressPos, lastMousePos;
     QPoint lastRightClickGrid;
 
     std::vector<std::vector<DisplayTile>> displayTiles;

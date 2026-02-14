@@ -23,7 +23,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     // testing configuration
     for (int r = 10; r < config.mapHeight; r++) {
         for (int c = 10; c < config.mapWidth; c++) {
-            gameMap->tileAt(r, c).color = QColor(39, 39, 39);
+            gameMap->tileAt(r, c).color = QColor(57, 57, 57);
         }
     }
     QVBoxLayout* layout = new QVBoxLayout(this);

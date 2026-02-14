@@ -394,6 +394,9 @@ inline void BasicGame::step() {
 
 inline std::vector<RankItem> BasicGame::ranklist() {
     std::vector<RankItem> rank(players.size());
+    for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
+        rank[i].player = i;
+    }
     for (auto& row : board.tiles) {
         for (auto& tile : row) {
             if (!isValidPlayer(tile.occupier)) continue;

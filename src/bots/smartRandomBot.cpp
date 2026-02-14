@@ -102,13 +102,11 @@ class SmartRandomBot : public BasicBot {
                 return a.army > b.army;
             return a.army < b.army;
         };
-        std::sort(p.begin(), p.end(), cmp);
-        lastCoords.push_back(coo);
+        int best_dir = std::min_element(p.begin(), p.end(), cmp)->dir;
+        Coord nextCoo(coo.x + dx[best_dir], coo.y + dy[best_dir]);
+        lastCoords.push_back(nextCoo);
         if (lastCoords.size() > 100) lastCoords.pop_front();
-        auto& best = p.front();
-        moveQueue.emplace_back(
-            MoveType::MOVE_ARMY, coo,
-            Coord(coo.x + dx[best.dir], coo.y + dy[best.dir]), false);
+        moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, nextCoo, false);
     }
 };
 

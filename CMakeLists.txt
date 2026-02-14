@@ -26,7 +26,7 @@ set(PROJECT_SOURCES
         src/localGameWindow/localGameWindow.h
         src/mapCreatorWindow/mapCreatorWindow.cpp
         src/mapCreatorWindow/mapCreatorWindow.h
-        src/bots/DummyBot.cpp
+        src/bots/smartRandomBot.cpp
         src/GameEngine/board.hpp
         src/GameEngine/bot.h
         src/GameEngine/game.hpp

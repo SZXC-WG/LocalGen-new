@@ -26,7 +26,7 @@ Before submitting a bot to this folder, make sure it satisfies **all** of the fo
    - Overrides the `compute` method.
 6. The bot is registered via the `REGISTER_BOT` macro.
 
-See `DummyBot.cpp` for a reference implementation.
+See `dummyBot.cpp` for a reference implementation.
 
 ---
 

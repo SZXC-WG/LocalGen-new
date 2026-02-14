@@ -166,6 +166,12 @@ struct GameConstantsPack {
     config::Config config;
 };
 
+struct RankInfo {
+    index_t player;
+    army_t army;
+    pos_t land[TILE_TYPE_COUNT];
+};
+
 class BasicGame {
    protected:
     std::mt19937 rng{std::random_device()()};
@@ -225,24 +231,8 @@ class BasicGame {
     void broadcast(turn_t turn, GameMessageType message,
                    std::vector<index_t> associatedList);
 
-   public:
-    class GameBoard : public Board {
-       protected:
-        BasicGame* game;
-
-       public:
-        GameBoard() = delete;
-        explicit GameBoard(BasicGame* _game);
-        GameBoard(BasicGame* _game, Board* _board);
-
-        bool visible(pos_t row, pos_t col, index_t player) const override;
-        void update(turn_t turn);
-
-        friend class BasicGame;
-    };
-
    protected:
-    GameBoard board{this};
+    Board board;
 
     void capture(index_t p1, index_t p2);
 
@@ -255,17 +245,6 @@ class BasicGame {
 
    public:
     void step();
-
-   public:
-    class RankInfo {
-       private:
-        index_t player;
-        army_t army;
-        pos_t land[TILE_TYPE_COUNT];
-
-       public:
-        friend class BasicGame;
-    };
 
    protected:
     std::vector<RankInfo> rank;
@@ -299,45 +278,6 @@ class BasicGame {
     std::vector<ReplayUnit> replay;
 };
 
-inline BasicGame::GameBoard::GameBoard(BasicGame* _game) : game(_game) {}
-
-inline BasicGame::GameBoard::GameBoard(BasicGame* _game, Board* _board)
-    : Board(*_board), game(_game) {}
-
-inline bool BasicGame::GameBoard::visible(pos_t row, pos_t col,
-                                          index_t player) const {
-    return Board::visible(row, col, player);
-}
-
-inline void BasicGame::GameBoard::update(turn_t turn) {
-    for (auto& row : tiles) {
-        for (auto& tile : row) {
-            if (tile.occupier == -1) {
-                continue;
-            }
-            switch (tile.type) {
-                case TILE_CITY:
-                case TILE_GENERAL:
-                case TILE_CAPTURED_GENERAL: ++tile.army;
-                case TILE_BLANK:
-                    if (turn > 0 && turn % 25 == 0) ++tile.army;
-                    break;
-                case TILE_SWAMP:
-                    if (tile.army > 0) --tile.army;
-                    break;
-                default: break;
-            }
-            if (tile.army == 0) {
-                if (tile.type == TILE_SWAMP) tile.occupier = -1;
-            }
-            if (tile.army < 0) {
-                tile.occupier = -1;
-                tile.army = 0;
-            }
-        }
-    }
-}
-
 inline void BasicGame::capture(index_t p1, index_t p2) {
     alive[p2] = false;
     for (auto& row : board.tiles) {
@@ -362,7 +302,7 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
       players(_players.size()),
       names(_players.size()),
       teams(_players.size()),
-      board(this, &_board),
+      board(_board),
       alive(_players.size()),
       spawnCoord(_players.size()) {
     if (_players.empty()) {
@@ -386,7 +326,7 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
         players[randId[i]] = _players[i];
         names[randId[i]] = name[i];
         teams[randId[i]] = _teams[i];
-        indexMap[players[randId[i]]] = randId[i];
+        indexMap[_players[i]] = randId[i];
     }
 }
 
@@ -443,7 +383,9 @@ inline void BasicGame::step() {
     }
 
     // update board
-    if (curHalfTurnPhase == 0) board.update(curTurn);
+    if (curHalfTurnPhase == 0) {
+        board.update(curTurn > 0 && curTurn % 25 == 0);
+    }
     curTurn += curHalfTurnPhase;
     curHalfTurnPhase ^= 1;
 

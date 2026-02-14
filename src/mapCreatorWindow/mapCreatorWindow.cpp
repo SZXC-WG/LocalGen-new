@@ -500,7 +500,7 @@ void MapCreatorWindow::onOpenMap() {
         }
         QString mapData = mapFile.readLine();
         mapFile.close();
-        Board board;
+        InitBoard board;
         board.v5Unzip(mapData.toStdString());
         int width = board.getWidth(), height = board.getHeight();
         map->realloc(width, height);

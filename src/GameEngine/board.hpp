@@ -38,7 +38,7 @@ struct BoardView {
 
 /// Game map board.
 class Board {
-   protected:
+   public:
     pos_t row = 0, col = 0;
     std::vector<std::vector<Tile>> tiles;
 
@@ -82,104 +82,9 @@ class Board {
         tiles.resize(_row + 2, std::vector<Tile>(_col + 2, Tile()));
     }
 
-    /// Map coding system derived from v5.
-    /// v6 is designed to be compatible with v5, so we saved this system.
-   private:
-    static inline intmax_t PMod(intmax_t& x) {
-        intmax_t res = x & 63;  // 63 = 0b111111
-        x >>= 6;
-        return res;
-    };
-    static constexpr int CHAR_AD = 48;
-
-   public:
-    std::string v5Zip() {
-        std::string strZip;
-        int i, j;
-        intmax_t k1 = row, k2 = col;
-        strZip.push_back(PMod(k1) + CHAR_AD);
-        strZip.push_back(PMod(k1) + CHAR_AD);
-        strZip.push_back(PMod(k2) + CHAR_AD);
-        strZip.push_back(PMod(k2) + CHAR_AD);
-
-        for (i = 1; i <= row; i++)
-            for (j = 1; j <= col; j++) {
-                strZip.push_back(tiles[i][j].occupier + CHAR_AD);
-
-                int type = 0;
-                switch (tiles[i][j].type) {
-                    case TILE_BLANK:       type = 0; break;
-                    case TILE_SWAMP:       type = 1; break;
-                    case TILE_MOUNTAIN:    type = 2; break;
-                    case TILE_SPAWN:       type = 3; break;
-                    case TILE_CITY:        type = 4; break;
-                    case TILE_DESERT:      type = 5; break;
-                    case TILE_LOOKOUT:     type = 6; break;
-                    case TILE_OBSERVATORY: type = 7; break;
-                    default:               break;
-                }
-
-                char ch = (type << 2) + (tiles[i][j].lit << 1);
-                k1 = tiles[i][j].army;
-
-                if (k1 < 0) {
-                    k1 = -k1;
-                    strZip.push_back(ch += CHAR_AD + 1);
-                } else
-                    strZip.push_back(ch += CHAR_AD);
-
-                for (k2 = 1; k2 <= 8; k2++)
-                    strZip.push_back(PMod(k1) + CHAR_AD);
-            }
-        return strZip;
-    };
-
-    void v5Unzip(std::string strUnzip) {
-        strUnzip.push_back('\0');
-
-        int i, j, k = 4;
-        int f, p = 0;
-
-        for (; strUnzip[p] != '\0'; p++) strUnzip[p] -= CHAR_AD;
-
-        row = (strUnzip[1] << 6) + strUnzip[0];
-        col = (strUnzip[3] << 6) + strUnzip[2];
-        tiles.resize(row + 2, std::vector<Tile>(col + 2));
-
-        for (i = 1; i <= row; i++)
-            for (j = 1; j <= col; j++) {
-                tiles[i][j].occupier = strUnzip[k++];
-                if (tiles[i][j].occupier == 0) tiles[i][j].occupier = -1;
-                bool f = strUnzip[k] & 1;
-                strUnzip[k] >>= 1;
-                tiles[i][j].lit = strUnzip[k] & 1;
-                strUnzip[k] >>= 1;
-                int type = strUnzip[k++];
-                tiles[i][j].army = 0;
-
-                switch (type) {
-                    case 0:  tiles[i][j].type = TILE_BLANK; break;
-                    case 1:  tiles[i][j].type = TILE_SWAMP; break;
-                    case 2:  tiles[i][j].type = TILE_MOUNTAIN; break;
-                    case 3:  tiles[i][j].type = TILE_SPAWN; break;
-                    case 4:  tiles[i][j].type = TILE_CITY; break;
-                    case 5:  tiles[i][j].type = TILE_DESERT; break;
-                    case 6:  tiles[i][j].type = TILE_LOOKOUT; break;
-                    case 7:  tiles[i][j].type = TILE_OBSERVATORY; break;
-                    default: break;
-                }
-
-                for (p = 7; p >= 0; p--)
-                    tiles[i][j].army =
-                        (tiles[i][j].army << 6) + strUnzip[k + p];
-                k += 8;
-                tiles[i][j].army = f ? (-tiles[i][j].army) : tiles[i][j].army;
-            }
-    };
-
    public:
     /// Check whether the %Tile at (x,y) is visible to a %Player.
-    virtual bool visible(pos_t x, pos_t y, index_t player) const {
+    bool visible(pos_t x, pos_t y, index_t player) const {
         // invalidity check
         if (isInvalidPos(x, y)) return false;
 
@@ -286,6 +191,36 @@ class Board {
     };
 
    public:
+    void update(bool increaseAllArmy = false) {
+        for (auto& row : tiles) {
+            for (auto& tile : row) {
+                if (tile.occupier == -1) {
+                    continue;
+                }
+                switch (tile.type) {
+                    case TILE_CITY:
+                    case TILE_GENERAL:
+                    case TILE_CAPTURED_GENERAL: ++tile.army;
+                    case TILE_BLANK:
+                        if (increaseAllArmy) ++tile.army;
+                        break;
+                    case TILE_SWAMP:
+                        if (tile.army > 0) --tile.army;
+                        break;
+                    default: break;
+                }
+                if (tile.army == 0) {
+                    if (tile.type == TILE_SWAMP) tile.occupier = -1;
+                }
+                if (tile.army < 0) {
+                    tile.occupier = -1;
+                    tile.army = 0;
+                }
+            }
+        }
+    }
+
+   public:
     BoardView view(index_t player) const {
         BoardView boardView;
         auto& tileViews = boardView.tiles;
@@ -357,6 +292,101 @@ class InitBoard : public Board {
     inline unsigned getSpawnTeam(Coord pos) {
         assert(isValidPos(pos) && tileAt(pos).type == TILE_SPAWN);
         return spawns.at(pos);
+    };
+
+    /// Map coding system derived from v5.
+    /// v6 is designed to be compatible with v5, so we saved this system.
+   private:
+    static inline intmax_t PMod(intmax_t& x) {
+        intmax_t res = x & 63;  // 63 = 0b111111
+        x >>= 6;
+        return res;
+    };
+    static constexpr int CHAR_AD = 48;
+
+   public:
+    std::string v5Zip() {
+        std::string strZip;
+        int i, j;
+        intmax_t k1 = row, k2 = col;
+        strZip.push_back(PMod(k1) + CHAR_AD);
+        strZip.push_back(PMod(k1) + CHAR_AD);
+        strZip.push_back(PMod(k2) + CHAR_AD);
+        strZip.push_back(PMod(k2) + CHAR_AD);
+
+        for (i = 1; i <= row; i++)
+            for (j = 1; j <= col; j++) {
+                strZip.push_back(tiles[i][j].occupier + CHAR_AD);
+
+                int type = 0;
+                switch (tiles[i][j].type) {
+                    case TILE_BLANK:       type = 0; break;
+                    case TILE_SWAMP:       type = 1; break;
+                    case TILE_MOUNTAIN:    type = 2; break;
+                    case TILE_SPAWN:       type = 3; break;
+                    case TILE_CITY:        type = 4; break;
+                    case TILE_DESERT:      type = 5; break;
+                    case TILE_LOOKOUT:     type = 6; break;
+                    case TILE_OBSERVATORY: type = 7; break;
+                    default:               break;
+                }
+
+                char ch = (type << 2) + (tiles[i][j].lit << 1);
+                k1 = tiles[i][j].army;
+
+                if (k1 < 0) {
+                    k1 = -k1;
+                    strZip.push_back(ch += CHAR_AD + 1);
+                } else
+                    strZip.push_back(ch += CHAR_AD);
+
+                for (k2 = 1; k2 <= 8; k2++)
+                    strZip.push_back(PMod(k1) + CHAR_AD);
+            }
+        return strZip;
+    };
+
+    void v5Unzip(std::string strUnzip) {
+        strUnzip.push_back('\0');
+
+        int i, j, k = 4;
+        int f, p = 0;
+
+        for (; strUnzip[p] != '\0'; p++) strUnzip[p] -= CHAR_AD;
+
+        row = (strUnzip[1] << 6) + strUnzip[0];
+        col = (strUnzip[3] << 6) + strUnzip[2];
+        tiles.resize(row + 2, std::vector<Tile>(col + 2));
+
+        for (i = 1; i <= row; i++)
+            for (j = 1; j <= col; j++) {
+                tiles[i][j].occupier = strUnzip[k++];
+                if (tiles[i][j].occupier == 0) tiles[i][j].occupier = -1;
+                bool f = strUnzip[k] & 1;
+                strUnzip[k] >>= 1;
+                tiles[i][j].lit = strUnzip[k] & 1;
+                strUnzip[k] >>= 1;
+                int type = strUnzip[k++];
+                tiles[i][j].army = 0;
+
+                switch (type) {
+                    case 0:  tiles[i][j].type = TILE_BLANK; break;
+                    case 1:  tiles[i][j].type = TILE_SWAMP; break;
+                    case 2:  tiles[i][j].type = TILE_MOUNTAIN; break;
+                    case 3:  tiles[i][j].type = TILE_SPAWN; break;
+                    case 4:  tiles[i][j].type = TILE_CITY; break;
+                    case 5:  tiles[i][j].type = TILE_DESERT; break;
+                    case 6:  tiles[i][j].type = TILE_LOOKOUT; break;
+                    case 7:  tiles[i][j].type = TILE_OBSERVATORY; break;
+                    default: break;
+                }
+
+                for (p = 7; p >= 0; p--)
+                    tiles[i][j].army =
+                        (tiles[i][j].army << 6) + strUnzip[k + p];
+                k += 8;
+                tiles[i][j].army = f ? (-tiles[i][j].army) : tiles[i][j].army;
+            }
     };
 };
 

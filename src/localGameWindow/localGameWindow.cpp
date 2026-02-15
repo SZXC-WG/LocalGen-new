@@ -218,10 +218,15 @@ InitBoard createRandomBoard(int width, int height) {
 
     QRandomGenerator* rng = QRandomGenerator::global();
     int area = width * height;
-    int numMountains = rng->bounded(area / 8, area / 8 + area / 20 + 1);
+    int numMountains = rng->bounded(area / 7, area / 7 + area / 20 + 1);
     for (int i = 0; i < numMountains; ++i) {
         Coord pos(rng->bounded(height) + 1, rng->bounded(width) + 1);
-        board.changeTile(pos, Tile(-1, TILE_MOUNTAIN, 0));
+        int type = rng->bounded(10);
+        board.changeTile(pos, Tile(-1,
+                                   type == 0   ? TILE_LOOKOUT
+                                   : type == 1 ? TILE_OBSERVATORY
+                                               : TILE_MOUNTAIN,
+                                   0));
     }
 
     int numCities = rng->bounded(area / 30, area / 15 + 1);

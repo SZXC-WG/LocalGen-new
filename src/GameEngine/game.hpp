@@ -169,7 +169,8 @@ struct GameConstantsPack {
 struct RankItem {
     index_t player = -1;
     army_t army = 0;
-    pos_t land[TILE_TYPE_COUNT] = {0};
+    pos_t land = 0;
+    bool alive = false;
 };
 
 class BasicGame {
@@ -396,18 +397,14 @@ inline std::vector<RankItem> BasicGame::ranklist() {
     std::vector<RankItem> rank(players.size());
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         rank[i].player = i;
+        rank[i].alive = alive[i];
     }
+
     for (auto& row : board.tiles) {
         for (auto& tile : row) {
             if (!isValidPlayer(tile.occupier)) continue;
-            rank[tile.occupier].army += tile.army;
-            tile_type_e tileType = tile.type;
-            if (tileType == TILE_CAPTURED_GENERAL) {
-                tileType = TILE_CITY;
-            }
-            if (tileType >= 0 && tileType < TILE_TYPE_COUNT) {
-                ++rank[tile.occupier].land[tileType];
-            }
+            RankItem& item = rank[tile.occupier];
+            item.army += tile.army, ++item.land;
         }
     }
 

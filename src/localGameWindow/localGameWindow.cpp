@@ -424,16 +424,11 @@ void LocalGameWindow::updateLeaderboard(
             continue;
         }
 
-        int totalLand = 0;
-        for (int i = 0; i < TILE_TYPE_COUNT; ++i) {
-            totalLand += item.land[i];
-        }
-
         LeaderboardRow row;
         row.playerId = item.player;
         row.playerName = QString::fromStdString(game->getName(item.player));
         row.army = item.army;
-        row.land = totalLand;
+        row.land = item.land;
         row.playerColor = playerColor(item.player);
         rows.push_back(std::move(row));
     }

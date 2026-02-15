@@ -9,7 +9,8 @@
 #include <QWheelEvent>
 #include <cmath>
 
-MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled)
+MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled,
+                     int fitMargin)
     : QWidget(parent),
       scale(1.0),
       offset(0, 0),
@@ -17,6 +18,7 @@ MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled)
       leftMouseDragging(false),
       rightMouseDown(false),
       rightMouseDragging(false),
+      fitMargin(fitMargin),
       focusRow(-1),
       focusCol(-1),
       lastRightClickGrid(-1, -1) {
@@ -48,12 +50,12 @@ void MapWidget::realloc(int w, int h) {
     displayTiles.resize(h, std::vector<DisplayTile>(w));
 }
 
-void MapWidget::fitCenter(int margin) {
+void MapWidget::fitCenter() {
     qreal mapPixelWidth = mapWidth() * cellSize;
     qreal mapPixelHeight = mapHeight() * cellSize;
 
-    qreal availableWidth = width() - 2 * margin;
-    qreal availableHeight = height() - 2 * margin;
+    qreal availableWidth = width() - 2 * fitMargin;
+    qreal availableHeight = height() - 2 * fitMargin;
 
     if (availableWidth <= 0 || availableHeight <= 0) {
         return;
@@ -379,4 +381,9 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
 void MapWidget::bindMoveQueue(std::deque<Move>* queue) {
     moveQueue = queue;
     update();
+}
+
+void MapWidget::resizeEvent(QResizeEvent* event) {
+    QWidget::resizeEvent(event);
+    fitCenter();
 }

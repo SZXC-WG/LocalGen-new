@@ -243,7 +243,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     pal.setColor(QPalette::Window, QColor(36, 36, 36));
     setPalette(pal);
 
-    gameMap = new MapWidget(this, config.mapWidth, config.mapHeight);
+    gameMap = new MapWidget(this, config.mapWidth, config.mapHeight, true, 25);
     halfTurnTimer = new QTimer(this);
     halfTurnTimer->setSingleShot(true);
     halfTurnTimer->setTimerType(Qt::PreciseTimer);
@@ -329,7 +329,6 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     if (humanPlayer != nullptr)
         gameMap->bindMoveQueue(humanPlayer->getMoveQueue());
 
-    QTimer::singleShot(0, [this]() { gameMap->fitCenter(25); });
     if (game != nullptr) {
         updateLeaderboard(game->ranklist());
         positionFloatingWidgets();

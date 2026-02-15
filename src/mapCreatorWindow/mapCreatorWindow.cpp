@@ -28,7 +28,7 @@ MapCreatorWindow::MapCreatorWindow(QWidget* parent)
     pal.setColor(QPalette::Window, QColor(36, 36, 36));
     setPalette(pal);
 
-    map = new MapWidget(this, 10, 10, false);
+    map = new MapWidget(this, 10, 10, false, 100);
     connect(map, &MapWidget::cellClicked, this,
             &MapCreatorWindow::onMapClicked);
 
@@ -48,8 +48,6 @@ MapCreatorWindow::MapCreatorWindow(QWidget* parent)
     repositionFloatingElements();
 
     setFocusPolicy(Qt::StrongFocus);
-
-    QTimer::singleShot(0, [this]() { map->fitCenter(100); });
 }
 
 MapCreatorWindow::~MapCreatorWindow() {}
@@ -206,7 +204,7 @@ void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
             updateToolButtonStyles();
             updateHintBar();
             break;
-        case Qt::Key_C: map->fitCenter(100); break;
+        case Qt::Key_C: map->fitCenter(); break;
         default:        QDialog::keyPressEvent(event); break;
     }
 }
@@ -529,7 +527,7 @@ void MapCreatorWindow::onOpenMap() {
                 tile.lightIcon = loadedTile.lit;
             }
         }
-        map->fitCenter(100);
+        map->fitCenter();
         widthSlider->setValue(width);
         heightSlider->setValue(height);
         return;
@@ -621,7 +619,7 @@ void MapCreatorWindow::onOpenMap() {
         }
     }
 
-    map->fitCenter(100);
+    map->fitCenter();
     widthSlider->setValue(width);
     heightSlider->setValue(height);
 }

@@ -21,7 +21,8 @@ class MapWidget : public QWidget {
     Q_OBJECT
 
    public:
-    explicit MapWidget(QWidget* parent, int w, int h, bool focusEnabled = true);
+    explicit MapWidget(QWidget* parent, int w, int h, bool focusEnabled = true,
+                       int fitMargin = 25);
     ~MapWidget();
 
     void setFocusEnabled(bool enabled);
@@ -34,7 +35,7 @@ class MapWidget : public QWidget {
     void setMapHeight(int h);
     void realloc(int w, int h);
 
-    void fitCenter(int margin);
+    void fitCenter();
 
     void bindMoveQueue(std::deque<Move>* queue);
 
@@ -48,6 +49,7 @@ class MapWidget : public QWidget {
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
    private:
     // Helper functions
@@ -63,6 +65,7 @@ class MapWidget : public QWidget {
     // Constants
     static constexpr qreal cellSize = 20.0, zoomFactor = 1.1,
                            paddingFactor = 0.109375;
+    const int fitMargin;
 
     // State variables
     int focusRow, focusCol;

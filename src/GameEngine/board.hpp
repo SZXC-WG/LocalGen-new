@@ -87,6 +87,7 @@ class Board {
     bool visible(pos_t x, pos_t y, index_t player) const {
         // invalidity check
         if (isInvalidPos(x, y)) return false;
+        if (tiles[x][y].lit) return true;
 
         // occupier & adjacent check
         for (int dx = -1; dx <= 1; ++dx)

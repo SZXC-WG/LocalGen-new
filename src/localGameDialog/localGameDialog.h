@@ -2,10 +2,11 @@
 #define LOCALGAMEDIALOG_H
 
 #include <QDialog>
+#include <QStringList>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-    class LocalGameDialog;
+class LocalGameDialog;
 }
 QT_END_NAMESPACE
 
@@ -14,11 +15,7 @@ struct LocalGameConfig {
     bool enableSounds, showAnalysis;
     QString mapName;
     int mapWidth, mapHeight;
-    struct PlayerConfig {
-        QString name;
-        bool visible;
-    };
-    QVector<PlayerConfig> players;
+    QStringList players;
 };
 
 class LocalGameDialog : public QDialog {

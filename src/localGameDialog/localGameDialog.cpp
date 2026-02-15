@@ -1,5 +1,11 @@
 #include "localGameDialog.h"
 
+#include <QComboBox>
+#include <QFont>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QStringList>
+
 #include "../GameEngine/bot.h"
 #include "ui_localGameDialog.h"
 
@@ -25,8 +31,7 @@ LocalGameConfig LocalGameDialog::config() const {
     QLayout* layout = ui->groupBox_players->layout();
     for (int i = 0; i < numPlayers; ++i) {
         QWidget* playerWidget = layout->itemAt(i + 1)->widget();
-        players[i].name = playerWidget->findChild<QComboBox*>()->currentText();
-        players[i].visible = playerWidget->findChild<QCheckBox*>()->isChecked();
+        players[i] = playerWidget->findChild<QComboBox*>()->currentText();
     }
     return config;
 }
@@ -66,13 +71,9 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
                                    QSizePolicy::Preferred);
         playerCombo->setStyleSheet("color: teal;");
         playerCombo->setFont(comboFont);
-        QCheckBox* visibleChkbox = new QCheckBox(tr("Visible"));
-        visibleChkbox->setChecked(layout->count() == 1);
-        visibleChkbox->setFont(font);
         QHBoxLayout* playerLayout = new QHBoxLayout();
         playerLayout->addWidget(playerLabel);
         playerLayout->addWidget(playerCombo);
-        playerLayout->addWidget(visibleChkbox);
         playerLayout->setContentsMargins(0, 0, 0, 0);
         QWidget* playerWidget = new QWidget();
         playerWidget->setLayout(playerLayout);

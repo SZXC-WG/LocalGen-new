@@ -260,8 +260,8 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     teams.reserve(config.players.size() + 1);
     names.reserve(config.players.size() + 1);
 
-    for (const auto& playerConfig : config.players) {
-        if (playerConfig.name == "Human") {
+    for (QString name : config.players) {
+        if (name == "Human") {
             humanPlayer = new HumanPlayer();
             humanPlayer->setBoardViewHandler(
                 [this](const BoardView& boardView) { updateView(boardView); });
@@ -270,14 +270,14 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
             names.push_back("Human");
             continue;
         }
-        BasicBot* bot =
-            BotFactory::instance().create(playerConfig.name.toStdString());
+        std::string stdName = name.toStdString();
+        BasicBot* bot = BotFactory::instance().create(stdName);
         if (bot == nullptr) {
             continue;
         }
         players.push_back(bot);
         teams.push_back(static_cast<index_t>(teams.size()));
-        names.push_back(playerConfig.name.toStdString());
+        names.push_back(stdName);
     }
 
     InitBoard initialBoard =

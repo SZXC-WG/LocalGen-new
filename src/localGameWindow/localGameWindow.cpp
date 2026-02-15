@@ -420,15 +420,11 @@ void LocalGameWindow::updateLeaderboard(
     std::vector<LeaderboardRow> rows;
     rows.reserve(rank.size());
     for (const auto& item : rank) {
-        if (!game->isAlive(item.player)) {
-            continue;
-        }
-
+        if (!item.alive) continue;
         LeaderboardRow row;
         row.playerId = item.player;
         row.playerName = QString::fromStdString(game->getName(item.player));
-        row.army = item.army;
-        row.land = item.land;
+        row.army = item.army, row.land = item.land;
         row.playerColor = playerColor(item.player);
         rows.push_back(std::move(row));
     }

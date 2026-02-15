@@ -36,4 +36,8 @@ struct Coord {
     }
 };
 
+inline Coord operator+(const Coord& lhs, const Coord& rhs) {
+    return Coord(lhs.x + rhs.x, lhs.y + rhs.y);
+}
+
 #endif  // LGEN_GAMEENGINE_UTILS_HPP

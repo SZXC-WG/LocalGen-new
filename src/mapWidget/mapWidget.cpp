@@ -321,13 +321,19 @@ void MapWidget::setFocusEnabled(bool enabled) {
 }
 
 void MapWidget::keyPressEvent(QKeyEvent* event) {
+    int key = event->key();
+    if (key == Qt::Key_C) {
+        fitCenter();
+        return;
+    }
+
     if (moveQueue) {
-        if (event->key() == Qt::Key_Q) {
+        if (key == Qt::Key_Q) {
             moveQueue->clear();
             update();
             return;
         }
-        if (event->key() == Qt::Key_E) {
+        if (key == Qt::Key_E) {
             if (!moveQueue->empty()) {
                 Coord fromTile = moveQueue->back().from;
                 moveQueue->pop_back();
@@ -341,7 +347,7 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
 
     if (focusRow != -1 && focusCol != -1) {
         int oldRow = focusRow, oldCol = focusCol;
-        switch (event->key()) {
+        switch (key) {
             case Qt::Key_Left:
                 if (focusCol == 0) return;
                 focusCol--;

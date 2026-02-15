@@ -14,6 +14,7 @@ struct DisplayTile {
     QColor color = QColor(220, 220, 220);  // Default color for TILE_BLANK
     QString text;
     bool lightIcon = false;
+    bool displayBorders = true;
 };
 
 class MapWidget : public QWidget {

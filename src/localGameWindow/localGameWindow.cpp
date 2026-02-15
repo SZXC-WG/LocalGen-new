@@ -186,6 +186,7 @@ inline DisplayTile toDisplayTile(const TileView& tile) {
     if (!tile.visible) {
         display.color.setRgb(57, 57, 57);
         display.text.clear();
+        display.displayBorders = false;
         return display;
     }
     if (tile.occupier >= 0) {

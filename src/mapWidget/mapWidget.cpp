@@ -138,6 +138,8 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     painter.setFont(QFont("Quicksand", 6));
 
     int h = mapHeight(), w = mapWidth();
+    painter.fillRect(QRectF(0.0, 0.0, w * cellSize, h * cellSize),
+                     QColor(57, 57, 57));
 
     for (int r = 0; r < h; ++r) {
         for (int c = 0; c < w; ++c) {
@@ -145,7 +147,7 @@ void MapWidget::paintEvent(QPaintEvent* event) {
             QRectF cell(c * cellSize, r * cellSize, cellSize, cellSize);
             painter.setPen(QPen(Qt::black, 1.0 / scale));
             painter.fillRect(cell, tile.color);
-            painter.drawRect(cell);
+            if (tile.displayBorders) painter.drawRect(cell);
             if (tile.type != TILE_BLANK) {
                 QRectF imgRect(c * cellSize + padding, r * cellSize + padding,
                                cellSize - padding * 2, cellSize - padding * 2);

@@ -385,6 +385,7 @@ inline void BasicGame::step() {
     }
     curTurn += curHalfTurnPhase;
     curHalfTurnPhase ^= 1;
+    board.updateVisionCache();
 
     // request moves (for next turn)
     std::vector<RankItem> rank = ranklist();
@@ -473,6 +474,8 @@ inline int BasicGame::init() {
                                  static_cast<index_t>(players.size()), teams,
                                  conf});
     }
+
+    board.updateVisionCache();
     return 0;
 }
 

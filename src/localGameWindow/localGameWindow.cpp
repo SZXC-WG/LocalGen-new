@@ -331,8 +331,10 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
           [](const LeaderboardRow&) { return QColor(Qt::white); },
           [](const LeaderboardRow&) { return QColor(Qt::black); }}});
 
-    if (humanPlayer != nullptr)
+    if (humanPlayer != nullptr) {
         gameMap->bindMoveQueue(humanPlayer->getMoveQueue());
+        humanPlayerId = humanPlayer->playerId;
+    }
 
     if (game != nullptr) {
         updateLeaderboard(game->ranklist());
@@ -356,8 +358,12 @@ void LocalGameWindow::updateView(const BoardView& boardView) {
     int width = gameMap->mapWidth();
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
-            gameMap->tileAt(r, c) =
-                toDisplayTile(boardView.tileAt(r + 1, c + 1));
+            const TileView& tileView = boardView.tileAt(r + 1, c + 1);
+            gameMap->tileAt(r, c) = toDisplayTile(tileView);
+            if (tileView.type == TILE_GENERAL &&
+                tileView.occupier == humanPlayerId) {
+                generalRow = r, generalCol = c;
+            }
         }
     }
     gameMap->update();
@@ -375,7 +381,7 @@ void LocalGameWindow::runHalfTurn() {
     QElapsedTimer elapsedTimer;
     elapsedTimer.start();
     game->step();
-    if (humanPlayer == nullptr || !game->isAlive(humanPlayer->playerId)) {
+    if (!game->isAlive(humanPlayerId)) {
         updateView(game->fullView());
     }
     updateLeaderboard(game->ranklist());
@@ -453,6 +459,15 @@ void LocalGameWindow::positionFloatingWidgets() {
     if (turnLabel != nullptr) {
         turnLabel->raise();
     }
+}
+
+void LocalGameWindow::keyPressEvent(QKeyEvent* event) {
+    int key = event->key();
+    if (game->isAlive(humanPlayerId) && generalRow != -1 && key == Qt::Key_H) {
+        gameMap->setFocusCell(generalRow, generalCol);
+        return;
+    }
+    QDialog::keyPressEvent(event);
 }
 
 void LocalGameWindow::resizeEvent(QResizeEvent* event) {

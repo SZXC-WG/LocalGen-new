@@ -94,6 +94,7 @@ class LocalGameWindow : public QDialog {
     void positionFloatingWidgets();
 
    protected:
+    void keyPressEvent(QKeyEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
 
     MapWidget* gameMap = nullptr;
@@ -104,6 +105,9 @@ class LocalGameWindow : public QDialog {
     QLabel* turnLabel = nullptr;
     bool gameRunning = false;
     double halfTurnDurationMs = 500.0;
+
+    index_t humanPlayerId = -2;
+    int generalRow = -1, generalCol = -1;
 };
 
 #endif  // LOCALGAMEWINDOW_H

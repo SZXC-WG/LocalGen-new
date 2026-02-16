@@ -38,6 +38,7 @@ class MapWidget : public QWidget {
     void fitCenter();
 
     void bindMoveQueue(std::deque<Move>* queue);
+    void setFocusCell(int r, int c);
 
    signals:
     void cellClicked(int r, int c);

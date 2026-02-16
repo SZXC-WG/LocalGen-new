@@ -389,6 +389,11 @@ void MapWidget::bindMoveQueue(std::deque<Move>* queue) {
     update();
 }
 
+void MapWidget::setFocusCell(int r, int c) {
+    focusRow = r, focusCol = c;
+    update();
+}
+
 void MapWidget::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);
     fitCenter();

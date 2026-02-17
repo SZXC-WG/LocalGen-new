@@ -37,10 +37,14 @@ class MapCreatorWindow : public QDialog {
     void resizeEvent(QResizeEvent* event) override;
     void repositionFloatingElements();
 
+    // LG-format Map I/O
     void openMap_v5(const QString& filename);
     void openMap_v6(const QString& filename);
     void saveMap_v5(const QString& filename);
     void saveMap_v6(const QString& filename);
+
+    // Official map format
+    void openOfficialMap(const QByteArray& data);
 
     static const QString mapFileFilter;
 

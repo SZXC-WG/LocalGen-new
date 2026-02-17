@@ -8,6 +8,8 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QIcon>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QMessageBox>
@@ -481,23 +483,39 @@ void MapCreatorWindow::repositionFloatingElements() {
 }
 
 const QString MapCreatorWindow::mapFileFilter =
-    "All LocalGen Maps (*.lg *.lgmp);;LocalGen v5 (*.lg) - Legacy "
-    "Format;;LocalGen v6 (*.lgmp) - Current Format";
+    "All Supported Maps (*.lg *.lgmp *.json);;"
+    "Official Generals.io Map (*.json);;"
+    "LocalGen v5 (*.lg) - Legacy Format;;"
+    "LocalGen v6 (*.lgmp) - Current Format;;";
 
 void MapCreatorWindow::onOpenMap() {
     QString filename =
         QFileDialog::getOpenFileName(this, "Open Map", "", mapFileFilter);
     if (filename.isEmpty()) return;
 
-    // v5 map format
     if (filename.endsWith(".lg"))
         openMap_v5(filename);
     else if (filename.endsWith(".lgmp"))
         openMap_v6(filename);
-    else
+    else if (filename.endsWith(".json")) {
+        QFile file(filename);
+        if (!file.open(QIODevice::ReadOnly)) {
+            QMessageBox::critical(this, "Error", "Failed to open map file.");
+            return;
+        }
+        QByteArray data = file.readAll();
+        file.close();
+        openOfficialMap(data);
+    } else {
         QMessageBox::critical(this, "Error",
-                              "Unsupported file format. Please select a .lg or "
-                              ".lgmp file.");
+                              "Unsupported file format. Please select a .lg, "
+                              ".lgmp, or .json file.");
+        return;
+    }
+
+    map->fitCenter();
+    widthSlider->setValue(map->mapWidth());
+    heightSlider->setValue(map->mapHeight());
 }
 
 void MapCreatorWindow::openMap_v5(const QString& filename) {
@@ -534,9 +552,6 @@ void MapCreatorWindow::openMap_v5(const QString& filename) {
             tile.lightIcon = loadedTile.lit;
         }
     }
-    map->fitCenter();
-    widthSlider->setValue(width);
-    heightSlider->setValue(height);
 }
 
 void MapCreatorWindow::openMap_v6(const QString& filename) {
@@ -625,10 +640,103 @@ void MapCreatorWindow::openMap_v6(const QString& filename) {
             map->tileAt(r, c) = unpackTile(packed);
         }
     }
+}
 
-    map->fitCenter();
-    widthSlider->setValue(width);
-    heightSlider->setValue(height);
+void MapCreatorWindow::openOfficialMap(const QByteArray& data) {
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+    if (error.error != QJsonParseError::NoError || !doc.isObject()) {
+        QMessageBox::critical(this, "Error", "This is not a valid JSON file.");
+        return;
+    }
+
+    QJsonObject obj = doc.object();
+    int width = obj.value(QLatin1StringView("width")).toInt(),
+        height = obj.value(QLatin1StringView("height")).toInt();
+    QString mapStr = obj.value(QLatin1StringView("map")).toString();
+    if (width <= 0 || height <= 0 || mapStr.isEmpty()) {
+        QMessageBox::critical(this, "Error",
+                              "Missing or invalid map configuration.");
+        return;
+    }
+
+    QStringList tileList = mapStr.split(',');
+    if (tileList.size() != width * height) {
+        QMessageBox::critical(this, "Error",
+                              QString("Inconsistent map data: number of tiles "
+                                      "(%1) does not match width*height (%2).")
+                                  .arg(tileList.size())
+                                  .arg(width * height));
+        return;
+    }
+
+    bool hasBadTiles = false;
+    map->realloc(width, height);
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            QString tileCode = tileList[r * width + c].trimmed();
+            auto& tile = map->tileAt(r, c);
+            if (tileCode.startsWith("L_")) {
+                tile.lightIcon = true;
+                tileCode = tileCode.mid(2);
+            }
+            if (tileCode.isEmpty()) {
+                tile.type = TILE_BLANK;
+                tile.color.setRgb(220, 220, 220);
+                continue;
+            }
+            bool ok;
+            int army = tileCode.toInt(&ok);
+            if (ok) {
+                tile.text = QString::number(army);
+                tile.type = TILE_CITY;
+                tile.color.setRgb(128, 128, 128);
+                continue;
+            }
+            switch (tileCode.at(0).unicode()) {
+                case 'g':
+                    tile.type = TILE_SPAWN;
+                    tile.color = Qt::darkCyan;
+                    tile.text = tileCode.mid(1);
+                    continue;
+                case 'm':
+                    tile.type = TILE_MOUNTAIN;
+                    tile.color.setRgb(187, 187, 187);
+                    continue;
+                case 'l':
+                    tile.type = TILE_LOOKOUT;
+                    tile.color.setRgb(187, 187, 187);
+                    continue;
+                case 'o':
+                    tile.type = TILE_OBSERVATORY;
+                    tile.color.setRgb(187, 187, 187);
+                    continue;
+                case 'd':
+                    tile.type = TILE_DESERT;
+                    tile.color.setRgb(220, 220, 220);
+                    continue;
+                case 's':
+                    tile.type = TILE_SWAMP;
+                    tile.color.setRgb(128, 128, 128);
+                    continue;
+                case 'n':
+                    tile.type = TILE_NEUTRAL;
+                    tile.color.setRgb(128, 128, 128);
+                    tile.text = tileCode.mid(1);
+                    continue;
+                default:
+                    tile.type = TILE_BLANK;
+                    tile.color = Qt::red;
+                    tile.text = "ERR";
+                    hasBadTiles = true;
+            }
+        }
+    }
+    if (hasBadTiles) {
+        QMessageBox::warning(this, "Warning",
+                             "Some tiles are not recognized. "
+                             "Please edit or truncate them before saving.");
+    }
 }
 
 void MapCreatorWindow::onSaveMap() {

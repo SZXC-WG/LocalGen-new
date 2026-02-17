@@ -490,49 +490,56 @@ void MapCreatorWindow::onOpenMap() {
     if (filename.isEmpty()) return;
 
     // v5 map format
-    if (filename.endsWith(".lg")) {
-        QFile mapFile(filename);
-        if (!mapFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QMessageBox::critical(this, "Error", "Failed to open map file.");
-            return;
-        }
-        QString mapData = mapFile.readLine();
-        mapFile.close();
-        InitBoard board;
-        board.v5Unzip(mapData.toStdString());
-        int width = board.getWidth(), height = board.getHeight();
-        map->realloc(width, height);
-        for (int r = 0; r < height; ++r) {
-            for (int c = 0; c < width; ++c) {
-                auto& tile = map->tileAt(r, c);
-                const auto& loadedTile = board.getTile({r + 1, c + 1});
-                tile.type = loadedTile.type;
-                switch (loadedTile.type) {
-                    case TILE_MOUNTAIN:
-                    case TILE_LOOKOUT:  tile.color.setRgb(187, 187, 187); break;
-                    case TILE_OBSERVATORY:
-                        tile.color.setRgb(187, 187, 187);
-                        break;
-                    case TILE_DESERT: tile.color.setRgb(220, 220, 220); break;
-                    case TILE_SWAMP:
-                    case TILE_CITY:   tile.color.setRgb(128, 128, 128); break;
-                    case TILE_SPAWN:  tile.color = Qt::darkCyan; break;
-                    default:
-                        tile.color = loadedTile.army == 0
-                                         ? QColor(220, 220, 220)
-                                         : QColor(128, 128, 128);
-                };
-                if (loadedTile.army != 0 || loadedTile.type == TILE_CITY)
-                    tile.text = QString::number(loadedTile.army);
-                tile.lightIcon = loadedTile.lit;
-            }
-        }
-        map->fitCenter();
-        widthSlider->setValue(width);
-        heightSlider->setValue(height);
+    if (filename.endsWith(".lg"))
+        openMap_v5(filename);
+    else if (filename.endsWith(".lgmp"))
+        openMap_v6(filename);
+    else
+        QMessageBox::critical(this, "Error",
+                              "Unsupported file format. Please select a .lg or "
+                              ".lgmp file.");
+}
+
+void MapCreatorWindow::openMap_v5(const QString& filename) {
+    QFile mapFile(filename);
+    if (!mapFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Failed to open map file.");
         return;
     }
+    QString mapData = mapFile.readLine();
+    mapFile.close();
+    InitBoard board;
+    board.v5Unzip(mapData.toStdString());
+    int width = board.getWidth(), height = board.getHeight();
+    map->realloc(width, height);
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            auto& tile = map->tileAt(r, c);
+            const auto& loadedTile = board.getTile({r + 1, c + 1});
+            tile.type = loadedTile.type;
+            switch (loadedTile.type) {
+                case TILE_MOUNTAIN:
+                case TILE_LOOKOUT:
+                case TILE_OBSERVATORY: tile.color.setRgb(187, 187, 187); break;
+                case TILE_DESERT:      tile.color.setRgb(220, 220, 220); break;
+                case TILE_SWAMP:
+                case TILE_CITY:        tile.color.setRgb(128, 128, 128); break;
+                case TILE_SPAWN:       tile.color = Qt::darkCyan; break;
+                default:
+                    tile.color = loadedTile.army == 0 ? QColor(220, 220, 220)
+                                                      : QColor(128, 128, 128);
+            };
+            if (loadedTile.army != 0 || loadedTile.type == TILE_CITY)
+                tile.text = QString::number(loadedTile.army);
+            tile.lightIcon = loadedTile.lit;
+        }
+    }
+    map->fitCenter();
+    widthSlider->setValue(width);
+    heightSlider->setValue(height);
+}
 
+void MapCreatorWindow::openMap_v6(const QString& filename) {
     QFile mapFile(filename);
     if (!mapFile.open(QIODevice::ReadOnly)) {
         QMessageBox::critical(this, "Error", "Failed to open map file.");
@@ -629,36 +636,49 @@ void MapCreatorWindow::onSaveMap() {
         QFileDialog::getSaveFileName(this, "Save Map", "", mapFileFilter);
     if (filename.isEmpty()) return;
 
+    if (filename.endsWith(".lg"))
+        saveMap_v5(filename);
+    else if (filename.endsWith(".lgmp"))
+        saveMap_v6(filename);
+    else
+        QMessageBox::critical(this, "Error",
+                              "Unsupported file format. Please select a .lg or "
+                              ".lgmp file.");
+}
+
+void MapCreatorWindow::saveMap_v5(const QString& filename) {
     int width = map->mapWidth(), height = map->mapHeight();
 
     // v5 map format
-    if (filename.endsWith(".lg")) {
-        QFile mapFile(filename);
-        if (!mapFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QMessageBox::critical(this, "Error", "Failed to open map file.");
-            return;
-        }
-        InitBoard board(height, width);
-        for (int r = 0; r < height; ++r) {
-            for (int c = 0; c < width; ++c) {
-                const auto& tile = map->tileAt(r, c);
-                Tile boardTile;
-                boardTile.type = tile.type;
-                boardTile.lit = tile.lightIcon;
-                // v5 encoding does not support general teams,
-                // so this field is ignored for now
-                // TODO: add warning if team is set
-                boardTile.army = tile.text.isEmpty() || tile.type == TILE_SPAWN
-                                     ? 0
-                                     : tile.text.toInt();
-                board.changeTile({r + 1, c + 1}, boardTile);
-            }
-        }
-        mapFile.write(QString::fromStdString(board.v5Zip()).toUtf8());
+    QFile mapFile(filename);
+    if (!mapFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Failed to open map file.");
         return;
     }
 
-    // v6 map format
+    InitBoard board(height, width);
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            const auto& tile = map->tileAt(r, c);
+            Tile boardTile;
+            boardTile.type = tile.type;
+            boardTile.lit = tile.lightIcon;
+            // v5 encoding does not support general teams,
+            // so this field is ignored for now
+            // TODO: add warning if team is set
+            boardTile.army = tile.text.isEmpty() || tile.type == TILE_SPAWN
+                                 ? 0
+                                 : tile.text.toInt();
+            board.changeTile({r + 1, c + 1}, boardTile);
+        }
+    }
+
+    mapFile.write(QString::fromStdString(board.v5Zip()).toUtf8());
+}
+
+void MapCreatorWindow::saveMap_v6(const QString& filename) {
+    int width = map->mapWidth(), height = map->mapHeight();
+
     // 19 bits per tile, thus packed into uint32
     auto packTile = [](const DisplayTile& tile) -> quint32 {
         // [18..16] type (3) | [15] lit | [14..0] army+16384

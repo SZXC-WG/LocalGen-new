@@ -17,14 +17,11 @@
 
 class ZlyBot : public BasicBot {
    private:
-    constexpr static army_t INF = 10'000'000'000'000'000LL;
+    using value_t = intmax_t;
+    constexpr static int64_t INF = 10'000'000'000'000'000LL;
     constexpr static Coord delta[] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
 
-    enum class BotMode {
-        ATTACK,
-        EXPLORE,
-        DEFEND,
-    };
+    enum class BotMode { ATTACK, EXPLORE, DEFEND };
     BotMode mode;
 
     pos_t height, width;
@@ -40,9 +37,9 @@ class ZlyBot : public BasicBot {
     std::vector<bool> alive;
     std::deque<Coord> route;
     std::vector<Coord> generals;
-    army_t tileTypeWeight[16];
-    std::vector<std::vector<army_t>> tileValue;
-    std::vector<std::vector<army_t>> dist;
+    value_t tileTypeWeight[16];
+    std::vector<std::vector<value_t>> tileValue;
+    std::vector<std::vector<pos_t>> dist;
     std::vector<std::vector<tile_type_e>> tileTypeMemory;
 
     std::vector<std::vector<int>> distMark;
@@ -90,15 +87,14 @@ class ZlyBot : public BasicBot {
         alive.assign(constants.playerCount, true);
         generals.assign(constants.playerCount, Coord(-1, -1));
 
-        tileValue.assign(height + 2, std::vector<army_t>(width + 2));
-        dist.assign(height + 2, std::vector<army_t>(width + 2));
+        tileValue.assign(height + 2, std::vector<value_t>(width + 2));
+        dist.assign(height + 2, std::vector<pos_t>(width + 2));
         tileTypeMemory.assign(
             height + 2, std::vector<tile_type_e>(width + 2, tile_type_e(-1)));
 
         distMark.assign(height + 2, std::vector<int>(width + 2, 0));
         distVersion = 0;
 
-        // 初始化 findRoute 的优化缓冲区
         routeMap.assign(height + 2, std::vector<NodeInfo>(width + 2));
         routeMark.assign(height + 2, std::vector<int>(width + 2, 0));
         routeVersion = 0;
@@ -170,7 +166,7 @@ class ZlyBot : public BasicBot {
             q.pop();
 
             int curDist = routeMap[u.x][u.y].dist;
-            army_t curArmy = routeMap[u.x][u.y].army;
+            value_t curArmy = routeMap[u.x][u.y].army;
 
             if (found && curDist >= foundDist) continue;
 
@@ -179,7 +175,7 @@ class ZlyBot : public BasicBot {
                 if (v.x < 1 || v.x > height || v.y < 1 || v.y > width) continue;
                 if (isImpassableTile(typeAt(v.x, v.y))) continue;
 
-                army_t gain = 0;
+                value_t gain = 0;
                 if (board.tileAt(v).occupier == id)
                     gain = board.tileAt(v).army;
                 else if (board.tileAt(v).visible)
@@ -198,7 +194,7 @@ class ZlyBot : public BasicBot {
                         gain = -200;
                 }
 
-                army_t newArmy = curArmy + gain;
+                value_t newArmy = curArmy + gain;
                 int newDist = curDist + 1;
 
                 if (routeMark[v.x][v.y] != routeVersion) {
@@ -264,7 +260,7 @@ class ZlyBot : public BasicBot {
 
         if (board.tileAt(focus).occupier != id ||
             board.tileAt(focus).army == 0) {
-            long long mxArmy = -1;
+            army_t mxArmy = -1;
             Coord mxCoo = generals[id];
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
@@ -305,7 +301,7 @@ class ZlyBot : public BasicBot {
             }
         } else if (mode == BotMode::EXPLORE) {
             Coord bestTarget = focus;
-            army_t bestValue = -INF;
+            value_t bestValue = -INF;
             for (int i = 1; i <= height; ++i) {
                 for (int j = 1; j <= width; ++j) {
                     if (tileValue[i][j] > bestValue) {

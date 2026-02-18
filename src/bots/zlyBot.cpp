@@ -112,7 +112,7 @@ class ZlyBot : public BasicBot {
         distMark[foc.x][foc.y] = distVersion;
 
         std::queue<std::pair<Coord, int>> q;
-        q.push({foc, 0});
+        q.emplace(foc, 0);
 
         while (!q.empty()) {
             auto [cur, curDist] = q.front();
@@ -128,7 +128,7 @@ class ZlyBot : public BasicBot {
 
                 dist[next.x][next.y] = curDist + 1;
                 distMark[next.x][next.y] = distVersion;
-                q.push({next, curDist + 1});
+                q.emplace(next, curDist + 1);
             }
         }
 

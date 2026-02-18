@@ -7,7 +7,7 @@
 
 #define ll long long
 
-// #define DEBUG_ZLY_V2_1
+#define DEBUG_ZLY_V2_1
 
 namespace zlyBot_v2_1 {
 const ll INF = 10'000'000'000'000'000LL;
@@ -183,7 +183,8 @@ inline void calcData(int playerId) {
     // dist0 to spawn
     homeZone[playerId].clear();
     memset(distToSpawn[playerId], 0x3f, sizeof(distToSpawn[playerId]));
-    distToSpawn[playerId][focus[playerId][0].x][focus[playerId][0].y] = 0;
+    distToSpawn[playerId][LGgame::genCoo[playerId].x]
+               [LGgame::genCoo[playerId].y] = 0;
     queue.push({0, LGgame::genCoo[playerId]});
 #ifdef DEBUG_ZLY_V2_1
     db << "in calcData bfs (dist to spawn):" << std::endl;

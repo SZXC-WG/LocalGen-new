@@ -7,7 +7,7 @@
 
 #define ll long long
 
-#define DEBUG_ZLY_V2_1
+// #define DEBUG_ZLY_V2_1
 
 namespace zlyBot_v2_1 {
 const ll INF = 10'000'000'000'000'000LL;

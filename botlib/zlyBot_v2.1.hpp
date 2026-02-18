@@ -247,12 +247,10 @@ inline void calcData(int playerId) {
                             if (adja.x < 1 || adja.x > mapH || adja.y < 1 ||
                                 adja.y > mapW)
                                 continue;
-                            if (isVisible(
-                                    adja.x, adja.y,
-                                    1 << playerId && gmp(adja) == playerId))
-                                adjacent_minimum_same_player =
-                                    min(adjacent_minimum_same_player,
-                                        dist0[playerId][adja.x][adja.y]);
+                            if (isVisible(adja.x, adja.y, 1 << playerId) &&
+                                gmp(adja) == gmp(i, j))
+                                adjacent_minimum_same_player = min(
+                                    adjacent_minimum_same_player, gma(adja));
                         }
                         if (adjacent_minimum_same_player == INF)
                             adjacent_minimum_same_player = gma(i, j);

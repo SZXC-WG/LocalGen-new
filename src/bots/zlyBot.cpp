@@ -45,6 +45,23 @@ class ZlyBot : public BasicBot {
     std::vector<std::vector<army_t>> dist;
     std::vector<std::vector<tile_type_e>> tileTypeMemory;
 
+    // calcData 版本标记
+    std::vector<std::vector<int>> distMark;
+    int distVersion;
+
+    // --- findRoute 优化变量 ---
+    // 使用一维的版本标记和复用的二维数组代替昂贵的 3D DP 数组
+    struct NodeInfo {
+        int dist;
+        army_t army;
+        Coord parent;
+    };
+    // 存储寻路过程中的状态：routeMap[x][y]
+    std::vector<std::vector<NodeInfo>> routeMap;
+    // 寻路版本标记，避免每次清空数组
+    std::vector<std::vector<int>> routeMark;
+    int routeVersion;
+
     inline tile_type_e typeAt(pos_t x, pos_t y) {
         if (tileTypeMemory.at(x).at(y) != -1)
             return tileTypeMemory[x][y];
@@ -66,6 +83,7 @@ class ZlyBot : public BasicBot {
         config = constants.config;
 
         focus = Coord(0, 0);
+        // 初始化权重 (保持原逻辑)
         tileTypeWeight[TILE_BLANK] = 30 - 25;
         tileTypeWeight[TILE_SWAMP] = -1500;
         tileTypeWeight[TILE_MOUNTAIN] = -INF;
@@ -82,31 +100,54 @@ class ZlyBot : public BasicBot {
         dist.assign(height + 2, std::vector<army_t>(width + 2));
         tileTypeMemory.assign(
             height + 2, std::vector<tile_type_e>(width + 2, tile_type_e(-1)));
+
+        distMark.assign(height + 2, std::vector<int>(width + 2, 0));
+        distVersion = 0;
+
+        // 初始化 findRoute 的优化缓冲区
+        routeMap.assign(height + 2, std::vector<NodeInfo>(width + 2));
+        routeMark.assign(height + 2, std::vector<int>(width + 2, 0));
+        routeVersion = 0;
     }
 
    private:
     void calcData(Coord foc) {
-        dist.assign(height + 2, std::vector<army_t>(width + 2, INF));
+        ++distVersion;
+        if (distVersion == 0) {  // 处理溢出
+            distMark.assign(height + 2, std::vector<int>(width + 2, 0));
+            distVersion = 1;
+        }
+
         dist[foc.x][foc.y] = 0;
+        distMark[foc.x][foc.y] = distVersion;
+
         std::queue<std::pair<Coord, int>> q;
         q.push({foc, 0});
+
         while (!q.empty()) {
             auto [cur, curDist] = q.front();
             q.pop();
+
             for (int i = 0; i < 4; ++i) {
                 Coord next = cur + delta[i];
                 if (next.x < 1 || next.x > height || next.y < 1 ||
                     next.y > width)
                     continue;
                 if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                if (dist[next.x][next.y] != INF) continue;
+                if (distMark[next.x][next.y] == distVersion) continue;
+
                 dist[next.x][next.y] = curDist + 1;
+                distMark[next.x][next.y] = distVersion;
                 q.push({next, curDist + 1});
             }
         }
+
+        // 计算 tileValue (O(HW))
         for (int i = 1; i <= height; ++i) {
             for (int j = 1; j <= width; ++j) {
                 if (board.tileAt(i, j).occupier == id)
+                    tileValue[i][j] = -INF;
+                else if (distMark[i][j] != distVersion)  // 不可达区域
                     tileValue[i][j] = -INF;
                 else
                     tileValue[i][j] = tileTypeWeight[typeAt(i, j)] - dist[i][j];
@@ -115,61 +156,96 @@ class ZlyBot : public BasicBot {
     }
 
     void findRoute(Coord start, Coord desti) {
-        int cnt = 1;
-        std::vector<std::vector<std::vector<army_t>>> dp;
-        std::vector<std::vector<std::vector<Coord>>> pr;
-        auto gv = [&](int x, int y) -> army_t {
-            if (x < 1 || x > height || y < 1 || y > width) return -INF;
-            if (isImpassableTile(typeAt(x, y))) return -INF;
-            if (board.tileAt(x, y).occupier == id)
-                return board.tileAt(x, y).army;
-            else {
-                if (board.tileAt(x, y).visible)
-                    return -board.tileAt(x, y).army;
+        ++routeVersion;
+        if (routeVersion == 0) {
+            routeMark.assign(height + 2, std::vector<int>(width + 2, 0));
+            routeVersion = 1;
+        }
+
+        std::queue<Coord> q;
+        q.push(start);
+
+        routeMark[start.x][start.y] = routeVersion;
+        routeMap[start.x][start.y] = {0, board.tileAt(start).army,
+                                      Coord(-1, -1)};
+
+        bool found = false;
+        int foundDist = -1;
+
+        while (!q.empty()) {
+            Coord u = q.front();
+            q.pop();
+
+            int curDist = routeMap[u.x][u.y].dist;
+            army_t curArmy = routeMap[u.x][u.y].army;
+
+            if (found && curDist >= foundDist) continue;
+
+            for (int i = 0; i < 4; ++i) {
+                Coord v = u + delta[i];
+                if (v.x < 1 || v.x > height || v.y < 1 || v.y > width) continue;
+                if (isImpassableTile(typeAt(v.x, v.y))) continue;
+
+                army_t gain = 0;
+                if (board.tileAt(v).occupier == id)
+                    gain = board.tileAt(v).army;
+                else if (board.tileAt(v).visible)
+                    gain = -board.tileAt(v).army;
                 else {
-                    if (typeAt(x, y) == 0) return -5;
-                    if (typeAt(x, y) == 1) return -10;
-                    if (typeAt(x, y) == 3) return -5;
-                    if (typeAt(x, y) == 4) return -40;
-                    if (typeAt(x, y) == 5) return -200;
+                    tile_type_e t = typeAt(v.x, v.y);
+                    if (t == TILE_BLANK)
+                        gain = -5;
+                    else if (t == TILE_SWAMP)
+                        gain = -10;
+                    else if (t == TILE_SPAWN)
+                        gain = -5;
+                    else if (t == TILE_CITY)
+                        gain = -40;
+                    else if (t == TILE_DESERT)
+                        gain = -200;
                 }
-            }
-            return 0;
-        };
-        dp.emplace_back(height + 1, std::vector<army_t>(width + 1, -INF));
-        pr.emplace_back(height + 1,
-                        std::vector<Coord>(width + 1, Coord(-1, -1)));
-        dp[0][start.x][start.y] = board.tileAt(start).army;
-        // printf("player %d (%ls):\n",id,playerInfo[id].name.c_str());
-        for (int i = 1; i <= cnt; ++i) {
-            dp.emplace_back(height + 1, std::vector<army_t>(width + 1, -INF));
-            pr.emplace_back(height + 1,
-                            std::vector<Coord>(width + 1, Coord(-1, -1)));
-            for (pos_t x = 1; x <= height; ++x) {
-                for (pos_t y = 1; y <= width; ++y) {
-                    if (dp[i - 1][x][y] == -INF) continue;
-                    for (int j = 0; j < 4; ++j) {
-                        int nx = x + delta[j].x, ny = y + delta[j].y;
-                        if (nx < 1 || nx > height || ny < 1 || ny > width)
-                            continue;
-                        if (isImpassableTile(typeAt(nx, ny))) continue;
-                        army_t nv = dp[i - 1][x][y] + gv(nx, ny);
-                        if (nv > dp[i][nx][ny]) {
-                            pr[i][nx][ny] = Coord(x, y);
-                            dp[i][nx][ny] = nv;
+
+                army_t newArmy = curArmy + gain;
+                int newDist = curDist + 1;
+
+                if (routeMark[v.x][v.y] != routeVersion) {
+                    routeMark[v.x][v.y] = routeVersion;
+                    routeMap[v.x][v.y] = {newDist, newArmy, u};
+                    q.push(v);
+
+                    if (v == desti) {
+                        found = true;
+                        foundDist = newDist;
+                    }
+                } else {
+                    if (routeMap[v.x][v.y].dist == newDist) {
+                        if (newArmy > routeMap[v.x][v.y].army) {
+                            routeMap[v.x][v.y].army = newArmy;
+                            routeMap[v.x][v.y].parent = u;
                         }
                     }
                 }
             }
-            if (i == cnt && pr[i][desti.x][desti.y] == Coord(-1, -1)) ++cnt;
         }
+
         route.clear();
-        Coord p = desti;
-        while (p != Coord(-1, -1)) {
-            route.push_front(p);
-            p = pr[cnt--][p.x][p.y];
+        if (found) {
+            Coord p = desti;
+            while (p != start && p != Coord(-1, -1)) {
+                route.push_front(p);
+                if (routeMark[p.x][p.y] != routeVersion) break;
+                p = routeMap[p.x][p.y].parent;
+            }
         }
-        route.pop_front();
+        if (route.empty() && start != desti) {
+            for (int i = 0; i < 4; ++i) {
+                Coord next = start + delta[i];
+                if (!isImpassableTile(typeAt(next.x, next.y))) {
+                    route.push_back(next);
+                    break;
+                }
+            }
+        }
     }
 
    public:
@@ -192,9 +268,10 @@ class ZlyBot : public BasicBot {
                 if (board.tileAt(i, j).visible &&
                     board.tileAt(i, j).type == TILE_GENERAL)
                     generals[board.tileAt(i, j).occupier] = Coord(i, j);
+
         if (board.tileAt(focus).occupier != id ||
             board.tileAt(focus).army == 0) {
-            long long mxArmy = 0;
+            long long mxArmy = -1;
             Coord mxCoo = generals[id];
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
@@ -208,6 +285,7 @@ class ZlyBot : public BasicBot {
             }
             focus = mxCoo;
         }
+
         mode = BotMode::EXPLORE;
         int goalGeneralId = -1;
         army_t goalGeneralArmy = INF;
@@ -220,30 +298,37 @@ class ZlyBot : public BasicBot {
                 }
             }
         }
+
         calcData(focus);
+
         if (mode == BotMode::ATTACK) {
             findRoute(focus, generals[goalGeneralId]);
-            Move ret = Move(MoveType::MOVE_ARMY, focus, route.front(), false);
-            focus = route.front();
-            route.pop_front();
-            moveQueue.emplace_back(ret);
+            if (!route.empty()) {
+                Move ret =
+                    Move(MoveType::MOVE_ARMY, focus, route.front(), false);
+                focus = route.front();
+                route.pop_front();
+                moveQueue.emplace_back(ret);
+            }
         } else if (mode == BotMode::EXPLORE) {
-            struct node {
-                Coord focus;
-                army_t value;
-            };
-            std::vector<node> v;
-            for (int i = 1; i <= height; ++i)
-                for (int j = 1; j <= width; ++j)
-                    v.push_back(node{Coord(i, j), tileValue[i][j]});
-            sort(v.begin(), v.end(), [](const node& a, const node& b) {
-                return a.value > b.value;
-            });
-            findRoute(focus, v[0].focus);
-            Move ret = Move{MoveType::MOVE_ARMY, focus, route.front(), false};
-            focus = route.front();
-            route.pop_front();
-            moveQueue.emplace_back(ret);
+            Coord bestTarget = focus;
+            army_t bestValue = -INF;
+            for (int i = 1; i <= height; ++i) {
+                for (int j = 1; j <= width; ++j) {
+                    if (tileValue[i][j] > bestValue) {
+                        bestValue = tileValue[i][j];
+                        bestTarget = Coord(i, j);
+                    }
+                }
+            }
+            findRoute(focus, bestTarget);
+            if (!route.empty()) {
+                Move ret =
+                    Move{MoveType::MOVE_ARMY, focus, route.front(), false};
+                focus = route.front();
+                route.pop_front();
+                moveQueue.emplace_back(ret);
+            }
         }
     }
 };

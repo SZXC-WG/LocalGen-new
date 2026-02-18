@@ -45,20 +45,15 @@ class ZlyBot : public BasicBot {
     std::vector<std::vector<army_t>> dist;
     std::vector<std::vector<tile_type_e>> tileTypeMemory;
 
-    // calcData 版本标记
     std::vector<std::vector<int>> distMark;
     int distVersion;
 
-    // --- findRoute 优化变量 ---
-    // 使用一维的版本标记和复用的二维数组代替昂贵的 3D DP 数组
     struct NodeInfo {
         int dist;
         army_t army;
         Coord parent;
     };
-    // 存储寻路过程中的状态：routeMap[x][y]
     std::vector<std::vector<NodeInfo>> routeMap;
-    // 寻路版本标记，避免每次清空数组
     std::vector<std::vector<int>> routeMark;
     int routeVersion;
 
@@ -83,7 +78,6 @@ class ZlyBot : public BasicBot {
         config = constants.config;
 
         focus = Coord(0, 0);
-        // 初始化权重 (保持原逻辑)
         tileTypeWeight[TILE_BLANK] = 30 - 25;
         tileTypeWeight[TILE_SWAMP] = -1500;
         tileTypeWeight[TILE_MOUNTAIN] = -INF;
@@ -113,7 +107,7 @@ class ZlyBot : public BasicBot {
    private:
     void calcData(Coord foc) {
         ++distVersion;
-        if (distVersion == 0) {  // 处理溢出
+        if (distVersion == 0) {
             distMark.assign(height + 2, std::vector<int>(width + 2, 0));
             distVersion = 1;
         }
@@ -142,12 +136,11 @@ class ZlyBot : public BasicBot {
             }
         }
 
-        // 计算 tileValue (O(HW))
         for (int i = 1; i <= height; ++i) {
             for (int j = 1; j <= width; ++j) {
                 if (board.tileAt(i, j).occupier == id)
                     tileValue[i][j] = -INF;
-                else if (distMark[i][j] != distVersion)  // 不可达区域
+                else if (distMark[i][j] != distVersion)
                     tileValue[i][j] = -INF;
                 else
                     tileValue[i][j] = tileTypeWeight[typeAt(i, j)] - dist[i][j];

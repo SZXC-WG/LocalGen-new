@@ -88,7 +88,10 @@ inline void initBot(int botId) {
                 case 2: blockArmyRem[botId][i][j] = INF; break;
                 case 3: blockArmyRem[botId][i][j] = -INF; break;
                 case 4: blockArmyRem[botId][i][j] = 40; break;
-                case 5: blockArmyRem[botId][i][j] = 40; break;
+                case 5: blockArmyRem[botId][i][j] = 0; break;
+                case 6: blockArmyRem[botId][i][j] = INF; break;
+                case 7: blockArmyRem[botId][i][j] = INF; break;
+                case 8: blockArmyRem[botId][i][j] = 40; break;
             }
         }
     }

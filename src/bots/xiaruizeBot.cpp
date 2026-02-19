@@ -31,6 +31,7 @@ class XiaruizeBot : public BasicBot {
     std::vector<game::RankItem> rank;
 
     Coord spawnCoord;
+    Coord currentPos;
     std::vector<int> operation;
     std::vector<std::vector<bool>> vis;
     int sendArmyProcess;
@@ -124,6 +125,22 @@ class XiaruizeBot : public BasicBot {
         return spawnCoord;
     }
 
+    Coord findMaxArmyPos() {
+        army_t maxArmy = 0;
+        Coord maxCoo = spawnCoord;
+        for (pos_t i = 1; i <= height; ++i) {
+            for (pos_t j = 1; j <= width; ++j) {
+                if (board.tileAt(i, j).visible &&
+                    board.tileAt(i, j).occupier == id &&
+                    board.tileAt(i, j).army > maxArmy) {
+                    maxArmy = board.tileAt(i, j).army;
+                    maxCoo = Coord(i, j);
+                }
+            }
+        }
+        return maxCoo;
+    }
+
    public:
     void init(index_t playerId,
               const game::GameConstantsPack& constants) override {
@@ -136,6 +153,7 @@ class XiaruizeBot : public BasicBot {
         config = constants.config;
 
         spawnCoord = Coord(0, 0);
+        currentPos = Coord(-1, -1);
         operation.clear();
         vis.assign(height + 2, std::vector<bool>(width + 2, false));
         sendArmyProcess = 0;
@@ -150,14 +168,16 @@ class XiaruizeBot : public BasicBot {
 
         moveQueue.clear();
 
-        Coord coord = findGeneralPos();
         if (spawnCoord == Coord(0, 0)) {
-            spawnCoord = coord;
+            spawnCoord = findGeneralPos();
         }
 
-        if (!board.tileAt(coord).visible || board.tileAt(coord).army == 0 ||
-            board.tileAt(coord).occupier != id) {
+        if (currentPos == Coord(-1, -1) ||
+            !board.tileAt(currentPos).visible ||
+            board.tileAt(currentPos).army == 0 ||
+            board.tileAt(currentPos).occupier != id) {
             vis.assign(height + 2, std::vector<bool>(width + 2, false));
+            currentPos = findMaxArmyPos();
             otherRobotProtection =
                 std::max(0, std::min(static_cast<int>(operation.size()) - 10,
                                      static_cast<int>(mtrd() % 10)));
@@ -173,27 +193,31 @@ class XiaruizeBot : public BasicBot {
             ++sendArmyProcess;
             if (otherRobotProtection > 0) {
                 --otherRobotProtection;
-                Coord next = coord + delta[operation[sendArmyProcess - 2]];
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, coord, next, false);
+                Coord next = currentPos + delta[operation[sendArmyProcess - 2]];
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, currentPos, next, false);
             } else {
-                Coord next = coord + delta[operation[sendArmyProcess - 2]];
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, coord, next, true);
+                Coord next = currentPos + delta[operation[sendArmyProcess - 2]];
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, currentPos, next, true);
             }
             return;
         }
 
-        vis[coord.x][coord.y] = true;
-        int returnValue = dfs(coord);
+        vis[currentPos.x][currentPos.y] = true;
+        int returnValue = dfs(currentPos);
 
         if (returnValue != -1) {
-            Coord next = coord + delta[returnValue];
-            moveQueue.emplace_back(MoveType::MOVE_ARMY, coord, next, true);
+            Coord next = currentPos + delta[returnValue];
+            previousPos = currentPos;
+            currentPos = next;
+            moveQueue.emplace_back(MoveType::MOVE_ARMY, previousPos, next, true);
         } else {
             if (!operation.empty()) {
                 int res = changeDirection(operation.back());
                 operation.pop_back();
-                Coord next = coord + delta[res];
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, coord, next, true);
+                Coord next = currentPos + delta[res];
+                previousPos = currentPos;
+                currentPos = next;
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, previousPos, next, true);
             }
         }
     }

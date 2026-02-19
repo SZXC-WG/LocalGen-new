@@ -382,6 +382,10 @@ void LocalGameWindow::runHalfTurn() {
     elapsedTimer.start();
     game->step();
     if (!game->isAlive(humanPlayerId)) {
+        if (humanPlayer != nullptr) {
+            humanPlayer = nullptr;
+            gameMap->bindMoveQueue(nullptr);
+        }
         updateView(game->fullView());
     }
     updateLeaderboard(game->ranklist());
@@ -420,6 +424,7 @@ void LocalGameWindow::stopGameLoop() {
         halfTurnTimer->stop();
     }
     gameMap->bindMoveQueue(nullptr);
+    gameMap->setFocusEnabled(false);
 }
 
 void LocalGameWindow::updateLeaderboard(

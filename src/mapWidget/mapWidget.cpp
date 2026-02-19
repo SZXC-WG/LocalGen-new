@@ -144,8 +144,18 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     painter.fillRect(QRectF(0.0, 0.0, w * cellSize, h * cellSize),
                      QColor(57, 57, 57));
 
-    for (int r = 0; r < h; ++r) {
-        for (int c = 0; c < w; ++c) {
+    const qreal cellPixelSize = cellSize * scale;
+
+    const int startCol = qMax(0, static_cast<int>(-offset.x() / cellPixelSize));
+    const int startRow = qMax(0, static_cast<int>(-offset.y() / cellPixelSize));
+
+    const int endCol = qMin(
+        w - 1, static_cast<int>((-offset.x() + width()) / cellPixelSize) + 1);
+    const int endRow = qMin(
+        h - 1, static_cast<int>((-offset.y() + height()) / cellPixelSize) + 1);
+
+    for (int r = startRow; r <= endRow; ++r) {
+        for (int c = startCol; c <= endCol; ++c) {
             const DisplayTile& tile = displayTiles[r][c];
             QRectF cell(c * cellSize, r * cellSize, cellSize, cellSize);
             painter.setPen(QPen(Qt::black, 1.0 / scale));
@@ -212,11 +222,15 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         if (move.type == MoveType::MOVE_ARMY) {
             int r1 = move.from.x - 1, c1 = move.from.y - 1;
             int r2 = move.to.x - 1, c2 = move.to.y - 1;
+            if ((startRow <= r1 && r1 <= endRow && startCol <= c1 &&
+                 c1 <= endCol) ||
+                (startRow <= r2 && r2 <= endRow && startCol <= c2 &&
+                 c2 <= endCol)) {
+                QPointF p1((c1 + 0.5) * cellSize, (r1 + 0.5) * cellSize);
+                QPointF p2((c2 + 0.5) * cellSize, (r2 + 0.5) * cellSize);
 
-            QPointF p1((c1 + 0.5) * cellSize, (r1 + 0.5) * cellSize);
-            QPointF p2((c2 + 0.5) * cellSize, (r2 + 0.5) * cellSize);
-
-            drawArrow(painter, p1, p2, cellSize * 0.3, 1.5 / scale);
+                drawArrow(painter, p1, p2, cellSize * 0.3, 1.5 / scale);
+            }
         }
     }
 }

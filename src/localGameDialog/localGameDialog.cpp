@@ -4,6 +4,7 @@
 #include <QFont>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QRandomGenerator>
 #include <QStringList>
 
 #include "../GameEngine/bot.h"
@@ -57,16 +58,19 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
     while (layout->count() > requiredCount) {
         layout->takeAt(layout->count() - 1)->widget()->deleteLater();
     }
+    if (layout->count() == requiredCount) return;
     const QStringList botNames = toQStringList(BotFactory::instance().list());
     const QFont& font = ui->labNumPlayers->font();
     const QFont& comboFont = ui->comboBox_gameMap->font();
+    QRandomGenerator* rng = QRandomGenerator::global();
     while (layout->count() < requiredCount) {
         QLabel* playerLabel = new QLabel(tr("Player %1").arg(layout->count()));
         playerLabel->setFont(font);
         QComboBox* playerCombo = new QComboBox();
         if (layout->count() == 1) playerCombo->addItem(tr("Human"));
         playerCombo->addItems(botNames);
-        playerCombo->setCurrentIndex(0);
+        playerCombo->setCurrentIndex(
+            layout->count() == 1 ? 0 : rng->bounded(playerCombo->count()));
         playerCombo->setSizePolicy(QSizePolicy::Expanding,
                                    QSizePolicy::Preferred);
         playerCombo->setStyleSheet("color: teal;");

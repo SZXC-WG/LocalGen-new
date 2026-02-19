@@ -30,6 +30,7 @@ set(PROJECT_SOURCES
         src/bots/zlyBot.cpp
         src/bots/zlyBot_v2.cpp
         src/bots/zlyBot_v2.1.cpp
+        src/bots/xiaruizeBot.cpp
         src/GameEngine/board.hpp
         src/GameEngine/bot.h
         src/GameEngine/game.hpp

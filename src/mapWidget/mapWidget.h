@@ -70,6 +70,7 @@ class MapWidget : public QWidget {
 
     // State variables
     int focusRow, focusCol;
+    bool takingHalfArmy = false;
 
     qreal scale;
     QPointF offset;

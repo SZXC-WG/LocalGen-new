@@ -294,6 +294,7 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
             } else {
                 focusRow = focusCol = -1;
             }
+            takingHalfArmy = false;
             update();
         }
     } else if (event->button() == Qt::RightButton) {
@@ -342,6 +343,16 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
                     update();
                 }
                 return;
+            case Qt::Key_Z:
+                if (focusRow != -1) {
+                    DisplayTile& tile = tileAt(focusRow, focusCol);
+                    if (!isImpassableTile(tile.type)) {
+                        tile.text = "50%";
+                        takingHalfArmy = true;
+                        update();
+                    }
+                }
+                return;
         }
     }
 
@@ -372,11 +383,10 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
             return;
         }
         if (moveQueue) {
-            // TODO: align with official keys (Z for 50%)
-            bool takeHalf = (event->modifiers() & Qt::ControlModifier);
             moveQueue->emplace_back(
                 MoveType::MOVE_ARMY, Coord(oldRow + 1, oldCol + 1),
-                Coord(focusRow + 1, focusCol + 1), takeHalf);
+                Coord(focusRow + 1, focusCol + 1), takingHalfArmy);
+            takingHalfArmy = false;
         }
         update();
     } else {

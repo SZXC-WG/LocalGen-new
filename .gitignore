@@ -7,3 +7,4 @@
 *.lgsts
 _players.ini
 build
+.cache

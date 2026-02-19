@@ -468,7 +468,8 @@ void LocalGameWindow::positionFloatingWidgets() {
 
 void LocalGameWindow::keyPressEvent(QKeyEvent* event) {
     int key = event->key();
-    if (game->isAlive(humanPlayerId) && generalRow != -1 && key == Qt::Key_H) {
+    if (gameRunning && game->isAlive(humanPlayerId) && generalRow != -1 &&
+        key == Qt::Key_H) {
         gameMap->setFocusCell(generalRow, generalCol);
         return;
     }

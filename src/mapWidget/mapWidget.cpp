@@ -328,20 +328,20 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
     }
 
     if (moveQueue) {
-        if (key == Qt::Key_Q) {
-            moveQueue->clear();
-            update();
-            return;
-        }
-        if (key == Qt::Key_E) {
-            if (!moveQueue->empty()) {
-                Coord fromTile = moveQueue->back().from;
-                moveQueue->pop_back();
-                focusRow = fromTile.x - 1;
-                focusCol = fromTile.y - 1;
+        switch (key) {
+            case Qt::Key_Q:
+                moveQueue->clear();
                 update();
-            }
-            return;
+                return;
+            case Qt::Key_E:
+                if (!moveQueue->empty()) {
+                    Coord fromTile = moveQueue->back().from;
+                    moveQueue->pop_back();
+                    focusRow = fromTile.x - 1;
+                    focusCol = fromTile.y - 1;
+                    update();
+                }
+                return;
         }
     }
 

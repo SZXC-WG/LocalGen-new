@@ -29,6 +29,7 @@ set(PROJECT_SOURCES
         src/bots/smartRandomBot.cpp
         src/bots/zlyBot.cpp
         src/bots/zlyBot_v2.cpp
+        src/bots/zlyBot_v2.1.cpp
         src/GameEngine/board.hpp
         src/GameEngine/bot.h
         src/GameEngine/game.hpp

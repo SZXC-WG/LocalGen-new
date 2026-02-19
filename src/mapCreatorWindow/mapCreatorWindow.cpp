@@ -189,7 +189,7 @@ void MapCreatorWindow::onMapClicked(int r, int c) {
             break;
         case LIGHT: tile.lightIcon = !tile.lightIcon;
     }
-    map->repaint();
+    map->update();
 }
 
 void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {

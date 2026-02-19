@@ -34,20 +34,21 @@ void MapWidget::setMapWidth(int w) {
         for (auto& row : displayTiles) {
             row.resize(w);
         }
-        repaint();
+        update();
     }
 }
 
 void MapWidget::setMapHeight(int h) {
     if (h != mapHeight()) {
         displayTiles.resize(h, std::vector<DisplayTile>(mapWidth()));
-        repaint();
+        update();
     }
 }
 
 void MapWidget::realloc(int w, int h) {
     displayTiles.clear();
     displayTiles.resize(h, std::vector<DisplayTile>(w));
+    update();
 }
 
 void MapWidget::fitCenter() {

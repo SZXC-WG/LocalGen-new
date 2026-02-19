@@ -31,6 +31,7 @@ class XrzBot : public BasicBot {
     std::vector<game::RankItem> rank;
 
     Coord previousPos;
+    Coord currentPos;
     std::vector<std::vector<int>> visitTime;
     int turnCount;
     army_t armyNow;
@@ -64,6 +65,7 @@ class XrzBot : public BasicBot {
         config = constants.config;
 
         previousPos = Coord(-1, -1);
+        currentPos = Coord(-1, -1);
         visitTime.assign(height + 2, std::vector<int>(width + 2, 0));
         turnCount = 0;
         armyNow = 0;
@@ -76,28 +78,16 @@ class XrzBot : public BasicBot {
 
         moveQueue.clear();
 
-        Coord player = Coord(1, 1);
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                if (board.tileAt(i, j).visible &&
-                    board.tileAt(i, j).type == TILE_GENERAL &&
-                    board.tileAt(i, j).occupier == id) {
-                    player = Coord(i, j);
-                    break;
-                }
-            }
-        }
-
-        armyNow = board.tileAt(player).army;
-        turnCount++;
-        visitTime[player.x][player.y]++;
-
-        if (board.tileAt(player).army == 0 ||
-            board.tileAt(player).occupier != id) {
+        if (currentPos == Coord(-1, -1) || board.tileAt(currentPos).army == 0 ||
+            board.tileAt(currentPos).occupier != id) {
             for (auto& row : visitTime)
                 for (auto& cell : row) cell = 0;
-            player = findMaxArmyPos();
+            currentPos = findMaxArmyPos();
         }
+
+        armyNow = board.tileAt(currentPos).army;
+        turnCount++;
+        visitTime[currentPos.x][currentPos.y]++;
 
         int checkOrder[5] = {0, 1, 2, 3, 4};
         std::shuffle(checkOrder + 1, checkOrder + 5, mtrd);
@@ -105,7 +95,7 @@ class XrzBot : public BasicBot {
         int okDir = 0;
         for (int j = 1; j <= 4; ++j) {
             int i = checkOrder[j];
-            Coord next = player + delta[i];
+            Coord next = currentPos + delta[i];
             if (next.x < 1 || next.x > height || next.y < 1 || next.y > width)
                 continue;
             if (isImpassableTile(board.tileAt(next).type)) continue;
@@ -113,15 +103,19 @@ class XrzBot : public BasicBot {
 
             if (board.tileAt(next).occupier != id &&
                 board.tileAt(next).type == TILE_GENERAL) {
-                previousPos = player;
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, player, next, true);
+                previousPos = currentPos;
+                currentPos = next;
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, previousPos, next,
+                                       false);
                 return;
             }
             if (board.tileAt(next).type == TILE_CITY &&
-                board.tileAt(next).army <= board.tileAt(player).army &&
+                board.tileAt(next).army <= board.tileAt(currentPos).army &&
                 board.tileAt(next).occupier != id) {
-                previousPos = player;
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, player, next, true);
+                previousPos = currentPos;
+                currentPos = next;
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, previousPos, next,
+                                       false);
                 return;
             }
         }
@@ -129,20 +123,26 @@ class XrzBot : public BasicBot {
         int timeToTry = 1000;
         while (timeToTry--) {
             int i = (mtrd() % 4 + mtrd() % 4 + mtrd() % 4) % 4 + 1;
-            Coord next = player + delta[i];
+            Coord next = currentPos + delta[i];
             if (next.x < 1 || next.x > height || next.y < 1 || next.y > width)
                 continue;
             if (isImpassableTile(board.tileAt(next).type)) continue;
 
             if (board.tileAt(next).occupier != id &&
                 board.tileAt(next).type == TILE_GENERAL) {
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, player, next, true);
+                previousPos = currentPos;
+                currentPos = next;
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, previousPos, next,
+                                       false);
                 return;
             }
             if (board.tileAt(next).type == TILE_CITY &&
-                board.tileAt(next).army <= board.tileAt(player).army &&
+                board.tileAt(next).army <= board.tileAt(currentPos).army &&
                 board.tileAt(next).occupier == -1) {
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, player, next, true);
+                previousPos = currentPos;
+                currentPos = next;
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, previousPos, next,
+                                       false);
                 return;
             }
 
@@ -161,15 +161,20 @@ class XrzBot : public BasicBot {
             cnt += std::max(0, visitTime[next.x][next.y] * 10);
 
             if (mtrd() % cnt == 0) {
-                previousPos = player;
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, player, next, true);
+                previousPos = currentPos;
+                currentPos = next;
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, previousPos, next,
+                                       false);
                 return;
             }
         }
 
         if (okDir != 0) {
-            Coord next = player + delta[okDir];
-            moveQueue.emplace_back(MoveType::MOVE_ARMY, player, next, true);
+            Coord next = currentPos + delta[okDir];
+            previousPos = currentPos;
+            currentPos = next;
+            moveQueue.emplace_back(MoveType::MOVE_ARMY, previousPos, next,
+                                   false);
         }
     }
 };

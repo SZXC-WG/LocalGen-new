@@ -1,7 +1,7 @@
 /**
  * @file xiaruizeBot.cpp
  *
- * Legacy xiaruizeBot from LocalGen v5.
+ * XiaruizeBot from LocalGen v5.
  *
  * @copyright Copyright (c) SZXC Work Group.
  */
@@ -32,11 +32,11 @@ class XiaruizeBot : public BasicBot {
 
     Coord spawnCoord;
     Coord currentPos;
+    Coord previousPos;
     std::vector<int> operation;
     std::vector<std::vector<bool>> vis;
     int sendArmyProcess;
     int otherRobotProtection;
-    Coord previousPos;
 
     inline int changeDirection(int x) {
         switch (x) {
@@ -59,8 +59,7 @@ class XiaruizeBot : public BasicBot {
                 continue;
             if (isImpassableTile(board.tileAt(next).type)) continue;
             if (board.tileAt(next).type == TILE_GENERAL &&
-                board.tileAt(next).occupier != id &&
-                board.tileAt(next).army < board.tileAt(coord).army) {
+                board.tileAt(next).occupier != id) {
                 operation.push_back(x);
                 previousPos = coord;
                 return x;
@@ -154,11 +153,11 @@ class XiaruizeBot : public BasicBot {
 
         spawnCoord = Coord(0, 0);
         currentPos = Coord(-1, -1);
+        previousPos = Coord(-1, -1);
         operation.clear();
         vis.assign(height + 2, std::vector<bool>(width + 2, false));
         sendArmyProcess = 0;
         otherRobotProtection = 0;
-        previousPos = Coord(-1, -1);
     }
 
     void requestMove(const BoardView& boardView,
@@ -173,21 +172,20 @@ class XiaruizeBot : public BasicBot {
         }
 
         if (currentPos == Coord(-1, -1) ||
-            !board.tileAt(currentPos).visible ||
             board.tileAt(currentPos).army == 0 ||
             board.tileAt(currentPos).occupier != id) {
             vis.assign(height + 2, std::vector<bool>(width + 2, false));
-            currentPos = findMaxArmyPos();
-            otherRobotProtection =
-                std::max(0, std::min(static_cast<int>(operation.size()) - 10,
-                                     static_cast<int>(mtrd() % 10)));
             sendArmyProcess = 1;
-            return;
+            otherRobotProtection = std::max(
+                0, std::min(static_cast<int>(operation.size()) - 10,
+                            static_cast<int>(mtrd() % 10)));
+            currentPos = spawnCoord;
         }
 
         if (sendArmyProcess > 0) {
             if (sendArmyProcess > static_cast<int>(operation.size())) {
                 sendArmyProcess = 0;
+                moveQueue.emplace_back(MoveType::EMPTY);
                 return;
             }
             ++sendArmyProcess;
@@ -206,18 +204,15 @@ class XiaruizeBot : public BasicBot {
         int returnValue = dfs(currentPos);
 
         if (returnValue != -1) {
+            sendArmyProcess = 0;
             Coord next = currentPos + delta[returnValue];
-            previousPos = currentPos;
-            currentPos = next;
-            moveQueue.emplace_back(MoveType::MOVE_ARMY, previousPos, next, true);
+            moveQueue.emplace_back(MoveType::MOVE_ARMY, currentPos, next, true);
         } else {
             if (!operation.empty()) {
                 int res = changeDirection(operation.back());
                 operation.pop_back();
                 Coord next = currentPos + delta[res];
-                previousPos = currentPos;
-                currentPos = next;
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, previousPos, next, true);
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, currentPos, next, true);
             }
         }
     }

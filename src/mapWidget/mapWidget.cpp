@@ -69,8 +69,8 @@ void MapWidget::fitCenter() {
     qreal scaledMapWidth = mapPixelWidth * scale;
     qreal scaledMapHeight = mapPixelHeight * scale;
 
-    offset.setX((width() - scaledMapWidth) / 2.0);
-    offset.setY((height() - scaledMapHeight) / 2.0);
+    offset.setX((width() - scaledMapWidth) * 0.5);
+    offset.setY((height() - scaledMapHeight) * 0.5);
 
     update();
 }
@@ -116,18 +116,7 @@ static void drawArrow(QPainter& painter, const QPointF& p1, const QPointF& p2,
     painter.drawPath(path);
 }
 
-void MapWidget::paintEvent(QPaintEvent* event) {
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::TextAntialiasing);
-    painter.setRenderHint(QPainter::SmoothPixmapTransform);
-    painter.translate(offset);
-    painter.scale(scale, scale);
-
-    const qreal padding = cellSize * paddingFactor;
-
-    static const QColor bg(220, 220, 220);
-
+static QSvgRenderer& getSvgRenderer(int cacheId) {
     static QSvgRenderer renderer_city(QString(":/images/svg/city.svg")),
         renderer_general(QString(":/images/svg/crown.svg")),
         renderer_desert(QString(":/images/svg/desert.svg")),
@@ -137,99 +126,162 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         renderer_obstacle(QString(":/images/svg/obstacle.svg")),
         renderer_swamp(QString(":/images/svg/swamp.svg")),
         renderer_light(QString(":/images/svg/light.svg"));
+    static QSvgRenderer* renderers[11] = {
+        &renderer_general,  nullptr,
+        &renderer_mountain, &renderer_city,
+        &renderer_swamp,    &renderer_desert,
+        &renderer_lookout,  &renderer_observatory,
+        &renderer_obstacle, &renderer_light,
+        &renderer_light,
+    };
+    return *renderers[cacheId];
+}
 
-    painter.setFont(QFont("Quicksand", 6));
+QPixmap& MapWidget::getPixmapCache(int cacheId, int physicalSize) {
+    QPixmap& px = pixmapCache[cacheId];
+    if (px.size().width() == physicalSize) return px;
 
-    int h = mapHeight(), w = mapWidth();
-    painter.fillRect(QRectF(0.0, 0.0, w * cellSize, h * cellSize),
-                     QColor(57, 57, 57));
+    px = QPixmap(physicalSize, physicalSize);
+    px.setDevicePixelRatio(1.0);
+    px.fill(Qt::transparent);
 
+    QPainter p(&px);
+    p.setRenderHint(QPainter::Antialiasing);
+    QSvgRenderer& renderer = getSvgRenderer(cacheId);
+    renderer.render(&p, QRectF(0, 0, physicalSize, physicalSize));
+    return px;
+}
+
+void MapWidget::paintEvent(QPaintEvent* event) {
+    // Constants
+    const int h = mapHeight(), w = mapWidth();
+    const qreal dpr = devicePixelRatioF();
+    constexpr QColor bgColor(57, 57, 57);
+
+    // Compute geometry
+    constexpr qreal padding = cellSize * paddingFactor;
     const qreal cellPixelSize = cellSize * scale;
+    const qreal physicalScale = scale * dpr;
+    const qreal invScale = 1.0 / physicalScale;
 
+    const int bigPhysicalSize =
+        qMax(1, qRound((cellSize - padding * 2) * physicalScale));
+    const int smallPhysicalSize =
+        qMax(1, qRound(0.2 * cellSize * physicalScale));
+    const QRect bigRect(0, 0, bigPhysicalSize, bigPhysicalSize),
+        smallRect(0, 0, smallPhysicalSize, smallPhysicalSize);
+
+    // Visible grid range
     const int startCol = qMax(0, static_cast<int>(-offset.x() / cellPixelSize));
     const int startRow = qMax(0, static_cast<int>(-offset.y() / cellPixelSize));
-
     const int endCol = qMin(
         w - 1, static_cast<int>((-offset.x() + width()) / cellPixelSize) + 1);
     const int endRow = qMin(
         h - 1, static_cast<int>((-offset.y() + height()) / cellPixelSize) + 1);
 
+    // Chunks for batched rendering
+    QHash<uint, QVector<QRectF>> bgRects;
+    QVector<QRectF> borderRects;
+    QVector<QPainter::PixmapFragment> tileChunks[11];
+    QVector<QPair<QRectF, QString>> texts;  // {(rect, text)}
+
+    // Populate chunks
     for (int r = startRow; r <= endRow; ++r) {
         for (int c = startCol; c <= endCol; ++c) {
             const DisplayTile& tile = displayTiles[r][c];
             QRectF cell(c * cellSize, r * cellSize, cellSize, cellSize);
-            painter.setPen(QPen(Qt::black, 1.0 / scale));
-            painter.fillRect(cell, tile.color);
-            if (tile.displayBorders) painter.drawRect(cell);
+            QPointF center((c + 0.5) * cellSize, (r + 0.5) * cellSize);
+
+            if (tile.color != bgColor) bgRects[tile.color.rgba()].append(cell);
+            if (tile.displayBorders) borderRects.append(cell);
+
             if (tile.type != TILE_BLANK) {
-                QRectF imgRect(c * cellSize + padding, r * cellSize + padding,
-                               cellSize - padding * 2, cellSize - padding * 2);
-                switch (tile.type) {
-                    case TILE_CITY:
-                        renderer_city.render(&painter, imgRect);
-                        break;
-                    case TILE_GENERAL:
-                        renderer_general.render(&painter, imgRect);
-                        break;
-                    case TILE_DESERT:
-                        renderer_desert.render(&painter, imgRect);
-                        break;
-                    case TILE_LOOKOUT:
-                        renderer_lookout.render(&painter, imgRect);
-                        break;
-                    case TILE_MOUNTAIN:
-                        renderer_mountain.render(&painter, imgRect);
-                        break;
-                    case TILE_OBSERVATORY:
-                        renderer_observatory.render(&painter, imgRect);
-                        break;
-                    case TILE_OBSTACLE:
-                        renderer_obstacle.render(&painter, imgRect);
-                        break;
-                    case TILE_SWAMP:
-                        renderer_swamp.render(&painter, imgRect);
-                        break;
-                    default: break;
+                tileChunks[tile.type].append(QPainter::PixmapFragment::create(
+                    center, bigRect, invScale, invScale));
+            }
+
+            if (tile.lightIcon) {
+                if (tile.type == TILE_BLANK && tile.text.isEmpty()) {
+                    tileChunks[9].append(QPainter::PixmapFragment::create(
+                        center, bigRect, invScale, invScale));
+                } else {
+                    QPointF smallCenter(
+                        c * cellSize + 0.5 * padding + 0.1 * cellSize,
+                        r * cellSize + 0.5 * padding + 0.1 * cellSize);
+                    tileChunks[10].append(QPainter::PixmapFragment::create(
+                        smallCenter, smallRect, invScale, invScale));
                 }
             }
-            if (tile.lightIcon) {
-                QRectF lightRect =
-                    tile.type == TILE_BLANK && tile.text.isEmpty()
-                        ? QRectF(c * cellSize + padding, r * cellSize + padding,
-                                 cellSize - padding * 2, cellSize - padding * 2)
-                        : QRect(c * cellSize + 0.5 * padding,
-                                r * cellSize + 0.5 * padding, 0.2 * cellSize,
-                                0.2 * cellSize);
-                renderer_light.render(&painter, lightRect);
-            }
+
             if (!tile.text.isEmpty()) {
-                painter.setPen(Qt::white);
-                painter.drawText(cell, Qt::AlignCenter, tile.text);
+                texts.emplaceBack(cell, tile.text);
             }
         }
     }
 
-    if (focusRow != -1) {
-        painter.setPen(QPen(Qt::white, 1.35 / scale));
-        QRectF cell(focusCol * cellSize, focusRow * cellSize, cellSize,
-                    cellSize);
-        painter.drawRect(cell);
+    // Initialize painter
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::TextAntialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    painter.translate(offset);
+    painter.scale(scale, scale);
+
+    // Background & Borders
+    painter.setPen(Qt::NoPen);
+    painter.fillRect(QRectF(startCol * cellSize, startRow * cellSize,
+                            (endCol - startCol + 1) * cellSize,
+                            (endRow - startRow + 1) * cellSize),
+                     bgColor);
+    for (const auto& [color, rects] : bgRects.asKeyValueRange()) {
+        painter.setBrush(QColor::fromRgba(color));
+        painter.drawRects(rects);
     }
 
-    if (moveQueue == nullptr || moveQueue->empty()) return;
+    painter.setBrush(Qt::NoBrush);
+    painter.setPen(QPen(Qt::black, 1.0 / scale));
+    painter.drawRects(borderRects);
 
-    for (const auto& move : *moveQueue) {
-        if (move.type == MoveType::MOVE_ARMY) {
-            int r1 = move.from.x - 1, c1 = move.from.y - 1;
-            int r2 = move.to.x - 1, c2 = move.to.y - 1;
-            if ((startRow <= r1 && r1 <= endRow && startCol <= c1 &&
-                 c1 <= endCol) ||
-                (startRow <= r2 && r2 <= endRow && startCol <= c2 &&
-                 c2 <= endCol)) {
-                QPointF p1((c1 + 0.5) * cellSize, (r1 + 0.5) * cellSize);
-                QPointF p2((c2 + 0.5) * cellSize, (r2 + 0.5) * cellSize);
+    // Tiles & Lights
+    for (int i = 0; i < 11; ++i) {
+        if (!tileChunks[i].isEmpty()) {
+            QPixmap& px = getPixmapCache(
+                i, (i == 10 ? smallPhysicalSize : bigPhysicalSize));
+            painter.drawPixmapFragments(tileChunks[i].constData(),
+                                        tileChunks[i].size(), px);
+        }
+    }
 
-                drawArrow(painter, p1, p2, cellSize * 0.3, 1.5 / scale);
+    // Focus
+    if (focusRow != -1) {
+        painter.setPen(QPen(Qt::white, 1.35 / scale));
+        painter.drawRect(QRectF(focusCol * cellSize, focusRow * cellSize,
+                                cellSize, cellSize));
+    }
+
+    // Texts
+    if (!texts.isEmpty()) {
+        painter.setPen(Qt::white);
+        painter.setFont(QFont("Quicksand", 6));
+        for (const auto& [rect, text] : texts) {
+            painter.drawText(rect, Qt::AlignCenter, text);
+        }
+    }
+
+    // Move queue
+    if (moveQueue != nullptr && !moveQueue->empty()) {
+        for (const auto& move : *moveQueue) {
+            if (move.type == MoveType::MOVE_ARMY) {
+                int r1 = move.from.x - 1, c1 = move.from.y - 1;
+                int r2 = move.to.x - 1, c2 = move.to.y - 1;
+                if ((startRow <= r1 && r1 <= endRow && startCol <= c1 &&
+                     c1 <= endCol) ||
+                    (startRow <= r2 && r2 <= endRow && startCol <= c2 &&
+                     c2 <= endCol)) {
+                    QPointF p1((c1 + 0.5) * cellSize, (r1 + 0.5) * cellSize);
+                    QPointF p2((c2 + 0.5) * cellSize, (r2 + 0.5) * cellSize);
+                    drawArrow(painter, p1, p2, cellSize * 0.3, 1.5 / scale);
+                }
             }
         }
     }

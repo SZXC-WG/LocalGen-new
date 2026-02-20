@@ -1,6 +1,7 @@
 #ifndef MAPWIDGET_H
 #define MAPWIDGET_H
 
+#include <QPixmap>
 #include <QPoint>
 #include <QWidget>
 #include <deque>
@@ -63,6 +64,8 @@ class MapWidget : public QWidget {
         return isValidGridPos(pos.x(), pos.y());
     }
 
+    QPixmap& getPixmapCache(int cacheId, int physicalSize);
+
     // Constants
     static constexpr qreal cellSize = 20.0, zoomFactor = 1.1,
                            paddingFactor = 0.109375;
@@ -81,6 +84,10 @@ class MapWidget : public QWidget {
 
     std::vector<std::vector<DisplayTile>> displayTiles;
     std::deque<Move>* moveQueue = nullptr;
+
+    // Cached rendering data
+    QPixmap pixmapCache[11];  // 0-8: TILE_SPAWN to TILE_OBSTACLE;
+                              // 9-10: light (full/small)
 };
 
 #endif  // MAPWIDGET_H

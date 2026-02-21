@@ -152,6 +152,27 @@ QPixmap& MapWidget::getPixmapCache(int cacheId, int physicalSize) {
     return px;
 }
 
+QPixmap& MapWidget::getTextPixmap(const QString& text, qreal physicalScale,
+                                  int physicalSize) {
+    QPixmap& px = textPixmapCache[text];
+    if (!px.isNull()) return px;
+
+    px = QPixmap(physicalSize, physicalSize);
+    px.setDevicePixelRatio(1.0);
+    px.fill(Qt::transparent);
+
+    static QFont font("Quicksand");
+    font.setPointSizeF(6.0 * physicalScale);
+
+    QPainter p(&px);
+    p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+    p.setPen(Qt::white);
+    p.setFont(font);
+
+    p.drawText(px.rect(), Qt::AlignCenter, text);
+    return px;
+}
+
 void MapWidget::paintEvent(QPaintEvent* event) {
     // Constants
     const int h = mapHeight(), w = mapWidth();
@@ -163,13 +184,15 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     const qreal cellPixelSize = cellSize * scale;
     const qreal physicalScale = scale * dpr;
     const qreal invScale = 1.0 / physicalScale;
+    const int physicalCellSize = qMax(1, qRound(cellPixelSize * dpr));
 
     const int bigPhysicalSize =
         qMax(1, qRound((cellSize - padding * 2) * physicalScale));
     const int smallPhysicalSize =
         qMax(1, qRound(0.2 * cellSize * physicalScale));
     const QRect bigRect(0, 0, bigPhysicalSize, bigPhysicalSize),
-        smallRect(0, 0, smallPhysicalSize, smallPhysicalSize);
+        smallRect(0, 0, smallPhysicalSize, smallPhysicalSize),
+        textRect(0, 0, physicalCellSize, physicalCellSize);
 
     // Visible grid range
     const int startCol = qMax(0, static_cast<int>(-offset.x() / cellPixelSize));
@@ -183,7 +206,13 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     QHash<uint, QVector<QRectF>> bgRects;
     QVector<QRectF> borderRects;
     QVector<QPainter::PixmapFragment> tileChunks[11];
-    QVector<QPair<QRectF, QString>> texts;  // {(rect, text)}
+    QHash<QString, QVector<QPainter::PixmapFragment>> textChunks;
+
+    // Text cache
+    if (!qFuzzyCompare(physicalScale, lastPhysicalScale)) {
+        textPixmapCache.clear();
+        lastPhysicalScale = physicalScale;
+    }
 
     // Populate chunks
     for (int r = startRow; r <= endRow; ++r) {
@@ -214,7 +243,8 @@ void MapWidget::paintEvent(QPaintEvent* event) {
             }
 
             if (!tile.text.isEmpty()) {
-                texts.emplaceBack(cell, tile.text);
+                textChunks[tile.text].append(QPainter::PixmapFragment::create(
+                    center, textRect, invScale, invScale));
             }
         }
     }
@@ -260,12 +290,10 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     }
 
     // Texts
-    if (!texts.isEmpty()) {
-        painter.setPen(Qt::white);
-        painter.setFont(QFont("Quicksand", 6));
-        for (const auto& [rect, text] : texts) {
-            painter.drawText(rect, Qt::AlignCenter, text);
-        }
+    for (const auto& [text, fragments] : textChunks.asKeyValueRange()) {
+        QPixmap& px = getTextPixmap(text, physicalScale, physicalCellSize);
+        painter.drawPixmapFragments(fragments.constData(), fragments.size(),
+                                    px);
     }
 
     // Move queue
@@ -284,6 +312,13 @@ void MapWidget::paintEvent(QPaintEvent* event) {
                 }
             }
         }
+    }
+
+    // Text cache - prevent memory bloat
+    qsizetype maxCacheSize =
+        qMax(2 * textChunks.size(), static_cast<qsizetype>(w * h) / 5);
+    if (textPixmapCache.size() > maxCacheSize) {
+        textPixmapCache.clear();
     }
 }
 

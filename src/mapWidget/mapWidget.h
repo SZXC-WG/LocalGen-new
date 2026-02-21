@@ -1,6 +1,7 @@
 #ifndef MAPWIDGET_H
 #define MAPWIDGET_H
 
+#include <QHash>
 #include <QPixmap>
 #include <QPoint>
 #include <QWidget>
@@ -65,6 +66,8 @@ class MapWidget : public QWidget {
     }
 
     QPixmap& getPixmapCache(int cacheId, int physicalSize);
+    QPixmap& getTextPixmap(const QString& text, qreal physicalScale,
+                           int physicalSize);
 
     // Constants
     static constexpr qreal cellSize = 20.0, zoomFactor = 1.1,
@@ -88,6 +91,8 @@ class MapWidget : public QWidget {
     // Cached rendering data
     QPixmap pixmapCache[11];  // 0-8: TILE_SPAWN to TILE_OBSTACLE;
                               // 9-10: light (full/small)
+    QHash<QString, QPixmap> textPixmapCache;
+    qreal lastPhysicalScale = -1.0;
 };
 
 #endif  // MAPWIDGET_H

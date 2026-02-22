@@ -2,8 +2,12 @@
 #define MAPWIDGET_H
 
 #include <QHash>
+#include <QPainter>
 #include <QPixmap>
 #include <QPoint>
+#include <QRectF>
+#include <QString>
+#include <QVector>
 #include <QWidget>
 #include <deque>
 #include <vector>
@@ -93,6 +97,13 @@ class MapWidget : public QWidget {
                               // 9-10: light (full/small)
     QHash<QString, QPixmap> textPixmapCache;
     qreal lastPhysicalScale = -1.0;
+
+    // Chunks for batched rendering
+    // defined here to reduce heap allocations during paintEvent
+    QHash<uint, QVector<QRectF>> bgRects;
+    QVector<QRectF> borderRects;
+    QVector<QPainter::PixmapFragment> tileChunks[11];
+    QHash<QString, QVector<QPainter::PixmapFragment>> textChunks;
 };
 
 #endif  // MAPWIDGET_H

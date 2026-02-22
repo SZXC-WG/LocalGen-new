@@ -203,10 +203,10 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         h - 1, static_cast<int>((-offset.y() + height()) / cellPixelSize) + 1);
 
     // Chunks for batched rendering
-    QHash<uint, QVector<QRectF>> bgRects;
-    QVector<QRectF> borderRects;
-    QVector<QPainter::PixmapFragment> tileChunks[11];
-    QHash<QString, QVector<QPainter::PixmapFragment>> textChunks;
+    bgRects.clear();
+    borderRects.clear();
+    for (int i = 0; i < 11; ++i) tileChunks[i].clear();
+    textChunks.clear();
 
     // Text cache
     if (!qFuzzyCompare(physicalScale, lastPhysicalScale)) {

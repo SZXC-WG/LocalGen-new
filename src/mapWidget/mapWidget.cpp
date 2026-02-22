@@ -274,8 +274,6 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     painter.setBrush(Qt::NoBrush);
     painter.drawRects(borderRects);
 
-    painter.setRenderHint(QPainter::Antialiasing, true);
-
     // Tiles & Lights
     for (int i = 0; i < 11; ++i) {
         if (!tileChunks[i].isEmpty()) {
@@ -286,20 +284,21 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         }
     }
 
-    // Focus
-    if (focusRow != -1) {
-        QPen focusPen(Qt::white, 1.35);
-        focusPen.setCosmetic(true);
-        painter.setPen(focusPen);
-        painter.drawRect(QRectF(focusCol * cellSize, focusRow * cellSize,
-                                cellSize, cellSize));
-    }
-
     // Texts
     for (const auto& [text, fragments] : textChunks.asKeyValueRange()) {
         QPixmap& px = getTextPixmap(text, physicalScale, physicalCellSize);
         painter.drawPixmapFragments(fragments.constData(), fragments.size(),
                                     px);
+    }
+
+    // Focus
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    if (focusRow != -1) {
+        QPen focusPen(Qt::white, 1.5);
+        focusPen.setCosmetic(true);
+        painter.setPen(focusPen);
+        painter.drawRect(QRectF(focusCol * cellSize, focusRow * cellSize,
+                                cellSize, cellSize));
     }
 
     // Move queue

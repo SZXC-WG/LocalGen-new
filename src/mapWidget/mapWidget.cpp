@@ -251,13 +251,13 @@ void MapWidget::paintEvent(QPaintEvent* event) {
 
     // Initialize painter
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::TextAntialiasing);
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
     painter.translate(offset);
     painter.scale(scale, scale);
 
     // Background & Borders
+    painter.setRenderHint(QPainter::Antialiasing, false);
+
     painter.setPen(Qt::NoPen);
     painter.fillRect(QRectF(startCol * cellSize, startRow * cellSize,
                             (endCol - startCol + 1) * cellSize,
@@ -268,9 +268,13 @@ void MapWidget::paintEvent(QPaintEvent* event) {
         painter.drawRects(rects);
     }
 
+    QPen borderPen(Qt::black, 1.0);
+    borderPen.setCosmetic(true);
+    painter.setPen(borderPen);
     painter.setBrush(Qt::NoBrush);
-    painter.setPen(QPen(Qt::black, 1.0 / scale));
     painter.drawRects(borderRects);
+
+    painter.setRenderHint(QPainter::Antialiasing, true);
 
     // Tiles & Lights
     for (int i = 0; i < 11; ++i) {
@@ -284,7 +288,9 @@ void MapWidget::paintEvent(QPaintEvent* event) {
 
     // Focus
     if (focusRow != -1) {
-        painter.setPen(QPen(Qt::white, 1.35 / scale));
+        QPen focusPen(Qt::white, 1.35);
+        focusPen.setCosmetic(true);
+        painter.setPen(focusPen);
         painter.drawRect(QRectF(focusCol * cellSize, focusRow * cellSize,
                                 cellSize, cellSize));
     }

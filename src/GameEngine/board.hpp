@@ -252,16 +252,22 @@ class Board {
     }
 
    public:
-    BoardView view(index_t player) const {
-        BoardView boardView;
+    void view(index_t player, BoardView& boardView) const {
         auto& tileViews = boardView.tiles;
-        boardView.row = row, boardView.col = col;
-        tileViews.resize(row + 2, std::vector<TileView>(col + 2));
+        if (boardView.row != row || boardView.col != col) {
+            boardView.row = row, boardView.col = col;
+            tileViews.resize(row + 2, std::vector<TileView>(col + 2));
+        }
         for (pos_t i = 1; i <= row; ++i) {
             for (pos_t j = 1; j <= col; ++j) {
                 tileViews[i][j].updateFrom(tiles[i][j], visible(i, j, player));
             }
         }
+    }
+
+    BoardView view(index_t player) const {
+        BoardView boardView;
+        view(player, boardView);
         return boardView;
     }
 

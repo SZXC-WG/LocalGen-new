@@ -185,6 +185,7 @@ class BasicGame {
 
    protected:
     std::vector<Player*> players;
+    mutable std::vector<BoardView> playerViews;
     std::unordered_map<Player*, index_t> indexMap;
     std::vector<std::string> names;
     std::vector<index_t> teams;
@@ -207,11 +208,10 @@ class BasicGame {
     inline std::string getName(index_t player) const { return names[player]; }
     inline std::vector<std::string> getNames() const { return names; }
 
-    inline BoardView view(index_t player) const {
-        if (!isValidPlayer(player)) {
-            throw std::out_of_range("Invalid player index for view");
-        }
-        return board.view(player);
+    inline const BoardView& view(index_t player) const {
+        BoardView& playerView = playerViews.at(player);
+        board.view(player, playerView);
+        return playerView;
     }
 
     inline BoardView fullView() const { return board.fullView(); }
@@ -297,6 +297,7 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
                             std::vector<std::string> name, InitBoard _board)
     : initialBoard(_board),
       players(_players.size()),
+      playerViews(_players.size()),
       names(_players.size()),
       teams(_players.size()),
       board(_board),
@@ -390,7 +391,7 @@ inline void BasicGame::step() {
     // request moves (for next turn)
     std::vector<RankItem> rank = ranklist();
     for (index_t i : getAlivePlayers()) {
-        players[i]->requestMove(board.view(i), rank);
+        players[i]->requestMove(view(i), rank);
     }
 }
 

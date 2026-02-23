@@ -208,12 +208,6 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     for (int i = 0; i < 11; ++i) tileChunks[i].clear();
     textChunks.clear();
 
-    // Text cache
-    if (!qFuzzyCompare(physicalScale, lastPhysicalScale)) {
-        textPixmapCache.clear();
-        lastPhysicalScale = physicalScale;
-    }
-
     // Populate chunks
     for (int r = startRow; r <= endRow; ++r) {
         for (int c = startCol; c <= endCol; ++c) {
@@ -285,6 +279,11 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     }
 
     // Texts
+    if (!qFuzzyCompare(physicalScale, lastPhysicalScale)) {
+        textPixmapCache.clear();
+        lastPhysicalScale = physicalScale;
+    }
+
     for (const auto& [text, fragments] : textChunks.asKeyValueRange()) {
         QPixmap& px = getTextPixmap(text, physicalScale, physicalCellSize);
         painter.drawPixmapFragments(fragments.constData(), fragments.size(),

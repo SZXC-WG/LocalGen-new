@@ -293,9 +293,26 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     // Focus
     painter.setRenderHint(QPainter::Antialiasing, true);
     if (focusRow != -1) {
+        // adjacent dark overlays
+        static const QPair<int, int> dir[4] = {
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        QVector<QRectF> overlays;
+        for (const auto& [dx, dy] : dir) {
+            int nr = focusRow + dx, nc = focusCol + dy;
+            if (0 <= nr && nr < h && 0 <= nc && nc < w) {
+                overlays.emplaceBack(nc * cellSize, nr * cellSize, cellSize,
+                                     cellSize);
+            }
+        }
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(QColor(34, 34, 34, 153));
+        painter.drawRects(overlays);
+
+        // focus outline
         QPen focusPen(Qt::white, 1.5);
         focusPen.setCosmetic(true);
         painter.setPen(focusPen);
+        painter.setBrush(Qt::NoBrush);
         painter.drawRect(QRectF(focusCol * cellSize, focusRow * cellSize,
                                 cellSize, cellSize));
     }

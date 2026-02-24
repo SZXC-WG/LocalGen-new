@@ -56,7 +56,9 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
     QLayout* layout = ui->groupBox_players->layout();
     int requiredCount = numPlayers + 1;
     while (layout->count() > requiredCount) {
-        layout->takeAt(layout->count() - 1)->widget()->deleteLater();
+        QLayoutItem* item = layout->takeAt(layout->count() - 1);
+        item->widget()->deleteLater();
+        delete item;
     }
     if (layout->count() == requiredCount) return;
     const QStringList botNames = toQStringList(BotFactory::instance().list());

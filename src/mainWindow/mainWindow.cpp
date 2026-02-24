@@ -15,11 +15,11 @@ MainWindow::MainWindow(QWidget* parent)
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::on_btnLocalGame_clicked() {
-    LocalGameDialog* dialog = new LocalGameDialog(this);
-    int result = dialog->exec();
+    LocalGameDialog dialog(this);
+    int result = dialog.exec();
     if (result == QDialog::Accepted) {
-        LocalGameWindow* window = new LocalGameWindow(this, dialog->config());
-        window->exec();
+        LocalGameWindow window(this, dialog.config());
+        window.exec();
     }
 }
 
@@ -35,6 +35,6 @@ void MainWindow::on_btnLoadReplay_clicked() {
 }
 
 void MainWindow::on_btnCreateMap_clicked() {
-    MapCreatorWindow* window = new MapCreatorWindow(this);
-    window->exec();
+    MapCreatorWindow window(this);
+    window.exec();
 }

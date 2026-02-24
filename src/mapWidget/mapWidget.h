@@ -32,10 +32,12 @@ class MapWidget : public QWidget {
     ~MapWidget();
 
     void setFocusEnabled(bool enabled);
-    inline DisplayTile& tileAt(int r, int c) { return displayTiles[r][c]; }
+    inline DisplayTile& tileAt(int r, int c) {
+        return displayTiles[r * _mapWidth + c];
+    }
 
-    inline int mapWidth() const { return displayTiles[0].size(); }
-    inline int mapHeight() const { return displayTiles.size(); }
+    inline int mapWidth() const { return _mapWidth; }
+    inline int mapHeight() const { return _mapHeight; }
 
     void setMapWidth(int w);
     void setMapHeight(int h);
@@ -89,7 +91,8 @@ class MapWidget : public QWidget {
     QPoint leftMousePressPos, lastMousePos;
     QPoint lastRightClickGrid;
 
-    std::vector<std::vector<DisplayTile>> displayTiles;
+    int _mapWidth = 0, _mapHeight = 0;
+    std::vector<DisplayTile> displayTiles;
     std::deque<Move>* moveQueue = nullptr;
 
     // Cached rendering data

@@ -30,24 +30,35 @@ MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled,
 MapWidget::~MapWidget() {}
 
 void MapWidget::setMapWidth(int w) {
-    if (w != mapWidth()) {
-        for (auto& row : displayTiles) {
-            row.resize(w);
+    if (w == _mapWidth) return;
+
+    if (_mapWidth > 0 && _mapHeight > 0) {
+        std::vector<DisplayTile> newTiles(_mapHeight * w);
+        int minW = std::min(w, _mapWidth);
+        for (int r = 0; r < _mapHeight; ++r) {
+            for (int c = 0; c < minW; ++c) {
+                newTiles[r * w + c] = displayTiles[r * _mapWidth + c];
+            }
         }
-        update();
+        displayTiles = std::move(newTiles);
+    } else {
+        displayTiles.resize(_mapHeight * w);
     }
+
+    _mapWidth = w;
+    update();
 }
 
 void MapWidget::setMapHeight(int h) {
-    if (h != mapHeight()) {
-        displayTiles.resize(h, std::vector<DisplayTile>(mapWidth()));
-        update();
-    }
+    if (h == _mapHeight) return;
+    _mapHeight = h;
+    displayTiles.resize(h * _mapWidth);
+    update();
 }
 
 void MapWidget::realloc(int w, int h) {
-    displayTiles.clear();
-    displayTiles.resize(h, std::vector<DisplayTile>(w));
+    _mapWidth = w, _mapHeight = h;
+    displayTiles.resize(h * w);
     update();
 }
 
@@ -175,7 +186,7 @@ QPixmap& MapWidget::getTextPixmap(const QString& text, qreal physicalScale,
 
 void MapWidget::paintEvent(QPaintEvent* event) {
     // Constants
-    const int h = mapHeight(), w = mapWidth();
+    const int h = _mapHeight, w = _mapWidth;
     const qreal dpr = devicePixelRatioF();
     constexpr QColor bgColor(57, 57, 57);
 
@@ -211,7 +222,7 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     // Populate chunks
     for (int r = startRow; r <= endRow; ++r) {
         for (int c = startCol; c <= endCol; ++c) {
-            const DisplayTile& tile = displayTiles[r][c];
+            const DisplayTile& tile = tileAt(r, c);
             QRectF cell(c * cellSize, r * cellSize, cellSize, cellSize);
             QPointF center((c + 0.5) * cellSize, (r + 0.5) * cellSize);
 

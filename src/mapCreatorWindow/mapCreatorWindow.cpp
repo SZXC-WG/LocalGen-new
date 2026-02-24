@@ -533,7 +533,7 @@ void MapCreatorWindow::openMap_v5(const QString& filename) {
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
             auto& tile = map->tileAt(r, c);
-            const auto& loadedTile = board.getTile({r + 1, c + 1});
+            const Tile& loadedTile = board.tileAt({r + 1, c + 1});
             tile.type = loadedTile.type;
             switch (loadedTile.type) {
                 case TILE_MOUNTAIN:

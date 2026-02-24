@@ -277,15 +277,13 @@ class BasicGame {
 
 inline void BasicGame::capture(index_t p1, index_t p2) {
     alive[p2] = false;
-    for (auto& row : board.tiles) {
-        for (auto& tile : row) {
-            if (tile.occupier == p2) {
-                tile.occupier = p1;
-                if (tile.type == TILE_GENERAL) {
-                    tile.type = TILE_CAPTURED_GENERAL;
-                } else if (tile.army > 1) {
-                    tile.army >>= 1;
-                }
+    for (auto& tile : board.tiles) {
+        if (tile.occupier == p2) {
+            tile.occupier = p1;
+            if (tile.type == TILE_GENERAL) {
+                tile.type = TILE_CAPTURED_GENERAL;
+            } else if (tile.army > 1) {
+                tile.army >>= 1;
             }
         }
     }
@@ -402,9 +400,8 @@ inline std::vector<RankItem> BasicGame::ranklist() {
         rank[i].alive = alive[i];
     }
 
-    for (auto& row : board.tiles) {
-        for (auto& tile : row) {
-            if (!isValidPlayer(tile.occupier)) continue;
+    for (auto& tile : board.tiles) {
+        if (isValidPlayer(tile.occupier)) {
             RankItem& item = rank[tile.occupier];
             item.army += tile.army, ++item.land;
         }
@@ -432,7 +429,7 @@ inline int BasicGame::initSpawn() {
     int spawnCount = 0;
     for (int i = 1; i <= board.row; ++i) {
         for (int j = 1; j <= board.col; ++j) {
-            if (board.tiles[i][j].type == TILE_SPAWN) {
+            if (board.tileAt(i, j).type == TILE_SPAWN) {
                 spawnCandidates.emplace_back(i, j);
                 ++spawnCount;
             }
@@ -444,8 +441,8 @@ inline int BasicGame::initSpawn() {
     int blankCount = 0;
     for (int i = 1; i <= board.row; ++i) {
         for (int j = 1; j <= board.col; ++j) {
-            if (board.tiles[i][j].type == TILE_PLAIN &&
-                board.tiles[i][j].army == 0) {
+            const Tile& tile = board.tileAt(i, j);
+            if (tile.type == TILE_PLAIN && tile.army == 0) {
                 spawnCandidates.emplace_back(i, j);
                 ++blankCount;
             }

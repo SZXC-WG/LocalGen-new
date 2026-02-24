@@ -5,18 +5,19 @@
 #include <QComboBox>
 #include <QFileDialog>
 #include <QFont>
-#include <QGridLayout>
 #include <QHBoxLayout>
-#include <QIcon>
+#include <QInputDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QSlider>
-#include <QTimer>
 #include <QVBoxLayout>
 
 #include "../GameEngine/board.hpp"
@@ -24,7 +25,9 @@
 #define MAGIC_6 quint32(0x4C47656E)
 
 MapCreatorWindow::MapCreatorWindow(QWidget* parent)
-    : QDialog(parent), selectedTool(MOUNTAIN) {
+    : QDialog(parent),
+      networkManager(new QNetworkAccessManager(this)),
+      selectedTool(MOUNTAIN) {
     setWindowTitle("Map Creator");
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(36, 36, 36));
@@ -213,72 +216,95 @@ void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
 
 void MapCreatorWindow::setupSliders() {
     sliderContainer = new QWidget(this);
-    sliderContainer->setFixedSize(520, 80);
+    sliderContainer->setFixedSize(550, 70);
 
     QHBoxLayout* containerLayout = new QHBoxLayout(sliderContainer);
     containerLayout->setContentsMargins(0, 0, 0, 0);
     containerLayout->addStretch();
 
     QWidget* floatingPanel = new QWidget(sliderContainer);
-    floatingPanel->setFixedSize(520, 80);
+    floatingPanel->setFixedSize(550, 70);
     floatingPanel->setStyleSheet(
         "QWidget { background-color: white; border-bottom-left-radius: 8px; "
         "border-bottom-right-radius: 8px; }");
 
-    QGridLayout* mainSliderLayout = new QGridLayout(floatingPanel);
-    mainSliderLayout->setContentsMargins(15, 10, 15, 10);
-    mainSliderLayout->setSpacing(5);
+    QVBoxLayout* panelLayout = new QVBoxLayout(floatingPanel);
+    panelLayout->setContentsMargins(12, 6, 12, 6);
+    panelLayout->setSpacing(8);
 
     QFont font("Quicksand", 10, QFont::Bold);
+    QFont btnFont("Quicksand", 9, QFont::Bold);
 
-    QPushButton* openButton = new QPushButton("Open", floatingPanel);
-    QPushButton* saveButton = new QPushButton("Save", floatingPanel);
+    // Button row
+    QHBoxLayout* buttonRow = new QHBoxLayout();
+    buttonRow->setSpacing(6);
 
-    QString buttonStyle =
-        "QPushButton {"
-        "    background-color: #f0f0f0;"
-        "    border: 1px solid #d0d0d0;"
-        "    border-radius: 4px;"
-        "    padding: 4px 12px;"
-        "    font-weight: bold;"
-        "    color: black;"
-        "}"
-        "QPushButton:hover {"
-        "    background-color: #e0e0e0;"
-        "    border: 1px solid #c0c0c0;"
-        "}"
-        "QPushButton:pressed {"
-        "    background-color: #d0d0d0;"
-        "}";
+    auto makeButton = [&](const QString& text, const QString& bg,
+                          const QString& border, const QString& fg,
+                          const QString& hoverBg, const QString& hoverBorder,
+                          const QString& pressedBg) {
+        QPushButton* btn = new QPushButton(text, floatingPanel);
+        btn->setFont(btnFont);
+        btn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        btn->setStyleSheet(
+            QString("QPushButton {"
+                    "    background-color: %1;"
+                    "    border: 1px solid %2;"
+                    "    border-radius: 4px;"
+                    "    padding: 4px 12px;"
+                    "    font-weight: bold;"
+                    "    color: %3;"
+                    "}"
+                    "QPushButton:hover {"
+                    "    background-color: %4;"
+                    "    border: 1px solid %5;"
+                    "}"
+                    "QPushButton:pressed {"
+                    "    background-color: %6;"
+                    "}")
+                .arg(bg, border, fg, hoverBg, hoverBorder, pressedBg));
+        return btn;
+    };
 
-    openButton->setStyleSheet(buttonStyle);
-    saveButton->setStyleSheet(buttonStyle);
-    openButton->setFont(QFont("Quicksand", 9, QFont::Bold));
-    saveButton->setFont(QFont("Quicksand", 9, QFont::Bold));
+    QPushButton* openButton =
+        makeButton("\xF0\x9F\x93\x82 Open", "#e8f5e9", "#a5d6a7", "#2e7d32",
+                   "#c8e6c9", "#81c784", "#a5d6a7");
+    QPushButton* saveButton =
+        makeButton("\xF0\x9F\x92\xBE Save", "#fff3e0", "#ffcc80", "#e65100",
+                   "#ffe0b2", "#ffb74d", "#ffcc80");
+    QPushButton* importButton =
+        makeButton("\xF0\x9F\x8C\x90 Import", "#e8f0fe", "#a8c7fa", "#1a73e8",
+                   "#d2e3fc", "#7baaf7", "#aecbfa");
 
-    // Connect slots
     connect(openButton, &QPushButton::clicked, this,
             &MapCreatorWindow::onOpenMap);
     connect(saveButton, &QPushButton::clicked, this,
             &MapCreatorWindow::onSaveMap);
+    connect(importButton, &QPushButton::clicked, this,
+            &MapCreatorWindow::onImportFromWeb);
 
-    // Width slider components
-    QLabel* widthLabel = new QLabel("Width:", floatingPanel);
+    buttonRow->addWidget(openButton);
+    buttonRow->addWidget(saveButton);
+    buttonRow->addWidget(importButton);
+    panelLayout->addLayout(buttonRow);
+
+    // Slider row
+    QHBoxLayout* sliderRow = new QHBoxLayout();
+    sliderRow->setContentsMargins(0, 0, 0, 0);
+    sliderRow->setSpacing(5);
+
+    // Width slider
+    QLabel* widthLabel = new QLabel("W:", floatingPanel);
     widthLabel->setFont(font);
     widthLabel->setStyleSheet("color: black;");
-    widthLabel->setMinimumWidth(50);
-    widthLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    widthLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     widthSlider = new QSlider(Qt::Horizontal, floatingPanel);
     widthSlider->setRange(1, 100);
     widthSlider->setValue(10);
-    widthSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     QLabel* widthValueLabel = new QLabel("10", floatingPanel);
     widthValueLabel->setFont(font);
     widthValueLabel->setStyleSheet("color: black;");
     widthValueLabel->setAlignment(Qt::AlignCenter);
-    widthValueLabel->setSizePolicy(QSizePolicy::Maximum,
-                                   QSizePolicy::Preferred);
+    widthValueLabel->setFixedWidth(30);
 
     connect(widthSlider, &QSlider::valueChanged,
             [this, widthValueLabel](int value) {
@@ -286,23 +312,24 @@ void MapCreatorWindow::setupSliders() {
                 map->setMapWidth(value);
             });
 
-    // Height slider components
-    QLabel* heightLabel = new QLabel("Height:", floatingPanel);
+    sliderRow->addWidget(widthLabel);
+    sliderRow->addWidget(widthSlider, 1);
+    sliderRow->addWidget(widthValueLabel);
+
+    sliderRow->addSpacing(10);
+
+    // Height slider
+    QLabel* heightLabel = new QLabel("H:", floatingPanel);
     heightLabel->setFont(font);
     heightLabel->setStyleSheet("color: black;");
-    heightLabel->setMinimumWidth(50);
-    heightLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    heightLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     heightSlider = new QSlider(Qt::Horizontal, floatingPanel);
     heightSlider->setRange(1, 100);
     heightSlider->setValue(10);
-    heightSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     QLabel* heightValueLabel = new QLabel("10", floatingPanel);
     heightValueLabel->setFont(font);
     heightValueLabel->setStyleSheet("color: black;");
     heightValueLabel->setAlignment(Qt::AlignCenter);
-    heightValueLabel->setSizePolicy(QSizePolicy::Maximum,
-                                    QSizePolicy::Preferred);
+    heightValueLabel->setFixedWidth(30);
 
     connect(heightSlider, &QSlider::valueChanged,
             [this, heightValueLabel](int value) {
@@ -310,15 +337,11 @@ void MapCreatorWindow::setupSliders() {
                 map->setMapHeight(value);
             });
 
-    // Add all components to grid layout
-    mainSliderLayout->addWidget(openButton, 0, 0);
-    mainSliderLayout->addWidget(widthLabel, 0, 1);
-    mainSliderLayout->addWidget(widthSlider, 0, 2);
-    mainSliderLayout->addWidget(widthValueLabel, 0, 3);
-    mainSliderLayout->addWidget(saveButton, 1, 0);
-    mainSliderLayout->addWidget(heightLabel, 1, 1);
-    mainSliderLayout->addWidget(heightSlider, 1, 2);
-    mainSliderLayout->addWidget(heightValueLabel, 1, 3);
+    sliderRow->addWidget(heightLabel);
+    sliderRow->addWidget(heightSlider, 1);
+    sliderRow->addWidget(heightValueLabel);
+
+    panelLayout->addLayout(sliderRow);
 
     containerLayout->addWidget(floatingPanel);
     containerLayout->addStretch();
@@ -737,6 +760,37 @@ void MapCreatorWindow::openOfficialMap(const QByteArray& data) {
                              "Some tiles are not recognized. "
                              "Please edit or truncate them before saving.");
     }
+}
+
+void MapCreatorWindow::onImportFromWeb() {
+    bool ok;
+    QString mapName = QInputDialog::getText(
+        this, "Import from Generals.io",
+        "Enter the map name:", QLineEdit::Normal, "", &ok);
+    if (!ok || mapName.trimmed().isEmpty()) return;
+
+    auto urlName = QUrl::toPercentEncoding(mapName.trimmed());
+    QNetworkRequest request(
+        QUrl("https://generals.io/api/map?name=" + urlName));
+    request.setHeader(
+        QNetworkRequest::UserAgentHeader,
+        "LocalGen/1.0 (+https://github.com/SZXC-WG/LocalGen-new)");
+
+    QNetworkReply* reply = networkManager->get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        if (reply->error() != QNetworkReply::NoError) {
+            QMessageBox::critical(
+                this, "Network Error",
+                "Failed to fetch map: " + reply->errorString());
+            return;
+        }
+        QByteArray data = reply->readAll();
+        openOfficialMap(data);
+        map->fitCenter();
+        widthSlider->setValue(map->mapWidth());
+        heightSlider->setValue(map->mapHeight());
+    });
 }
 
 void MapCreatorWindow::onSaveMap() {

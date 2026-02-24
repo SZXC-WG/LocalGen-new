@@ -13,6 +13,8 @@
 
 #include "../mapWidget/mapWidget.h"
 
+class QNetworkAccessManager;
+
 class MapCreatorWindow : public QDialog {
     Q_OBJECT
 
@@ -27,6 +29,7 @@ class MapCreatorWindow : public QDialog {
     void setupSliders();
     void onOpenMap();
     void onSaveMap();
+    void onImportFromWeb();
 
    private:
     void setupToolbar();
@@ -45,6 +48,8 @@ class MapCreatorWindow : public QDialog {
 
     // Official map format
     void openOfficialMap(const QByteArray& data);
+
+    QNetworkAccessManager* networkManager;
 
     static const QString mapFileFilter;
 

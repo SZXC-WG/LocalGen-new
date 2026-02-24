@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
-find_package(Qt6 REQUIRED COMPONENTS Widgets Svg)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Svg Network)
 
 set(PROJECT_SOURCES
         src/main.cpp
@@ -48,7 +48,7 @@ qt_add_executable(LocalGen-new
 
 target_include_directories(LocalGen-new PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(LocalGen-new PRIVATE Qt6::Widgets Qt6::Svg)
+target_link_libraries(LocalGen-new PRIVATE Qt6::Widgets Qt6::Svg Qt6::Network)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

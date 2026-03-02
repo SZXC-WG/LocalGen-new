@@ -27,10 +27,11 @@ set(PROJECT_SOURCES
         src/mapCreatorWindow/mapCreatorWindow.cpp
         src/mapCreatorWindow/mapCreatorWindow.h
         src/bots/smartRandomBot.cpp
+        src/bots/xrzBot.cpp
+        src/bots/szlyBot.cpp
         src/bots/zlyBot.cpp
         src/bots/zlyBot_v2.cpp
         src/bots/zlyBot_v2.1.cpp
-        src/bots/xrzBot.cpp
         src/GameEngine/board.hpp
         src/GameEngine/bot.h
         src/GameEngine/game.hpp

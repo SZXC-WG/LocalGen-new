@@ -76,8 +76,11 @@ class MapWidget : public QWidget {
                            int physicalSize);
 
     // Constants
-    static constexpr qreal cellSize = 20.0, zoomFactor = 1.1,
+    static constexpr qreal cellSize = 32.0, zoomFactor = 1.1,
                            paddingFactor = 0.109375;
+    static constexpr qreal minScale = 0.3679, maxScale = 7.389;
+    static constexpr qreal minFontPixelSize = 8.0, maxFontPixelSize = 18.0,
+                           fontHeightRatio = 0.375;
     const int fitMargin;
 
     // State variables

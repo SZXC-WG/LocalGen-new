@@ -172,8 +172,18 @@ QPixmap& MapWidget::getTextPixmap(const QString& text, qreal physicalScale,
     px.setDevicePixelRatio(1.0);
     px.fill(Qt::transparent);
 
+    const qreal dpr = devicePixelRatioF();
+    const qreal scale = physicalScale / dpr;
+
+    // Font height on screen = cell height * ratio, bounded by min/max
+    qreal screenCellHeight = cellSize * scale;
+    qreal targetFontHeight = qBound(minFontPixelSize,
+                                     screenCellHeight * fontHeightRatio,
+                                     maxFontPixelSize);
+    int fontPixelSize = qMax(1, qRound(targetFontHeight * dpr));
+
     static QFont font("Quicksand");
-    font.setPointSizeF(6.0 * physicalScale);
+    font.setPixelSize(fontPixelSize);
 
     QPainter p(&px);
     p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
@@ -363,6 +373,7 @@ void MapWidget::wheelEvent(QWheelEvent* event) {
         scale *= zoomFactor;
     else
         scale /= zoomFactor;
+    scale = qBound(minScale, scale, maxScale);
     offset = widgetMousePos - oldMousePos * scale;
     update();
 }

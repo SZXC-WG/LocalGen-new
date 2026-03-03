@@ -62,6 +62,11 @@ class ZlyBot_v2_1 : public BasicBot {
     std::vector<std::vector<bool>> isSeenBefore;
     Coord spawnCoord;
 
+    // findRoute 缓存矩阵，避免每帧重新分配
+    std::vector<std::vector<bool>> routeVis;
+    std::vector<std::vector<Coord>> routePrev;
+    std::vector<std::vector<value_t>> routeDp;
+
     inline void recordNewMove(Coord pos) {
         prevMoves.emplace_back(pos);
         inPrevMoves[pos.x][pos.y] = true;
@@ -89,7 +94,9 @@ class ZlyBot_v2_1 : public BasicBot {
 
     void calcData(Coord foc0, Coord foc1) {
         {
-            dist0.assign(height + 2, std::vector<value_t>(width + 2, DIST_INF));
+            // 使用 fill 重置而非 assign，避免每回合重新分配内存
+            for (auto& row : dist0)
+                std::fill(row.begin(), row.end(), DIST_INF);
             dist0[foc0.x][foc0.y] = 0;
             std::priority_queue<std::pair<value_t, Coord>,
                                 std::vector<std::pair<value_t, Coord>>,
@@ -122,7 +129,8 @@ class ZlyBot_v2_1 : public BasicBot {
             }
         }
         {
-            dist1.assign(height + 2, std::vector<value_t>(width + 2, DIST_INF));
+            for (auto& row : dist1)
+                std::fill(row.begin(), row.end(), DIST_INF);
             dist1[foc1.x][foc1.y] = 0;
             std::priority_queue<std::pair<value_t, Coord>,
                                 std::vector<std::pair<value_t, Coord>>,
@@ -156,8 +164,8 @@ class ZlyBot_v2_1 : public BasicBot {
         }
         {
             homeZone.clear();
-            distToSpawn.assign(height + 2,
-                               std::vector<value_t>(width + 2, DIST_INF));
+            for (auto& row : distToSpawn)
+                std::fill(row.begin(), row.end(), DIST_INF);
             distToSpawn[spawnCoord.x][spawnCoord.y] = 0;
             std::priority_queue<std::pair<value_t, Coord>,
                                 std::vector<std::pair<value_t, Coord>>,
@@ -263,25 +271,25 @@ class ZlyBot_v2_1 : public BasicBot {
         auto UnitedInc = [&](int x, int y) -> value_t {
             return DisInc * 1000 + ArmyInc(x, y) + TypeInc(x, y);
         };
-        std::vector<std::vector<bool>> vis(height + 2,
-                                           std::vector<bool>(width + 2, false));
-        std::vector<std::vector<Coord>> prev(
-            height + 2, std::vector<Coord>(width + 2, Coord(-1, -1)));
-        std::vector<std::vector<value_t>> dp(
-            height + 2, std::vector<value_t>(width + 2, INF));
+        // 重置缓存矩阵而非重新分配
+        for (pos_t i = 0; i < height + 2; ++i) {
+            std::fill(routeVis[i].begin(), routeVis[i].end(), false);
+            std::fill(routePrev[i].begin(), routePrev[i].end(), Coord(-1, -1));
+            std::fill(routeDp[i].begin(), routeDp[i].end(), INF);
+        }
         std::priority_queue<std::pair<value_t, Coord>,
                             std::vector<std::pair<value_t, Coord>>,
                             std::greater<std::pair<value_t, Coord>>>
             q;
-        dp[start.x][start.y] = 0;
+        routeDp[start.x][start.y] = 0;
         q.emplace(0, start);
         while (!q.empty()) {
             Coord cur = q.top().second;
             value_t curVal = q.top().first;
             q.pop();
-            if (curVal > dp[cur.x][cur.y]) continue;
-            if (vis[cur.x][cur.y]) continue;
-            vis[cur.x][cur.y] = true;
+            if (curVal > routeDp[cur.x][cur.y]) continue;
+            if (routeVis[cur.x][cur.y]) continue;
+            routeVis[cur.x][cur.y] = true;
             if (cur == desti) break;
             for (int i = 0; i < 4; ++i) {
                 Coord next = cur + delta[i];
@@ -289,12 +297,12 @@ class ZlyBot_v2_1 : public BasicBot {
                     next.y > width)
                     continue;
                 if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                if (vis[next.x][next.y]) continue;
+                if (routeVis[next.x][next.y]) continue;
                 if (inPrevMoves[next.x][next.y]) continue;
                 value_t nextVal = curVal + UnitedInc(next.x, next.y);
-                if (nextVal < dp[next.x][next.y]) {
-                    dp[next.x][next.y] = nextVal;
-                    prev[next.x][next.y] = cur;
+                if (nextVal < routeDp[next.x][next.y]) {
+                    routeDp[next.x][next.y] = nextVal;
+                    routePrev[next.x][next.y] = cur;
                     q.emplace(nextVal, next);
                 }
             }
@@ -303,7 +311,7 @@ class ZlyBot_v2_1 : public BasicBot {
         Coord cur = desti;
         while (cur != Coord(-1, -1)) {
             route.push_front(cur);
-            cur = prev[cur.x][cur.y];
+            cur = routePrev[cur.x][cur.y];
         }
         route.pop_front();
         if (route.empty() && start != desti) {
@@ -383,6 +391,9 @@ class ZlyBot_v2_1 : public BasicBot {
         tileArmyMemory.assign(height + 2, std::vector<army_t>(width + 2, 0));
         inPrevMoves.assign(height + 2, std::vector<bool>(width + 2, false));
         isSeenBefore.assign(height + 2, std::vector<bool>(width + 2, false));
+        routeVis.assign(height + 2, std::vector<bool>(width + 2, false));
+        routePrev.assign(height + 2, std::vector<Coord>(width + 2, Coord(-1, -1)));
+        routeDp.assign(height + 2, std::vector<value_t>(width + 2, INF));
         mode = BotMode::EXPLORE;
     }
 

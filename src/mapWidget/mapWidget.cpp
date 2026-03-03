@@ -185,12 +185,23 @@ QPixmap& MapWidget::getTextPixmap(const QString& text, qreal physicalScale,
     static QFont font("Quicksand");
     font.setPixelSize(fontPixelSize);
 
+    // Truncate text if too wide, keeping at least 1 character
+    QString displayText = text;
+    QFontMetrics fm(font);
+    if (fm.horizontalAdvance(displayText) > physicalSize) {
+        while (displayText.length() > 1 &&
+               fm.horizontalAdvance(displayText + "...") > physicalSize) {
+            displayText.chop(1);
+        }
+        displayText += "...";
+    }
+
     QPainter p(&px);
     p.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     p.setPen(Qt::white);
     p.setFont(font);
 
-    p.drawText(px.rect(), Qt::AlignCenter, text);
+    p.drawText(px.rect(), Qt::AlignCenter, displayText);
     return px;
 }
 

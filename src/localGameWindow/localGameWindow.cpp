@@ -307,8 +307,8 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     turnLabel = new QLabel("Turn 0", this);
     turnLabel->setFont(QFont("Quicksand", 18, QFont::Bold));
     turnLabel->setStyleSheet(
-        "QLabel { background-color: rgba(0, 0, 0, 180); "
-        "color: white; padding: 8px 16px; "
+        "QLabel { background-color: white; "
+        "color: black; padding: 8px 16px; "
         "font-size: 18px; font-weight: bold; "
         "border-radius: 4px; }");
     turnLabel->setMinimumWidth(120);

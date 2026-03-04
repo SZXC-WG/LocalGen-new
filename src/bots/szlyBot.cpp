@@ -26,33 +26,33 @@ class SzlyBot : public BasicBot {
 
     enum class BotMode { ATTACK, EXPLORE };
 
-    // Game constants (from init)
     index_t id;
-    pos_t height, width;
+    pos_t height, width, W;
     index_t playerCount;
 
-    // State maintenance
     BotMode mode;
-    Coord lastPos;                   // Replaces v5 focus system
-    std::vector<Coord> seenGeneral;  // Records enemy general positions
-    Coord myGeneral;                 // Own general position
+    Coord lastPos;
+    std::vector<Coord> seenGeneral;
+    Coord myGeneral;
 
-    // Data storage
-    std::vector<std::vector<value_t>> blockValue;
-    std::vector<std::vector<value_t>> eval;
-    std::vector<std::vector<Coord>> parent;
-    std::vector<std::vector<pos_t>> dist;
-    std::vector<std::vector<tile_type_e>> blockType;
-    std::vector<std::vector<bool>> knownBlockType;
-    std::array<value_t, 16>
-        blockValueWeight;  // Terrain weights (indexed by v6 enum)
+    std::vector<value_t> blockValue;
+    std::vector<value_t> eval;
+    std::vector<Coord> parent;
+    std::vector<pos_t> dist;
+    std::vector<tile_type_e> blockType;
+    std::vector<bool> knownBlockType;
+    std::array<value_t, 16> blockValueWeight;
 
     std::mt19937 rng{std::random_device{}()};
+
+    inline size_t idx(pos_t x, pos_t y) const {
+        return static_cast<size_t>(x * W + y);
+    }
 
     inline bool isValidPosition(pos_t x, pos_t y,
                                 const BoardView& board) const {
         return x >= 1 && x <= board.row && y >= 1 && y <= board.col &&
-               !isImpassableTile(blockType[x][y]);
+               !isImpassableTile(blockType[idx(x, y)]);
     }
 
     inline pos_t approxDist(Coord a, Coord b) const {
@@ -62,32 +62,22 @@ class SzlyBot : public BasicBot {
     tile_type_e getType(const BoardView& board, pos_t x, pos_t y) {
         const TileView& tile = board.tileAt(x, y);
         if (tile.visible) {
-            knownBlockType[x][y] = true;
+            knownBlockType[idx(x, y)] = true;
             return tile.type;
         }
-        // v5: unpassable or city -> unknown (5)
-        // v6: map to TILE_OBSTACLE
         if (isImpassableTile(tile.type) || tile.type == TILE_CITY) {
             return TILE_OBSTACLE;
         }
-        // v5: desert -> unknown (5) when invisible
-        // v6: map to TILE_OBSTACLE
         if (tile.type == TILE_DESERT) {
             return TILE_OBSTACLE;
         }
-        // Invisible general appears as blank
         if (tile.type == TILE_GENERAL) {
             return TILE_BLANK;
         }
-        // plain/swamp remain as-is
         return tile.type;
     }
 
     void computeRoutes(Coord st, const BoardView& board) {
-        // Type values for eval computation
-        // Indexed by v6 tile_type_e
-        // v5: {-5, -10, -INF, -5, -40, 0, -INF, -INF, -200}
-        // Mapped to v6 enum values
         static const value_t typeValues[] = {
             /* TILE_SPAWN=0 */ -5,
             /* TILE_BLANK=1 */ -5,
@@ -97,7 +87,7 @@ class SzlyBot : public BasicBot {
             /* TILE_DESERT=5 */ 0,
             /* TILE_LOOKOUT=6 */ -INF,
             /* TILE_OBSERVATORY=7 */ -INF,
-            /* TILE_OBSTACLE=8 */ 0,  // v5: unknown = 0
+            /* TILE_OBSTACLE=8 */ 0,
         };
 
         auto gv = [&](pos_t x, pos_t y) -> value_t {
@@ -105,69 +95,65 @@ class SzlyBot : public BasicBot {
             const TileView& tile = board.tileAt(x, y);
             if (tile.occupier == id) return tile.army;
             if (tile.visible) return -tile.army;
-            return typeValues[blockType[x][y]];
+            return typeValues[blockType[idx(x, y)]];
         };
 
-        // Reset arrays
         for (pos_t i = 0; i <= height + 1; ++i) {
             for (pos_t j = 0; j <= width + 1; ++j) {
-                dist[i][j] = 0x3f3f3f3f;
-                eval[i][j] = -INF;
+                dist[idx(i, j)] = 0x3f3f3f3f;
+                eval[idx(i, j)] = -INF;
             }
         }
 
         std::queue<Coord> q;
         q.push(st);
-        dist[st.x][st.y] = 0;
-        eval[st.x][st.y] = 0;
-        parent[st.x][st.y] = Coord(-1, -1);
+        dist[idx(st.x, st.y)] = 0;
+        eval[idx(st.x, st.y)] = 0;
+        parent[idx(st.x, st.y)] = Coord(-1, -1);
 
         while (!q.empty()) {
             Coord cur = q.front();
             q.pop();
             pos_t x = cur.x, y = cur.y;
-            pos_t curDist = dist[x][y];
-            value_t curEval = (eval[x][y] += gv(x, y));
+            pos_t curDist = dist[idx(x, y)];
+            value_t curEval = (eval[idx(x, y)] += gv(x, y));
 
             for (int i = 0; i < 4; ++i) {
                 pos_t nx = x + delta[i].x;
                 pos_t ny = y + delta[i].y;
                 if (nx < 1 || nx > height || ny < 1 || ny > width) continue;
-                if (isImpassableTile(blockType[nx][ny])) continue;
+                if (isImpassableTile(blockType[idx(nx, ny)])) continue;
 
                 pos_t nd = curDist + 1;
-                if (nd < dist[nx][ny]) {
-                    dist[nx][ny] = nd;
-                    eval[nx][ny] = curEval;
-                    parent[nx][ny] = cur;
+                if (nd < dist[idx(nx, ny)]) {
+                    dist[idx(nx, ny)] = nd;
+                    eval[idx(nx, ny)] = curEval;
+                    parent[idx(nx, ny)] = cur;
                     q.emplace(nx, ny);
-                } else if (nd == dist[nx][ny] && curEval > eval[nx][ny]) {
-                    eval[nx][ny] = curEval;
-                    parent[nx][ny] = cur;
+                } else if (nd == dist[idx(nx, ny)] && curEval > eval[idx(nx, ny)]) {
+                    eval[idx(nx, ny)] = curEval;
+                    parent[idx(nx, ny)] = cur;
                 }
             }
         }
 
-        // Compute block values
         for (pos_t i = 1; i <= height; ++i) {
             for (pos_t j = 1; j <= width; ++j) {
                 const TileView& tile = board.tileAt(i, j);
-                blockValue[i][j] =
+                blockValue[idx(i, j)] =
                     (tile.occupier == id)
                         ? -INF
-                        : blockValueWeight[blockType[i][j]] - dist[i][j];
+                        : blockValueWeight[blockType[idx(i, j)]] - dist[idx(i, j)];
             }
         }
     }
 
     Coord moveTowards(Coord st, Coord dest) const {
-        // Safety: limit iterations to prevent infinite loop
         int maxIterations = height * width;
-        while (parent[dest.x][dest.y] != st) {
-            dest = parent[dest.x][dest.y];
-            // Safety check: if parent is invalid or max iterations reached
+        while (parent[idx(dest.x, dest.y)] != st) {
+            dest = parent[idx(dest.x, dest.y)];
             if (dest.x == -1 || dest.y == -1 || --maxIterations <= 0) {
-                return st;  // Return start position as fallback
+                return st;
             }
         }
         return dest;
@@ -182,10 +168,9 @@ class SzlyBot : public BasicBot {
                 const TileView& tile = board.tileAt(i, j);
                 if (tile.occupier == id && tile.army > 0) {
                     value_t weightedArmy = tile.army;
-                    // Apply terrain modifiers
-                    if (blockType[i][j] == TILE_BLANK) {
+                    if (blockType[idx(i, j)] == TILE_BLANK) {
                         weightedArmy -= weightedArmy / 4;
-                    } else if (blockType[i][j] == TILE_CITY) {
+                    } else if (blockType[idx(i, j)] == TILE_CITY) {
                         weightedArmy -= weightedArmy / 6;
                     }
                     if (weightedArmy > maxArmy) {
@@ -204,39 +189,34 @@ class SzlyBot : public BasicBot {
         id = playerId;
         height = constants.mapHeight;
         width = constants.mapWidth;
+        W = width + 2;
         playerCount = constants.playerCount;
 
-        // Initialize data structures
-        blockValue.assign(height + 2, std::vector<value_t>(width + 2, 0));
-        eval.assign(height + 2, std::vector<value_t>(width + 2, 0));
-        parent.assign(height + 2, std::vector<Coord>(width + 2, Coord(-1, -1)));
-        dist.assign(height + 2, std::vector<pos_t>(width + 2, 0x3f3f3f3f));
-        blockType.assign(height + 2,
-                         std::vector<tile_type_e>(width + 2, TILE_BLANK));
-        knownBlockType.assign(height + 2, std::vector<bool>(width + 2, false));
+        blockValue.assign((height + 2) * W, 0);
+        eval.assign((height + 2) * W, 0);
+        parent.assign((height + 2) * W, Coord(-1, -1));
+        dist.assign((height + 2) * W, 0x3f3f3f3f);
+        blockType.assign((height + 2) * W, TILE_BLANK);
+        knownBlockType.assign((height + 2) * W, false);
         seenGeneral.assign(playerCount, Coord(-1, -1));
 
         lastPos = Coord(-1, -1);
         myGeneral = Coord(-1, -1);
 
-        // Initialize block value weights (indexed by v6 tile_type_e)
-        // v5: {31 - plainRate, -1000, -INF, 6, 35, 25}
-        // Mapped to v6 enum values
         blockValueWeight.fill(-INF);
-        blockValueWeight[TILE_BLANK] = 30;  // plain
+        blockValueWeight[TILE_BLANK] = 30;
         blockValueWeight[TILE_SWAMP] = -1000;
         blockValueWeight[TILE_MOUNTAIN] = -INF;
-        blockValueWeight[TILE_GENERAL] = 6;  // general (spawn)
+        blockValueWeight[TILE_GENERAL] = 6;
         blockValueWeight[TILE_CITY] = 35;
         blockValueWeight[TILE_DESERT] = 25;
-        blockValueWeight[TILE_OBSTACLE] = 25;  // unknown
+        blockValueWeight[TILE_OBSTACLE] = 25;
     }
 
     void requestMove(const BoardView& boardView,
                      const std::vector<game::RankItem>& rank) override {
         moveQueue.clear();
 
-        // 1. Update seen generals
         for (pos_t i = 1; i <= height; ++i) {
             for (pos_t j = 1; j <= width; ++j) {
                 const TileView& tile = boardView.tileAt(i, j);
@@ -251,16 +231,14 @@ class SzlyBot : public BasicBot {
             }
         }
 
-        // 2. Update block types
         for (pos_t i = 1; i <= height; ++i) {
             for (pos_t j = 1; j <= width; ++j) {
-                if (!knownBlockType[i][j]) {
-                    blockType[i][j] = getType(boardView, i, j);
+                if (!knownBlockType[idx(i, j)]) {
+                    blockType[idx(i, j)] = getType(boardView, i, j);
                 }
             }
         }
 
-        // 3. Determine starting position (replace v5 focus system)
         Coord coo(-1, -1);
         if (lastPos.x != -1) {
             const TileView& tile = boardView.tileAt(lastPos);
@@ -272,12 +250,9 @@ class SzlyBot : public BasicBot {
             coo = findStrongestUnit(boardView);
         }
         if (coo.x == -1 || boardView.tileAt(coo).army <= 1) {
-            return;  // No valid move
+            return;
         }
 
-        // 4. Determine bot mode
-        // Note: rank is sorted by army count, NOT indexed by player ID
-        // Use rank[i].player to get the actual player ID
         mode = BotMode::EXPLORE;
         value_t minArmy = INF;
         index_t targetId = -1;
@@ -292,23 +267,19 @@ class SzlyBot : public BasicBot {
             }
         }
 
-        // 5. Compute routes from starting position
         computeRoutes(coo, boardView);
 
-        // 6. Determine target and move
-        Coord target = coo;  // Default to current position
-        double P_multiplier =
-            std::max(0.7, std::pow(0.85, 0));  // No turn counter in v6
+        Coord target = coo;
+        double P_multiplier = std::max(0.7, std::pow(0.85, 0));
 
         if (mode == BotMode::ATTACK && targetId != -1) {
             target = seenGeneral[targetId];
         } else {
-            // Explore mode: find highest value block
             value_t maxBlockValue = -INF;
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
-                    if (blockValue[i][j] > maxBlockValue) {
-                        maxBlockValue = blockValue[i][j];
+                    if (blockValue[idx(i, j)] > maxBlockValue) {
+                        maxBlockValue = blockValue[idx(i, j)];
                         target = Coord(i, j);
                     }
                 }
@@ -316,32 +287,27 @@ class SzlyBot : public BasicBot {
             P_multiplier *= 0.85;
         }
 
-        // Safety check: ensure target is reachable
-        if (parent[target.x][target.y].x == -1) {
-            // Target not reachable, find nearest reachable
+        if (parent[idx(target.x, target.y)].x == -1) {
             pos_t minDist = 0x3f3f3f3f;
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
-                    if (parent[i][j].x != -1 && dist[i][j] < minDist) {
-                        minDist = dist[i][j];
+                    if (parent[idx(i, j)].x != -1 && dist[idx(i, j)] < minDist) {
+                        minDist = dist[idx(i, j)];
                         target = Coord(i, j);
                     }
                 }
             }
         }
 
-        // 7. Smart move with potential gathering
         Coord fastestMove = moveTowards(coo, target);
 
-        // Check if on swamp - always move directly
-        if (blockType[coo.x][coo.y] == TILE_SWAMP) {
+        if (blockType[idx(coo.x, coo.y)] == TILE_SWAMP) {
             moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, fastestMove,
                                    false);
             lastPos = fastestMove;
             return;
         }
 
-        // Try to gather nearby army
         Coord gatherPos(-1, -1);
         double maxWeight = -1e18;
 
@@ -356,18 +322,16 @@ class SzlyBot : public BasicBot {
             if (nc != fastestMove && adjTile.occupier == id &&
                 adjTile.army > 2) {
                 double weight = adjTile.army;
-                // Distance penalty from general
                 if (myGeneral.x != -1) {
                     weight -= 250.0 / (approxDist(nc, myGeneral) + 0.5);
                 } else {
                     weight -= 3;
                 }
-                // Terrain modifiers
-                if (blockType[nx][ny] == TILE_SWAMP) {
+                if (blockType[idx(nx, ny)] == TILE_SWAMP) {
                     weight += 1;
-                } else if (blockType[nx][ny] == TILE_GENERAL) {
+                } else if (blockType[idx(nx, ny)] == TILE_GENERAL) {
                     weight *= 0.6;
-                } else if (blockType[nx][ny] == TILE_CITY) {
+                } else if (blockType[idx(nx, ny)] == TILE_CITY) {
                     weight *= 0.8;
                 }
                 if (weight > maxWeight) {
@@ -377,16 +341,13 @@ class SzlyBot : public BasicBot {
             }
         }
 
-        // Random decision between direct move and gathering
         std::uniform_real_distribution<double> dis(-1.0, 1.0);
         if (gatherPos.x == -1 ||
             dis(rng) > P_multiplier * std::tanh(maxWeight * 0.015)) {
-            // Direct move towards target
             moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, fastestMove,
                                    false);
             lastPos = fastestMove;
         } else {
-            // Gather army (move from gatherPos to coo)
             moveQueue.emplace_back(MoveType::MOVE_ARMY, gatherPos, coo, false);
             lastPos = coo;
         }

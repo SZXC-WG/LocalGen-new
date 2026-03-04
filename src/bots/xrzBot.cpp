@@ -21,7 +21,7 @@ class XrzBot : public BasicBot {
 
     std::mt19937 mtrd{std::random_device{}()};
 
-    pos_t height, width;
+    pos_t height, width, W;
     index_t playerCnt;
     index_t id, team;
     std::vector<index_t> teamIds;
@@ -32,9 +32,13 @@ class XrzBot : public BasicBot {
 
     Coord previousPos;
     Coord currentPos;
-    std::vector<std::vector<int>> visitTime;
+    std::vector<int> visitTime;
     int turnCount;
     army_t armyNow;
+
+    inline size_t idx(pos_t x, pos_t y) const {
+        return static_cast<size_t>(x * W + y);
+    }
 
     Coord findMaxArmyPos() {
         army_t maxArmy = 0;
@@ -59,6 +63,7 @@ class XrzBot : public BasicBot {
         id = playerId;
         height = constants.mapHeight;
         width = constants.mapWidth;
+        W = width + 2;
         playerCnt = constants.playerCount;
         teamIds = constants.teams;
         team = constants.teams.at(playerId);
@@ -66,7 +71,7 @@ class XrzBot : public BasicBot {
 
         previousPos = Coord(-1, -1);
         currentPos = Coord(-1, -1);
-        visitTime.assign(height + 2, std::vector<int>(width + 2, 0));
+        visitTime.assign((height + 2) * W, 0);
         turnCount = 0;
         armyNow = 0;
     }
@@ -80,14 +85,13 @@ class XrzBot : public BasicBot {
 
         if (currentPos == Coord(-1, -1) || board.tileAt(currentPos).army == 0 ||
             board.tileAt(currentPos).occupier != id) {
-            for (auto& row : visitTime)
-                for (auto& cell : row) cell = 0;
+            std::fill(visitTime.begin(), visitTime.end(), 0);
             currentPos = findMaxArmyPos();
         }
 
         armyNow = board.tileAt(currentPos).army;
         turnCount++;
-        visitTime[currentPos.x][currentPos.y]++;
+        visitTime[idx(currentPos.x, currentPos.y)]++;
 
         int checkOrder[5] = {0, 1, 2, 3, 4};
         std::shuffle(checkOrder + 1, checkOrder + 5, mtrd);
@@ -158,7 +162,7 @@ class XrzBot : public BasicBot {
             if (board.tileAt(next).occupier == id &&
                 board.tileAt(next).army >= 2000)
                 cnt--;
-            cnt += std::max(0, visitTime[next.x][next.y] * 10);
+            cnt += std::max(0, visitTime[idx(next.x, next.y)] * 10);
 
             if (mtrd() % cnt == 0) {
                 previousPos = currentPos;

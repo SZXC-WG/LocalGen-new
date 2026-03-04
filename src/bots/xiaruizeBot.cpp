@@ -21,7 +21,7 @@ class XiaruizeBot : public BasicBot {
 
     std::mt19937 mtrd{std::random_device{}()};
 
-    pos_t height, width;
+    pos_t height, width, W;
     index_t playerCnt;
     index_t id, team;
     std::vector<index_t> teamIds;
@@ -34,9 +34,13 @@ class XiaruizeBot : public BasicBot {
     Coord currentPos;
     Coord previousPos;
     std::vector<int> operation;
-    std::vector<std::vector<bool>> vis;
+    std::vector<bool> vis;
     int sendArmyProcess;
     int otherRobotProtection;
+
+    inline size_t idx(pos_t x, pos_t y) const {
+        return static_cast<size_t>(x * W + y);
+    }
 
     inline int changeDirection(int x) {
         switch (x) {
@@ -89,7 +93,7 @@ class XiaruizeBot : public BasicBot {
             if (next.x < 1 || next.x > height || next.y < 1 || next.y > width)
                 continue;
             if (isImpassableTile(board.tileAt(next).type)) continue;
-            if (vis[next.x][next.y]) continue;
+            if (vis[idx(next.x, next.y)]) continue;
             operation.push_back(x);
             previousPos = coord;
             return x;
@@ -146,6 +150,7 @@ class XiaruizeBot : public BasicBot {
         id = playerId;
         height = constants.mapHeight;
         width = constants.mapWidth;
+        W = width + 2;
         playerCnt = constants.playerCount;
         teamIds = constants.teams;
         team = constants.teams.at(playerId);
@@ -155,7 +160,7 @@ class XiaruizeBot : public BasicBot {
         currentPos = Coord(-1, -1);
         previousPos = Coord(-1, -1);
         operation.clear();
-        vis.assign(height + 2, std::vector<bool>(width + 2, false));
+        vis.assign((height + 2) * W, false);
         sendArmyProcess = 0;
         otherRobotProtection = 0;
     }
@@ -174,7 +179,7 @@ class XiaruizeBot : public BasicBot {
         if (currentPos == Coord(-1, -1) ||
             board.tileAt(currentPos).army == 0 ||
             board.tileAt(currentPos).occupier != id) {
-            vis.assign(height + 2, std::vector<bool>(width + 2, false));
+            vis.assign((height + 2) * W, false);
             sendArmyProcess = 1;
             otherRobotProtection = std::max(
                 0, std::min(static_cast<int>(operation.size()) - 10,
@@ -200,7 +205,7 @@ class XiaruizeBot : public BasicBot {
             return;
         }
 
-        vis[currentPos.x][currentPos.y] = true;
+        vis[idx(currentPos.x, currentPos.y)] = true;
         int returnValue = dfs(currentPos);
 
         if (returnValue != -1) {

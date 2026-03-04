@@ -551,16 +551,18 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
                 break;
             default: QWidget::keyPressEvent(event); return;
         }
-        if (isImpassableTile(tileAt(focusRow, focusCol).type)) {
-            focusRow = oldRow;
-            focusCol = oldCol;
-            return;
-        }
-        if (moveQueue) {
-            moveQueue->emplace_back(
-                MoveType::MOVE_ARMY, Coord(oldRow + 1, oldCol + 1),
-                Coord(focusRow + 1, focusCol + 1), takingHalfArmy);
-            takingHalfArmy = false;
+        if (key < Qt::Key_I || key > Qt::Key_L) {
+            if (isImpassableTile(tileAt(focusRow, focusCol).type)) {
+                focusRow = oldRow;
+                focusCol = oldCol;
+                return;
+            }
+            if (moveQueue) {
+                moveQueue->emplace_back(
+                    MoveType::MOVE_ARMY, Coord(oldRow + 1, oldCol + 1),
+                    Coord(focusRow + 1, focusCol + 1), takingHalfArmy);
+                takingHalfArmy = false;
+            }
         }
         update();
     } else {

@@ -1,7 +1,6 @@
 #include "mainWindow.h"
 
 #include <QMessageBox>
-#include <QCloseEvent>
 
 #include "../localGameDialog/localGameDialog.h"
 #include "../localGameWindow/localGameWindow.h"
@@ -13,28 +12,14 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
 }
 
-MainWindow::~MainWindow() {
-    delete ui;
-}
-
-void MainWindow::closeEvent(QCloseEvent* event) {
-    for (auto* w : childWindows) {
-        w->close();
-    }
-    QMainWindow::closeEvent(event);
-}
+MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::on_btnLocalGame_clicked() {
     LocalGameDialog dialog(this);
     int result = dialog.exec();
     if (result == QDialog::Accepted) {
-        LocalGameWindow* window = new LocalGameWindow(nullptr, dialog.config());
-        childWindows.append(window);
-        connect(window, &QObject::destroyed, this, [this, window]() {
-            childWindows.removeOne(window);
-        });
-        window->setAttribute(Qt::WA_DeleteOnClose);
-        window->show();
+        LocalGameWindow window(this, dialog.config());
+        window.exec();
     }
 }
 
@@ -50,11 +35,6 @@ void MainWindow::on_btnLoadReplay_clicked() {
 }
 
 void MainWindow::on_btnCreateMap_clicked() {
-    MapCreatorWindow* window = new MapCreatorWindow(nullptr);
-    childWindows.append(window);
-    connect(window, &QObject::destroyed, this, [this, window]() {
-        childWindows.removeOne(window);
-    });
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->show();
+    MapCreatorWindow window(this);
+    window.exec();
 }

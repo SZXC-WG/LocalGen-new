@@ -572,6 +572,8 @@ void MapCreatorWindow::openMap_v5(const QString& filename) {
             };
             if (loadedTile.army != 0 || loadedTile.type == TILE_CITY)
                 tile.text = QString::number(loadedTile.army);
+            else
+                tile.text.clear();
             tile.lightIcon = loadedTile.lit;
         }
     }
@@ -699,6 +701,7 @@ void MapCreatorWindow::openOfficialMap(const QByteArray& data) {
         for (int c = 0; c < width; ++c) {
             QString tileCode = tileList[r * width + c].trimmed();
             auto& tile = map->tileAt(r, c);
+            tile.text.clear();
             if (tileCode.startsWith("L_")) {
                 tile.lightIcon = true;
                 tileCode = tileCode.mid(2);

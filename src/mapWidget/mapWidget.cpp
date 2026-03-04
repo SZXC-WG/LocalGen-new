@@ -177,9 +177,8 @@ QPixmap& MapWidget::getTextPixmap(const QString& text, qreal physicalScale,
 
     // Font height on screen = cell height * ratio, bounded by min/max
     qreal screenCellHeight = cellSize * scale;
-    qreal targetFontHeight = qBound(minFontPixelSize,
-                                     screenCellHeight * fontHeightRatio,
-                                     maxFontPixelSize);
+    qreal targetFontHeight = qBound(
+        minFontPixelSize, screenCellHeight * fontHeightRatio, maxFontPixelSize);
     int fontPixelSize = qMax(1, qRound(targetFontHeight * dpr));
 
     static QFont font("Quicksand");
@@ -479,9 +478,20 @@ void MapWidget::setFocusEnabled(bool enabled) {
 
 void MapWidget::keyPressEvent(QKeyEvent* event) {
     int key = event->key();
-    if (key == Qt::Key_C) {
-        fitCenter();
-        return;
+    switch (key) {
+        case Qt::Key_C: fitCenter(); return;
+        case Qt::Key_Space:
+            focusRow = focusCol = -1;
+            update();
+            return;
+        case Qt::Key_0:
+            scale *= zoomFactor;
+            update();
+            return;
+        case Qt::Key_9:
+            scale /= zoomFactor;
+            update();
+            return;
     }
 
     if (moveQueue) {

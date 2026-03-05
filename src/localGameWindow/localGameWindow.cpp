@@ -184,7 +184,10 @@ inline DisplayTile toDisplayTile(const TileView& tile) {
     display.type = tile.type;
     display.lightIcon = false;
     if (!tile.visible) {
-        display.color.setRgb(57, 57, 57);
+        if (tile.type == TILE_SWAMP)
+            display.color.setRgb(128, 128, 128);
+        else
+            display.color.setRgb(57, 57, 57);
         display.text.clear();
         display.displayBorders = false;
         return display;
@@ -234,6 +237,12 @@ InitBoard createRandomBoard(int width, int height) {
         Coord pos(rng->bounded(height) + 1, rng->bounded(width) + 1);
         army_t army = static_cast<army_t>(rng->bounded(40, 50));
         board.changeTile(pos, Tile(-1, TILE_CITY, army));
+    }
+
+    int numSwamps = rng->bounded(area / 20, area / 15 + 1);
+    for (int i = 0; i < numSwamps; ++i) {
+        Coord pos(rng->bounded(height) + 1, rng->bounded(width) + 1);
+        board.changeTile(pos, Tile(-1, TILE_SWAMP, 0));
     }
 
     return board;

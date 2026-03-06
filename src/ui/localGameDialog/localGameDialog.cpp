@@ -7,7 +7,7 @@
 #include <QRandomGenerator>
 #include <QStringList>
 
-#include "../core/bot.h"
+#include "src/core/bot.h"
 #include "ui_localGameDialog.h"
 
 LocalGameDialog::LocalGameDialog(QWidget* parent)

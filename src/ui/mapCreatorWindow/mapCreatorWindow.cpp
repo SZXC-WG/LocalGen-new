@@ -20,7 +20,7 @@
 #include <QSlider>
 #include <QVBoxLayout>
 
-#include "../core/board.hpp"
+#include "src/core/board.hpp"
 
 #define MAGIC_6 quint32(0x4C47656E)
 

@@ -12,8 +12,8 @@
 #include <QVBoxLayout>
 #include <algorithm>
 
-#include "../core/bot.h"
-#include "../core/game.hpp"
+#include "src/core/bot.h"
+#include "src/core/game.hpp"
 
 FloatingLeaderboardWidget::FloatingLeaderboardWidget(QWidget* parent)
     : QWidget(parent) {

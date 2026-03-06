@@ -14,18 +14,18 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Svg Network)
 
 set(PROJECT_SOURCES
         src/main.cpp
-        src/mainWindow/mainWindow.cpp
-        src/mainWindow/mainWindow.h
-        src/mainWindow/mainWindow.ui
-        src/localGameDialog/localGameDialog.cpp
-        src/localGameDialog/localGameDialog.h
-        src/localGameDialog/localGameDialog.ui
-        src/mapWidget/mapWidget.cpp
-        src/mapWidget/mapWidget.h
-        src/localGameWindow/localGameWindow.cpp
-        src/localGameWindow/localGameWindow.h
-        src/mapCreatorWindow/mapCreatorWindow.cpp
-        src/mapCreatorWindow/mapCreatorWindow.h
+        src/ui/mainWindow/mainWindow.cpp
+        src/ui/mainWindow/mainWindow.h
+        src/ui/mainWindow/mainWindow.ui
+        src/ui/localGameDialog/localGameDialog.cpp
+        src/ui/localGameDialog/localGameDialog.h
+        src/ui/localGameDialog/localGameDialog.ui
+        src/ui/mapWidget/mapWidget.cpp
+        src/ui/mapWidget/mapWidget.h
+        src/ui/localGameWindow/localGameWindow.cpp
+        src/ui/localGameWindow/localGameWindow.h
+        src/ui/mapCreatorWindow/mapCreatorWindow.cpp
+        src/ui/mapCreatorWindow/mapCreatorWindow.h
         src/bots/smartRandomBot.cpp
         src/bots/xrzBot.cpp
         src/bots/szlyBot.cpp

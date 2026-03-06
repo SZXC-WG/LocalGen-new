@@ -1,15 +1,15 @@
 /**
  * @file board.hpp
  *
- * LocalGen Module: GameEngine
+ * LocalGen Module: core
  *
  * Map Boards
  *
  * Container of maps.
  */
 
-#ifndef LGEN_GAMEENGINE_BOARD_HPP
-#define LGEN_GAMEENGINE_BOARD_HPP
+#ifndef LGEN_CORE_BOARD_HPP
+#define LGEN_CORE_BOARD_HPP
 
 #include <cassert>
 #include <map>
@@ -415,4 +415,4 @@ class InitBoard : public Board {
     };
 };
 
-#endif  // LGEN_GAMEENGINE_BOARD_HPP
+#endif  // LGEN_CORE_BOARD_HPP

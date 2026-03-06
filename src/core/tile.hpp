@@ -1,15 +1,15 @@
 /**
  * @file tile.hpp
  *
- * LocalGen Module: GameEngine
+ * LocalGen Module: core
  *
  * Tiles
  *
  * Tiles are basic elements of map boards.
  */
 
-#ifndef LGEN_GAMEENGINE_TILE_HPP
-#define LGEN_GAMEENGINE_TILE_HPP
+#ifndef LGEN_CORE_TILE_HPP
+#define LGEN_CORE_TILE_HPP
 
 #include "utils.hpp"
 
@@ -91,4 +91,4 @@ struct TileView {
     };
 };
 
-#endif  // LGEN_GAMEENGINE_TILE_HPP
+#endif  // LGEN_CORE_TILE_HPP

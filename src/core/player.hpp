@@ -1,15 +1,15 @@
 /**
  * @file player.hpp
  *
- * LocalGen Module: GameEngine
+ * LocalGen Module: core
  *
  * Players
  *
  * Players are basic participants of games.
  */
 
-#ifndef LGEN_GAMEENGINE_PLAYER_HPP
-#define LGEN_GAMEENGINE_PLAYER_HPP
+#ifndef LGEN_CORE_PLAYER_HPP
+#define LGEN_CORE_PLAYER_HPP
 
 #include <cstdint>
 #include <deque>
@@ -54,4 +54,4 @@ class Player {
     }
 };
 
-#endif  // LGEN_GAMEENGINE_PLAYER_HPP
+#endif  // LGEN_CORE_PLAYER_HPP

@@ -1,15 +1,15 @@
 /**
  * @file game.hpp
  *
- * LocalGen Module: GameEngine
+ * LocalGen Module: core
  *
  * Games
  *
  * Core game operations
  */
 
-#ifndef LGEN_GAMEENGINE_GAME_HPP
-#define LGEN_GAMEENGINE_GAME_HPP
+#ifndef LGEN_CORE_GAME_HPP
+#define LGEN_CORE_GAME_HPP
 
 #include <algorithm>
 #include <array>
@@ -482,4 +482,4 @@ inline void BasicGame::broadcast(turn_t turn, GameMessageType message,
 
 }  // namespace game
 
-#endif  // LGEN_GAMEENGINE_GAME_HPP
+#endif  // LGEN_CORE_GAME_HPP

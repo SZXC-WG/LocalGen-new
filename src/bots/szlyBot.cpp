@@ -15,8 +15,8 @@
 #include <random>
 #include <vector>
 
-#include "../GameEngine/bot.h"
-#include "../GameEngine/game.hpp"
+#include "../core/bot.h"
+#include "../core/game.hpp"
 
 class SzlyBot : public BasicBot {
    private:
@@ -130,7 +130,8 @@ class SzlyBot : public BasicBot {
                     eval[idx(nx, ny)] = curEval;
                     parent[idx(nx, ny)] = cur;
                     q.emplace(nx, ny);
-                } else if (nd == dist[idx(nx, ny)] && curEval > eval[idx(nx, ny)]) {
+                } else if (nd == dist[idx(nx, ny)] &&
+                           curEval > eval[idx(nx, ny)]) {
                     eval[idx(nx, ny)] = curEval;
                     parent[idx(nx, ny)] = cur;
                 }
@@ -143,7 +144,8 @@ class SzlyBot : public BasicBot {
                 blockValue[idx(i, j)] =
                     (tile.occupier == id)
                         ? -INF
-                        : blockValueWeight[blockType[idx(i, j)]] - dist[idx(i, j)];
+                        : blockValueWeight[blockType[idx(i, j)]] -
+                              dist[idx(i, j)];
             }
         }
     }
@@ -258,7 +260,8 @@ class SzlyBot : public BasicBot {
         index_t targetId = -1;
 
         for (const auto& item : rank) {
-            if (item.player != id && seenGeneral[item.player].x != -1 && item.alive) {
+            if (item.player != id && seenGeneral[item.player].x != -1 &&
+                item.alive) {
                 mode = BotMode::ATTACK;
                 if (item.army < minArmy) {
                     minArmy = item.army;
@@ -291,7 +294,8 @@ class SzlyBot : public BasicBot {
             pos_t minDist = 0x3f3f3f3f;
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
-                    if (parent[idx(i, j)].x != -1 && dist[idx(i, j)] < minDist) {
+                    if (parent[idx(i, j)].x != -1 &&
+                        dist[idx(i, j)] < minDist) {
                         minDist = dist[idx(i, j)];
                         target = Coord(i, j);
                     }

@@ -1,15 +1,15 @@
 /**
  * @file move.hpp
  *
- * LocalGen Module: GameEngine
+ * LocalGen Module: core
  *
  * Moves
  *
  * Moves are basic operations of players.
  */
 
-#ifndef LGEN_GAMEENGINE_MOVE_HPP
-#define LGEN_GAMEENGINE_MOVE_HPP
+#ifndef LGEN_CORE_MOVE_HPP
+#define LGEN_CORE_MOVE_HPP
 
 #include "utils.hpp"
 
@@ -30,4 +30,4 @@ struct Move {
 /// A pure empty move.
 constexpr Move EMPTY_MOVE;
 
-#endif  // LGEN_GAMEENGINE_MOVE_HPP
+#endif  // LGEN_CORE_MOVE_HPP

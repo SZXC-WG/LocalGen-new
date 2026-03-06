@@ -1,13 +1,13 @@
 /**
  * @file utils.hpp
  *
- * LocalGen Module: GameEngine
+ * LocalGen Module: core
  *
  * Utility functions and definitions
  */
 
-#ifndef LGEN_GAMEENGINE_UTILS_HPP
-#define LGEN_GAMEENGINE_UTILS_HPP
+#ifndef LGEN_CORE_UTILS_HPP
+#define LGEN_CORE_UTILS_HPP
 
 #include <cstdint>
 
@@ -40,4 +40,4 @@ inline Coord operator+(const Coord& lhs, const Coord& rhs) {
     return Coord(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
-#endif  // LGEN_GAMEENGINE_UTILS_HPP
+#endif  // LGEN_CORE_UTILS_HPP

@@ -13,7 +13,7 @@
 
 class QResizeEvent;
 
-#include "../GameEngine/player.hpp"
+#include "../core/player.hpp"
 #include "../localGameDialog/localGameDialog.h"
 #include "../mapWidget/mapWidget.h"
 

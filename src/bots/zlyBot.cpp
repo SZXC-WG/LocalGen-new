@@ -12,8 +12,8 @@
 #include <queue>
 #include <random>
 
-#include "../GameEngine/bot.h"
-#include "../GameEngine/game.hpp"
+#include "../core/bot.h"
+#include "../core/game.hpp"
 
 class ZlyBot : public BasicBot {
    private:
@@ -143,7 +143,8 @@ class ZlyBot : public BasicBot {
                 else if (distMark[idx(i, j)] != distVersion)
                     tileValue[idx(i, j)] = -INF;
                 else
-                    tileValue[idx(i, j)] = tileTypeWeight[typeAt(i, j)] - dist[idx(i, j)];
+                    tileValue[idx(i, j)] =
+                        tileTypeWeight[typeAt(i, j)] - dist[idx(i, j)];
             }
         }
     }
@@ -160,7 +161,7 @@ class ZlyBot : public BasicBot {
 
         routeMark[idx(start.x, start.y)] = routeVersion;
         routeMap[idx(start.x, start.y)] = {0, board.tileAt(start).army,
-                                      Coord(-1, -1)};
+                                           Coord(-1, -1)};
 
         bool found = false;
         int foundDist = -1;

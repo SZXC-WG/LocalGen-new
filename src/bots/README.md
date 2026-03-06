@@ -19,7 +19,7 @@ Before submitting a bot to this folder, make sure it satisfies **all** of the fo
 1. The bot is written in C++ (or another language that can be compiled as C++).
 2. It uses C++17 features only; the code must compile with a C++17-compliant compiler.
 3. The entire implementation lives in a single source file (`*.cpp`).
-4. That source file includes the header `src/GameEngine/bot.h`.
+4. That source file includes the header `src/core/bot.h`.
 5. Your bot class
    - Has a unique name (i.e., does not clash with existing bots).
    - Inherits from `BasicBot`.

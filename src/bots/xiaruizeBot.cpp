@@ -12,8 +12,8 @@
 #include <random>
 #include <vector>
 
-#include "../GameEngine/bot.h"
-#include "../GameEngine/game.hpp"
+#include "../core/bot.h"
+#include "../core/game.hpp"
 
 class XiaruizeBot : public BasicBot {
    private:
@@ -176,14 +176,13 @@ class XiaruizeBot : public BasicBot {
             spawnCoord = findGeneralPos();
         }
 
-        if (currentPos == Coord(-1, -1) ||
-            board.tileAt(currentPos).army == 0 ||
+        if (currentPos == Coord(-1, -1) || board.tileAt(currentPos).army == 0 ||
             board.tileAt(currentPos).occupier != id) {
             vis.assign((height + 2) * W, false);
             sendArmyProcess = 1;
-            otherRobotProtection = std::max(
-                0, std::min(static_cast<int>(operation.size()) - 10,
-                            static_cast<int>(mtrd() % 10)));
+            otherRobotProtection =
+                std::max(0, std::min(static_cast<int>(operation.size()) - 10,
+                                     static_cast<int>(mtrd() % 10)));
             currentPos = spawnCoord;
         }
 
@@ -197,10 +196,12 @@ class XiaruizeBot : public BasicBot {
             if (otherRobotProtection > 0) {
                 --otherRobotProtection;
                 Coord next = currentPos + delta[operation[sendArmyProcess - 2]];
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, currentPos, next, false);
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, currentPos, next,
+                                       false);
             } else {
                 Coord next = currentPos + delta[operation[sendArmyProcess - 2]];
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, currentPos, next, true);
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, currentPos, next,
+                                       true);
             }
             return;
         }
@@ -217,7 +218,8 @@ class XiaruizeBot : public BasicBot {
                 int res = changeDirection(operation.back());
                 operation.pop_back();
                 Coord next = currentPos + delta[res];
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, currentPos, next, true);
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, currentPos, next,
+                                       true);
             }
         }
     }

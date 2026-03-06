@@ -15,8 +15,8 @@
 #include <queue>
 #include <random>
 
-#include "../GameEngine/bot.h"
-#include "../GameEngine/game.hpp"
+#include "../core/bot.h"
+#include "../core/game.hpp"
 
 class GcBot : public BasicBot {
    private:
@@ -61,17 +61,15 @@ class GcBot : public BasicBot {
     }
 
     void evaluateRouteCosts(Coord st) {
-        static const value_t typeValues[] = {
-            /* TILE_BLANK=1 */ -5,
-            /* TILE_SWAMP=2 */ -10,
-            /* TILE_MOUNTAIN=3 */ -INF,
-            /* TILE_CITY=4 */ -40,
-            /* TILE_GENERAL=5 */ -5,
-            /* TILE_SPAWN=6 */ 0,
-            /* TILE_DESERT=7 */ -INF,
-            /* TILE_LOOKOUT=8 */ -INF,
-            /* TILE_OBSTACLE=9 */ 0
-        };
+        static const value_t typeValues[] = {/* TILE_BLANK=1 */ -5,
+                                             /* TILE_SWAMP=2 */ -10,
+                                             /* TILE_MOUNTAIN=3 */ -INF,
+                                             /* TILE_CITY=4 */ -40,
+                                             /* TILE_GENERAL=5 */ -5,
+                                             /* TILE_SPAWN=6 */ 0,
+                                             /* TILE_DESERT=7 */ -INF,
+                                             /* TILE_LOOKOUT=8 */ -INF,
+                                             /* TILE_OBSTACLE=9 */ 0};
 
         auto gv = [&](pos_t x, pos_t y) -> value_t {
             int bt = blockType[idx(x, y)];
@@ -111,7 +109,8 @@ class GcBot : public BasicBot {
                     eval[idx(nx, ny)] = curEval;
                     par[idx(nx, ny)] = cur;
                     q.emplace(nx, ny);
-                } else if (nd == dist[idx(nx, ny)] && curEval > eval[idx(nx, ny)]) {
+                } else if (nd == dist[idx(nx, ny)] &&
+                           curEval > eval[idx(nx, ny)]) {
                     eval[idx(nx, ny)] = curEval;
                     par[idx(nx, ny)] = cur;
                 }
@@ -156,12 +155,12 @@ class GcBot : public BasicBot {
         const auto& tile = board.tileAt(x, y);
         if (tile.visible) {
             switch (tile.type) {
-                case TILE_BLANK:    return 0;
-                case TILE_SWAMP:    return 1;
-                case TILE_MOUNTAIN: return 2;
-                case TILE_CITY:     return 4;
-                case TILE_SPAWN:    return 3;
-                case TILE_DESERT:   return 0;
+                case TILE_BLANK:       return 0;
+                case TILE_SWAMP:       return 1;
+                case TILE_MOUNTAIN:    return 2;
+                case TILE_CITY:        return 4;
+                case TILE_SPAWN:       return 3;
+                case TILE_DESERT:      return 0;
                 case TILE_LOOKOUT:     return 2;
                 case TILE_OBSERVATORY: return 2;
                 case TILE_OBSTACLE:    return 5;
@@ -169,9 +168,9 @@ class GcBot : public BasicBot {
             }
         } else {
             switch (tile.type) {
-                case TILE_BLANK:  return 0;
-                case TILE_SWAMP:  return 1;
-                default:          return 5;
+                case TILE_BLANK: return 0;
+                case TILE_SWAMP: return 1;
+                default:         return 5;
             }
         }
     }
@@ -244,8 +243,10 @@ class GcBot : public BasicBot {
 
         blockTypeValue[0] = 55 + static_cast<value_t>(std::pow(turn, 0.2));
         blockTypeValue[1] = -500 * static_cast<value_t>(std::pow(turn, -0.1));
-        blockTypeValue[4] = 28 * static_cast<value_t>(std::pow(turn - 12, 0.15));
-        blockTypeValue[5] = 35 + 15 * static_cast<value_t>(std::pow(turn, 0.15));
+        blockTypeValue[4] =
+            28 * static_cast<value_t>(std::pow(turn - 12, 0.15));
+        blockTypeValue[5] =
+            35 + 15 * static_cast<value_t>(std::pow(turn, 0.15));
 
         Coord coo = lastPos;
         if (!isValidPosition(coo.x, coo.y) ||
@@ -286,7 +287,8 @@ class GcBot : public BasicBot {
                 std::vector<Coord> unknownPlains;
                 for (pos_t i = 1; i <= height; ++i) {
                     for (pos_t j = 1; j <= width; ++j) {
-                        if (blockType[idx(i, j)] == 0 && !knownBlockType[idx(i, j)] &&
+                        if (blockType[idx(i, j)] == 0 &&
+                            !knownBlockType[idx(i, j)] &&
                             dist[idx(i, j)] < 500) {
                             unknownPlains.emplace_back(i, j);
                         }
@@ -305,9 +307,10 @@ class GcBot : public BasicBot {
                     const auto& tile = board.tileAt(i, j);
                     if (tile.occupier != id && dist[idx(i, j)] < 500 &&
                         !isImpassableTile(tile.type)) {
-                        value_t blockValue = blockTypeValue[blockType[idx(i, j)]] +
-                                             eval[idx(i, j)] / 5 -
-                                             (dist[idx(i, j)] + army[idx(i, j)] / 2);
+                        value_t blockValue =
+                            blockTypeValue[blockType[idx(i, j)]] +
+                            eval[idx(i, j)] / 5 -
+                            (dist[idx(i, j)] + army[idx(i, j)] / 2);
                         if (seenGeneral[id].x != -1) {
                             blockValue -=
                                 approxDist(Coord(i, j), seenGeneral[id]) * 5LL;
@@ -323,9 +326,9 @@ class GcBot : public BasicBot {
             pos_t x = prevTarget.x, y = prevTarget.y;
             if (x != -1 && board.tileAt(x, y).occupier != id &&
                 !isImpassableTile(board.tileAt(x, y).type)) {
-                value_t prevBlockValue = blockTypeValue[blockType[idx(x, y)]] +
-                                         eval[idx(x, y)] / 5 -
-                                         (dist[idx(x, y)] + army[idx(x, y)] / 2);
+                value_t prevBlockValue =
+                    blockTypeValue[blockType[idx(x, y)]] + eval[idx(x, y)] / 5 -
+                    (dist[idx(x, y)] + army[idx(x, y)] / 2);
                 if (seenGeneral[id].x != -1) {
                     prevBlockValue -=
                         approxDist(Coord(x, y), seenGeneral[id]) * 5LL;

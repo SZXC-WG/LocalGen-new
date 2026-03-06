@@ -12,8 +12,8 @@
 #include <queue>
 #include <random>
 
-#include "../GameEngine/bot.h"
-#include "../GameEngine/game.hpp"
+#include "../core/bot.h"
+#include "../core/game.hpp"
 
 class ZlyBot_v2 : public BasicBot {
    private:
@@ -119,8 +119,8 @@ class ZlyBot_v2 : public BasicBot {
                     tileValue[idx(i, j)] = tileTypeWeight[typeAt(i, j)];
                     tileValue[idx(i, j)] -= dist[idx(i, j)];
                     tileValue[idx(i, j)] -= armyAt(i, j);
-                    tileValue[idx(i, j)] -=
-                        isSeenBefore[idx(i, j)] * (turn - 100000.0 / rank[id].army);
+                    tileValue[idx(i, j)] -= isSeenBefore[idx(i, j)] *
+                                            (turn - 100000.0 / rank[id].army);
                     if (board.tileAt(i, j).visible &&
                         board.tileAt(i, j).occupier != -1) {
                         army_t adjacent_minimum_same_player = INF;
@@ -139,8 +139,9 @@ class ZlyBot_v2 : public BasicBot {
                         if (adjacent_minimum_same_player == INF)
                             adjacent_minimum_same_player =
                                 board.tileAt(i, j).army;
-                        tileValue[idx(i, j)] += 2 * (board.tileAt(i, j).army -
-                                                adjacent_minimum_same_player);
+                        tileValue[idx(i, j)] +=
+                            2 * (board.tileAt(i, j).army -
+                                 adjacent_minimum_same_player);
                     }
                 }
             }
@@ -307,17 +308,25 @@ class ZlyBot_v2 : public BasicBot {
                     tileArmyMemory[idx(i, j)] = board.tileAt(i, j).army;
                 } else if (!isSeenBefore[idx(i, j)]) {
                     switch (typeAt(i, j)) {
-                        case TILE_BLANK:    tileArmyMemory[idx(i, j)] = 0; break;
-                        case TILE_SWAMP:    tileArmyMemory[idx(i, j)] = 0; break;
-                        case TILE_MOUNTAIN: tileArmyMemory[idx(i, j)] = INF; break;
-                        case TILE_SPAWN:    tileArmyMemory[idx(i, j)] = -INF; break;
-                        case TILE_CITY:     tileArmyMemory[idx(i, j)] = 40; break;
-                        case TILE_DESERT:   tileArmyMemory[idx(i, j)] = 40; break;
-                        case TILE_LOOKOUT:  tileArmyMemory[idx(i, j)] = INF; break;
+                        case TILE_BLANK: tileArmyMemory[idx(i, j)] = 0; break;
+                        case TILE_SWAMP: tileArmyMemory[idx(i, j)] = 0; break;
+                        case TILE_MOUNTAIN:
+                            tileArmyMemory[idx(i, j)] = INF;
+                            break;
+                        case TILE_SPAWN:
+                            tileArmyMemory[idx(i, j)] = -INF;
+                            break;
+                        case TILE_CITY:   tileArmyMemory[idx(i, j)] = 40; break;
+                        case TILE_DESERT: tileArmyMemory[idx(i, j)] = 40; break;
+                        case TILE_LOOKOUT:
+                            tileArmyMemory[idx(i, j)] = INF;
+                            break;
                         case TILE_OBSERVATORY:
                             tileArmyMemory[idx(i, j)] = INF;
                             break;
-                        case TILE_OBSTACLE: tileArmyMemory[idx(i, j)] = 40; break;
+                        case TILE_OBSTACLE:
+                            tileArmyMemory[idx(i, j)] = 40;
+                            break;
                     }
                 }
                 if (board.tileAt(i, j).visible &&

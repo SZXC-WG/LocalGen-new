@@ -12,8 +12,8 @@
 #include <deque>
 #include <vector>
 
-#include "../GameEngine/board.hpp"
-#include "../GameEngine/move.hpp"
+#include "../core/board.hpp"
+#include "../core/move.hpp"
 
 struct DisplayTile {
     tile_type_e type = TILE_BLANK;

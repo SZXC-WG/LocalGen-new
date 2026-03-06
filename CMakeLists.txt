@@ -33,13 +33,13 @@ set(PROJECT_SOURCES
         src/bots/zlyBot_v2.cpp
         src/bots/zlyBot_v2.1.cpp
         src/bots/gcBot.cpp
-        src/GameEngine/board.hpp
-        src/GameEngine/bot.h
-        src/GameEngine/game.hpp
-        src/GameEngine/move.hpp
-        src/GameEngine/player.hpp
-        src/GameEngine/tile.hpp
-        src/GameEngine/utils.hpp
+        src/core/board.hpp
+        src/core/bot.h
+        src/core/game.hpp
+        src/core/move.hpp
+        src/core/player.hpp
+        src/core/tile.hpp
+        src/core/utils.hpp
         res/res.qrc
 )
 

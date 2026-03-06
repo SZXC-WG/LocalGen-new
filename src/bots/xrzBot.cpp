@@ -12,8 +12,8 @@
 #include <random>
 #include <vector>
 
-#include "../GameEngine/bot.h"
-#include "../GameEngine/game.hpp"
+#include "../core/bot.h"
+#include "../core/game.hpp"
 
 class XrzBot : public BasicBot {
    private:

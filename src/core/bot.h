@@ -1,13 +1,13 @@
 /**
  * @file bot.h
  *
- * LocalGen Module: GameEngine
+ * LocalGen Module: core
  *
  * Basic bot infrastructure: abstract class + static factory/registry.
  */
 
-#ifndef LGEN_GAMEENGINE_BOT_H
-#define LGEN_GAMEENGINE_BOT_H
+#ifndef LGEN_CORE_BOT_H
+#define LGEN_CORE_BOT_H
 
 #include <functional>
 #include <string>
@@ -57,4 +57,4 @@ struct BotRegistrar {
     }
 };
 
-#endif  // LGEN_GAMEENGINE_BOT_H
+#endif  // LGEN_CORE_BOT_H

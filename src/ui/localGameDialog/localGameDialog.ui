@@ -184,11 +184,6 @@
             </property>
             <item>
              <property name="text">
-              <string>Random</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
               <string>Standard</string>
              </property>
             </item>

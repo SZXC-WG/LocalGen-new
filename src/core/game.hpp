@@ -173,6 +173,14 @@ struct RankItem {
     bool alive = false;
 };
 
+/// Move priority categories (based on generals.io priority system).
+/// Higher values = higher priority.
+enum class MovePriority : uint8_t {
+    ATTACK_GENERAL = 0,  // Attacks on enemy generals (lowest priority)
+    NORMAL = 1,          // Normal attack moves
+    DEFENSIVE = 2        // Friendly-to-friendly moves (highest, excluding chase)
+};
+
 class BasicGame {
    protected:
     std::mt19937 rng{std::random_device()()};
@@ -236,6 +244,54 @@ class BasicGame {
     Board board;
 
     void capture(index_t p1, index_t p2);
+
+    // Move priority helper functions
+    /// Check if a move is defensive (friendly-to-friendly, including teammates).
+    inline bool isDefensiveMove(index_t player, const Move& move) const {
+        if (move.type != MoveType::MOVE_ARMY) return false;
+        const Tile& toTile = board.tileAt(move.to);
+        return isValidPlayer(toTile.occupier) &&
+               inSameTeam(toTile.occupier, player);
+    }
+
+    /// Check if a move is an attack on an enemy general.
+    inline bool isAttackGeneral(index_t player, const Move& move) const {
+        if (move.type != MoveType::MOVE_ARMY) return false;
+        const Tile& toTile = board.tileAt(move.to);
+        return toTile.type == TILE_GENERAL &&
+               isValidPlayer(toTile.occupier) &&
+               !inSameTeam(toTile.occupier, player);
+    }
+
+    /// Get the priority category of a move.
+    inline MovePriority getMovePriority(index_t player, const Move& move) const {
+        if (isDefensiveMove(player, move)) return MovePriority::DEFENSIVE;
+        if (isAttackGeneral(player, move)) return MovePriority::ATTACK_GENERAL;
+        return MovePriority::NORMAL;
+    }
+
+    /// Compare two moves by priority. Returns true if 'a' should execute before 'b'.
+    inline bool compareMovePriority(
+        const std::pair<index_t, Move>& a,
+        const std::pair<index_t, Move>& b) const {
+        // 1. Priority category (higher enum value = higher priority)
+        MovePriority pA = getMovePriority(a.first, a.second);
+        MovePriority pB = getMovePriority(b.first, b.second);
+        if (pA != pB) return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
+
+        // 2. Army size tiebreaker (larger army = higher priority)
+        army_t armyA = board.tileAt(a.second.from).army;
+        army_t armyB = board.tileAt(b.second.from).army;
+        if (armyA != armyB) return armyA > armyB;
+
+        // 3. Old priority (player index) as final tiebreaker
+        // phase 0: ascending, phase 1: descending
+        if (curHalfTurnPhase == 0) {
+            return a.first < b.first;
+        } else {
+            return a.first > b.first;
+        }
+    }
 
    public:
     BasicGame() = delete;
@@ -341,10 +397,16 @@ inline void BasicGame::step() {
         if (move.type != MoveType::EMPTY) moves.emplace_back(i, move);
     }
 
-    // sort moves
-    // phase 0 - ascending (already in order)
-    // phase 1 - descending (need to reverse)
-    if (curHalfTurnPhase == 1) std::reverse(moves.begin(), moves.end());
+    // sort moves by priority system
+    // Priority order (high to low):
+    // 1. Defensive moves (friendly-to-friendly)
+    // 2. Normal attack moves
+    // 3. Attacks on enemy generals (lowest)
+    // Tiebreakers: army size, then old priority (player index)
+    std::sort(moves.begin(), moves.end(),
+        [this](const auto& a, const auto& b) {
+            return compareMovePriority(a, b);
+        });
 
     // execute moves
     for (auto [player, move] : moves) {

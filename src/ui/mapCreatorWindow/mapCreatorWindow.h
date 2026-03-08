@@ -72,7 +72,7 @@ class MapCreatorWindow : public QDialog {
     void saveMap_v6(const QString& filename);
 
     // Official map format
-    void openOfficialMap(const QByteArray& data);
+    bool openOfficialMap(const QByteArray& data);
 
     QNetworkAccessManager* networkManager;
 

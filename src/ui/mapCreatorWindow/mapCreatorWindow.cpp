@@ -794,8 +794,9 @@ void MapCreatorWindow::onOpenMap() {
         }
         QByteArray data = file.readAll();
         file.close();
-        openOfficialMap(data);
-        resetMapMetadata(QFileInfo(filename).completeBaseName());
+        if (!openOfficialMap(data)) {
+            return;
+        }
     } else {
         QMessageBox::critical(this, "Error",
                               "Unsupported file format. Please select a .lg, "
@@ -953,12 +954,12 @@ void MapCreatorWindow::openMap_v6(const QString& filename) {
     setMapMetadata(metadata);
 }
 
-void MapCreatorWindow::openOfficialMap(const QByteArray& data) {
+bool MapCreatorWindow::openOfficialMap(const QByteArray& data) {
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(data, &error);
     if (error.error != QJsonParseError::NoError || !doc.isObject()) {
         QMessageBox::critical(this, "Error", "This is not a valid JSON file.");
-        return;
+        return false;
     }
 
     QJsonObject obj = doc.object();
@@ -968,8 +969,38 @@ void MapCreatorWindow::openOfficialMap(const QByteArray& data) {
     if (width <= 0 || height <= 0 || mapStr.isEmpty()) {
         QMessageBox::critical(this, "Error",
                               "Missing or invalid map configuration.");
-        return;
+        return false;
     }
+
+    const QString mapTitle =
+        obj.value(QLatin1StringView("title")).toString().trimmed();
+    const QString author =
+        obj.value(QLatin1StringView("username")).toString().trimmed();
+    const QString description =
+        obj.value(QLatin1StringView("description")).toString().trimmed();
+    const QString createdAt =
+        obj.value(QLatin1StringView("created_at")).toString().trimmed();
+
+    if (mapTitle.isEmpty() || author.isEmpty() || createdAt.isEmpty()) {
+        QMessageBox::critical(
+            this, "Error",
+            "Missing required metadata. Official JSON maps must include "
+            "non-empty title, created_at, and username fields.");
+        return false;
+    }
+
+    QDateTime creationDateTime =
+        QDateTime::fromString(createdAt, Qt::ISODateWithMs);
+    if (!creationDateTime.isValid()) {
+        creationDateTime = QDateTime::fromString(createdAt, Qt::ISODate);
+    }
+    if (!creationDateTime.isValid()) {
+        QMessageBox::critical(this, "Error",
+                              "Invalid created_at metadata. Expected an "
+                              "ISO-8601 datetime string.");
+        return false;
+    }
+    creationDateTime = creationDateTime.toLocalTime();
 
     QStringList tileList = mapStr.split(',');
     if (tileList.size() != width * height) {
@@ -978,7 +1009,7 @@ void MapCreatorWindow::openOfficialMap(const QByteArray& data) {
                                       "(%1) does not match width*height (%2).")
                                   .arg(tileList.size())
                                   .arg(width * height));
-        return;
+        return false;
     }
 
     bool hasBadTiles = false;
@@ -1049,6 +1080,9 @@ void MapCreatorWindow::openOfficialMap(const QByteArray& data) {
                              "Some tiles are not recognized. "
                              "Please edit or truncate them before saving.");
     }
+
+    setMapMetadata({mapTitle, author, creationDateTime, description});
+    return true;
 }
 
 void MapCreatorWindow::onImportFromWeb() {
@@ -1079,8 +1113,9 @@ void MapCreatorWindow::onImportFromWeb() {
             return;
         }
         QByteArray data = reply->readAll();
-        openOfficialMap(data);
-        resetMapMetadata(mapTitle);
+        if (!openOfficialMap(data)) {
+            return;
+        }
         map->fitCenter();
         widthSlider->setValue(map->mapWidth());
         heightSlider->setValue(map->mapHeight());

@@ -447,8 +447,6 @@ void MapCreatorWindow::setupMetadataSidebar() {
     sidebarPanel->setStyleSheet(
         "QWidget#metadataSidebarPanel {"
         "    background-color: rgba(8, 8, 8, 179);"
-        "    border-top-left-radius: 10px;"
-        "    border-bottom-left-radius: 10px;"
         "}"
         "QLabel { color: white; }"
         "QLabel#sidebarTitleLabel { color: rgba(255, 255, 255, 0.98); }"

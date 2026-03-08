@@ -178,7 +178,8 @@ struct RankItem {
 enum class MovePriority : uint8_t {
     ATTACK_GENERAL = 0,  // Attacks on enemy generals (lowest priority)
     NORMAL = 1,          // Normal attack moves
-    DEFENSIVE = 2        // Friendly-to-friendly moves (highest, excluding chase)
+    DEFENSIVE = 2,       // Friendly-to-friendly moves
+    CHASE = 3            // Chasing a fleeing enemy (highest priority)
 };
 
 class BasicGame {
@@ -263,8 +264,27 @@ class BasicGame {
                !inSameTeam(toTile.occupier, player);
     }
 
+    /// Check if a move is a chase (target tile's enemy occupier is moving out).
+    inline bool isChaseMove(index_t player, const Move& move,
+                            const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
+        if (move.type != MoveType::MOVE_ARMY) return false;
+        const Tile& toTile = board.tileAt(move.to);
+
+        // Target tile must have an enemy occupier
+        if (!isValidPlayer(toTile.occupier)) return false;
+        if (inSameTeam(toTile.occupier, player)) return false;
+
+        // That enemy must be moving out of the target tile
+        auto it = moveOutMap.find(move.to);
+        if (it == moveOutMap.end()) return false;
+
+        return it->second == toTile.occupier;
+    }
+
     /// Get the priority category of a move.
-    inline MovePriority getMovePriority(index_t player, const Move& move) const {
+    inline MovePriority getMovePriority(index_t player, const Move& move,
+                                        const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
+        if (isChaseMove(player, move, moveOutMap)) return MovePriority::CHASE;
         if (isDefensiveMove(player, move)) return MovePriority::DEFENSIVE;
         if (isAttackGeneral(player, move)) return MovePriority::ATTACK_GENERAL;
         return MovePriority::NORMAL;
@@ -273,10 +293,11 @@ class BasicGame {
     /// Compare two moves by priority. Returns true if 'a' should execute before 'b'.
     inline bool compareMovePriority(
         const std::pair<index_t, Move>& a,
-        const std::pair<index_t, Move>& b) const {
+        const std::pair<index_t, Move>& b,
+        const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
         // 1. Priority category (higher enum value = higher priority)
-        MovePriority pA = getMovePriority(a.first, a.second);
-        MovePriority pB = getMovePriority(b.first, b.second);
+        MovePriority pA = getMovePriority(a.first, a.second, moveOutMap);
+        MovePriority pB = getMovePriority(b.first, b.second, moveOutMap);
         if (pA != pB) return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
 
         // 2. Army size tiebreaker (larger army = higher priority)
@@ -397,15 +418,25 @@ inline void BasicGame::step() {
         if (move.type != MoveType::EMPTY) moves.emplace_back(i, move);
     }
 
+    // build move-out map for chase detection
+    // moveOutMap[coord] = player_index means that player is moving out of coord
+    std::unordered_map<Coord, index_t, CoordHash> moveOutMap;
+    for (const auto& [player, move] : moves) {
+        if (move.type == MoveType::MOVE_ARMY) {
+            moveOutMap[move.from] = player;
+        }
+    }
+
     // sort moves by priority system
     // Priority order (high to low):
-    // 1. Defensive moves (friendly-to-friendly)
-    // 2. Normal attack moves
-    // 3. Attacks on enemy generals (lowest)
+    // 1. Chase moves (catching fleeing enemies)
+    // 2. Defensive moves (friendly-to-friendly)
+    // 3. Normal attack moves
+    // 4. Attacks on enemy generals (lowest)
     // Tiebreakers: army size, then old priority (player index)
     std::sort(moves.begin(), moves.end(),
-        [this](const auto& a, const auto& b) {
-            return compareMovePriority(a, b);
+        [this, &moveOutMap](const auto& a, const auto& b) {
+            return compareMovePriority(a, b, moveOutMap);
         });
 
     // execute moves

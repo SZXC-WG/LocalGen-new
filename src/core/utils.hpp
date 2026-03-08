@@ -10,6 +10,7 @@
 #define LGEN_CORE_UTILS_HPP
 
 #include <cstdint>
+#include <functional>
 
 // Common type aliases
 
@@ -39,5 +40,12 @@ struct Coord {
 inline Coord operator+(const Coord& lhs, const Coord& rhs) {
     return Coord(lhs.x + rhs.x, lhs.y + rhs.y);
 }
+
+/// Hash function for Coord, enables use in std::unordered_map.
+struct CoordHash {
+    inline std::size_t operator()(const Coord& c) const {
+        return std::hash<pos_t>{}(c.x) ^ (std::hash<pos_t>{}(c.y) << 1);
+    }
+};
 
 #endif  // LGEN_CORE_UTILS_HPP

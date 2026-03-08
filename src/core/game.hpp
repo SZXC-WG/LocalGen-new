@@ -299,31 +299,34 @@ class BasicGame {
     inline bool compareMovePriority(
         const std::pair<index_t, Move>& a, const std::pair<index_t, Move>& b,
         const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
-        // use full priority system
-        if (conf.MoveProcessMethod == config::MoveProcessMode::FULL) {
-            const MoveType& tA = a.second.type;
-            const MoveType& tB = b.second.type;
-            if (tA != tB)
-                return static_cast<uint8_t>(tA) < static_cast<uint8_t>(tB);
+        const MoveType& tA = a.second.type;
+        const MoveType& tB = b.second.type;
+        if (tA != tB)
+            return static_cast<uint8_t>(tA) < static_cast<uint8_t>(tB);
 
-            // Priority category (higher enum value = higher priority)
-            MovePriority pA = getMovePriority(a.first, a.second, moveOutMap);
-            MovePriority pB = getMovePriority(b.first, b.second, moveOutMap);
-            if (pA != pB)
-                return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
+        switch (conf.MoveProcessMethod) {
+            case config::MoveProcessMode::FULL:
+                // Priority category (higher enum value = higher priority)
+                MovePriority pA =
+                    getMovePriority(a.first, a.second, moveOutMap);
+                MovePriority pB =
+                    getMovePriority(b.first, b.second, moveOutMap);
+                if (pA != pB)
+                    return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
 
-            // Army size tiebreaker (larger army = higher priority)
-            army_t armyA = board.tileAt(a.second.from).army;
-            army_t armyB = board.tileAt(b.second.from).army;
-            if (armyA != armyB) return armyA > armyB;
-        }
+                // Army size tiebreaker (larger army = higher priority)
+                army_t armyA = board.tileAt(a.second.from).army;
+                army_t armyB = board.tileAt(b.second.from).army;
+                if (armyA != armyB) return armyA > armyB;
 
-        // Old priority (player index) as final tiebreaker
-        // phase 0: ascending, phase 1: descending
-        if (curHalfTurnPhase == 0) {
-            return a.first < b.first;
-        } else {
-            return a.first > b.first;
+            case config::MoveProcessMode::PARITY:
+                // Old priority (player index) as final tiebreaker
+                // phase 0: ascending, phase 1: descending
+                if (curHalfTurnPhase == 0) {
+                    return a.first < b.first;
+                } else {
+                    return a.first > b.first;
+                }
         }
     }
 

@@ -375,7 +375,7 @@ class InitBoard : public Board {
         strUnzip.push_back('\0');
 
         int i, j, k = 4;
-        int f, p = 0;
+        int p = 0;
 
         for (; strUnzip[p] != '\0'; p++) strUnzip[p] -= CHAR_AD;
 

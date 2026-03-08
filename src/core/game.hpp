@@ -34,6 +34,7 @@ namespace game {
 namespace config {
 
 enum class VisionMode : uint8_t { NEAR8, NEAR4 };
+enum class MoveProcessMode : uint8_t { FULL, PARITY };
 
 #define GAME_CONFIG_UNIT_LIST(F)                        \
     F(bool, RanklistShowLand, true)                     \
@@ -45,7 +46,8 @@ enum class VisionMode : uint8_t { NEAR8, NEAR4 };
     F(VisionMode, OverallVisionMode, VisionMode::NEAR8) \
     F(int, OverallVisionRange, 1)                       \
     F(int, CityVisionRange, 1)                          \
-    F(int, SpawnVisionRange, 1)
+    F(int, SpawnVisionRange, 1)                         \
+    F(MoveProcessMode, MoveProcessMethod, FULL)
 
 struct Config {
 #define DECL(type, name, def) type name = def;
@@ -297,21 +299,24 @@ class BasicGame {
     inline bool compareMovePriority(
         const std::pair<index_t, Move>& a, const std::pair<index_t, Move>& b,
         const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
-        const MoveType& tA = a.second.type;
-        const MoveType& tB = b.second.type;
-        if (tA != tB)
-            return static_cast<uint8_t>(tA) < static_cast<uint8_t>(tB);
+        // use full priority system
+        if (conf.MoveProcessMethod == config::MoveProcessMode::FULL) {
+            const MoveType& tA = a.second.type;
+            const MoveType& tB = b.second.type;
+            if (tA != tB)
+                return static_cast<uint8_t>(tA) < static_cast<uint8_t>(tB);
 
-        // Priority category (higher enum value = higher priority)
-        MovePriority pA = getMovePriority(a.first, a.second, moveOutMap);
-        MovePriority pB = getMovePriority(b.first, b.second, moveOutMap);
-        if (pA != pB)
-            return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
+            // Priority category (higher enum value = higher priority)
+            MovePriority pA = getMovePriority(a.first, a.second, moveOutMap);
+            MovePriority pB = getMovePriority(b.first, b.second, moveOutMap);
+            if (pA != pB)
+                return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
 
-        // Army size tiebreaker (larger army = higher priority)
-        army_t armyA = board.tileAt(a.second.from).army;
-        army_t armyB = board.tileAt(b.second.from).army;
-        if (armyA != armyB) return armyA > armyB;
+            // Army size tiebreaker (larger army = higher priority)
+            army_t armyA = board.tileAt(a.second.from).army;
+            army_t armyB = board.tileAt(b.second.from).army;
+            if (armyA != armyB) return armyA > armyB;
+        }
 
         // Old priority (player index) as final tiebreaker
         // phase 0: ascending, phase 1: descending

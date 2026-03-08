@@ -857,7 +857,7 @@ void MapCreatorWindow::openMap_v6(const QString& filename) {
 
     QDataStream ds(&mapFile);
     ds.setVersion(QDataStream::Qt_6_7);
-    ds.setByteOrder(QDataStream::LittleEndian);
+    ds.setByteOrder(QDataStream::BigEndian);
 
     quint32 magic = 0;
     ds >> magic;
@@ -1225,7 +1225,7 @@ void MapCreatorWindow::saveMap_v6(const QString& filename) {
 
     QDataStream ds(&mapFile);
     ds.setVersion(QDataStream::Qt_6_7);
-    ds.setByteOrder(QDataStream::LittleEndian);
+    ds.setByteOrder(QDataStream::BigEndian);
 
     ds << MAGIC_6 << metadata.title << metadata.author
        << metadata.creationDateTime << metadata.description;

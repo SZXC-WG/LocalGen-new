@@ -247,7 +247,8 @@ class BasicGame {
     void capture(index_t p1, index_t p2);
 
     // Move priority helper functions
-    /// Check if a move is defensive (friendly-to-friendly, including teammates).
+    /// Check if a move is defensive (friendly-to-friendly, including
+    /// teammates).
     inline bool isDefensiveMove(index_t player, const Move& move) const {
         if (move.type != MoveType::MOVE_ARMY) return false;
         const Tile& toTile = board.tileAt(move.to);
@@ -259,14 +260,14 @@ class BasicGame {
     inline bool isAttackGeneral(index_t player, const Move& move) const {
         if (move.type != MoveType::MOVE_ARMY) return false;
         const Tile& toTile = board.tileAt(move.to);
-        return toTile.type == TILE_GENERAL &&
-               isValidPlayer(toTile.occupier) &&
+        return toTile.type == TILE_GENERAL && isValidPlayer(toTile.occupier) &&
                !inSameTeam(toTile.occupier, player);
     }
 
     /// Check if a move is a chase (target tile's enemy occupier is moving out).
-    inline bool isChaseMove(index_t player, const Move& move,
-                            const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
+    inline bool isChaseMove(
+        index_t player, const Move& move,
+        const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
         if (move.type != MoveType::MOVE_ARMY) return false;
         const Tile& toTile = board.tileAt(move.to);
 
@@ -282,30 +283,37 @@ class BasicGame {
     }
 
     /// Get the priority category of a move.
-    inline MovePriority getMovePriority(index_t player, const Move& move,
-                                        const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
+    inline MovePriority getMovePriority(
+        index_t player, const Move& move,
+        const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
         if (isChaseMove(player, move, moveOutMap)) return MovePriority::CHASE;
         if (isDefensiveMove(player, move)) return MovePriority::DEFENSIVE;
         if (isAttackGeneral(player, move)) return MovePriority::ATTACK_GENERAL;
         return MovePriority::NORMAL;
     }
 
-    /// Compare two moves by priority. Returns true if 'a' should execute before 'b'.
+    /// Compare two moves by priority.
+    /// Returns true if `a` should execute before `b`.
     inline bool compareMovePriority(
-        const std::pair<index_t, Move>& a,
-        const std::pair<index_t, Move>& b,
+        const std::pair<index_t, Move>& a, const std::pair<index_t, Move>& b,
         const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
-        // 1. Priority category (higher enum value = higher priority)
+        const MoveType& tA = a.second.type;
+        const MoveType& tB = b.second.type;
+        if (tA != tB)
+            return static_cast<uint8_t>(tA) < static_cast<uint8_t>(tB);
+
+        // Priority category (higher enum value = higher priority)
         MovePriority pA = getMovePriority(a.first, a.second, moveOutMap);
         MovePriority pB = getMovePriority(b.first, b.second, moveOutMap);
-        if (pA != pB) return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
+        if (pA != pB)
+            return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
 
-        // 2. Army size tiebreaker (larger army = higher priority)
+        // Army size tiebreaker (larger army = higher priority)
         army_t armyA = board.tileAt(a.second.from).army;
         army_t armyB = board.tileAt(b.second.from).army;
         if (armyA != armyB) return armyA > armyB;
 
-        // 3. Old priority (player index) as final tiebreaker
+        // Old priority (player index) as final tiebreaker
         // phase 0: ascending, phase 1: descending
         if (curHalfTurnPhase == 0) {
             return a.first < b.first;
@@ -435,9 +443,9 @@ inline void BasicGame::step() {
     // 4. Attacks on enemy generals (lowest)
     // Tiebreakers: army size, then old priority (player index)
     std::sort(moves.begin(), moves.end(),
-        [this, &moveOutMap](const auto& a, const auto& b) {
-            return compareMovePriority(a, b, moveOutMap);
-        });
+              [this, &moveOutMap](const auto& a, const auto& b) {
+                  return compareMovePriority(a, b, moveOutMap);
+              });
 
     // execute moves
     for (auto [player, move] : moves) {

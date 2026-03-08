@@ -13,7 +13,13 @@
 
 #include "utils.hpp"
 
-enum class MoveType { EMPTY, MOVE_ARMY, SURRENDER };
+/// Move types.
+/// Set value for priority settings.
+enum class MoveType {
+    EMPTY = 0,
+    SURRENDER = 1,
+    MOVE_ARMY = 2,
+};
 
 /// Stores a single move: `from` -> `to`.
 struct Move {

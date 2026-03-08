@@ -971,14 +971,12 @@ bool MapCreatorWindow::openOfficialMap(const QByteArray& data) {
         return false;
     }
 
-    const QString mapTitle =
-        obj.value(QLatin1StringView("title")).toString().trimmed();
-    const QString author =
-        obj.value(QLatin1StringView("username")).toString().trimmed();
+    const QString mapTitle = obj.value(QLatin1StringView("title")).toString();
+    const QString author = obj.value(QLatin1StringView("username")).toString();
     const QString description =
         obj.value(QLatin1StringView("description")).toString().trimmed();
     const QString createdAt =
-        obj.value(QLatin1StringView("created_at")).toString().trimmed();
+        obj.value(QLatin1StringView("created_at")).toString();
 
     if (mapTitle.isEmpty() || createdAt.isEmpty()) {
         QMessageBox::critical(
@@ -1089,7 +1087,7 @@ void MapCreatorWindow::onImportFromWeb() {
     QString mapTitle = QInputDialog::getText(
         this, "Import from Generals.io",
         "Enter the map title:", QLineEdit::Normal, "", &ok);
-    if (!ok || (mapTitle = mapTitle.trimmed()).isEmpty()) return;
+    if (!ok || mapTitle.isEmpty()) return;
 
     auto encodedTitle = QUrl::toPercentEncoding(mapTitle);
     QNetworkRequest request(

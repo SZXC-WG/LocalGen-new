@@ -25,9 +25,7 @@
 #define MAGIC_6 quint32(0x4C47656E)
 
 MapCreatorWindow::MapCreatorWindow(QWidget* parent)
-    : QDialog(parent),
-      networkManager(new QNetworkAccessManager(this)),
-      selectedTool(MOUNTAIN) {
+    : QDialog(parent), networkManager(nullptr), selectedTool(MOUNTAIN) {
     setWindowTitle("Map Creator");
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(36, 36, 36));
@@ -778,6 +776,10 @@ void MapCreatorWindow::onImportFromWeb() {
     request.setHeader(
         QNetworkRequest::UserAgentHeader,
         "LocalGen/1.0 (+https://github.com/SZXC-WG/LocalGen-new)");
+
+    if (!networkManager) {
+        networkManager = new QNetworkAccessManager(this);
+    }
 
     QNetworkReply* reply = networkManager->get(request);
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {

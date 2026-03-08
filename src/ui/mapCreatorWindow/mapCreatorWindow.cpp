@@ -3,14 +3,20 @@
 #include <QBitArray>
 #include <QByteArray>
 #include <QComboBox>
+#include <QDataStream>
+#include <QDateTimeEdit>
+#include <QEasingCurve>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QFont>
+#include <QFormLayout>
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -18,14 +24,25 @@
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QSlider>
+#include <QTextEdit>
+#include <QToolButton>
 #include <QVBoxLayout>
 
 #include "src/core/board.hpp"
 
-#define MAGIC_6 quint32(0x4C47656E)
+namespace {
+constexpr quint32 MAGIC_6 = 0x4C47364D;
+constexpr int METADATA_SIDEBAR_EXPANDED_WIDTH = 236;
+constexpr int METADATA_SIDEBAR_COLLAPSED_WIDTH = 42;
+constexpr int METADATA_SIDEBAR_COLLAPSED_HEIGHT = 156;
+constexpr int METADATA_SIDEBAR_ANIMATION_MS = 120;
+}  // namespace
 
 MapCreatorWindow::MapCreatorWindow(QWidget* parent)
-    : QDialog(parent), networkManager(nullptr), selectedTool(MOUNTAIN) {
+    : QDialog(parent),
+      networkManager(nullptr),
+      metadataSidebarExpanded(true),
+      selectedTool(MOUNTAIN) {
     setWindowTitle("Map Creator");
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(36, 36, 36));
@@ -38,6 +55,7 @@ MapCreatorWindow::MapCreatorWindow(QWidget* parent)
     setupToolbar();
     setupSliders();
     setupHintBar();
+    setupMetadataSidebar();
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -345,6 +363,238 @@ void MapCreatorWindow::setupSliders() {
     containerLayout->addStretch();
 }
 
+void MapCreatorWindow::setupMetadataSidebar() {
+    sidebarContainer = new QWidget(this);
+    sidebarContainer->setObjectName("metadataSidebar");
+    sidebarContainer->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    sidebarContainer->setAttribute(Qt::WA_StyledBackground, true);
+    sidebarContainer->setStyleSheet(
+        "QWidget#metadataSidebar { background: transparent; }");
+
+    sidebarPanel = new QWidget(sidebarContainer);
+    sidebarPanel->setObjectName("metadataSidebarPanel");
+    sidebarPanel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    QVBoxLayout* sidebarLayout = new QVBoxLayout(sidebarPanel);
+    sidebarLayout->setContentsMargins(16, 32, 16, 32);
+    sidebarLayout->setSpacing(18);
+
+    sidebarHeader = new QWidget(sidebarPanel);
+    QHBoxLayout* headerLayout = new QHBoxLayout(sidebarHeader);
+    headerLayout->setContentsMargins(0, 0, 0, 0);
+    headerLayout->setSpacing(8);
+
+    sidebarTitleLabel = new QLabel("Map Metadata", sidebarHeader);
+    sidebarTitleLabel->setObjectName("sidebarTitleLabel");
+    sidebarTitleLabel->setFont(QFont("Quicksand", 13, QFont::Bold));
+
+    headerLayout->addWidget(sidebarTitleLabel);
+    headerLayout->addStretch();
+
+    sidebarToggleButton = new QToolButton(sidebarContainer);
+    sidebarToggleButton->setFixedSize(METADATA_SIDEBAR_COLLAPSED_WIDTH,
+                                      METADATA_SIDEBAR_COLLAPSED_HEIGHT);
+    sidebarToggleButton->setFont(QFont("Segoe UI Symbol", 24));
+    sidebarToggleButton->setAttribute(Qt::WA_Hover, false);
+    sidebarToggleButton->setStyleSheet(
+        "QToolButton {"
+        "    border: none;"
+        "    border-top-left-radius: 10px;"
+        "    border-bottom-left-radius: 10px;"
+        "    background-color: rgba(8, 8, 8, 179);"
+        "    color: white;"
+        "    padding: 0;"
+        "}");
+
+    metadataFormContainer = new QWidget(sidebarContainer);
+    QFormLayout* formLayout = new QFormLayout(metadataFormContainer);
+    formLayout->setContentsMargins(0, 0, 0, 0);
+    formLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+    formLayout->setRowWrapPolicy(QFormLayout::WrapAllRows);
+    formLayout->setHorizontalSpacing(0);
+    formLayout->setVerticalSpacing(10);
+    formLayout->setLabelAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+    mapTitleEdit = new QLineEdit(metadataFormContainer);
+    mapTitleEdit->setPlaceholderText("Enter map title");
+    mapTitleEdit->setClearButtonEnabled(true);
+
+    authorEdit = new QLineEdit(metadataFormContainer);
+    authorEdit->setPlaceholderText("Enter author name");
+    authorEdit->setClearButtonEnabled(true);
+
+    creationDateEdit =
+        new QDateTimeEdit(QDateTime::currentDateTime(), metadataFormContainer);
+    creationDateEdit->setCalendarPopup(true);
+    creationDateEdit->setDisplayFormat("yyyy-MM-dd HH:mm:ss");
+
+    descriptionEdit = new QTextEdit(metadataFormContainer);
+    descriptionEdit->setPlaceholderText("Enter map description");
+    descriptionEdit->setAcceptRichText(false);
+    descriptionEdit->setTabChangesFocus(true);
+    descriptionEdit->setMinimumHeight(96);
+
+    formLayout->addRow("Title", mapTitleEdit);
+    formLayout->addRow("Author", authorEdit);
+    formLayout->addRow("Created", creationDateEdit);
+    formLayout->addRow("Description", descriptionEdit);
+
+    sidebarLayout->addStretch();
+    sidebarLayout->addWidget(sidebarHeader);
+    sidebarLayout->addWidget(metadataFormContainer);
+    sidebarLayout->addStretch();
+
+    sidebarPanel->setStyleSheet(
+        "QWidget#metadataSidebarPanel {"
+        "    background-color: rgba(8, 8, 8, 179);"
+        "    border-top-left-radius: 10px;"
+        "    border-bottom-left-radius: 10px;"
+        "}"
+        "QLabel { color: white; }"
+        "QLabel#sidebarTitleLabel { color: rgba(255, 255, 255, 0.98); }"
+        "QLineEdit, QDateTimeEdit, QTextEdit {"
+        "    min-height: 34px;"
+        "    border: 1px solid rgba(255, 255, 255, 0.16);"
+        "    border-radius: 6px;"
+        "    padding: 4px 10px;"
+        "    background-color: rgba(255, 255, 255, 0.08);"
+        "    color: white;"
+        "}"
+        "QLineEdit::placeholder { color: rgba(255, 255, 255, 0.55); }"
+        "QTextEdit { padding-top: 8px; padding-bottom: 8px; }"
+        "QLineEdit:focus, QDateTimeEdit:focus, QTextEdit:focus {"
+        "    border: 1px solid rgba(255, 255, 255, 0.38);"
+        "    background-color: rgba(255, 255, 255, 0.12);"
+        "}"
+        "QDateTimeEdit::drop-down {"
+        "    subcontrol-origin: padding;"
+        "    width: 24px;"
+        "    border: none;"
+        "}"
+        "QToolButton { border: none; background: transparent; }");
+
+    connect(sidebarToggleButton, &QToolButton::clicked, this,
+            &MapCreatorWindow::toggleMetadataSidebar);
+
+    sidebarAnimation =
+        new QPropertyAnimation(sidebarContainer, "geometry", this);
+    sidebarAnimation->setDuration(METADATA_SIDEBAR_ANIMATION_MS);
+    sidebarAnimation->setEasingCurve(QEasingCurve::OutCubic);
+    connect(sidebarAnimation, &QPropertyAnimation::finished, this,
+            [this]() { applyMetadataSidebarState(); });
+
+    resetMapMetadata();
+    updateMetadataSidebar();
+}
+
+void MapCreatorWindow::toggleMetadataSidebar() {
+    metadataSidebarExpanded = !metadataSidebarExpanded;
+    updateMetadataSidebar(true);
+}
+
+void MapCreatorWindow::updateMetadataSidebar(bool animate) {
+    if (!sidebarContainer) return;
+
+    if (sidebarAnimation &&
+        sidebarAnimation->state() == QAbstractAnimation::Running) {
+        sidebarAnimation->stop();
+    }
+
+    if (!animate) {
+        applyMetadataSidebarState();
+        sidebarContainer->setGeometry(
+            metadataSidebarGeometry(metadataSidebarExpanded));
+        sidebarContainer->raise();
+        return;
+    }
+
+    const QRect expandedGeometry = metadataSidebarGeometry(true);
+    const QRect hiddenGeometry = metadataSidebarGeometry(false);
+
+    sidebarContainer->setMinimumSize(0, 0);
+    sidebarContainer->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+
+    applyMetadataSidebarState();
+    sidebarAnimation->setStartValue(sidebarContainer->geometry());
+    sidebarAnimation->setEndValue(metadataSidebarExpanded ? expandedGeometry
+                                                          : hiddenGeometry);
+
+    sidebarContainer->raise();
+    sidebarAnimation->start();
+}
+
+void MapCreatorWindow::applyMetadataSidebarState() {
+    if (!sidebarContainer || !sidebarPanel) return;
+
+    QVBoxLayout* sidebarLayout =
+        qobject_cast<QVBoxLayout*>(sidebarPanel->layout());
+
+    sidebarToggleButton->setText(
+        QString::fromUtf8(metadataSidebarExpanded ? "❯" : "❮"));
+    if (sidebarLayout) {
+        sidebarLayout->setContentsMargins(16, 32, 16, 32);
+        sidebarLayout->setSpacing(18);
+    }
+
+    sidebarContainer->setFixedWidth(METADATA_SIDEBAR_EXPANDED_WIDTH +
+                                    METADATA_SIDEBAR_COLLAPSED_WIDTH);
+    sidebarContainer->setFixedHeight(height());
+    sidebarPanel->setGeometry(METADATA_SIDEBAR_COLLAPSED_WIDTH, 0,
+                              METADATA_SIDEBAR_EXPANDED_WIDTH, height());
+    sidebarHeader->setVisible(true);
+    metadataFormContainer->setVisible(true);
+    sidebarPanel->show();
+    sidebarContainer->show();
+
+    sidebarToggleButton->setGeometry(metadataSidebarButtonGeometry());
+    sidebarToggleButton->raise();
+}
+
+QRect MapCreatorWindow::metadataSidebarGeometry(bool expanded) const {
+    if (!map) return QRect();
+
+    const int sidebarWidth =
+        METADATA_SIDEBAR_EXPANDED_WIDTH + METADATA_SIDEBAR_COLLAPSED_WIDTH;
+    const int sidebarHeight = height();
+    const int sidebarY = 0;
+    const int sidebarX = expanded ? width() - sidebarWidth
+                                  : width() - METADATA_SIDEBAR_COLLAPSED_WIDTH;
+    return QRect(sidebarX, sidebarY, sidebarWidth, sidebarHeight);
+}
+
+QRect MapCreatorWindow::metadataSidebarButtonGeometry() const {
+    return QRect(
+        0, (sidebarContainer->height() - METADATA_SIDEBAR_COLLAPSED_HEIGHT) / 2,
+        METADATA_SIDEBAR_COLLAPSED_WIDTH, METADATA_SIDEBAR_COLLAPSED_HEIGHT);
+}
+
+void MapCreatorWindow::setMapMetadata(const MapMetadata& metadata) {
+    mapTitleEdit->setText(metadata.title);
+    authorEdit->setText(metadata.author);
+    creationDateEdit->setDateTime(metadata.creationDateTime.isValid()
+                                      ? metadata.creationDateTime
+                                      : QDateTime::currentDateTime());
+    descriptionEdit->setPlainText(metadata.description);
+}
+
+MapCreatorWindow::MapMetadata MapCreatorWindow::currentMetadata() const {
+    return {mapTitleEdit->text().trimmed(), authorEdit->text().trimmed(),
+            creationDateEdit->dateTime().isValid()
+                ? creationDateEdit->dateTime()
+                : QDateTime::currentDateTime(),
+            descriptionEdit->toPlainText().trimmed()};
+}
+
+void MapCreatorWindow::resetMapMetadata(const QString& mapTitle,
+                                        const QString& author,
+                                        const QDateTime& creationDateTime,
+                                        const QString& description) {
+    setMapMetadata({mapTitle, author,
+                    creationDateTime.isValid() ? creationDateTime
+                                               : QDateTime::currentDateTime(),
+                    description});
+}
+
 void MapCreatorWindow::setupHintBar() {
     hintContainer = new QWidget(this);
     hintContainer->setFixedHeight(50);
@@ -486,20 +736,38 @@ void MapCreatorWindow::updateHintBar() {
 
 void MapCreatorWindow::resizeEvent(QResizeEvent* event) {
     QDialog::resizeEvent(event);
+    updateMetadataSidebar();
     repositionFloatingElements();
 }
 
 void MapCreatorWindow::repositionFloatingElements() {
-    if (sliderContainer && toolbar && hintContainer) {
-        sliderContainer->move((width() - sliderContainer->width()) / 2, 0);
+    if (sliderContainer && toolbar && hintContainer && sidebarContainer &&
+        map) {
+        const QRect canvasRect = map->geometry();
+
+        sliderContainer->move(
+            canvasRect.left() +
+                (canvasRect.width() - sliderContainer->width()) / 2,
+            0);
         sliderContainer->raise();
 
-        toolbar->move(0, (height() - toolbar->height()) / 2);
+        toolbar->move(
+            canvasRect.left(),
+            canvasRect.top() + (canvasRect.height() - toolbar->height()) / 2);
         toolbar->raise();
 
-        hintContainer->move((width() - hintContainer->width()) / 2,
-                            height() - hintContainer->height());
+        hintContainer->move(
+            canvasRect.left() +
+                (canvasRect.width() - hintContainer->width()) / 2,
+            canvasRect.bottom() - hintContainer->height() + 1);
         hintContainer->raise();
+
+        if (!sidebarAnimation ||
+            sidebarAnimation->state() != QAbstractAnimation::Running) {
+            sidebarContainer->setGeometry(
+                metadataSidebarGeometry(metadataSidebarExpanded));
+        }
+        sidebarContainer->raise();
     }
 }
 
@@ -527,6 +795,7 @@ void MapCreatorWindow::onOpenMap() {
         QByteArray data = file.readAll();
         file.close();
         openOfficialMap(data);
+        resetMapMetadata(QFileInfo(filename).completeBaseName());
     } else {
         QMessageBox::critical(this, "Error",
                               "Unsupported file format. Please select a .lg, "
@@ -575,6 +844,8 @@ void MapCreatorWindow::openMap_v5(const QString& filename) {
             tile.lightIcon = loadedTile.lit;
         }
     }
+
+    resetMapMetadata(QFileInfo(filename).completeBaseName());
 }
 
 void MapCreatorWindow::openMap_v6(const QString& filename) {
@@ -596,6 +867,10 @@ void MapCreatorWindow::openMap_v6(const QString& filename) {
         return;
     }
 
+    QString mapTitle, author, description;
+    QDateTime creationDateTime;
+    ds >> mapTitle >> author >> creationDateTime >> description;
+
     quint16 w16, h16;
     QByteArray compressed;
     ds >> w16 >> h16 >> compressed;
@@ -605,6 +880,17 @@ void MapCreatorWindow::openMap_v6(const QString& filename) {
                               "Invalid or corrupted map file format.");
         return;
     }
+
+    if (!creationDateTime.isValid()) {
+        QMessageBox::critical(
+            this, "Error",
+            "Invalid .lgmp metadata: creation datetime is missing or "
+            "corrupted.");
+        return;
+    }
+
+    const MapMetadata metadata = {mapTitle, author, creationDateTime,
+                                  description};
 
     // decompress map data
     const int width = w16, height = h16;
@@ -663,6 +949,8 @@ void MapCreatorWindow::openMap_v6(const QString& filename) {
             map->tileAt(r, c) = unpackTile(packed);
         }
     }
+
+    setMapMetadata(metadata);
 }
 
 void MapCreatorWindow::openOfficialMap(const QByteArray& data) {
@@ -765,14 +1053,14 @@ void MapCreatorWindow::openOfficialMap(const QByteArray& data) {
 
 void MapCreatorWindow::onImportFromWeb() {
     bool ok;
-    QString mapName = QInputDialog::getText(
+    QString mapTitle = QInputDialog::getText(
         this, "Import from Generals.io",
-        "Enter the map name:", QLineEdit::Normal, "", &ok);
-    if (!ok || mapName.trimmed().isEmpty()) return;
+        "Enter the map title:", QLineEdit::Normal, "", &ok);
+    if (!ok || (mapTitle = mapTitle.trimmed()).isEmpty()) return;
 
-    auto urlName = QUrl::toPercentEncoding(mapName.trimmed());
+    auto encodedTitle = QUrl::toPercentEncoding(mapTitle);
     QNetworkRequest request(
-        QUrl("https://generals.io/api/map?name=" + urlName));
+        QUrl("https://generals.io/api/map?name=" + encodedTitle));
     request.setHeader(
         QNetworkRequest::UserAgentHeader,
         "LocalGen/1.0 (+https://github.com/SZXC-WG/LocalGen-new)");
@@ -782,7 +1070,7 @@ void MapCreatorWindow::onImportFromWeb() {
     }
 
     QNetworkReply* reply = networkManager->get(request);
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, mapTitle]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
             QMessageBox::critical(
@@ -792,6 +1080,7 @@ void MapCreatorWindow::onImportFromWeb() {
         }
         QByteArray data = reply->readAll();
         openOfficialMap(data);
+        resetMapMetadata(mapTitle);
         map->fitCenter();
         widthSlider->setValue(map->mapWidth());
         heightSlider->setValue(map->mapHeight());
@@ -814,6 +1103,15 @@ void MapCreatorWindow::onSaveMap() {
 }
 
 void MapCreatorWindow::saveMap_v5(const QString& filename) {
+    if (QMessageBox::warning(
+            this, "Legacy Format Warning",
+            "The .lg format does not support map metadata. Title, author, and "
+            "creation date, and description will not be saved.",
+            QMessageBox::Ok | QMessageBox::Cancel,
+            QMessageBox::Cancel) == QMessageBox::Cancel) {
+        return;
+    }
+
     int width = map->mapWidth(), height = map->mapHeight();
 
     // v5 map format
@@ -845,6 +1143,7 @@ void MapCreatorWindow::saveMap_v5(const QString& filename) {
 
 void MapCreatorWindow::saveMap_v6(const QString& filename) {
     int width = map->mapWidth(), height = map->mapHeight();
+    const MapMetadata metadata = currentMetadata();
 
     // 19 bits per tile, thus packed into uint32
     auto packTile = [](const DisplayTile& tile) -> quint32 {
@@ -883,7 +1182,9 @@ void MapCreatorWindow::saveMap_v6(const QString& filename) {
     ds.setVersion(QDataStream::Qt_6_7);
     ds.setByteOrder(QDataStream::LittleEndian);
 
-    ds << MAGIC_6 << quint16(width) << quint16(height) << compressed;
+    ds << MAGIC_6 << metadata.title << metadata.author
+       << metadata.creationDateTime << metadata.description;
+    ds << quint16(width) << quint16(height) << compressed;
 
     mapFile.close();
 }

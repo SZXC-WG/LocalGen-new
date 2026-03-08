@@ -2,12 +2,18 @@
 #define MAPCREATORWINDOW_H
 
 #include <QComboBox>
+#include <QDateTime>
+#include <QDateTimeEdit>
 #include <QDialog>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPropertyAnimation>
 #include <QPushButton>
 #include <QSlider>
 #include <QSpinBox>
+#include <QTextEdit>
+#include <QToolButton>
 #include <QWidget>
 #include <cstdint>
 
@@ -27,14 +33,33 @@ class MapCreatorWindow : public QDialog {
    private slots:
     void onToolSelected();
     void setupSliders();
+    void setupMetadataSidebar();
     void onOpenMap();
     void onSaveMap();
     void onImportFromWeb();
 
    private:
+    struct MapMetadata {
+        QString title;
+        QString author;
+        QDateTime creationDateTime;
+        QString description;
+    };
+
     void setupToolbar();
     void updateToolButtonStyles();
     void setupHintBar();
+    void toggleMetadataSidebar();
+    void updateMetadataSidebar(bool animate = false);
+    void applyMetadataSidebarState();
+    QRect metadataSidebarGeometry(bool expanded) const;
+    QRect metadataSidebarButtonGeometry() const;
+    void setMapMetadata(const MapMetadata& metadata);
+    MapMetadata currentMetadata() const;
+    void resetMapMetadata(
+        const QString& mapName = QString(), const QString& author = QString(),
+        const QDateTime& creationDateTime = QDateTime::currentDateTime(),
+        const QString& description = QString());
     void updateHintBar();
     void keyPressEvent(QKeyEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
@@ -56,6 +81,18 @@ class MapCreatorWindow : public QDialog {
     MapWidget* map;
     QWidget* toolbar;
     QList<QPushButton*> toolButtons;
+    QWidget* sidebarContainer;
+    QWidget* sidebarPanel;
+    QWidget* sidebarHeader;
+    QLabel* sidebarTitleLabel;
+    QToolButton* sidebarToggleButton;
+    QWidget* metadataFormContainer;
+    QLineEdit* mapTitleEdit;
+    QLineEdit* authorEdit;
+    QDateTimeEdit* creationDateEdit;
+    QTextEdit* descriptionEdit;
+    QPropertyAnimation* sidebarAnimation;
+    bool metadataSidebarExpanded;
 
     QWidget* sliderContainer;
     QSlider* widthSlider;

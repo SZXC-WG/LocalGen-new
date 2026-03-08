@@ -1103,12 +1103,25 @@ void MapCreatorWindow::onImportFromWeb() {
     QNetworkReply* reply = networkManager->get(request);
     connect(reply, &QNetworkReply::finished, this, [this, reply, mapTitle]() {
         reply->deleteLater();
+
+        // Check for HTTP errors
+        int statusCode =
+            reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (statusCode == 404) {
+            QMessageBox::critical(this, "Error",
+                                  "The requested map does not exist.");
+            return;
+        }
+
+        // Other network errors
         if (reply->error() != QNetworkReply::NoError) {
             QMessageBox::critical(
                 this, "Network Error",
                 "Failed to fetch map: " + reply->errorString());
             return;
         }
+
+        // Finally: parse the response
         QByteArray data = reply->readAll();
         if (!openOfficialMap(data)) {
             return;

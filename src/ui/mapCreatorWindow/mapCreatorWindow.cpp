@@ -981,11 +981,11 @@ bool MapCreatorWindow::openOfficialMap(const QByteArray& data) {
     const QString createdAt =
         obj.value(QLatin1StringView("created_at")).toString().trimmed();
 
-    if (mapTitle.isEmpty() || author.isEmpty() || createdAt.isEmpty()) {
+    if (mapTitle.isEmpty() || createdAt.isEmpty()) {
         QMessageBox::critical(
             this, "Error",
             "Missing required metadata. Official JSON maps must include "
-            "non-empty title, created_at, and username fields.");
+            "non-empty title and created_at fields.");
         return false;
     }
 

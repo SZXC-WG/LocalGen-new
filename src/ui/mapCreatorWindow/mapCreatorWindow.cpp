@@ -576,7 +576,7 @@ void MapCreatorWindow::setMapMetadata(const MapMetadata& metadata) {
 }
 
 MapCreatorWindow::MapMetadata MapCreatorWindow::currentMetadata() const {
-    return {mapTitleEdit->text().trimmed(), authorEdit->text().trimmed(),
+    return {mapTitleEdit->text(), authorEdit->text(),
             creationDateEdit->dateTime().isValid()
                 ? creationDateEdit->dateTime()
                 : QDateTime::currentDateTime(),

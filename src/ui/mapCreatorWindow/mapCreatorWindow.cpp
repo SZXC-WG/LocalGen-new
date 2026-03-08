@@ -744,22 +744,23 @@ void MapCreatorWindow::repositionFloatingElements() {
     if (sliderContainer && toolbar && hintContainer && sidebarContainer &&
         map) {
         const QRect canvasRect = map->geometry();
+        const int canvasTop = canvasRect.top(),
+                  canvasBottom = canvasRect.bottom(),
+                  canvasLeft = canvasRect.left(),
+                  canvasWidth = canvasRect.width(),
+                  canvasHeight = canvasRect.height();
 
         sliderContainer->move(
-            canvasRect.left() +
-                (canvasRect.width() - sliderContainer->width()) / 2,
-            0);
+            canvasLeft + (canvasWidth - sliderContainer->width()) / 2, 0);
         sliderContainer->raise();
 
-        toolbar->move(
-            canvasRect.left(),
-            canvasRect.top() + (canvasRect.height() - toolbar->height()) / 2);
+        toolbar->move(canvasLeft,
+                      canvasTop + (canvasHeight - toolbar->height()) / 2);
         toolbar->raise();
 
         hintContainer->move(
-            canvasRect.left() +
-                (canvasRect.width() - hintContainer->width()) / 2,
-            canvasRect.bottom() - hintContainer->height() + 1);
+            canvasLeft + (canvasWidth - hintContainer->width()) / 2,
+            canvasBottom - hintContainer->height() + 1);
         hintContainer->raise();
 
         if (!sidebarAnimation ||

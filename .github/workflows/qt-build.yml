@@ -27,7 +27,7 @@ jobs:
             qt_arch: clang_64
 
           - os: windows-latest
-            compiler: vcvarsall
+            compiler: msvc
             qt_arch: win64_msvc2022_64
 
           - os: windows-latest

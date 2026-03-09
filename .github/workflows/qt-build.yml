@@ -45,12 +45,14 @@ jobs:
           compiler: ${{ matrix.compiler }}
           cmake: true
           ninja: true
+          cache-tools: false
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
           version: 6.8.3
           arch: ${{ matrix.qt_arch }}
+          cache: false
 
       - name: Build
         run: cmake -B build -G Ninja && cmake --build build

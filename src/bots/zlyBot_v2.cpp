@@ -100,9 +100,9 @@ class ZlyBot_v2 : public BasicBot {
                 value_t newDist = curDist + 10;
                 if (board.tileAt(next).visible) {
                     if (board.tileAt(next).occupier != id)
-                        newDist += std::max(armyAt(next.x, next.y), value_t(0));
+                        newDist += std::max(armyAt(next.x, next.y), army_t(0));
                 } else
-                    newDist += std::max(armyAt(next.x, next.y), value_t(0));
+                    newDist += std::max(armyAt(next.x, next.y), army_t(0));
                 if (typeAt(next.x, next.y) == TILE_SWAMP) newDist += 100;
                 if (newDist < dist[idx(next.x, next.y)]) {
                     dist[idx(next.x, next.y)] = newDist;

@@ -118,9 +118,9 @@ class ZlyBot_v2_1 : public BasicBot {
                     if (board.tileAt(next).visible) {
                         if (board.tileAt(next).occupier != id)
                             newDist +=
-                                std::max(armyAt(next.x, next.y), value_t(0));
+                                std::max(armyAt(next.x, next.y), army_t(0));
                     } else
-                        newDist += std::max(armyAt(next.x, next.y), value_t(0));
+                        newDist += std::max(armyAt(next.x, next.y), army_t(0));
                     if (typeAt(next.x, next.y) == TILE_SWAMP) newDist += 100;
                     if (newDist < dist0[idx(next.x, next.y)]) {
                         dist0[idx(next.x, next.y)] = newDist;
@@ -151,9 +151,9 @@ class ZlyBot_v2_1 : public BasicBot {
                     if (board.tileAt(next).visible) {
                         if (board.tileAt(next).occupier != id)
                             newDist +=
-                                std::max(armyAt(next.x, next.y), value_t(0));
+                                std::max(armyAt(next.x, next.y), army_t(0));
                     } else
-                        newDist += std::max(armyAt(next.x, next.y), value_t(0));
+                        newDist += std::max(armyAt(next.x, next.y), army_t(0));
                     if (typeAt(next.x, next.y) == TILE_SWAMP) newDist += 100;
                     if (newDist < dist1[idx(next.x, next.y)]) {
                         dist1[idx(next.x, next.y)] = newDist;

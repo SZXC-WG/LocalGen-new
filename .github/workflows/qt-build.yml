@@ -19,19 +19,15 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            compiler: gcc
             qt_arch: linux_gcc_64
 
           - os: macos-latest
-            compiler: llvm
             qt_arch: clang_64
 
           - os: windows-latest
-            compiler: msvc
             qt_arch: win64_msvc2022_64
 
           - os: windows-latest
-            compiler: gcc
             qt_arch: win64_mingw
 
     runs-on: ${{ matrix.os }}
@@ -42,7 +38,6 @@ jobs:
       - name: Setup C++
         uses: aminya/setup-cpp@v1
         with:
-          compiler: ${{ matrix.compiler }}
           cmake: true
           ninja: true
           cache-tools: false

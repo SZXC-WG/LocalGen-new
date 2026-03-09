@@ -39,6 +39,11 @@ jobs:
             qt_arch: win64_mingw
             qt_tools: 'tools_mingw1310'
 
+          - name: Windows (LLVM)
+            os: windows-latest
+            qt_arch: win64_llvm_mingw
+            qt_tools: ''
+
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
 

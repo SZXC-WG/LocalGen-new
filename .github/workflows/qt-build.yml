@@ -52,5 +52,5 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B build -S . -G Ninja
+          cmake -B build -S . -G Ninja -DCMAKE_TOOLCHAIN_FILE=$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake
           cmake --build build -j4 --config Release

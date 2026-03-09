@@ -35,6 +35,7 @@ jobs:
             qt_arch: win64_mingw
             qt_tools: 'tools_cmake tools_ninja tools_mingw1310'
 
+    name: ${{ matrix.qt_arch }}
     runs-on: ${{ matrix.os }}
 
     steps:

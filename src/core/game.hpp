@@ -47,7 +47,7 @@ enum class MoveProcessMode : uint8_t { FULL, PARITY };
     F(int, OverallVisionRange, 1)                       \
     F(int, CityVisionRange, 1)                          \
     F(int, SpawnVisionRange, 1)                         \
-    F(MoveProcessMode, MoveProcessMethod, FULL)
+    F(MoveProcessMode, MoveProcessMethod, MoveProcessMode::FULL)
 
 struct Config {
 #define DECL(type, name, def) type name = def;
@@ -305,7 +305,7 @@ class BasicGame {
             return static_cast<uint8_t>(tA) < static_cast<uint8_t>(tB);
 
         switch (conf.MoveProcessMethod) {
-            case config::MoveProcessMode::FULL:
+            case config::MoveProcessMode::FULL: {
                 // Priority category (higher enum value = higher priority)
                 MovePriority pA =
                     getMovePriority(a.first, a.second, moveOutMap);
@@ -318,6 +318,7 @@ class BasicGame {
                 army_t armyA = board.tileAt(a.second.from).army;
                 army_t armyB = board.tileAt(b.second.from).army;
                 if (armyA != armyB) return armyA > armyB;
+            }
 
             case config::MoveProcessMode::PARITY:
                 // Old priority (player index) as final tiebreaker

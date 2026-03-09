@@ -21,15 +21,19 @@ jobs:
         include:
           - os: ubuntu-latest
             qt_arch: linux_gcc_64
+            qt_tools: 'tools_cmake tools_ninja'
 
           - os: macos-latest
             qt_arch: clang_64
+            qt_tools: 'tools_cmake tools_ninja'
 
           - os: windows-latest
             qt_arch: win64_msvc2022_64
+            qt_tools: 'tools_cmake tools_ninja'
 
           - os: windows-latest
             qt_arch: win64_mingw
+            qt_tools: 'tools_cmake tools_ninja tools_mingw1310'
 
     runs-on: ${{ matrix.os }}
 
@@ -41,7 +45,7 @@ jobs:
         with:
           version: 6.8.3
           arch: ${{ matrix.qt_arch }}
-          tools: 'tools_cmake tools_ninja'
+          tools: ${{ matrix.qt_tools }}
           cache: false
 
       - name: Build

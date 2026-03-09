@@ -29,7 +29,7 @@ jobs:
 
           - os: windows-latest
             qt_arch: win64_msvc2022_64
-            qt_tools: 'tools_cmake tools_ninja'
+            qt_tools: 'tools_cmake tools_ninja tools_vcredist,qt.tools.vcredist_msvc2022_x64'
 
           - os: windows-latest
             qt_arch: win64_mingw

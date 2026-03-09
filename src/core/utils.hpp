@@ -48,4 +48,12 @@ struct CoordHash {
     }
 };
 
+/// Helper for std::visit
+template <class... Ts>
+struct overloaded : Ts... {
+    using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
 #endif  // LGEN_CORE_UTILS_HPP

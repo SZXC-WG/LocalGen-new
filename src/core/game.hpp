@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "board.hpp"
+#include "message.hpp"
 #include "move.hpp"
 #include "player.hpp"
 #include "tile.hpp"
@@ -159,8 +160,6 @@ constexpr inline PatchStatus patchStatus(const Config& config,
 
 }  // namespace config
 
-enum class GameMessageType : uint8_t { WIN, CAPTURE, SURRENDER, TEXT };
-
 struct GameConstantsPack {
     pos_t mapHeight, mapWidth;
     index_t playerCount;
@@ -240,8 +239,7 @@ class BasicGame {
     inline void setConfig(config::ConfigPatch patch) { conf = conf | patch; }
 
    public:
-    void broadcast(turn_t turn, GameMessageType message,
-                   std::vector<index_t> associatedList);
+    void broadcast(turn_t turn, const GameMessageData& messageData);
 
    protected:
     Board board;
@@ -376,7 +374,7 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
             }
         }
     }
-    broadcast(curTurn, GameMessageType::CAPTURE, {p1, p2});
+    broadcast(curTurn, GameMessageCapture{p1, p2});
 }
 
 inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
@@ -479,7 +477,7 @@ inline void BasicGame::step() {
             }
         } else if (move.type == MoveType::SURRENDER) {
             alive[player] = false;
-            broadcast(curTurn, GameMessageType::SURRENDER, {player});
+            broadcast(curTurn, GameMessageSurrender{player});
         }
     }
 
@@ -582,8 +580,13 @@ inline int BasicGame::init() {
     return 0;
 }
 
-inline void BasicGame::broadcast(turn_t turn, GameMessageType message,
-                                 std::vector<index_t> associatedList) {}
+inline void BasicGame::broadcast(turn_t turn,
+                                 const GameMessageData& messageData) {
+    GameEvent event{turn, messageData};
+    for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
+        players[i]->onGameEvent(event);
+    }
+}
 
 }  // namespace game
 

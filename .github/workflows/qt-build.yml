@@ -19,23 +19,27 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - name: Linux (GCC)
+            os: ubuntu-latest
             qt_arch: linux_gcc_64
             qt_tools: 'tools_cmake tools_ninja'
 
-          - os: macos-latest
+          - name: macOS (Clang)
+            os: macos-latest
             qt_arch: clang_64
             qt_tools: 'tools_cmake tools_ninja'
 
-          - os: windows-latest
+          - name: Windows (MSVC)
+            os: windows-latest
             qt_arch: win64_msvc2022_64
             qt_tools: 'tools_cmake tools_ninja tools_vcredist,qt.tools.vcredist_msvc2022_x64'
 
-          - os: windows-latest
+          - name: Windows (MinGW)
+            os: windows-latest
             qt_arch: win64_mingw
             qt_tools: 'tools_cmake tools_ninja tools_mingw1310'
 
-    name: ${{ matrix.qt_arch }}
+    name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
 
     steps:

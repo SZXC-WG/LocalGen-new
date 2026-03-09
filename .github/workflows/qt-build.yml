@@ -51,4 +51,6 @@ jobs:
           cache: false
 
       - name: Build
-        run: cmake -B build -G Ninja && cmake --build build
+        run: |
+          cmake -B build -S . -G Ninja
+          cmake --build build -j4 --config Release

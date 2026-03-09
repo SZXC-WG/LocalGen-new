@@ -304,30 +304,25 @@ class BasicGame {
         if (tA != tB)
             return static_cast<uint8_t>(tA) < static_cast<uint8_t>(tB);
 
-        switch (conf.MoveProcessMethod) {
-            case config::MoveProcessMode::FULL: {
-                // Priority category (higher enum value = higher priority)
-                MovePriority pA =
-                    getMovePriority(a.first, a.second, moveOutMap);
-                MovePriority pB =
-                    getMovePriority(b.first, b.second, moveOutMap);
-                if (pA != pB)
-                    return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
+        if (conf.MoveProcessMethod == config::MoveProcessMode::FULL) {
+            // Priority category (higher enum value = higher priority)
+            MovePriority pA = getMovePriority(a.first, a.second, moveOutMap);
+            MovePriority pB = getMovePriority(b.first, b.second, moveOutMap);
+            if (pA != pB)
+                return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
 
-                // Army size tiebreaker (larger army = higher priority)
-                army_t armyA = board.tileAt(a.second.from).army;
-                army_t armyB = board.tileAt(b.second.from).army;
-                if (armyA != armyB) return armyA > armyB;
-            }
+            // Army size tiebreaker (larger army = higher priority)
+            army_t armyA = board.tileAt(a.second.from).army;
+            army_t armyB = board.tileAt(b.second.from).army;
+            if (armyA != armyB) return armyA > armyB;
+        }
 
-            case config::MoveProcessMode::PARITY:
-                // Old priority (player index) as final tiebreaker
-                // phase 0: ascending, phase 1: descending
-                if (curHalfTurnPhase == 0) {
-                    return a.first < b.first;
-                } else {
-                    return a.first > b.first;
-                }
+        // Old priority (player index) as final tiebreaker
+        // phase 0: ascending, phase 1: descending
+        if (curHalfTurnPhase == 0) {
+            return a.first < b.first;
+        } else {
+            return a.first > b.first;
         }
     }
 

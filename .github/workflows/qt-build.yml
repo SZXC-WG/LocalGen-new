@@ -53,6 +53,10 @@ jobs:
           tools: ${{ matrix.qt_tools }}
           cache: false
 
+      - name: Setup MSVC
+        if: contains(matrix.qt_arch, 'msvc')
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Build
         shell: bash
         run: |

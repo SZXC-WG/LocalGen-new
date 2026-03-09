@@ -51,7 +51,7 @@ jobs:
           version: 6.8.3
           arch: ${{ matrix.qt_arch }}
           tools: ${{ matrix.qt_tools }}
-          cache: false
+          cache: true
 
       - name: Setup MSVC
         if: contains(matrix.qt_arch, 'msvc')

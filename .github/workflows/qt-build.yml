@@ -36,18 +36,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup C++
-        uses: aminya/setup-cpp@v1
-        with:
-          cmake: true
-          ninja: true
-          cache-tools: false
-
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
           version: 6.8.3
           arch: ${{ matrix.qt_arch }}
+          tools: 'tools_cmake tools_ninja'
           cache: false
 
       - name: Build

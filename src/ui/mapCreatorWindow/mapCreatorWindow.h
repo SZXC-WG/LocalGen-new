@@ -65,6 +65,10 @@ class MapCreatorWindow : public QDialog {
     void resizeEvent(QResizeEvent* event) override;
     void repositionFloatingElements();
 
+    // DisplayBoard <-> InitBoard conversion
+    InitBoard toInitBoard() const;
+    void fromInitBoard(const InitBoard& board);
+
     // LG-format Map I/O
     void openMap_v5(const QString& filename);
     void openMap_v6(const QString& filename);

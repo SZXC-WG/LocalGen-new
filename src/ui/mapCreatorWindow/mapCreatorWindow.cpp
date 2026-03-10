@@ -770,6 +770,56 @@ void MapCreatorWindow::repositionFloatingElements() {
     }
 }
 
+InitBoard MapCreatorWindow::toInitBoard() const {
+    const int width = map->mapWidth(), height = map->mapHeight();
+    InitBoard board(height, width);
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            const auto& tile = map->tileAt(r, c);
+            Tile boardTile;
+            boardTile.type = tile.type;
+            boardTile.lit = tile.lightIcon;
+            // v5 encoding does not support general teams,
+            // so this field is ignored for now
+            // TODO: add warning if team is set
+            boardTile.army = tile.text.isEmpty() || tile.type == TILE_SPAWN
+                                 ? 0
+                                 : tile.text.toInt();
+            board.changeTile({r + 1, c + 1}, boardTile);
+        }
+    }
+    return board;
+}
+
+void MapCreatorWindow::fromInitBoard(const InitBoard& board) {
+    const int width = board.getWidth(), height = board.getHeight();
+    map->realloc(width, height);
+    for (int r = 0; r < height; ++r) {
+        for (int c = 0; c < width; ++c) {
+            auto& tile = map->tileAt(r, c);
+            const Tile& loadedTile = board.tileAt({r + 1, c + 1});
+            tile.type = loadedTile.type;
+            switch (loadedTile.type) {
+                case TILE_MOUNTAIN:
+                case TILE_LOOKOUT:
+                case TILE_OBSERVATORY: tile.color.setRgb(187, 187, 187); break;
+                case TILE_DESERT:      tile.color.setRgb(220, 220, 220); break;
+                case TILE_SWAMP:
+                case TILE_CITY:        tile.color.setRgb(128, 128, 128); break;
+                case TILE_SPAWN:       tile.color = Qt::darkCyan; break;
+                default:
+                    tile.color = loadedTile.army == 0 ? QColor(220, 220, 220)
+                                                      : QColor(128, 128, 128);
+            };
+            if (loadedTile.army != 0 || loadedTile.type == TILE_CITY)
+                tile.text = QString::number(loadedTile.army);
+            else
+                tile.text.clear();
+            tile.lightIcon = loadedTile.lit;
+        }
+    }
+}
+
 const QString MapCreatorWindow::mapFileFilter =
     "All Supported Maps (*.lg *.lgmp *.json);;"
     "Official Generals.io Map (*.json);;"
@@ -818,33 +868,7 @@ void MapCreatorWindow::openMap_v5(const QString& filename) {
     mapFile.close();
     InitBoard board;
     board.v5Unzip(mapData.toStdString());
-    int width = board.getWidth(), height = board.getHeight();
-    map->realloc(width, height);
-    for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
-            auto& tile = map->tileAt(r, c);
-            const Tile& loadedTile = board.tileAt({r + 1, c + 1});
-            tile.type = loadedTile.type;
-            switch (loadedTile.type) {
-                case TILE_MOUNTAIN:
-                case TILE_LOOKOUT:
-                case TILE_OBSERVATORY: tile.color.setRgb(187, 187, 187); break;
-                case TILE_DESERT:      tile.color.setRgb(220, 220, 220); break;
-                case TILE_SWAMP:
-                case TILE_CITY:        tile.color.setRgb(128, 128, 128); break;
-                case TILE_SPAWN:       tile.color = Qt::darkCyan; break;
-                default:
-                    tile.color = loadedTile.army == 0 ? QColor(220, 220, 220)
-                                                      : QColor(128, 128, 128);
-            };
-            if (loadedTile.army != 0 || loadedTile.type == TILE_CITY)
-                tile.text = QString::number(loadedTile.army);
-            else
-                tile.text.clear();
-            tile.lightIcon = loadedTile.lit;
-        }
-    }
-
+    this->fromInitBoard(board);
     resetMapMetadata(QFileInfo(filename).completeBaseName());
 }
 
@@ -1157,8 +1181,6 @@ void MapCreatorWindow::saveMap_v5(const QString& filename) {
         return;
     }
 
-    int width = map->mapWidth(), height = map->mapHeight();
-
     // v5 map format
     QFile mapFile(filename);
     if (!mapFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -1166,23 +1188,7 @@ void MapCreatorWindow::saveMap_v5(const QString& filename) {
         return;
     }
 
-    InitBoard board(height, width);
-    for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
-            const auto& tile = map->tileAt(r, c);
-            Tile boardTile;
-            boardTile.type = tile.type;
-            boardTile.lit = tile.lightIcon;
-            // v5 encoding does not support general teams,
-            // so this field is ignored for now
-            // TODO: add warning if team is set
-            boardTile.army = tile.text.isEmpty() || tile.type == TILE_SPAWN
-                                 ? 0
-                                 : tile.text.toInt();
-            board.changeTile({r + 1, c + 1}, boardTile);
-        }
-    }
-
+    InitBoard board = toInitBoard();
     mapFile.write(QString::fromStdString(board.v5Zip()).toUtf8());
 }
 

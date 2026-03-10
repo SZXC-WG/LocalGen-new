@@ -44,7 +44,7 @@ inline Coord operator+(const Coord& lhs, const Coord& rhs) {
 /// Hash function for Coord, enables use in std::unordered_map.
 struct CoordHash {
     inline std::size_t operator()(const Coord& c) const {
-        return std::hash<pos_t>{}(c.x) ^ (std::hash<pos_t>{}(c.y) << 1);
+        return static_cast<std::size_t>(c.x) << 16 | c.y;
     }
 };
 

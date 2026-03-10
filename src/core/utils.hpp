@@ -41,12 +41,15 @@ inline Coord operator+(const Coord& lhs, const Coord& rhs) {
     return Coord(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
+namespace std {
 /// Hash function for Coord, enables use in std::unordered_map.
-struct CoordHash {
-    inline std::size_t operator()(const Coord& c) const {
-        return static_cast<std::size_t>(c.x) << 16 | c.y;
+template <>
+struct hash<Coord> {
+    inline size_t operator()(const Coord& c) const {
+        return static_cast<size_t>(c.x) << 16 | c.y;
     }
 };
+}  // namespace std
 
 /// Helper for std::visit
 template <class... Ts>

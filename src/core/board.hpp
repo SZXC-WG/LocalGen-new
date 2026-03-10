@@ -12,8 +12,8 @@
 #define LGEN_CORE_BOARD_HPP
 
 #include <cassert>
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "move.hpp"
@@ -292,7 +292,7 @@ class InitBoard : public Board {
 
    public:
     /// Spawns and team preferences
-    std::map<Coord, unsigned> spawns;
+    std::unordered_map<Coord, unsigned> spawns;
 
     inline void changeTile(Coord pos, Tile tile) {
         assert(isValidPos(pos));

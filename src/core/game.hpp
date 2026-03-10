@@ -267,7 +267,7 @@ class BasicGame {
     /// Check if a move is a chase (target tile's enemy occupier is moving out).
     inline bool isChaseMove(
         index_t player, const Move& move,
-        const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
+        const std::unordered_map<Coord, index_t>& moveOutMap) const {
         if (move.type != MoveType::MOVE_ARMY) return false;
         const Tile& toTile = board.tileAt(move.to);
 
@@ -285,7 +285,7 @@ class BasicGame {
     /// Get the priority category of a move.
     inline MovePriority getMovePriority(
         index_t player, const Move& move,
-        const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
+        const std::unordered_map<Coord, index_t>& moveOutMap) const {
         if (isChaseMove(player, move, moveOutMap)) return MovePriority::CHASE;
         if (isDefensiveMove(player, move)) return MovePriority::DEFENSIVE;
         if (isAttackGeneral(player, move)) return MovePriority::ATTACK_GENERAL;
@@ -296,7 +296,7 @@ class BasicGame {
     /// Returns true if `a` should execute before `b`.
     inline bool compareMovePriority(
         const std::pair<index_t, Move>& a, const std::pair<index_t, Move>& b,
-        const std::unordered_map<Coord, index_t, CoordHash>& moveOutMap) const {
+        const std::unordered_map<Coord, index_t>& moveOutMap) const {
         const MoveType& tA = a.second.type;
         const MoveType& tB = b.second.type;
         if (tA != tB)
@@ -430,7 +430,7 @@ inline void BasicGame::step() {
 
     // build move-out map for chase detection
     // moveOutMap[coord] = player_index means that player is moving out of coord
-    std::unordered_map<Coord, index_t, CoordHash> moveOutMap;
+    std::unordered_map<Coord, index_t> moveOutMap;
     for (const auto& [player, move] : moves) {
         if (move.type == MoveType::MOVE_ARMY) {
             moveOutMap[move.from] = player;

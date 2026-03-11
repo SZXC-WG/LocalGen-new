@@ -830,7 +830,7 @@ void MapCreatorWindow::fromInitBoard(const InitBoard& board) {
 }
 
 const QString MapCreatorWindow::mapFileFilter =
-    "All Supported Maps (*.lg *.lgmp *.json);;"
+    "All Supported Maps (*.lgmp *.lg *.json);;"
     "Official Generals.io Map (*.json);;"
     "LocalGen v5 (*.lg) - Legacy Format;;"
     "LocalGen v6 (*.lgmp) - Current Format;;";

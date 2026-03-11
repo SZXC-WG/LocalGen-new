@@ -775,17 +775,20 @@ InitBoard MapCreatorWindow::toInitBoard() const {
     InitBoard board(height, width);
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
-            const auto& tile = map->tileAt(r, c);
+            const DisplayTile& tile = map->tileAt(r, c);
             Tile boardTile;
             boardTile.type = tile.type;
             boardTile.lit = tile.lightIcon;
-            // v5 encoding does not support general teams,
-            // so this field is ignored for now
-            // TODO: add warning if team is set
             boardTile.army = tile.text.isEmpty() || tile.type == TILE_SPAWN
                                  ? 0
                                  : tile.text.toInt();
-            board.changeTile({r + 1, c + 1}, boardTile);
+            Coord pos(r + 1, c + 1);
+            board.changeTile(pos, boardTile);
+            if (tile.type == TILE_SPAWN) {
+                board.setSpawn(pos, tile.text.isEmpty()
+                                        ? 0
+                                        : tile.text.at(0).unicode() - 'A' + 1);
+            }
         }
     }
     return board;
@@ -796,7 +799,7 @@ void MapCreatorWindow::fromInitBoard(const InitBoard& board) {
     map->realloc(width, height);
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
-            auto& tile = map->tileAt(r, c);
+            DisplayTile& tile = map->tileAt(r, c);
             const Tile& loadedTile = board.tileAt({r + 1, c + 1});
             tile.type = loadedTile.type;
             switch (loadedTile.type) {
@@ -811,7 +814,13 @@ void MapCreatorWindow::fromInitBoard(const InitBoard& board) {
                     tile.color = loadedTile.army == 0 ? QColor(220, 220, 220)
                                                       : QColor(128, 128, 128);
             };
-            if (loadedTile.army != 0 || loadedTile.type == TILE_CITY)
+            if (loadedTile.type == TILE_SPAWN) {
+                unsigned team = board.getSpawnTeam({r + 1, c + 1});
+                if (team > 0)
+                    tile.text = QString(QLatin1Char('A' + team - 1));
+                else
+                    tile.text.clear();
+            } else if (loadedTile.army != 0 || loadedTile.type == TILE_CITY)
                 tile.text = QString::number(loadedTile.army);
             else
                 tile.text.clear();

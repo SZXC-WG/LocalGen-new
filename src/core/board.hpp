@@ -313,7 +313,7 @@ class InitBoard : public Board {
 
     /// Get the team preference of a spawn.
     /// @return The team preference of the spawn.
-    inline unsigned getSpawnTeam(Coord pos) {
+    inline unsigned getSpawnTeam(Coord pos) const {
         assert(isValidPos(pos) && tileAt(pos).type == TILE_SPAWN);
         return spawns.at(pos);
     };
@@ -399,7 +399,7 @@ class InitBoard : public Board {
                     case 0:  tile.type = TILE_BLANK; break;
                     case 1:  tile.type = TILE_SWAMP; break;
                     case 2:  tile.type = TILE_MOUNTAIN; break;
-                    case 3:  tile.type = TILE_SPAWN; break;
+                    case 3:  setSpawn({i, j}, 0); break;
                     case 4:  tile.type = TILE_CITY; break;
                     case 5:  tile.type = TILE_DESERT; break;
                     case 6:  tile.type = TILE_LOOKOUT; break;

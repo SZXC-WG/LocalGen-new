@@ -66,8 +66,8 @@ LocalGen’s development is organized across three groups of branches:
 
 - **`v5.x`**:  
   This branch covers version 5, which is now going to **long-term maintenance**.  
-  Versions 2 to 5 of LocalGen are built with [EGE Graphics](https://xege.org), and we’re working on creating an object-oriented system based on EGE.  
-  **Note:** Releases for this branch are **Windows-only** due to EGE’s limitations. However, if you want to run it on Linux or macOS, [**Wine**](https://www.winehq.org) might be an option. (We have tested, it worked well on a Ubuntu 22.04 LTS machine.)
+  Versions 2 to 5 of LocalGen are built with [EGE Graphics](https://xege.org) (24.04), and we’re working on creating an object-oriented system based on it.  
+  **Note:** Releases for this branch are **Windows-only** due to EGE 24.04’s limitations. However, if you want to run it on Linux or macOS, [**Wine**](https://www.winehq.org) might be an option. (We have tested, it worked well on a Ubuntu 22.04 LTS machine.)
 
 - **`release`**:  
   This branch is used to store older version releases (v1-v4) and related resources like maps and fonts. For newer version releases, head over to the [releases page](http://github.com/SZXC-WG/LocalGen-new/releases).

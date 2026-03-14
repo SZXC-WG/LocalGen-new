@@ -552,6 +552,8 @@ class ZlyBot_v2_1 : public BasicBot {
             if (!route.empty()) {
                 Move ret =
                     Move(MoveType::MOVE_ARMY, focus[1], route.front(), false);
+                if (focus[1] == generals[id])
+                    ret.takeHalf = true;  // only take half army at general
                 focus[1] = route.front();
                 route.pop_front();
                 leastUsage = std::min((pos_t)route.size(), pos_t(0));

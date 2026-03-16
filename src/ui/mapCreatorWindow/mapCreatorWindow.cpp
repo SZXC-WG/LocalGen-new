@@ -776,18 +776,15 @@ InitBoard MapCreatorWindow::toInitBoard() const {
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
             const DisplayTile& tile = map->tileAt(r, c);
-            Tile boardTile;
+            Tile& boardTile = board.tileAt({r + 1, c + 1});
             boardTile.type = tile.type;
             boardTile.lit = tile.lightIcon;
-            boardTile.army = tile.text.isEmpty() || tile.type == TILE_SPAWN
-                                 ? 0
-                                 : tile.text.toInt();
-            Coord pos(r + 1, c + 1);
-            board.changeTile(pos, boardTile);
-            if (tile.type == TILE_SPAWN) {
-                board.setSpawn(pos, tile.text.isEmpty()
-                                        ? 0
-                                        : tile.text.at(0).unicode() - 'A' + 1);
+            if (tile.text.isEmpty()) {
+                boardTile.army = 0;
+            } else if (tile.type == TILE_SPAWN) {
+                boardTile.spawnTeam = tile.text.at(0).unicode() - 'A' + 1;
+            } else {
+                boardTile.army = tile.text.toInt();
             }
         }
     }
@@ -815,7 +812,7 @@ void MapCreatorWindow::fromInitBoard(const InitBoard& board) {
                                                       : QColor(128, 128, 128);
             };
             if (loadedTile.type == TILE_SPAWN) {
-                unsigned team = board.getSpawnTeam({r + 1, c + 1});
+                unsigned team = loadedTile.spawnTeam;
                 if (team > 0)
                     tile.text = QString(QLatin1Char('A' + team - 1));
                 else

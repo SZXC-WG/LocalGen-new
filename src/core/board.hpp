@@ -290,34 +290,6 @@ class InitBoard : public Board {
     InitBoard() = default;
     InitBoard(pos_t row, pos_t col) : Board(row, col) {};
 
-   public:
-    /// Spawns and team preferences
-    std::unordered_map<Coord, unsigned> spawns;
-
-    inline void changeTile(Coord pos, Tile tile) {
-        assert(isValidPos(pos));
-        tileAt(pos) = tile;
-        if (tile.type == TILE_SPAWN)
-            setSpawn(pos, 0);
-        else
-            spawns.erase(pos);
-    };
-
-    /// Set attributes of a spawn.
-    /// @param team The team preference of the spawn.
-    inline void setSpawn(Coord pos, unsigned team) {
-        assert(isValidPos(pos));
-        if (tileAt(pos).type != TILE_SPAWN) tileAt(pos).type = TILE_SPAWN;
-        spawns[pos] = team;
-    };
-
-    /// Get the team preference of a spawn.
-    /// @return The team preference of the spawn.
-    inline unsigned getSpawnTeam(Coord pos) const {
-        assert(isValidPos(pos) && tileAt(pos).type == TILE_SPAWN);
-        return spawns.at(pos);
-    };
-
     /// Map coding system derived from v5.
     /// v6 is designed to be compatible with v5, so we saved this system.
    private:
@@ -357,7 +329,7 @@ class InitBoard : public Board {
                 }
 
                 char ch = (type << 2) + (tile.lit << 1);
-                k1 = tile.army;
+                k1 = tile.type == TILE_SPAWN ? 0 : tile.army;
 
                 if (k1 < 0) {
                     k1 = -k1;
@@ -393,13 +365,12 @@ class InitBoard : public Board {
                 tile.lit = strUnzip[k] & 1;
                 strUnzip[k] >>= 1;
                 int type = strUnzip[k++];
-                tile.army = 0;
 
                 switch (type) {
                     case 0:  tile.type = TILE_BLANK; break;
                     case 1:  tile.type = TILE_SWAMP; break;
                     case 2:  tile.type = TILE_MOUNTAIN; break;
-                    case 3:  setSpawn({i, j}, 0); break;
+                    case 3:  tile.type = TILE_SPAWN; break;
                     case 4:  tile.type = TILE_CITY; break;
                     case 5:  tile.type = TILE_DESERT; break;
                     case 6:  tile.type = TILE_LOOKOUT; break;
@@ -407,10 +378,15 @@ class InitBoard : public Board {
                     default: break;
                 }
 
-                for (p = 7; p >= 0; p--)
-                    tile.army = (tile.army << 6) + strUnzip[k + p];
+                if (tile.type == TILE_SPAWN)
+                    tile.army = 0;
+                else {
+                    army_t army = 0;
+                    for (p = 7; p >= 0; p--)
+                        army = (army << 6) + strUnzip[k + p];
+                    tile.army = f ? -army : army;
+                }
                 k += 8;
-                tile.army = f ? (-tile.army) : tile.army;
             }
     };
 };

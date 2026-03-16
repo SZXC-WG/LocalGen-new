@@ -49,7 +49,10 @@ inline bool isImpassableTile(tile_type_e type) {
 struct Tile {
     index_t occupier = -1;  // -1 stands for unoccupied
     tile_type_e type = TILE_BLANK;
-    army_t army = 0;
+    union {
+        army_t army = 0;     // for regular tiles
+        unsigned spawnTeam;  // for spawn tiles (InitBoard only)
+    };
     bool lit = false;
 
     Tile() = default;

@@ -225,24 +225,24 @@ InitBoard createRandomBoard(int width, int height) {
     for (int i = 0; i < numMountains; ++i) {
         Coord pos(rng->bounded(height) + 1, rng->bounded(width) + 1);
         int type = rng->bounded(10);
-        board.changeTile(pos, Tile(-1,
-                                   type == 0   ? TILE_LOOKOUT
-                                   : type == 1 ? TILE_OBSERVATORY
-                                               : TILE_MOUNTAIN,
-                                   0));
+        board.tileAt(pos) = Tile(-1,
+                                 type == 0   ? TILE_LOOKOUT
+                                 : type == 1 ? TILE_OBSERVATORY
+                                             : TILE_MOUNTAIN,
+                                 0);
     }
 
     int numCities = rng->bounded(area / 30, area / 15 + 1);
     for (int i = 0; i < numCities; ++i) {
         Coord pos(rng->bounded(height) + 1, rng->bounded(width) + 1);
         army_t army = static_cast<army_t>(rng->bounded(40, 50));
-        board.changeTile(pos, Tile(-1, TILE_CITY, army));
+        board.tileAt(pos) = Tile(-1, TILE_CITY, army);
     }
 
     int numSwamps = rng->bounded(area / 20, area / 15 + 1);
     for (int i = 0; i < numSwamps; ++i) {
         Coord pos(rng->bounded(height) + 1, rng->bounded(width) + 1);
-        board.changeTile(pos, Tile(-1, TILE_SWAMP, 0));
+        board.tileAt(pos) = Tile(-1, TILE_SWAMP, 0);
     }
 
     return board;

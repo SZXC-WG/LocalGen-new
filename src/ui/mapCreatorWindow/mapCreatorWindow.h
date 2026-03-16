@@ -18,6 +18,7 @@
 #include <cstdint>
 
 #include "../mapWidget/mapWidget.h"
+#include "src/core/map.hpp"
 
 class QNetworkAccessManager;
 
@@ -39,13 +40,6 @@ class MapCreatorWindow : public QDialog {
     void onImportFromWeb();
 
    private:
-    struct MapMetadata {
-        QString title;
-        QString author;
-        QDateTime creationDateTime;
-        QString description;
-    };
-
     void setupToolbar();
     void updateToolButtonStyles();
     void setupHintBar();
@@ -68,15 +62,6 @@ class MapCreatorWindow : public QDialog {
     // DisplayBoard <-> InitBoard conversion
     InitBoard toInitBoard() const;
     void fromInitBoard(const InitBoard& board);
-
-    // LG-format Map I/O
-    void openMap_v5(const QString& filename);
-    void openMap_v6(const QString& filename);
-    void saveMap_v5(const QString& filename);
-    void saveMap_v6(const QString& filename);
-
-    // Official map format
-    bool openOfficialMap(const QByteArray& data);
 
     QNetworkAccessManager* networkManager;
 

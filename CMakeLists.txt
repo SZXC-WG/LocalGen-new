@@ -36,6 +36,7 @@ set(PROJECT_SOURCES
         src/core/board.hpp
         src/core/bot.h
         src/core/game.hpp
+        src/core/map.hpp
         src/core/message.hpp
         src/core/move.hpp
         src/core/player.hpp

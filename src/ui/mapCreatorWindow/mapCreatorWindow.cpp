@@ -1,9 +1,6 @@
 #include "mapCreatorWindow.h"
 
-#include <QBitArray>
-#include <QByteArray>
 #include <QComboBox>
-#include <QDataStream>
 #include <QDateTimeEdit>
 #include <QEasingCurve>
 #include <QFileDialog>
@@ -12,8 +9,6 @@
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QInputDialog>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
@@ -25,13 +20,14 @@
 #include <QResizeEvent>
 #include <QSlider>
 #include <QTextEdit>
+#include <QTimer>
 #include <QToolButton>
 #include <QVBoxLayout>
 
 #include "src/core/board.hpp"
+#include "src/core/map.hpp"
 
 namespace {
-constexpr quint32 MAGIC_6 = 0x4C47364D;
 constexpr int METADATA_SIDEBAR_EXPANDED_WIDTH = 236;
 constexpr int METADATA_SIDEBAR_COLLAPSED_WIDTH = 42;
 constexpr int METADATA_SIDEBAR_COLLAPSED_HEIGHT = 156;
@@ -575,7 +571,7 @@ void MapCreatorWindow::setMapMetadata(const MapMetadata& metadata) {
     descriptionEdit->setPlainText(metadata.description);
 }
 
-MapCreatorWindow::MapMetadata MapCreatorWindow::currentMetadata() const {
+MapMetadata MapCreatorWindow::currentMetadata() const {
     return {mapTitleEdit->text(), authorEdit->text(),
             creationDateEdit->dateTime().isValid()
                 ? creationDateEdit->dateTime()
@@ -794,10 +790,19 @@ InitBoard MapCreatorWindow::toInitBoard() const {
 void MapCreatorWindow::fromInitBoard(const InitBoard& board) {
     const int width = board.getWidth(), height = board.getHeight();
     map->realloc(width, height);
+    bool hasBadTiles = false;
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
             DisplayTile& tile = map->tileAt(r, c);
             const Tile& loadedTile = board.tileAt({r + 1, c + 1});
+            tile.lightIcon = loadedTile.lit;
+            if (loadedTile.occupier != -1) {
+                tile.type = TILE_BLANK;
+                tile.color = Qt::red;
+                tile.text = "ERR";
+                hasBadTiles = true;
+                continue;
+            }
             tile.type = loadedTile.type;
             switch (loadedTile.type) {
                 case TILE_MOUNTAIN:
@@ -821,8 +826,14 @@ void MapCreatorWindow::fromInitBoard(const InitBoard& board) {
                 tile.text = QString::number(loadedTile.army);
             else
                 tile.text.clear();
-            tile.lightIcon = loadedTile.lit;
         }
+    }
+    if (hasBadTiles) {
+        QTimer::singleShot(0, this, [this]() {
+            QMessageBox::warning(this, "Warning",
+                                 "Some tiles are not recognized. "
+                                 "Please edit or truncate them before saving.");
+        });
     }
 }
 
@@ -837,279 +848,36 @@ void MapCreatorWindow::onOpenMap() {
         QFileDialog::getOpenFileName(this, "Open Map", "", mapFileFilter);
     if (filename.isEmpty()) return;
 
-    if (filename.endsWith(".lg"))
-        openMap_v5(filename);
-    else if (filename.endsWith(".lgmp"))
-        openMap_v6(filename);
-    else if (filename.endsWith(".json")) {
-        QFile file(filename);
-        if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(this, "Error", "Failed to open map file.");
-            return;
+    MapDocument doc;
+    QString errMsg;
+    if (filename.endsWith(".lg")) {
+        doc.board = openMap_v5(filename, errMsg);
+        if (errMsg.isEmpty()) {
+            QFileInfo fileInfo(filename);
+            doc.metadata.title = fileInfo.completeBaseName();
+            doc.metadata.creationDateTime = fileInfo.birthTime();
         }
-        QByteArray data = file.readAll();
-        file.close();
-        if (!openOfficialMap(data)) {
-            return;
-        }
+    } else if (filename.endsWith(".lgmp")) {
+        doc = openMap_v6(filename, errMsg);
+    } else if (filename.endsWith(".json")) {
+        doc = openOfficialMap(filename, errMsg);
     } else {
-        QMessageBox::critical(this, "Error",
-                              "Unsupported file format. Please select a .lg, "
-                              ".lgmp, or .json file.");
+        errMsg =
+            "Unsupported file format. Please select a "
+            ".lg, .lgmp, or .json file.";
+    }
+
+    if (!errMsg.isEmpty()) {
+        QMessageBox::critical(this, "Error", errMsg);
         return;
     }
+
+    this->fromInitBoard(doc.board);
+    this->setMapMetadata(doc.metadata);
 
     map->fitCenter();
     widthSlider->setValue(map->mapWidth());
     heightSlider->setValue(map->mapHeight());
-}
-
-void MapCreatorWindow::openMap_v5(const QString& filename) {
-    QFile mapFile(filename);
-    if (!mapFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", "Failed to open map file.");
-        return;
-    }
-    QString mapData = mapFile.readLine();
-    mapFile.close();
-    InitBoard board;
-    board.v5Unzip(mapData.toStdString());
-    this->fromInitBoard(board);
-    resetMapMetadata(QFileInfo(filename).completeBaseName());
-}
-
-void MapCreatorWindow::openMap_v6(const QString& filename) {
-    QFile mapFile(filename);
-    if (!mapFile.open(QIODevice::ReadOnly)) {
-        QMessageBox::critical(this, "Error", "Failed to open map file.");
-        return;
-    }
-
-    QDataStream ds(&mapFile);
-    ds.setVersion(QDataStream::Qt_6_7);
-    ds.setByteOrder(QDataStream::BigEndian);
-
-    quint32 magic = 0;
-    ds >> magic;
-    if (magic != MAGIC_6) {
-        QMessageBox::critical(this, "Error",
-                              "Invalid map file: bad magic number.");
-        return;
-    }
-
-    QString mapTitle, author, description;
-    QDateTime creationDateTime;
-    ds >> mapTitle >> author >> creationDateTime >> description;
-
-    quint16 w16, h16;
-    QByteArray compressed;
-    ds >> w16 >> h16 >> compressed;
-
-    if (ds.status() != QDataStream::Ok) {
-        QMessageBox::critical(this, "Error",
-                              "Invalid or corrupted map file format.");
-        return;
-    }
-
-    if (!creationDateTime.isValid()) {
-        QMessageBox::critical(
-            this, "Error",
-            "Invalid .lgmp metadata: creation datetime is missing or "
-            "corrupted.");
-        return;
-    }
-
-    const MapMetadata metadata = {mapTitle, author, creationDateTime,
-                                  description};
-
-    // decompress map data
-    const int width = w16, height = h16;
-    QByteArray raw = qUncompress(compressed);
-    if (raw.isEmpty()) {
-        QMessageBox::critical(
-            this, "Error",
-            "Failed to decompress map data. The file might be corrupted.");
-        return;
-    }
-
-    const int expectedBits = width * height * 19;
-    const int expectedBytes = (expectedBits + 7) / 8;
-    if (raw.size() != expectedBytes) {
-        QMessageBox::critical(
-            this, "Error",
-            "Decompressed data size mismatch. The file is corrupted.");
-        return;
-    }
-
-    QBitArray bits = QBitArray::fromBits(raw.constData(), expectedBits);
-
-    // unpack tile from 19 bits
-    auto unpackTile = [](quint32 p) -> DisplayTile {
-        DisplayTile tile;
-        tile.type = static_cast<tile_type_e>((p >> 16) & 0x7);
-        tile.lightIcon = ((p >> 15) & 0x1);
-        int val = (p & 0x7FFF) - 16384;
-        tile.text = tile.type == TILE_CITY ? QString::number(val)
-                    : val == 0             ? QString()
-                    : tile.type == TILE_SPAWN
-                        ? QString(QLatin1Char('A' + val - 1))
-                        : QString::number(val);
-        switch (tile.type) {
-            case TILE_MOUNTAIN:
-            case TILE_LOOKOUT:
-            case TILE_OBSERVATORY: tile.color.setRgb(187, 187, 187); break;
-            case TILE_DESERT:      tile.color.setRgb(220, 220, 220); break;
-            case TILE_SWAMP:
-            case TILE_CITY:        tile.color.setRgb(128, 128, 128); break;
-            case TILE_SPAWN:       tile.color = Qt::darkCyan; break;
-            default:
-                tile.color = tile.text.isEmpty() ? QColor(220, 220, 220)
-                                                 : QColor(128, 128, 128);
-        };
-        return tile;
-    };
-
-    map->realloc(width, height);
-    int offset = 0;
-    for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
-            quint32 packed = 0;
-            for (int b = 0; b < 19; ++b, ++offset)
-                if (bits.testBit(offset)) packed |= (1u << b);
-            map->tileAt(r, c) = unpackTile(packed);
-        }
-    }
-
-    setMapMetadata(metadata);
-}
-
-bool MapCreatorWindow::openOfficialMap(const QByteArray& data) {
-    QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
-    if (error.error != QJsonParseError::NoError || !doc.isObject()) {
-        QMessageBox::critical(this, "Error", "This is not a valid JSON file.");
-        return false;
-    }
-
-    QJsonObject obj = doc.object();
-    int width = obj.value(QLatin1StringView("width")).toInt(),
-        height = obj.value(QLatin1StringView("height")).toInt();
-    QString mapStr = obj.value(QLatin1StringView("map")).toString();
-    if (width <= 0 || height <= 0 || mapStr.isEmpty()) {
-        QMessageBox::critical(this, "Error",
-                              "Missing or invalid map configuration.");
-        return false;
-    }
-
-    const QString mapTitle = obj.value(QLatin1StringView("title")).toString();
-    const QString author = obj.value(QLatin1StringView("username")).toString();
-    const QString description =
-        obj.value(QLatin1StringView("description")).toString().trimmed();
-    const QString createdAt =
-        obj.value(QLatin1StringView("created_at")).toString();
-
-    if (mapTitle.isEmpty() || createdAt.isEmpty()) {
-        QMessageBox::critical(
-            this, "Error",
-            "Missing required metadata. Official JSON maps must include "
-            "non-empty title and created_at fields.");
-        return false;
-    }
-
-    QDateTime creationDateTime =
-        QDateTime::fromString(createdAt, Qt::ISODateWithMs);
-    if (!creationDateTime.isValid()) {
-        creationDateTime = QDateTime::fromString(createdAt, Qt::ISODate);
-    }
-    if (!creationDateTime.isValid()) {
-        QMessageBox::critical(this, "Error",
-                              "Invalid created_at metadata. Expected an "
-                              "ISO-8601 datetime string.");
-        return false;
-    }
-    creationDateTime = creationDateTime.toLocalTime();
-
-    QStringList tileList = mapStr.split(',');
-    if (tileList.size() != width * height) {
-        QMessageBox::critical(this, "Error",
-                              QString("Inconsistent map data: number of tiles "
-                                      "(%1) does not match width*height (%2).")
-                                  .arg(tileList.size())
-                                  .arg(width * height));
-        return false;
-    }
-
-    bool hasBadTiles = false;
-    map->realloc(width, height);
-    for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
-            QString tileCode = tileList[r * width + c].trimmed();
-            auto& tile = map->tileAt(r, c);
-            tile.text.clear();
-            if (tileCode.startsWith("L_")) {
-                tile.lightIcon = true;
-                tileCode = tileCode.mid(2);
-            }
-            if (tileCode.isEmpty()) {
-                tile.type = TILE_BLANK;
-                tile.color.setRgb(220, 220, 220);
-                continue;
-            }
-            bool ok;
-            int army = tileCode.toInt(&ok);
-            if (ok) {
-                tile.text = QString::number(army);
-                tile.type = TILE_CITY;
-                tile.color.setRgb(128, 128, 128);
-                continue;
-            }
-            switch (tileCode.at(0).unicode()) {
-                case 'g':
-                    tile.type = TILE_SPAWN;
-                    tile.color = Qt::darkCyan;
-                    tile.text = tileCode.mid(1);
-                    continue;
-                case 'm':
-                    tile.type = TILE_MOUNTAIN;
-                    tile.color.setRgb(187, 187, 187);
-                    continue;
-                case 'l':
-                    tile.type = TILE_LOOKOUT;
-                    tile.color.setRgb(187, 187, 187);
-                    continue;
-                case 'o':
-                    tile.type = TILE_OBSERVATORY;
-                    tile.color.setRgb(187, 187, 187);
-                    continue;
-                case 'd':
-                    tile.type = TILE_DESERT;
-                    tile.color.setRgb(220, 220, 220);
-                    continue;
-                case 's':
-                    tile.type = TILE_SWAMP;
-                    tile.color.setRgb(128, 128, 128);
-                    continue;
-                case 'n':
-                    tile.type = TILE_NEUTRAL;
-                    tile.color.setRgb(128, 128, 128);
-                    tile.text = tileCode.mid(1);
-                    continue;
-                default:
-                    tile.type = TILE_BLANK;
-                    tile.color = Qt::red;
-                    tile.text = "ERR";
-                    hasBadTiles = true;
-            }
-        }
-    }
-    if (hasBadTiles) {
-        QMessageBox::warning(this, "Warning",
-                             "Some tiles are not recognized. "
-                             "Please edit or truncate them before saving.");
-    }
-
-    setMapMetadata({mapTitle, author, creationDateTime, description});
-    return true;
 }
 
 void MapCreatorWindow::onImportFromWeb() {
@@ -1131,7 +899,7 @@ void MapCreatorWindow::onImportFromWeb() {
     }
 
     QNetworkReply* reply = networkManager->get(request);
-    connect(reply, &QNetworkReply::finished, this, [this, reply, mapTitle]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         reply->deleteLater();
 
         // Check for HTTP errors
@@ -1153,9 +921,14 @@ void MapCreatorWindow::onImportFromWeb() {
 
         // Finally: parse the response
         QByteArray data = reply->readAll();
-        if (!openOfficialMap(data)) {
+        QString errMsg;
+        MapDocument doc = openOfficialMap(data, errMsg);
+        if (!errMsg.isEmpty()) {
+            QMessageBox::critical(this, "Error", errMsg);
             return;
         }
+        this->fromInitBoard(doc.board);
+        this->setMapMetadata(doc.metadata);
         map->fitCenter();
         widthSlider->setValue(map->mapWidth());
         heightSlider->setValue(map->mapHeight());
@@ -1167,81 +940,26 @@ void MapCreatorWindow::onSaveMap() {
         QFileDialog::getSaveFileName(this, "Save Map", "", mapFileFilter);
     if (filename.isEmpty()) return;
 
-    if (filename.endsWith(".lg"))
-        saveMap_v5(filename);
-    else if (filename.endsWith(".lgmp"))
-        saveMap_v6(filename);
-    else
-        QMessageBox::critical(this, "Error",
-                              "Unsupported file format. Please select a .lg or "
-                              ".lgmp file.");
-}
+    MapDocument doc{currentMetadata(), toInitBoard()};
 
-void MapCreatorWindow::saveMap_v5(const QString& filename) {
-    if (QMessageBox::warning(
-            this, "Legacy Format Warning",
-            "The .lg format does not support map metadata. Title, author, and "
-            "creation date, and description will not be saved.",
-            QMessageBox::Ok | QMessageBox::Cancel,
-            QMessageBox::Cancel) == QMessageBox::Cancel) {
-        return;
-    }
-
-    // v5 map format
-    QFile mapFile(filename);
-    if (!mapFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", "Failed to open map file.");
-        return;
-    }
-
-    InitBoard board = toInitBoard();
-    mapFile.write(QString::fromStdString(board.v5Zip()).toUtf8());
-}
-
-void MapCreatorWindow::saveMap_v6(const QString& filename) {
-    int width = map->mapWidth(), height = map->mapHeight();
-    const MapMetadata metadata = currentMetadata();
-
-    // 19 bits per tile, thus packed into uint32
-    auto packTile = [](const DisplayTile& tile) -> quint32 {
-        // [18..16] type (3) | [15] lit | [14..0] army+16384
-        int type = tile.type, lit = tile.lightIcon,
-            val = tile.text.isEmpty() ? 0
-                  : tile.type == TILE_SPAWN
-                      ? tile.text.at(0).unicode() - 'A' + 1
-                      : tile.text.toInt();
-        return (type << 16) | (lit << 15) | (val + 16384);
-    };
-
-    QBitArray bits(height * width * 19);
-    int offset = 0;
-    for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
-            quint32 packed = packTile(map->tileAt(r, c));
-            for (int b = 0; b < 19; ++b, ++offset) {
-                bits.setBit(offset, (packed >> b) & 1);
-            }
+    QString errMsg;
+    if (filename.endsWith(".lg")) {
+        if (QMessageBox::warning(
+                this, "Legacy Format Warning",
+                "The .lg format does not support map metadata. Title, author, "
+                "creation date, and description will not be saved.",
+                QMessageBox::Ok | QMessageBox::Cancel,
+                QMessageBox::Cancel) == QMessageBox::Cancel) {
+            return;
         }
+        saveMap_v5(filename, doc.board, errMsg);
+    } else if (filename.endsWith(".lgmp")) {
+        saveMap_v6(filename, doc, errMsg);
+    } else {
+        errMsg = "Unsupported file format. Please select a .lg or .lgmp file.";
     }
 
-    // deflate
-    const int byteLen = (bits.size() + 7) / 8;
-    const uchar* src = reinterpret_cast<const uchar*>(bits.bits());
-    QByteArray compressed = qCompress(src, byteLen, 9);
-
-    QFile mapFile(filename);
-    if (!mapFile.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this, "Error", "Failed to open map file.");
-        return;
+    if (!errMsg.isEmpty()) {
+        QMessageBox::critical(this, "Error", errMsg);
     }
-
-    QDataStream ds(&mapFile);
-    ds.setVersion(QDataStream::Qt_6_7);
-    ds.setByteOrder(QDataStream::BigEndian);
-
-    ds << MAGIC_6 << metadata.title << metadata.author
-       << metadata.creationDateTime << metadata.description;
-    ds << quint16(width) << quint16(height) << compressed;
-
-    mapFile.close();
 }

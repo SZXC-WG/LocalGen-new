@@ -301,7 +301,7 @@ class InitBoard : public Board {
     static constexpr int CHAR_AD = 48;
 
    public:
-    std::string v5Zip() {
+    std::string v5Zip() const {
         std::string strZip;
         int i, j;
         intmax_t k1 = row, k2 = col;

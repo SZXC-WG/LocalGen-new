@@ -21,6 +21,7 @@
 #include <QJsonParseError>
 #include <QMessageBox>
 #include <QString>
+#include <string>
 
 #include "board.hpp"
 
@@ -37,8 +38,105 @@ struct MapDocument {
 };
 
 namespace {
+
 constexpr quint32 MAGIC_6 = 0x4C47364D;
-}
+
+inline intmax_t PMod(intmax_t& x) {
+    intmax_t res = x & 63;  // 63 = 0b111111
+    x >>= 6;
+    return res;
+};
+constexpr int CHAR_AD = 48;
+
+std::string v5Zip(const InitBoard& board) {
+    const int row = board.getHeight(), col = board.getWidth();
+
+    std::string strZip;
+    intmax_t k1 = row, k2 = col;
+    strZip.push_back(PMod(k1) + CHAR_AD);
+    strZip.push_back(PMod(k1) + CHAR_AD);
+    strZip.push_back(PMod(k2) + CHAR_AD);
+    strZip.push_back(PMod(k2) + CHAR_AD);
+
+    for (int i = 1; i <= row; i++)
+        for (int j = 1; j <= col; j++) {
+            const Tile& tile = board.tileAt(i, j);
+            strZip.push_back(tile.occupier + CHAR_AD);
+
+            int type = 0;
+            switch (tile.type) {
+                case TILE_BLANK:       type = 0; break;
+                case TILE_SWAMP:       type = 1; break;
+                case TILE_MOUNTAIN:    type = 2; break;
+                case TILE_SPAWN:       type = 3; break;
+                case TILE_CITY:        type = 4; break;
+                case TILE_DESERT:      type = 5; break;
+                case TILE_LOOKOUT:     type = 6; break;
+                case TILE_OBSERVATORY: type = 7; break;
+                default:               break;
+            }
+
+            char ch = (type << 2) + (tile.lit << 1);
+            k1 = tile.type == TILE_SPAWN ? 0 : tile.army;
+
+            if (k1 < 0) {
+                k1 = -k1;
+                strZip.push_back(ch += CHAR_AD + 1);
+            } else
+                strZip.push_back(ch += CHAR_AD);
+
+            for (k2 = 1; k2 <= 8; k2++) strZip.push_back(PMod(k1) + CHAR_AD);
+        }
+    return strZip;
+};
+
+InitBoard v5Unzip(std::string strUnzip) {
+    strUnzip.push_back('\0');
+
+    int k = 4, p = 0;
+    for (; strUnzip[p] != '\0'; p++) strUnzip[p] -= CHAR_AD;
+
+    const int row = (strUnzip[1] << 6) + strUnzip[0];
+    const int col = (strUnzip[3] << 6) + strUnzip[2];
+
+    InitBoard board(row, col);
+    for (int i = 1; i <= row; i++)
+        for (int j = 1; j <= col; j++) {
+            Tile& tile = board.tileAt(i, j);
+            tile.occupier = strUnzip[k++];
+            if (tile.occupier == 0) tile.occupier = -1;
+            bool f = strUnzip[k] & 1;
+            strUnzip[k] >>= 1;
+            tile.lit = strUnzip[k] & 1;
+            strUnzip[k] >>= 1;
+            int type = strUnzip[k++];
+
+            switch (type) {
+                case 0:  tile.type = TILE_BLANK; break;
+                case 1:  tile.type = TILE_SWAMP; break;
+                case 2:  tile.type = TILE_MOUNTAIN; break;
+                case 3:  tile.type = TILE_SPAWN; break;
+                case 4:  tile.type = TILE_CITY; break;
+                case 5:  tile.type = TILE_DESERT; break;
+                case 6:  tile.type = TILE_LOOKOUT; break;
+                case 7:  tile.type = TILE_OBSERVATORY; break;
+                default: break;
+            }
+
+            if (tile.type == TILE_SPAWN)
+                tile.army = 0;
+            else {
+                army_t army = 0;
+                for (p = 7; p >= 0; p--) army = (army << 6) + strUnzip[k + p];
+                tile.army = f ? -army : army;
+            }
+            k += 8;
+        }
+
+    return board;
+};
+
+}  // namespace
 
 inline InitBoard openMap_v5(const QString& filename, QString& errMsg) {
     QFile mapFile(filename);
@@ -48,9 +146,7 @@ inline InitBoard openMap_v5(const QString& filename, QString& errMsg) {
     }
     QString mapData = mapFile.readLine();
     mapFile.close();
-    InitBoard board;
-    board.v5Unzip(mapData.toStdString());
-    return board;
+    return v5Unzip(mapData.toStdString());
 };
 
 inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
@@ -256,7 +352,7 @@ inline void saveMap_v5(const QString& filename, const InitBoard& board,
         errMsg = "Failed to open map file.";
         return;
     }
-    mapFile.write(QString::fromStdString(board.v5Zip()).toUtf8());
+    mapFile.write(QString::fromStdString(v5Zip(board)).toUtf8());
 };
 
 inline void saveMap_v6(const QString& filename, const MapDocument& doc,

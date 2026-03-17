@@ -47,6 +47,7 @@ class MapWidget : public QWidget {
 
     void bindMoveQueue(std::deque<Move>* queue);
     void setFocusCell(int r, int c);
+    void centerOnCell(int r, int c);
 
    signals:
     void cellClicked(int r, int c);

@@ -580,6 +580,15 @@ void MapWidget::setFocusCell(int r, int c) {
     update();
 }
 
+void MapWidget::centerOnCell(int r, int c) {
+    focusRow = r, focusCol = c;
+    qreal cellPixelSize = cellSize * scale;
+    QPointF cellCenter((c + 0.5) * cellPixelSize, (r + 0.5) * cellPixelSize);
+    QPointF widgetCenter(width() * 0.5, height() * 0.5);
+    offset = widgetCenter - cellCenter;
+    update();
+}
+
 void MapWidget::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);
     fitCenter();

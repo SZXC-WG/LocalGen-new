@@ -15,7 +15,7 @@ class QResizeEvent;
 
 #include "../localGameDialog/localGameDialog.h"
 #include "../mapWidget/mapWidget.h"
-#include "src/core/player.hpp"
+#include "core/player.hpp"
 
 namespace game {
 class BasicGame;

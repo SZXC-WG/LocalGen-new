@@ -12,8 +12,8 @@
 #include <queue>
 #include <random>
 
-#include "../core/bot.h"
-#include "../core/game.hpp"
+#include "core/bot.h"
+#include "core/game.hpp"
 
 class ZlyBot : public BasicBot {
    private:

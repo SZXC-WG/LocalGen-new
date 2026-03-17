@@ -24,8 +24,8 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
-#include "src/core/board.hpp"
-#include "src/core/map.hpp"
+#include "core/board.hpp"
+#include "core/map.hpp"
 
 namespace {
 constexpr int METADATA_SIDEBAR_EXPANDED_WIDTH = 236;

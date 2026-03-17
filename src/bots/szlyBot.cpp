@@ -15,8 +15,8 @@
 #include <random>
 #include <vector>
 
-#include "../core/bot.h"
-#include "../core/game.hpp"
+#include "core/bot.h"
+#include "core/game.hpp"
 
 class SzlyBot : public BasicBot {
    private:

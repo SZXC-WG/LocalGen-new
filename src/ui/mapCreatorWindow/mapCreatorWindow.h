@@ -18,7 +18,7 @@
 #include <cstdint>
 
 #include "../mapWidget/mapWidget.h"
-#include "src/core/map.hpp"
+#include "core/map.hpp"
 
 class QNetworkAccessManager;
 

@@ -12,6 +12,13 @@
 
 LocalGameDialog::LocalGameDialog(QWidget* parent)
     : QDialog(parent), ui(new Ui::LocalGameDialog) {
+    // Promote this dialog to a regular top-level window so desktop switching
+    // treats it like the main window.
+    Qt::WindowFlags flags = windowFlags();
+    flags |= Qt::Window;
+    flags &= ~Qt::Dialog;
+    setWindowFlags(flags);
+
     ui->setupUi(this);
     on_spinBox_numPlayers_valueChanged(ui->spinBox_numPlayers->value());
 }

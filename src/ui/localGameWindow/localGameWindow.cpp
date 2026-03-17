@@ -252,6 +252,14 @@ Board createRandomBoard(int width, int height) {
 
 LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     : QDialog(parent) {
+    // Present the gameplay UI as a regular top-level window to keep it on the
+    // current virtual desktop.
+    Qt::WindowFlags flags = windowFlags();
+    flags |= Qt::Window;
+    flags |= Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint;
+    flags &= ~Qt::Dialog;
+    setWindowFlags(flags);
+
     setWindowTitle("Local Game");
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor(36, 36, 36));
@@ -309,8 +317,6 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     layout->addWidget(gameMap);
     setLayout(layout);
     resize(800, 600);
-    setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint |
-                   Qt::WindowMinimizeButtonHint);
 
     turnLabel = new QLabel("Turn 0", this);
     turnLabel->setFont(QFont("Quicksand", 18, QFont::Bold));

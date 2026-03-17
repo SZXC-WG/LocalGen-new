@@ -766,9 +766,9 @@ void MapCreatorWindow::repositionFloatingElements() {
     }
 }
 
-InitBoard MapCreatorWindow::toInitBoard() const {
+Board MapCreatorWindow::toBoard() const {
     const int width = map->mapWidth(), height = map->mapHeight();
-    InitBoard board(height, width);
+    Board board(height, width);
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
             const DisplayTile& tile = map->tileAt(r, c);
@@ -787,7 +787,7 @@ InitBoard MapCreatorWindow::toInitBoard() const {
     return board;
 }
 
-void MapCreatorWindow::fromInitBoard(const InitBoard& board) {
+void MapCreatorWindow::fromBoard(const Board& board) {
     const int width = board.getWidth(), height = board.getHeight();
     map->realloc(width, height);
     bool hasBadTiles = false;
@@ -872,7 +872,7 @@ void MapCreatorWindow::onOpenMap() {
         return;
     }
 
-    this->fromInitBoard(doc.board);
+    this->fromBoard(doc.board);
     this->setMapMetadata(doc.metadata);
 
     map->fitCenter();
@@ -927,7 +927,7 @@ void MapCreatorWindow::onImportFromWeb() {
             QMessageBox::critical(this, "Error", errMsg);
             return;
         }
-        this->fromInitBoard(doc.board);
+        this->fromBoard(doc.board);
         this->setMapMetadata(doc.metadata);
         map->fitCenter();
         widthSlider->setValue(map->mapWidth());
@@ -940,7 +940,7 @@ void MapCreatorWindow::onSaveMap() {
         QFileDialog::getSaveFileName(this, "Save Map", "", mapFileFilter);
     if (filename.isEmpty()) return;
 
-    MapDocument doc{currentMetadata(), toInitBoard()};
+    MapDocument doc{currentMetadata(), toBoard()};
 
     QString errMsg;
     if (filename.endsWith(".lg")) {

@@ -328,7 +328,7 @@ class BasicGame {
     BasicGame() = delete;
     BasicGame(bool remainIndex, std::vector<Player*> _players,
               std::vector<index_t> _teams, std::vector<std::string> name,
-              InitBoard _board);
+              Board _board);
     ~BasicGame();
 
    public:
@@ -351,11 +351,11 @@ class BasicGame {
     }
 
    protected:
-    InitBoard initialBoard;
+    Board initialBoard;
 
    public:
-    inline void setInitialBoard(InitBoard initial) { initialBoard = initial; }
-    inline InitBoard getInitialBoard() { return initialBoard; }
+    inline void setInitialBoard(Board initial) { initialBoard = initial; }
+    inline Board getInitialBoard() { return initialBoard; }
 
    protected:
     struct ReplayUnit {};
@@ -379,7 +379,7 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
 
 inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
                             std::vector<index_t> _teams,
-                            std::vector<std::string> name, InitBoard _board)
+                            std::vector<std::string> name, Board _board)
     : initialBoard(_board),
       players(_players.size()),
       playerViews(_players.size()),

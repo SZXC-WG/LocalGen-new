@@ -51,7 +51,7 @@ struct Tile {
     tile_type_e type = TILE_BLANK;
     union {
         army_t army = 0;     // for regular tiles
-        unsigned spawnTeam;  // for spawn tiles (InitBoard only)
+        unsigned spawnTeam;  // for spawn tiles
     };
     bool lit = false;
 

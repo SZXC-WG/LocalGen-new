@@ -284,11 +284,4 @@ class Board {
     };
 };
 
-/// Derived class for initial boards (pre-game boards).
-class InitBoard : public Board {
-   public:
-    InitBoard() = default;
-    InitBoard(pos_t row, pos_t col) : Board(row, col) {};
-};
-
 #endif  // LGEN_CORE_BOARD_HPP

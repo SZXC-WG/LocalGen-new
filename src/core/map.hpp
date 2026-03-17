@@ -34,7 +34,7 @@ struct MapMetadata {
 
 struct MapDocument {
     MapMetadata metadata;
-    InitBoard board;
+    Board board;
 };
 
 namespace {
@@ -48,7 +48,7 @@ inline intmax_t PMod(intmax_t& x) {
 };
 constexpr int CHAR_AD = 48;
 
-std::string v5Zip(const InitBoard& board) {
+std::string v5Zip(const Board& board) {
     const int row = board.getHeight(), col = board.getWidth();
 
     std::string strZip;
@@ -90,7 +90,7 @@ std::string v5Zip(const InitBoard& board) {
     return strZip;
 };
 
-InitBoard v5Unzip(std::string strUnzip) {
+Board v5Unzip(std::string strUnzip) {
     strUnzip.push_back('\0');
 
     int k = 4, p = 0;
@@ -99,7 +99,7 @@ InitBoard v5Unzip(std::string strUnzip) {
     const int row = (strUnzip[1] << 6) + strUnzip[0];
     const int col = (strUnzip[3] << 6) + strUnzip[2];
 
-    InitBoard board(row, col);
+    Board board(row, col);
     for (int i = 1; i <= row; i++)
         for (int j = 1; j <= col; j++) {
             Tile& tile = board.tileAt(i, j);
@@ -138,11 +138,11 @@ InitBoard v5Unzip(std::string strUnzip) {
 
 }  // namespace
 
-inline InitBoard openMap_v5(const QString& filename, QString& errMsg) {
+inline Board openMap_v5(const QString& filename, QString& errMsg) {
     QFile mapFile(filename);
     if (!mapFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         errMsg = "Failed to open map file.";
-        return InitBoard();
+        return Board();
     }
     QString mapData = mapFile.readLine();
     mapFile.close();
@@ -219,7 +219,7 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
         return tile;
     };
 
-    InitBoard board(height, width);
+    Board board(height, width);
     int offset = 0;
     for (int r = 1; r <= height; ++r) {
         for (int c = 1; c <= width; ++c) {
@@ -287,7 +287,7 @@ inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
         return MapDocument();
     }
 
-    InitBoard board(height, width);
+    Board board(height, width);
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
             QString tileCode = tileList[r * width + c].trimmed();
@@ -345,7 +345,7 @@ inline MapDocument openOfficialMap(const QString& filename, QString& errMsg) {
     return openOfficialMap(data, errMsg);
 }
 
-inline void saveMap_v5(const QString& filename, const InitBoard& board,
+inline void saveMap_v5(const QString& filename, const Board& board,
                        QString& errMsg) {
     QFile mapFile(filename);
     if (!mapFile.open(QIODevice::WriteOnly | QIODevice::Text)) {

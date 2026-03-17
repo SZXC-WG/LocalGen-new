@@ -59,9 +59,9 @@ class MapCreatorWindow : public QDialog {
     void resizeEvent(QResizeEvent* event) override;
     void repositionFloatingElements();
 
-    // DisplayBoard <-> InitBoard conversion
-    InitBoard toInitBoard() const;
-    void fromInitBoard(const InitBoard& board);
+    // DisplayBoard <-> Board conversion
+    Board toBoard() const;
+    void fromBoard(const Board& board);
 
     QNetworkAccessManager* networkManager;
 

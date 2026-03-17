@@ -216,8 +216,8 @@ inline DisplayTile toDisplayTile(const TileView& tile) {
     return display;
 }
 
-InitBoard createRandomBoard(int width, int height) {
-    InitBoard board(height, width);
+Board createRandomBoard(int width, int height) {
+    Board board(height, width);
 
     QRandomGenerator* rng = QRandomGenerator::global();
     int area = width * height;
@@ -295,8 +295,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         names.push_back(stdName);
     }
 
-    InitBoard initialBoard =
-        createRandomBoard(config.mapWidth, config.mapHeight);
+    Board initialBoard = createRandomBoard(config.mapWidth, config.mapHeight);
     game = new game::BasicGame(true, players, teams, names, initialBoard);
     if (game->init() != 0) {
         QMessageBox::critical(this, "Local Game",

@@ -551,7 +551,8 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
                 break;
             default: QWidget::keyPressEvent(event); return;
         }
-        if (key < Qt::Key_I || key > Qt::Key_L) {
+        bool noMoveMask = event->modifiers() & Qt::ShiftModifier;
+        if (!noMoveMask && (key < Qt::Key_I || key > Qt::Key_L)) {
             if (isImpassableTile(tileAt(focusRow, focusCol).type)) {
                 focusRow = oldRow;
                 focusCol = oldCol;

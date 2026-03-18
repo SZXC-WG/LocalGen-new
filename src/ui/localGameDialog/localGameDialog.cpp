@@ -1,14 +1,43 @@
 #include "localGameDialog.h"
 
 #include <QComboBox>
+#include <QCoreApplication>
+#include <QDir>
+#include <QFileInfo>
 #include <QFont>
 #include <QHBoxLayout>
+#include <QHash>
 #include <QLabel>
 #include <QRandomGenerator>
 #include <QStringList>
 
 #include "core/bot.h"
+#include "core/map.hpp"
 #include "ui_localGameDialog.h"
+
+namespace {
+
+constexpr int MapPathRole = Qt::UserRole;
+constexpr int MapWidthRole = Qt::UserRole + 1;
+constexpr int MapHeightRole = Qt::UserRole + 2;
+
+struct LocalMapChoice {
+    QString filePath;
+    QString fileName;
+    QString displayName;
+    int width = 0;
+    int height = 0;
+};
+
+QStringList toQStringList(const std::vector<std::string>& vec) {
+    QStringList list;
+    for (const auto& str : vec) {
+        list.append(QString::fromStdString(str));
+    }
+    return list;
+}
+
+}  // namespace
 
 LocalGameDialog::LocalGameDialog(QWidget* parent)
     : QDialog(parent), ui(new Ui::LocalGameDialog) {
@@ -20,6 +49,9 @@ LocalGameDialog::LocalGameDialog(QWidget* parent)
     setWindowFlags(flags);
 
     ui->setupUi(this);
+    randomMapWidth = ui->spinBox_mapWidth->value();
+    randomMapHeight = ui->spinBox_mapHeight->value();
+    populateAvailableMaps();
     on_spinBox_numPlayers_valueChanged(ui->spinBox_numPlayers->value());
 }
 
@@ -31,6 +63,8 @@ LocalGameConfig LocalGameDialog::config() const {
     config.enableSounds = ui->checkBox_enableSounds->isChecked();
     config.showAnalysis = ui->checkBox_showAnalysis->isChecked();
     config.mapName = ui->comboBox_gameMap->currentText();
+    config.mapFilePath =
+        ui->comboBox_gameMap->currentData(MapPathRole).toString();
     config.mapWidth = ui->spinBox_mapWidth->value();
     config.mapHeight = ui->spinBox_mapHeight->value();
     int numPlayers = ui->spinBox_numPlayers->value();
@@ -50,13 +84,58 @@ void LocalGameDialog::on_btnStartGame_clicked() {
 
 void LocalGameDialog::on_btnCancel_clicked() { this->done(QDialog::Rejected); }
 
-// Helper: vector<string> -> QStringList
-QStringList toQStringList(const std::vector<std::string>& vec) {
-    QStringList list;
-    for (const auto& str : vec) {
-        list.append(QString::fromStdString(str));
+void LocalGameDialog::populateAvailableMaps() {
+    auto* mapCombo = ui->comboBox_gameMap;
+    mapCombo->clear();
+    mapCombo->addItem("Standard", QString());
+
+    const QString standardLabel = mapCombo->itemText(0);
+    QHash<QString, int> displayNameCounts;
+    displayNameCounts.insert(standardLabel, 1);
+
+    std::vector<LocalMapChoice> choices;
+    QDir mapsDir(QDir(QCoreApplication::applicationDirPath()).filePath("maps"));
+    if (mapsDir.exists()) {
+        const QFileInfoList mapFiles = mapsDir.entryInfoList(
+            QStringList{"*.lgmp"}, QDir::Files | QDir::NoSymLinks,
+            QDir::Name | QDir::IgnoreCase);
+        choices.reserve(mapFiles.size());
+
+        for (const QFileInfo& fileInfo : mapFiles) {
+            QString errMsg;
+            MapDocument doc = openMap_v6(fileInfo.absoluteFilePath(), errMsg);
+            if (!errMsg.isEmpty()) continue;
+            if (doc.board.getWidth() <= 0 || doc.board.getHeight() <= 0)
+                continue;
+
+            LocalMapChoice choice;
+            choice.filePath = fileInfo.absoluteFilePath();
+            choice.fileName = fileInfo.fileName();
+            choice.displayName = doc.metadata.title.trimmed();
+            if (choice.displayName.isEmpty()) {
+                choice.displayName = fileInfo.fileName();
+            }
+            choice.width = doc.board.getWidth();
+            choice.height = doc.board.getHeight();
+            choices.push_back(choice);
+            ++displayNameCounts[choice.displayName];
+        }
     }
-    return list;
+
+    for (const LocalMapChoice& choice : choices) {
+        QString displayName = choice.displayName;
+        if (displayNameCounts.value(displayName) > 1) {
+            displayName = QString("%1 (%2)").arg(displayName, choice.fileName);
+        }
+
+        const int index = mapCombo->count();
+        mapCombo->addItem(displayName, choice.filePath);
+        mapCombo->setItemData(index, choice.width, MapWidthRole);
+        mapCombo->setItemData(index, choice.height, MapHeightRole);
+    }
+
+    mapCombo->setCurrentIndex(0);
+    on_comboBox_gameMap_currentIndexChanged(0);
 }
 
 void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
@@ -92,4 +171,37 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
         playerWidget->setLayout(playerLayout);
         layout->addWidget(playerWidget);
     }
+}
+
+void LocalGameDialog::on_comboBox_gameMap_currentIndexChanged(int index) {
+    if (index < 0) return;
+
+    const QString mapFilePath =
+        ui->comboBox_gameMap->itemData(index, MapPathRole).toString();
+
+    updatingMapControls = true;
+    if (mapFilePath.isEmpty()) {
+        ui->spinBox_mapWidth->setEnabled(true);
+        ui->spinBox_mapHeight->setEnabled(true);
+        ui->spinBox_mapWidth->setValue(randomMapWidth);
+        ui->spinBox_mapHeight->setValue(randomMapHeight);
+    } else {
+        ui->spinBox_mapWidth->setValue(
+            ui->comboBox_gameMap->itemData(index, MapWidthRole).toInt());
+        ui->spinBox_mapHeight->setValue(
+            ui->comboBox_gameMap->itemData(index, MapHeightRole).toInt());
+        ui->spinBox_mapWidth->setEnabled(false);
+        ui->spinBox_mapHeight->setEnabled(false);
+    }
+    updatingMapControls = false;
+}
+
+void LocalGameDialog::on_spinBox_mapWidth_valueChanged(int value) {
+    if (updatingMapControls || !ui->spinBox_mapWidth->isEnabled()) return;
+    randomMapWidth = value;
+}
+
+void LocalGameDialog::on_spinBox_mapHeight_valueChanged(int value) {
+    if (updatingMapControls || !ui->spinBox_mapHeight->isEnabled()) return;
+    randomMapHeight = value;
 }

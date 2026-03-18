@@ -22,6 +22,7 @@ void MainWindow::on_btnLocalGame_clicked() {
     if (result == QDialog::Accepted) {
         // Use the same top-level window behavior for the in-game window.
         LocalGameWindow window(nullptr, dialog.config());
+        if (window.layout() == nullptr) return;
         window.exec();
     }
 }

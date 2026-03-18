@@ -14,6 +14,7 @@
 
 #include "core/bot.h"
 #include "core/game.hpp"
+#include "core/map.hpp"
 
 FloatingLeaderboardWidget::FloatingLeaderboardWidget(QWidget* parent)
     : QWidget(parent) {
@@ -265,7 +266,29 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     pal.setColor(QPalette::Window, QColor(36, 36, 36));
     setPalette(pal);
 
-    gameMap = new MapWidget(this, config.mapWidth, config.mapHeight, true, 25);
+    Board initialBoard;
+    if (config.mapFilePath.isEmpty()) {
+        initialBoard = createRandomBoard(config.mapWidth, config.mapHeight);
+    } else {
+        QString errMsg;
+        MapDocument mapDoc = openMap_v6(config.mapFilePath, errMsg);
+        if (!errMsg.isEmpty()) {
+            QMessageBox::critical(
+                this, "Local Game",
+                QString("Failed to load the selected map.\n%1").arg(errMsg));
+            return;
+        }
+        initialBoard = mapDoc.board;
+    }
+
+    if (initialBoard.getWidth() <= 0 || initialBoard.getHeight() <= 0) {
+        QMessageBox::critical(this, "Local Game",
+                              QString("The selected map is empty or invalid."));
+        return;
+    }
+
+    gameMap = new MapWidget(this, initialBoard.getWidth(),
+                            initialBoard.getHeight(), true, 25);
     halfTurnTimer = new QTimer(this);
     halfTurnTimer->setSingleShot(true);
     halfTurnTimer->setTimerType(Qt::PreciseTimer);
@@ -303,13 +326,21 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         names.push_back(stdName);
     }
 
-    Board initialBoard = createRandomBoard(config.mapWidth, config.mapHeight);
     game = new game::BasicGame(true, players, teams, names, initialBoard);
-    if (game->init() != 0) {
-        QMessageBox::critical(this, "Local Game",
-                              "Failed to initialize local game.");
+    const int initResult = game->init();
+    if (initResult != 0) {
+        QString errMsg = "Failed to initialize local game.";
+        if (initResult == 1) {
+            errMsg = QString(
+                         "The selected map does not have enough spawn points "
+                         "or blank tiles to accommodate %1 players.")
+                         .arg(static_cast<int>(config.players.size()));
+        }
+        QMessageBox::critical(this, "Local Game", errMsg);
         delete game;
         game = nullptr;
+        humanPlayer = nullptr;
+        return;
     }
 
     QVBoxLayout* layout = new QVBoxLayout(this);
@@ -437,8 +468,10 @@ void LocalGameWindow::stopGameLoop() {
     if (halfTurnTimer != nullptr && halfTurnTimer->isActive()) {
         halfTurnTimer->stop();
     }
-    gameMap->bindMoveQueue(nullptr);
-    gameMap->setFocusEnabled(false);
+    if (gameMap != nullptr) {
+        gameMap->bindMoveQueue(nullptr);
+        gameMap->setFocusEnabled(false);
+    }
 }
 
 void LocalGameWindow::updateLeaderboard(

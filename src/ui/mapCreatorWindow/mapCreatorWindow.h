@@ -65,7 +65,8 @@ class MapCreatorWindow : public QDialog {
 
     QNetworkAccessManager* networkManager;
 
-    static const QString mapFileFilter;
+    static const QString openMapFileFilter;
+    static const QString saveMapFileFilter;
 
     MapWidget* map;
     QWidget* toolbar;

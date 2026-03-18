@@ -843,15 +843,18 @@ void MapCreatorWindow::fromBoard(const Board& board) {
     }
 }
 
-const QString MapCreatorWindow::mapFileFilter =
+const QString MapCreatorWindow::openMapFileFilter =
     "All Supported Maps (*.lgmp *.lg *.json);;"
     "Official Generals.io Map (*.json);;"
     "LocalGen v5 (*.lg) - Legacy Format;;"
     "LocalGen v6 (*.lgmp) - Current Format;;";
 
+const QString MapCreatorWindow::saveMapFileFilter =
+    "LocalGen v6 (*.lgmp) - Current Format";
+
 void MapCreatorWindow::onOpenMap() {
     QString filename =
-        QFileDialog::getOpenFileName(this, "Open Map", "", mapFileFilter);
+        QFileDialog::getOpenFileName(this, "Open Map", "", openMapFileFilter);
     if (filename.isEmpty()) return;
 
     MapDocument doc;
@@ -943,27 +946,17 @@ void MapCreatorWindow::onImportFromWeb() {
 
 void MapCreatorWindow::onSaveMap() {
     QString filename =
-        QFileDialog::getSaveFileName(this, "Save Map", "", mapFileFilter);
+        QFileDialog::getSaveFileName(this, "Save Map", "", saveMapFileFilter);
     if (filename.isEmpty()) return;
+
+    if (!filename.endsWith(".lgmp", Qt::CaseInsensitive)) {
+        filename += ".lgmp";
+    }
 
     MapDocument doc{currentMetadata(), toBoard()};
 
     QString errMsg;
-    if (filename.endsWith(".lg")) {
-        if (QMessageBox::warning(
-                this, "Legacy Format Warning",
-                "The .lg format does not support map metadata. Title, author, "
-                "creation date, and description will not be saved.",
-                QMessageBox::Ok | QMessageBox::Cancel,
-                QMessageBox::Cancel) == QMessageBox::Cancel) {
-            return;
-        }
-        saveMap_v5(filename, doc.board, errMsg);
-    } else if (filename.endsWith(".lgmp")) {
-        saveMap_v6(filename, doc, errMsg);
-    } else {
-        errMsg = "Unsupported file format. Please select a .lg or .lgmp file.";
-    }
+    saveMap_v6(filename, doc, errMsg);
 
     if (!errMsg.isEmpty()) {
         QMessageBox::critical(this, "Error", errMsg);

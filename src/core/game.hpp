@@ -561,6 +561,13 @@ inline int BasicGame::init() {
     int spawnReturn = initSpawn();
     if (spawnReturn != 0) return spawnReturn;
 
+    for (Tile& tile : board.tiles) {
+        if (tile.type == TILE_SPAWN) {
+            tile.type = TILE_BLANK;
+            tile.army = 0;
+        }
+    }
+
     alive = std::vector(players.size(), true);
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         Tile& spawnTile = board.tileAt(spawnCoord[i]);

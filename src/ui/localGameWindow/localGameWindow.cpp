@@ -426,7 +426,8 @@ void LocalGameWindow::runHalfTurn() {
     QElapsedTimer elapsedTimer;
     elapsedTimer.start();
     game->step();
-    if (!game->isAlive(humanPlayerId)) {
+    if (!game->isAlive(humanPlayerId) ||
+        static_cast<int>(game->getAlivePlayers().size()) <= 1) {
         if (humanPlayer != nullptr) {
             humanPlayer = nullptr;
             gameMap->bindMoveQueue(nullptr);

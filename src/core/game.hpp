@@ -200,6 +200,13 @@ class BasicGame {
     std::vector<std::string> names;
     std::vector<index_t> teams;
     std::vector<bool> alive;
+    // Surrender uses a three-stage lifecycle:
+    // request during the current turn, take effect after that turn finishes,
+    // then dissolve any remaining territory 50 full turns later.
+    std::vector<bool> pendingSurrender;
+    std::vector<bool> surrendered;
+    std::vector<bool> surrenderResolved;
+    std::vector<turn_t> surrenderEffectiveTurn;
     std::vector<Coord> spawnCoord;
 
     inline bool isValidPlayer(index_t player) const {
@@ -209,6 +216,12 @@ class BasicGame {
    public:
     inline bool isAlive(index_t player) const {
         return isValidPlayer(player) && alive[player];
+    }
+    inline bool isSurrenderPending(index_t player) const {
+        return isValidPlayer(player) && pendingSurrender[player];
+    }
+    inline bool isSurrendered(index_t player) const {
+        return isValidPlayer(player) && surrendered[player];
     }
     inline index_t getPlayerCount() const {
         return static_cast<index_t>(players.size());
@@ -245,6 +258,15 @@ class BasicGame {
     Board board;
 
     void capture(index_t p1, index_t p2);
+    void resolveSurrenderedTerritory(index_t player);
+    void clearSurrenderState(index_t player);
+    inline bool acceptsOrders(index_t player) const {
+        return isAlive(player) && !pendingSurrender[player];
+    }
+    inline bool shouldResolveSurrender(index_t player, turn_t turn) const {
+        return surrendered[player] && !surrenderResolved[player] &&
+               turn >= surrenderEffectiveTurn[player] + 51;
+    }
 
     // Move priority helper functions
     /// Check if a move is defensive (friendly-to-friendly, including
@@ -364,6 +386,7 @@ class BasicGame {
 
 inline void BasicGame::capture(index_t p1, index_t p2) {
     alive[p2] = false;
+    clearSurrenderState(p2);
     for (auto& tile : board.tiles) {
         if (tile.occupier == p2) {
             tile.occupier = p1;
@@ -387,6 +410,10 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
       teams(_players.size()),
       board(_board),
       alive(_players.size()),
+      pendingSurrender(_players.size(), false),
+      surrendered(_players.size(), false),
+      surrenderResolved(_players.size(), false),
+      surrenderEffectiveTurn(_players.size(), 0),
       spawnCoord(_players.size()) {
     if (_players.empty()) {
         throw std::invalid_argument("BasicGame requires at least one player");
@@ -417,14 +444,61 @@ inline BasicGame::~BasicGame() {
     for (auto player : players) delete player;
 }
 
+inline void BasicGame::resolveSurrenderedTerritory(index_t player) {
+    if (!isValidPlayer(player) || surrenderResolved[player] ||
+        !surrendered[player]) {
+        return;
+    }
+
+    for (auto& tile : board.tiles) {
+        if (tile.occupier != player) continue;
+
+        tile.occupier = -1;
+        // Original cities stay cities, surrendered generals turn into cities,
+        // and every other tile becomes neutral land while keeping its army.
+        if (tile.type == TILE_GENERAL) {
+            tile.type = TILE_CITY;
+        } else if (tile.type != TILE_CITY) {
+            tile.type = TILE_BLANK;
+        }
+    }
+
+    surrenderResolved[player] = true;
+}
+
+inline void BasicGame::clearSurrenderState(index_t player) {
+    if (!isValidPlayer(player)) return;
+
+    pendingSurrender[player] = false;
+    surrendered[player] = false;
+    surrenderResolved[player] = false;
+    surrenderEffectiveTurn[player] = 0;
+}
+
 inline void BasicGame::step() {
+    const uint8_t halfTurnPhase = curHalfTurnPhase;
+    const turn_t turn = curTurn;
+
+    if (halfTurnPhase == 0) {
+        // Territory cleanup happens before a new full turn starts resolving.
+        for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
+            if (!shouldResolveSurrender(i, turn)) continue;
+            resolveSurrenderedTerritory(i);
+        }
+    }
+
     // collect moves
     std::vector<std::pair<index_t, Move>> moves;
     for (index_t i : getAlivePlayers()) {
+        if (!acceptsOrders(i)) continue;
         Player* player = players[i];
         Move move;
         while ((move = player->step()).type != MoveType::EMPTY &&
                !board.available(i, move));
+        if (move.type == MoveType::SURRENDER) {
+            pendingSurrender[i] = true;
+            continue;
+        }
         if (move.type != MoveType::EMPTY) moves.emplace_back(i, move);
     }
 
@@ -475,23 +549,37 @@ inline void BasicGame::step() {
                     toTile.occupier = player;
                 }
             }
-        } else if (move.type == MoveType::SURRENDER) {
-            alive[player] = false;
-            broadcast(curTurn, GameMessageSurrender{player});
         }
     }
 
     // update board
-    if (curHalfTurnPhase == 0) {
-        board.update(curTurn > 0 && curTurn % 25 == 0);
+    if (halfTurnPhase == 0) {
+        board.update(turn > 0 && turn % 25 == 0);
     }
-    curTurn += curHalfTurnPhase;
+    curTurn += halfTurnPhase;
     curHalfTurnPhase ^= 1;
+
+    if (halfTurnPhase == 1) {
+        // A surrender only becomes official after the current full turn has
+        // finished all combat, capture, and growth checks.
+        for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
+            if (!pendingSurrender[i]) continue;
+
+            pendingSurrender[i] = false;
+            surrendered[i] = true;
+            surrenderResolved[i] = false;
+            surrenderEffectiveTurn[i] = turn;
+            alive[i] = false;
+            broadcast(turn, GameMessageSurrender{i});
+        }
+    }
+
     board.updateVisionCache();
 
     // request moves (for next turn)
     std::vector<RankItem> rank = ranklist();
     for (index_t i : getAlivePlayers()) {
+        if (!acceptsOrders(i)) continue;
         players[i]->requestMove(view(i), rank);
     }
 }
@@ -569,6 +657,10 @@ inline int BasicGame::init() {
     }
 
     alive = std::vector(players.size(), true);
+    pendingSurrender.assign(players.size(), false);
+    surrendered.assign(players.size(), false);
+    surrenderResolved.assign(players.size(), false);
+    surrenderEffectiveTurn.assign(players.size(), 0);
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         Tile& spawnTile = board.tileAt(spawnCoord[i]);
         spawnTile.occupier = i;

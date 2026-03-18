@@ -155,20 +155,17 @@ void FloatingLeaderboardWidget::updateFixedSize() {
 
 void HumanPlayer::init(index_t playerId,
                        const game::GameConstantsPack& constants) {
+    Q_UNUSED(constants);
     this->playerId = playerId;
 }
 
 void HumanPlayer::requestMove(const BoardView& boardView,
                               const std::vector<game::RankItem>& rank) {
-    if (boardViewHandler) {
-        boardViewHandler(boardView);
-    }
+    Q_UNUSED(boardView);
+    Q_UNUSED(rank);
 }
 
-void HumanPlayer::setBoardViewHandler(
-    std::function<void(const BoardView&)> boardViewHandler) {
-    this->boardViewHandler = std::move(boardViewHandler);
-}
+void HumanPlayer::requestSurrender() { surrender(); }
 
 namespace {
 
@@ -309,8 +306,6 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     for (QString name : config.players) {
         if (name == "Human") {
             humanPlayer = new HumanPlayer();
-            humanPlayer->setBoardViewHandler(
-                [this](const BoardView& boardView) { updateView(boardView); });
             players.push_back(humanPlayer);
             teams.push_back(static_cast<index_t>(teams.size()));
             names.push_back("Human");
@@ -382,6 +377,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     }
 
     if (game != nullptr) {
+        refreshHumanView();
         updateLeaderboard(game->ranklist());
         positionFloatingWidgets();
         gameRunning = true;
@@ -401,6 +397,8 @@ LocalGameWindow::~LocalGameWindow() {
 void LocalGameWindow::updateView(const BoardView& boardView) {
     int height = gameMap->mapHeight();
     int width = gameMap->mapWidth();
+    generalRow = -1;
+    generalCol = -1;
     for (int r = 0; r < height; ++r) {
         for (int c = 0; c < width; ++c) {
             const TileView& tileView = boardView.tileAt(r + 1, c + 1);
@@ -412,6 +410,49 @@ void LocalGameWindow::updateView(const BoardView& boardView) {
         }
     }
     gameMap->update();
+}
+
+void LocalGameWindow::refreshHumanView() {
+    if (game == nullptr || gameMap == nullptr || humanPlayerId < 0) {
+        return;
+    }
+
+    // Once the human is defeated or surrender has taken effect, the window
+    // switches to a spectator-style full map refresh every half-turn.
+    if (!game->isAlive(humanPlayerId) || game->isSurrendered(humanPlayerId)) {
+        updateView(game->fullView());
+        return;
+    }
+
+    updateView(game->view(humanPlayerId));
+}
+
+void LocalGameWindow::disableHumanInput() {
+    if (gameMap == nullptr) {
+        return;
+    }
+
+    gameMap->bindMoveQueue(nullptr);
+    gameMap->setFocusEnabled(false);
+}
+
+bool LocalGameWindow::humanCanSurrender() const {
+    return gameRunning && game != nullptr && humanPlayer != nullptr &&
+           game->isAlive(humanPlayerId) && !humanSurrenderRequested &&
+           !game->isSurrenderPending(humanPlayerId) &&
+           !game->isSurrendered(humanPlayerId);
+}
+
+bool LocalGameWindow::humanCanTrackGeneral() const {
+    return gameRunning && game != nullptr && generalRow != -1 &&
+           (game->isAlive(humanPlayerId) || game->isSurrendered(humanPlayerId));
+}
+
+bool LocalGameWindow::humanNeedsReadOnlyMap() const {
+    return game != nullptr &&
+           (!game->isAlive(humanPlayerId) ||
+            game->isSurrenderPending(humanPlayerId) ||
+            game->isSurrendered(humanPlayerId) || humanSurrenderRequested);
 }
 
 void LocalGameWindow::runHalfTurn() {
@@ -426,14 +467,9 @@ void LocalGameWindow::runHalfTurn() {
     QElapsedTimer elapsedTimer;
     elapsedTimer.start();
     game->step();
-    if (!game->isAlive(humanPlayerId) ||
-        static_cast<int>(game->getAlivePlayers().size()) <= 1) {
-        if (humanPlayer != nullptr) {
-            humanPlayer = nullptr;
-            gameMap->bindMoveQueue(nullptr);
-        }
-        updateView(game->fullView());
-    }
+    refreshHumanView();
+
+    if (humanNeedsReadOnlyMap()) disableHumanInput();
     updateLeaderboard(game->ranklist());
 
     turn_t curTurn = game->getCurTurn();
@@ -469,10 +505,7 @@ void LocalGameWindow::stopGameLoop() {
     if (halfTurnTimer != nullptr && halfTurnTimer->isActive()) {
         halfTurnTimer->stop();
     }
-    if (gameMap != nullptr) {
-        gameMap->bindMoveQueue(nullptr);
-        gameMap->setFocusEnabled(false);
-    }
+    disableHumanInput();
 }
 
 void LocalGameWindow::updateLeaderboard(
@@ -515,7 +548,23 @@ void LocalGameWindow::positionFloatingWidgets() {
 
 void LocalGameWindow::keyPressEvent(QKeyEvent* event) {
     int key = event->key();
-    if (gameRunning && game->isAlive(humanPlayerId) && generalRow != -1) {
+    // Confirmation lives at the window level so Esc keeps working even after
+    // we detach the map widget from the human move queue.
+    if (key == Qt::Key_Escape && humanCanSurrender()) {
+        const QMessageBox::StandardButton result = QMessageBox::question(
+            this, "Surrender",
+            "Are you sure you want to surrender? You will lose control of "
+            "your armies and reveal the full map.",
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        if (result == QMessageBox::Yes) {
+            humanPlayer->requestSurrender();
+            humanSurrenderRequested = true;
+            disableHumanInput();
+        }
+        return;
+    }
+
+    if (humanCanTrackGeneral()) {
         if (key == Qt::Key_H) {
             gameMap->setFocusCell(generalRow, generalCol);
             return;

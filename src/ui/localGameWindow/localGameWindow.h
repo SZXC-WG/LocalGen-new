@@ -8,7 +8,6 @@
 #include <QString>
 #include <QTimer>
 #include <QWidget>
-#include <functional>
 #include <vector>
 
 class QResizeEvent;
@@ -68,14 +67,10 @@ class HumanPlayer : public Player {
               const game::GameConstantsPack& constants) override;
     void requestMove(const BoardView& boardView,
                      const std::vector<game::RankItem>& rank) override;
+    void requestSurrender();
     std::deque<Move>* getMoveQueue() { return &moveQueue; }
-    void setBoardViewHandler(
-        std::function<void(const BoardView&)> boardViewHandler);
 
     index_t playerId = -1;
-
-   private:
-    std::function<void(const BoardView&)> boardViewHandler;
 };
 
 class LocalGameWindow : public QDialog {
@@ -92,6 +87,11 @@ class LocalGameWindow : public QDialog {
     void scheduleNextHalfTurn(double delayMs);
     void stopGameLoop();
     void positionFloatingWidgets();
+    void refreshHumanView();
+    void disableHumanInput();
+    bool humanCanSurrender() const;
+    bool humanCanTrackGeneral() const;
+    bool humanNeedsReadOnlyMap() const;
 
    protected:
     void keyPressEvent(QKeyEvent* event) override;
@@ -105,6 +105,7 @@ class LocalGameWindow : public QDialog {
     QLabel* turnLabel = nullptr;
     bool gameRunning = false;
     double halfTurnDurationMs = 500.0;
+    bool humanSurrenderRequested = false;
 
     index_t humanPlayerId = -2;
     int generalRow = -1, generalCol = -1;

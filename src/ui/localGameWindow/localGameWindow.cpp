@@ -484,7 +484,6 @@ void LocalGameWindow::updateLeaderboard(
     std::vector<LeaderboardRow> rows;
     rows.reserve(rank.size());
     for (const auto& item : rank) {
-        if (!item.alive) continue;
         LeaderboardRow row;
         row.playerId = item.player;
         row.playerName = QString::fromStdString(game->getName(item.player));

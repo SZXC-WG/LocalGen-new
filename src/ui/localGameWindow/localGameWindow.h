@@ -28,6 +28,7 @@ struct LeaderboardRow {
     army_t army = 0;
     int land = 0;
     QColor playerColor;
+    bool isAlive = true;
 };
 
 class FloatingLeaderboardWidget : public QWidget {

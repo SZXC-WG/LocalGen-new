@@ -103,6 +103,12 @@ void FloatingLeaderboardWidget::paintEvent(QPaintEvent* event) {
             painter.setPen(borderPen);
             rowX += columnWidths[i];
         }
+
+        if (!row.isAlive) {
+            painter.fillRect(QRect(0, y, width(), rowHeight),
+                             QColor(0, 0, 0, 153));
+        }
+
         y += rowHeight;
     }
 
@@ -489,6 +495,7 @@ void LocalGameWindow::updateLeaderboard(
         row.playerName = QString::fromStdString(game->getName(item.player));
         row.army = item.army, row.land = item.land;
         row.playerColor = playerColor(item.player);
+        row.isAlive = game->isAlive(item.player);
         rows.push_back(std::move(row));
     }
 

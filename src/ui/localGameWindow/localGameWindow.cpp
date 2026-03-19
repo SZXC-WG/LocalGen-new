@@ -516,6 +516,20 @@ void LocalGameWindow::positionFloatingWidgets() {
 void LocalGameWindow::keyPressEvent(QKeyEvent* event) {
     int key = event->key();
     if (gameRunning && game->isAlive(humanPlayerId) && generalRow != -1) {
+        if (key == Qt::Key_Escape) {
+            const QMessageBox::StandardButton result = QMessageBox::question(
+                this, "Surrender",
+                "Are you sure you want to surrender? You will lose control of "
+                "your armies and reveal the full map.",
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (gameRunning && game->isAlive(humanPlayerId) &&
+                result == QMessageBox::Yes) {
+                auto moveQueue = humanPlayer->getMoveQueue();
+                moveQueue->clear();
+                moveQueue->emplace_back(MoveType::SURRENDER);
+            }
+            return;
+        }
         if (key == Qt::Key_H) {
             gameMap->setFocusCell(generalRow, generalCol);
             return;

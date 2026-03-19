@@ -450,6 +450,7 @@ inline void BasicGame::step() {
               });
 
     // execute moves
+    std::vector<index_t> surrenderingPlayers;
     for (auto [player, move] : moves) {
         if (!alive[player] || !board.available(player, move))
             continue;  // skip just-captured players or invalid moves
@@ -476,8 +477,20 @@ inline void BasicGame::step() {
                 }
             }
         } else if (move.type == MoveType::SURRENDER) {
-            alive[player] = false;
+            surrenderingPlayers.push_back(player);
             broadcast(curTurn, GameMessageSurrender{player});
+        }
+    }
+
+    for (index_t player : surrenderingPlayers) {
+        alive[player] = false;
+        for (auto& tile : board.tiles) {
+            if (tile.occupier == player) {
+                tile.occupier = -1;
+                if (tile.type == TILE_GENERAL) {
+                    tile.type = TILE_CAPTURED_GENERAL;
+                }
+            }
         }
     }
 

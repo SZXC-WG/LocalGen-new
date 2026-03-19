@@ -532,11 +532,10 @@ inline std::vector<RankItem> BasicGame::ranklist() {
 }
 
 inline int BasicGame::initSpawn() {
-    std::mt19937 random{std::random_device()()};
-    int playerCount = static_cast<int>(players.size());
-    std::vector<index_t> playerSequence(players.size());
+    const int playerCount = static_cast<int>(players.size());
+    std::vector<index_t> playerSequence(playerCount);
     std::iota(playerSequence.begin(), playerSequence.end(), 0);
-    std::shuffle(playerSequence.begin(), playerSequence.end(), random);
+    std::shuffle(playerSequence.begin(), playerSequence.end(), rng);
     std::vector<Coord> spawnCandidates;
     auto assign = [&]() -> void {
         for (int i = 0; i < playerCount; ++i)
@@ -551,7 +550,7 @@ inline int BasicGame::initSpawn() {
             }
         }
     }
-    std::shuffle(spawnCandidates.begin(), spawnCandidates.end(), random);
+    std::shuffle(spawnCandidates.begin(), spawnCandidates.end(), rng);
     if (spawnCount >= playerCount) return assign(), 0;
 
     int blankCount = 0;
@@ -565,7 +564,7 @@ inline int BasicGame::initSpawn() {
         }
     }
     std::shuffle(spawnCandidates.begin() + spawnCount, spawnCandidates.end(),
-                 random);
+                 rng);
     if (spawnCount + blankCount >= playerCount) return assign(), 0;
     return 1;
 }

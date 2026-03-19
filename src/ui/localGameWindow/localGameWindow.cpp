@@ -6,7 +6,6 @@
 #include <QMessageBox>
 #include <QPaintEvent>
 #include <QPainter>
-#include <QRandomGenerator>
 #include <QResizeEvent>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -224,33 +223,35 @@ inline DisplayTile toDisplayTile(const TileView& tile) {
 }
 
 Board createRandomBoard(int width, int height) {
+    const int area = width * height;
     Board board(height, width);
 
-    QRandomGenerator* rng = QRandomGenerator::global();
-    int area = width * height;
-    int numMountains = rng->bounded(area / 7, area / 7 + area / 20 + 1);
+    std::mt19937 rng(std::random_device{}());
+    std::uniform_int_distribution<int> dist_row(1, height), dist_col(1, width),
+        dist_tile(0, 9), dist_army(40, 49),
+        dist_numMountains(area / 7, area / 7 + area / 20),
+        dist_numCities(area / 30, area / 15),
+        dist_numSwamps(area / 20, area / 15);
+
+    int numMountains = dist_numMountains(rng);
     for (int i = 0; i < numMountains; ++i) {
-        Coord pos(rng->bounded(height) + 1, rng->bounded(width) + 1);
-        int type = rng->bounded(10);
-        board.tileAt(pos) = Tile(-1,
-                                 type == 0   ? TILE_LOOKOUT
-                                 : type == 1 ? TILE_OBSERVATORY
-                                             : TILE_MOUNTAIN,
-                                 0);
+        int type = dist_tile(rng);
+        board.tileAt(dist_row(rng), dist_col(rng)) =
+            Tile(-1,
+                 type == 0   ? TILE_LOOKOUT
+                 : type == 1 ? TILE_OBSERVATORY
+                             : TILE_MOUNTAIN,
+                 0);
     }
 
-    int numCities = rng->bounded(area / 30, area / 15 + 1);
-    for (int i = 0; i < numCities; ++i) {
-        Coord pos(rng->bounded(height) + 1, rng->bounded(width) + 1);
-        army_t army = static_cast<army_t>(rng->bounded(40, 50));
-        board.tileAt(pos) = Tile(-1, TILE_CITY, army);
-    }
+    int numCities = dist_numCities(rng);
+    for (int i = 0; i < numCities; ++i)
+        board.tileAt(dist_row(rng), dist_col(rng)) =
+            Tile(-1, TILE_CITY, dist_army(rng));
 
-    int numSwamps = rng->bounded(area / 20, area / 15 + 1);
-    for (int i = 0; i < numSwamps; ++i) {
-        Coord pos(rng->bounded(height) + 1, rng->bounded(width) + 1);
-        board.tileAt(pos) = Tile(-1, TILE_SWAMP, 0);
-    }
+    int numSwamps = dist_numSwamps(rng);
+    for (int i = 0; i < numSwamps; ++i)
+        board.tileAt(dist_row(rng), dist_col(rng)) = Tile(-1, TILE_SWAMP, 0);
 
     return board;
 }

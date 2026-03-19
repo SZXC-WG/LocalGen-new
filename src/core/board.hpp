@@ -12,6 +12,7 @@
 #define LGEN_CORE_BOARD_HPP
 
 #include <cassert>
+#include <random>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -282,6 +283,42 @@ class Board {
     inline TileView view(index_t player, Coord pos) const {
         return TileView(tileAt(pos), visible(pos, player));
     };
+
+   public:
+    static Board generate(int width, int height) {
+        const int area = width * height;
+        Board board(height, width);
+
+        std::mt19937 rng(std::random_device{}());
+        std::uniform_int_distribution<int> dist_row(1, height),
+            dist_col(1, width), dist_tile(0, 9), dist_army(40, 49),
+            dist_numMountains(area / 7, area / 7 + area / 20),
+            dist_numCities(area / 30, area / 15),
+            dist_numSwamps(area / 20, area / 15);
+
+        int numMountains = dist_numMountains(rng);
+        for (int i = 0; i < numMountains; ++i) {
+            int type = dist_tile(rng);
+            board.tileAt(dist_row(rng), dist_col(rng)) =
+                Tile(-1,
+                     type == 0   ? TILE_LOOKOUT
+                     : type == 1 ? TILE_OBSERVATORY
+                                 : TILE_MOUNTAIN,
+                     0);
+        }
+
+        int numCities = dist_numCities(rng);
+        for (int i = 0; i < numCities; ++i)
+            board.tileAt(dist_row(rng), dist_col(rng)) =
+                Tile(-1, TILE_CITY, dist_army(rng));
+
+        int numSwamps = dist_numSwamps(rng);
+        for (int i = 0; i < numSwamps; ++i)
+            board.tileAt(dist_row(rng), dist_col(rng)) =
+                Tile(-1, TILE_SWAMP, 0);
+
+        return board;
+    }
 };
 
 #endif  // LGEN_CORE_BOARD_HPP

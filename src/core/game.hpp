@@ -30,8 +30,6 @@
 #include "tile.hpp"
 #include "utils.hpp"
 
-namespace game {
-
 namespace config {
 
 enum class VisionMode : uint8_t { NEAR8, NEAR4 };
@@ -606,7 +604,5 @@ inline void BasicGame::broadcast(turn_t turn,
         players[i]->onGameEvent(event);
     }
 }
-
-}  // namespace game
 
 #endif  // LGEN_CORE_GAME_HPP

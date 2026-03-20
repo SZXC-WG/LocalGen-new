@@ -158,13 +158,12 @@ void FloatingLeaderboardWidget::updateFixedSize() {
     setFixedSize(totalWidth, height);
 }
 
-void HumanPlayer::init(index_t playerId,
-                       const game::GameConstantsPack& constants) {
+void HumanPlayer::init(index_t playerId, const GameConstantsPack& constants) {
     this->playerId = playerId;
 }
 
 void HumanPlayer::requestMove(const BoardView& boardView,
-                              const std::vector<game::RankItem>& rank) {
+                              const std::vector<RankItem>& rank) {
     if (boardViewHandler) {
         boardViewHandler(boardView);
     }
@@ -299,7 +298,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         names.push_back(stdName);
     }
 
-    game = new game::BasicGame(true, players, teams, names, initialBoard);
+    game = new BasicGame(true, players, teams, names, initialBoard);
     const int initResult = game->init();
     if (initResult != 0) {
         QString errMsg = "Failed to initialize local game.";
@@ -448,8 +447,7 @@ void LocalGameWindow::stopGameLoop() {
     }
 }
 
-void LocalGameWindow::updateLeaderboard(
-    const std::vector<game::RankItem>& rank) {
+void LocalGameWindow::updateLeaderboard(const std::vector<RankItem>& rank) {
     if (leaderboardWidget == nullptr || game == nullptr) {
         return;
     }

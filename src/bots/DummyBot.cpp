@@ -58,8 +58,7 @@ class DummyBot : public BasicBot {
 
    public:
     // Remember to override the `init` method to process game constants.
-    void init(index_t _playerId,
-              const game::GameConstantsPack& constants) override {
+    void init(index_t _playerId, const GameConstantsPack& constants) override {
         // This method is called when the game starts.
         // Game constants are sent via this method.
         // You can use this method to initialize your bot's state.
@@ -76,7 +75,7 @@ class DummyBot : public BasicBot {
     // This method will be called **every turn**. Make that into your bot's
     // logic.
     void requestMove(const BoardView& boardView,
-                     const std::vector<game::RankItem>& rank) override {
+                     const std::vector<RankItem>& rank) override {
         // This DummyBot uses a derivative of the smartRandomBot from LG v5.
         // As LG v6 removed the outdated "focus" feature, this bot will choose a
         // maximum tile every time.

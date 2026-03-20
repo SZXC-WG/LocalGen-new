@@ -16,8 +16,6 @@
 
 #include "utils.hpp"  // For index_t, turn_t
 
-namespace game {
-
 // Win Message
 struct GameMessageWin {
     index_t winner;
@@ -49,7 +47,5 @@ struct GameEvent {
     turn_t turn;
     GameMessageData data;
 };
-
-}  // namespace game
 
 #endif  // LGEN_CORE_MESSAGE_HPP

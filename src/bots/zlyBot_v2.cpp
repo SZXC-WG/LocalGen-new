@@ -29,12 +29,12 @@ class ZlyBot_v2 : public BasicBot {
     index_t playerCnt;
     index_t id, team;
     std::vector<index_t> teamIds;
-    game::config::Config config;
+    config::Config config;
 
     turn_t halfTurn, turn;
 
     BoardView board;
-    std::vector<game::RankItem> rank;
+    std::vector<RankItem> rank;
 
     inline bool inSameTeam(index_t anotherPlayer) const {
         return teamIds[anotherPlayer] == team;
@@ -243,8 +243,7 @@ class ZlyBot_v2 : public BasicBot {
     }
 
    public:
-    void init(index_t playerId,
-              const game::GameConstantsPack& constants) override {
+    void init(index_t playerId, const GameConstantsPack& constants) override {
         id = playerId;
         height = constants.mapHeight;
         width = constants.mapWidth;
@@ -279,14 +278,14 @@ class ZlyBot_v2 : public BasicBot {
     }
 
     void requestMove(const BoardView& boardView,
-                     const std::vector<game::RankItem>& _rank) override {
+                     const std::vector<RankItem>& _rank) override {
         ++halfTurn;
         turn += (halfTurn & 1);
 
         board = boardView;
         rank = _rank;
         std::sort(begin(rank), end(rank),
-                  [](game::RankItem lhs, game::RankItem rhs) -> bool {
+                  [](RankItem lhs, RankItem rhs) -> bool {
                       return lhs.player < rhs.player;
                   });
         for (index_t i = 0; i < playerCnt; ++i) {

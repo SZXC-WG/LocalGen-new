@@ -21,10 +21,8 @@
 #include "move.hpp"
 #include "utils.hpp"
 
-namespace game {
 struct GameConstantsPack;
 struct RankItem;
-}  // namespace game
 
 /// Base struct for players.
 class Player {
@@ -42,36 +40,33 @@ class Player {
     }
 
    public:
-    virtual void init(index_t playerId,
-                      const game::GameConstantsPack& constants) = 0;
+    virtual void init(index_t playerId, const GameConstantsPack& constants) = 0;
 
     virtual void requestMove(const BoardView& boardView,
-                             const std::vector<game::RankItem>& rank) = 0;
+                             const std::vector<RankItem>& rank) = 0;
 
-    virtual void onGameEvent(const game::GameEvent& event) {
+    virtual void onGameEvent(const GameEvent& event) {
         std::visit(
-            overloaded{
-                [this, t = event.turn](const game::GameMessageWin& m) {
-                    this->onWin(t, m);
-                },
-                [this, t = event.turn](const game::GameMessageCapture& m) {
-                    this->onCapture(t, m);
-                },
-                [this, t = event.turn](const game::GameMessageSurrender& m) {
-                    this->onSurrender(t, m);
-                },
-                [this, t = event.turn](const game::GameMessageText& m) {
-                    this->onText(t, m);
-                }},
+            overloaded{[this, t = event.turn](const GameMessageWin& m) {
+                           this->onWin(t, m);
+                       },
+                       [this, t = event.turn](const GameMessageCapture& m) {
+                           this->onCapture(t, m);
+                       },
+                       [this, t = event.turn](const GameMessageSurrender& m) {
+                           this->onSurrender(t, m);
+                       },
+                       [this, t = event.turn](const GameMessageText& m) {
+                           this->onText(t, m);
+                       }},
             event.data);
     }
 
    protected:
-    virtual void onWin(turn_t turn, const game::GameMessageWin& msg) {}
-    virtual void onCapture(turn_t turn, const game::GameMessageCapture& msg) {}
-    virtual void onSurrender(turn_t turn,
-                             const game::GameMessageSurrender& msg) {}
-    virtual void onText(turn_t turn, const game::GameMessageText& msg) {}
+    virtual void onWin(turn_t turn, const GameMessageWin& msg) {}
+    virtual void onCapture(turn_t turn, const GameMessageCapture& msg) {}
+    virtual void onSurrender(turn_t turn, const GameMessageSurrender& msg) {}
+    virtual void onText(turn_t turn, const GameMessageText& msg) {}
 
    public:
     inline Move step() {

@@ -27,12 +27,12 @@ class GcBot : public BasicBot {
     pos_t height, width, W;
     index_t playerCnt;
     index_t id;
-    game::config::Config config;
+    config::Config config;
 
     turn_t halfTurn, turn;
 
     BoardView board;
-    std::vector<game::RankItem> rank;
+    std::vector<RankItem> rank;
 
     std::vector<Coord> seenGeneral;
     std::vector<value_t> blockTypeValue;
@@ -178,8 +178,7 @@ class GcBot : public BasicBot {
    public:
     GcBot() : rnd(std::random_device{}()) {}
 
-    void init(index_t playerId,
-              const game::GameConstantsPack& constants) override {
+    void init(index_t playerId, const GameConstantsPack& constants) override {
         id = playerId;
         height = constants.mapHeight;
         width = constants.mapWidth;
@@ -204,14 +203,14 @@ class GcBot : public BasicBot {
     }
 
     void requestMove(const BoardView& boardView,
-                     const std::vector<game::RankItem>& _rank) override {
+                     const std::vector<RankItem>& _rank) override {
         ++halfTurn;
         turn += (halfTurn & 1);
 
         board = boardView;
         rank = _rank;
         std::sort(begin(rank), end(rank),
-                  [](game::RankItem lhs, game::RankItem rhs) -> bool {
+                  [](RankItem lhs, RankItem rhs) -> bool {
                       return lhs.player < rhs.player;
                   });
 

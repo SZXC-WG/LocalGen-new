@@ -25,10 +25,10 @@ class XiaruizeBot : public BasicBot {
     index_t playerCnt;
     index_t id, team;
     std::vector<index_t> teamIds;
-    game::config::Config config;
+    config::Config config;
 
     BoardView board;
-    std::vector<game::RankItem> rank;
+    std::vector<RankItem> rank;
 
     Coord spawnCoord;
     Coord currentPos;
@@ -145,8 +145,7 @@ class XiaruizeBot : public BasicBot {
     }
 
    public:
-    void init(index_t playerId,
-              const game::GameConstantsPack& constants) override {
+    void init(index_t playerId, const GameConstantsPack& constants) override {
         id = playerId;
         height = constants.mapHeight;
         width = constants.mapWidth;
@@ -166,7 +165,7 @@ class XiaruizeBot : public BasicBot {
     }
 
     void requestMove(const BoardView& boardView,
-                     const std::vector<game::RankItem>& _rank) override {
+                     const std::vector<RankItem>& _rank) override {
         board = boardView;
         rank = _rank;
 

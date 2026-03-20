@@ -186,8 +186,7 @@ class SzlyBot : public BasicBot {
     }
 
    public:
-    void init(index_t playerId,
-              const game::GameConstantsPack& constants) override {
+    void init(index_t playerId, const GameConstantsPack& constants) override {
         id = playerId;
         height = constants.mapHeight;
         width = constants.mapWidth;
@@ -216,7 +215,7 @@ class SzlyBot : public BasicBot {
     }
 
     void requestMove(const BoardView& boardView,
-                     const std::vector<game::RankItem>& rank) override {
+                     const std::vector<RankItem>& rank) override {
         moveQueue.clear();
 
         for (pos_t i = 1; i <= height; ++i) {

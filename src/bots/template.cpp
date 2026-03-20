@@ -20,11 +20,10 @@ class /*%BotClass%*/ : public BasicBot {
     // Destructors can be defined if necessary.
    protected:
    public:
-    void init(index_t playerId,
-              const game::GameConstantsPack& constants) override {}
+    void init(index_t playerId, const GameConstantsPack& constants) override {}
 
     void requestMove(const BoardView& boardView,
-                     const std::vector<game::RankItem>& rank) override {}
+                     const std::vector<RankItem>& rank) override {}
 };
 
 // Do not forget to register your bot.

@@ -17,10 +17,8 @@ class QResizeEvent;
 #include "../mapWidget/mapWidget.h"
 #include "core/player.hpp"
 
-namespace game {
 class BasicGame;
 struct RankItem;
-}  // namespace game
 
 struct LeaderboardRow {
     index_t playerId = -1;
@@ -65,10 +63,9 @@ class FloatingLeaderboardWidget : public QWidget {
 // Helper class
 class HumanPlayer : public Player {
    public:
-    void init(index_t playerId,
-              const game::GameConstantsPack& constants) override;
+    void init(index_t playerId, const GameConstantsPack& constants) override;
     void requestMove(const BoardView& boardView,
-                     const std::vector<game::RankItem>& rank) override;
+                     const std::vector<RankItem>& rank) override;
     std::deque<Move>* getMoveQueue() { return &moveQueue; }
     void setBoardViewHandler(
         std::function<void(const BoardView&)> boardViewHandler);
@@ -88,7 +85,7 @@ class LocalGameWindow : public QDialog {
 
    private:
     void updateView(const BoardView& boardView);
-    void updateLeaderboard(const std::vector<game::RankItem>& rank);
+    void updateLeaderboard(const std::vector<RankItem>& rank);
     void runHalfTurn();
     void scheduleNextHalfTurn(double delayMs);
     void stopGameLoop();
@@ -101,7 +98,7 @@ class LocalGameWindow : public QDialog {
     MapWidget* gameMap = nullptr;
     FloatingLeaderboardWidget* leaderboardWidget = nullptr;
     HumanPlayer* humanPlayer = nullptr;
-    game::BasicGame* game = nullptr;
+    BasicGame* game = nullptr;
     QTimer* halfTurnTimer = nullptr;
     QLabel* turnLabel = nullptr;
     bool gameRunning = false;

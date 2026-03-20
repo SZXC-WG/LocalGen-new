@@ -1,38 +1,27 @@
 <div align="center">
-  <h1>Local Generals.io
-    <br/>
-    <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/SZXC-WG/LocalGen-new" />
-    <a href="https://github.com/SZXC-WG/LocalGen-new/stargazers">
-      <img alt="GitHub stars" src="https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social"/>
-    </a>
-  </h1>
-  <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/SZXC-WG/LocalGen-new" />
-  <a href="https://github.com/SZXC-WG/LocalGen-new/commits">
-    <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/t/SZXC-WG/LocalGen-new?label=total%20commits" />
-  </a>
-  <a href="https://github.com/SZXC-WG/LocalGen-new/contributors">
-    <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/SZXC-WG/LocalGen-new" />
-  </a>
-  <br/>
-  <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/SZXC-WG/LocalGen-new" />
-  <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/SZXC-WG/LocalGen-new" />
-  <a href="https://github.com/SZXC-WG/LocalGen-new/blob/master/LICENSE">
-    <img alt="License" src="https://img.shields.io/github/license/SZXC-WG/LocalGen-new.svg" />
-  </a>
-  <br/>
-  <img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/SZXC-WG/LocalGen-new/total" />
-  <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/SZXC-WG/LocalGen-new"/>
-  <img alt="GitHub repo file or directory count" src="https://img.shields.io/github/directory-file-count/SZXC-WG/LocalGen-new" />
-  <br/>
-  <a href="https://github.com/SZXC-WG/LocalGen-new/releases/latest">
-    <img alt="GitHub Release" src="https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?label=latest%20stable" />
-    <img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new?label=date" />
-  </a>
-  <br/>
-  <a href="https://github.com/SZXC-WG/LocalGen-new/releases">
-    <img alt="GitHub Pre-Release" src="https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?include_prereleases&label=latest%20preview" />
-    <img alt="GitHub Pre-Release Date" src="https://img.shields.io/github/release-date-pre/SZXC-WG/LocalGen-new?label=date" />
-  </a>
+
+<h1>Local Generals.io</h1>
+
+<img alt="GitHub Created At" src="https://img.shields.io/github/created-at/SZXC-WG/LocalGen-new" />
+<img alt="GitHub Total Downloads" src="https://img.shields.io/github/downloads/SZXC-WG/LocalGen-new/total" />
+<a href="https://github.com/SZXC-WG/LocalGen-new/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social"/></a>
+
+<img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/SZXC-WG/LocalGen-new" />
+<a href="https://github.com/SZXC-WG/LocalGen-new/commits"><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/t/SZXC-WG/LocalGen-new?label=total%20commits" /></a>
+<a href="https://github.com/SZXC-WG/LocalGen-new/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/SZXC-WG/LocalGen-new" /></a>
+
+<a href="https://github.com/SZXC-WG/LocalGen-new/releases/latest">
+<img alt="GitHub Release" src="https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?label=latest%20stable" />
+<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new?label=date" />
+</a>
+
+<a href="https://github.com/SZXC-WG/LocalGen-new/releases">
+<img alt="GitHub Pre-Release" src="https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?include_prereleases&label=latest%20preview" />
+<img alt="GitHub Pre-Release Date" src="https://img.shields.io/github/release-date-pre/SZXC-WG/LocalGen-new?label=date" />
+</a>
+
+<a href="https://deepwiki.com/SZXC-WG/LocalGen-new"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+
 </div>
 
 ## Intro
@@ -60,16 +49,16 @@ Absolutely! We welcome any form of contribution.
 
 LocalGen’s development is organized across three groups of branches:
 
-- **`master` | `v6.x`**:  
-  The `master` branch serves as the main development branch for version 6.  
+- **`master` | `v6.x`**:
+  The `master` branch serves as the main development branch for version 6.
   **Starting from v6, we will be migrating the UI to the Qt library**, aiming for better performance and cross-platform support. The source code will also undergo a significant refactor to improve maintainability.
 
-- **`v5.x`**:  
-  This branch covers version 5, which is now going to **long-term maintenance**.  
-  Versions 2 to 5 of LocalGen are built with [EGE Graphics](https://xege.org) (24.04), and we’re working on creating an object-oriented system based on it.  
+- **`v5.x`**:
+  This branch covers version 5, which is now going to **long-term maintenance**.
+  Versions 2 to 5 of LocalGen are built with [EGE Graphics](https://xege.org) (24.04), and we’re working on creating an object-oriented system based on it.
   **Note:** Releases for this branch are **Windows-only** due to EGE 24.04’s limitations. However, if you want to run it on Linux or macOS, [**Wine**](https://www.winehq.org) might be an option. (We have tested, it worked well on a Ubuntu 22.04 LTS machine.)
 
-- **`release`**:  
+- **`release`**:
   This branch is used to store older version releases (v1-v4) and related resources like maps and fonts. For newer version releases, head over to the [releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
 
 If you'd like to contribute, please submit a pull request to the `v5.0` branch. We appreciate your help!

@@ -3,22 +3,20 @@
 
 #include <QColor>
 #include <QDialog>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QPaintEvent>
+#include <QResizeEvent>
 #include <QString>
 #include <QTimer>
 #include <QWidget>
 #include <functional>
 #include <vector>
 
-class QResizeEvent;
-
 #include "../localGameDialog/localGameDialog.h"
 #include "../mapWidget/mapWidget.h"
+#include "core/game.hpp"
 #include "core/player.hpp"
-
-class BasicGame;
-struct RankItem;
 
 struct LeaderboardRow {
     index_t playerId = -1;

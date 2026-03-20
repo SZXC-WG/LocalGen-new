@@ -2,25 +2,21 @@
 
 <h1>Local Generals.io</h1>
 
-<img alt="GitHub Created At" src="https://img.shields.io/github/created-at/SZXC-WG/LocalGen-new" />
-<img alt="GitHub Total Downloads" src="https://img.shields.io/github/downloads/SZXC-WG/LocalGen-new/total" />
-<a href="https://github.com/SZXC-WG/LocalGen-new/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social"/></a>
+![GitHub Created At](https://img.shields.io/github/created-at/SZXC-WG/LocalGen-new)
+![GitHub Total Downloads](https://img.shields.io/github/downloads/SZXC-WG/LocalGen-new/total)
+[![GitHub stars](https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social)](https://github.com/SZXC-WG/LocalGen-new/stargazers)
 
-<img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/SZXC-WG/LocalGen-new" />
-<a href="https://github.com/SZXC-WG/LocalGen-new/commits"><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/t/SZXC-WG/LocalGen-new?label=total%20commits" /></a>
-<a href="https://github.com/SZXC-WG/LocalGen-new/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/SZXC-WG/LocalGen-new" /></a>
+![GitHub last commit](https://img.shields.io/github/last-commit/SZXC-WG/LocalGen-new)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/t/SZXC-WG/LocalGen-new?label=total%20commits)](https://github.com/SZXC-WG/LocalGen-new/commits)
+[![GitHub contributors](https://img.shields.io/github/contributors/SZXC-WG/LocalGen-new)](https://github.com/SZXC-WG/LocalGen-new/contributors)
 
-<a href="https://github.com/SZXC-WG/LocalGen-new/releases/latest">
-<img alt="GitHub Release" src="https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?label=latest%20stable" />
-<img alt="GitHub Release Date" src="https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new?label=date" />
-</a>
+[![GitHub Release](https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?label=latest%20stable)](https://github.com/SZXC-WG/LocalGen-new/releases/latest)
+[![GitHub Release Date](https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new?label=date)](https://github.com/SZXC-WG/LocalGen-new/releases/latest)
 
-<a href="https://github.com/SZXC-WG/LocalGen-new/releases">
-<img alt="GitHub Pre-Release" src="https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?include_prereleases&label=latest%20preview" />
-<img alt="GitHub Pre-Release Date" src="https://img.shields.io/github/release-date-pre/SZXC-WG/LocalGen-new?label=date" />
-</a>
+[![GitHub Pre-Release](https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?include_prereleases&label=latest%20preview)](https://github.com/SZXC-WG/LocalGen-new/releases)
+[![GitHub Pre-Release Date](https://img.shields.io/github/release-date-pre/SZXC-WG/LocalGen-new?label=date)](https://github.com/SZXC-WG/LocalGen-new/releases)
 
-<a href="https://deepwiki.com/SZXC-WG/LocalGen-new"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/SZXC-WG/LocalGen-new)
 
 </div>
 

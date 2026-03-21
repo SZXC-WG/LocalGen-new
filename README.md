@@ -1,18 +1,17 @@
 <div align="center">
 
+<img alt="Icon" src="https://github.com/SZXC-WG/LocalGen-new/blob/master/res/img/favicon.png?raw=true" height=128 />
+
 <h1>Local Generals.io</h1>
 
 ![GitHub Created At](https://img.shields.io/github/created-at/SZXC-WG/LocalGen-new)
 ![GitHub Total Downloads](https://img.shields.io/github/downloads/SZXC-WG/LocalGen-new/total)
-[![GitHub stars](https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social)](https://github.com/SZXC-WG/LocalGen-new/stargazers)
-
+[![GitHub stars](https://img.shields.io/github/stars/SZXC-WG/LocalGen-new.svg?style=social)](https://github.com/SZXC-WG/LocalGen-new/stargazers)  
 ![GitHub last commit](https://img.shields.io/github/last-commit/SZXC-WG/LocalGen-new)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/t/SZXC-WG/LocalGen-new?label=total%20commits)](https://github.com/SZXC-WG/LocalGen-new/commits)
-[![GitHub contributors](https://img.shields.io/github/contributors/SZXC-WG/LocalGen-new)](https://github.com/SZXC-WG/LocalGen-new/contributors)
-
+[![GitHub contributors](https://img.shields.io/github/contributors/SZXC-WG/LocalGen-new)](https://github.com/SZXC-WG/LocalGen-new/contributors)  
 [![GitHub Release](https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?label=latest%20stable)](https://github.com/SZXC-WG/LocalGen-new/releases/latest)
-[![GitHub Release Date](https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new?label=date)](https://github.com/SZXC-WG/LocalGen-new/releases/latest)
-
+[![GitHub Release Date](https://img.shields.io/github/release-date/SZXC-WG/LocalGen-new?label=date)](https://github.com/SZXC-WG/LocalGen-new/releases/latest)  
 [![GitHub Pre-Release](https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?include_prereleases&label=latest%20preview)](https://github.com/SZXC-WG/LocalGen-new/releases)
 [![GitHub Pre-Release Date](https://img.shields.io/github/release-date-pre/SZXC-WG/LocalGen-new?label=date)](https://github.com/SZXC-WG/LocalGen-new/releases)
 

@@ -49,8 +49,44 @@ class OimBot : public BasicBot {
     struct PathResult {
         bool reachable = false;
         int cost = kInf;
-        std::vector<int> dist;
-        std::vector<Coord> parent;
+        const std::vector<int>* dist = nullptr;
+        const std::vector<int>* stamp = nullptr;
+        const std::vector<Coord>* parent = nullptr;
+        int activeStamp = 0;
+
+        int distance(size_t node) const {
+            if (dist == nullptr || stamp == nullptr || node >= dist->size())
+                return kInf;
+            return (*stamp)[node] == activeStamp ? (*dist)[node] : kInf;
+        }
+
+        Coord parentAt(size_t node) const {
+            if (parent == nullptr || stamp == nullptr || node >= parent->size())
+                return Coord{-1, -1};
+            return (*stamp)[node] == activeStamp ? (*parent)[node]
+                                                 : Coord{-1, -1};
+        }
+    };
+
+    struct ReversePathResult {
+        bool reachable = false;
+        const std::vector<int>* dist = nullptr;
+        const std::vector<int>* stamp = nullptr;
+        const std::vector<Coord>* next = nullptr;
+        int activeStamp = 0;
+
+        int distance(size_t node) const {
+            if (dist == nullptr || stamp == nullptr || node >= dist->size())
+                return kInf;
+            return (*stamp)[node] == activeStamp ? (*dist)[node] : kInf;
+        }
+
+        Coord nextAt(size_t node) const {
+            if (next == nullptr || stamp == nullptr || node >= next->size())
+                return Coord{-1, -1};
+            return (*stamp)[node] == activeStamp ? (*next)[node]
+                                                 : Coord{-1, -1};
+        }
     };
 
     struct CandidateMove {
@@ -75,6 +111,26 @@ class OimBot : public BasicBot {
         int launchTiming = 20;
     };
 
+    struct SearchWorkspace {
+        std::vector<int> dist;
+        std::vector<int> stamp;
+        std::vector<Coord> link;
+        int activeStamp = 1;
+        std::vector<std::pair<int, Coord>> heap;
+    };
+
+    struct RecentEdge {
+        Coord from{-1, -1};
+        Coord to{-1, -1};
+        uint64_t undirectedKey = 0;
+    };
+
+    struct RoutePreview {
+        Coord first{-1, -1};
+        int steps = 0;
+        bool reachable = false;
+    };
+
     pos_t height = 0;
     pos_t width = 0;
     pos_t W = 0;
@@ -88,9 +144,13 @@ class OimBot : public BasicBot {
     BoardView board;
     BoardView prevBoard;
     bool hasPrevBoard = false;
+    int decisionSerial = 0;
     std::vector<RankItem> sortedRank;
     std::vector<RankItem> prevSortedRank;
     bool hasPrevRank = false;
+    std::vector<Coord> friendlyTilesCache;
+    std::vector<Coord> ownedCitiesCache;
+    army_t largestFriendlyArmyCache = 0;
     std::vector<TileMemory> memory;
     std::vector<Coord> knownGenerals;
     std::vector<std::vector<double>> predictedGeneralScore;
@@ -100,8 +160,10 @@ class OimBot : public BasicBot {
     std::vector<bool> aliveById;
     std::vector<army_t> playerArmyDelta;
     std::vector<pos_t> playerLandDelta;
-    std::vector<Coord> recentMoveSources;
-    std::vector<Coord> recentMoveTargets;
+    std::deque<RecentEdge> recentEdges;
+    std::unordered_map<uint64_t, int> recentEdgeCounts;
+    Coord lastMoveFrom{-1, -1};
+    Coord lastMoveTo{-1, -1};
     Coord myGeneral{-1, -1};
     Coord currentObjective{-1, -1};
     Coord previousAnchor{-1, -1};
@@ -113,12 +175,28 @@ class OimBot : public BasicBot {
     index_t lockedTargetPlayer = -1;
     int targetLockUntil = -1;
     Stance currentStance = Stance::GATHER;
+    mutable std::vector<Coord> targetGeneralCache;
+    mutable std::vector<int> targetGeneralCacheStamp;
+    mutable std::vector<TimingPlan> timingPlanCache;
+    mutable std::vector<int> timingPlanCacheStamp;
+    mutable std::vector<int> distFromGeneralCache;
+    mutable int distFromGeneralCacheStamp = -1;
+    mutable Coord distFromGeneralSource{-1, -1};
+    mutable SearchWorkspace forwardSearch;
+    mutable SearchWorkspace reverseSearch;
     std::mt19937 rng{std::random_device{}()};
 
     inline size_t idx(pos_t x, pos_t y) const {
         return static_cast<size_t>(x * W + y);
     }
     inline size_t idx(Coord c) const { return idx(c.x, c.y); }
+
+    inline uint64_t undirectedEdgeKey(Coord a, Coord b) const {
+        uint64_t lhs = static_cast<uint64_t>(idx(a));
+        uint64_t rhs = static_cast<uint64_t>(idx(b));
+        if (lhs > rhs) std::swap(lhs, rhs);
+        return (lhs << 32) | rhs;
+    }
 
     inline bool inside(Coord c) const {
         return c.x >= 1 && c.x <= height && c.y >= 1 && c.y <= width;
@@ -150,6 +228,66 @@ class OimBot : public BasicBot {
 
     inline bool isNeutralCity(const TileView& tile) const {
         return tile.type == TILE_CITY && tile.occupier < 0;
+    }
+
+    inline Coord primaryObjective() const {
+        if (lockedObjective != Coord{-1, -1} &&
+            fullTurn <= static_cast<turn_t>(objectiveLockUntil)) {
+            return lockedObjective;
+        }
+        return currentObjective;
+    }
+
+    static bool minHeapCompare(const std::pair<int, Coord>& lhs,
+                               const std::pair<int, Coord>& rhs) {
+        return lhs.first > rhs.first;
+    }
+
+    void prepareWorkspace(SearchWorkspace& workspace) const {
+        const size_t total = static_cast<size_t>((height + 2) * W);
+        if (workspace.dist.size() != total) {
+            workspace.dist.assign(total, kInf);
+            workspace.stamp.assign(total, 0);
+            workspace.link.assign(total, Coord{-1, -1});
+            workspace.heap.reserve(total);
+        }
+        if (workspace.activeStamp == std::numeric_limits<int>::max()) {
+            std::fill(workspace.stamp.begin(), workspace.stamp.end(), 0);
+            workspace.activeStamp = 1;
+        } else {
+            ++workspace.activeStamp;
+        }
+        workspace.heap.clear();
+    }
+
+    void touchWorkspaceNode(SearchWorkspace& workspace, size_t node) const {
+        if (workspace.stamp[node] == workspace.activeStamp) return;
+        workspace.stamp[node] = workspace.activeStamp;
+        workspace.dist[node] = kInf;
+        workspace.link[node] = Coord{-1, -1};
+    }
+
+    void rebuildTurnCaches() {
+        friendlyTilesCache.clear();
+        ownedCitiesCache.clear();
+        largestFriendlyArmyCache = 0;
+        friendlyTilesCache.reserve(static_cast<size_t>(height * width / 3 + 8));
+        ownedCitiesCache.reserve(12);
+
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord c{x, y};
+                const TileView& tile = board.tileAt(c);
+                if (tile.occupier != id) continue;
+                friendlyTilesCache.push_back(c);
+                largestFriendlyArmyCache =
+                    std::max(largestFriendlyArmyCache, tile.army);
+                if (tile.type == TILE_CITY) ownedCitiesCache.push_back(c);
+            }
+        }
+
+        distFromGeneralCacheStamp = -1;
+        distFromGeneralSource = Coord{-1, -1};
     }
 
     std::vector<Coord> allCoords() const {
@@ -238,43 +376,34 @@ class OimBot : public BasicBot {
     }
 
     void pushRecentMove(Coord from, Coord to) {
-        recentMoveSources.push_back(from);
-        recentMoveTargets.push_back(to);
-        if (static_cast<int>(recentMoveSources.size()) > kLookbackMoves) {
-            recentMoveSources.erase(recentMoveSources.begin());
-            recentMoveTargets.erase(recentMoveTargets.begin());
+        uint64_t edgeKey = undirectedEdgeKey(from, to);
+        recentEdges.push_back(RecentEdge{from, to, edgeKey});
+        ++recentEdgeCounts[edgeKey];
+        if (static_cast<int>(recentEdges.size()) > kLookbackMoves) {
+            RecentEdge expired = recentEdges.front();
+            recentEdges.pop_front();
+            auto it = recentEdgeCounts.find(expired.undirectedKey);
+            if (it != recentEdgeCounts.end()) {
+                if (--it->second <= 0) recentEdgeCounts.erase(it);
+            }
         }
+        lastMoveFrom = from;
+        lastMoveTo = to;
     }
 
     bool isRecentBounce(Coord from, Coord to) const {
-        for (size_t i = 0; i < recentMoveSources.size(); ++i) {
-            if (recentMoveSources[i] == to && recentMoveTargets[i] == from)
-                return true;
-        }
-        return false;
+        return recentEdgeCounts.find(undirectedEdgeKey(from, to)) !=
+               recentEdgeCounts.end();
     }
 
     bool isImmediateReverse(Coord from, Coord to) const {
-        if (recentMoveSources.empty()) return false;
-        const Coord& lastFrom = recentMoveSources.back();
-        const Coord& lastTo = recentMoveTargets.back();
-        return from == lastTo && to == lastFrom;
+        return from == lastMoveTo && to == lastMoveFrom;
     }
 
     int oscillationPairCount(Coord from, Coord to, int window = 10) const {
-        int count = 0;
-        if (window <= 0) return 0;
-        int begin =
-            std::max(0, static_cast<int>(recentMoveSources.size()) - window);
-        for (int i = begin; i < static_cast<int>(recentMoveSources.size());
-             ++i) {
-            bool sameDir =
-                recentMoveSources[i] == from && recentMoveTargets[i] == to;
-            bool reverseDir =
-                recentMoveSources[i] == to && recentMoveTargets[i] == from;
-            if (sameDir || reverseDir) ++count;
-        }
-        return count;
+        (void)window;
+        auto it = recentEdgeCounts.find(undirectedEdgeKey(from, to));
+        return it == recentEdgeCounts.end() ? 0 : it->second;
     }
 
     bool isTacticalReverseWorthIt(Coord from, Coord to) const {
@@ -291,9 +420,29 @@ class OimBot : public BasicBot {
     }
 
     bool shouldBlockOscillation(Coord from, Coord to) const {
-        if (!isImmediateReverse(from, to)) return false;
+        if (!inside(from) || !inside(to)) return false;
         if (isTacticalReverseWorthIt(from, to)) return false;
-        return oscillationPairCount(from, to, 12) >= 2;
+
+        const TileView& dst = board.tileAt(to);
+        Coord objective = primaryObjective();
+        bool friendlyBackstep = isFriendlyTile(dst);
+        bool driftingAway = false;
+
+        if (objective != Coord{-1, -1}) {
+            int fromDist = manhattan(from, objective);
+            int toDist = manhattan(to, objective);
+            driftingAway = toDist > fromDist;
+            if (!attackCorridorMask.empty() && attackCorridorMask[idx(from)] &&
+                !attackCorridorMask[idx(to)] && toDist >= fromDist) {
+                driftingAway = true;
+            }
+        }
+
+        int pairCount = oscillationPairCount(from, to, 12);
+        if (isImmediateReverse(from, to) && friendlyBackstep) return true;
+        if (pairCount >= 2 && friendlyBackstep && driftingAway) return true;
+        if (pairCount >= 3 && friendlyBackstep) return true;
+        return false;
     }
 
     void rememberVisibleBoard() {
@@ -427,9 +576,12 @@ class OimBot : public BasicBot {
     }
 
     Coord chooseTargetPlayerGeneral(index_t player) const {
-        if (player < 0) return Coord{-1, -1};
-        if (knownGenerals[player] != Coord{-1, -1})
-            return knownGenerals[player];
+        if (player < 0 || player >= playerCnt) return Coord{-1, -1};
+        if (knownGenerals[player] != Coord{-1, -1}) return knownGenerals[player];
+        if (player < static_cast<index_t>(targetGeneralCacheStamp.size()) &&
+            targetGeneralCacheStamp[player] == decisionSerial) {
+            return targetGeneralCache[player];
+        }
         const auto& scores = predictedGeneralScore[player];
         const auto& mask = candidateGeneralMask[player];
         double bestScore = -1e100;
@@ -450,6 +602,10 @@ class OimBot : public BasicBot {
                     best = c;
                 }
             }
+        }
+        if (player < static_cast<index_t>(targetGeneralCache.size())) {
+            targetGeneralCache[player] = best;
+            targetGeneralCacheStamp[player] = decisionSerial;
         }
         return best;
     }
@@ -517,46 +673,127 @@ class OimBot : public BasicBot {
     PathResult weightedPath(Coord start,
                             const std::function<int(Coord)>& stepCost) const {
         PathResult result;
-        const size_t total = static_cast<size_t>((height + 2) * W);
-        result.dist.assign(total, kInf);
-        result.parent.assign(total, Coord{-1, -1});
-        using Node = std::pair<int, Coord>;
-        std::priority_queue<Node, std::vector<Node>, std::greater<Node>> pq;
-        result.dist[idx(start)] = 0;
-        pq.emplace(0, start);
-        while (!pq.empty()) {
-            auto [curDist, cur] = pq.top();
-            pq.pop();
-            if (curDist != result.dist[idx(cur)]) continue;
+        if (!inside(start)) return result;
+
+        prepareWorkspace(forwardSearch);
+        size_t startIndex = idx(start);
+        touchWorkspaceNode(forwardSearch, startIndex);
+        forwardSearch.dist[startIndex] = 0;
+        forwardSearch.heap.emplace_back(0, start);
+        std::push_heap(forwardSearch.heap.begin(), forwardSearch.heap.end(),
+                       minHeapCompare);
+
+        while (!forwardSearch.heap.empty()) {
+            std::pop_heap(forwardSearch.heap.begin(), forwardSearch.heap.end(),
+                          minHeapCompare);
+            auto [curDist, cur] = forwardSearch.heap.back();
+            forwardSearch.heap.pop_back();
+            if (curDist != forwardSearch.dist[idx(cur)]) continue;
             for (Coord d : kDirs) {
                 Coord nxt = cur + d;
                 if (!inside(nxt)) continue;
                 const TileMemory& mem = memory[idx(nxt)];
                 if (!isPassable(mem.type)) continue;
+                size_t nextIndex = idx(nxt);
+                touchWorkspaceNode(forwardSearch, nextIndex);
                 int nd = curDist + stepCost(nxt);
-                if (nd < result.dist[idx(nxt)]) {
-                    result.dist[idx(nxt)] = nd;
-                    result.parent[idx(nxt)] = cur;
-                    pq.emplace(nd, nxt);
+                if (nd < forwardSearch.dist[nextIndex]) {
+                    forwardSearch.dist[nextIndex] = nd;
+                    forwardSearch.link[nextIndex] = cur;
+                    forwardSearch.heap.emplace_back(nd, nxt);
+                    std::push_heap(forwardSearch.heap.begin(),
+                                   forwardSearch.heap.end(), minHeapCompare);
                 }
             }
         }
         result.reachable = true;
+        result.dist = &forwardSearch.dist;
+        result.stamp = &forwardSearch.stamp;
+        result.parent = &forwardSearch.link;
+        result.activeStamp = forwardSearch.activeStamp;
+        return result;
+    }
+
+    ReversePathResult weightedReversePath(
+        Coord goal, const std::function<int(Coord)>& stepCost) const {
+        ReversePathResult result;
+        if (!inside(goal)) return result;
+
+        prepareWorkspace(reverseSearch);
+        size_t goalIndex = idx(goal);
+        touchWorkspaceNode(reverseSearch, goalIndex);
+        reverseSearch.dist[goalIndex] = 0;
+        reverseSearch.heap.emplace_back(0, goal);
+        std::push_heap(reverseSearch.heap.begin(), reverseSearch.heap.end(),
+                       minHeapCompare);
+
+        while (!reverseSearch.heap.empty()) {
+            std::pop_heap(reverseSearch.heap.begin(), reverseSearch.heap.end(),
+                          minHeapCompare);
+            auto [curDist, cur] = reverseSearch.heap.back();
+            reverseSearch.heap.pop_back();
+            if (curDist != reverseSearch.dist[idx(cur)]) continue;
+            for (Coord d : kDirs) {
+                Coord prev = cur + d;
+                if (!inside(prev)) continue;
+                const TileMemory& mem = memory[idx(prev)];
+                if (!isPassable(mem.type)) continue;
+                size_t prevIndex = idx(prev);
+                touchWorkspaceNode(reverseSearch, prevIndex);
+                int nd = curDist + stepCost(cur);
+                if (nd < reverseSearch.dist[prevIndex]) {
+                    reverseSearch.dist[prevIndex] = nd;
+                    reverseSearch.link[prevIndex] = cur;
+                    reverseSearch.heap.emplace_back(nd, prev);
+                    std::push_heap(reverseSearch.heap.begin(),
+                                   reverseSearch.heap.end(), minHeapCompare);
+                }
+            }
+        }
+
+        result.reachable = true;
+        result.dist = &reverseSearch.dist;
+        result.stamp = &reverseSearch.stamp;
+        result.next = &reverseSearch.link;
+        result.activeStamp = reverseSearch.activeStamp;
         return result;
     }
 
     std::vector<Coord> reconstructPath(Coord start, Coord goal,
-                                       const std::vector<Coord>& parent) const {
+                                       const PathResult& path) const {
         std::vector<Coord> rev;
         if (goal == Coord{-1, -1}) return rev;
         Coord cur = goal;
         while (cur != Coord{-1, -1} && cur != start) {
             rev.push_back(cur);
-            cur = parent[idx(cur)];
+            cur = path.parentAt(idx(cur));
         }
         if (cur != start) return {};
         std::reverse(rev.begin(), rev.end());
         return rev;
+    }
+
+    RoutePreview previewRoute(Coord start, Coord goal,
+                              const ReversePathResult& path) const {
+        RoutePreview preview;
+        if (!inside(start) || !inside(goal)) return preview;
+        if (start == goal) {
+            preview.reachable = true;
+            return preview;
+        }
+
+        Coord cur = start;
+        const int maxSteps = static_cast<int>(height * width) + 5;
+        for (int step = 0; step < maxSteps && cur != goal; ++step) {
+            Coord next = path.nextAt(idx(cur));
+            if (next == Coord{-1, -1}) return RoutePreview{};
+            if (preview.first == Coord{-1, -1}) preview.first = next;
+            cur = next;
+            ++preview.steps;
+        }
+        if (cur != goal) return RoutePreview{};
+        preview.reachable = true;
+        return preview;
     }
 
     army_t estimatedArmyAt(Coord c) const {
@@ -583,29 +820,12 @@ class OimBot : public BasicBot {
         return std::max(1, penalty);
     }
 
-    std::vector<Coord> ourTiles() const {
-        std::vector<Coord> tiles;
-        for (pos_t x = 1; x <= height; ++x) {
-            for (pos_t y = 1; y <= width; ++y) {
-                Coord c{x, y};
-                const TileView& tile = board.tileAt(c);
-                if (tile.occupier == id) tiles.push_back(c);
-            }
-        }
-        return tiles;
+    const std::vector<Coord>& ourTiles() const {
+        return friendlyTilesCache;
     }
 
-    std::vector<Coord> ownedCities() const {
-        std::vector<Coord> cities;
-        for (pos_t x = 1; x <= height; ++x) {
-            for (pos_t y = 1; y <= width; ++y) {
-                Coord c{x, y};
-                const TileView& tile = board.tileAt(c);
-                if (tile.occupier == id && tile.type == TILE_CITY)
-                    cities.push_back(c);
-            }
-        }
-        return cities;
+    const std::vector<Coord>& ownedCities() const {
+        return ownedCitiesCache;
     }
 
     Coord strongestFriendlyTile(bool includeGeneral = true,
@@ -656,26 +876,35 @@ class OimBot : public BasicBot {
         return required;
     }
 
-    bool canReasonablyCommitToCity(Coord city, Coord source) const {
+    bool canReasonablyCommitToCity(Coord city, Coord source,
+                                   const ReversePathResult& reversePath) const {
         if (city == Coord{-1, -1} || source == Coord{-1, -1}) return false;
         if (!isNeutralCity(board.tileAt(city))) return true;
         const TileView& src = board.tileAt(source);
         if (src.occupier != id || src.army <= 1) return false;
-        auto path = weightedPath(
-            source, [&](Coord c) { return attackPenalty(c, true); });
-        if (path.dist[idx(city)] >= kInf) return false;
-        auto route = reconstructPath(source, city, path.parent);
-        if (route.empty()) return false;
-        return src.army - 1 >=
-               cityCommitRequirement(city, static_cast<int>(route.size()));
+        if (reversePath.distance(idx(source)) >= kInf) return false;
+        RoutePreview route = previewRoute(source, city, reversePath);
+        if (!route.reachable || route.first == Coord{-1, -1}) return false;
+        return src.army - 1 >= cityCommitRequirement(city, route.steps);
+    }
+
+    bool canReasonablyCommitToCity(Coord city, Coord source) const {
+        if (city == Coord{-1, -1} || source == Coord{-1, -1}) return false;
+        if (!isNeutralCity(board.tileAt(city))) return true;
+        auto reversePath =
+            weightedReversePath(city, [&](Coord c) { return attackPenalty(c, true); });
+        return canReasonablyCommitToCity(city, source, reversePath);
     }
 
     bool anyReasonableCityCommit(Coord city, army_t minSourceArmy = 2) const {
         if (!isNeutralCity(board.tileAt(city))) return true;
+        auto reversePath =
+            weightedReversePath(city, [&](Coord c) { return attackPenalty(c, true); });
         for (Coord source : ourTiles()) {
             const TileView& src = board.tileAt(source);
             if (src.army < minSourceArmy) continue;
-            if (canReasonablyCommitToCity(city, source)) return true;
+            if (canReasonablyCommitToCity(city, source, reversePath))
+                return true;
         }
         return false;
     }
@@ -824,19 +1053,36 @@ class OimBot : public BasicBot {
             if (openingPhase && shouldAvoidOpeningSwamp(c)) cost += 1000;
             return std::max(1, cost);
         });
-        if (path.dist[idx(city)] >= kInf) return std::nullopt;
-        auto route = reconstructPath(source, city, path.parent);
+        if (path.distance(idx(city)) >= kInf) return std::nullopt;
+        auto route = reconstructPath(source, city, path);
         if (route.empty()) return std::nullopt;
         currentObjective = city;
         return Move(MoveType::MOVE_ARMY, source, route.front(), false);
     }
 
-    std::vector<int> bfsDistance(Coord start) const {
-        std::vector<int> dist(static_cast<size_t>((height + 2) * W), kInf);
-        if (start == Coord{-1, -1}) return dist;
+    const std::vector<int>& bfsDistance(Coord start) const {
+        if (distFromGeneralCache.size() !=
+            static_cast<size_t>((height + 2) * W)) {
+            distFromGeneralCache.assign(static_cast<size_t>((height + 2) * W),
+                                        kInf);
+        }
+        if (start == Coord{-1, -1}) {
+            std::fill(distFromGeneralCache.begin(), distFromGeneralCache.end(),
+                      kInf);
+            distFromGeneralCacheStamp = decisionSerial;
+            distFromGeneralSource = start;
+            return distFromGeneralCache;
+        }
+        if (distFromGeneralCacheStamp == decisionSerial &&
+            distFromGeneralSource == start) {
+            return distFromGeneralCache;
+        }
+
+        std::fill(distFromGeneralCache.begin(), distFromGeneralCache.end(),
+                  kInf);
         std::queue<Coord> q;
         q.push(start);
-        dist[idx(start)] = 0;
+        distFromGeneralCache[idx(start)] = 0;
         while (!q.empty()) {
             Coord cur = q.front();
             q.pop();
@@ -844,18 +1090,19 @@ class OimBot : public BasicBot {
                 Coord nxt = cur + d;
                 if (!inside(nxt)) continue;
                 if (!isPassable(memory[idx(nxt)].type)) continue;
-                if (dist[idx(nxt)] != kInf) continue;
-                dist[idx(nxt)] = dist[idx(cur)] + 1;
+                if (distFromGeneralCache[idx(nxt)] != kInf) continue;
+                distFromGeneralCache[idx(nxt)] =
+                    distFromGeneralCache[idx(cur)] + 1;
                 q.push(nxt);
             }
         }
-        return dist;
+        distFromGeneralCacheStamp = decisionSerial;
+        distFromGeneralSource = start;
+        return distFromGeneralCache;
     }
 
     army_t largestFriendlyArmy() const {
-        army_t best = 0;
-        for (Coord c : ourTiles()) best = std::max(best, board.tileAt(c).army);
-        return best;
+        return largestFriendlyArmyCache;
     }
 
     int currentCycleOffset(int cycleTurns = 50) const {
@@ -864,6 +1111,12 @@ class OimBot : public BasicBot {
     }
 
     TimingPlan computeTimingPlan(index_t targetPlayer) const {
+        if (targetPlayer >= 0 &&
+            targetPlayer < static_cast<index_t>(timingPlanCacheStamp.size()) &&
+            timingPlanCacheStamp[targetPlayer] == decisionSerial) {
+            return timingPlanCache[targetPlayer];
+        }
+
         TimingPlan plan;
         Coord target = chooseTargetPlayerGeneral(targetPlayer);
         int pathLength = 8;
@@ -873,8 +1126,8 @@ class OimBot : public BasicBot {
         if (myGeneral != Coord{-1, -1} && target != Coord{-1, -1}) {
             auto path = weightedPath(
                 myGeneral, [&](Coord c) { return attackPenalty(c, true); });
-            if (path.dist[idx(target)] < kInf) {
-                auto route = reconstructPath(myGeneral, target, path.parent);
+            if (path.distance(idx(target)) < kInf) {
+                auto route = reconstructPath(myGeneral, target, path);
                 pathLength = std::max<int>(8, static_cast<int>(route.size()));
                 for (Coord c : route) {
                     const TileMemory& mem = memory[idx(c)];
@@ -910,6 +1163,11 @@ class OimBot : public BasicBot {
 
         plan.gatherSplit = std::min(34, gatherSplit);
         plan.launchTiming = std::min(44, launchTiming);
+        if (targetPlayer >= 0 &&
+            targetPlayer < static_cast<index_t>(timingPlanCache.size())) {
+            timingPlanCache[targetPlayer] = plan;
+            timingPlanCacheStamp[targetPlayer] = decisionSerial;
+        }
         return plan;
     }
 
@@ -1046,8 +1304,8 @@ class OimBot : public BasicBot {
             if (!memory[idx(c)].everSeen) cost -= 1;
             return std::max(1, cost);
         });
-        if (path.dist[idx(target)] >= kInf) return;
-        auto route = reconstructPath(myGeneral, target, path.parent);
+        if (path.distance(idx(target)) >= kInf) return;
+        auto route = reconstructPath(myGeneral, target, path);
         for (Coord c : route) {
             attackCorridorMask[idx(c)] = 1;
             for (Coord d : kDirs) {
@@ -1147,14 +1405,13 @@ class OimBot : public BasicBot {
                 });
 
                 for (Coord target : keyTargets) {
-                    if (pathFromEnemy.dist[idx(target)] >= kInf) continue;
-                    auto route =
-                        reconstructPath(enemy, target, pathFromEnemy.parent);
+                    if (pathFromEnemy.distance(idx(target)) >= kInf) continue;
+                    auto route = reconstructPath(enemy, target, pathFromEnemy);
                     if (route.empty()) continue;
 
                     double targetValue = target == myGeneral ? 140.0 : 55.0;
                     double pressure = tile.army * 3.2 -
-                                      pathFromEnemy.dist[idx(target)] * 11.0 +
+                                      pathFromEnemy.distance(idx(target)) * 11.0 +
                                       targetValue;
                     if (target == myGeneral &&
                         board.tileAt(myGeneral).army < tile.army + 4)
@@ -1197,12 +1454,11 @@ class OimBot : public BasicBot {
                 });
 
                 for (Coord target : keyTargets) {
-                    if (pathFromEnemy.dist[idx(target)] >= kInf) continue;
-                    auto route =
-                        reconstructPath(enemy, target, pathFromEnemy.parent);
+                    if (pathFromEnemy.distance(idx(target)) >= kInf) continue;
+                    auto route = reconstructPath(enemy, target, pathFromEnemy);
                     if (route.empty()) continue;
                     double pressure = mem.army * 2.4 -
-                                      pathFromEnemy.dist[idx(target)] * 10.0 +
+                                      pathFromEnemy.distance(idx(target)) * 10.0 +
                                       (target == myGeneral ? 110.0 : 35.0);
                     ThreatInfo info;
                     info.source = enemy;
@@ -1245,61 +1501,62 @@ class OimBot : public BasicBot {
             if (!inside(target)) continue;
             if (!uniqueTargets.insert(idx(target)).second) continue;
             const TileView& targetTile = board.tileAt(target);
+            auto reversePath = weightedReversePath(target, [&](Coord c) {
+                int cost = defenseMode ? 2 : 3;
+                const TileView& dst = board.tileAt(c);
+                if (dst.occupier != id)
+                    cost +=
+                        attackPenalty(c, !defenseMode) + (defenseMode ? 2 : 6);
+                if (defenseMode && myGeneral != Coord{-1, -1})
+                    cost += std::max(0, manhattan(c, myGeneral) - 3);
+                if (!defenseMode && currentObjective != Coord{-1, -1})
+                    cost += manhattan(c, currentObjective) / 6;
+                return std::max(1, cost);
+            });
 
             for (Coord source : ourTiles()) {
                 const TileView& src = board.tileAt(source);
                 if (src.army < minSourceArmy) continue;
                 if (source == target) continue;
                 if (isNeutralCity(targetTile) &&
-                    !canReasonablyCommitToCity(target, source))
+                    !canReasonablyCommitToCity(target, source, reversePath))
                     continue;
                 if (isNeutralCity(targetTile) && defenseMode == false &&
                     currentObjective == target && !shouldLaunchNow(-1) &&
                     estimatedArmyAt(target) > 20)
                     continue;
 
-                auto path = weightedPath(source, [&](Coord c) {
-                    int cost = defenseMode ? 2 : 3;
-                    const TileView& dst = board.tileAt(c);
-                    if (dst.occupier != id)
-                        cost += attackPenalty(c, !defenseMode) +
-                                (defenseMode ? 2 : 6);
-                    if (defenseMode && myGeneral != Coord{-1, -1})
-                        cost += std::max(0, manhattan(c, myGeneral) - 3);
-                    if (!defenseMode && currentObjective != Coord{-1, -1})
-                        cost += manhattan(c, currentObjective) / 6;
-                    return std::max(1, cost);
-                });
-                if (path.dist[idx(target)] >= kInf) continue;
-                auto route = reconstructPath(source, target, path.parent);
-                if (route.empty()) continue;
+                if (reversePath.distance(idx(source)) >= kInf) continue;
+                RoutePreview route = previewRoute(source, target, reversePath);
+                if (!route.reachable || route.first == Coord{-1, -1}) continue;
 
                 double score = static_cast<double>(src.army - 1) *
                                (defenseMode ? 2.6 : 1.8);
-                score -= path.dist[idx(target)] * (defenseMode ? 3.8 : 2.7);
-                score -= route.size() * (defenseMode ? 4.5 : 2.5);
+                score -= reversePath.distance(idx(source)) *
+                         (defenseMode ? 3.8 : 2.7);
+                score -= route.steps * (defenseMode ? 4.5 : 2.5);
                 if (source == myGeneral) score -= defenseMode ? 4.0 : 10.0;
                 if (board.tileAt(source).type == TILE_CITY) score -= 3.0;
                 if (target == currentObjective) score += 12.0;
                 if (!defenseMode && !attackCorridorMask.empty()) {
                     if (attackCorridorMask[idx(source)]) score += 12.0;
-                    if (attackCorridorMask[idx(route.front())]) score += 16.0;
+                    if (attackCorridorMask[idx(route.first)]) score += 16.0;
                     if (lockedObjective != Coord{-1, -1}) {
                         score -=
-                            manhattan(route.front(), lockedObjective) * 0.6;
+                            manhattan(route.first, lockedObjective) * 0.6;
                     }
                 }
                 if (defenseMode && myGeneral != Coord{-1, -1})
                     score -= manhattan(source, myGeneral) * 1.5;
                 if (!defenseMode && currentObjective != Coord{-1, -1})
                     score -= manhattan(source, currentObjective) * 0.8;
-                if (shouldBlockOscillation(source, route.front())) continue;
-                if (isRecentBounce(source, route.front())) score -= 60.0;
+                if (shouldBlockOscillation(source, route.first)) continue;
+                if (isRecentBounce(source, route.first)) score -= 60.0;
 
                 if (score > best.score) {
                     best.score = score;
                     best.move =
-                        Move(MoveType::MOVE_ARMY, source, route.front(), false);
+                        Move(MoveType::MOVE_ARMY, source, route.first, false);
                     best.valid = true;
                 }
             }
@@ -1367,8 +1624,8 @@ class OimBot : public BasicBot {
             if (!memory[idx(c)].everSeen) cost += 1;
             return cost;
         });
-        if (path.dist[idx(target)] >= kInf) return std::nullopt;
-        auto route = reconstructPath(source, target, path.parent);
+        if (path.distance(idx(target)) >= kInf) return std::nullopt;
+        auto route = reconstructPath(source, target, path);
         if (route.empty()) return std::nullopt;
 
         army_t needed = std::max<army_t>(2, estimatedArmyAt(target) + 2);
@@ -1380,7 +1637,7 @@ class OimBot : public BasicBot {
 
     Coord bestExpansionTarget(index_t targetPlayer) const {
         Coord enemyGuess = chooseTargetPlayerGeneral(targetPlayer);
-        auto distFromGeneral = bfsDistance(myGeneral);
+        const auto& distFromGeneral = bfsDistance(myGeneral);
         Coord best{-1, -1};
         double bestScore = -1e100;
         for (pos_t x = 1; x <= height; ++x) {
@@ -1444,8 +1701,8 @@ class OimBot : public BasicBot {
             }
             return std::max(1, cost);
         });
-        if (path.dist[idx(target)] >= kInf) return std::nullopt;
-        auto route = reconstructPath(source, target, path.parent);
+        if (path.distance(idx(target)) >= kInf) return std::nullopt;
+        auto route = reconstructPath(source, target, path);
         if (route.empty()) return std::nullopt;
         return Move(MoveType::MOVE_ARMY, source, route.front(), false);
     }
@@ -1468,9 +1725,8 @@ class OimBot : public BasicBot {
             if (myGeneral != Coord{-1, -1}) {
                 auto path = weightedPath(
                     myGeneral, [&](Coord c) { return attackPenalty(c, true); });
-                if (path.dist[idx(enemyGuess)] < kInf) {
-                    auto route =
-                        reconstructPath(myGeneral, enemyGuess, path.parent);
+                if (path.distance(idx(enemyGuess)) < kInf) {
+                    auto route = reconstructPath(myGeneral, enemyGuess, path);
                     for (size_t i = 0; i < route.size() && i < 6; ++i)
                         targets.push_back(route[i]);
                 }
@@ -1519,7 +1775,7 @@ class OimBot : public BasicBot {
             return std::nullopt;
         auto path = weightedPath(
             source, [&](Coord c) { return attackPenalty(c, true); });
-        auto route = reconstructPath(source, target, path.parent);
+        auto route = reconstructPath(source, target, path);
         if (route.empty()) return std::nullopt;
         return Move(MoveType::MOVE_ARMY, source, route.front(), false);
     }
@@ -1680,13 +1936,30 @@ class OimBot : public BasicBot {
         aliveById.assign(playerCnt, true);
         playerArmyDelta.assign(playerCnt, 0);
         playerLandDelta.assign(playerCnt, 0);
-        recentMoveSources.clear();
-        recentMoveTargets.clear();
+        friendlyTilesCache.clear();
+        ownedCitiesCache.clear();
+        largestFriendlyArmyCache = 0;
+        recentEdges.clear();
+        recentEdgeCounts.clear();
+        lastMoveFrom = Coord{-1, -1};
+        lastMoveTo = Coord{-1, -1};
         myGeneral = Coord{-1, -1};
         currentObjective = Coord{-1, -1};
         previousAnchor = Coord{-1, -1};
         openingLaneTarget = Coord{-1, -1};
         openingLaneHeading = Coord{-1, -1};
+        lockedObjective = Coord{-1, -1};
+        objectiveLockUntil = -1;
+        lockedTargetPlayer = -1;
+        targetLockUntil = -1;
+        decisionSerial = 0;
+        targetGeneralCache.assign(playerCnt, Coord{-1, -1});
+        targetGeneralCacheStamp.assign(playerCnt, -1);
+        timingPlanCache.assign(playerCnt, TimingPlan{});
+        timingPlanCacheStamp.assign(playerCnt, -1);
+        distFromGeneralCache.assign(static_cast<size_t>((height + 2) * W), kInf);
+        distFromGeneralCacheStamp = -1;
+        distFromGeneralSource = Coord{-1, -1};
         openingLaunchTurn = computeOpeningLaunchTurn();
         currentStance = Stance::GATHER;
         prevBoard = BoardView{};
@@ -1699,11 +1972,13 @@ class OimBot : public BasicBot {
                      const std::vector<RankItem>& rank) override {
         ++halfTurn;
         fullTurn += (halfTurn & 1);
+        ++decisionSerial;
         board = boardView;
         refreshRank(rank);
         moveQueue.clear();
 
         rememberVisibleBoard();
+        rebuildTurnCaches();
         auto candidate = selectStrategicMove();
         if (!candidate.has_value() || !moveLooksSafe(*candidate))
             candidate = fallbackMove();

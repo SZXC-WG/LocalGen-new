@@ -254,6 +254,48 @@ class OimBot : public BasicBot {
         return false;
     }
 
+    bool isImmediateReverse(Coord from, Coord to) const {
+        if (recentMoveSources.empty()) return false;
+        const Coord& lastFrom = recentMoveSources.back();
+        const Coord& lastTo = recentMoveTargets.back();
+        return from == lastTo && to == lastFrom;
+    }
+
+    int oscillationPairCount(Coord from, Coord to, int window = 10) const {
+        int count = 0;
+        if (window <= 0) return 0;
+        int begin =
+            std::max(0, static_cast<int>(recentMoveSources.size()) - window);
+        for (int i = begin; i < static_cast<int>(recentMoveSources.size());
+             ++i) {
+            bool sameDir =
+                recentMoveSources[i] == from && recentMoveTargets[i] == to;
+            bool reverseDir =
+                recentMoveSources[i] == to && recentMoveTargets[i] == from;
+            if (sameDir || reverseDir) ++count;
+        }
+        return count;
+    }
+
+    bool isTacticalReverseWorthIt(Coord from, Coord to) const {
+        if (!inside(from) || !inside(to)) return false;
+        const TileView& src = board.tileAt(from);
+        const TileView& dst = board.tileAt(to);
+        if (src.army <= 1) return false;
+        army_t attack = src.army - 1;
+        army_t defense = estimatedArmyAt(to);
+        if (dst.type == TILE_GENERAL) return attack > defense;
+        if (isEnemyTile(dst)) return attack > defense;
+        if (dst.type == TILE_CITY) return attack > defense;
+        return false;
+    }
+
+    bool shouldBlockOscillation(Coord from, Coord to) const {
+        if (!isImmediateReverse(from, to)) return false;
+        if (isTacticalReverseWorthIt(from, to)) return false;
+        return oscillationPairCount(from, to, 12) >= 2;
+    }
+
     void rememberVisibleBoard() {
         newlyVisibleEnemyTiles.assign(playerCnt, 0);
         decayPredictions();
@@ -1053,6 +1095,7 @@ class OimBot : public BasicBot {
                     continue;
                 if (shouldAvoidOpeningSwamp(to) && dst.type != TILE_CITY)
                     continue;
+                if (shouldBlockOscillation(from, to)) continue;
                 double score = 0.0;
                 if (dst.type == TILE_GENERAL) score += 1e6;
                 if (dst.type == TILE_CITY) score += 450.0 - defense;
@@ -1250,6 +1293,7 @@ class OimBot : public BasicBot {
                     score -= manhattan(source, myGeneral) * 1.5;
                 if (!defenseMode && currentObjective != Coord{-1, -1})
                     score -= manhattan(source, currentObjective) * 0.8;
+                if (shouldBlockOscillation(source, route.front())) continue;
                 if (isRecentBounce(source, route.front())) score -= 60.0;
 
                 if (score > best.score) {
@@ -1491,6 +1535,7 @@ class OimBot : public BasicBot {
             if (!inside(to)) continue;
             const TileView& tile = board.tileAt(to);
             if (isImpassableTile(tile.type)) continue;
+            if (shouldBlockOscillation(source, to)) continue;
             if (tile.occupier == id && isRecentBounce(source, to)) continue;
             choices.push_back(to);
         }

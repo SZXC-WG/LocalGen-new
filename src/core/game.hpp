@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <numeric>
 #include <optional>
+#include <queue>
 #include <random>
 #include <stdexcept>
 #include <string>
@@ -388,7 +389,8 @@ inline std::vector<pos_t> BasicGame::calcDist(Coord pos) {
         for (Coord del : delta) {
             Coord next = cur + del;
             if (next.x > 0 && next.x <= height && next.y > 0 &&
-                next.y <= width && dist.at(grid(next)) == dist_inf) {
+                next.y <= width && !isImpassableTile(board.tileAt(next).type) &&
+                dist.at(grid(next)) == dist_inf) {
                 q.emplace_back(next, dis + 1);
                 dist.at(grid(next)) = dis + 1;
             }
@@ -407,6 +409,7 @@ inline void BasicGame::neutralize(index_t player) {
             }
         }
     }
+    // No need to broadcast: this is a low-level operation.
 }
 inline void BasicGame::takeOver(index_t p1, index_t p2) {
     alive[p2] = false;
@@ -418,6 +421,7 @@ inline void BasicGame::takeOver(index_t p1, index_t p2) {
             }
         }
     }
+    // No need to broadcast: this is a low-level operation.
 }
 inline void BasicGame::capture(index_t p1, index_t p2) {
     alive[p2] = false;
@@ -540,8 +544,10 @@ inline void BasicGame::step() {
 
     // handle afk players
     while (!surrenderQueue.empty() &&
-           surrenderQueue.front().second + 25 == curTurn) {
+           surrenderQueue.front().second + 25 <= curTurn) {
         index_t player = surrenderQueue.front().first;
+        surrenderQueue.pop();
+
         index_t tMate = player;
         // TODO: implementation for teams
         // If there are players left in the team, the player's land and army
@@ -656,6 +662,8 @@ inline int BasicGame::init() {
                                  static_cast<index_t>(players.size()), teams,
                                  conf});
     }
+
+    surrenderQueue = decltype(surrenderQueue)();
 
     board.updateVisionCache();
     return 0;

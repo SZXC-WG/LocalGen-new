@@ -1,0 +1,55 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    branches: [master]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze (C++)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: cpp
+          build-mode: manual
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.8.3
+          arch: linux_gcc_64
+          cache: true
+
+      - name: Configure build
+        run: >-
+          cmake -B build/codeql -S . -G Ninja
+          -DCMAKE_TOOLCHAIN_FILE=$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build/codeql -j4 --config Release
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v4

@@ -33,6 +33,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/bots/zlyBot_v2.cpp
     src/bots/zlyBot_v2.1.cpp
     src/bots/gcBot.cpp
+    src/bots/oimBot.cpp
     src/core/board.hpp
     src/core/bot.h
     src/core/game.hpp

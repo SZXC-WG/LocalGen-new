@@ -174,6 +174,7 @@ struct RankItem {
     army_t army = 0;
     pos_t land = 0;
     bool alive = false;
+    turn_t surrLeft = -1;
 };
 
 /// Move priority categories (based on generals.io priority system).
@@ -585,6 +586,10 @@ inline std::vector<RankItem> BasicGame::ranklist() {
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         rank[i].player = i;
         rank[i].alive = alive[i];
+    }
+
+    for (auto [player, left] : surrenderQueue) {
+        rank[player].surrLeft = left;
     }
 
     for (auto& tile : board.tiles) {

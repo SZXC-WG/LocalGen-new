@@ -156,6 +156,9 @@ constexpr inline PatchStatus patchStatus(const Config& config,
     return PatchStatus::OVERRIDDEN;
 }
 
+#undef GAME_CONFIG_UNIT_LIST
+#undef GAME_CONFIG_MODIFIER_LIST
+
 }  // namespace config
 
 struct GameConstantsPack {

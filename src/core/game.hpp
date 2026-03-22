@@ -14,9 +14,9 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <deque>
 #include <numeric>
 #include <optional>
-#include <queue>
 #include <random>
 #include <stdexcept>
 #include <string>
@@ -252,7 +252,7 @@ class BasicGame {
    protected:
     Board board;
 
-    std::queue<std::pair<index_t, turn_t>> surrenderQueue;
+    std::deque<std::pair<index_t, turn_t>> surrenderQueue;
 
     void neutralize(index_t player);
     void takeOver(index_t p1, index_t p2);
@@ -537,16 +537,19 @@ inline void BasicGame::step() {
                 }
             }
         } else if (move.type == MoveType::SURRENDER) {
-            surrenderQueue.emplace(player, curTurn);
+            surrenderQueue.emplace_back(player, 50);
+            alive[player] = false;
             broadcast(curTurn, GameMessageSurrender{player});
         }
     }
 
+    std::for_each(surrenderQueue.begin(), surrenderQueue.end(),
+                  [&](auto& x) { --x.second; });
+
     // handle afk players
-    while (!surrenderQueue.empty() &&
-           surrenderQueue.front().second + 25 <= curTurn) {
+    while (!surrenderQueue.empty() && surrenderQueue.front().second <= 0) {
         index_t player = surrenderQueue.front().first;
-        surrenderQueue.pop();
+        surrenderQueue.pop_front();
 
         index_t tMate = player;
         // TODO: implementation for teams

@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <numeric>
 #include <optional>
+#include <queue>
 #include <random>
 #include <stdexcept>
 #include <string>
@@ -243,11 +244,22 @@ class BasicGame {
     void broadcast(turn_t turn, const GameMessageData& messageData);
 
    protected:
+    /// Calculate distance from a certain coordinate.
+    /// The route can't pass impassable tiles.
+    /// This function is reserved for future use.
+    std::vector<pos_t> calcDist(Coord pos);
+
+   protected:
     Board board;
 
+    std::queue<std::pair<index_t, turn_t>> surrenderQueue;
+
+    void neutralize(index_t player);
+    void takeOver(index_t p1, index_t p2);
     void capture(index_t p1, index_t p2);
 
-    // Move priority helper functions
+    /// Move priority helper functions
+   protected:
     /// Check if a move is defensive (friendly-to-friendly, including
     /// teammates).
     inline bool isDefensiveMove(index_t player, const Move& move) const {
@@ -363,6 +375,54 @@ class BasicGame {
     std::vector<ReplayUnit> replay;
 };
 
+inline std::vector<pos_t> BasicGame::calcDist(Coord pos) {
+    static constexpr Coord delta[] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+    pos_t height = board.getHeight(), width = board.getWidth();
+    const pos_t dist_inf = height * width + 1;
+    std::vector<pos_t> dist((height + 2) * (width + 2), dist_inf);
+    auto grid = [&, this](Coord p) { return p.x * (width + 2) + p.y; };
+    std::vector<std::pair<Coord, pos_t>> q;
+    std::size_t head = 0;
+    q.emplace_back(pos, 0);
+    while (head < q.size()) {
+        auto [cur, dis] = q.at(head++);
+        for (Coord del : delta) {
+            Coord next = cur + del;
+            if (next.x > 0 && next.x <= height && next.y > 0 &&
+                next.y <= width && !isImpassableTile(board.tileAt(next).type) &&
+                dist.at(grid(next)) == dist_inf) {
+                q.emplace_back(next, dis + 1);
+                dist.at(grid(next)) = dis + 1;
+            }
+        }
+    }
+    return dist;
+}
+
+inline void BasicGame::neutralize(index_t player) {
+    alive[player] = false;
+    for (auto& tile : board.tiles) {
+        if (tile.occupier == player) {
+            tile.occupier = -1;
+            if (tile.type == TILE_GENERAL) {
+                tile.type = TILE_CAPTURED_GENERAL;
+            }
+        }
+    }
+    // No need to broadcast: this is a low-level operation.
+}
+inline void BasicGame::takeOver(index_t p1, index_t p2) {
+    alive[p2] = false;
+    for (auto& tile : board.tiles) {
+        if (tile.occupier == p2) {
+            tile.occupier = p1;
+            if (tile.type == TILE_GENERAL) {
+                tile.type = TILE_CAPTURED_GENERAL;
+            }
+        }
+    }
+    // No need to broadcast: this is a low-level operation.
+}
 inline void BasicGame::capture(index_t p1, index_t p2) {
     alive[p2] = false;
     for (auto& tile : board.tiles) {
@@ -451,7 +511,6 @@ inline void BasicGame::step() {
               });
 
     // execute moves
-    std::vector<index_t> surrenderingPlayers;
     for (auto [player, move] : moves) {
         if (!alive[player] || !board.available(player, move))
             continue;  // skip just-captured players or invalid moves
@@ -478,20 +537,28 @@ inline void BasicGame::step() {
                 }
             }
         } else if (move.type == MoveType::SURRENDER) {
-            surrenderingPlayers.push_back(player);
+            surrenderQueue.emplace(player, curTurn);
             broadcast(curTurn, GameMessageSurrender{player});
         }
     }
 
-    for (index_t player : surrenderingPlayers) {
-        alive[player] = false;
-        for (auto& tile : board.tiles) {
-            if (tile.occupier == player) {
-                tile.occupier = -1;
-                if (tile.type == TILE_GENERAL) {
-                    tile.type = TILE_CAPTURED_GENERAL;
-                }
-            }
+    // handle afk players
+    while (!surrenderQueue.empty() &&
+           surrenderQueue.front().second + 25 <= curTurn) {
+        index_t player = surrenderQueue.front().first;
+        surrenderQueue.pop();
+
+        index_t tMate = player;
+        // TODO: implementation for teams
+        // If there are players left in the team, the player's land and army
+        // will be taken over by the team mate whose general is closest to
+        // theirs. Here, "closest" means to have the least distance, where
+        // "distance" is the length of the shortest path not passing any
+        // impassable tiles defined by `isImpassibleTile(type)`.
+        if (tMate == player) {
+            neutralize(player);
+        } else {
+            takeOver(tMate, player);
         }
     }
 
@@ -595,6 +662,8 @@ inline int BasicGame::init() {
                                  static_cast<index_t>(players.size()), teams,
                                  conf});
     }
+
+    surrenderQueue = decltype(surrenderQueue)();
 
     board.updateVisionCache();
     return 0;

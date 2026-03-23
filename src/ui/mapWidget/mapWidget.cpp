@@ -1,8 +1,10 @@
 #include "mapWidget.h"
 
 #include <QApplication>
+#include <QEvent>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QNativeGestureEvent>
 #include <QPainter>
 #include <QPainterPath>
 #include <QSvgRenderer>
@@ -23,11 +25,22 @@ MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled,
       focusCol(-1),
       lastRightClickGrid(-1, -1) {
     setMouseTracking(true);
+    setAttribute(Qt::WA_AcceptTouchEvents, true);
     setFocusEnabled(focusEnabled);
     realloc(width, height);
 }
 
 MapWidget::~MapWidget() {}
+
+bool MapWidget::event(QEvent* event) {
+    if (event->type() == QEvent::NativeGesture) {
+        if (handleNativeGesture(static_cast<QNativeGestureEvent*>(event))) {
+            return true;
+        }
+    }
+
+    return QWidget::event(event);
+}
 
 void MapWidget::setMapWidth(int w) {
     if (w == _mapWidth) return;
@@ -374,18 +387,71 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     }
 }
 
-void MapWidget::wheelEvent(QWheelEvent* event) {
-    int delta = event->angleDelta().y();
-    QPoint globalMousePos = QCursor::pos();
-    QPoint widgetMousePos = mapFromGlobal(globalMousePos);
-    QPointF oldMousePos = (widgetMousePos - offset) / scale;
-    if (delta > 0)
-        scale *= zoomFactor;
-    else
-        scale /= zoomFactor;
-    scale = qBound(minScale, scale, maxScale);
-    offset = widgetMousePos - oldMousePos * scale;
+void MapWidget::panBy(const QPointF& delta) {
+    if (delta.isNull()) return;
+    offset += delta;
     update();
+}
+
+void MapWidget::zoomAt(const QPointF& widgetPos, qreal zoomMultiplier) {
+    if (zoomMultiplier <= 0.0) return;
+
+    const qreal previousScale = scale;
+    const qreal nextScale =
+        qBound(minScale, previousScale * zoomMultiplier, maxScale);
+    if (qFuzzyCompare(previousScale, nextScale)) return;
+
+    const QPointF anchor = (widgetPos - offset) / previousScale;
+    scale = nextScale;
+    offset = widgetPos - anchor * scale;
+    update();
+}
+
+bool MapWidget::isTouchpadScrollEvent(const QWheelEvent* event) const {
+    return !event->pixelDelta().isNull() || event->phase() != Qt::NoScrollPhase;
+}
+
+bool MapWidget::handleNativeGesture(QNativeGestureEvent* event) {
+    if (event == nullptr) return false;
+
+    switch (event->gestureType()) {
+        case Qt::BeginNativeGesture:
+        case Qt::EndNativeGesture:
+        case Qt::PanNativeGesture:
+        case Qt::SmartZoomNativeGesture:
+        case Qt::RotateNativeGesture:
+        case Qt::SwipeNativeGesture:     return false;
+        case Qt::ZoomNativeGesture:      {
+            const qreal zoomMultiplier = std::exp(event->value());
+            zoomAt(event->position(), zoomMultiplier);
+            event->accept();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void MapWidget::wheelEvent(QWheelEvent* event) {
+    if (isTouchpadScrollEvent(event)) {
+        QPointF panDelta = event->pixelDelta();
+        if (panDelta.isNull()) {
+            panDelta = QPointF(event->angleDelta()) / 8.0;
+        }
+        panBy(panDelta);
+        event->accept();
+        return;
+    }
+
+    const int delta = event->angleDelta().y();
+    if (delta == 0) {
+        event->ignore();
+        return;
+    }
+
+    const qreal zoomMultiplier = delta > 0 ? zoomFactor : 1.0 / zoomFactor;
+    zoomAt(event->position(), zoomMultiplier);
+    event->accept();
 }
 
 void MapWidget::mousePressEvent(QMouseEvent* event) {

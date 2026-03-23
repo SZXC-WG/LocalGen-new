@@ -1,7 +1,9 @@
 #ifndef MAPWIDGET_H
 #define MAPWIDGET_H
 
+#include <QEvent>
 #include <QHash>
+#include <QNativeGestureEvent>
 #include <QPainter>
 #include <QPixmap>
 #include <QPoint>
@@ -53,6 +55,7 @@ class MapWidget : public QWidget {
     void cellClicked(int r, int c);
 
    protected:
+    bool event(QEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
@@ -64,6 +67,10 @@ class MapWidget : public QWidget {
    private:
     // Helper functions
     QPoint mapToGrid(const QPoint& pos) const;
+    void panBy(const QPointF& delta);
+    void zoomAt(const QPointF& widgetPos, qreal zoomMultiplier);
+    bool isTouchpadScrollEvent(const QWheelEvent* event) const;
+    bool handleNativeGesture(QNativeGestureEvent* event);
 
     inline bool isValidGridPos(int x, int y) const {
         return x >= 0 && x < mapWidth() && y >= 0 && y < mapHeight();

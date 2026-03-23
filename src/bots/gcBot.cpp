@@ -75,7 +75,9 @@ class GcBot : public BasicBot {
             int bt = blockType[idx(x, y)];
             if (bt == 1) return -1;
             if (bt == 5) return 0;
+            if (!knownBlockType[idx(x, y)]) return 2;
             if (board.tileAt(x, y).occupier == id) return army[idx(x, y)] - 1;
+            if (bt == 4) return -army[idx(x, y)] / 2;
             return -army[idx(x, y)];
         };
 
@@ -293,7 +295,7 @@ class GcBot : public BasicBot {
                 }
             }
             if (!unknownPlains.empty()) {
-                std::size_t k = unknownPlains.size() / 3;
+                std::size_t k = unknownPlains.size() / 4;
                 std::nth_element(unknownPlains.begin(),
                                  unknownPlains.begin() + k,
                                  unknownPlains.end());

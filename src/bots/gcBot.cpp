@@ -312,7 +312,7 @@ class GcBot : public BasicBot {
                             (dist[idx(i, j)] + army[idx(i, j)] / 2);
                         if (seenGeneral[id].x != -1) {
                             blockValue -=
-                                approxDist(Coord(i, j), seenGeneral[id]) * 5LL;
+                                approxDist(Coord(i, j), seenGeneral[id]) * 3LL;
                         }
                         if (blockValue > maxBlockValue) {
                             maxBlockValue = blockValue;
@@ -330,7 +330,7 @@ class GcBot : public BasicBot {
                     (dist[idx(x, y)] + army[idx(x, y)] / 2);
                 if (seenGeneral[id].x != -1) {
                     prevBlockValue -=
-                        approxDist(Coord(x, y), seenGeneral[id]) * 5LL;
+                        approxDist(Coord(x, y), seenGeneral[id]) * 3LL;
                 }
                 if (std::abs(prevBlockValue - maxBlockValue) < 25) {
                     targetPos = prevTarget;

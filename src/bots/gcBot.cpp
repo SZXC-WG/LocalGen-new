@@ -341,6 +341,11 @@ class GcBot : public BasicBot {
         }
         prevTarget = targetPos;
 
+        if (targetPos.x == -1) {
+            moveQueue.emplace_back(MoveType::EMPTY);
+            return;
+        }
+
         if (blockType[idx(coo.x, coo.y)] == 1 || dis(rnd) > 0.07 ||
             eval[idx(targetPos.x, targetPos.y)] > 150) {
             Coord nextPos = moveTowards(coo, targetPos);

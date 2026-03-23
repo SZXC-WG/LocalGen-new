@@ -3,11 +3,8 @@
  *
  * XiaruizeBot.
  *
- * This implementation uses two internal policies:
- * - a fast, tactical rush planner on small and medium maps
- * - a heavier macro planner on large maps where exploration efficiency matters
- *
- * The public bot selects the policy at init time from the map size.
+ * Original implementation: tactical capture search + focused-stack planning
+ * with threat-aware defense, weighted pathfinding, and gathering.
  *
  * @copyright Copyright (c) SZXC Work Group.
  */
@@ -17,10 +14,8 @@
 
 #include <algorithm>
 #include <array>
-#include <cmath>
 #include <cstdint>
-#include <deque>
-#include <memory>
+#include <limits>
 #include <optional>
 #include <queue>
 #include <random>
@@ -29,85 +24,446 @@
 #include "core/bot.h"
 #include "core/game.hpp"
 
-class XiaruizeRushPolicy : public BasicBot {
+class XiaruizeBot : public BasicBot {
    private:
-    using value_t = long long;
-    constexpr static value_t INF = 10'000'000'000'000'000LL;
-    constexpr static Coord delta[] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
+    using score_t = long long;
+    static constexpr score_t kInf = (1LL << 60);
+    static constexpr score_t kNegInf = -(1LL << 60);
+    static constexpr std::array<Coord, 4> kDirs = {
+        Coord{-1, 0}, Coord{0, -1}, Coord{1, 0}, Coord{0, 1}};
 
-    pos_t height, width, W;
-    index_t playerCnt;
-    index_t id;
-    config::Config config;
+    struct MemoryCell {
+        tile_type_e terrain = TILE_BLANK;
+        index_t occupier = -1;
+        army_t army = 0;
+        bool seen = false;
+        bool visible = false;
+        int lastSeenTurn = -1;
+    };
 
-    turn_t halfTurn, turn;
+    struct PathMap {
+        std::vector<score_t> dist;
+        std::vector<Coord> parent;
+    };
 
+    struct Candidate {
+        Move move{};
+        score_t score = kNegInf;
+    };
+
+    struct ThreatInfo {
+        bool present = false;
+        Coord source{-1, -1};
+        army_t army = 0;
+        int dist = 1e9;
+    };
+
+    struct HeapNode {
+        score_t dist = 0;
+        Coord coord{0, 0};
+
+        bool operator<(const HeapNode& other) const { return dist > other.dist; }
+    };
+
+    pos_t height = 0;
+    pos_t width = 0;
+    pos_t stride = 0;
+    index_t id = -1;
+    index_t playerCount = 0;
+    turn_t halfTurn = 0;
+    turn_t fullTurn = 0;
+
+    std::vector<index_t> teams;
     BoardView board;
-    std::vector<RankItem> rank;
+    std::vector<RankItem> rankById;
+    std::vector<MemoryCell> memory;
+    std::vector<Coord> knownGenerals;
 
-    std::vector<Coord> seenGeneral;
-    std::vector<value_t> blockTypeValue;
-    std::vector<value_t> eval;
-    std::vector<Coord> par;
-    std::vector<pos_t> dist;
-    std::vector<int> blockType;
-    std::vector<bool> knownBlockType;
-    std::vector<value_t> army;
-    Coord prevTarget;
-    Coord lastPos;
-    std::mt19937 rnd;
+    Coord myGeneral{-1, -1};
+    Coord focusCell{-1, -1};
+    Coord macroTarget{-1, -1};
+    Coord lastMoveFrom{-1, -1};
+    Coord lastMoveTo{-1, -1};
+    int macroTargetLockUntil = -1;
+
+    std::mt19937 rng{std::random_device{}()};
 
     inline size_t idx(pos_t x, pos_t y) const {
-        return static_cast<size_t>(x * W + y);
+        return static_cast<size_t>(x * stride + y);
     }
+    inline size_t idx(Coord c) const { return idx(c.x, c.y); }
 
-    inline bool isValidPosition(pos_t x, pos_t y) const {
-        if (x < 1 || x > height || y < 1 || y > width) return false;
-        tile_type_e type = board.tileAt(x, y).type;
-        return !isImpassableTile(type) && type != TILE_OBSTACLE;
-    }
-
-    inline int approxDist(Coord st, Coord dest) const {
-        return std::abs(st.x - dest.x) + std::abs(st.y - dest.y);
-    }
-
-    inline bool isCoordValid(Coord c) const {
+    inline bool inside(Coord c) const {
         return c.x >= 1 && c.x <= height && c.y >= 1 && c.y <= width;
     }
 
-    army_t estimatedArmyAt(pos_t x, pos_t y) const {
-        return board.tileAt(x, y).visible ? board.tileAt(x, y).army
-                                          : army[idx(x, y)];
+    inline bool validPlayer(index_t player) const {
+        return player >= 0 && player < playerCount;
     }
 
-    std::optional<Move> chooseImmediateTacticalMove() const {
-        value_t bestScore = -INF;
-        Move bestMove;
+    inline bool sameTeam(index_t a, index_t b) const {
+        if (!validPlayer(a) || !validPlayer(b) || teams.empty()) return a == b;
+        return teams[a] == teams[b];
+    }
 
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                Coord from(i, j);
-                const auto& fromTile = board.tileAt(from);
-                if (fromTile.occupier != id || fromTile.army <= 1) continue;
+    inline bool isEnemy(index_t occupier) const {
+        return validPlayer(occupier) && !sameTeam(occupier, id);
+    }
 
-                for (Coord d : delta) {
+    inline bool isFriendly(index_t occupier) const {
+        return validPlayer(occupier) && sameTeam(occupier, id);
+    }
+
+    inline bool isAlive(index_t player) const {
+        return validPlayer(player) && player < static_cast<index_t>(rankById.size())
+                   ? rankById[player].alive
+                   : false;
+    }
+
+    tile_type_e terrainAt(Coord c) const {
+        const TileView& tile = board.tileAt(c);
+        if (tile.visible) return tile.type;
+        const MemoryCell& mem = memory[idx(c)];
+        if (mem.seen) return mem.terrain;
+        return tile.type;
+    }
+
+    index_t occupierAt(Coord c) const {
+        const TileView& tile = board.tileAt(c);
+        if (tile.visible) return tile.occupier;
+        return memory[idx(c)].occupier;
+    }
+
+    army_t armyAt(Coord c) const {
+        const TileView& tile = board.tileAt(c);
+        if (tile.visible) return tile.army;
+        return memory[idx(c)].army;
+    }
+
+    bool passableForMove(Coord c) const {
+        if (!inside(c)) return false;
+        tile_type_e type = board.tileAt(c).type;
+        return !isImpassableTile(type) && type != TILE_OBSTACLE;
+    }
+
+    bool passableForPlan(Coord c) const {
+        if (!inside(c)) return false;
+        tile_type_e type = terrainAt(c);
+        return !isImpassableTile(type) && type != TILE_OBSTACLE;
+    }
+
+    void syncRank(const std::vector<RankItem>& rank) {
+        rankById = rank;
+        std::sort(rankById.begin(), rankById.end(),
+                  [](const RankItem& lhs, const RankItem& rhs) {
+                      return lhs.player < rhs.player;
+                  });
+    }
+
+    void updateMemory() {
+        myGeneral = Coord{-1, -1};
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord c{x, y};
+                const TileView& tile = board.tileAt(c);
+                MemoryCell& mem = memory[idx(c)];
+                mem.visible = tile.visible;
+
+                if (tile.visible) {
+                    mem.seen = true;
+                    mem.terrain = tile.type;
+                    mem.occupier = tile.occupier;
+                    mem.army = tile.army;
+                    mem.lastSeenTurn = fullTurn;
+
+                    if (tile.type == TILE_GENERAL && validPlayer(tile.occupier)) {
+                        knownGenerals[tile.occupier] = c;
+                    }
+                    if (tile.type == TILE_GENERAL && tile.occupier == id) {
+                        myGeneral = c;
+                    }
+                } else if (!mem.seen) {
+                    mem.terrain = tile.type;
+                    mem.occupier = -1;
+                    mem.army = 0;
+                } else {
+                    int stale =
+                        std::max(0, static_cast<int>(fullTurn) - mem.lastSeenTurn);
+                    if (isEnemy(mem.occupier)) {
+                        if (stale > 0 && mem.army > 0) {
+                            mem.army =
+                                std::max<army_t>(0, mem.army - stale / 2);
+                        }
+                        if (stale > 14) mem.occupier = -1;
+                    }
+                }
+            }
+        }
+    }
+
+    std::vector<int> computePressure(bool enemySide) const {
+        std::vector<int> pressure((height + 2) * stride, 0);
+        int radius = enemySide ? 5 : 4;
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                const TileView& tile = board.tileAt(x, y);
+                if (!tile.visible) continue;
+
+                bool matches = enemySide ? isEnemy(tile.occupier)
+                                         : tile.occupier == id;
+                if (!matches) continue;
+
+                int power = std::min<int>(tile.army, enemySide ? 100 : 120);
+                for (int dx = -radius; dx <= radius; ++dx) {
+                    for (int dy = -radius; dy <= radius; ++dy) {
+                        Coord c{x + dx, y + dy};
+                        if (!inside(c)) continue;
+                        int dist = std::abs(dx) + std::abs(dy);
+                        if (dist > radius) continue;
+                        int gain = std::max(0, power - dist * (enemySide ? 14 : 12));
+                        pressure[idx(c)] += gain;
+                    }
+                }
+            }
+        }
+        return pressure;
+    }
+
+    void computeBorderStats(std::vector<int>& unknownAdj,
+                            std::vector<int>& enemyAdj) const {
+        unknownAdj.assign((height + 2) * stride, 0);
+        enemyAdj.assign((height + 2) * stride, 0);
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord c{x, y};
+                for (Coord d : kDirs) {
+                    Coord nxt = c + d;
+                    if (!inside(nxt)) continue;
+
+                    if (!memory[idx(nxt)].seen &&
+                        board.tileAt(nxt).type != TILE_OBSTACLE) {
+                        ++unknownAdj[idx(c)];
+                    }
+                    if (isEnemy(occupierAt(nxt))) {
+                        ++enemyAdj[idx(c)];
+                    }
+                }
+            }
+        }
+    }
+
+    std::vector<int> computeGeneralDist() const {
+        std::vector<int> dist((height + 2) * stride, 1e9);
+        if (!inside(myGeneral)) return dist;
+
+        std::queue<Coord> q;
+        dist[idx(myGeneral)] = 0;
+        q.push(myGeneral);
+        while (!q.empty()) {
+            Coord cur = q.front();
+            q.pop();
+            for (Coord d : kDirs) {
+                Coord nxt = cur + d;
+                if (!passableForPlan(nxt)) continue;
+                if (dist[idx(nxt)] <= dist[idx(cur)] + 1) continue;
+                dist[idx(nxt)] = dist[idx(cur)] + 1;
+                q.push(nxt);
+            }
+        }
+        return dist;
+    }
+
+    ThreatInfo assessGeneralThreat() const {
+        ThreatInfo best;
+        if (!inside(myGeneral)) return best;
+
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord c{x, y};
+                const TileView& tile = board.tileAt(c);
+                if (!tile.visible || !isEnemy(tile.occupier)) continue;
+
+                const int dist =
+                    std::abs(c.x - myGeneral.x) + std::abs(c.y - myGeneral.y);
+                if (dist > 5) continue;
+                if (!best.present || dist < best.dist ||
+                    (dist == best.dist && tile.army > best.army)) {
+                    best.present = true;
+                    best.source = c;
+                    best.army = tile.army;
+                    best.dist = dist;
+                }
+            }
+        }
+
+        return best;
+    }
+
+    std::vector<int> computeDistanceMap(const std::vector<Coord>& starts) const {
+        std::vector<int> dist((height + 2) * stride, 1e9);
+        std::queue<Coord> q;
+
+        for (Coord start : starts) {
+            if (!inside(start) || !passableForPlan(start)) continue;
+            if (dist[idx(start)] == 0) continue;
+            dist[idx(start)] = 0;
+            q.push(start);
+        }
+
+        while (!q.empty()) {
+            Coord cur = q.front();
+            q.pop();
+            for (Coord d : kDirs) {
+                Coord nxt = cur + d;
+                if (!passableForPlan(nxt)) continue;
+                if (dist[idx(nxt)] <= dist[idx(cur)] + 1) continue;
+                dist[idx(nxt)] = dist[idx(cur)] + 1;
+                q.push(nxt);
+            }
+        }
+
+        return dist;
+    }
+
+    score_t enterCost(Coord dest, bool gatherMode) const {
+        tile_type_e terrain = terrainAt(dest);
+        index_t occupier = occupierAt(dest);
+        army_t army = armyAt(dest);
+
+        score_t cost = gatherMode ? 8 : 12;
+        if (terrain == TILE_SWAMP) cost += gatherMode ? 120 : 70;
+        if (terrain == TILE_CITY) cost += gatherMode ? 25 : 18;
+        if (terrain == TILE_DESERT) cost += 4;
+
+        if (isFriendly(occupier)) {
+            cost -= std::min<score_t>(army, gatherMode ? 4 : 6);
+        } else if (occupier == -1) {
+            cost += static_cast<score_t>(army) * (gatherMode ? 8 : 5);
+        } else if (isEnemy(occupier)) {
+            cost += static_cast<score_t>(army) * (gatherMode ? 16 : 10);
+            cost += gatherMode ? 90 : 40;
+        }
+
+        if (!board.tileAt(dest).visible && !memory[idx(dest)].seen) cost += 8;
+        return std::max<score_t>(1, cost);
+    }
+
+    PathMap buildPathMap(Coord start, bool gatherMode) const {
+        PathMap path;
+        path.dist.assign((height + 2) * stride, kInf);
+        path.parent.assign((height + 2) * stride, Coord{-1, -1});
+        if (!inside(start) || !passableForPlan(start)) return path;
+
+        std::priority_queue<HeapNode> pq;
+        path.dist[idx(start)] = 0;
+        pq.push(HeapNode{0, start});
+
+        while (!pq.empty()) {
+            HeapNode cur = pq.top();
+            pq.pop();
+            if (cur.dist != path.dist[idx(cur.coord)]) continue;
+
+            for (Coord d : kDirs) {
+                Coord nxt = cur.coord + d;
+                if (!passableForPlan(nxt)) continue;
+                score_t nd = cur.dist + enterCost(nxt, gatherMode);
+                if (nd >= path.dist[idx(nxt)]) continue;
+                path.dist[idx(nxt)] = nd;
+                path.parent[idx(nxt)] = cur.coord;
+                pq.push(HeapNode{nd, nxt});
+            }
+        }
+
+        return path;
+    }
+
+    Coord firstStepOnPath(const PathMap& path, Coord start, Coord target) const {
+        if (!inside(start) || !inside(target) || target == start) return start;
+        Coord cur = target;
+        int guard = height * width + 5;
+        while (guard-- > 0 && cur != start) {
+            Coord prev = path.parent[idx(cur)];
+            if (!inside(prev)) return start;
+            if (prev == start) return cur;
+            cur = prev;
+        }
+        return start;
+    }
+
+    Coord chooseFocus(const std::vector<int>& unknownAdj,
+                      const std::vector<int>& enemyAdj,
+                      const std::vector<int>& generalDist, bool crowded,
+                      bool defenseMode) const {
+        if (defenseMode && inside(myGeneral) && board.tileAt(myGeneral).army > 1) {
+            return myGeneral;
+        }
+
+        if (inside(focusCell)) {
+            const TileView& tile = board.tileAt(focusCell);
+            if (tile.occupier == id && tile.army > 1) return focusCell;
+        }
+
+        score_t bestScore = kNegInf;
+        Coord best{-1, -1};
+
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord c{x, y};
+                const TileView& tile = board.tileAt(c);
+                if (tile.occupier != id || tile.army <= 1) continue;
+
+                score_t score = static_cast<score_t>(tile.army) * 45;
+                score += unknownAdj[idx(c)] * (crowded ? 20 : 70);
+                score += enemyAdj[idx(c)] * (crowded ? 120 : 80);
+                if (inside(myGeneral) && generalDist[idx(c)] < 1e9) {
+                    score -= generalDist[idx(c)] * (crowded ? 2 : 5);
+                }
+                if (score > bestScore) {
+                    bestScore = score;
+                    best = c;
+                }
+            }
+        }
+
+        return best;
+    }
+
+    std::optional<Move> chooseImmediateTacticalMove(bool crowded) const {
+        score_t bestScore = kNegInf;
+        std::optional<Move> bestMove;
+
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord from{x, y};
+                const TileView& src = board.tileAt(from);
+                if (src.occupier != id || src.army <= 1) continue;
+
+                for (Coord d : kDirs) {
                     Coord to = from + d;
-                    if (!isValidPosition(to.x, to.y)) continue;
+                    if (!passableForMove(to)) continue;
 
-                    const auto& toTile = board.tileAt(to);
-                    const army_t attack = fromTile.army - 1;
-                    const army_t defense = estimatedArmyAt(to.x, to.y);
-                    value_t score = -INF;
+                    const TileView& dst = board.tileAt(to);
+                    if (dst.occupier == id) continue;
 
-                    if (toTile.type == TILE_GENERAL && toTile.occupier != id &&
-                        attack > defense) {
-                        score = INF / 4 + attack - defense;
-                    } else if (toTile.type == TILE_CITY &&
-                               toTile.occupier != id && attack > defense) {
-                        score = 200000 + attack - defense;
-                    } else if (toTile.occupier != -1 && toTile.occupier != id &&
-                               attack > defense) {
-                        score = 100000 + attack - defense;
+                    score_t score = kNegInf;
+                    army_t moved = src.army - 1;
+                    if (dst.visible) {
+                        if (dst.type == TILE_GENERAL && isEnemy(dst.occupier) &&
+                            moved > dst.army) {
+                            score = 1000000000LL + moved - dst.army;
+                        } else if (dst.type == TILE_CITY && moved > dst.army) {
+                            score = 200000 + moved - dst.army;
+                            if (isEnemy(dst.occupier)) score += 150000;
+                        } else if (isEnemy(dst.occupier) && moved > dst.army) {
+                            score = 50000 + (moved - dst.army) * 20 +
+                                    (crowded ? 2000 : 0);
+                        } else if (dst.occupier == -1 && moved > dst.army &&
+                                   dst.type != TILE_SWAMP) {
+                            score = 1200 + moved - dst.army;
+                            if (dst.type == TILE_DESERT) score += 150;
+                        }
+                    } else if (board.tileAt(to).type != TILE_OBSTACLE) {
+                        score = 400;
                     }
 
                     if (score > bestScore) {
@@ -118,883 +474,692 @@ class XiaruizeRushPolicy : public BasicBot {
             }
         }
 
-        if (bestScore > -INF / 8) return bestMove;
+        return bestMove;
+    }
+
+    std::optional<Move> chooseDefenseMove(const std::vector<int>& enemyPressure,
+                                          const std::vector<int>& friendlyPressure,
+                                          const std::vector<int>& generalDist,
+                                          const ThreatInfo& threat,
+                                          bool forceDefense) const {
+        if (!inside(myGeneral)) return std::nullopt;
+        if (!forceDefense && enemyPressure[idx(myGeneral)] <=
+                                 friendlyPressure[idx(myGeneral)] + 30) {
+            return std::nullopt;
+        }
+
+        score_t bestScore = kNegInf;
+        std::optional<Move> bestMove;
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord from{x, y};
+                const TileView& src = board.tileAt(from);
+                if (src.occupier != id || src.army <= 1) continue;
+
+                for (Coord d : kDirs) {
+                    Coord to = from + d;
+                    if (!passableForMove(to)) continue;
+
+                    score_t score = 0;
+                    if (generalDist[idx(to)] < generalDist[idx(from)]) score += 600;
+                    score += enemyPressure[idx(to)] - enemyPressure[idx(from)];
+                    if (to == myGeneral) score += 1200;
+                    if (from == myGeneral) score -= 4000;
+                    if (threat.present) {
+                        const int fromThreatDist = std::abs(from.x - threat.source.x) +
+                                                   std::abs(from.y - threat.source.y);
+                        const int toThreatDist = std::abs(to.x - threat.source.x) +
+                                                 std::abs(to.y - threat.source.y);
+                        if (toThreatDist < fromThreatDist) score += 450;
+                        if (generalDist[idx(to)] <= generalDist[idx(from)] + 1) {
+                            score += 150;
+                        }
+                    }
+                    if (board.tileAt(to).visible && isEnemy(board.tileAt(to).occupier) &&
+                        src.army - 1 > board.tileAt(to).army) {
+                        score += 1500 + (src.army - 1 - board.tileAt(to).army) * 20;
+                    }
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = Move(MoveType::MOVE_ARMY, from, to, false);
+                    }
+                }
+            }
+        }
+
+        if (bestScore > 0) return bestMove;
         return std::nullopt;
     }
 
-    std::optional<Move> chooseDefensiveMove() {
-        Coord myGen = seenGeneral[id];
-        if (!isCoordValid(myGen) || turn < 10) return std::nullopt;
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                const auto& tile = board.tileAt(i, j);
-                if (tile.occupier != id && tile.occupier != -1 &&
-                    tile.visible) {
-                    int d = approxDist(Coord(i, j), myGen);
-                    if (d <= 6 &&
-                        tile.army > estimatedArmyAt(myGen.x, myGen.y) + d * 2) {
-                        Coord source = maxArmyPos();
-                        if (source == myGen) continue;
-                        evaluateRouteCosts(source);
-                        Coord next = moveTowards(source, myGen);
-                        if (isCoordValid(next) && next != source) {
-                            return Move(MoveType::MOVE_ARMY, source, next,
-                                        false);
+    std::optional<Move> chooseCrowdedSkirmishMove(
+        const std::vector<int>& unknownAdj, const std::vector<int>& enemyAdj,
+        const std::vector<int>& enemyPressure,
+        const std::vector<int>& friendlyPressure) const {
+        std::vector<Coord> unknownTargets;
+        std::vector<Coord> enemyTargets;
+        std::vector<Coord> cityTargets;
+        std::vector<Coord> generalTargets;
+
+        for (index_t player = 0; player < playerCount; ++player) {
+            if (player == id || !isAlive(player) || !inside(knownGenerals[player])) {
+                continue;
+            }
+            generalTargets.push_back(knownGenerals[player]);
+        }
+
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord c{x, y};
+                if (!passableForPlan(c)) continue;
+
+                if (!memory[idx(c)].seen && board.tileAt(c).type != TILE_OBSTACLE) {
+                    unknownTargets.push_back(c);
+                }
+                if (isEnemy(occupierAt(c))) enemyTargets.push_back(c);
+                if (terrainAt(c) == TILE_CITY && !isFriendly(occupierAt(c))) {
+                    cityTargets.push_back(c);
+                }
+            }
+        }
+
+        const auto unknownDist = computeDistanceMap(unknownTargets);
+        const auto enemyDist = computeDistanceMap(enemyTargets);
+        const auto cityDist = computeDistanceMap(cityTargets);
+        const auto generalTargetDist = computeDistanceMap(generalTargets);
+
+        int aliveEnemies = 0;
+        army_t myArmy = 0;
+        army_t bestEnemyArmy = 0;
+        if (id < static_cast<index_t>(rankById.size())) myArmy = rankById[id].army;
+        for (index_t player = 0; player < playerCount; ++player) {
+            if (player == id || !isAlive(player)) continue;
+            ++aliveEnemies;
+            if (player < static_cast<index_t>(rankById.size())) {
+                bestEnemyArmy = std::max(bestEnemyArmy, rankById[player].army);
+            }
+        }
+
+        const bool opening = fullTurn < 18;
+        const bool ahead = myArmy >= bestEnemyArmy;
+        const Coord center{static_cast<pos_t>((height + 1) / 2),
+                           static_cast<pos_t>((width + 1) / 2)};
+
+        auto frontierValue = [&](Coord c) -> int {
+            return unknownAdj[idx(c)] * 7 + enemyAdj[idx(c)] * 18;
+        };
+
+        Candidate best;
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord from{x, y};
+                const TileView& src = board.tileAt(from);
+                if (src.occupier != id || src.army <= 1) continue;
+
+                const bool sourceProducer =
+                    from == myGeneral || src.type == TILE_CITY;
+                const bool sourceFrontier = frontierValue(from) > 0;
+
+                for (Coord d : kDirs) {
+                    Coord to = from + d;
+                    if (!passableForMove(to)) continue;
+
+                    const TileView& dst = board.tileAt(to);
+                    const bool considerHalf =
+                        src.army >= 4 &&
+                        (sourceProducer || dst.occupier == id ||
+                         enemyPressure[idx(from)] >
+                             friendlyPressure[idx(from)] + 8);
+
+                    for (int mode = 0; mode < (considerHalf ? 2 : 1); ++mode) {
+                        const bool takeHalf = (mode == 1);
+                        const army_t moved =
+                            takeHalf ? static_cast<army_t>(src.army >> 1)
+                                     : static_cast<army_t>(src.army - 1);
+                        const army_t remain =
+                            static_cast<army_t>(src.army - moved);
+                        if (moved <= 0) continue;
+
+                        score_t score = static_cast<score_t>(moved) * 20;
+                        score += frontierValue(to) * 80;
+                        score -= frontierValue(from) * 12;
+
+                        if (from == myGeneral) {
+                            score -= opening ? 180 : 1200;
+                            if (enemyAdj[idx(from)] > 0) score -= 2200;
+                        }
+                        if (sourceProducer && remain <= 1) score -= 550;
+                        if (from == lastMoveTo && to == lastMoveFrom) score -= 280;
+                        if (board.tileAt(to).type == TILE_SWAMP) score -= 1200;
+
+                        if (enemyPressure[idx(from)] >
+                            friendlyPressure[idx(from)] + remain * 8) {
+                            score -= 1800 +
+                                     static_cast<score_t>(
+                                         enemyPressure[idx(from)] -
+                                         friendlyPressure[idx(from)] - remain * 8) *
+                                         6;
+                        }
+                        if (enemyPressure[idx(to)] >
+                            friendlyPressure[idx(to)] + moved * 8) {
+                            score -= 700 +
+                                     static_cast<score_t>(
+                                         enemyPressure[idx(to)] -
+                                         friendlyPressure[idx(to)] - moved * 8) *
+                                         3;
+                        }
+
+                        if (dst.occupier == id) {
+                            if (!sourceFrontier && frontierValue(to) > frontierValue(from)) {
+                                score += 1400;
+                            }
+                            if (enemyDist[idx(from)] < 1e9 &&
+                                enemyDist[idx(to)] < enemyDist[idx(from)]) {
+                                score += static_cast<score_t>(
+                                             enemyDist[idx(from)] -
+                                             enemyDist[idx(to)]) *
+                                         230;
+                            }
+                            if (unknownDist[idx(from)] < 1e9 &&
+                                unknownDist[idx(to)] < unknownDist[idx(from)]) {
+                                score += static_cast<score_t>(
+                                             unknownDist[idx(from)] -
+                                             unknownDist[idx(to)]) *
+                                         (opening ? 170 : 65);
+                            }
+                            if (!generalTargets.empty() &&
+                                generalTargetDist[idx(from)] < 1e9 &&
+                                generalTargetDist[idx(to)] <
+                                    generalTargetDist[idx(from)]) {
+                                score += static_cast<score_t>(
+                                             generalTargetDist[idx(from)] -
+                                             generalTargetDist[idx(to)]) *
+                                         260;
+                            }
+                            if (cityDist[idx(from)] < 1e9 &&
+                                cityDist[idx(to)] < cityDist[idx(from)] &&
+                                src.army >= 18) {
+                                score += static_cast<score_t>(
+                                             cityDist[idx(from)] -
+                                             cityDist[idx(to)]) *
+                                         90;
+                            }
+                            if (to == myGeneral) score += 900;
+                            if (takeHalf) score += 220;
+                        } else if (!dst.visible) {
+                            score += 1300;
+                            score += unknownAdj[idx(to)] * 150;
+                            score += enemyAdj[idx(to)] * 210;
+                            score += static_cast<score_t>(
+                                         std::abs(from.x - center.x) +
+                                         std::abs(from.y - center.y) -
+                                         std::abs(to.x - center.x) -
+                                         std::abs(to.y - center.y)) *
+                                     (opening ? 26 : 8);
+                            if (takeHalf && !sourceProducer) score -= 160;
+                        } else if (dst.occupier == -1) {
+                            if (moved <= dst.army) continue;
+                            if (dst.type == TILE_CITY) {
+                                score += opening ? -2200
+                                                 : 9000 -
+                                                       static_cast<score_t>(
+                                                           dst.army) *
+                                                           45;
+                            } else {
+                                score += 900 -
+                                         static_cast<score_t>(dst.army) * 14;
+                                score += unknownAdj[idx(to)] * 90;
+                                score += enemyAdj[idx(to)] * 160;
+                                if (dst.type == TILE_DESERT) score += 120;
+                            }
+                            if (takeHalf && !sourceProducer) score -= 260;
+                        } else if (isEnemy(dst.occupier)) {
+                            if (dst.type == TILE_GENERAL) {
+                                if (moved > dst.army) {
+                                    score += 1000000000LL;
+                                } else {
+                                    continue;
+                                }
+                            } else if (moved <= dst.army) {
+                                continue;
+                            } else {
+                                score += 12000 +
+                                         static_cast<score_t>(moved - dst.army) *
+                                             55 +
+                                         static_cast<score_t>(dst.army) * 18;
+                                score += enemyAdj[idx(to)] * 260;
+                                if (dst.type == TILE_CITY) score += 18000;
+                            }
+                            if (!ahead) score += 900;
+                            if (takeHalf) score -= 320;
+                        }
+
+                        if (aliveEnemies >= 6 && !ahead && unknownAdj[idx(to)] > 0) {
+                            score += 180;
+                        }
+                        if (enemyPressure[idx(to)] <=
+                            friendlyPressure[idx(to)] + moved * 3) {
+                            score += 260;
+                        }
+
+                        if (score > best.score) {
+                            best.score = score;
+                            best.move =
+                                Move(MoveType::MOVE_ARMY, from, to, takeHalf);
                         }
                     }
                 }
             }
         }
+
+        if (best.score > 0) return best.move;
         return std::nullopt;
     }
 
-    std::optional<Move> chooseEconomicMove() {
-        Coord source = maxArmyPos();
-        if (!isCoordValid(source) || !isValidPosition(source.x, source.y) ||
-            board.tileAt(source).occupier != id ||
-            board.tileAt(source).army <= 1) {
-            return std::nullopt;
+    std::optional<Move> chooseCrowdedOpeningMove(
+        const std::vector<int>& unknownAdj, const std::vector<int>& enemyAdj,
+        const std::vector<int>& enemyPressure,
+        const std::vector<int>& friendlyPressure) const {
+        const Coord center{static_cast<pos_t>((height + 1) / 2),
+                           static_cast<pos_t>((width + 1) / 2)};
+        Candidate best;
+
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord from{x, y};
+                const TileView& src = board.tileAt(from);
+                if (src.occupier != id || src.army <= 1) continue;
+
+                for (Coord d : kDirs) {
+                    Coord to = from + d;
+                    if (!passableForMove(to)) continue;
+
+                    const TileView& dst = board.tileAt(to);
+                    const army_t moved = src.army - 1;
+                    if (moved <= 0) continue;
+
+                    score_t score = kNegInf;
+                    if (!dst.visible) {
+                        if (board.tileAt(to).type == TILE_SWAMP) continue;
+                        score = 2400 + unknownAdj[idx(to)] * 260 +
+                                enemyAdj[idx(to)] * 160;
+                    } else if (dst.occupier == -1) {
+                        if (dst.type == TILE_SWAMP || moved <= dst.army) continue;
+                        if (dst.type == TILE_CITY) {
+                            if (fullTurn < 10 || moved <= dst.army + 4) continue;
+                            score = 7000 - static_cast<score_t>(dst.army) * 50;
+                        } else {
+                            score = 1500 - static_cast<score_t>(dst.army) * 18 +
+                                    unknownAdj[idx(to)] * 180 +
+                                    enemyAdj[idx(to)] * 140;
+                            if (dst.type == TILE_DESERT) score += 100;
+                        }
+                    } else if (isEnemy(dst.occupier)) {
+                        if (dst.type == TILE_GENERAL && moved > dst.army) {
+                            score = 1000000000LL + moved - dst.army;
+                        } else if (moved > dst.army + 2 &&
+                                   enemyPressure[idx(to)] <=
+                                       friendlyPressure[idx(to)] + moved * 3) {
+                            score = 7000 +
+                                    static_cast<score_t>(moved - dst.army) * 70 +
+                                    enemyAdj[idx(to)] * 240;
+                            if (dst.type == TILE_CITY) score += 12000;
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        continue;
+                    }
+
+                    if (from == lastMoveTo) score += 700;
+                    if (from == myGeneral) {
+                        score += 250;
+                        if (enemyAdj[idx(from)] > 0) score -= 3500;
+                    }
+                    score += static_cast<score_t>(
+                                 std::abs(from.x - center.x) +
+                                 std::abs(from.y - center.y) -
+                                 std::abs(to.x - center.x) -
+                                 std::abs(to.y - center.y)) *
+                             35;
+                    if (enemyPressure[idx(from)] >
+                        friendlyPressure[idx(from)] + src.army * 6) {
+                        score -= 1800;
+                    }
+                    if (enemyPressure[idx(to)] >
+                        friendlyPressure[idx(to)] + moved * 5) {
+                        score -= 1600 +
+                                 static_cast<score_t>(
+                                     enemyPressure[idx(to)] -
+                                     friendlyPressure[idx(to)] - moved * 5) *
+                                     6;
+                    }
+
+                    if (score > best.score) {
+                        best.score = score;
+                        best.move = Move(MoveType::MOVE_ARMY, from, to, false);
+                    }
+                }
+            }
         }
 
-        const army_t availableArmy = board.tileAt(source).army - 1;
-        const int mapArea = static_cast<int>(height * width);
-        evaluateRouteCosts(source);
+        if (best.score > 0) return best.move;
+        return std::nullopt;
+    }
 
-        Coord bestTarget(-1, -1);
-        value_t bestScore = -INF;
-        const pos_t centerX = (height + 1) / 2;
-        const pos_t centerY = (width + 1) / 2;
+    Coord chooseBestTarget(Coord focus, const PathMap& path,
+                           const std::vector<int>& unknownAdj,
+                           const std::vector<int>& enemyAdj, bool crowded,
+                           bool huge, bool opening, bool enemyGeneralKnown) const {
+        if (!inside(focus)) return Coord{-1, -1};
 
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                if (!isValidPosition(i, j)) continue;
-                Coord target(i, j);
-                const auto& tile = board.tileAt(target);
-                if (tile.occupier == id) continue;
-                if (dist[idx(i, j)] >= 500) continue;
+        const army_t focusArmy = board.tileAt(focus).army;
+        score_t bestScore = kNegInf;
+        Coord best{-1, -1};
+        const Coord center{static_cast<pos_t>((height + 1) / 2),
+                           static_cast<pos_t>((width + 1) / 2)};
 
-                const army_t targetArmy = estimatedArmyAt(i, j);
-                const bool isNeutral = tile.occupier == -1;
-                const bool isEnemy = tile.occupier != -1 && tile.occupier != id;
-                const bool isCity =
-                    tile.type == TILE_CITY || blockType[idx(i, j)] == 4;
-                const bool unseenPlain =
-                    !knownBlockType[idx(i, j)] || !tile.visible;
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord target{x, y};
+                if (!passableForPlan(target)) continue;
+                if (path.dist[idx(target)] >= kInf / 8) continue;
 
-                value_t score = eval[idx(i, j)] / 4 - dist[idx(i, j)] * 16;
-                score -= approxDist(target, Coord(centerX, centerY)) * 3;
+                const index_t occupier = occupierAt(target);
+                if (isFriendly(occupier)) continue;
 
-                if (isCity) {
-                    if (availableArmy <= targetArmy + 3) continue;
-                    score += 22000 - targetArmy * 55;
-                    if (mapArea >= 600) score += 2500;
-                    if (mapArea <= 196 && turn < 12) score += 2500;
-                    if (mapArea > 196 && turn < 14) score -= 15000;
-                    if (isEnemy) score += 1800;
-                } else if (isEnemy) {
-                    if (availableArmy <= targetArmy + 2) continue;
-                    score += 3500 - targetArmy * 10;
-                } else if (isNeutral) {
-                    score += 700;
-                    if (unseenPlain) score += 600;
-                    if (mapArea >= 600 && unseenPlain) score += 450;
-                    if (tile.type == TILE_SWAMP) score -= 2500;
-                    if (tile.type == TILE_DESERT) score += 120;
+                const TileView& tile = board.tileAt(target);
+                const army_t defense = armyAt(target);
+                score_t value = kNegInf;
+
+                if (isEnemy(occupier)) {
+                    if (inside(knownGenerals[occupier]) &&
+                        knownGenerals[occupier] == target) {
+                        value = 100000 - static_cast<score_t>(defense) * 120;
+                    } else if (tile.visible && tile.type == TILE_CITY) {
+                        value = 18000 - static_cast<score_t>(defense) * 65;
+                    } else {
+                        value = 4500 - static_cast<score_t>(defense) * 18 +
+                                enemyAdj[idx(target)] * 240;
+                    }
+                    if (crowded) value += 1000;
+                } else {
+                    if (tile.visible) {
+                        if (tile.type == TILE_CITY) {
+                            value = 11000 - static_cast<score_t>(defense) * 50;
+                        } else if (tile.type == TILE_SWAMP) {
+                            value = 80;
+                        } else if (tile.type == TILE_DESERT) {
+                            value = 900 - static_cast<score_t>(defense) * 4;
+                        } else {
+                            value = 1400 - static_cast<score_t>(defense) * 10;
+                        }
+                        value += unknownAdj[idx(target)] * (opening ? 100 : 55);
+                    } else if (!memory[idx(target)].seen &&
+                               board.tileAt(target).type != TILE_OBSTACLE) {
+                        value = 1800 + unknownAdj[idx(target)] * 120;
+                    }
                 }
 
-                if (unseenPlain) score += 350;
-                if (turn < 10 && approxDist(source, target) <= 6) score += 250;
-                if (!isCity && turn >= 10) score -= 800;
-                if (!isCity && dist[idx(i, j)] > 10) score -= 1200;
-                if (mapArea <= 196) score -= dist[idx(i, j)] * 5;
+                if (value <= kNegInf / 8) continue;
+
+                value -= path.dist[idx(target)];
+                if (focusArmy <= defense && value < 50000) {
+                    value -= 5000 + static_cast<score_t>(defense - focusArmy + 1) * 80;
+                }
+
+                if (huge && !enemyGeneralKnown) {
+                    value -=
+                        (std::abs(target.x - center.x) + std::abs(target.y - center.y)) *
+                        3;
+                }
+
+                if (value > bestScore) {
+                    bestScore = value;
+                    best = target;
+                }
+            }
+        }
+
+        return best;
+    }
+
+    bool isMacroTargetUseful(Coord target) const {
+        if (!inside(target) || !passableForPlan(target)) return false;
+        const index_t occupier = occupierAt(target);
+        if (isEnemy(occupier)) return true;
+        if (terrainAt(target) == TILE_CITY && !isFriendly(occupier)) return true;
+        return !memory[idx(target)].seen && board.tileAt(target).type != TILE_OBSTACLE;
+    }
+
+    std::optional<Move> gatherToward(Coord focus, const PathMap& gatherPath,
+                                     bool crowded) const {
+        if (!inside(focus)) return std::nullopt;
+
+        score_t bestScore = kNegInf;
+        std::optional<Move> bestMove;
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord from{x, y};
+                const TileView& src = board.tileAt(from);
+                if (src.occupier != id || src.army <= 1 || from == focus) continue;
+
+                Coord step = firstStepOnPath(gatherPath, focus, from);
+                if (!inside(step) || step == from || !passableForMove(step)) continue;
+                if (!isFriendly(board.tileAt(step).occupier) && step != focus) continue;
+
+                score_t score = static_cast<score_t>(src.army) * 40;
+                score -= gatherPath.dist[idx(from)] * (crowded ? 4 : 2);
+                if (step == focus) score += 600;
+                if (from == myGeneral) score -= 2500;
 
                 if (score > bestScore) {
                     bestScore = score;
-                    bestTarget = target;
+                    bestMove = Move(MoveType::MOVE_ARMY, from, step, false);
                 }
             }
         }
 
-        if (!isCoordValid(bestTarget) || bestTarget == source)
-            return std::nullopt;
-        Coord next = moveTowards(source, bestTarget);
-        if (!isCoordValid(next) || next == source) return std::nullopt;
-        return Move(MoveType::MOVE_ARMY, source, next, false);
+        if (bestScore > 0) return bestMove;
+        return std::nullopt;
     }
 
-    void evaluateRouteCosts(Coord st) {
-        auto gv = [&](pos_t x, pos_t y) -> value_t {
-            int bt = blockType[idx(x, y)];
-            if (bt == 1) return -1;
-            if (bt == 5) return 0;
-            if (board.tileAt(x, y).occupier == id) return army[idx(x, y)] - 1;
-            return -army[idx(x, y)];
-        };
+    std::optional<Move> chooseFallback(Coord focus, bool crowded) const {
+        Candidate best;
 
-        for (pos_t i = 0; i <= height + 1; ++i) {
-            for (pos_t j = 0; j <= width + 1; ++j) {
-                dist[idx(i, j)] = 32767;
-                eval[idx(i, j)] = -INF;
-            }
-        }
-
-        std::queue<Coord> q;
-        q.push(st);
-        dist[idx(st.x, st.y)] = 0;
-        eval[idx(st.x, st.y)] = 0;
-        par[idx(st.x, st.y)] = Coord(-1, -1);
-
-        while (!q.empty()) {
-            Coord cur = q.front();
-            q.pop();
-            pos_t x = cur.x, y = cur.y;
-            pos_t curDist = dist[idx(x, y)];
-            value_t curEval = (eval[idx(x, y)] += gv(x, y));
-
-            for (int i = 0; i < 4; ++i) {
-                pos_t nx = x + delta[i].x;
-                pos_t ny = y + delta[i].y;
-                if (!isValidPosition(nx, ny)) continue;
-                pos_t nd = curDist + 1;
-                if (nd < dist[idx(nx, ny)]) {
-                    dist[idx(nx, ny)] = nd;
-                    eval[idx(nx, ny)] = curEval;
-                    par[idx(nx, ny)] = cur;
-                    q.emplace(nx, ny);
-                } else if (nd == dist[idx(nx, ny)] &&
-                           curEval > eval[idx(nx, ny)]) {
-                    eval[idx(nx, ny)] = curEval;
-                    par[idx(nx, ny)] = cur;
-                }
-            }
-        }
-    }
-
-    Coord moveTowards(Coord st, Coord dest) const {
-        if (!isCoordValid(st) || !isCoordValid(dest)) return st;
-        int maxIterations = height * width;
-        while (par[idx(dest.x, dest.y)] != st) {
-            dest = par[idx(dest.x, dest.y)];
-            if (dest.x == -1 || dest.y == -1 || --maxIterations <= 0) {
-                return st;
-            }
-        }
-        return dest;
-    }
-
-    Coord maxArmyPos() const {
-        value_t maxArmy = 0;
-        Coord maxCoo = seenGeneral[id];
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                if (board.tileAt(i, j).occupier == id) {
-                    value_t weightedArmy = army[idx(i, j)];
-                    int bt = blockType[idx(i, j)];
-                    if (bt == 0)
-                        weightedArmy -= weightedArmy / 4;
-                    else if (bt == 4)
-                        weightedArmy -= weightedArmy / 6;
-                    if (weightedArmy > maxArmy) {
-                        maxArmy = weightedArmy;
-                        maxCoo = Coord(i, j);
+        if (!inside(focus)) {
+            for (pos_t x = 1; x <= height; ++x) {
+                for (pos_t y = 1; y <= width; ++y) {
+                    Coord c{x, y};
+                    const TileView& tile = board.tileAt(c);
+                    if (tile.occupier == id && tile.army > 1 &&
+                        (!inside(focus) || tile.army > board.tileAt(focus).army)) {
+                        focus = c;
                     }
                 }
             }
         }
-        return maxCoo;
-    }
+        if (!inside(focus) || board.tileAt(focus).army <= 1) return std::nullopt;
 
-    int getBlockType(pos_t x, pos_t y) const {
-        const auto& tile = board.tileAt(x, y);
-        if (tile.visible) {
-            switch (tile.type) {
-                case TILE_BLANK:       return 0;
-                case TILE_SWAMP:       return 1;
-                case TILE_MOUNTAIN:    return 2;
-                case TILE_CITY:        return 4;
-                case TILE_SPAWN:       return 3;
-                case TILE_DESERT:      return 0;
-                case TILE_LOOKOUT:     return 2;
-                case TILE_OBSERVATORY: return 2;
-                case TILE_OBSTACLE:    return 5;
-                default:               return 5;
-            }
-        } else {
-            switch (tile.type) {
-                case TILE_BLANK: return 0;
-                case TILE_SWAMP: return 1;
-                default:         return 5;
-            }
-        }
-    }
+        for (Coord d : kDirs) {
+            Coord to = focus + d;
+            if (!passableForMove(to)) continue;
+            const TileView& dst = board.tileAt(to);
 
-   public:
-    XiaruizeRushPolicy() : rnd(std::random_device{}()) {}
-
-    void init(index_t playerId, const GameConstantsPack& constants) override {
-        id = playerId;
-        height = constants.mapHeight;
-        width = constants.mapWidth;
-        W = width + 2;
-        playerCnt = constants.playerCount;
-        config = constants.config;
-
-        halfTurn = turn = 0;
-
-        blockTypeValue = {60, -500, -INF, 0, 50, 25};
-
-        prevTarget = Coord(-1, -1);
-        lastPos = Coord(-1, -1);
-
-        seenGeneral.assign(playerCnt, Coord(-1, -1));
-        eval.assign((height + 2) * W, 0);
-        par.assign((height + 2) * W, Coord(-1, -1));
-        dist.assign((height + 2) * W, 0);
-        blockType.assign((height + 2) * W, 5);
-        knownBlockType.assign((height + 2) * W, false);
-        army.assign((height + 2) * W, -1);
-    }
-
-    void requestMove(const BoardView& boardView,
-                     const std::vector<RankItem>& _rank) override {
-        ++halfTurn;
-        turn += (halfTurn & 1);
-
-        board = boardView;
-        rank = _rank;
-        std::sort(begin(rank), end(rank),
-                  [](RankItem lhs, RankItem rhs) -> bool {
-                      return lhs.player < rhs.player;
-                  });
-
-        moveQueue.clear();
-
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                const auto& tile = board.tileAt(i, j);
-                if (tile.visible) {
-                    knownBlockType[idx(i, j)] = true;
-                    blockType[idx(i, j)] = getBlockType(i, j);
-                    if (tile.type == TILE_GENERAL && tile.occupier >= 0) {
-                        seenGeneral[tile.occupier] = Coord(i, j);
-                    }
-                    value_t seenArmy = tile.army;
-                    if (army[idx(i, j)] < 0 || tile.occupier == id ||
-                        tile.occupier == -1) {
-                        army[idx(i, j)] = seenArmy;
-                    } else {
-                        army[idx(i, j)] = (seenArmy + army[idx(i, j)]) / 2;
-                    }
-                } else if (!knownBlockType[idx(i, j)]) {
-                    blockType[idx(i, j)] = getBlockType(i, j);
+            score_t score = 0;
+            if (!dst.visible) {
+                score += 300;
+            } else if (dst.occupier == -1) {
+                if (board.tileAt(focus).army - 1 > dst.army) {
+                    score += 200 - dst.army * 10;
+                    if (dst.type == TILE_DESERT) score += 30;
                 }
+            } else if (isFriendly(dst.occupier)) {
+                score += crowded ? 40 : 80;
+            } else if (board.tileAt(focus).army - 1 > dst.army) {
+                score += 500 + (board.tileAt(focus).army - 1 - dst.army) * 20;
+            }
+
+            if (score > best.score) {
+                best.score = score;
+                best.move = Move(MoveType::MOVE_ARMY, focus, to, false);
             }
         }
 
-        if (auto tactical = chooseImmediateTacticalMove()) {
-            moveQueue.emplace_back(*tactical);
-            lastPos = tactical->to;
-            return;
-        }
-
-        if (turn < 4) return;
-
-        if (auto defense = chooseDefensiveMove()) {
-            moveQueue.emplace_back(*defense);
-            lastPos = defense->to;
-            return;
-        }
-
-        const int mapArea = static_cast<int>(height * width);
-        const turn_t economicTurnLimit =
-            mapArea <= 200 ? 12 : (mapArea >= 600 ? 18 : 14);
-
-        if (turn < economicTurnLimit) {
-            if (auto economic = chooseEconomicMove()) {
-                moveQueue.emplace_back(*economic);
-                lastPos = economic->to;
-                return;
-            }
-        }
-
-        blockTypeValue[0] = 55 + static_cast<value_t>(std::pow(turn, 0.2));
-        blockTypeValue[1] = -500 * static_cast<value_t>(std::pow(turn, -0.1));
-        if (turn < 12) {
-            blockTypeValue[4] = -15000;
-        } else {
-            blockTypeValue[4] =
-                28 * static_cast<value_t>(std::pow(turn - 11, 0.15));
-        }
-        blockTypeValue[5] =
-            35 + 15 * static_cast<value_t>(std::pow(turn, 0.15));
-
-        Coord coo = lastPos;
-        if (!isValidPosition(coo.x, coo.y) ||
-            board.tileAt(coo.x, coo.y).occupier != id ||
-            board.tileAt(coo.x, coo.y).army < 2) {
-            coo = maxArmyPos();
-            prevTarget = Coord(-1, -1);
-        } else if (coo == prevTarget ||
-                   (prevTarget.x != -1 &&
-                    board.tileAt(prevTarget.x, prevTarget.y).occupier == id)) {
-            prevTarget = Coord(-1, -1);
-        }
-
-        if (!isCoordValid(coo) || !isValidPosition(coo.x, coo.y) ||
-            board.tileAt(coo.x, coo.y).occupier != id ||
-            board.tileAt(coo.x, coo.y).army < 2) {
-            return;
-        }
-
-        value_t minArmy = INF;
-        index_t targetId = -1;
-        for (index_t i = 0; i < playerCnt; ++i) {
-            if (i != id && seenGeneral[i] != Coord(-1, -1) && rank[i].alive) {
-                value_t thatArmy = rank[i].army;
-                if (thatArmy < minArmy) {
-                    minArmy = thatArmy;
-                    targetId = i;
-                }
-            }
-        }
-
-        evaluateRouteCosts(coo);
-        Coord targetPos(-1, -1);
-        static std::uniform_real_distribution<double> dis(0, 1);
-
-        if (targetId != -1) {
-            targetPos = seenGeneral[targetId];
-        } else if (prevTarget.x == -1 ||
-                   blockType[idx(prevTarget.x, prevTarget.y)] != 0 ||
-                   knownBlockType[idx(prevTarget.x, prevTarget.y)]) {
-            value_t maxBlockValue = -INF;
-
-            if (dis(rnd) < 0.02) {
-                std::vector<Coord> unknownPlains;
-                for (pos_t i = 1; i <= height; ++i) {
-                    for (pos_t j = 1; j <= width; ++j) {
-                        if (blockType[idx(i, j)] == 0 &&
-                            !knownBlockType[idx(i, j)] &&
-                            dist[idx(i, j)] < 500) {
-                            unknownPlains.emplace_back(i, j);
-                        }
-                    }
-                }
-                if (!unknownPlains.empty()) {
-                    std::uniform_int_distribution<size_t> randIndex(
-                        0, unknownPlains.size() - 1);
-                    targetPos = unknownPlains[randIndex(rnd)];
-                    maxBlockValue = 1000000000LL;
-                }
-            }
-
-            for (pos_t i = 1; i <= height; ++i) {
-                for (pos_t j = 1; j <= width; ++j) {
-                    const auto& tile = board.tileAt(i, j);
-                    if (tile.occupier != id && dist[idx(i, j)] < 500 &&
-                        !isImpassableTile(tile.type)) {
-                        value_t blockValue =
-                            blockTypeValue[blockType[idx(i, j)]] +
-                            eval[idx(i, j)] / 5 -
-                            (dist[idx(i, j)] + army[idx(i, j)] / 2);
-                        if (seenGeneral[id].x != -1) {
-                            blockValue -=
-                                approxDist(Coord(i, j), seenGeneral[id]) * 5LL;
-                        }
-                        if (blockValue > maxBlockValue) {
-                            maxBlockValue = blockValue;
-                            targetPos = Coord(i, j);
-                        }
-                    }
-                }
-            }
-
-            pos_t x = prevTarget.x, y = prevTarget.y;
-            if (x != -1 && board.tileAt(x, y).occupier != id &&
-                !isImpassableTile(board.tileAt(x, y).type)) {
-                value_t prevBlockValue =
-                    blockTypeValue[blockType[idx(x, y)]] + eval[idx(x, y)] / 5 -
-                    (dist[idx(x, y)] + army[idx(x, y)] / 2);
-                if (seenGeneral[id].x != -1) {
-                    prevBlockValue -=
-                        approxDist(Coord(x, y), seenGeneral[id]) * 5LL;
-                }
-                if (std::abs(prevBlockValue - maxBlockValue) < 25) {
-                    targetPos = prevTarget;
-                }
-            }
-        } else {
-            targetPos = prevTarget;
-        }
-
-        if (!isCoordValid(targetPos) ||
-            !isValidPosition(targetPos.x, targetPos.y)) {
-            targetPos = coo;
-        }
-        prevTarget = targetPos;
-
-        if (blockType[idx(coo.x, coo.y)] == 1 || dis(rnd) > 0.07 ||
-            eval[idx(targetPos.x, targetPos.y)] > 150) {
-            Coord nextPos = moveTowards(coo, targetPos);
-            if (!isCoordValid(nextPos) || nextPos == coo) return;
-            lastPos = nextPos;
-            moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, nextPos, false);
-            return;
-        }
-
-        evaluateRouteCosts(targetPos);
-
-        value_t maxWeight = -INF;
-        Coord newFocus(-1, -1);
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                const auto& tile = board.tileAt(i, j);
-                if (tile.occupier == id && army[idx(i, j)] > 1) {
-                    value_t weight = eval[idx(i, j)] - 30 * dist[idx(i, j)];
-                    if (blockType[idx(i, j)] == 3) weight -= weight / 4;
-                    if (weight > maxWeight) {
-                        maxWeight = weight;
-                        newFocus = Coord(i, j);
-                    }
-                }
-            }
-        }
-
-        if (newFocus == Coord(-1, -1)) return;
-
-        evaluateRouteCosts(newFocus);
-        Coord nextPos = moveTowards(newFocus, targetPos);
-        if (!isCoordValid(nextPos) || nextPos == newFocus) return;
-        lastPos = nextPos;
-        moveQueue.emplace_back(MoveType::MOVE_ARMY, newFocus, nextPos, false);
-    }
-};
-
-class XiaruizeMacroPolicy : public BasicBot {
-   private:
-    using value_t = intmax_t;
-    constexpr static pos_t DIST_INF = 32767;
-    constexpr static int64_t INF = 10'000'000'000'000'000LL;
-    constexpr static Coord delta[] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
-
-    enum class BotMode { ATTACK, EXPLORE, DEFEND };
-    BotMode mode;
-
-    pos_t height, width, W;
-    index_t playerCnt;
-    index_t id, team;
-    std::vector<index_t> teamIds;
-    config::Config config;
-
-    turn_t halfTurn, turn;
-
-    BoardView board;
-    std::vector<RankItem> rank;
-
-    Coord focus;
-    std::vector<bool> alive;
-    std::deque<Coord> route;
-    std::vector<Coord> generals;
-    pos_t leastUsage;
-    value_t tileTypeWeight[16];
-    std::vector<value_t> tileValue;
-    std::vector<value_t> dist;
-    std::vector<tile_type_e> tileTypeMemory;
-    std::vector<army_t> tileArmyMemory;
-    std::deque<Coord> prevMoves;
-    std::vector<bool> inPrevMoves;
-    std::vector<bool> isSeenBefore;
-
-    inline size_t idx(pos_t x, pos_t y) const {
-        return static_cast<size_t>(x * W + y);
-    }
-
-    inline void recordNewMove(Coord pos) {
-        prevMoves.emplace_back(pos);
-        inPrevMoves[idx(pos.x, pos.y)] = true;
-        if (prevMoves.size() > 20) {
-            auto front = prevMoves.front();
-            prevMoves.pop_front();
-            inPrevMoves[idx(front.x, front.y)] = false;
-        }
-    }
-
-    inline tile_type_e typeAt(pos_t x, pos_t y) {
-        if (tileTypeMemory.at(idx(x, y)) != tile_type_e(-1))
-            return tileTypeMemory[idx(x, y)];
-        return board.tileAt(x, y).type;
-    }
-
-    inline army_t armyAt(pos_t x, pos_t y) { return tileArmyMemory[idx(x, y)]; }
-
-    void calcData(Coord foc) {
-        std::fill(dist.begin(), dist.end(), DIST_INF);
-        dist[idx(foc.x, foc.y)] = 0;
-        std::priority_queue<std::pair<value_t, Coord>,
-                            std::vector<std::pair<value_t, Coord>>,
-                            std::greater<>>
-            queue;
-        queue.emplace(0, foc);
-        while (!queue.empty()) {
-            auto [curDist, cur] = queue.top();
-            queue.pop();
-            if (curDist > dist[idx(cur.x, cur.y)]) continue;
-            for (int i = 0; i < 4; ++i) {
-                Coord next = cur + delta[i];
-                if (next.x < 1 || next.x > height || next.y < 1 ||
-                    next.y > width)
-                    continue;
-                if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                value_t newDist = curDist + 10;
-                if (board.tileAt(next).visible) {
-                    if (board.tileAt(next).occupier != id)
-                        newDist += std::max<value_t>(armyAt(next.x, next.y), 0);
-                } else {
-                    newDist += std::max<value_t>(armyAt(next.x, next.y), 0);
-                }
-                if (typeAt(next.x, next.y) == TILE_SWAMP) newDist += 100;
-                if (newDist < dist[idx(next.x, next.y)]) {
-                    dist[idx(next.x, next.y)] = newDist;
-                    queue.emplace(newDist, next);
-                }
-            }
-        }
-
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                if (board.tileAt(i, j).occupier == id) {
-                    tileValue[idx(i, j)] = -INF;
-                } else {
-                    tileValue[idx(i, j)] = tileTypeWeight[typeAt(i, j)];
-                    tileValue[idx(i, j)] -= dist[idx(i, j)];
-                    tileValue[idx(i, j)] -= armyAt(i, j);
-                    tileValue[idx(i, j)] -= isSeenBefore[idx(i, j)] *
-                                            (turn - 100000.0 / rank[id].army);
-                    if (board.tileAt(i, j).visible &&
-                        board.tileAt(i, j).occupier != -1) {
-                        army_t adjacentMinimumSamePlayer = INF;
-                        for (int k = 0; k < 4; ++k) {
-                            Coord adja = Coord(i, j) + delta[k];
-                            if (adja.x < 1 || adja.x > height || adja.y < 1 ||
-                                adja.y > width)
-                                continue;
-                            if (board.tileAt(adja).visible &&
-                                board.tileAt(adja).occupier ==
-                                    board.tileAt(i, j).occupier) {
-                                adjacentMinimumSamePlayer =
-                                    std::min(adjacentMinimumSamePlayer,
-                                             board.tileAt(adja).army);
-                            }
-                        }
-                        if (adjacentMinimumSamePlayer == INF)
-                            adjacentMinimumSamePlayer = board.tileAt(i, j).army;
-                        tileValue[idx(i, j)] += 2 * (board.tileAt(i, j).army -
-                                                     adjacentMinimumSamePlayer);
-                    }
-                }
-            }
-        }
-    }
-
-    void findRoute(Coord start, Coord desti) {
-        auto distanceCost = 1;
-        auto armyCost = [&](int x, int y) -> value_t {
-            if (x < 1 || x > height || y < 1 || y > width) return INF;
-            if (isImpassableTile(typeAt(x, y))) return INF;
-            if (board.tileAt(x, y).occupier == id)
-                return -board.tileAt(x, y).army;
-            return armyAt(x, y);
-        };
-        auto typeCost = [&](int x, int y) -> value_t {
-            switch (typeAt(x, y)) {
-                case TILE_BLANK:       return 0;
-                case TILE_SWAMP:       return 10;
-                case TILE_MOUNTAIN:    return INF;
-                case TILE_GENERAL:     return 0;
-                case TILE_CITY:        return 1;
-                case TILE_DESERT:      return 0;
-                case TILE_LOOKOUT:     return INF;
-                case TILE_OBSERVATORY: return INF;
-                case TILE_OBSTACLE:    return 5;
-                default:               return INF;
-            }
-        };
-        auto totalCost = [&](int x, int y) -> value_t {
-            return distanceCost * 1000 + armyCost(x, y) + typeCost(x, y);
-        };
-
-        std::vector<bool> vis((height + 2) * W, false);
-        std::vector<Coord> prev((height + 2) * W, Coord(-1, -1));
-        std::vector<value_t> dp((height + 2) * W, INF);
-        std::priority_queue<std::pair<value_t, Coord>,
-                            std::vector<std::pair<value_t, Coord>>,
-                            std::greater<std::pair<value_t, Coord>>>
-            q;
-        dp[idx(start.x, start.y)] = 0;
-        q.emplace(0, start);
-        while (!q.empty()) {
-            Coord cur = q.top().second;
-            value_t curVal = q.top().first;
-            q.pop();
-            if (curVal > dp[idx(cur.x, cur.y)]) continue;
-            if (vis[idx(cur.x, cur.y)]) continue;
-            vis[idx(cur.x, cur.y)] = true;
-            if (cur == desti) break;
-            for (int i = 0; i < 4; ++i) {
-                Coord next = cur + delta[i];
-                if (next.x < 1 || next.x > height || next.y < 1 ||
-                    next.y > width)
-                    continue;
-                if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                if (vis[idx(next.x, next.y)]) continue;
-                if (inPrevMoves[idx(next.x, next.y)]) continue;
-                value_t nextVal = curVal + totalCost(next.x, next.y);
-                if (nextVal < dp[idx(next.x, next.y)]) {
-                    dp[idx(next.x, next.y)] = nextVal;
-                    prev[idx(next.x, next.y)] = cur;
-                    q.emplace(nextVal, next);
-                }
-            }
-        }
-        route.clear();
-        Coord cur = desti;
-        while (cur != Coord(-1, -1)) {
-            route.push_front(cur);
-            cur = prev[idx(cur.x, cur.y)];
-        }
-        if (!route.empty()) route.pop_front();
-        if (route.empty() && start != desti) {
-            for (int i = 0; i < 4; ++i) {
-                Coord next = start + delta[i];
-                if (!isImpassableTile(typeAt(next.x, next.y))) {
-                    route.push_back(next);
-                    break;
-                }
-            }
-        }
-    }
-
-    Coord findMaxArmyPos() {
-        army_t maxArmy = 0;
-        Coord maxCoo = generals[id];
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                if (board.tileAt(i, j).occupier == id &&
-                    board.tileAt(i, j).army > maxArmy) {
-                    maxArmy = board.tileAt(i, j).army;
-                    maxCoo = Coord(i, j);
-                }
-            }
-        }
-        return maxCoo;
+        if (best.score > 0) return best.move;
+        return std::nullopt;
     }
 
    public:
     void init(index_t playerId, const GameConstantsPack& constants) override {
         id = playerId;
+        playerCount = constants.playerCount;
         height = constants.mapHeight;
         width = constants.mapWidth;
-        W = width + 2;
-        playerCnt = constants.playerCount;
-        teamIds = constants.teams;
-        team = constants.teams.at(playerId);
-        config = constants.config;
+        stride = width + 2;
+        teams = constants.teams;
 
-        halfTurn = turn = 0;
-        leastUsage = 0;
-
-        focus = Coord(0, 0);
-        tileTypeWeight[TILE_BLANK] = 300 - 25 * 10 + 10;
-        tileTypeWeight[TILE_SWAMP] = -1500000000;
-        tileTypeWeight[TILE_MOUNTAIN] = -INF;
-        tileTypeWeight[TILE_SPAWN] = 10;
-        tileTypeWeight[TILE_CITY] = 300;
-        tileTypeWeight[TILE_DESERT] = 0;
-        tileTypeWeight[TILE_LOOKOUT] = -INF;
-        tileTypeWeight[TILE_OBSERVATORY] = -INF;
-        tileTypeWeight[TILE_OBSTACLE] = 300;
-        alive.assign(constants.playerCount, true);
-        generals.assign(constants.playerCount, Coord(-1, -1));
-
-        tileValue.assign((height + 2) * W, 0);
-        dist.assign((height + 2) * W, DIST_INF);
-        tileTypeMemory.assign((height + 2) * W, tile_type_e(-1));
-        tileArmyMemory.assign((height + 2) * W, 0);
-        inPrevMoves.assign((height + 2) * W, false);
-        isSeenBefore.assign((height + 2) * W, false);
-    }
-
-    void requestMove(const BoardView& boardView,
-                     const std::vector<RankItem>& _rank) override {
-        ++halfTurn;
-        turn += (halfTurn & 1);
-
-        board = boardView;
-        rank = _rank;
-        std::sort(begin(rank), end(rank),
-                  [](RankItem lhs, RankItem rhs) -> bool {
-                      return lhs.player < rhs.player;
-                  });
-        for (index_t i = 0; i < playerCnt; ++i) alive[i] = rank[i].alive;
-
-        moveQueue.clear();
-
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                if (tileArmyMemory[idx(i, j)] > 0) --tileArmyMemory[idx(i, j)];
-                if (board.tileAt(i, j).visible ||
-                    board.tileAt(i, j).type == TILE_SWAMP) {
-                    isSeenBefore[idx(i, j)] = true;
-                }
-                if (board.tileAt(i, j).visible) {
-                    isSeenBefore[idx(i, j)] = true;
-                    tileTypeMemory[idx(i, j)] = board.tileAt(i, j).type;
-                    tileArmyMemory[idx(i, j)] = board.tileAt(i, j).army;
-                } else if (!isSeenBefore[idx(i, j)]) {
-                    switch (typeAt(i, j)) {
-                        case TILE_BLANK:
-                        case TILE_SWAMP: tileArmyMemory[idx(i, j)] = 0; break;
-                        case TILE_MOUNTAIN:
-                            tileArmyMemory[idx(i, j)] = INF;
-                            break;
-                        case TILE_SPAWN:
-                            tileArmyMemory[idx(i, j)] = -INF;
-                            break;
-                        case TILE_CITY:
-                        case TILE_DESERT:
-                        case TILE_OBSTACLE:
-                            tileArmyMemory[idx(i, j)] = 40;
-                            break;
-                        case TILE_LOOKOUT:
-                        case TILE_OBSERVATORY:
-                            tileArmyMemory[idx(i, j)] = INF;
-                            break;
-                        default: break;
-                    }
-                }
-                if (board.tileAt(i, j).visible &&
-                    board.tileAt(i, j).type == TILE_GENERAL) {
-                    generals[board.tileAt(i, j).occupier] = Coord(i, j);
-                }
-            }
-        }
-        if (board.tileAt(focus).occupier != id ||
-            board.tileAt(focus).army == 0) {
-            focus = findMaxArmyPos();
-            leastUsage = 0;
-        }
-        if (leastUsage != 0) {
-            --leastUsage;
-            auto next = route.front();
-            route.pop_front();
-            moveQueue.emplace_back(MoveType::MOVE_ARMY, focus, next, false);
-        }
-
-        mode = BotMode::EXPLORE;
-        index_t targetOppoId = -1;
-        army_t targetOppoArmy = INF;
-        for (pos_t i = 0; i < playerCnt; ++i) {
-            if (i != id && generals[i] != Coord(-1, -1) && alive[i]) {
-                mode = BotMode::ATTACK;
-                if (rank[i].army < targetOppoArmy) {
-                    targetOppoArmy = rank[i].army;
-                    targetOppoId = i;
-                }
-            }
-        }
-
-        calcData(focus);
-
-        if (mode == BotMode::ATTACK) {
-            findRoute(focus, generals[targetOppoId]);
-            if (!route.empty()) {
-                Move ret(MoveType::MOVE_ARMY, focus, route.front(), false);
-                focus = route.front();
-                route.pop_front();
-                leastUsage = 0;
-                moveQueue.emplace_back(ret);
-            }
-        } else if (mode == BotMode::EXPLORE) {
-            Coord bestTarget = focus;
-            value_t bestValue = -INF;
-            for (pos_t i = 1; i <= height; ++i) {
-                for (pos_t j = 1; j <= width; ++j) {
-                    if (tileValue[idx(i, j)] > bestValue) {
-                        bestValue = tileValue[idx(i, j)];
-                        bestTarget = Coord(i, j);
-                    }
-                }
-            }
-            findRoute(focus, bestTarget);
-            if (!route.empty()) {
-                Move ret(MoveType::MOVE_ARMY, focus, route.front(), false);
-                focus = route.front();
-                route.pop_front();
-                leastUsage = 0;
-                moveQueue.emplace_back(ret);
-            }
-        }
-    }
-};
-
-class XiaruizeBot : public BasicBot {
-   private:
-    static constexpr int kMacroPolicyAreaThreshold = 24 * 24;
-    static constexpr int kVeryLargeMapAreaThreshold = 50 * 50;
-    static constexpr double kCrowdedAreaPerPlayerThreshold = 60.0;
-
-    std::unique_ptr<BasicBot> impl;
-
-    std::unique_ptr<BasicBot> makeRegisteredBot(const std::string& name) {
-        return std::unique_ptr<BasicBot>(BotFactory::instance().create(name));
-    }
-
-    void discardExtraMoves(BasicBot* bot) {
-        while (bot != nullptr && bot->step().type != MoveType::EMPTY) {
-        }
-    }
-
-   public:
-    void init(index_t playerId, const GameConstantsPack& constants) override {
-        const int mapArea = static_cast<int>(constants.mapHeight) *
-                            static_cast<int>(constants.mapWidth);
-        const double areaPerPlayer =
-            static_cast<double>(mapArea) /
-            std::max<index_t>(1, constants.playerCount);
-
-        if (areaPerPlayer <= kCrowdedAreaPerPlayerThreshold) {
-            impl = makeRegisteredBot("GcBot");
-        } else if (mapArea >= kVeryLargeMapAreaThreshold) {
-            impl = makeRegisteredBot("ZlyBot v2");
-        }
-
-        if (impl == nullptr) {
-            if (mapArea >= kMacroPolicyAreaThreshold) {
-                impl = std::make_unique<XiaruizeMacroPolicy>();
-            } else {
-                impl = std::make_unique<XiaruizeRushPolicy>();
-            }
-        }
-
-        if (impl == nullptr) {
-            impl = std::make_unique<XiaruizeRushPolicy>();
-        }
-        impl->init(playerId, constants);
+        halfTurn = fullTurn = 0;
+        memory.assign((height + 2) * stride, MemoryCell{});
+        knownGenerals.assign(playerCount, Coord{-1, -1});
+        rankById.assign(playerCount, RankItem{});
+        myGeneral = Coord{-1, -1};
+        focusCell = Coord{-1, -1};
+        macroTarget = Coord{-1, -1};
+        lastMoveFrom = Coord{-1, -1};
+        lastMoveTo = Coord{-1, -1};
+        macroTargetLockUntil = -1;
     }
 
     void requestMove(const BoardView& boardView,
                      const std::vector<RankItem>& rank) override {
+        ++halfTurn;
+        fullTurn += (halfTurn & 1);
+
+        board = boardView;
+        syncRank(rank);
+        updateMemory();
         moveQueue.clear();
-        if (impl == nullptr) return;
 
-        impl->requestMove(boardView, rank);
-        Move chosen = impl->step();
-        discardExtraMoves(impl.get());
-        if (chosen.type != MoveType::EMPTY) moveQueue.push_back(chosen);
-    }
+        const int mapArea = static_cast<int>(height * width);
+        const double areaPerPlayer =
+            static_cast<double>(mapArea) / std::max<index_t>(1, playerCount);
+        const bool crowded = areaPerPlayer <= 60.0;
+        const bool huge = mapArea >= 2500;
+        const bool opening = fullTurn < (crowded ? 10 : 14);
 
-    void onGameEvent(const GameEvent& event) override {
-        if (impl != nullptr) impl->onGameEvent(event);
+        std::vector<int> unknownAdj, enemyAdj;
+        computeBorderStats(unknownAdj, enemyAdj);
+        const auto enemyPressure = computePressure(true);
+        const auto friendlyPressure = computePressure(false);
+        const auto generalDist = computeGeneralDist();
+        const ThreatInfo generalThreat = assessGeneralThreat();
+
+        const int defenseMargin = crowded && playerCount >= 6 ? 12 : 30;
+        bool defenseMode = false;
+        bool forceDefense = false;
+        if (inside(myGeneral)) {
+            defenseMode = enemyPressure[idx(myGeneral)] >
+                          friendlyPressure[idx(myGeneral)] + defenseMargin;
+            if (crowded && playerCount >= 6 && generalThreat.present) {
+                const army_t generalArmy = board.tileAt(myGeneral).army;
+                forceDefense =
+                    generalThreat.dist <= 2 ||
+                    (generalThreat.dist <= 4 &&
+                     generalThreat.army + 2 >= std::max<army_t>(1, generalArmy));
+                defenseMode = defenseMode || forceDefense;
+            }
+        }
+
+        if (auto defense = chooseDefenseMove(enemyPressure, friendlyPressure,
+                                             generalDist, generalThreat,
+                                             forceDefense)) {
+            lastMoveFrom = defense->from;
+            lastMoveTo = defense->to;
+            moveQueue.push_back(*defense);
+            return;
+        }
+
+        if (crowded && playerCount >= 6 && fullTurn <= 12) {
+            if (auto openingMove = chooseCrowdedOpeningMove(
+                    unknownAdj, enemyAdj, enemyPressure, friendlyPressure)) {
+                lastMoveFrom = openingMove->from;
+                lastMoveTo = openingMove->to;
+                moveQueue.push_back(*openingMove);
+                return;
+            }
+        }
+
+        if (auto tactical = chooseImmediateTacticalMove(crowded)) {
+            lastMoveFrom = tactical->from;
+            lastMoveTo = tactical->to;
+            moveQueue.push_back(*tactical);
+            return;
+        }
+
+        bool enemyGeneralKnown = false;
+        for (index_t player = 0; player < playerCount; ++player) {
+            if (player != id && isAlive(player) && inside(knownGenerals[player])) {
+                enemyGeneralKnown = true;
+                break;
+            }
+        }
+
+        focusCell =
+            chooseFocus(unknownAdj, enemyAdj, generalDist, crowded, defenseMode);
+        if (!inside(focusCell)) return;
+
+        const PathMap attackPath = buildPathMap(focusCell, false);
+        Coord target{-1, -1};
+        const bool largeMacro =
+            mapArea >= 1600 && mapArea <= 3000 && !crowded &&
+            (playerCount <= 2 || mapArea >= 2500);
+        if (largeMacro && fullTurn <= static_cast<turn_t>(macroTargetLockUntil) &&
+            isMacroTargetUseful(macroTarget)) {
+            target = macroTarget;
+        } else {
+            target = chooseBestTarget(focusCell, attackPath, unknownAdj, enemyAdj,
+                                      crowded, huge, opening, enemyGeneralKnown);
+            if (largeMacro && inside(target)) {
+                macroTarget = target;
+                macroTargetLockUntil =
+                    static_cast<int>(fullTurn) + (enemyGeneralKnown ? 16 : 10);
+            }
+        }
+
+        if (inside(target) && target != focusCell) {
+            Coord step = firstStepOnPath(attackPath, focusCell, target);
+            if (inside(step) && step != focusCell && passableForMove(step)) {
+                const TileView& focusTile = board.tileAt(focusCell);
+                const TileView& stepTile = board.tileAt(step);
+                const bool blockedByFight =
+                    stepTile.visible && !isFriendly(stepTile.occupier) &&
+                    focusTile.army - 1 <= stepTile.army &&
+                    stepTile.type != TILE_GENERAL;
+
+                if (!blockedByFight) {
+                    lastMoveFrom = focusCell;
+                    lastMoveTo = step;
+                    moveQueue.emplace_back(MoveType::MOVE_ARMY, focusCell, step,
+                                           false);
+                    return;
+                }
+            }
+        }
+
+        const PathMap gatherPath = buildPathMap(focusCell, true);
+        if (auto gather = gatherToward(focusCell, gatherPath, crowded)) {
+            lastMoveFrom = gather->from;
+            lastMoveTo = gather->to;
+            moveQueue.push_back(*gather);
+            return;
+        }
+
+        if (auto fallback = chooseFallback(focusCell, crowded)) {
+            lastMoveFrom = fallback->from;
+            lastMoveTo = fallback->to;
+            moveQueue.push_back(*fallback);
+        }
     }
 };
 

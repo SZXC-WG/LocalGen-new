@@ -282,23 +282,23 @@ class GcBot : public BasicBot {
                    knownBlockType[idx(prevTarget.x, prevTarget.y)]) {
             value_t maxBlockValue = -INF;
 
-            if (dis(rnd) < 0.02) {
-                std::vector<Coord> unknownPlains;
-                for (pos_t i = 1; i <= height; ++i) {
-                    for (pos_t j = 1; j <= width; ++j) {
-                        if (blockType[idx(i, j)] == 0 &&
-                            !knownBlockType[idx(i, j)] &&
-                            dist[idx(i, j)] < 500) {
-                            unknownPlains.emplace_back(i, j);
-                        }
+            std::vector<std::pair<value_t, Coord>> unknownPlains;
+            for (pos_t i = 1; i <= height; ++i) {
+                for (pos_t j = 1; j <= width; ++j) {
+                    if (blockType[idx(i, j)] == 0 &&
+                        !knownBlockType[idx(i, j)] && dist[idx(i, j)] < 500) {
+                        unknownPlains.emplace_back(dist[idx(i, j)],
+                                                   Coord(i, j));
                     }
                 }
-                if (!unknownPlains.empty()) {
-                    std::uniform_int_distribution<size_t> randIndex(
-                        0, unknownPlains.size() - 1);
-                    targetPos = unknownPlains[randIndex(rnd)];
-                    maxBlockValue = 1e9;
-                }
+            }
+            if (!unknownPlains.empty()) {
+                std::size_t k = unknownPlains.size() / 3;
+                std::nth_element(unknownPlains.begin(),
+                                 unknownPlains.begin() + k,
+                                 unknownPlains.end());
+                targetPos = unknownPlains[k].second;
+                maxBlockValue = 500 - dist[idx(targetPos.x, targetPos.y)] * 3;
             }
 
             for (pos_t i = 1; i <= height; ++i) {

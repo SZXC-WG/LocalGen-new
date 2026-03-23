@@ -71,13 +71,15 @@ class GcBot : public BasicBot {
                                              /* TILE_LOOKOUT=8 */ -INF,
                                              /* TILE_OBSTACLE=9 */ 0};
 
+        const army_t cityBonus = board.tileAt(st).army / 12;
         auto gv = [&](pos_t x, pos_t y) -> value_t {
             int bt = blockType[idx(x, y)];
             if (bt == 1) return -1;
             if (bt == 5) return 0;
             if (!knownBlockType[idx(x, y)]) return 2;
-            if (board.tileAt(x, y).occupier == id) return army[idx(x, y)] - 1;
-            if (bt == 4) return -army[idx(x, y)] / 2;
+            auto occupier = board.tileAt(x, y).occupier;
+            if (occupier == id) return army[idx(x, y)] - 1;
+            if (bt == 4) return -army[idx(x, y)] / 2 + cityBonus;
             return -army[idx(x, y)];
         };
 
@@ -240,7 +242,27 @@ class GcBot : public BasicBot {
             }
         }
 
-        if (turn < 13) return;
+        if (turn < 13 && rank[id].land == 1) {
+            Coord coo = seenGeneral[id];
+            army_t minArmy = army[idx(coo.x, coo.y)] - 1;
+            for (auto [dx, dy] : delta) {
+                auto nx = coo.x + dx, ny = coo.y + dy;
+                if (isValidPosition(nx, ny)) {
+                    auto type = blockType[idx(nx, ny)];
+                    army_t thatArmy = army[idx(nx, ny)];
+                    if (type != 4 && thatArmy >= 0) continue;
+                    if (thatArmy < minArmy) {
+                        minArmy = thatArmy;
+                        lastPos = Coord(nx, ny);
+                    }
+                }
+            }
+            if (lastPos != coo) {
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, lastPos,
+                                       false);
+            }
+            return;
+        }
 
         blockTypeValue[0] = 55 + static_cast<value_t>(std::pow(turn, 0.2));
         blockTypeValue[1] = -500 * static_cast<value_t>(std::pow(turn, -0.1));
@@ -376,7 +398,7 @@ class GcBot : public BasicBot {
 
         if (newFocus == Coord(-1, -1)) {
             lastPos = coo;
-            moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, coo, false);
+            moveQueue.emplace_back(MoveType::EMPTY);
             return;
         }
 

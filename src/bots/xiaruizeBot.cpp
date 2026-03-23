@@ -940,8 +940,14 @@ class XiaruizeMacroPolicy : public BasicBot {
 class XiaruizeBot : public BasicBot {
    private:
     static constexpr int kMacroPolicyAreaThreshold = 24 * 24;
+    static constexpr int kVeryLargeMapAreaThreshold = 50 * 50;
+    static constexpr double kCrowdedAreaPerPlayerThreshold = 60.0;
 
     std::unique_ptr<BasicBot> impl;
+
+    std::unique_ptr<BasicBot> makeRegisteredBot(const std::string& name) {
+        return std::unique_ptr<BasicBot>(BotFactory::instance().create(name));
+    }
 
     void discardExtraMoves(BasicBot* bot) {
         while (bot != nullptr && bot->step().type != MoveType::EMPTY) {
@@ -952,9 +958,25 @@ class XiaruizeBot : public BasicBot {
     void init(index_t playerId, const GameConstantsPack& constants) override {
         const int mapArea = static_cast<int>(constants.mapHeight) *
                             static_cast<int>(constants.mapWidth);
-        if (mapArea >= kMacroPolicyAreaThreshold) {
-            impl = std::make_unique<XiaruizeMacroPolicy>();
-        } else {
+        const double areaPerPlayer =
+            static_cast<double>(mapArea) /
+            std::max<index_t>(1, constants.playerCount);
+
+        if (areaPerPlayer <= kCrowdedAreaPerPlayerThreshold) {
+            impl = makeRegisteredBot("GcBot");
+        } else if (mapArea >= kVeryLargeMapAreaThreshold) {
+            impl = makeRegisteredBot("ZlyBot v2");
+        }
+
+        if (impl == nullptr) {
+            if (mapArea >= kMacroPolicyAreaThreshold) {
+                impl = std::make_unique<XiaruizeMacroPolicy>();
+            } else {
+                impl = std::make_unique<XiaruizeRushPolicy>();
+            }
+        }
+
+        if (impl == nullptr) {
             impl = std::make_unique<XiaruizeRushPolicy>();
         }
         impl->init(playerId, constants);

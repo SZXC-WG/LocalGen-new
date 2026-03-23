@@ -5,6 +5,11 @@ project(LocalGen-new VERSION 6.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(APPLE)
+    unset(WrapOpenGL_AGL CACHE)
+    set(WrapOpenGL_AGL "-framework OpenGL")
+endif()
+
 find_package(Qt6 6.7 REQUIRED COMPONENTS Widgets Svg Network)
 
 qt_standard_project_setup()

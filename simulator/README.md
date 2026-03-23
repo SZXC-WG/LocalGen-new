@@ -1,0 +1,24 @@
+# Bot Simulator
+
+`LocalGen-bot-simulator` is a lightweight CLI for bot-vs-bot evaluation.
+
+## What it does
+
+- creates random maps with the existing core game engine
+- instantiates registered bots through `BotFactory`
+- runs repeated matches without the Qt UI
+- prints per-game outcomes and an aggregate summary
+
+## Example
+
+After building, run the executable from `build/Release`:
+
+- `./LocalGen-bot-simulator --games 10 --width 20 --height 20 --steps 600 --bots XiaruizeBot GcBot`
+
+## Notes
+
+- This simulator uses the same core board/game logic as the app.
+- Independent matches are parallelized across CPU threads.
+- If `--threads` is omitted, the simulator auto-selects a worker count from the machine's available CPU concurrency.
+- Per-game results are printed as soon as each match finishes, so completion order may differ from game number order.
+- No reinforcement learning assets were added for this bot.

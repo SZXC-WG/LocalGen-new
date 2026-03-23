@@ -12,6 +12,18 @@ endif()
 
 find_package(Qt6 6.7 REQUIRED COMPONENTS Widgets Svg Network)
 
+set(LOCALGEN_BOT_SOURCES
+    src/bots/smartRandomBot.cpp
+    src/bots/xiaruizeBot.cpp
+    src/bots/xrzBot.cpp
+    src/bots/szlyBot.cpp
+    src/bots/zlyBot.cpp
+    src/bots/zlyBot_v2.cpp
+    src/bots/zlyBot_v2.1.cpp
+    src/bots/gcBot.cpp
+    src/bots/oimBot.cpp
+)
+
 qt_standard_project_setup()
 set(CMAKE_AUTORCC ON)
 
@@ -31,14 +43,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/ui/localGameWindow/localGameWindow.h
     src/ui/mapCreatorWindow/mapCreatorWindow.cpp
     src/ui/mapCreatorWindow/mapCreatorWindow.h
-    src/bots/smartRandomBot.cpp
-    src/bots/xrzBot.cpp
-    src/bots/szlyBot.cpp
-    src/bots/zlyBot.cpp
-    src/bots/zlyBot_v2.cpp
-    src/bots/zlyBot_v2.1.cpp
-    src/bots/gcBot.cpp
-    src/bots/oimBot.cpp
+    ${LOCALGEN_BOT_SOURCES}
     src/core/board.hpp
     src/core/bot.h
     src/core/game.hpp
@@ -57,6 +62,24 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Svg Qt6::Network)
+
+add_executable(LocalGen-bot-simulator
+    simulator/botSimulator.cpp
+    ${LOCALGEN_BOT_SOURCES}
+    src/core/board.hpp
+    src/core/bot.h
+    src/core/game.hpp
+    src/core/message.hpp
+    src/core/move.hpp
+    src/core/player.hpp
+    src/core/tile.hpp
+    src/core/utils.hpp
+)
+
+target_include_directories(LocalGen-bot-simulator PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

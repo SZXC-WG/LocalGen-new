@@ -264,12 +264,11 @@ class GcBot : public BasicBot {
             return;
         }
 
-        blockTypeValue[0] = 55 + static_cast<value_t>(std::pow(turn, 0.2));
-        blockTypeValue[1] = static_cast<value_t>(-500 * std::pow(turn, -0.1));
-        blockTypeValue[4] =
-            static_cast<value_t>(28 * std::pow(turn - 12, 0.15));
-        blockTypeValue[5] =
-            35 + static_cast<value_t>(15 * std::pow(turn, 0.15));
+        const double armyStrength = std::log(rank[id].army + 1.0);
+        blockTypeValue[0] = 55 - static_cast<value_t>(5 * armyStrength);
+        blockTypeValue[1] = -500 + static_cast<value_t>(50 * armyStrength);
+        blockTypeValue[4] = static_cast<value_t>(armyStrength * armyStrength);
+        blockTypeValue[5] = 35 + static_cast<value_t>(4 * armyStrength);
 
         Coord coo = lastPos;
         if (!isValidPosition(coo.x, coo.y) ||

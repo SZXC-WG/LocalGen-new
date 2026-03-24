@@ -309,7 +309,8 @@ class GcBot : public BasicBot {
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
                     if (blockType[idx(i, j)] == 0 &&
-                        !knownBlockType[idx(i, j)] && dist[idx(i, j)] < 500) {
+                        !knownBlockType[idx(i, j)] && dist[idx(i, j)] < 500 &&
+                        eval[idx(i, j)] > -100) {
                         unknownPlains.emplace_back(dist[idx(i, j)],
                                                    Coord(i, j));
                     }

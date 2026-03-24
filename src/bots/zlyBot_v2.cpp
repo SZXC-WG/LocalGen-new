@@ -2,6 +2,7 @@
  * @file zlyBot_v2.cpp
  *
  * ZlyBot v2 from LocalGen v5.
+ * Author: AppOfficer
  *
  * @copyright Copyright (c) SZXC Work Group.
  */

@@ -1,7 +1,8 @@
 /**
  * @file szlyBot.cpp
  *
- * szlyBot migrated from LocalGen v5.
+ * SzlyBot migrated from LocalGen v5.
+ * Author: GoodCoder666
  *
  * @copyright Copyright (c) SZXC Work Group.
  */

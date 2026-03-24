@@ -2,6 +2,7 @@
  * @file xiaruizeBot.cpp
  *
  * XiaruizeBot.
+ * Author: xiaruize0911
  *
  * Original implementation: tactical capture search + focused-stack planning
  * with threat-aware defense, weighted pathfinding, and gathering.
@@ -29,8 +30,8 @@ class XiaruizeBot : public BasicBot {
     using score_t = long long;
     static constexpr score_t kInf = (1LL << 60);
     static constexpr score_t kNegInf = -(1LL << 60);
-    static constexpr std::array<Coord, 4> kDirs = {
-        Coord{-1, 0}, Coord{0, -1}, Coord{1, 0}, Coord{0, 1}};
+    static constexpr std::array<Coord, 4> kDirs = {Coord{-1, 0}, Coord{0, -1},
+                                                   Coord{1, 0}, Coord{0, 1}};
 
     struct MemoryCell {
         tile_type_e terrain = TILE_BLANK;
@@ -62,7 +63,9 @@ class XiaruizeBot : public BasicBot {
         score_t dist = 0;
         Coord coord{0, 0};
 
-        bool operator<(const HeapNode& other) const { return dist > other.dist; }
+        bool operator<(const HeapNode& other) const {
+            return dist > other.dist;
+        }
     };
 
     pos_t height = 0;
@@ -115,7 +118,8 @@ class XiaruizeBot : public BasicBot {
     }
 
     inline bool isAlive(index_t player) const {
-        return validPlayer(player) && player < static_cast<index_t>(rankById.size())
+        return validPlayer(player) &&
+                       player < static_cast<index_t>(rankById.size())
                    ? rankById[player].alive
                    : false;
     }
@@ -176,7 +180,8 @@ class XiaruizeBot : public BasicBot {
                     mem.army = tile.army;
                     mem.lastSeenTurn = fullTurn;
 
-                    if (tile.type == TILE_GENERAL && validPlayer(tile.occupier)) {
+                    if (tile.type == TILE_GENERAL &&
+                        validPlayer(tile.occupier)) {
                         knownGenerals[tile.occupier] = c;
                     }
                     if (tile.type == TILE_GENERAL && tile.occupier == id) {
@@ -187,8 +192,8 @@ class XiaruizeBot : public BasicBot {
                     mem.occupier = -1;
                     mem.army = 0;
                 } else {
-                    int stale =
-                        std::max(0, static_cast<int>(fullTurn) - mem.lastSeenTurn);
+                    int stale = std::max(
+                        0, static_cast<int>(fullTurn) - mem.lastSeenTurn);
                     if (isEnemy(mem.occupier)) {
                         if (stale > 0 && mem.army > 0) {
                             mem.army =
@@ -209,8 +214,8 @@ class XiaruizeBot : public BasicBot {
                 const TileView& tile = board.tileAt(x, y);
                 if (!tile.visible) continue;
 
-                bool matches = enemySide ? isEnemy(tile.occupier)
-                                         : tile.occupier == id;
+                bool matches =
+                    enemySide ? isEnemy(tile.occupier) : tile.occupier == id;
                 if (!matches) continue;
 
                 int power = std::min<int>(tile.army, enemySide ? 100 : 120);
@@ -220,7 +225,8 @@ class XiaruizeBot : public BasicBot {
                         if (!inside(c)) continue;
                         int dist = std::abs(dx) + std::abs(dy);
                         if (dist > radius) continue;
-                        int gain = std::max(0, power - dist * (enemySide ? 14 : 12));
+                        int gain =
+                            std::max(0, power - dist * (enemySide ? 14 : 12));
                         pressure[idx(c)] += gain;
                     }
                 }
@@ -299,7 +305,8 @@ class XiaruizeBot : public BasicBot {
         return best;
     }
 
-    std::vector<int> computeDistanceMap(const std::vector<Coord>& starts) const {
+    std::vector<int> computeDistanceMap(
+        const std::vector<Coord>& starts) const {
         std::vector<int> dist((height + 2) * stride, 1e9);
         std::queue<Coord> q;
 
@@ -377,7 +384,8 @@ class XiaruizeBot : public BasicBot {
         return path;
     }
 
-    Coord firstStepOnPath(const PathMap& path, Coord start, Coord target) const {
+    Coord firstStepOnPath(const PathMap& path, Coord start,
+                          Coord target) const {
         if (!inside(start) || !inside(target) || target == start) return start;
         Coord cur = target;
         int guard = height * width + 5;
@@ -394,7 +402,8 @@ class XiaruizeBot : public BasicBot {
                       const std::vector<int>& enemyAdj,
                       const std::vector<int>& generalDist, bool crowded,
                       bool defenseMode) const {
-        if (defenseMode && inside(myGeneral) && board.tileAt(myGeneral).army > 1) {
+        if (defenseMode && inside(myGeneral) &&
+            board.tileAt(myGeneral).army > 1) {
             return myGeneral;
         }
 
@@ -477,11 +486,11 @@ class XiaruizeBot : public BasicBot {
         return bestMove;
     }
 
-    std::optional<Move> chooseDefenseMove(const std::vector<int>& enemyPressure,
-                                          const std::vector<int>& friendlyPressure,
-                                          const std::vector<int>& generalDist,
-                                          const ThreatInfo& threat,
-                                          bool forceDefense) const {
+    std::optional<Move> chooseDefenseMove(
+        const std::vector<int>& enemyPressure,
+        const std::vector<int>& friendlyPressure,
+        const std::vector<int>& generalDist, const ThreatInfo& threat,
+        bool forceDefense) const {
         if (!inside(myGeneral)) return std::nullopt;
         if (!forceDefense && enemyPressure[idx(myGeneral)] <=
                                  friendlyPressure[idx(myGeneral)] + 30) {
@@ -501,23 +510,29 @@ class XiaruizeBot : public BasicBot {
                     if (!passableForMove(to)) continue;
 
                     score_t score = 0;
-                    if (generalDist[idx(to)] < generalDist[idx(from)]) score += 600;
+                    if (generalDist[idx(to)] < generalDist[idx(from)])
+                        score += 600;
                     score += enemyPressure[idx(to)] - enemyPressure[idx(from)];
                     if (to == myGeneral) score += 1200;
                     if (from == myGeneral) score -= 4000;
                     if (threat.present) {
-                        const int fromThreatDist = std::abs(from.x - threat.source.x) +
-                                                   std::abs(from.y - threat.source.y);
-                        const int toThreatDist = std::abs(to.x - threat.source.x) +
-                                                 std::abs(to.y - threat.source.y);
+                        const int fromThreatDist =
+                            std::abs(from.x - threat.source.x) +
+                            std::abs(from.y - threat.source.y);
+                        const int toThreatDist =
+                            std::abs(to.x - threat.source.x) +
+                            std::abs(to.y - threat.source.y);
                         if (toThreatDist < fromThreatDist) score += 450;
-                        if (generalDist[idx(to)] <= generalDist[idx(from)] + 1) {
+                        if (generalDist[idx(to)] <=
+                            generalDist[idx(from)] + 1) {
                             score += 150;
                         }
                     }
-                    if (board.tileAt(to).visible && isEnemy(board.tileAt(to).occupier) &&
+                    if (board.tileAt(to).visible &&
+                        isEnemy(board.tileAt(to).occupier) &&
                         src.army - 1 > board.tileAt(to).army) {
-                        score += 1500 + (src.army - 1 - board.tileAt(to).army) * 20;
+                        score +=
+                            1500 + (src.army - 1 - board.tileAt(to).army) * 20;
                     }
 
                     if (score > bestScore) {
@@ -542,7 +557,8 @@ class XiaruizeBot : public BasicBot {
         std::vector<Coord> generalTargets;
 
         for (index_t player = 0; player < playerCount; ++player) {
-            if (player == id || !isAlive(player) || !inside(knownGenerals[player])) {
+            if (player == id || !isAlive(player) ||
+                !inside(knownGenerals[player])) {
                 continue;
             }
             generalTargets.push_back(knownGenerals[player]);
@@ -553,7 +569,8 @@ class XiaruizeBot : public BasicBot {
                 Coord c{x, y};
                 if (!passableForPlan(c)) continue;
 
-                if (!memory[idx(c)].seen && board.tileAt(c).type != TILE_OBSTACLE) {
+                if (!memory[idx(c)].seen &&
+                    board.tileAt(c).type != TILE_OBSTACLE) {
                     unknownTargets.push_back(c);
                 }
                 if (isEnemy(occupierAt(c))) enemyTargets.push_back(c);
@@ -571,7 +588,8 @@ class XiaruizeBot : public BasicBot {
         int aliveEnemies = 0;
         army_t myArmy = 0;
         army_t bestEnemyArmy = 0;
-        if (id < static_cast<index_t>(rankById.size())) myArmy = rankById[id].army;
+        if (id < static_cast<index_t>(rankById.size()))
+            myArmy = rankById[id].army;
         for (index_t player = 0; player < playerCount; ++player) {
             if (player == id || !isAlive(player)) continue;
             ++aliveEnemies;
@@ -629,36 +647,38 @@ class XiaruizeBot : public BasicBot {
                             if (enemyAdj[idx(from)] > 0) score -= 2200;
                         }
                         if (sourceProducer && remain <= 1) score -= 550;
-                        if (from == lastMoveTo && to == lastMoveFrom) score -= 280;
+                        if (from == lastMoveTo && to == lastMoveFrom)
+                            score -= 280;
                         if (board.tileAt(to).type == TILE_SWAMP) score -= 1200;
 
                         if (enemyPressure[idx(from)] >
                             friendlyPressure[idx(from)] + remain * 8) {
-                            score -= 1800 +
-                                     static_cast<score_t>(
-                                         enemyPressure[idx(from)] -
-                                         friendlyPressure[idx(from)] - remain * 8) *
-                                         6;
+                            score -= 1800 + static_cast<score_t>(
+                                                enemyPressure[idx(from)] -
+                                                friendlyPressure[idx(from)] -
+                                                remain * 8) *
+                                                6;
                         }
                         if (enemyPressure[idx(to)] >
                             friendlyPressure[idx(to)] + moved * 8) {
-                            score -= 700 +
-                                     static_cast<score_t>(
-                                         enemyPressure[idx(to)] -
-                                         friendlyPressure[idx(to)] - moved * 8) *
-                                         3;
+                            score -= 700 + static_cast<score_t>(
+                                               enemyPressure[idx(to)] -
+                                               friendlyPressure[idx(to)] -
+                                               moved * 8) *
+                                               3;
                         }
 
                         if (dst.occupier == id) {
-                            if (!sourceFrontier && frontierValue(to) > frontierValue(from)) {
+                            if (!sourceFrontier &&
+                                frontierValue(to) > frontierValue(from)) {
                                 score += 1400;
                             }
                             if (enemyDist[idx(from)] < 1e9 &&
                                 enemyDist[idx(to)] < enemyDist[idx(from)]) {
-                                score += static_cast<score_t>(
-                                             enemyDist[idx(from)] -
-                                             enemyDist[idx(to)]) *
-                                         230;
+                                score +=
+                                    static_cast<score_t>(enemyDist[idx(from)] -
+                                                         enemyDist[idx(to)]) *
+                                    230;
                             }
                             if (unknownDist[idx(from)] < 1e9 &&
                                 unknownDist[idx(to)] < unknownDist[idx(from)]) {
@@ -679,10 +699,10 @@ class XiaruizeBot : public BasicBot {
                             if (cityDist[idx(from)] < 1e9 &&
                                 cityDist[idx(to)] < cityDist[idx(from)] &&
                                 src.army >= 18) {
-                                score += static_cast<score_t>(
-                                             cityDist[idx(from)] -
-                                             cityDist[idx(to)]) *
-                                         90;
+                                score +=
+                                    static_cast<score_t>(cityDist[idx(from)] -
+                                                         cityDist[idx(to)]) *
+                                    90;
                             }
                             if (to == myGeneral) score += 900;
                             if (takeHalf) score += 220;
@@ -701,13 +721,12 @@ class XiaruizeBot : public BasicBot {
                             if (moved <= dst.army) continue;
                             if (dst.type == TILE_CITY) {
                                 score += opening ? -2200
-                                                 : 9000 -
-                                                       static_cast<score_t>(
-                                                           dst.army) *
-                                                           45;
+                                                 : 9000 - static_cast<score_t>(
+                                                              dst.army) *
+                                                              45;
                             } else {
-                                score += 900 -
-                                         static_cast<score_t>(dst.army) * 14;
+                                score +=
+                                    900 - static_cast<score_t>(dst.army) * 14;
                                 score += unknownAdj[idx(to)] * 90;
                                 score += enemyAdj[idx(to)] * 160;
                                 if (dst.type == TILE_DESERT) score += 120;
@@ -723,10 +742,11 @@ class XiaruizeBot : public BasicBot {
                             } else if (moved <= dst.army) {
                                 continue;
                             } else {
-                                score += 12000 +
-                                         static_cast<score_t>(moved - dst.army) *
-                                             55 +
-                                         static_cast<score_t>(dst.army) * 18;
+                                score +=
+                                    12000 +
+                                    static_cast<score_t>(moved - dst.army) *
+                                        55 +
+                                    static_cast<score_t>(dst.army) * 18;
                                 score += enemyAdj[idx(to)] * 260;
                                 if (dst.type == TILE_CITY) score += 18000;
                             }
@@ -734,7 +754,8 @@ class XiaruizeBot : public BasicBot {
                             if (takeHalf) score -= 320;
                         }
 
-                        if (aliveEnemies >= 6 && !ahead && unknownAdj[idx(to)] > 0) {
+                        if (aliveEnemies >= 6 && !ahead &&
+                            unknownAdj[idx(to)] > 0) {
                             score += 180;
                         }
                         if (enemyPressure[idx(to)] <=
@@ -784,9 +805,11 @@ class XiaruizeBot : public BasicBot {
                         score = 2400 + unknownAdj[idx(to)] * 260 +
                                 enemyAdj[idx(to)] * 160;
                     } else if (dst.occupier == -1) {
-                        if (dst.type == TILE_SWAMP || moved <= dst.army) continue;
+                        if (dst.type == TILE_SWAMP || moved <= dst.army)
+                            continue;
                         if (dst.type == TILE_CITY) {
-                            if (fullTurn < 10 || moved <= dst.army + 4) continue;
+                            if (fullTurn < 10 || moved <= dst.army + 4)
+                                continue;
                             score = 7000 - static_cast<score_t>(dst.army) * 50;
                         } else {
                             score = 1500 - static_cast<score_t>(dst.army) * 18 +
@@ -800,9 +823,10 @@ class XiaruizeBot : public BasicBot {
                         } else if (moved > dst.army + 2 &&
                                    enemyPressure[idx(to)] <=
                                        friendlyPressure[idx(to)] + moved * 3) {
-                            score = 7000 +
-                                    static_cast<score_t>(moved - dst.army) * 70 +
-                                    enemyAdj[idx(to)] * 240;
+                            score =
+                                7000 +
+                                static_cast<score_t>(moved - dst.army) * 70 +
+                                enemyAdj[idx(to)] * 240;
                             if (dst.type == TILE_CITY) score += 12000;
                         } else {
                             continue;
@@ -816,11 +840,10 @@ class XiaruizeBot : public BasicBot {
                         score += 250;
                         if (enemyAdj[idx(from)] > 0) score -= 3500;
                     }
-                    score += static_cast<score_t>(
-                                 std::abs(from.x - center.x) +
-                                 std::abs(from.y - center.y) -
-                                 std::abs(to.x - center.x) -
-                                 std::abs(to.y - center.y)) *
+                    score += static_cast<score_t>(std::abs(from.x - center.x) +
+                                                  std::abs(from.y - center.y) -
+                                                  std::abs(to.x - center.x) -
+                                                  std::abs(to.y - center.y)) *
                              35;
                     if (enemyPressure[idx(from)] >
                         friendlyPressure[idx(from)] + src.army * 6) {
@@ -828,11 +851,11 @@ class XiaruizeBot : public BasicBot {
                     }
                     if (enemyPressure[idx(to)] >
                         friendlyPressure[idx(to)] + moved * 5) {
-                        score -= 1600 +
-                                 static_cast<score_t>(
-                                     enemyPressure[idx(to)] -
-                                     friendlyPressure[idx(to)] - moved * 5) *
-                                     6;
+                        score -=
+                            1600 + static_cast<score_t>(
+                                       enemyPressure[idx(to)] -
+                                       friendlyPressure[idx(to)] - moved * 5) *
+                                       6;
                     }
 
                     if (score > best.score) {
@@ -850,7 +873,8 @@ class XiaruizeBot : public BasicBot {
     Coord chooseBestTarget(Coord focus, const PathMap& path,
                            const std::vector<int>& unknownAdj,
                            const std::vector<int>& enemyAdj, bool crowded,
-                           bool huge, bool opening, bool enemyGeneralKnown) const {
+                           bool huge, bool opening,
+                           bool enemyGeneralKnown) const {
         if (!inside(focus)) return Coord{-1, -1};
 
         const army_t focusArmy = board.tileAt(focus).army;
@@ -905,13 +929,14 @@ class XiaruizeBot : public BasicBot {
 
                 value -= path.dist[idx(target)];
                 if (focusArmy <= defense && value < 50000) {
-                    value -= 5000 + static_cast<score_t>(defense - focusArmy + 1) * 80;
+                    value -= 5000 +
+                             static_cast<score_t>(defense - focusArmy + 1) * 80;
                 }
 
                 if (huge && !enemyGeneralKnown) {
-                    value -=
-                        (std::abs(target.x - center.x) + std::abs(target.y - center.y)) *
-                        3;
+                    value -= (std::abs(target.x - center.x) +
+                              std::abs(target.y - center.y)) *
+                             3;
                 }
 
                 if (value > bestScore) {
@@ -928,8 +953,10 @@ class XiaruizeBot : public BasicBot {
         if (!inside(target) || !passableForPlan(target)) return false;
         const index_t occupier = occupierAt(target);
         if (isEnemy(occupier)) return true;
-        if (terrainAt(target) == TILE_CITY && !isFriendly(occupier)) return true;
-        return !memory[idx(target)].seen && board.tileAt(target).type != TILE_OBSTACLE;
+        if (terrainAt(target) == TILE_CITY && !isFriendly(occupier))
+            return true;
+        return !memory[idx(target)].seen &&
+               board.tileAt(target).type != TILE_OBSTACLE;
     }
 
     std::optional<Move> gatherToward(Coord focus, const PathMap& gatherPath,
@@ -942,11 +969,14 @@ class XiaruizeBot : public BasicBot {
             for (pos_t y = 1; y <= width; ++y) {
                 Coord from{x, y};
                 const TileView& src = board.tileAt(from);
-                if (src.occupier != id || src.army <= 1 || from == focus) continue;
+                if (src.occupier != id || src.army <= 1 || from == focus)
+                    continue;
 
                 Coord step = firstStepOnPath(gatherPath, focus, from);
-                if (!inside(step) || step == from || !passableForMove(step)) continue;
-                if (!isFriendly(board.tileAt(step).occupier) && step != focus) continue;
+                if (!inside(step) || step == from || !passableForMove(step))
+                    continue;
+                if (!isFriendly(board.tileAt(step).occupier) && step != focus)
+                    continue;
 
                 score_t score = static_cast<score_t>(src.army) * 40;
                 score -= gatherPath.dist[idx(from)] * (crowded ? 4 : 2);
@@ -973,13 +1003,15 @@ class XiaruizeBot : public BasicBot {
                     Coord c{x, y};
                     const TileView& tile = board.tileAt(c);
                     if (tile.occupier == id && tile.army > 1 &&
-                        (!inside(focus) || tile.army > board.tileAt(focus).army)) {
+                        (!inside(focus) ||
+                         tile.army > board.tileAt(focus).army)) {
                         focus = c;
                     }
                 }
             }
         }
-        if (!inside(focus) || board.tileAt(focus).army <= 1) return std::nullopt;
+        if (!inside(focus) || board.tileAt(focus).army <= 1)
+            return std::nullopt;
 
         for (Coord d : kDirs) {
             Coord to = focus + d;
@@ -1063,17 +1095,17 @@ class XiaruizeBot : public BasicBot {
                           friendlyPressure[idx(myGeneral)] + defenseMargin;
             if (crowded && playerCount >= 6 && generalThreat.present) {
                 const army_t generalArmy = board.tileAt(myGeneral).army;
-                forceDefense =
-                    generalThreat.dist <= 2 ||
-                    (generalThreat.dist <= 4 &&
-                     generalThreat.army + 2 >= std::max<army_t>(1, generalArmy));
+                forceDefense = generalThreat.dist <= 2 ||
+                               (generalThreat.dist <= 4 &&
+                                generalThreat.army + 2 >=
+                                    std::max<army_t>(1, generalArmy));
                 defenseMode = defenseMode || forceDefense;
             }
         }
 
-        if (auto defense = chooseDefenseMove(enemyPressure, friendlyPressure,
-                                             generalDist, generalThreat,
-                                             forceDefense)) {
+        if (auto defense =
+                chooseDefenseMove(enemyPressure, friendlyPressure, generalDist,
+                                  generalThreat, forceDefense)) {
             lastMoveFrom = defense->from;
             lastMoveTo = defense->to;
             moveQueue.push_back(*defense);
@@ -1099,27 +1131,30 @@ class XiaruizeBot : public BasicBot {
 
         bool enemyGeneralKnown = false;
         for (index_t player = 0; player < playerCount; ++player) {
-            if (player != id && isAlive(player) && inside(knownGenerals[player])) {
+            if (player != id && isAlive(player) &&
+                inside(knownGenerals[player])) {
                 enemyGeneralKnown = true;
                 break;
             }
         }
 
-        focusCell =
-            chooseFocus(unknownAdj, enemyAdj, generalDist, crowded, defenseMode);
+        focusCell = chooseFocus(unknownAdj, enemyAdj, generalDist, crowded,
+                                defenseMode);
         if (!inside(focusCell)) return;
 
         const PathMap attackPath = buildPathMap(focusCell, false);
         Coord target{-1, -1};
-        const bool largeMacro =
-            mapArea >= 1600 && mapArea <= 3000 && !crowded &&
-            (playerCount <= 2 || mapArea >= 2500);
-        if (largeMacro && fullTurn <= static_cast<turn_t>(macroTargetLockUntil) &&
+        const bool largeMacro = mapArea >= 1600 && mapArea <= 3000 &&
+                                !crowded &&
+                                (playerCount <= 2 || mapArea >= 2500);
+        if (largeMacro &&
+            fullTurn <= static_cast<turn_t>(macroTargetLockUntil) &&
             isMacroTargetUseful(macroTarget)) {
             target = macroTarget;
         } else {
-            target = chooseBestTarget(focusCell, attackPath, unknownAdj, enemyAdj,
-                                      crowded, huge, opening, enemyGeneralKnown);
+            target =
+                chooseBestTarget(focusCell, attackPath, unknownAdj, enemyAdj,
+                                 crowded, huge, opening, enemyGeneralKnown);
             if (largeMacro && inside(target)) {
                 macroTarget = target;
                 macroTargetLockUntil =

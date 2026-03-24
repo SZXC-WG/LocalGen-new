@@ -1,9 +1,8 @@
 /**
  * @file gcBot.cpp
  *
- * gcBot from LocalGen v5.
- * Features: army memory with exponential smoothing, dynamic weight adjustment,
- *           prevTarget continuity, dual BFS army gathering.
+ * GcBot
+ * Author: GoodCoder666
  *
  * @copyright Copyright (c) SZXC Work Group.
  */

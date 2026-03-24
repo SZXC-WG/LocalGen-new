@@ -245,6 +245,7 @@ class GcBot : public BasicBot {
         if (turn < 13 && rank[id].land == 1) {
             Coord coo = seenGeneral[id];
             army_t minArmy = army[idx(coo.x, coo.y)] - 1;
+            lastPos = coo;
             for (auto [dx, dy] : delta) {
                 auto nx = coo.x + dx, ny = coo.y + dy;
                 if (isValidPosition(nx, ny)) {

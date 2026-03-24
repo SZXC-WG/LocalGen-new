@@ -98,6 +98,14 @@ class KutuBot : public BasicBot {
         double score = -1e100;
     };
 
+    struct SourceCandidate {
+        Coord source{-1, -1};
+        army_t sourceArmy = 0;
+        army_t commitArmy = 0;
+        int distance = kInf;
+        double seedScore = -1e100;
+    };
+
     enum class FocusMode : uint8_t {
         ECONOMY,
         ASSAULT,
@@ -144,6 +152,13 @@ class KutuBot : public BasicBot {
 
     std::vector<Coord> friendlyTilesCache;
     std::vector<Coord> ownedCitiesCache;
+    std::vector<Coord> duelEnemyTargetsCache;
+    std::vector<Coord> duelFrontierFogCache;
+    std::vector<int> visibleEnemyCountByPlayer;
+    std::vector<uint8_t> duelFogMark;
+    std::vector<double> duelCandidateScoreCache;
+    std::vector<uint8_t> duelCandidateMark;
+    std::vector<Coord> duelCandidateTouched;
     army_t largestFriendlyArmyCache = 0;
     Coord myGeneral{-1, -1};
     Coord currentObjective{-1, -1};
@@ -406,11 +421,45 @@ class KutuBot : public BasicBot {
     void rebuildTurnCaches() {
         friendlyTilesCache.clear();
         ownedCitiesCache.clear();
+        duelEnemyTargetsCache.clear();
+        duelFrontierFogCache.clear();
         largestFriendlyArmyCache = 0;
+        std::fill(visibleEnemyCountByPlayer.begin(),
+                  visibleEnemyCountByPlayer.end(), 0);
+        std::fill(duelFogMark.begin(), duelFogMark.end(), 0);
         for (pos_t x = 1; x <= height; ++x) {
             for (pos_t y = 1; y <= width; ++y) {
                 Coord c{x, y};
                 const TileView& tile = board.tileAt(c);
+                const TileMemory& mem = memory[idx(c)];
+                const bool visibleEnemyTile = tile.visible && isEnemyTile(tile);
+                const bool recentEnemyTile =
+                    !tile.visible && isEnemyOccupier(mem.occupier) &&
+                    static_cast<int>(fullTurn) - mem.lastSeenTurn <= 4;
+                if (visibleEnemyTile) {
+                    if (tile.occupier >= 0 &&
+                        tile.occupier < static_cast<index_t>(
+                                            visibleEnemyCountByPlayer.size())) {
+                        ++visibleEnemyCountByPlayer[tile.occupier];
+                    }
+                    duelEnemyTargetsCache.push_back(c);
+                } else if (recentEnemyTile) {
+                    duelEnemyTargetsCache.push_back(c);
+                }
+                if (visibleEnemyTile || recentEnemyTile) {
+                    for (Coord d : kDirs) {
+                        Coord adj = c + d;
+                        if (!inside(adj)) continue;
+                        const TileView& adjTile = board.tileAt(adj);
+                        const TileMemory& adjMem = memory[idx(adj)];
+                        const size_t adjIndex = idx(adj);
+                        if (!adjTile.visible && !adjMem.everSeen &&
+                            !duelFogMark[adjIndex]) {
+                            duelFogMark[adjIndex] = 1;
+                            duelFrontierFogCache.push_back(adj);
+                        }
+                    }
+                }
                 if (tile.occupier != id) continue;
                 friendlyTilesCache.push_back(c);
                 largestFriendlyArmyCache =
@@ -730,33 +779,38 @@ class KutuBot : public BasicBot {
             if (manhattan(city, myGeneral) <= 8) keyTargets.push_back(city);
         }
 
-        for (pos_t x = 1; x <= height; ++x) {
-            for (pos_t y = 1; y <= width; ++y) {
-                Coord c{x, y};
-                const TileView& tile = board.tileAt(c);
-                if (!isEnemyTile(tile) || tile.army <= 1) continue;
-                for (Coord target : keyTargets) {
-                    const auto enemyPath = weightedPath(c, [&](Coord step) {
-                        int cost = 1;
-                        if (memory[idx(step)].type == TILE_SWAMP) cost += 5;
-                        if (step == myGeneral) cost = std::max(1, cost - 1);
-                        return cost;
-                    });
-                    if (enemyPath.distance(idx(target)) >= kInf) continue;
+        for (Coord target : keyTargets) {
+            const auto enemyPath = weightedReversePath(target, [&](Coord step) {
+                int cost = 1;
+                if (memory[idx(step)].type == TILE_SWAMP) cost += 5;
+                if (step == myGeneral) cost = std::max(1, cost - 1);
+                return cost;
+            });
+            if (!enemyPath.reachable) continue;
+
+            for (pos_t x = 1; x <= height; ++x) {
+                for (pos_t y = 1; y <= width; ++y) {
+                    Coord c{x, y};
+                    const TileView& tile = board.tileAt(c);
+                    if (!isEnemyTile(tile) || tile.army <= 1) continue;
+
+                    const int dist = enemyPath.distance(idx(c));
+                    if (dist >= kInf) continue;
+                    const double score = tile.army * 3.0 - dist * 12.0 +
+                                         (target == myGeneral ? 150.0 : 60.0);
+                    if (best.has_value() && score <= best->score) continue;
+
                     std::vector<Coord> route =
                         reconstructPath(c, target, enemyPath);
                     if (route.empty()) continue;
+
                     ThreatInfo info;
                     info.enemy = c;
                     info.target = target;
                     info.route = std::move(route);
                     info.army = tile.army;
-                    info.score =
-                        tile.army * 3.0 - enemyPath.distance(idx(target)) * 12.0 +
-                        (target == myGeneral ? 150.0 : 60.0);
-                    if (!best.has_value() || info.score > best->score) {
-                        best = info;
-                    }
+                    info.score = score;
+                    best = info;
                 }
             }
         }
@@ -770,6 +824,65 @@ class KutuBot : public BasicBot {
         const pos_t landLead = rankById[id].land - rankById[enemy].land;
         return armyLead >= 20 || (armyLead >= 10 && landLead >= 8) ||
                landLead >= 14;
+    }
+
+    bool isDuelAggressionProfile() const {
+        return playerCnt <= 2 && static_cast<int>(height * width) <= 500;
+    }
+
+    bool isCoreOwnedCity(Coord c) const {
+        if (!inside(c) || myGeneral == Coord{-1, -1}) return false;
+        const TileView& tile = board.tileAt(c);
+        return tile.occupier == id && tile.type == TILE_CITY &&
+               manhattan(c, myGeneral) <= 5;
+    }
+
+    bool hasVisibleEnemyPresence(index_t enemy = -1) const {
+        if (enemy >= 0) {
+            return enemy < static_cast<index_t>(visibleEnemyCountByPlayer.size()) &&
+                   visibleEnemyCountByPlayer[enemy] > 0;
+        }
+        return std::any_of(visibleEnemyCountByPlayer.begin(),
+                           visibleEnemyCountByPlayer.end(),
+                           [](int count) { return count > 0; });
+    }
+
+    bool hasEnemyAdjacent(Coord c) const {
+        for (Coord d : kDirs) {
+            Coord adj = c + d;
+            if (!inside(adj)) continue;
+            const TileView& tile = board.tileAt(adj);
+            if (isEnemyTile(tile)) return true;
+            const TileMemory& mem = memory[idx(adj)];
+            if (!tile.visible && isEnemyOccupier(mem.occupier) &&
+                static_cast<int>(fullTurn) - mem.lastSeenTurn <= 4) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool pullsStrongestStackAwayFrom(Coord focus, const Move& move) const {
+        if (focus == Coord{-1, -1}) return false;
+        Coord strongest = strongestFriendlyTile(true, focus, 1);
+        if (strongest == Coord{-1, -1} || move.from != strongest) return false;
+        return manhattan(move.to, focus) > manhattan(move.from, focus);
+    }
+
+    bool shouldBypassEarlyEconomy(index_t enemy, Coord enemyGuess) {
+        if (!isDuelAggressionProfile() || fullTurn < 8) return false;
+        if (enemyGuess != Coord{-1, -1}) return true;
+        if (hasVisibleEnemyPresence(enemy)) return true;
+
+        Coord source = strongestFriendlyTile(true);
+        if (source == Coord{-1, -1} || board.tileAt(source).army <= 1) {
+            return false;
+        }
+
+        for (Coord c : duelEnemyTargetsCache) {
+            if (manhattan(source, c) <= 8) return true;
+        }
+        return false;
     }
 
     int planningPenalty(Coord c, FocusMode mode, bool allowGeneralDive) const {
@@ -863,6 +976,42 @@ class KutuBot : public BasicBot {
         return need;
     }
 
+    int objectiveOptionLimit(FocusMode mode) const {
+        const int mapArea = static_cast<int>(height * width);
+        int limit = 8;
+        switch (mode) {
+            case FocusMode::ECONOMY:
+                limit = mapArea >= 900 ? 5 : 8;
+                break;
+            case FocusMode::CONVERSION:
+                limit = mapArea >= 900 ? 6 : 8;
+                break;
+            case FocusMode::ASSAULT:
+                limit = mapArea >= 900 ? 4 : 6;
+                break;
+            case FocusMode::DEFENSE:
+                limit = 4;
+                break;
+        }
+        if (fullTurn >= 30) limit = std::max(4, limit - 1);
+        if (friendlyTilesCache.size() >= 80) limit = std::max(4, limit - 1);
+        return limit;
+    }
+
+    int sourceOptionLimit(FocusMode mode) const {
+        const int mapArea = static_cast<int>(height * width);
+        int limit = 7;
+        switch (mode) {
+            case FocusMode::DEFENSE: limit = 5; break;
+            case FocusMode::ASSAULT: limit = 6; break;
+            case FocusMode::ECONOMY:
+            case FocusMode::CONVERSION: limit = 7; break;
+        }
+        if (mapArea >= 900) limit = std::max(4, limit - 2);
+        if (fullTurn >= 30) limit = std::max(4, limit - 1);
+        return limit;
+    }
+
     std::optional<FocusPlan> buildFocusPlan(Coord objective, FocusMode mode,
                                             bool allowGeneralDive,
                                             bool allowGeneralSource = true) const {
@@ -876,21 +1025,55 @@ class KutuBot : public BasicBot {
         FocusPlan best;
         best.objective = objective;
 
+        std::vector<SourceCandidate> candidates;
+        candidates.reserve(friendlyTilesCache.size());
+        const double seedDistWeight = mode == FocusMode::DEFENSE
+                                          ? 5.5
+                                          : (fullTurn < 12 ? 10.0 : 7.0);
+
         for (Coord source : friendlyTilesCache) {
             const TileView& tile = board.tileAt(source);
             if (tile.army <= 1) continue;
             if (!allowGeneralSource && source == myGeneral) continue;
             const int dist = reversePath.distance(idx(source));
             if (dist >= kInf) continue;
-            std::vector<Coord> route =
-                reconstructPath(source, objective, reversePath);
-            if (route.empty()) continue;
 
             const army_t sourceArmy = tile.army;
             const army_t reserve = reserveForSource(source);
             const army_t commitArmy =
                 std::max<army_t>(0, sourceArmy - 1 - reserve);
             if (commitArmy <= 0) continue;
+
+            double seedScore = commitArmy * 8.0 - dist * seedDistWeight;
+            if (tile.type == TILE_CITY) seedScore -= 6.0;
+            if (source == myGeneral) seedScore += fullTurn < 10 ? 4.0 : -10.0;
+            if (mode == FocusMode::DEFENSE && myGeneral != Coord{-1, -1}) {
+                seedScore -= manhattan(source, myGeneral) * 1.4;
+            }
+            if (mode == FocusMode::CONVERSION &&
+                isEnemyOccupier(memory[idx(objective)].occupier)) {
+                seedScore += 12.0;
+            }
+
+            candidates.push_back(
+                SourceCandidate{source, sourceArmy, commitArmy, dist, seedScore});
+        }
+
+        if (candidates.empty()) return std::nullopt;
+        std::sort(candidates.begin(), candidates.end(),
+                  [](const SourceCandidate& lhs, const SourceCandidate& rhs) {
+                      return lhs.seedScore > rhs.seedScore;
+                  });
+        if (static_cast<int>(candidates.size()) > sourceOptionLimit(mode)) {
+            candidates.resize(sourceOptionLimit(mode));
+        }
+
+        for (const SourceCandidate& candidate : candidates) {
+            const Coord source = candidate.source;
+            const TileView& tile = board.tileAt(source);
+            std::vector<Coord> route =
+                reconstructPath(source, objective, reversePath);
+            if (route.empty()) continue;
 
             const army_t support = supportAlongRoute(source, route);
             const int pressure = corridorPressure(route);
@@ -899,18 +1082,19 @@ class KutuBot : public BasicBot {
                                       mode, allowGeneralDive);
 
             const double distWeight = fullTurn < 12 ? 10.0 : 7.0;
-            double score = commitArmy * 8.0 + support * 2.2 - dist * distWeight +
-                           pressure * 4.0;
+            double score =
+                candidate.commitArmy * 8.0 + support * 2.2 -
+                candidate.distance * distWeight + pressure * 4.0;
             if (tile.type == TILE_CITY) score -= 6.0;
             if (source == myGeneral) score += fullTurn < 10 ? 6.0 : -9.0;
             if (route.size() >= 2 && board.tileAt(route[0]).occupier == id &&
                 board.tileAt(route[1]).occupier == id) {
                 score += 8.0;
             }
-            if (commitArmy + support >= need) {
+            if (candidate.commitArmy + support >= need) {
                 score += 70.0;
             } else {
-                score -= (need - commitArmy) * 1.8;
+                score -= (need - candidate.commitArmy) * 1.8;
             }
             if (mode == FocusMode::ECONOMY && memory[idx(objective)].type == TILE_CITY) {
                 score += 25.0;
@@ -928,12 +1112,12 @@ class KutuBot : public BasicBot {
                 best.valid = true;
                 best.source = source;
                 best.route = std::move(route);
-                best.sourceArmy = sourceArmy;
-                best.commitArmy = commitArmy;
+                best.sourceArmy = candidate.sourceArmy;
+                best.commitArmy = candidate.commitArmy;
                 best.corridorSupport = support;
                 best.sourceScore = score;
-                best.distance = dist;
-                best.rally = commitArmy + support < need;
+                best.distance = candidate.distance;
+                best.rally = candidate.commitArmy + support < need;
             }
         }
 
@@ -948,7 +1132,23 @@ class KutuBot : public BasicBot {
             FocusMode::ASSAULT, true);
         const army_t pressure =
             plan.commitArmy + plan.corridorSupport / 2;
+        const bool duelAggro = isDuelAggressionProfile();
         if (pressure >= need + 2) return true;
+        if (duelAggro && plan.distance <= 10 && pressure >= need - 2) {
+            return true;
+        }
+        if (duelAggro && enemy >= 0 && knownGenerals[enemy] == plan.objective &&
+            pressure >= need - 3 && largestFriendlyArmyCache >= need) {
+            return true;
+        }
+        if (enemy >= 0 && knownGenerals[enemy] == plan.objective &&
+            plan.distance <= 12 && pressure >= need - 1) {
+            return true;
+        }
+        if (playerCnt <= 2 && fullTurn >= 10 && plan.distance <= 9 &&
+            largestFriendlyArmyCache >= need + 2) {
+            return true;
+        }
         if (enemy >= 0 &&
             (playerArmyDelta[enemy] < -4 || playerLandDelta[enemy] < -1)) {
             return true;
@@ -983,6 +1183,81 @@ class KutuBot : public BasicBot {
         return options;
     }
 
+    std::optional<Move> chooseRallyMove(const FocusPlan& plan,
+                                        FocusMode mode) const {
+        if (!plan.valid || plan.source == Coord{-1, -1}) return std::nullopt;
+
+        CandidateMove best;
+        const size_t corridorLen = std::min<size_t>(plan.route.size(), 3);
+        auto corridorDistance = [&](Coord c) {
+            int bestDist = manhattan(c, plan.source);
+            for (size_t i = 0; i < corridorLen; ++i) {
+                if (board.tileAt(plan.route[i]).occupier != id) continue;
+                bestDist = std::min(bestDist, manhattan(c, plan.route[i]));
+            }
+            return bestDist;
+        };
+
+        for (Coord from : friendlyTilesCache) {
+            const TileView& src = board.tileAt(from);
+            if (src.army <= 1 || from == plan.source) continue;
+
+            const int before = corridorDistance(from);
+            if (before <= 0) continue;
+
+            for (Coord d : kDirs) {
+                Coord to = from + d;
+                if (!inside(to)) continue;
+                const TileView& dst = board.tileAt(to);
+                if (dst.occupier != id) continue;
+                if (shouldBlockOscillation(from, to)) continue;
+
+                const int after = corridorDistance(to);
+                if (after >= before) continue;
+
+                Move move(MoveType::MOVE_ARMY, from, to, false);
+                if (!moveLooksSafe(move)) continue;
+
+                double score =
+                    (src.army - 1) * 12.0 + (before - after) * 34.0;
+                if (to == plan.source) score += 60.0;
+                if (src.type == TILE_CITY) score -= 18.0;
+                if (from == myGeneral) score -= fullTurn < 12 ? 60.0 : 120.0;
+                if (mode == FocusMode::DEFENSE && myGeneral != Coord{-1, -1}) {
+                    score += std::max(
+                        0, manhattan(from, myGeneral) - manhattan(to, myGeneral)) *
+                             18.0;
+                }
+                if (score > best.score) {
+                    best.valid = true;
+                    best.score = score;
+                    best.move = move;
+                }
+            }
+        }
+
+        if (!best.valid) return std::nullopt;
+        return best.move;
+    }
+
+    bool shouldPreferRally(const FocusPlan& plan, FocusMode mode) const {
+        if (!plan.valid || !plan.rally) return false;
+        if (mode == FocusMode::DEFENSE) return true;
+        if (isDuelAggressionProfile()) {
+            if (mode == FocusMode::ASSAULT && plan.distance <= 6) return false;
+            if (mode == FocusMode::CONVERSION && plan.distance <= 5 &&
+                inside(plan.objective)) {
+                const TileView& objectiveTile = board.tileAt(plan.objective);
+                if (objectiveTile.visible && isEnemyTile(objectiveTile)) {
+                    return false;
+                }
+            }
+        }
+        const int mapArea = static_cast<int>(height * width);
+        return plan.distance >= 6 || fullTurn >= 14 ||
+               (mapArea >= 700 && fullTurn >= 8);
+    }
+
     std::optional<Move> chooseMoveForObjectives(
         const std::vector<ObjectiveOption>& options, FocusMode mode,
         bool allowGeneralDive, Coord* chosenObjective = nullptr) {
@@ -993,20 +1268,29 @@ class KutuBot : public BasicBot {
             auto plan =
                 buildFocusPlan(option.target, mode, allowGeneralDive, true);
             if (!plan.has_value()) continue;
-            Move move(MoveType::MOVE_ARMY, plan->source, plan->route.front(),
-                      false);
-            if (!moveLooksSafe(move)) continue;
+
+            std::optional<Move> move;
             double totalScore = option.score + plan->sourceScore;
-            if (plan->rally) {
-                totalScore -=
-                    mode == FocusMode::ASSAULT ? 24.0 : 8.0;
+            if (shouldPreferRally(*plan, mode)) {
+                move = chooseRallyMove(*plan, mode);
+                if (move.has_value()) {
+                    totalScore += mode == FocusMode::ASSAULT ? 8.0 : 12.0;
+                } else {
+                    totalScore -= mode == FocusMode::ASSAULT ? 24.0 : 8.0;
+                }
             } else {
                 totalScore += 12.0;
+            }
+            if (!move.has_value()) {
+                Move directMove(MoveType::MOVE_ARMY, plan->source,
+                                plan->route.front(), false);
+                if (!moveLooksSafe(directMove)) continue;
+                move = directMove;
             }
             if (plan->route.size() <= 4) totalScore += 10.0;
             if (totalScore > bestScore) {
                 bestScore = totalScore;
-                bestMove = move;
+                bestMove = *move;
                 bestObjective = option.target;
             }
         }
@@ -1017,6 +1301,98 @@ class KutuBot : public BasicBot {
         return bestMove;
     }
 
+    std::optional<Move> chooseAggressiveDuelMove(index_t enemy) {
+        if (!isDuelAggressionProfile() || enemy < 0 || fullTurn < 8) {
+            return std::nullopt;
+        }
+
+        const Coord enemyGuess = chooseTargetPlayerGeneral(enemy);
+        const bool visibleEnemy = hasVisibleEnemyPresence(enemy);
+        if (enemyGuess == Coord{-1, -1} && !visibleEnemy) {
+            return std::nullopt;
+        }
+        if (!visibleEnemy && largestFriendlyArmyCache < 9) {
+            return std::nullopt;
+        }
+
+        duelCandidateTouched.clear();
+        auto pushCandidate = [&](Coord target, double score) {
+            if (!inside(target)) return;
+            const TileView& tile = board.tileAt(target);
+            const TileMemory& mem = memory[idx(target)];
+            if (!isPassable(mem.type) || tile.occupier == id) return;
+            if (tile.type == TILE_SWAMP) score -= 45.0;
+            if (myGeneral != Coord{-1, -1}) {
+                score -= manhattan(target, myGeneral) * 0.25;
+            }
+            if (currentObjective == target) score += 18.0;
+            const size_t node = idx(target);
+            if (!duelCandidateMark[node]) {
+                duelCandidateMark[node] = 1;
+                duelCandidateScoreCache[node] = score;
+                duelCandidateTouched.push_back(target);
+            } else {
+                duelCandidateScoreCache[node] =
+                    std::max(duelCandidateScoreCache[node], score);
+            }
+        };
+
+        if (knownGenerals[enemy] != Coord{-1, -1}) {
+            pushCandidate(knownGenerals[enemy], 420.0);
+        }
+        if (enemyGuess != Coord{-1, -1} &&
+            (visibleEnemy || largestFriendlyArmyCache >= 10)) {
+            for (int dx = -4; dx <= 4; ++dx) {
+                for (int dy = -4; dy <= 4; ++dy) {
+                    Coord target{static_cast<pos_t>(enemyGuess.x + dx),
+                                 static_cast<pos_t>(enemyGuess.y + dy)};
+                    const int dist = std::abs(dx) + std::abs(dy);
+                    if (dist > 4) continue;
+                    pushCandidate(target, 160.0 - dist * 20.0);
+                }
+            }
+        }
+
+        for (Coord c : duelEnemyTargetsCache) {
+            const TileView& tile = board.tileAt(c);
+            if (tile.visible && isEnemyTile(tile)) {
+                const army_t enemyArmy = estimatedArmyAt(c);
+                double score = tile.type == TILE_CITY
+                                   ? 320.0 - enemyArmy * 3.2
+                                   : 175.0 +
+                                         std::min<army_t>(enemyArmy, 60) * 1.2;
+                if (largestFriendlyArmyCache >= enemyArmy + 2) {
+                    score += 28.0;
+                }
+                pushCandidate(c, score);
+            } else {
+                pushCandidate(c, 130.0);
+            }
+        }
+        for (Coord fog : duelFrontierFogCache) {
+            pushCandidate(fog, 110.0);
+        }
+
+        std::vector<ObjectiveOption> options;
+        options.reserve(std::min<size_t>(12, duelCandidateTouched.size()));
+        for (Coord c : duelCandidateTouched) {
+            const size_t node = idx(c);
+            const double score = duelCandidateScoreCache[node];
+            if (score > -1e90) options.push_back(ObjectiveOption{c, score});
+            duelCandidateMark[node] = 0;
+            duelCandidateScoreCache[node] = -1e100;
+        }
+        duelCandidateTouched.clear();
+        std::sort(options.begin(), options.end(),
+                  [](const ObjectiveOption& lhs, const ObjectiveOption& rhs) {
+                      return lhs.score > rhs.score;
+                  });
+        if (static_cast<int>(options.size()) > 3) options.resize(3);
+
+        if (options.empty()) return std::nullopt;
+        return chooseMoveForObjectives(options, FocusMode::ASSAULT, true);
+    }
+
     std::optional<Move> chooseDefensiveMove(index_t enemy) {
         if (enemy < 0 || myGeneral == Coord{-1, -1} || fullTurn < 6) {
             return std::nullopt;
@@ -1024,14 +1400,19 @@ class KutuBot : public BasicBot {
 
         auto threat = analyzeThreat(enemy);
         if (!threat.has_value()) return std::nullopt;
+        const bool duelAggro = isDuelAggressionProfile();
+        const army_t generalArmy = board.tileAt(myGeneral).army;
         const bool urgentGeneral =
             threat->target == myGeneral &&
-            (threat->route.size() <= 5 ||
-             threat->army >= board.tileAt(myGeneral).army + 2);
+            (threat->route.size() <= (duelAggro ? 4 : 5) ||
+             threat->army >= generalArmy + (duelAggro ? 1 : 2));
         const bool urgentCity =
-            threat->target != myGeneral && threat->route.size() <= 4 &&
+            threat->target != myGeneral &&
+            (duelAggro ? isCoreOwnedCity(threat->target) : true) &&
+            threat->route.size() <= (duelAggro ? 3 : 4) &&
             threat->army >= estimatedArmyAt(threat->target);
         if (!urgentGeneral && !urgentCity) return std::nullopt;
+        const Coord enemyFocus = chooseTargetPlayerGeneral(enemy);
 
         for (Coord d : kDirs) {
             Coord adj = threat->enemy + d;
@@ -1039,6 +1420,10 @@ class KutuBot : public BasicBot {
             const TileView& tile = board.tileAt(adj);
             if (tile.occupier != id || tile.army <= threat->army + 1) continue;
             Move move(MoveType::MOVE_ARMY, adj, threat->enemy, false);
+            if (duelAggro && !urgentGeneral &&
+                pullsStrongestStackAwayFrom(enemyFocus, move)) {
+                continue;
+            }
             if (moveLooksSafe(move)) return move;
         }
 
@@ -1056,7 +1441,12 @@ class KutuBot : public BasicBot {
         if (inside(threat->enemy)) {
             objectives.push_back(ObjectiveOption{threat->enemy, 132.0});
         }
-        return chooseMoveForObjectives(objectives, FocusMode::DEFENSE, true);
+        auto move = chooseMoveForObjectives(objectives, FocusMode::DEFENSE, true);
+        if (move.has_value() && duelAggro && !urgentGeneral &&
+            pullsStrongestStackAwayFrom(enemyFocus, *move)) {
+            return std::nullopt;
+        }
+        return move;
     }
 
     bool canCommitToCity(Coord city, const FocusPlan& plan) const {
@@ -1075,6 +1465,7 @@ class KutuBot : public BasicBot {
         }
 
         const int mapArea = static_cast<int>(height * width);
+        const bool duelAggro = isDuelAggressionProfile() && fullTurn >= 8;
         const auto path = weightedPath(source, [&](Coord c) {
             int cost = attackPenalty(c, true);
             if (memory[idx(c)].type == TILE_SWAMP && fullTurn < 24) cost += 25;
@@ -1091,15 +1482,16 @@ class KutuBot : public BasicBot {
             for (pos_t y = 1; y <= width; ++y) {
                 Coord target{x, y};
                 const TileView& tile = board.tileAt(target);
+                const TileMemory& mem = memory[idx(target)];
                 if (!isPassable(memory[idx(target)].type) || tile.occupier == id) {
                     continue;
                 }
                 if (path.distance(idx(target)) >= kInf) continue;
                 double score = -path.distance(idx(target)) * 9.0;
                 score -= manhattan(target, Coord{cx, cy}) * 1.7;
-                if (!memory[idx(target)].everSeen) score += 80.0;
-                if (!tile.visible) score += 30.0;
-                if (tile.occupier == enemy) score += 55.0;
+                if (!mem.everSeen) score += duelAggro ? 42.0 : 80.0;
+                if (!tile.visible) score += duelAggro ? 12.0 : 30.0;
+                if (tile.occupier == enemy) score += duelAggro ? 82.0 : 55.0;
                 if (tile.type == TILE_CITY) {
                     score += 260.0 - estimatedArmyAt(target) * 3.5;
                     if (mapArea > 700 && fullTurn < 18) score -= 120.0;
@@ -1108,13 +1500,27 @@ class KutuBot : public BasicBot {
                     score -= 50.0;
                 } else if (isEnemyTile(tile) && fullTurn < 10 &&
                            estimatedArmyAt(target) > 1) {
-                    score -= 75.0;
+                    score -= duelAggro ? 20.0 : 75.0;
                 } else {
-                    score += 24.0;
+                    score += duelAggro ? 8.0 : 24.0;
                 }
                 if (enemyGuess != Coord{-1, -1}) {
                     score +=
                         std::max(0.0, 36.0 - manhattan(target, enemyGuess) * 1.1);
+                }
+                if (duelAggro) {
+                    if (isEnemyTile(tile)) score += 48.0;
+                    if (enemyGuess != Coord{-1, -1} &&
+                        manhattan(target, enemyGuess) <= 4) {
+                        score += std::max(
+                            0.0, 26.0 - manhattan(target, enemyGuess) * 4.0);
+                    }
+                    const bool remoteNeutral =
+                        tile.occupier == -1 && !isEnemyOccupier(mem.occupier) &&
+                        tile.type != TILE_CITY &&
+                        (enemyGuess == Coord{-1, -1} ||
+                         manhattan(target, enemyGuess) > 4);
+                    if (remoteNeutral) score -= tile.visible ? 15.0 : 22.0;
                 }
                 if (myGeneral != Coord{-1, -1} && fullTurn < 10) {
                     score += std::max(
@@ -1140,6 +1546,7 @@ class KutuBot : public BasicBot {
         const int mapArea = static_cast<int>(height * width);
         const Coord enemyGuess = chooseTargetPlayerGeneral(enemy);
         const bool conversion = isConversionMode(enemy);
+        const bool duelAggro = isDuelAggressionProfile() && fullTurn >= 8;
         if (fullTurn < 10 || friendlyTilesCache.size() <= 6) {
             if (auto simple = chooseSimpleEconomicMove(enemy)) return simple;
         }
@@ -1149,9 +1556,15 @@ class KutuBot : public BasicBot {
                 const TileMemory& mem = memory[idx(target)];
                 if (!isPassable(mem.type) || tile.occupier == id) return -1e100;
                 double score = 0.0;
-                if (!mem.everSeen) score += conversion ? 20.0 : 75.0;
-                if (!tile.visible) score += conversion ? 6.0 : 26.0;
-                if (tile.occupier == enemy) score += conversion ? 80.0 : 52.0;
+                if (!mem.everSeen) {
+                    score += conversion ? 20.0 : (duelAggro ? 38.0 : 75.0);
+                }
+                if (!tile.visible) {
+                    score += conversion ? 6.0 : (duelAggro ? 10.0 : 26.0);
+                }
+                if (tile.occupier == enemy) {
+                    score += conversion ? 80.0 : (duelAggro ? 96.0 : 52.0);
+                }
                 if (tile.type == TILE_CITY) {
                     score += 240.0 - estimatedArmyAt(target) * 3.3;
                     if (mapArea > 700 && fullTurn < 18) score -= 90.0;
@@ -1159,15 +1572,30 @@ class KutuBot : public BasicBot {
                 } else if (tile.type == TILE_SWAMP) {
                     score -= conversion ? 18.0 : 50.0;
                 } else if (isEnemyTile(tile)) {
-                    score += conversion ? 110.0 : 38.0;
-                    if (fullTurn < 10 && estimatedArmyAt(target) > 1) score -= 70.0;
+                    score += conversion ? 110.0 : (duelAggro ? 92.0 : 38.0);
+                    if (fullTurn < 10 && estimatedArmyAt(target) > 1) {
+                        score -= duelAggro ? 18.0 : 70.0;
+                    }
                 } else {
-                    score += conversion ? 10.0 : 22.0;
+                    score += conversion ? 10.0 : (duelAggro ? 4.0 : 22.0);
                 }
                 if (enemyGuess != Coord{-1, -1}) {
                     score += std::max(0.0,
                                       (conversion ? 42.0 : 32.0) -
                                           manhattan(target, enemyGuess) * 1.2);
+                }
+                if (duelAggro) {
+                    if (enemyGuess != Coord{-1, -1} &&
+                        manhattan(target, enemyGuess) <= 4) {
+                        score += std::max(
+                            0.0, 28.0 - manhattan(target, enemyGuess) * 4.0);
+                    }
+                    const bool remoteNeutral =
+                        tile.occupier == -1 && !isEnemyOccupier(mem.occupier) &&
+                        tile.type != TILE_CITY &&
+                        (enemyGuess == Coord{-1, -1} ||
+                         manhattan(target, enemyGuess) > 4);
+                    if (remoteNeutral) score -= tile.visible ? 16.0 : 22.0;
                 }
                 if (myGeneral != Coord{-1, -1}) {
                     score -= manhattan(target, myGeneral) * (conversion ? 0.15 : 0.4);
@@ -1178,7 +1606,8 @@ class KutuBot : public BasicBot {
                 }
                 return score;
             },
-            8);
+            objectiveOptionLimit(conversion ? FocusMode::CONVERSION
+                                            : FocusMode::ECONOMY));
 
         std::optional<Move> bestMove;
         double bestScore = -1e100;
@@ -1193,15 +1622,31 @@ class KutuBot : public BasicBot {
                 !canCommitToCity(option.target, *plan)) {
                 continue;
             }
-            Move move(MoveType::MOVE_ARMY, plan->source, plan->route.front(),
-                      false);
-            if (!moveLooksSafe(move)) continue;
+
+            std::optional<Move> move;
             double score = option.score + plan->sourceScore;
             if (memory[idx(option.target)].type == TILE_CITY) score += 15.0;
-            if (plan->rally) score -= conversion ? 2.0 : 8.0;
+            if (shouldPreferRally(*plan,
+                                  conversion ? FocusMode::CONVERSION
+                                             : FocusMode::ECONOMY)) {
+                move = chooseRallyMove(
+                    *plan, conversion ? FocusMode::CONVERSION
+                                      : FocusMode::ECONOMY);
+                if (move.has_value()) {
+                    score += conversion ? 4.0 : 10.0;
+                } else {
+                    score -= conversion ? 2.0 : 8.0;
+                }
+            }
+            if (!move.has_value()) {
+                Move directMove(MoveType::MOVE_ARMY, plan->source,
+                                plan->route.front(), false);
+                if (!moveLooksSafe(directMove)) continue;
+                move = directMove;
+            }
             if (score > bestScore) {
                 bestScore = score;
-                bestMove = move;
+                bestMove = *move;
                 bestObjective = option.target;
             }
         }
@@ -1215,14 +1660,27 @@ class KutuBot : public BasicBot {
     std::optional<Move> chooseObjectiveMove(index_t enemy, Coord objective,
                                             bool launchMode) {
         if (objective == Coord{-1, -1}) return std::nullopt;
-        auto plan = buildFocusPlan(
-            objective,
+        const FocusMode mode =
             isConversionMode(enemy) && !launchMode ? FocusMode::CONVERSION
-                                                   : FocusMode::ASSAULT,
-            true, true);
+                                                   : FocusMode::ASSAULT;
+        auto plan = buildFocusPlan(
+            objective, mode, true, true);
         if (!plan.has_value()) return std::nullopt;
-        Move move(MoveType::MOVE_ARMY, plan->source, plan->route.front(), false);
-        if (!moveLooksSafe(move)) return std::nullopt;
+
+        std::optional<Move> move;
+        const army_t need = estimateObjectiveNeed(
+            objective, static_cast<int>(plan->route.size()), mode, true);
+        const bool duelDirectNow =
+            isDuelAggressionProfile() && plan->commitArmy >= need - 2;
+        if (!launchMode && !duelDirectNow && shouldPreferRally(*plan, mode)) {
+            move = chooseRallyMove(*plan, mode);
+        }
+        if (!move.has_value()) {
+            Move directMove(MoveType::MOVE_ARMY, plan->source, plan->route.front(),
+                            false);
+            if (!moveLooksSafe(directMove)) return std::nullopt;
+            move = directMove;
+        }
         currentObjective = objective;
         return move;
     }
@@ -1230,6 +1688,7 @@ class KutuBot : public BasicBot {
     Coord chooseExpansionTarget(index_t enemy) {
         Coord enemyGuess = chooseTargetPlayerGeneral(enemy);
         const bool conversion = isConversionMode(enemy);
+        const bool duelAggro = isDuelAggressionProfile() && fullTurn >= 8;
         double bestScore = -1e100;
         Coord best{-1, -1};
         for (pos_t x = 1; x <= height; ++x) {
@@ -1239,22 +1698,38 @@ class KutuBot : public BasicBot {
                 const TileMemory& mem = memory[idx(c)];
                 if (!isPassable(mem.type) || tile.occupier == id) continue;
                 double score = 0.0;
-                if (!mem.everSeen) score += conversion ? 18.0 : 85.0;
-                if (!tile.visible) score += conversion ? 8.0 : 25.0;
+                if (!mem.everSeen) {
+                    score += conversion ? 18.0 : (duelAggro ? 46.0 : 85.0);
+                }
+                if (!tile.visible) {
+                    score += conversion ? 8.0 : (duelAggro ? 8.0 : 25.0);
+                }
                 if (tile.type == TILE_CITY) {
                     score += 190.0 - estimatedArmyAt(c) * 3.0;
                 } else if (tile.type == TILE_SWAMP) {
                     score -= conversion ? 15.0 : 40.0;
                 } else if (isEnemyTile(tile)) {
-                    score += conversion ? 125.0 : 90.0;
+                    score += conversion ? 125.0 : (duelAggro ? 138.0 : 90.0);
                     score += estimatedArmyAt(c) * 0.25;
                 } else {
-                    score += conversion ? 10.0 : 18.0;
+                    score += conversion ? 10.0 : (duelAggro ? 4.0 : 18.0);
                 }
                 if (enemyGuess != Coord{-1, -1}) {
                     score += std::max(0.0,
                                       (conversion ? 55.0 : 44.0) -
                                           manhattan(c, enemyGuess) * 1.4);
+                }
+                if (duelAggro) {
+                    if (enemyGuess != Coord{-1, -1} && manhattan(c, enemyGuess) <= 4) {
+                        score += std::max(0.0,
+                                          24.0 - manhattan(c, enemyGuess) * 4.0);
+                    }
+                    const bool remoteNeutral =
+                        tile.occupier == -1 && !isEnemyOccupier(mem.occupier) &&
+                        tile.type != TILE_CITY &&
+                        (enemyGuess == Coord{-1, -1} ||
+                         manhattan(c, enemyGuess) > 4);
+                    if (remoteNeutral) score -= tile.visible ? 18.0 : 24.0;
                 }
                 if (myGeneral != Coord{-1, -1}) {
                     score -= manhattan(c, myGeneral) * (conversion ? 0.2 : 0.5);
@@ -1302,6 +1777,8 @@ class KutuBot : public BasicBot {
 
     std::optional<Move> selectStrategicMove() {
         index_t enemy = chooseLockedEnemy(chooseEnemyPlayer());
+        const bool duelAggro = isDuelAggressionProfile();
+        const Coord enemyGeneral = chooseTargetPlayerGeneral(enemy);
         CandidateMove direct = chooseDirectCaptureMove(enemy);
         if (direct.valid && moveLooksSafe(direct.move)) {
             const TileView& target = board.tileAt(direct.move.to);
@@ -1316,14 +1793,28 @@ class KutuBot : public BasicBot {
 
         if (auto defense = chooseDefensiveMove(enemy)) return defense;
 
+        if (auto duelAttack = chooseAggressiveDuelMove(enemy)) return duelAttack;
+
         const int mapArea = static_cast<int>(height * width);
-        const int econWindow =
-            mapArea <= 200 ? 14 : (mapArea >= 700 ? 20 : 16);
-        if (fullTurn < econWindow || isConversionMode(enemy)) {
+        int econWindow = mapArea <= 200 ? 13 : (mapArea >= 700 ? 18 : 15);
+        if (duelAggro) {
+            econWindow =
+                (!hasVisibleEnemyPresence(enemy) && enemyGeneral == Coord{-1, -1})
+                    ? 10
+                    : 8;
+        } else {
+            if (playerCnt <= 2) econWindow = std::max(10, econWindow - 2);
+            if (largestFriendlyArmyCache >= 18) {
+                econWindow = std::max(10, econWindow - 2);
+            }
+        }
+        const bool bypassEarlyEconomy = shouldBypassEarlyEconomy(enemy, enemyGeneral);
+        if (((fullTurn < econWindow && !bypassEarlyEconomy) ||
+             isConversionMode(enemy)) &&
+            !(duelAggro && bypassEarlyEconomy && !isConversionMode(enemy))) {
             if (auto eco = chooseEconomicMove(enemy)) return eco;
         }
 
-        Coord enemyGeneral = chooseTargetPlayerGeneral(enemy);
         if (enemyGeneral != Coord{-1, -1}) {
             auto assaultPlan =
                 buildFocusPlan(enemyGeneral, FocusMode::ASSAULT, true, true);
@@ -1390,6 +1881,16 @@ class KutuBot : public BasicBot {
 
         friendlyTilesCache.clear();
         ownedCitiesCache.clear();
+        duelEnemyTargetsCache.clear();
+        duelFrontierFogCache.clear();
+        visibleEnemyCountByPlayer.assign(playerCnt, 0);
+        duelFogMark.assign(total, 0);
+        duelEnemyTargetsCache.reserve(total);
+        duelFrontierFogCache.reserve(total);
+        duelCandidateScoreCache.assign(total, -1e100);
+        duelCandidateMark.assign(total, 0);
+        duelCandidateTouched.clear();
+        duelCandidateTouched.reserve(total);
         largestFriendlyArmyCache = 0;
         myGeneral = Coord{-1, -1};
         currentObjective = Coord{-1, -1};

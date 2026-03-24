@@ -174,7 +174,7 @@ struct RankItem {
     army_t army = 0;
     pos_t land = 0;
     bool alive = false;
-    turn_t surrLeft = -1;
+    turn_t surrLeft = static_cast<turn_t>(-1);
 };
 
 /// Move priority categories (based on generals.io priority system).

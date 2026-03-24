@@ -1,8 +1,10 @@
 #include <algorithm>
 #include <atomic>
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <mutex>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -21,6 +23,8 @@ struct Options {
     int maxSteps = 600;
     int threads = 0;
     bool remainIndex = true;
+    bool hasSeedBase = false;
+    std::uint64_t seedBase = 0;
     std::vector<std::string> bots = {"XiaruizeBot", "GcBot"};
 };
 
@@ -40,11 +44,34 @@ struct GameResult {
     std::vector<BotStats> statsDelta;
 };
 
+struct BotSeedScope {
+    explicit BotSeedScope(const std::optional<std::uint64_t>& seed) {
+        if (seed.has_value()) {
+            bot_random::beginDeterministicSeeds(*seed);
+            active = true;
+        }
+    }
+
+    ~BotSeedScope() {
+        if (active) bot_random::endDeterministicSeeds();
+    }
+
+    bool active = false;
+};
+
 bool parsePositiveInt(const char* text, int& value) {
     char* end = nullptr;
     long parsed = std::strtol(text, &end, 10);
     if (end == text || *end != '\0' || parsed <= 0) return false;
     value = static_cast<int>(parsed);
+    return true;
+}
+
+bool parsePositiveUInt64(const char* text, std::uint64_t& value) {
+    char* end = nullptr;
+    unsigned long long parsed = std::strtoull(text, &end, 10);
+    if (end == text || *end != '\0' || parsed == 0) return false;
+    value = static_cast<std::uint64_t>(parsed);
     return true;
 }
 
@@ -57,6 +84,7 @@ void printUsage() {
         << "  --threads N        CPU worker threads (default: auto)\n"
         << "  --steps N          Maximum half-turn steps per game (default: "
            "600)\n"
+        << "  --seed-base N      Reproducible base seed for generated maps\n"
         << "  --shuffle          Randomize player index mapping in simulator\n"
         << "  --bots A B ...     Bot names to simulate (default: XiaruizeBot "
            "GcBot)\n";
@@ -80,6 +108,10 @@ bool parseArgs(int argc, char** argv, Options& options) {
                 options.threads = value;
             else
                 options.maxSteps = value;
+        } else if (arg == "--seed-base") {
+            if (i + 1 >= argc) return false;
+            if (!parsePositiveUInt64(argv[++i], options.seedBase)) return false;
+            options.hasSeedBase = true;
         } else if (arg == "--shuffle") {
             options.remainIndex = false;
         } else if (arg == "--bots") {
@@ -123,7 +155,17 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
     result.gameNumber = gameNumber;
     result.statsDelta.resize(options.bots.size());
 
-    Board board = Board::generate(options.width, options.height);
+    const std::optional<std::uint64_t> gameSeed =
+        options.hasSeedBase
+            ? std::optional<std::uint64_t>(
+                  options.seedBase +
+                  static_cast<std::uint64_t>(gameNumber - 1))
+            : std::nullopt;
+    Board board = gameSeed.has_value()
+                      ? Board::generate(options.width, options.height,
+                                        *gameSeed)
+                      : Board::generate(options.width, options.height);
+    BotSeedScope botSeedScope(gameSeed);
 
     std::vector<Player*> players;
     std::vector<index_t> teams;
@@ -146,7 +188,7 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
         names.push_back(botName);
     }
 
-    BasicGame game(options.remainIndex, players, teams, names, board);
+    BasicGame game(options.remainIndex, players, teams, names, board, gameSeed);
     const int initResult = game.init();
     if (initResult != 0) {
         std::ostringstream err;

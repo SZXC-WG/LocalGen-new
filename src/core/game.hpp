@@ -342,7 +342,7 @@ class BasicGame {
     BasicGame() = delete;
     BasicGame(bool remainIndex, std::vector<Player*> _players,
               std::vector<index_t> _teams, std::vector<std::string> name,
-              Board _board);
+              Board _board, std::optional<std::uint64_t> seed = std::nullopt);
     ~BasicGame();
 
    public:
@@ -441,8 +441,16 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
 
 inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
                             std::vector<index_t> _teams,
-                            std::vector<std::string> name, Board _board)
-    : initialBoard(_board),
+                            std::vector<std::string> name, Board _board,
+                            std::optional<std::uint64_t> seed)
+    : rng([&seed]() {
+          if (!seed.has_value()) return std::mt19937(std::random_device{}());
+          std::seed_seq seedSeq{
+              static_cast<std::uint32_t>(*seed),
+              static_cast<std::uint32_t>(*seed >> 32U)};
+          return std::mt19937(seedSeq);
+      }()),
+      initialBoard(_board),
       players(_players.size()),
       playerViews(_players.size()),
       names(_players.size()),

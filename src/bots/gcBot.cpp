@@ -176,7 +176,7 @@ class GcBot : public BasicBot {
     }
 
    public:
-    GcBot() : rnd(std::random_device{}()) {}
+    GcBot() : rnd(bot_random::makeBotRng(0x4763426FULL)) {}
 
     void init(index_t playerId, const GameConstantsPack& constants) override {
         id = playerId;

@@ -320,7 +320,7 @@ class XiaruizeBot : public BasicBot {
     }
 
    public:
-    XiaruizeBot() : rnd(std::random_device{}()) {}
+    XiaruizeBot() : rnd(bot_random::makeBotRng(0x58696152ULL)) {}
 
     void init(index_t playerId, const GameConstantsPack& constants) override {
         id = playerId;

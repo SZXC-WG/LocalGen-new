@@ -1,7 +1,8 @@
 /**
  * @file zlyBot.cpp
  *
- * Legacy `zlyBot` from LocalGen v5.
+ * ZlyBot from LocalGen v5.
+ * Author: AppOfficer
  *
  * @copyright Copyright (c) SZXC Work Group.
  */

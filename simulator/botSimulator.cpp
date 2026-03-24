@@ -1,3 +1,12 @@
+/**
+ * @file botSimulator.cpp
+ *
+ * LocalGen Bot Simulator
+ * Lightweight CLI for bot-vs-bot evaluation.
+ *
+ * @copyright Copyright (c) SZXC Work Group.
+ */
+
 #include <algorithm>
 #include <atomic>
 #include <cmath>
@@ -127,10 +136,11 @@ void printTableRow(const TableRow& row, const std::vector<std::size_t>& widths,
     std::cout << '\n';
 }
 
-void printSummaryTable(const Options& options, const std::vector<BotStats>& stats) {
-    const TableRow header = {"Bot",      "Wins",    "Win Rate", "95% CI",
+void printSummaryTable(const Options& options,
+                       const std::vector<BotStats>& stats) {
+    const TableRow header = {"Bot",      "Wins",     "Win Rate", "95% CI",
                              "Avg Rank", "Survived", "Avg Army", "Avg Land"};
-    const std::vector<bool> leftAligned = {true, false, false, true,
+    const std::vector<bool> leftAligned = {true,  false, false, true,
                                            false, false, false, false};
 
     std::vector<SummaryRow> rows;

@@ -1,7 +1,8 @@
 /**
  * @file xrzBot.cpp
  *
- * Legacy xrzBot from LocalGen v5.
+ * XrzBot from LocalGen v5.
+ * Author: xiaruize0911
  *
  * @copyright Copyright (c) SZXC Work Group.
  */

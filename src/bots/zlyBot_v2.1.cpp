@@ -1,7 +1,8 @@
 /**
  * @file zlyBot_v2.1.cpp
  *
- * ZlyBot v2.1 from LocalGen v5.
+ * ZlyBot v2.1
+ * Author: AppOfficer
  *
  * @copyright Copyright (c) SZXC Work Group.
  */

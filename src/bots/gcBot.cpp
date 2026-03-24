@@ -264,12 +264,11 @@ class GcBot : public BasicBot {
             return;
         }
 
-        blockTypeValue[0] = 55 + static_cast<value_t>(std::pow(turn, 0.2));
-        blockTypeValue[1] = -500 * static_cast<value_t>(std::pow(turn, -0.1));
-        blockTypeValue[4] =
-            28 * static_cast<value_t>(std::pow(turn - 12, 0.15));
-        blockTypeValue[5] =
-            35 + 15 * static_cast<value_t>(std::pow(turn, 0.15));
+        const double armyStrength = std::log(rank[id].army + 1.0);
+        blockTypeValue[0] = 55 - static_cast<value_t>(5 * armyStrength);
+        blockTypeValue[1] = -500 + static_cast<value_t>(50 * armyStrength);
+        blockTypeValue[4] = static_cast<value_t>(armyStrength * armyStrength);
+        blockTypeValue[5] = 35 + static_cast<value_t>(4 * armyStrength);
 
         Coord coo = lastPos;
         if (!isValidPosition(coo.x, coo.y) ||
@@ -310,7 +309,8 @@ class GcBot : public BasicBot {
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
                     if (blockType[idx(i, j)] == 0 &&
-                        !knownBlockType[idx(i, j)] && dist[idx(i, j)] < 500) {
+                        !knownBlockType[idx(i, j)] && dist[idx(i, j)] < 500 &&
+                        eval[idx(i, j)] > -100) {
                         unknownPlains.emplace_back(dist[idx(i, j)],
                                                    Coord(i, j));
                     }

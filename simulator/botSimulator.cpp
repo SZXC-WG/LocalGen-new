@@ -48,6 +48,13 @@ struct WinRateSummary {
     double upperBound = 0.0;
 };
 
+using TableRow = std::vector<std::string>;
+
+struct SummaryRow {
+    int wins = 0;
+    TableRow cells;
+};
+
 bool parsePositiveInt(const char* text, int& value) {
     char* end = nullptr;
     long parsed = std::strtol(text, &end, 10);
@@ -82,6 +89,100 @@ std::string formatPercent(double value) {
     out << std::fixed << std::setprecision(2)
         << std::clamp(value, 0.0, 1.0) * 100.0 << '%';
     return out.str();
+}
+
+std::string alignTextRight(const std::string& text, std::size_t width) {
+    std::ostringstream out;
+    out << std::right << std::setw(static_cast<int>(width)) << text;
+    return out.str();
+}
+
+std::string formatFixed(double value) {
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(2) << value;
+    return out.str();
+}
+
+void printTableDivider(const std::vector<std::size_t>& widths) {
+    std::cout << '+';
+    for (std::size_t width : widths) {
+        std::cout << std::string(width + 2, '-') << '+';
+    }
+    std::cout << '\n';
+}
+
+void printTableRow(const TableRow& row, const std::vector<std::size_t>& widths,
+                   const std::vector<bool>& leftAligned) {
+    std::cout << '|';
+    for (std::size_t i = 0; i < row.size(); ++i) {
+        std::cout << ' ';
+        if (leftAligned[i]) {
+            std::cout << std::left;
+        } else {
+            std::cout << std::right;
+        }
+        std::cout << std::setw(static_cast<int>(widths[i])) << row[i] << " |";
+    }
+    std::cout << std::left;
+    std::cout << '\n';
+}
+
+void printSummaryTable(const Options& options, const std::vector<BotStats>& stats) {
+    const TableRow header = {"Bot",      "Wins",    "Win Rate", "95% CI",
+                             "Podiums",  "Survived", "Avg Army", "Avg Land"};
+    const std::vector<bool> leftAligned = {true, false, false, true,
+                                           false, false, false, false};
+
+    std::vector<SummaryRow> rows;
+    rows.reserve(options.bots.size());
+    for (std::size_t i = 0; i < options.bots.size(); ++i) {
+        const BotStats& botStats = stats[i];
+        const WinRateSummary winRate =
+            calculateWinRateSummary(botStats.wins, options.games);
+        const std::string lowerBound =
+            alignTextRight(formatPercent(winRate.lowerBound), 7);
+        const std::string upperBound =
+            alignTextRight(formatPercent(winRate.upperBound), 7);
+
+        rows.push_back({
+            botStats.wins,
+            {
+                options.bots[i],
+                std::to_string(botStats.wins),
+                formatPercent(winRate.rate),
+                "[" + lowerBound + ", " + upperBound + "]",
+                std::to_string(botStats.podiums),
+                std::to_string(botStats.survivalCount),
+                formatFixed(static_cast<double>(botStats.totalArmy) /
+                            options.games),
+                formatFixed(static_cast<double>(botStats.totalLand) /
+                            options.games),
+            },
+        });
+    }
+
+    std::stable_sort(rows.begin(), rows.end(),
+                     [](const SummaryRow& lhs, const SummaryRow& rhs) {
+                         return lhs.wins > rhs.wins;
+                     });
+
+    std::vector<std::size_t> widths(header.size(), 0);
+    for (std::size_t i = 0; i < header.size(); ++i) {
+        widths[i] = header[i].size();
+    }
+    for (const SummaryRow& row : rows) {
+        for (std::size_t i = 0; i < row.cells.size(); ++i) {
+            widths[i] = std::max(widths[i], row.cells[i].size());
+        }
+    }
+
+    printTableDivider(widths);
+    printTableRow(header, widths, std::vector<bool>(header.size(), true));
+    printTableDivider(widths);
+    for (const SummaryRow& row : rows) {
+        printTableRow(row.cells, widths, leftAligned);
+    }
+    printTableDivider(widths);
 }
 
 void printUsage() {
@@ -346,21 +447,7 @@ int main(int argc, char** argv) {
     }
 
     std::cout << "\nSummary\n";
-    for (std::size_t i = 0; i < options.bots.size(); ++i) {
-        const BotStats& botStats = stats[i];
-        const WinRateSummary winRate =
-            calculateWinRateSummary(botStats.wins, options.games);
-        std::cout << "- " << options.bots[i] << ": wins=" << botStats.wins
-                  << ", winRate=" << formatPercent(winRate.rate)
-                  << ", win95CI=[" << formatPercent(winRate.lowerBound) << ", "
-                  << formatPercent(winRate.upperBound) << ']'
-                  << ", podiums=" << botStats.podiums
-                  << ", survived=" << botStats.survivalCount << ", avgArmy="
-                  << static_cast<double>(botStats.totalArmy) / options.games
-                  << ", avgLand="
-                  << static_cast<double>(botStats.totalLand) / options.games
-                  << '\n';
-    }
+    printSummaryTable(options, stats);
 
     return 0;
 }

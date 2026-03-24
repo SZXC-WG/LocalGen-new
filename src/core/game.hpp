@@ -174,7 +174,7 @@ struct RankItem {
     army_t army = 0;
     pos_t land = 0;
     bool alive = false;
-    turn_t surrLeft = -1;
+    turn_t surrLeft = static_cast<turn_t>(-1);
 };
 
 /// Move priority categories (based on generals.io priority system).
@@ -342,7 +342,7 @@ class BasicGame {
     BasicGame() = delete;
     BasicGame(bool remainIndex, std::vector<Player*> _players,
               std::vector<index_t> _teams, std::vector<std::string> name,
-              Board _board, std::optional<std::uint64_t> seed = std::nullopt);
+              Board _board);
     ~BasicGame();
 
    public:
@@ -441,16 +441,8 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
 
 inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
                             std::vector<index_t> _teams,
-                            std::vector<std::string> name, Board _board,
-                            std::optional<std::uint64_t> seed)
-    : rng([&seed]() {
-          if (!seed.has_value()) return std::mt19937(std::random_device{}());
-          std::seed_seq seedSeq{
-              static_cast<std::uint32_t>(*seed),
-              static_cast<std::uint32_t>(*seed >> 32U)};
-          return std::mt19937(seedSeq);
-      }()),
-      initialBoard(_board),
+                            std::vector<std::string> name, Board _board)
+    : initialBoard(_board),
       players(_players.size()),
       playerViews(_players.size()),
       names(_players.size()),

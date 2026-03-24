@@ -15,7 +15,6 @@ find_package(Qt6 6.7 REQUIRED COMPONENTS Widgets Svg Network)
 set(LOCALGEN_BOT_SOURCES
     src/bots/smartRandomBot.cpp
     src/bots/xiaruizeBot.cpp
-    src/bots/xrzBot.cpp
     src/bots/szlyBot.cpp
     src/bots/zlyBot.cpp
     src/bots/zlyBot_v2.cpp

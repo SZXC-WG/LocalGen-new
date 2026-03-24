@@ -1,10 +1,10 @@
 #include <algorithm>
 #include <atomic>
-#include <cstdint>
+#include <cmath>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <mutex>
-#include <optional>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -23,15 +23,13 @@ struct Options {
     int maxSteps = 600;
     int threads = 0;
     bool remainIndex = true;
-    bool hasSeedBase = false;
-    std::uint64_t seedBase = 0;
     std::vector<std::string> bots = {"XiaruizeBot", "GcBot"};
 };
 
 struct BotStats {
     int wins = 0;
-    int podiums = 0;
     int survivalCount = 0;
+    long long totalRank = 0;
     long long totalArmy = 0;
     long long totalLand = 0;
 };
@@ -44,19 +42,17 @@ struct GameResult {
     std::vector<BotStats> statsDelta;
 };
 
-struct BotSeedScope {
-    explicit BotSeedScope(const std::optional<std::uint64_t>& seed) {
-        if (seed.has_value()) {
-            bot_random::beginDeterministicSeeds(*seed);
-            active = true;
-        }
-    }
+struct WinRateSummary {
+    double rate = 0.0;
+    double lowerBound = 0.0;
+    double upperBound = 0.0;
+};
 
-    ~BotSeedScope() {
-        if (active) bot_random::endDeterministicSeeds();
-    }
+using TableRow = std::vector<std::string>;
 
-    bool active = false;
+struct SummaryRow {
+    int wins = 0;
+    TableRow cells;
 };
 
 bool parsePositiveInt(const char* text, int& value) {
@@ -67,12 +63,127 @@ bool parsePositiveInt(const char* text, int& value) {
     return true;
 }
 
-bool parsePositiveUInt64(const char* text, std::uint64_t& value) {
-    char* end = nullptr;
-    unsigned long long parsed = std::strtoull(text, &end, 10);
-    if (end == text || *end != '\0' || parsed == 0) return false;
-    value = static_cast<std::uint64_t>(parsed);
-    return true;
+WinRateSummary calculateWinRateSummary(int wins, int totalGames) {
+    if (totalGames <= 0) return {};
+
+    constexpr double kWilsonZ95 = 1.959963984540054;
+    constexpr double z2 = kWilsonZ95 * kWilsonZ95;
+
+    const double n = static_cast<double>(totalGames);
+    const double p = static_cast<double>(wins) / n;
+    const double denominator = 1.0 + z2 / n;
+    const double center = (p + z2 / (2.0 * n)) / denominator;
+    const double margin = kWilsonZ95 *
+                          std::sqrt((p * (1.0 - p) + z2 / (4.0 * n)) / n) /
+                          denominator;
+
+    return {
+        p,
+        std::clamp(center - margin, 0.0, 1.0),
+        std::clamp(center + margin, 0.0, 1.0),
+    };
+}
+
+std::string formatPercent(double value) {
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(2)
+        << std::clamp(value, 0.0, 1.0) * 100.0 << '%';
+    return out.str();
+}
+
+std::string alignTextRight(const std::string& text, std::size_t width) {
+    std::ostringstream out;
+    out << std::right << std::setw(static_cast<int>(width)) << text;
+    return out.str();
+}
+
+std::string formatFixed(double value) {
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(2) << value;
+    return out.str();
+}
+
+void printTableDivider(const std::vector<std::size_t>& widths) {
+    std::cout << '+';
+    for (std::size_t width : widths) {
+        std::cout << std::string(width + 2, '-') << '+';
+    }
+    std::cout << '\n';
+}
+
+void printTableRow(const TableRow& row, const std::vector<std::size_t>& widths,
+                   const std::vector<bool>& leftAligned) {
+    std::cout << '|';
+    for (std::size_t i = 0; i < row.size(); ++i) {
+        std::cout << ' ';
+        if (leftAligned[i]) {
+            std::cout << std::left;
+        } else {
+            std::cout << std::right;
+        }
+        std::cout << std::setw(static_cast<int>(widths[i])) << row[i] << " |";
+    }
+    std::cout << std::left;
+    std::cout << '\n';
+}
+
+void printSummaryTable(const Options& options, const std::vector<BotStats>& stats) {
+    const TableRow header = {"Bot",      "Wins",    "Win Rate", "95% CI",
+                             "Avg Rank", "Survived", "Avg Army", "Avg Land"};
+    const std::vector<bool> leftAligned = {true, false, false, true,
+                                           false, false, false, false};
+
+    std::vector<SummaryRow> rows;
+    rows.reserve(options.bots.size());
+    for (std::size_t i = 0; i < options.bots.size(); ++i) {
+        const BotStats& botStats = stats[i];
+        const WinRateSummary winRate =
+            calculateWinRateSummary(botStats.wins, options.games);
+        const std::string lowerBound =
+            alignTextRight(formatPercent(winRate.lowerBound), 7);
+        const std::string upperBound =
+            alignTextRight(formatPercent(winRate.upperBound), 7);
+
+        rows.push_back({
+            botStats.wins,
+            {
+                options.bots[i],
+                std::to_string(botStats.wins),
+                formatPercent(winRate.rate),
+                "[" + lowerBound + ", " + upperBound + "]",
+                formatFixed(static_cast<double>(botStats.totalRank) /
+                            options.games),
+                std::to_string(botStats.survivalCount),
+                formatFixed(static_cast<double>(botStats.totalArmy) /
+                            options.games),
+                formatFixed(static_cast<double>(botStats.totalLand) /
+                            options.games),
+            },
+        });
+    }
+
+    std::stable_sort(rows.begin(), rows.end(),
+                     [](const SummaryRow& lhs, const SummaryRow& rhs) {
+                         return lhs.wins > rhs.wins;
+                     });
+
+    std::vector<std::size_t> widths(header.size(), 0);
+    for (std::size_t i = 0; i < header.size(); ++i) {
+        widths[i] = header[i].size();
+    }
+    for (const SummaryRow& row : rows) {
+        for (std::size_t i = 0; i < row.cells.size(); ++i) {
+            widths[i] = std::max(widths[i], row.cells[i].size());
+        }
+    }
+
+    printTableDivider(widths);
+    printTableRow(header, widths, std::vector<bool>(header.size(), true));
+    printTableDivider(widths);
+    for (const SummaryRow& row : rows) {
+        printTableRow(row.cells, widths, leftAligned);
+    }
+    printTableDivider(widths);
 }
 
 void printUsage() {
@@ -84,7 +195,6 @@ void printUsage() {
         << "  --threads N        CPU worker threads (default: auto)\n"
         << "  --steps N          Maximum half-turn steps per game (default: "
            "600)\n"
-        << "  --seed-base N      Reproducible base seed for generated maps\n"
         << "  --shuffle          Randomize player index mapping in simulator\n"
         << "  --bots A B ...     Bot names to simulate (default: XiaruizeBot "
            "GcBot)\n";
@@ -108,10 +218,6 @@ bool parseArgs(int argc, char** argv, Options& options) {
                 options.threads = value;
             else
                 options.maxSteps = value;
-        } else if (arg == "--seed-base") {
-            if (i + 1 >= argc) return false;
-            if (!parsePositiveUInt64(argv[++i], options.seedBase)) return false;
-            options.hasSeedBase = true;
         } else if (arg == "--shuffle") {
             options.remainIndex = false;
         } else if (arg == "--bots") {
@@ -155,17 +261,7 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
     result.gameNumber = gameNumber;
     result.statsDelta.resize(options.bots.size());
 
-    const std::optional<std::uint64_t> gameSeed =
-        options.hasSeedBase
-            ? std::optional<std::uint64_t>(
-                  options.seedBase +
-                  static_cast<std::uint64_t>(gameNumber - 1))
-            : std::nullopt;
-    Board board = gameSeed.has_value()
-                      ? Board::generate(options.width, options.height,
-                                        *gameSeed)
-                      : Board::generate(options.width, options.height);
-    BotSeedScope botSeedScope(gameSeed);
+    Board board = Board::generate(options.width, options.height);
 
     std::vector<Player*> players;
     std::vector<index_t> teams;
@@ -188,7 +284,7 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
         names.push_back(botName);
     }
 
-    BasicGame game(options.remainIndex, players, teams, names, board, gameSeed);
+    BasicGame game(options.remainIndex, players, teams, names, board);
     const int initResult = game.init();
     if (initResult != 0) {
         std::ostringstream err;
@@ -215,9 +311,10 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
         result.statsDelta[findBotIndex(options.bots, result.winnerName)].wins++;
     }
 
-    for (std::size_t i = 0; i < finalRank.size() && i < 3; ++i) {
+    for (std::size_t i = 0; i < finalRank.size(); ++i) {
         const std::string playerName = game.getName(finalRank[i].player);
-        result.statsDelta[findBotIndex(options.bots, playerName)].podiums++;
+        result.statsDelta[findBotIndex(options.bots, playerName)].totalRank +=
+            static_cast<long long>(i) + 1;
     }
 
     for (int playerID = 0; playerID < static_cast<int>(options.bots.size());
@@ -259,8 +356,8 @@ void printGameResult(const GameResult& result) {
 void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
     for (std::size_t i = 0; i < stats.size(); ++i) {
         stats[i].wins += result.statsDelta[i].wins;
-        stats[i].podiums += result.statsDelta[i].podiums;
         stats[i].survivalCount += result.statsDelta[i].survivalCount;
+        stats[i].totalRank += result.statsDelta[i].totalRank;
         stats[i].totalArmy += result.statsDelta[i].totalArmy;
         stats[i].totalLand += result.statsDelta[i].totalLand;
     }
@@ -352,16 +449,7 @@ int main(int argc, char** argv) {
     }
 
     std::cout << "\nSummary\n";
-    for (std::size_t i = 0; i < options.bots.size(); ++i) {
-        const BotStats& botStats = stats[i];
-        std::cout << "- " << options.bots[i] << ": wins=" << botStats.wins
-                  << ", podiums=" << botStats.podiums
-                  << ", survived=" << botStats.survivalCount << ", avgArmy="
-                  << static_cast<double>(botStats.totalArmy) / options.games
-                  << ", avgLand="
-                  << static_cast<double>(botStats.totalLand) / options.games
-                  << '\n';
-    }
+    printSummaryTable(options, stats);
 
     return 0;
 }

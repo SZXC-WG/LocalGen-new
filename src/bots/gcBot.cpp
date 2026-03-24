@@ -1,9 +1,8 @@
 /**
  * @file gcBot.cpp
  *
- * gcBot from LocalGen v5.
- * Features: army memory with exponential smoothing, dynamic weight adjustment,
- *           prevTarget continuity, dual BFS army gathering.
+ * GcBot
+ * Author: GoodCoder666
  *
  * @copyright Copyright (c) SZXC Work Group.
  */
@@ -71,11 +70,15 @@ class GcBot : public BasicBot {
                                              /* TILE_LOOKOUT=8 */ -INF,
                                              /* TILE_OBSTACLE=9 */ 0};
 
+        const army_t cityBonus = board.tileAt(st).army / 12;
         auto gv = [&](pos_t x, pos_t y) -> value_t {
             int bt = blockType[idx(x, y)];
             if (bt == 1) return -1;
             if (bt == 5) return 0;
-            if (board.tileAt(x, y).occupier == id) return army[idx(x, y)] - 1;
+            if (!knownBlockType[idx(x, y)]) return 2;
+            auto occupier = board.tileAt(x, y).occupier;
+            if (occupier == id) return army[idx(x, y)] - 1;
+            if (bt == 4) return -army[idx(x, y)] / 2 + cityBonus;
             return -army[idx(x, y)];
         };
 
@@ -176,7 +179,7 @@ class GcBot : public BasicBot {
     }
 
    public:
-    GcBot() : rnd(bot_random::makeBotRng(0x4763426FULL)) {}
+    GcBot() : rnd(std::random_device{}()) {}
 
     void init(index_t playerId, const GameConstantsPack& constants) override {
         id = playerId;
@@ -238,7 +241,28 @@ class GcBot : public BasicBot {
             }
         }
 
-        if (turn < 13) return;
+        if (turn < 13 && rank[id].land == 1) {
+            Coord coo = seenGeneral[id];
+            army_t minArmy = army[idx(coo.x, coo.y)] - 1;
+            lastPos = coo;
+            for (auto [dx, dy] : delta) {
+                auto nx = coo.x + dx, ny = coo.y + dy;
+                if (isValidPosition(nx, ny)) {
+                    auto type = blockType[idx(nx, ny)];
+                    army_t thatArmy = army[idx(nx, ny)];
+                    if (type != 4 && thatArmy >= 0) continue;
+                    if (thatArmy < minArmy) {
+                        minArmy = thatArmy;
+                        lastPos = Coord(nx, ny);
+                    }
+                }
+            }
+            if (lastPos != coo) {
+                moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, lastPos,
+                                       false);
+            }
+            return;
+        }
 
         blockTypeValue[0] = 55 + static_cast<value_t>(std::pow(turn, 0.2));
         blockTypeValue[1] = -500 * static_cast<value_t>(std::pow(turn, -0.1));
@@ -282,23 +306,23 @@ class GcBot : public BasicBot {
                    knownBlockType[idx(prevTarget.x, prevTarget.y)]) {
             value_t maxBlockValue = -INF;
 
-            if (dis(rnd) < 0.02) {
-                std::vector<Coord> unknownPlains;
-                for (pos_t i = 1; i <= height; ++i) {
-                    for (pos_t j = 1; j <= width; ++j) {
-                        if (blockType[idx(i, j)] == 0 &&
-                            !knownBlockType[idx(i, j)] &&
-                            dist[idx(i, j)] < 500) {
-                            unknownPlains.emplace_back(i, j);
-                        }
+            std::vector<std::pair<value_t, Coord>> unknownPlains;
+            for (pos_t i = 1; i <= height; ++i) {
+                for (pos_t j = 1; j <= width; ++j) {
+                    if (blockType[idx(i, j)] == 0 &&
+                        !knownBlockType[idx(i, j)] && dist[idx(i, j)] < 500) {
+                        unknownPlains.emplace_back(dist[idx(i, j)],
+                                                   Coord(i, j));
                     }
                 }
-                if (!unknownPlains.empty()) {
-                    std::uniform_int_distribution<size_t> randIndex(
-                        0, unknownPlains.size() - 1);
-                    targetPos = unknownPlains[randIndex(rnd)];
-                    maxBlockValue = 1e9;
-                }
+            }
+            if (!unknownPlains.empty()) {
+                std::size_t k = unknownPlains.size() / 4;
+                std::nth_element(unknownPlains.begin(),
+                                 unknownPlains.begin() + k,
+                                 unknownPlains.end());
+                targetPos = unknownPlains[k].second;
+                maxBlockValue = 500 - dist[idx(targetPos.x, targetPos.y)] * 3;
             }
 
             for (pos_t i = 1; i <= height; ++i) {
@@ -374,7 +398,7 @@ class GcBot : public BasicBot {
 
         if (newFocus == Coord(-1, -1)) {
             lastPos = coo;
-            moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, coo, false);
+            moveQueue.emplace_back(MoveType::EMPTY);
             return;
         }
 

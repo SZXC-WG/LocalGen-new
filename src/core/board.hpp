@@ -12,7 +12,6 @@
 #define LGEN_CORE_BOARD_HPP
 
 #include <cassert>
-#include <cstdint>
 #include <random>
 #include <string>
 #include <unordered_map>
@@ -286,16 +285,11 @@ class Board {
     };
 
    public:
-    static Board generate(int width, int height, std::uint64_t seed) {
+    static Board generate(int width, int height) {
         const int area = width * height;
         Board board(height, width);
 
-        std::seed_seq seedSeq{
-            static_cast<std::uint32_t>(seed),
-            static_cast<std::uint32_t>(seed >> 32U),
-            static_cast<std::uint32_t>(width),
-            static_cast<std::uint32_t>(height)};
-        std::mt19937 rng(seedSeq);
+        std::mt19937 rng(std::random_device{}());
         std::uniform_int_distribution<int> dist_row(1, height),
             dist_col(1, width), dist_tile(0, 9), dist_army(40, 49),
             dist_numMountains(area / 7, area / 7 + area / 20),
@@ -324,13 +318,6 @@ class Board {
                 Tile(-1, TILE_SWAMP, 0);
 
         return board;
-    }
-
-    static Board generate(int width, int height) {
-        const std::uint64_t seed =
-            (static_cast<std::uint64_t>(std::random_device{}()) << 32U) ^
-            static_cast<std::uint64_t>(std::random_device{}());
-        return generate(width, height, seed);
     }
 };
 

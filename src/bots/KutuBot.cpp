@@ -158,7 +158,7 @@ class KutuBot : public BasicBot {
     mutable SearchWorkspace reverseSearch;
     std::deque<RecentEdge> recentEdges;
     std::unordered_map<std::uint64_t, int> recentEdgeCounts;
-    std::mt19937 rng{bot_random::makeBotRng(0x4B757475ULL)};
+    std::mt19937 rng{std::random_device{}()};
 
     inline size_t idx(Coord c) const {
         return static_cast<size_t>(c.x * W + c.y);

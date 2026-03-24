@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <atomic>
+#include <cmath>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <mutex>
 #include <sstream>
@@ -40,12 +42,46 @@ struct GameResult {
     std::vector<BotStats> statsDelta;
 };
 
+struct WinRateSummary {
+    double rate = 0.0;
+    double lowerBound = 0.0;
+    double upperBound = 0.0;
+};
+
 bool parsePositiveInt(const char* text, int& value) {
     char* end = nullptr;
     long parsed = std::strtol(text, &end, 10);
     if (end == text || *end != '\0' || parsed <= 0) return false;
     value = static_cast<int>(parsed);
     return true;
+}
+
+WinRateSummary calculateWinRateSummary(int wins, int totalGames) {
+    if (totalGames <= 0) return {};
+
+    constexpr double kWilsonZ95 = 1.959963984540054;
+    constexpr double z2 = kWilsonZ95 * kWilsonZ95;
+
+    const double n = static_cast<double>(totalGames);
+    const double p = static_cast<double>(wins) / n;
+    const double denominator = 1.0 + z2 / n;
+    const double center = (p + z2 / (2.0 * n)) / denominator;
+    const double margin = kWilsonZ95 *
+                          std::sqrt((p * (1.0 - p) + z2 / (4.0 * n)) / n) /
+                          denominator;
+
+    return {
+        p,
+        std::clamp(center - margin, 0.0, 1.0),
+        std::clamp(center + margin, 0.0, 1.0),
+    };
+}
+
+std::string formatPercent(double value) {
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(2)
+        << std::clamp(value, 0.0, 1.0) * 100.0 << '%';
+    return out.str();
 }
 
 void printUsage() {
@@ -312,7 +348,12 @@ int main(int argc, char** argv) {
     std::cout << "\nSummary\n";
     for (std::size_t i = 0; i < options.bots.size(); ++i) {
         const BotStats& botStats = stats[i];
+        const WinRateSummary winRate =
+            calculateWinRateSummary(botStats.wins, options.games);
         std::cout << "- " << options.bots[i] << ": wins=" << botStats.wins
+                  << ", winRate=" << formatPercent(winRate.rate)
+                  << ", win95CI=[" << formatPercent(winRate.lowerBound) << ", "
+                  << formatPercent(winRate.upperBound) << ']'
                   << ", podiums=" << botStats.podiums
                   << ", survived=" << botStats.survivalCount << ", avgArmy="
                   << static_cast<double>(botStats.totalArmy) / options.games

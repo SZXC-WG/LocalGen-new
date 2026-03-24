@@ -21,4 +21,5 @@ After building, run the executable from `build/Release`:
 - Independent matches are parallelized across CPU threads.
 - If `--threads` is omitted, the simulator auto-selects a worker count from the machine's available CPU concurrency.
 - Per-game results are printed as soon as each match finishes, so completion order may differ from game number order.
+- Aggregate summary output includes each bot's win rate and 95% confidence interval.
 - No reinforcement learning assets were added for this bot.

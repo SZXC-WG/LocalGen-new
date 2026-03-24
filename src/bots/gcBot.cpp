@@ -265,11 +265,11 @@ class GcBot : public BasicBot {
         }
 
         blockTypeValue[0] = 55 + static_cast<value_t>(std::pow(turn, 0.2));
-        blockTypeValue[1] = -500 * static_cast<value_t>(std::pow(turn, -0.1));
+        blockTypeValue[1] = static_cast<value_t>(-500 * std::pow(turn, -0.1));
         blockTypeValue[4] =
-            28 * static_cast<value_t>(std::pow(turn - 12, 0.15));
+            static_cast<value_t>(28 * std::pow(turn - 12, 0.15));
         blockTypeValue[5] =
-            35 + 15 * static_cast<value_t>(std::pow(turn, 0.15));
+            35 + static_cast<value_t>(15 * std::pow(turn, 0.15));
 
         Coord coo = lastPos;
         if (!isValidPosition(coo.x, coo.y) ||

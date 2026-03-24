@@ -28,8 +28,8 @@ struct Options {
 
 struct BotStats {
     int wins = 0;
-    int podiums = 0;
     int survivalCount = 0;
+    long long totalRank = 0;
     long long totalArmy = 0;
     long long totalLand = 0;
 };
@@ -129,7 +129,7 @@ void printTableRow(const TableRow& row, const std::vector<std::size_t>& widths,
 
 void printSummaryTable(const Options& options, const std::vector<BotStats>& stats) {
     const TableRow header = {"Bot",      "Wins",    "Win Rate", "95% CI",
-                             "Podiums",  "Survived", "Avg Army", "Avg Land"};
+                             "Avg Rank", "Survived", "Avg Army", "Avg Land"};
     const std::vector<bool> leftAligned = {true, false, false, true,
                                            false, false, false, false};
 
@@ -151,7 +151,8 @@ void printSummaryTable(const Options& options, const std::vector<BotStats>& stat
                 std::to_string(botStats.wins),
                 formatPercent(winRate.rate),
                 "[" + lowerBound + ", " + upperBound + "]",
-                std::to_string(botStats.podiums),
+                formatFixed(static_cast<double>(botStats.totalRank) /
+                            options.games),
                 std::to_string(botStats.survivalCount),
                 formatFixed(static_cast<double>(botStats.totalArmy) /
                             options.games),
@@ -310,9 +311,10 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
         result.statsDelta[findBotIndex(options.bots, result.winnerName)].wins++;
     }
 
-    for (std::size_t i = 0; i < finalRank.size() && i < 3; ++i) {
+    for (std::size_t i = 0; i < finalRank.size(); ++i) {
         const std::string playerName = game.getName(finalRank[i].player);
-        result.statsDelta[findBotIndex(options.bots, playerName)].podiums++;
+        result.statsDelta[findBotIndex(options.bots, playerName)].totalRank +=
+            static_cast<long long>(i) + 1;
     }
 
     for (int playerID = 0; playerID < static_cast<int>(options.bots.size());
@@ -354,8 +356,8 @@ void printGameResult(const GameResult& result) {
 void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
     for (std::size_t i = 0; i < stats.size(); ++i) {
         stats[i].wins += result.statsDelta[i].wins;
-        stats[i].podiums += result.statsDelta[i].podiums;
         stats[i].survivalCount += result.statsDelta[i].survivalCount;
+        stats[i].totalRank += result.statsDelta[i].totalRank;
         stats[i].totalArmy += result.statsDelta[i].totalArmy;
         stats[i].totalLand += result.statsDelta[i].totalLand;
     }

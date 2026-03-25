@@ -366,6 +366,7 @@ class GcBot : public BasicBot {
         prevTarget = targetPos;
 
         if (targetPos.x == -1) {
+            lastPos = Coord(-1, -1);
             moveQueue.emplace_back(MoveType::EMPTY);
             return;
         }
@@ -397,7 +398,7 @@ class GcBot : public BasicBot {
         }
 
         if (newFocus == Coord(-1, -1)) {
-            lastPos = coo;
+            lastPos = Coord(-1, -1);
             moveQueue.emplace_back(MoveType::EMPTY);
             return;
         }

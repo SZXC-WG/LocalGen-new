@@ -25,6 +25,14 @@ set(LOCALGEN_BOT_SOURCES
     src/bots/LyBot.cpp
 )
 
+set(LOCALGEN_WINDOWS_RESOURCES)
+
+if(WIN32)
+    list(APPEND LOCALGEN_WINDOWS_RESOURCES
+        res/localgen.rc
+    )
+endif()
+
 qt_standard_project_setup()
 set(CMAKE_AUTORCC ON)
 
@@ -55,6 +63,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/core/tile.hpp
     src/core/utils.hpp
     res/res.qrc
+    ${LOCALGEN_WINDOWS_RESOURCES}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

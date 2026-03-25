@@ -264,7 +264,8 @@ class GcBot : public BasicBot {
             return;
         }
 
-        const double armyStrength = std::log(rank[id].army + 1.0);
+        const double armyStrength =
+            std::log(std::min(static_cast<army_t>(3000), rank[id].army) + 1.0);
         blockTypeValue[0] = 55 - static_cast<value_t>(5 * armyStrength);
         blockTypeValue[1] = -500 + static_cast<value_t>(50 * armyStrength);
         blockTypeValue[4] = static_cast<value_t>(armyStrength * armyStrength);
@@ -308,9 +309,20 @@ class GcBot : public BasicBot {
             std::vector<std::pair<value_t, Coord>> unknownPlains;
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
-                    if (blockType[idx(i, j)] == 0 &&
-                        !knownBlockType[idx(i, j)] && dist[idx(i, j)] < 500 &&
-                        eval[idx(i, j)] > -100) {
+                    if (dist[idx(i, j)] >= 500 || eval[idx(i, j)] <= -100 ||
+                        blockType[idx(i, j)] != 0)
+                        continue;
+                    bool hasUnknownNeighbor = false;
+                    for (auto [dx, dy] : delta) {
+                        auto nx = i + dx, ny = j + dy;
+                        if (isValidPosition(nx, ny) &&
+                            blockType[idx(nx, ny)] == 5 &&
+                            !knownBlockType[idx(nx, ny)]) {
+                            hasUnknownNeighbor = true;
+                            break;
+                        }
+                    }
+                    if (hasUnknownNeighbor || !knownBlockType[idx(i, j)]) {
                         unknownPlains.emplace_back(dist[idx(i, j)],
                                                    Coord(i, j));
                     }
@@ -322,7 +334,9 @@ class GcBot : public BasicBot {
                                  unknownPlains.begin() + k,
                                  unknownPlains.end());
                 targetPos = unknownPlains[k].second;
-                maxBlockValue = 500 - dist[idx(targetPos.x, targetPos.y)] * 3;
+                maxBlockValue =
+                    static_cast<value_t>(4.0 * std::sqrt(rank[id].army)) -
+                    dist[idx(targetPos.x, targetPos.y)] * 3;
             }
 
             for (pos_t i = 1; i <= height; ++i) {
@@ -335,8 +349,9 @@ class GcBot : public BasicBot {
                             eval[idx(i, j)] / 5 -
                             (dist[idx(i, j)] + army[idx(i, j)] / 2);
                         if (seenGeneral[id].x != -1) {
-                            blockValue -=
-                                approxDist(Coord(i, j), seenGeneral[id]) * 3LL;
+                            blockValue -= static_cast<value_t>(std::sqrt(
+                                approxDist(Coord(i, j), seenGeneral[id]) *
+                                40.0));
                         }
                         if (blockValue > maxBlockValue) {
                             maxBlockValue = blockValue;
@@ -353,8 +368,8 @@ class GcBot : public BasicBot {
                     blockTypeValue[blockType[idx(x, y)]] + eval[idx(x, y)] / 5 -
                     (dist[idx(x, y)] + army[idx(x, y)] / 2);
                 if (seenGeneral[id].x != -1) {
-                    prevBlockValue -=
-                        approxDist(Coord(x, y), seenGeneral[id]) * 3LL;
+                    prevBlockValue -= static_cast<value_t>(std::sqrt(
+                        approxDist(Coord(x, y), seenGeneral[id]) * 40.0));
                 }
                 if (std::abs(prevBlockValue - maxBlockValue) < 25) {
                     targetPos = prevTarget;

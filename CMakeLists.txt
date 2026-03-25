@@ -50,9 +50,7 @@ if(WIN32)
     list(APPEND LOCALGEN_PLATFORM_RESOURCES
         ${LOCALGEN_RC_FILE}
     )
-endif()
-
-if(APPLE)
+elseif(APPLE)
     list(APPEND LOCALGEN_PLATFORM_RESOURCES
         res/icons/icon.icns
     )

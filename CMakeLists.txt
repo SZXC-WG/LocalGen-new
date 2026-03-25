@@ -22,7 +22,6 @@ set(LOCALGEN_BOT_SOURCES
     src/bots/gcBot.cpp
     src/bots/oimBot.cpp
     src/bots/KutuBot.cpp
-    src/bots/LyBot.cpp
 )
 
 set(LOCALGEN_PLATFORM_RESOURCES)

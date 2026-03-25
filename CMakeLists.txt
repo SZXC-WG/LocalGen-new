@@ -25,11 +25,21 @@ set(LOCALGEN_BOT_SOURCES
     src/bots/LyBot.cpp
 )
 
-set(LOCALGEN_WINDOWS_RESOURCES)
+set(LOCALGEN_PLATFORM_RESOURCES)
 
 if(WIN32)
-    list(APPEND LOCALGEN_WINDOWS_RESOURCES
+    list(APPEND LOCALGEN_PLATFORM_RESOURCES
         res/localgen.rc
+    )
+endif()
+
+if(APPLE)
+    list(APPEND LOCALGEN_PLATFORM_RESOURCES
+        res/icons/icon.icns
+    )
+
+    set_source_files_properties(${LOCALGEN_PLATFORM_RESOURCES} PROPERTIES
+        MACOSX_PACKAGE_LOCATION "Resources"
     )
 endif()
 
@@ -63,7 +73,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/core/tile.hpp
     src/core/utils.hpp
     res/res.qrc
-    ${LOCALGEN_WINDOWS_RESOURCES}
+    ${LOCALGEN_PLATFORM_RESOURCES}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -99,6 +109,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
+    MACOSX_BUNDLE_ICON_FILE icon.icns
     MACOSX_BUNDLE_GUI_IDENTIFIER "com.example.${PROJECT_NAME}"
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}

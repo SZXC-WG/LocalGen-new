@@ -28,8 +28,27 @@ set(LOCALGEN_BOT_SOURCES
 set(LOCALGEN_PLATFORM_RESOURCES)
 
 if(WIN32)
+    if(NOT DEFINED PROJECT_VERSION_TWEAK OR "${PROJECT_VERSION_TWEAK}" STREQUAL "")
+        set(LOCALGEN_VERSION_TWEAK 0)
+    else()
+        set(LOCALGEN_VERSION_TWEAK ${PROJECT_VERSION_TWEAK})
+    endif()
+
+    set(LOCALGEN_PRODUCT_NAME "LocalGen")
+    set(LOCALGEN_FILE_DESCRIPTION "Local Generals.io")
+    set(LOCALGEN_COMPANY_NAME "SZXC Work Group")
+    set(LOCALGEN_COPYRIGHT "Copyright (C) SZXC Work Group")
+
+    set(LOCALGEN_WIN_ICON "${CMAKE_CURRENT_SOURCE_DIR}/res/icons/icon.ico")
+    set(LOCALGEN_RC_FILE "${CMAKE_CURRENT_BINARY_DIR}/localgen.rc")
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/res/localgen.rc.in"
+        "${LOCALGEN_RC_FILE}"
+        @ONLY
+    )
+
     list(APPEND LOCALGEN_PLATFORM_RESOURCES
-        res/localgen.rc
+        ${LOCALGEN_RC_FILE}
     )
 endif()
 

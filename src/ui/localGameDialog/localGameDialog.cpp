@@ -1,6 +1,5 @@
 #include "localGameDialog.h"
 
-#include <QAbstractItemView>
 #include <QComboBox>
 #include <QCoreApplication>
 #include <QDir>
@@ -50,9 +49,6 @@ LocalGameDialog::LocalGameDialog(QWidget* parent)
     setWindowFlags(flags);
 
     ui->setupUi(this);
-    ui->comboBox_gameMap->setMaxVisibleItems(12);
-    ui->comboBox_gameMap->view()->setVerticalScrollMode(
-        QAbstractItemView::ScrollPerPixel);
     randomMapWidth = ui->spinBox_mapWidth->value();
     randomMapHeight = ui->spinBox_mapHeight->value();
     populateAvailableMaps();
@@ -167,9 +163,6 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
                                    QSizePolicy::Preferred);
         playerCombo->setStyleSheet("color: teal;");
         playerCombo->setFont(comboFont);
-        playerCombo->setMaxVisibleItems(12);
-        playerCombo->view()->setVerticalScrollMode(
-            QAbstractItemView::ScrollPerPixel);
         QHBoxLayout* playerLayout = new QHBoxLayout();
         playerLayout->addWidget(playerLabel);
         playerLayout->addWidget(playerCombo);

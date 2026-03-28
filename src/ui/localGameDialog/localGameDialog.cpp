@@ -1,15 +1,25 @@
 #include "localGameDialog.h"
 
+#include <QApplication>
 #include <QComboBox>
+#include <QEvent>
+#include <QFrame>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
 #include <QFont>
 #include <QHBoxLayout>
 #include <QHash>
+#include <QKeyEvent>
 #include <QLabel>
+#include <QLayout>
+#include <QListView>
+#include <QPointer>
 #include <QRandomGenerator>
+#include <QScrollBar>
 #include <QStringList>
+#include <QVBoxLayout>
+#include <QWheelEvent>
 
 #include "core/bot.h"
 #include "core/map.hpp"
@@ -37,6 +47,220 @@ QStringList toQStringList(const std::vector<std::string>& vec) {
     return list;
 }
 
+class MapComboPopupListView final : public QListView {
+   public:
+    explicit MapComboPopupListView(QWidget* parent = nullptr)
+        : QListView(parent) {}
+
+    bool scrollFromWheel(QWheelEvent* event) {
+        if (event == nullptr) return false;
+
+        // WSL/Linux can miss the default popup scrolling path, so we drive the
+        // popup list directly through its scroll bar.
+        QScrollBar* scrollBar = verticalScrollBar();
+        if (scrollBar == nullptr || scrollBar->maximum() <= scrollBar->minimum()
+            || !scrollBar->isEnabled()) {
+            return false;
+        }
+
+        int delta = 0;
+        if (!event->pixelDelta().isNull()) {
+            delta = event->pixelDelta().y();
+        } else {
+            angleDeltaRemainder += event->angleDelta().y();
+            const int steps = angleDeltaRemainder / 120;
+            angleDeltaRemainder -= steps * 120;
+            delta = steps * scrollBar->singleStep();
+        }
+
+        if (delta == 0) return false;
+
+        scrollBar->setValue(scrollBar->value() - delta);
+        event->accept();
+        return true;
+    }
+
+   protected:
+    bool viewportEvent(QEvent* event) override {
+        if (event->type() == QEvent::Wheel &&
+            scrollFromWheel(static_cast<QWheelEvent*>(event))) {
+            return true;
+        }
+        return QListView::viewportEvent(event);
+    }
+
+    void wheelEvent(QWheelEvent* event) override {
+        if (scrollFromWheel(event)) return;
+        QListView::wheelEvent(event);
+    }
+
+   private:
+    int angleDeltaRemainder = 0;
+};
+
+class MapComboBox final : public QComboBox {
+   public:
+    explicit MapComboBox(QWidget* parent = nullptr) : QComboBox(parent) {}
+
+    ~MapComboBox() override {
+        if (qApp != nullptr) {
+            qApp->removeEventFilter(this);
+        }
+    }
+
+   protected:
+    void showPopup() override {
+        if (count() == 0) return;
+
+        ensurePopup();
+        syncPopup();
+        popupFrame->show();
+        popupFrame->raise();
+        popupList->setFocus(Qt::PopupFocusReason);
+        qApp->installEventFilter(this);
+    }
+
+    void hidePopup() override {
+        if (popupFrame != nullptr) {
+            popupFrame->hide();
+        }
+        if (qApp != nullptr) {
+            qApp->removeEventFilter(this);
+        }
+        QComboBox::hidePopup();
+    }
+
+    bool eventFilter(QObject* watched, QEvent* event) override {
+        if (popupFrame == nullptr || popupList == nullptr || !popupFrame->isVisible()) {
+            return QComboBox::eventFilter(watched, event);
+        }
+
+        QWidget* watchedWidget = qobject_cast<QWidget*>(watched);
+        const bool insidePopup =
+            watchedWidget != nullptr &&
+            (watchedWidget == popupFrame || watchedWidget == popupList ||
+             watchedWidget == popupList->viewport() ||
+             popupFrame->isAncestorOf(watchedWidget));
+        const bool insideCombo =
+            watchedWidget != nullptr &&
+            (watchedWidget == this || isAncestorOf(watchedWidget));
+
+        switch (event->type()) {
+            case QEvent::Wheel:
+                if (insidePopup) return QComboBox::eventFilter(watched, event);
+                return popupList->scrollFromWheel(static_cast<QWheelEvent*>(event));
+            case QEvent::MouseButtonPress:
+            case QEvent::MouseButtonDblClick:
+                if (!insidePopup && !insideCombo) hidePopup();
+                break;
+            case QEvent::KeyPress:
+                if (static_cast<QKeyEvent*>(event)->key() == Qt::Key_Escape) {
+                    hidePopup();
+                    return true;
+                }
+                break;
+            case QEvent::WindowDeactivate:
+                hidePopup();
+                break;
+            default: break;
+        }
+
+        return QComboBox::eventFilter(watched, event);
+    }
+
+   private:
+    void ensurePopup() {
+        if (popupFrame != nullptr) return;
+
+        // We render the popup inside the dialog instead of using Qt's default
+        // combo popup so wheel events stay inside the application on WSL/Linux.
+        popupFrame = new QFrame(window());
+        popupFrame->setFrameShape(QFrame::StyledPanel);
+        popupFrame->setLineWidth(1);
+
+        auto* layout = new QVBoxLayout(popupFrame);
+        layout->setContentsMargins(0, 0, 0, 0);
+
+        popupList = new MapComboPopupListView(popupFrame);
+        popupList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        popupList->setSelectionMode(QAbstractItemView::SingleSelection);
+        popupList->setSelectionBehavior(QAbstractItemView::SelectRows);
+        popupList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        popupList->setFont(font());
+        popupList->setStyleSheet(styleSheet());
+        layout->addWidget(popupList);
+
+        connect(popupList, &QListView::clicked, this,
+                [this](const QModelIndex& index) {
+                    if (index.isValid()) {
+                        setCurrentIndex(index.row());
+                    }
+                    hidePopup();
+                });
+        connect(popupList, &QListView::activated, this,
+                [this](const QModelIndex& index) {
+                    if (index.isValid()) {
+                        setCurrentIndex(index.row());
+                    }
+                    hidePopup();
+                });
+    }
+
+    void syncPopup() {
+        popupList->setModel(model());
+        popupList->setCurrentIndex(model()->index(currentIndex(), 0));
+        popupList->scrollTo(popupList->currentIndex(),
+                            QAbstractItemView::PositionAtCenter);
+
+        const int rowHeight =
+            qMax(fontMetrics().height() + 8, popupList->sizeHintForRow(0));
+        const int visibleRows = qMax(1, qMin(8, count()));
+        const int popupHeight = visibleRows * rowHeight + popupFrame->frameWidth() * 2;
+        const int popupWidth = qMax(width(), popupList->sizeHintForColumn(0) + 32);
+
+        QWidget* hostWindow = window();
+        const QRect hostRect = hostWindow->rect();
+        const QPoint below =
+            hostWindow->mapFromGlobal(mapToGlobal(QPoint(0, height())));
+        const QPoint above = hostWindow->mapFromGlobal(mapToGlobal(QPoint(0, 0)));
+
+        int x = below.x();
+        int y = below.y();
+        if (x + popupWidth > hostRect.width()) {
+            x = qMax(0, hostRect.width() - popupWidth);
+        }
+        if (y + popupHeight > hostRect.height() && above.y() - popupHeight >= 0) {
+            y = above.y() - popupHeight;
+        } else if (y + popupHeight > hostRect.height()) {
+            y = qMax(0, hostRect.height() - popupHeight);
+        }
+
+        popupFrame->setGeometry(x, y, popupWidth, popupHeight);
+    }
+
+    QPointer<QFrame> popupFrame;
+    QPointer<MapComboPopupListView> popupList;
+};
+
+QComboBox* replaceMapComboBox(QComboBox* comboBox) {
+    if (comboBox == nullptr) return nullptr;
+
+    QWidget* parent = comboBox->parentWidget();
+    auto* replacement = new MapComboBox(parent);
+    replacement->setObjectName(comboBox->objectName());
+    replacement->setFont(comboBox->font());
+    replacement->setStyleSheet(comboBox->styleSheet());
+    replacement->setSizePolicy(comboBox->sizePolicy());
+
+    if (parent != nullptr && parent->layout() != nullptr) {
+        parent->layout()->replaceWidget(comboBox, replacement);
+    }
+    comboBox->hide();
+    comboBox->deleteLater();
+    replacement->show();
+    return replacement;
+}
+
 }  // namespace
 
 LocalGameDialog::LocalGameDialog(QWidget* parent)
@@ -49,6 +273,7 @@ LocalGameDialog::LocalGameDialog(QWidget* parent)
     setWindowFlags(flags);
 
     ui->setupUi(this);
+    ui->comboBox_gameMap = replaceMapComboBox(ui->comboBox_gameMap);
     randomMapWidth = ui->spinBox_mapWidth->value();
     randomMapHeight = ui->spinBox_mapHeight->value();
     populateAvailableMaps();

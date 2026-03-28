@@ -285,19 +285,21 @@ class GcBot : public BasicBot {
                 for (pos_t j = 1; j <= width; ++j) {
                     const TileInfo& tile = tileAt(i, j);
                     if (tile.dist >= 500 || tile.eval <= -100 ||
-                        tile.type != TILE_PLAIN)
+                        (tile.type != TILE_PLAIN && tile.type != TILE_SWAMP))
                         continue;
-                    bool hasUnknownNeighbor = false;
-                    for (auto [dx, dy] : delta) {
-                        auto nx = i + dx, ny = j + dy;
-                        if (!accessible(nx, ny)) continue;
-                        const TileInfo& nTile = tileAt(nx, ny);
-                        if (nTile.type == TILE_OBSTACLE && !nTile.known) {
-                            hasUnknownNeighbor = true;
-                            break;
+                    bool needExploration =
+                        (tile.type == TILE_PLAIN && !tile.known);
+                    if (!needExploration)
+                        for (auto [dx, dy] : delta) {
+                            auto nx = i + dx, ny = j + dy;
+                            if (!accessible(nx, ny)) continue;
+                            const TileInfo& nTile = tileAt(nx, ny);
+                            if (nTile.type == TILE_OBSTACLE && !nTile.known) {
+                                needExploration = true;
+                                break;
+                            }
                         }
-                    }
-                    if (hasUnknownNeighbor || !tile.known)
+                    if (needExploration)
                         unknownPlains.emplace_back(tile.dist, Coord(i, j));
                 }
             }

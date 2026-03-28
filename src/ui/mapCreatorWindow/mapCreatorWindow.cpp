@@ -1,5 +1,6 @@
 #include "mapCreatorWindow.h"
 
+#include <QAbstractItemView>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QEasingCurve>
@@ -668,6 +669,9 @@ void MapCreatorWindow::setupHintBar() {
         "    image: none;"
         "    border: none;"
         "}");
+    teamComboBox->setMaxVisibleItems(12);
+    teamComboBox->view()->setVerticalScrollMode(
+        QAbstractItemView::ScrollPerPixel);
     teamComboBox->setVisible(false);
 
     hintLayout->addWidget(hintLabel);

@@ -343,7 +343,8 @@ class GcBot : public BasicBot {
                 for (pos_t j = 1; j <= width; ++j) {
                     const auto& tile = board.tileAt(i, j);
                     if (tile.occupier != id && dist[idx(i, j)] < 500 &&
-                        !isImpassableTile(tile.type)) {
+                        !isImpassableTile(tile.type) &&
+                        tile.type != TILE_SPAWN) {
                         value_t blockValue =
                             blockTypeValue[blockType[idx(i, j)]] +
                             eval[idx(i, j)] / 5 -

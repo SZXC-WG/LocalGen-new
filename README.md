@@ -15,6 +15,7 @@
 [![GitHub Pre-Release](https://img.shields.io/github/v/release/SZXC-WG/LocalGen-new?include_prereleases&label=latest%20preview)](https://github.com/SZXC-WG/LocalGen-new/releases)
 [![GitHub Pre-Release Date](https://img.shields.io/github/release-date-pre/SZXC-WG/LocalGen-new?label=date)](https://github.com/SZXC-WG/LocalGen-new/releases)
 
+[![Qt Build](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/qt-build.yml/badge.svg)](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/qt-build.yml)
 [![CodeQL](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/codeql.yml/badge.svg)](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/codeql.yml)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/SZXC-WG/LocalGen-new)
 

@@ -24,7 +24,6 @@
 
 #include "core/bot.h"
 #include "core/game.hpp"
-#include "core/map.hpp"
 
 namespace {
 
@@ -35,7 +34,6 @@ struct Options {
     int maxSteps = 600;
     int threads = 0;
     bool remainIndex = true;
-    std::string mapPath;
     std::vector<std::string> bots = {"XiaruizeBot", "GcBot"};
 };
 
@@ -564,41 +562,12 @@ void updateTrueSkillRatings(std::vector<TrueSkillRating>& ratings,
     }
 }
 
-Board loadMapFile(const std::string& path) {
-    QString filePath = QString::fromStdString(path);
-    QString errMsg;
-
-    if (path.size() >= 3 && path.substr(path.size() - 3) == ".lg") {
-        Board board = openMap_v5(filePath, errMsg);
-        if (!errMsg.isEmpty()) {
-            throw std::runtime_error("Failed to load map: " + errMsg.toStdString());
-        }
-        return board;
-    } else if (path.size() >= 5 && path.substr(path.size() - 5) == ".lgmp") {
-        MapDocument doc = openMap_v6(filePath, errMsg);
-        if (!errMsg.isEmpty()) {
-            throw std::runtime_error("Failed to load map: " + errMsg.toStdString());
-        }
-        return doc.board;
-    } else if (path.size() >= 5 && path.substr(path.size() - 5) == ".json") {
-        MapDocument doc = openOfficialMap(filePath, errMsg);
-        if (!errMsg.isEmpty()) {
-            throw std::runtime_error("Failed to load map: " + errMsg.toStdString());
-        }
-        return doc.board;
-    } else {
-        throw std::runtime_error(
-            "Unknown map format. Supported formats: .lg, .lgmp, .json");
-    }
-}
-
 void printUsage() {
     std::cout
         << "Usage: LocalGen-bot-simulator [options]\n"
         << "  --games N          Number of matches to run (default: 8)\n"
         << "  --width N          Random map width (default: 20)\n"
         << "  --height N         Random map height (default: 20)\n"
-        << "  --map MAP          Load map from file (.lg, .lgmp, .json)\n"
         << "  --threads N        CPU worker threads (default: auto)\n"
         << "  --steps N          Maximum half-turn steps per game (default: "
            "600)\n"
@@ -608,7 +577,6 @@ void printUsage() {
 }
 
 bool parseArgs(int argc, char** argv, Options& options) {
-    bool hasMap = false, hasSize = false;
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
         if (arg == "--games" || arg == "--width" || arg == "--height" ||
@@ -618,22 +586,16 @@ bool parseArgs(int argc, char** argv, Options& options) {
             if (!parsePositiveInt(argv[++i], value)) return false;
             if (arg == "--games")
                 options.games = value;
-            else if (arg == "--width") {
+            else if (arg == "--width")
                 options.width = value;
-                hasSize = true;
-            } else if (arg == "--height") {
+            else if (arg == "--height")
                 options.height = value;
-                hasSize = true;
-            } else if (arg == "--threads")
+            else if (arg == "--threads")
                 options.threads = value;
             else
                 options.maxSteps = value;
         } else if (arg == "--shuffle") {
             options.remainIndex = false;
-        } else if (arg == "--map") {
-            if (i + 1 >= argc) return false;
-            options.mapPath = argv[++i];
-            hasMap = true;
         } else if (arg == "--bots") {
             options.bots.clear();
             while (i + 1 < argc &&
@@ -647,11 +609,6 @@ bool parseArgs(int argc, char** argv, Options& options) {
         } else {
             return false;
         }
-    }
-    if (hasMap && hasSize) {
-        std::cerr << "Error: --map cannot be used with --width or --height\n";
-        printUsage();
-        return false;
     }
     return options.bots.size() >= 2;
 }
@@ -675,16 +632,14 @@ std::size_t findBotIndex(const std::vector<std::string>& botNames,
     return static_cast<std::size_t>(std::distance(botNames.begin(), it));
 }
 
-GameResult runSingleGame(const Options& options, int gameNumber,
-                         const Board* templateBoard) {
+GameResult runSingleGame(const Options& options, int gameNumber) {
     GameResult result;
     result.gameNumber = gameNumber;
     result.ranksByBot.resize(options.bots.size(),
                              static_cast<int>(options.bots.size()));
     result.statsDelta.resize(options.bots.size());
 
-    Board board = templateBoard ? *templateBoard
-                                : Board::generate(options.width, options.height);
+    Board board = Board::generate(options.width, options.height);
 
     std::vector<Player*> players;
     std::vector<index_t> teams;
@@ -792,6 +747,7 @@ void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
 int main(int argc, char** argv) {
     Options options;
     if (!parseArgs(argc, argv, options)) {
+        printUsage();
         return 1;
     }
 
@@ -811,31 +767,10 @@ int main(int argc, char** argv) {
         }
     }
 
-    // Load map file if specified
-    Board loadedBoard;
-    const Board* templateBoard = nullptr;
-    if (!options.mapPath.empty()) {
-        try {
-            loadedBoard = loadMapFile(options.mapPath);
-            templateBoard = &loadedBoard;
-        } catch (const std::exception& ex) {
-            std::cerr << "Error: " << ex.what() << '\n';
-            return 3;
-        }
-    }
-
     const int workerCount = detectWorkerCount(options);
 
-    std::cout << "Running " << options.games << " games ";
-    if (templateBoard) {
-        std::cout << "on map " << options.mapPath
-                  << " (" << loadedBoard.getWidth() << "x"
-                  << loadedBoard.getHeight() << ")";
-    } else {
-        std::cout << "on " << options.width << 'x' << options.height
-                  << " random maps";
-    }
-    std::cout << " with bots:";
+    std::cout << "Running " << options.games << " games on " << options.width
+              << 'x' << options.height << " random maps with bots:";
     for (const auto& name : options.bots) std::cout << ' ' << name;
     std::cout << "\nUsing " << workerCount << " CPU worker thread(s).\n\n";
 
@@ -855,7 +790,7 @@ int main(int argc, char** argv) {
             if (gameNumber > options.games) return;
 
             try {
-                GameResult result = runSingleGame(options, gameNumber, templateBoard);
+                GameResult result = runSingleGame(options, gameNumber);
                 {
                     std::lock_guard<std::mutex> lock(outputMutex);
                     printGameResult(result);
@@ -888,7 +823,7 @@ int main(int argc, char** argv) {
             std::rethrow_exception(workerError);
         } catch (const std::exception& ex) {
             std::cerr << "Simulation failed: " << ex.what() << '\n';
-            return 4;
+            return 3;
         }
     }
 

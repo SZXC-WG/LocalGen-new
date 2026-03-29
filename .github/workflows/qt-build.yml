@@ -57,6 +57,7 @@ jobs:
           version: 6.8.3
           arch: ${{ matrix.qt_arch }}
           tools: ${{ matrix.qt_tools }}
+          modules: qtcharts
           cache: true
 
       - name: Setup MSVC

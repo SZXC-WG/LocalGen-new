@@ -13,8 +13,10 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <mutex>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -48,6 +50,7 @@ struct GameResult {
     int steps = 0;
     bool stepLimitReached = false;
     std::string winnerName;
+    std::vector<int> ranksByBot;
     std::vector<BotStats> statsDelta;
 };
 
@@ -57,11 +60,252 @@ struct WinRateSummary {
     double upperBound = 0.0;
 };
 
+struct ConfidenceInterval {
+    double lowerBound = 0.0;
+    double upperBound = 0.0;
+};
+
+struct TrueSkillRating {
+    double mu = 25.0;
+    double sigma = 25.0 / 3.0;
+};
+
 using TableRow = std::vector<std::string>;
 
 struct SummaryRow {
+    double skill = 0.0;
     int wins = 0;
     TableRow cells;
+};
+
+constexpr double kConfidenceZ95 = 1.959963984540054;
+constexpr double kTrueSkillBeta = (25.0 / 3.0) / 2.0;
+constexpr double kTrueSkillTau = (25.0 / 3.0) / 100.0;
+constexpr double kTrueSkillMinDelta = 0.0001;
+
+struct Gaussian {
+    double pi = 0.0;
+    double tau = 0.0;
+
+    Gaussian() = default;
+
+    Gaussian(double mu, double sigma) {
+        pi = 1.0 / (sigma * sigma);
+        tau = pi * mu;
+    }
+
+    double mu() const { return pi != 0.0 ? tau / pi : 0.0; }
+
+    double sigma() const {
+        return pi > 0.0 ? std::sqrt(1.0 / pi)
+                        : std::numeric_limits<double>::infinity();
+    }
+};
+
+Gaussian operator*(const Gaussian& lhs, const Gaussian& rhs) {
+    Gaussian result;
+    result.pi = lhs.pi + rhs.pi;
+    result.tau = lhs.tau + rhs.tau;
+    return result;
+}
+
+Gaussian operator/(const Gaussian& lhs, const Gaussian& rhs) {
+    Gaussian result;
+    result.pi = lhs.pi - rhs.pi;
+    result.tau = lhs.tau - rhs.tau;
+    return result;
+}
+
+struct Variable : Gaussian {
+    std::unordered_map<const void*, Gaussian> messages;
+
+    double set(const Gaussian& value) {
+        const double piDelta = std::abs(pi - value.pi);
+        const double tauDelta = std::abs(tau - value.tau);
+        pi = value.pi;
+        tau = value.tau;
+        if (std::isinf(piDelta)) return tauDelta;
+        return std::max(tauDelta, std::sqrt(piDelta));
+    }
+
+    void connect(const void* factor) { messages.emplace(factor, Gaussian{}); }
+
+    double updateMessage(const void* factor, const Gaussian& message) {
+        const Gaussian oldMessage = messages[factor];
+        messages[factor] = message;
+        return set((static_cast<const Gaussian&>(*this) / oldMessage) *
+                   message);
+    }
+
+    double updateValue(const void* factor, const Gaussian& value) {
+        const Gaussian oldMessage = messages[factor];
+        messages[factor] = value * oldMessage / static_cast<Gaussian&>(*this);
+        return set(value);
+    }
+};
+
+struct Factor {
+    explicit Factor(std::vector<Variable*> variables)
+        : vars(std::move(variables)) {
+        for (Variable* var : vars) {
+            var->connect(this);
+        }
+    }
+
+    std::vector<Variable*> vars;
+};
+
+struct PriorFactor : Factor {
+    PriorFactor(Variable* var, const TrueSkillRating& rating, double dynamic)
+        : Factor({var}), var(var), rating(rating), dynamic(dynamic) {}
+
+    double down() {
+        const double sigma =
+            std::sqrt(rating.sigma * rating.sigma + dynamic * dynamic);
+        return var->updateValue(this, Gaussian(rating.mu, sigma));
+    }
+
+    Variable* var = nullptr;
+    TrueSkillRating rating;
+    double dynamic = 0.0;
+};
+
+struct LikelihoodFactor : Factor {
+    LikelihoodFactor(Variable* mean, Variable* value, double variance)
+        : Factor({mean, value}), mean(mean), value(value), variance(variance) {}
+
+    double down() {
+        const Gaussian msg = *mean / mean->messages[this];
+        const double a = calcA(msg);
+        Gaussian message;
+        message.pi = a * msg.pi;
+        message.tau = a * msg.tau;
+        return value->updateMessage(this, message);
+    }
+
+    double up() {
+        const Gaussian msg = *value / value->messages[this];
+        const double a = calcA(msg);
+        Gaussian message;
+        message.pi = a * msg.pi;
+        message.tau = a * msg.tau;
+        return mean->updateMessage(this, message);
+    }
+
+    double calcA(const Gaussian& gaussian) const {
+        return 1.0 / (1.0 + variance * gaussian.pi);
+    }
+
+    Variable* mean = nullptr;
+    Variable* value = nullptr;
+    double variance = 0.0;
+};
+
+struct SumFactor : Factor {
+    SumFactor(Variable* sum, std::vector<Variable*> terms,
+              std::vector<double> coeffs)
+        : Factor(buildVariables(sum, terms)),
+          sum(sum),
+          terms(std::move(terms)),
+          coeffs(std::move(coeffs)) {}
+
+    double down() { return update(sum, terms, coeffs); }
+
+    double up(std::size_t index) {
+        std::vector<double> termCoeffs;
+        termCoeffs.reserve(coeffs.size());
+        const double coeff = coeffs[index];
+        for (std::size_t i = 0; i < coeffs.size(); ++i) {
+            if (coeff == 0.0) {
+                termCoeffs.push_back(0.0);
+            } else if (i == index) {
+                termCoeffs.push_back(1.0 / coeff);
+            } else {
+                termCoeffs.push_back(-coeffs[i] / coeff);
+            }
+        }
+
+        std::vector<Variable*> values = terms;
+        values[index] = sum;
+        return update(terms[index], values, termCoeffs);
+    }
+
+    static std::vector<Variable*> buildVariables(
+        Variable* sum, const std::vector<Variable*>& terms) {
+        std::vector<Variable*> variables;
+        variables.reserve(terms.size() + 1);
+        variables.push_back(sum);
+        variables.insert(variables.end(), terms.begin(), terms.end());
+        return variables;
+    }
+
+    double update(Variable* target, const std::vector<Variable*>& values,
+                  const std::vector<double>& termCoeffs) {
+        double piInverse = 0.0;
+        double mean = 0.0;
+        for (std::size_t i = 0; i < values.size(); ++i) {
+            const Gaussian marginal = *values[i] / values[i]->messages[this];
+            mean += termCoeffs[i] * marginal.mu();
+            if (std::isinf(piInverse)) continue;
+            if (marginal.pi == 0.0) {
+                piInverse = std::numeric_limits<double>::infinity();
+            } else {
+                piInverse += (termCoeffs[i] * termCoeffs[i]) / marginal.pi;
+            }
+        }
+
+        Gaussian message;
+        if (!std::isinf(piInverse) && piInverse > 0.0) {
+            message.pi = 1.0 / piInverse;
+            message.tau = message.pi * mean;
+        }
+        return target->updateMessage(this, message);
+    }
+
+    Variable* sum = nullptr;
+    std::vector<Variable*> terms;
+    std::vector<double> coeffs;
+};
+
+double standardNormalPdf(double value) {
+    static const double kInvSqrtTwoPi = 1.0 / std::sqrt(2.0 * std::acos(-1.0));
+    return kInvSqrtTwoPi * std::exp(-0.5 * value * value);
+}
+
+double standardNormalCdf(double value) {
+    return 0.5 * std::erfc(-value / std::sqrt(2.0));
+}
+
+double vWin(double diff) {
+    const double denominator = standardNormalCdf(diff);
+    return denominator > 0.0 ? standardNormalPdf(diff) / denominator : -diff;
+}
+
+double wWin(double diff) {
+    const double v = vWin(diff);
+    return std::clamp(v * (v + diff), 0.0, 1.0 - 1e-9);
+}
+
+struct TruncateFactor : Factor {
+    explicit TruncateFactor(Variable* var) : Factor({var}), var(var) {}
+
+    double up() {
+        const Gaussian marginal = *var;
+        const Gaussian message = var->messages[this];
+        const Gaussian division = marginal / message;
+        const double sqrtPi = std::sqrt(division.pi);
+        const double diff = division.tau / sqrtPi;
+        const double v = vWin(diff);
+        const double w = wWin(diff);
+        const double denominator = std::max(1e-9, 1.0 - w);
+
+        Gaussian value;
+        value.pi = division.pi / denominator;
+        value.tau = (division.tau + sqrtPi * v) / denominator;
+        return var->updateValue(this, value);
+    }
+
+    Variable* var = nullptr;
 };
 
 bool parsePositiveInt(const char* text, int& value) {
@@ -75,14 +319,13 @@ bool parsePositiveInt(const char* text, int& value) {
 WinRateSummary calculateWinRateSummary(int wins, int totalGames) {
     if (totalGames <= 0) return {};
 
-    constexpr double kWilsonZ95 = 1.959963984540054;
-    constexpr double z2 = kWilsonZ95 * kWilsonZ95;
+    constexpr double z2 = kConfidenceZ95 * kConfidenceZ95;
 
     const double n = static_cast<double>(totalGames);
     const double p = static_cast<double>(wins) / n;
     const double denominator = 1.0 + z2 / n;
     const double center = (p + z2 / (2.0 * n)) / denominator;
-    const double margin = kWilsonZ95 *
+    const double margin = kConfidenceZ95 *
                           std::sqrt((p * (1.0 - p) + z2 / (4.0 * n)) / n) /
                           denominator;
 
@@ -90,6 +333,14 @@ WinRateSummary calculateWinRateSummary(int wins, int totalGames) {
         p,
         std::clamp(center - margin, 0.0, 1.0),
         std::clamp(center + margin, 0.0, 1.0),
+    };
+}
+
+ConfidenceInterval calculateGaussianConfidenceInterval(double mean,
+                                                       double sigma) {
+    return {
+        mean - kConfidenceZ95 * sigma,
+        mean + kConfidenceZ95 * sigma,
     };
 }
 
@@ -137,11 +388,13 @@ void printTableRow(const TableRow& row, const std::vector<std::size_t>& widths,
 }
 
 void printSummaryTable(const Options& options,
-                       const std::vector<BotStats>& stats) {
-    const TableRow header = {"Bot",      "Wins",     "Win Rate", "95% CI",
-                             "Avg Rank", "Survived", "Avg Army", "Avg Land"};
-    const std::vector<bool> leftAligned = {true,  false, false, true,
-                                           false, false, false, false};
+                       const std::vector<BotStats>& stats,
+                       const std::vector<TrueSkillRating>& ratings) {
+    const TableRow header = {"Bot",      "TrueSkill",  "TS 95% CI", "Wins",
+                             "Win Rate", "Win 95% CI", "Avg Rank",  "Survived",
+                             "Avg Army", "Avg Land"};
+    const std::vector<bool> leftAligned = {true, false, true,  false, false,
+                                           true, false, false, false, false};
 
     std::vector<SummaryRow> rows;
     rows.reserve(options.bots.size());
@@ -149,15 +402,22 @@ void printSummaryTable(const Options& options,
         const BotStats& botStats = stats[i];
         const WinRateSummary winRate =
             calculateWinRateSummary(botStats.wins, options.games);
+        const ConfidenceInterval skillInterval =
+            calculateGaussianConfidenceInterval(ratings[i].mu,
+                                                ratings[i].sigma);
         const std::string lowerBound =
             alignTextRight(formatPercent(winRate.lowerBound), 7);
         const std::string upperBound =
             alignTextRight(formatPercent(winRate.upperBound), 7);
 
         rows.push_back({
+            ratings[i].mu,
             botStats.wins,
             {
                 options.bots[i],
+                formatFixed(ratings[i].mu),
+                "[" + formatFixed(skillInterval.lowerBound) + ", " +
+                    formatFixed(skillInterval.upperBound) + "]",
                 std::to_string(botStats.wins),
                 formatPercent(winRate.rate),
                 "[" + lowerBound + ", " + upperBound + "]",
@@ -174,6 +434,8 @@ void printSummaryTable(const Options& options,
 
     std::stable_sort(rows.begin(), rows.end(),
                      [](const SummaryRow& lhs, const SummaryRow& rhs) {
+                         if (lhs.skill != rhs.skill)
+                             return lhs.skill > rhs.skill;
                          return lhs.wins > rhs.wins;
                      });
 
@@ -194,6 +456,110 @@ void printSummaryTable(const Options& options,
         printTableRow(row.cells, widths, leftAligned);
     }
     printTableDivider(widths);
+}
+
+void updateTrueSkillRatings(std::vector<TrueSkillRating>& ratings,
+                            const std::vector<int>& ranksByBot) {
+    struct OrderedRating {
+        std::size_t botIndex = 0;
+        int rank = 0;
+        TrueSkillRating rating;
+    };
+
+    std::vector<OrderedRating> ordered;
+    ordered.reserve(ratings.size());
+    for (std::size_t i = 0; i < ratings.size(); ++i) {
+        ordered.push_back({i, ranksByBot[i], ratings[i]});
+    }
+
+    std::stable_sort(ordered.begin(), ordered.end(),
+                     [](const OrderedRating& lhs, const OrderedRating& rhs) {
+                         if (lhs.rank != rhs.rank) return lhs.rank < rhs.rank;
+                         return lhs.botIndex < rhs.botIndex;
+                     });
+
+    std::vector<Variable> ratingVars(ordered.size());
+    std::vector<Variable> performanceVars(ordered.size());
+    std::vector<Variable> teamPerformanceVars(ordered.size());
+    std::vector<Variable> teamDiffVars(ordered.size() > 1 ? ordered.size() - 1
+                                                          : 0);
+
+    std::vector<PriorFactor> ratingLayer;
+    std::vector<LikelihoodFactor> performanceLayer;
+    std::vector<SumFactor> teamPerformanceLayer;
+    std::vector<SumFactor> teamDiffLayer;
+    std::vector<TruncateFactor> truncateLayer;
+
+    ratingLayer.reserve(ordered.size());
+    performanceLayer.reserve(ordered.size());
+    teamPerformanceLayer.reserve(ordered.size());
+    if (ordered.size() > 1) {
+        teamDiffLayer.reserve(ordered.size() - 1);
+        truncateLayer.reserve(ordered.size() - 1);
+    }
+
+    for (std::size_t i = 0; i < ordered.size(); ++i) {
+        ratingLayer.emplace_back(&ratingVars[i], ordered[i].rating,
+                                 kTrueSkillTau);
+        performanceLayer.emplace_back(&ratingVars[i], &performanceVars[i],
+                                      kTrueSkillBeta * kTrueSkillBeta);
+        teamPerformanceLayer.emplace_back(
+            &teamPerformanceVars[i],
+            std::vector<Variable*>{&performanceVars[i]},
+            std::vector<double>{1.0});
+    }
+
+    for (std::size_t i = 0; i + 1 < ordered.size(); ++i) {
+        teamDiffLayer.emplace_back(
+            &teamDiffVars[i],
+            std::vector<Variable*>{&teamPerformanceVars[i],
+                                   &teamPerformanceVars[i + 1]},
+            std::vector<double>{1.0, -1.0});
+        truncateLayer.emplace_back(&teamDiffVars[i]);
+    }
+
+    for (PriorFactor& factor : ratingLayer) factor.down();
+    for (LikelihoodFactor& factor : performanceLayer) factor.down();
+    for (SumFactor& factor : teamPerformanceLayer) factor.down();
+
+    if (!teamDiffLayer.empty()) {
+        for (int iteration = 0; iteration < 10; ++iteration) {
+            double delta = 0.0;
+            if (teamDiffLayer.size() == 1) {
+                teamDiffLayer.front().down();
+                delta = truncateLayer.front().up();
+            } else {
+                for (std::size_t i = 0; i + 1 < teamDiffLayer.size(); ++i) {
+                    teamDiffLayer[i].down();
+                    delta = std::max(delta, truncateLayer[i].up());
+                    teamDiffLayer[i].up(1);
+                }
+                for (std::size_t i = teamDiffLayer.size() - 1; i > 0; --i) {
+                    teamDiffLayer[i].down();
+                    delta = std::max(delta, truncateLayer[i].up());
+                    teamDiffLayer[i].up(0);
+                }
+            }
+            if (delta <= kTrueSkillMinDelta) break;
+        }
+
+        teamDiffLayer.front().up(0);
+        teamDiffLayer.back().up(1);
+    }
+
+    for (SumFactor& factor : teamPerformanceLayer) {
+        for (std::size_t i = 0; i < factor.terms.size(); ++i) {
+            factor.up(i);
+        }
+    }
+    for (LikelihoodFactor& factor : performanceLayer) factor.up();
+
+    for (std::size_t i = 0; i < ordered.size(); ++i) {
+        ratings[ordered[i].botIndex] = {
+            ratingVars[i].mu(),
+            ratingVars[i].sigma(),
+        };
+    }
 }
 
 void printUsage() {
@@ -269,6 +635,8 @@ std::size_t findBotIndex(const std::vector<std::string>& botNames,
 GameResult runSingleGame(const Options& options, int gameNumber) {
     GameResult result;
     result.gameNumber = gameNumber;
+    result.ranksByBot.resize(options.bots.size(),
+                             static_cast<int>(options.bots.size()));
     result.statsDelta.resize(options.bots.size());
 
     Board board = Board::generate(options.width, options.height);
@@ -323,8 +691,9 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
 
     for (std::size_t i = 0; i < finalRank.size(); ++i) {
         const std::string playerName = game.getName(finalRank[i].player);
-        result.statsDelta[findBotIndex(options.bots, playerName)].totalRank +=
-            static_cast<long long>(i) + 1;
+        const std::size_t botIndex = findBotIndex(options.bots, playerName);
+        result.ranksByBot[botIndex] = static_cast<int>(i);
+        result.statsDelta[botIndex].totalRank += static_cast<long long>(i) + 1;
     }
 
     for (int playerID = 0; playerID < static_cast<int>(options.bots.size());
@@ -398,7 +767,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    std::vector<BotStats> stats(options.bots.size());
     const int workerCount = detectWorkerCount(options);
 
     std::cout << "Running " << options.games << " games on " << options.width
@@ -408,8 +776,9 @@ int main(int argc, char** argv) {
 
     std::atomic<int> nextGame{1};
     std::atomic<bool> stopRequested{false};
+    std::vector<GameResult> results(options.games);
     std::mutex outputMutex;
-    std::mutex statsMutex;
+    std::mutex resultsMutex;
     std::mutex errorMutex;
     std::exception_ptr workerError;
     std::vector<std::thread> workers;
@@ -427,8 +796,8 @@ int main(int argc, char** argv) {
                     printGameResult(result);
                 }
                 {
-                    std::lock_guard<std::mutex> lock(statsMutex);
-                    accumulateStats(stats, result);
+                    std::lock_guard<std::mutex> lock(resultsMutex);
+                    results[gameNumber - 1] = std::move(result);
                 }
             } catch (...) {
                 {
@@ -458,8 +827,17 @@ int main(int argc, char** argv) {
         }
     }
 
+    std::vector<BotStats> stats(options.bots.size());
+    std::vector<TrueSkillRating> ratings(options.bots.size());
+    // Replay results in submission order so the online rating update stays
+    // deterministic even when games finish on different threads.
+    for (const GameResult& result : results) {
+        accumulateStats(stats, result);
+        updateTrueSkillRatings(ratings, result.ranksByBot);
+    }
+
     std::cout << "\nSummary\n";
-    printSummaryTable(options, stats);
+    printSummaryTable(options, stats, ratings);
 
     return 0;
 }

@@ -10,7 +10,7 @@ if(APPLE)
     set(WrapOpenGL_AGL "-framework OpenGL")
 endif()
 
-find_package(Qt6 6.7 REQUIRED COMPONENTS Widgets Svg Network)
+find_package(Qt6 6.7 REQUIRED COMPONENTS Widgets Svg Network Charts)
 
 set(LOCALGEN_BOT_SOURCES
     src/bots/smartRandomBot.cpp
@@ -97,7 +97,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Svg Qt6::Network)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Svg Qt6::Network Qt6::Charts)
 
 add_executable(LocalGen-bot-simulator
     simulator/botSimulator.cpp

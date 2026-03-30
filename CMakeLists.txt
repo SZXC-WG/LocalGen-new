@@ -109,6 +109,7 @@ add_executable(LocalGen-bot-simulator
     src/core/board.hpp
     src/core/bot.h
     src/core/game.hpp
+    src/core/map.hpp
     src/core/message.hpp
     src/core/move.hpp
     src/core/player.hpp
@@ -120,6 +121,8 @@ target_include_directories(LocalGen-bot-simulator PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+target_link_libraries(LocalGen-bot-simulator PRIVATE Qt6::Core)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

@@ -14,6 +14,13 @@
 After building, run the executable from `build/Release`:
 
 - `./LocalGen-bot-simulator --games 10 --width 20 --height 20 --steps 600 --bots XiaruizeBot GcBot`
+- `./LocalGen-bot-simulator --games 10 --map maps/arena01.lgmp --steps 600 --bots XiaruizeBot GcBot`
+
+## Custom maps
+
+- `--map PATH` loads a custom map for every simulated game.
+- Only v6 `.lgmp` maps are supported by this flag.
+- When `--map` is provided, `--width` and `--height` are ignored.
 
 ## Notes
 

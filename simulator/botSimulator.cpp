@@ -11,6 +11,7 @@
 #include <atomic>
 #include <cmath>
 #include <cstdlib>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -24,6 +25,7 @@
 
 #include "core/bot.h"
 #include "core/game.hpp"
+#include "core/map.hpp"
 
 namespace {
 
@@ -34,6 +36,8 @@ struct Options {
     int maxSteps = 600;
     int threads = 0;
     bool remainIndex = true;
+    std::string mapPath;
+    Board customBoard;
     std::vector<std::string> bots = {"XiaruizeBot", "GcBot"};
 };
 
@@ -568,6 +572,8 @@ void printUsage() {
         << "  --games N          Number of matches to run (default: 8)\n"
         << "  --width N          Random map width (default: 20)\n"
         << "  --height N         Random map height (default: 20)\n"
+        << "  --map PATH         Use a custom .lgmp (v6) map instead of a "
+           "random map\n"
         << "  --threads N        CPU worker threads (default: auto)\n"
         << "  --steps N          Maximum half-turn steps per game (default: "
            "600)\n"
@@ -594,6 +600,9 @@ bool parseArgs(int argc, char** argv, Options& options) {
                 options.threads = value;
             else
                 options.maxSteps = value;
+        } else if (arg == "--map") {
+            if (i + 1 >= argc) return false;
+            options.mapPath = argv[++i];
         } else if (arg == "--shuffle") {
             options.remainIndex = false;
         } else if (arg == "--bots") {
@@ -611,6 +620,39 @@ bool parseArgs(int argc, char** argv, Options& options) {
         }
     }
     return options.bots.size() >= 2;
+}
+
+bool loadCustomMap(Options& options, std::string& errorMessage) {
+    if (options.mapPath.empty()) return true;
+
+    const std::filesystem::path mapPath(options.mapPath);
+    std::string extension = mapPath.extension().string();
+    std::transform(
+        extension.begin(), extension.end(), extension.begin(),
+        [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    if (extension != ".lgmp") {
+        errorMessage =
+            "Only v6 .lgmp maps are supported by --map: " + options.mapPath;
+        return false;
+    }
+
+    QString qtErrorMessage;
+    const MapDocument document =
+        openMap_v6(QString::fromStdString(options.mapPath), qtErrorMessage);
+    if (!qtErrorMessage.isEmpty()) {
+        errorMessage = "Failed to load map '" + options.mapPath +
+                       "': " + qtErrorMessage.toStdString();
+        return false;
+    }
+
+    if (document.board.getWidth() <= 0 || document.board.getHeight() <= 0) {
+        errorMessage =
+            "Failed to load map '" + options.mapPath + "': empty board.";
+        return false;
+    }
+
+    options.customBoard = document.board;
+    return true;
 }
 
 std::vector<RankItem> rankByPlayer(const std::vector<RankItem>& rank,
@@ -639,7 +681,9 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
                              static_cast<int>(options.bots.size()));
     result.statsDelta.resize(options.bots.size());
 
-    Board board = Board::generate(options.width, options.height);
+    Board board = options.mapPath.empty()
+                      ? Board::generate(options.width, options.height)
+                      : options.customBoard;
 
     std::vector<Player*> players;
     std::vector<index_t> teams;
@@ -751,6 +795,12 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    std::string mapError;
+    if (!loadCustomMap(options, mapError)) {
+        std::cerr << mapError << '\n';
+        return 2;
+    }
+
     const auto registeredBots = BotFactory::instance().list();
     std::unordered_map<std::string, bool> registered;
     for (const auto& name : registeredBots) {
@@ -763,14 +813,19 @@ int main(int argc, char** argv) {
                 std::cerr << ' ' << name;
             }
             std::cerr << '\n';
-            return 2;
+            return 3;
         }
     }
 
     const int workerCount = detectWorkerCount(options);
 
-    std::cout << "Running " << options.games << " games on " << options.width
-              << 'x' << options.height << " random maps with bots:";
+    std::cout << "Running " << options.games << " games on ";
+    if (options.mapPath.empty()) {
+        std::cout << options.width << 'x' << options.height << " random maps";
+    } else {
+        std::cout << "custom map " << options.mapPath;
+    }
+    std::cout << " with bots:";
     for (const auto& name : options.bots) std::cout << ' ' << name;
     std::cout << "\nUsing " << workerCount << " CPU worker thread(s).\n\n";
 
@@ -823,7 +878,7 @@ int main(int argc, char** argv) {
             std::rethrow_exception(workerError);
         } catch (const std::exception& ex) {
             std::cerr << "Simulation failed: " << ex.what() << '\n';
-            return 3;
+            return 4;
         }
     }
 

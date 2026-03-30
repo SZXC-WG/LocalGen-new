@@ -19,7 +19,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
-#include <QMessageBox>
 #include <QString>
 #include <string>
 

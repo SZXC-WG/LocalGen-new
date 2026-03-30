@@ -10,7 +10,6 @@
 #include <QResizeEvent>
 #include <QTimer>
 #include <QVBoxLayout>
-#include <QtCharts/QLegend>
 #include <algorithm>
 #include <cmath>
 
@@ -42,130 +41,6 @@ inline QColor playerColor(index_t playerId) {
         "#800080", "#9B0101", "#B3AC32", "#9A5E24", "#1031FF", "#594CA5",
         "#85A91C", "#F87375", "#B47FCA", "#B49971"};
     return palette[playerId % 16];
-}
-
-double adjustedAxisMax(double value) {
-    if (value <= 1.0) {
-        return 1.0;
-    }
-
-    return value + std::max(1.0, value * 0.08);
-}
-
-void styleAnalysisAxis(QAbstractAxis* axis, const QColor& foreground,
-                       const QColor& gridColor) {
-    if (axis == nullptr) {
-        return;
-    }
-
-    axis->setLabelsFont(QFont("Quicksand", 9, QFont::Medium));
-    axis->setTitleFont(QFont("Quicksand", 10, QFont::DemiBold));
-    axis->setLabelsColor(foreground);
-    axis->setTitleBrush(QBrush(foreground));
-    axis->setLinePenColor(foreground);
-    axis->setGridLineColor(gridColor);
-    axis->setMinorGridLineColor(gridColor);
-}
-
-QPushButton* createAnalysisToggleButton(const QString& text, QWidget* parent) {
-    QPushButton* button = new QPushButton(text, parent);
-    button->setCheckable(true);
-    button->setFocusPolicy(Qt::NoFocus);
-    button->setCursor(Qt::PointingHandCursor);
-    button->setStyleSheet(
-        "QPushButton {"
-        "background-color: rgba(240, 244, 248, 28);"
-        "color: rgb(240, 244, 248);"
-        "border: 1px solid rgba(240, 244, 248, 110);"
-        "border-radius: 14px;"
-        "padding: 5px 12px;"
-        "font: 600 10pt 'Quicksand';"
-        "}"
-        "QPushButton:checked {"
-        "background-color: rgba(73, 160, 255, 90);"
-        "}");
-    return button;
-}
-
-qreal smoothedLinearValue(const QList<QPointF>& history, qreal rawValue) {
-    constexpr qreal smoothingAlpha = 0.65;
-    if (history.isEmpty() || rawValue <= 0.0) {
-        return rawValue;
-    }
-    return history.constLast().y() +
-           smoothingAlpha * (rawValue - history.constLast().y());
-}
-
-qreal smoothedLogValue(const QList<QPointF>& history, qreal rawValue) {
-    constexpr qreal smoothingAlpha = 0.65;
-    const qreal rawLogValue = std::log10(std::max<qreal>(1.0, rawValue));
-    if (history.isEmpty() || rawValue <= 0.0) {
-        return std::pow(static_cast<qreal>(10.0), rawLogValue);
-    }
-    const qreal previousSmoothedLog =
-        std::log10(std::max<qreal>(1.0, history.constLast().y()));
-    const qreal smoothedLog =
-        previousSmoothedLog +
-        smoothingAlpha * (rawLogValue - previousSmoothedLog);
-    return std::pow(static_cast<qreal>(10.0), smoothedLog);
-}
-
-void appendAnalysisPoint(QList<QPointF>& history, qreal x, qreal y) {
-    history.append(QPointF(x, y));
-}
-
-void appendAnalysisHistories(PlayerAnalysisSeries& series, qreal stepValue,
-                             qreal armyValue, qreal landValue) {
-    appendAnalysisPoint(
-        series.linearArmyHistory, stepValue,
-        smoothedLinearValue(series.linearArmyHistory, armyValue));
-    appendAnalysisPoint(
-        series.linearLandHistory, stepValue,
-        smoothedLinearValue(series.linearLandHistory, landValue));
-    appendAnalysisPoint(series.logArmyHistory, stepValue,
-                        smoothedLogValue(series.logArmyHistory, armyValue));
-    appendAnalysisPoint(series.logLandHistory, stepValue,
-                        smoothedLogValue(series.logLandHistory, landValue));
-}
-
-const QList<QPointF>& analysisHistoryForMode(const PlayerAnalysisSeries& series,
-                                             bool showLand, bool useLogScale) {
-    if (useLogScale) {
-        return showLand ? series.logLandHistory : series.logArmyHistory;
-    }
-    return showLand ? series.linearLandHistory : series.linearArmyHistory;
-}
-
-QChart* createAnalysisChart(const QString& title, QValueAxis*& axisX) {
-    const QColor panelBackground(20, 23, 28, 0);
-    const QColor plotBackground(32, 37, 44, 160);
-    const QColor foreground(240, 244, 248);
-    const QColor gridColor(240, 244, 248, 64);
-
-    QChart* chart = new QChart();
-    chart->setTitle(title);
-    chart->setTitleFont(QFont("Quicksand", 11, QFont::Bold));
-    chart->setTitleBrush(QBrush(foreground));
-    chart->setAnimationOptions(QChart::NoAnimation);
-    chart->setBackgroundBrush(QBrush(panelBackground));
-    chart->setBackgroundPen(Qt::NoPen);
-    chart->setBackgroundVisible(true);
-    chart->setPlotAreaBackgroundBrush(QBrush(plotBackground));
-    chart->setPlotAreaBackgroundPen(QPen(gridColor));
-    chart->setPlotAreaBackgroundVisible(true);
-    chart->setMargins(QMargins(10, 10, 10, 10));
-    chart->legend()->hide();
-
-    axisX = new QValueAxis(chart);
-    axisX->setTitleText("Step");
-    axisX->setLabelFormat("%.0f");
-    axisX->setTickCount(6);
-    axisX->setMinorTickCount(0);
-    axisX->setRange(0.0, 1.0);
-    styleAnalysisAxis(axisX, foreground, gridColor);
-    chart->addAxis(axisX, Qt::AlignBottom);
-
-    return chart;
 }
 
 inline DisplayTile toDisplayTile(const TileView& tile) {
@@ -319,7 +194,14 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     turnLabel->raise();
 
     if (analysisEnabled) {
-        initializeAnalysisWidget();
+        std::vector<QColor> colors;
+        std::vector<QString> playerNames;
+        for (index_t i = 0; i < game->getPlayerCount(); ++i) {
+            colors.push_back(playerColor(i));
+            playerNames.push_back(QString::fromStdString(game->getName(i)));
+        }
+        analysisChartWidget = new AnalysisChartWidget(
+            this, game->getPlayerCount(), colors, playerNames);
     }
 
     leaderboardWidget = new LeaderboardWidget(this);
@@ -356,225 +238,6 @@ LocalGameWindow::~LocalGameWindow() {
         delete game;
         game = nullptr;
         humanPlayer = nullptr;
-    }
-}
-
-void LocalGameWindow::initializeAnalysisWidget() {
-    if (!analysisEnabled || game == nullptr || analysisWidget != nullptr) {
-        return;
-    }
-
-    const QColor foreground(240, 244, 248);
-    const QColor gridColor(240, 244, 248, 64);
-
-    analysisWidget = new QFrame(this);
-    analysisWidget->setFocusPolicy(Qt::NoFocus);
-    analysisWidget->setObjectName("analysisWidget");
-    analysisWidget->setStyleSheet(
-        "QFrame#analysisWidget {"
-        "background-color: rgba(18, 21, 26, 232);"
-        "border: 2px solid rgba(240, 244, 248, 180);"
-        "border-radius: 6px;"
-        "}");
-
-    QVBoxLayout* analysisLayout = new QVBoxLayout(analysisWidget);
-    analysisLayout->setContentsMargins(8, 8, 8, 8);
-    analysisLayout->setSpacing(6);
-
-    QHBoxLayout* controlsLayout = new QHBoxLayout();
-    controlsLayout->setContentsMargins(0, 0, 0, 0);
-    controlsLayout->addStretch(1);
-
-    analysisMetricToggle =
-        createAnalysisToggleButton("Switch to Land", analysisWidget);
-    controlsLayout->addWidget(analysisMetricToggle);
-
-    analysisScaleToggle =
-        createAnalysisToggleButton("Switch to Log", analysisWidget);
-    controlsLayout->addWidget(analysisScaleToggle);
-    analysisLayout->addLayout(controlsLayout);
-
-    analysisChart = createAnalysisChart("Army Trend", analysisAxisX);
-
-    analysisAxisYLinear = new QValueAxis(analysisChart);
-    analysisAxisYLinear->setLabelFormat("%.0f");
-    analysisAxisYLinear->setTickCount(6);
-    analysisAxisYLinear->setMinorTickCount(0);
-    analysisAxisYLinear->setRange(0.0, 1.0);
-    styleAnalysisAxis(analysisAxisYLinear, foreground, gridColor);
-    analysisChart->addAxis(analysisAxisYLinear, Qt::AlignLeft);
-
-    analysisAxisYLog = new QLogValueAxis(analysisChart);
-    analysisAxisYLog->setLabelFormat("%.0f");
-    analysisAxisYLog->setBase(10.0);
-    analysisAxisYLog->setMinorTickCount(8);
-    analysisAxisYLog->setRange(1.0, 10.0);
-    styleAnalysisAxis(analysisAxisYLog, foreground, gridColor);
-
-    analysisChartView = new QChartView(analysisChart, analysisWidget);
-    analysisChartView->setFocusPolicy(Qt::NoFocus);
-    analysisChartView->setFrameShape(QFrame::NoFrame);
-    analysisChartView->setRubberBand(QChartView::NoRubberBand);
-    analysisChartView->setRenderHint(QPainter::Antialiasing, true);
-    analysisChartView->setStyleSheet("background: transparent;");
-    analysisLayout->addWidget(analysisChartView, 1);
-
-    connect(analysisMetricToggle, &QPushButton::toggled, this,
-            [this](bool checked) {
-                analysisShowingLand = checked;
-                refreshAnalysisChart();
-            });
-    connect(analysisScaleToggle, &QPushButton::toggled, this,
-            [this](bool checked) {
-                analysisUsingLogScale = checked;
-                refreshAnalysisChart();
-            });
-
-    analysisSeries.resize(static_cast<size_t>(game->getPlayerCount()));
-    for (index_t playerId = 0; playerId < game->getPlayerCount(); ++playerId) {
-        const QColor color = playerColor(playerId);
-        const QString name = QString::fromStdString(game->getName(playerId));
-
-        QPen pen(color);
-        pen.setWidth(2);
-
-        QLineSeries* series = new QLineSeries(analysisChart);
-        series->setName(name);
-        series->setPen(pen);
-        analysisChart->addSeries(series);
-        series->attachAxis(analysisAxisX);
-        series->attachAxis(analysisAxisYLinear);
-
-        analysisSeries[static_cast<size_t>(playerId)].series = series;
-    }
-
-    refreshAnalysisChart();
-}
-
-void LocalGameWindow::refreshAnalysisChart() {
-    if (!analysisEnabled || analysisChart == nullptr) {
-        return;
-    }
-
-    const bool showLand = analysisShowingLand;
-    const bool useLogScale = analysisUsingLogScale;
-    analysisChart->setTitle(
-        QString("%1 Trend (%2)")
-            .arg(showLand ? "Land" : "Army", useLogScale ? "Log" : "Linear"));
-
-    if (analysisMetricToggle != nullptr) {
-        analysisMetricToggle->setText(showLand ? "Switch to Army"
-                                               : "Switch to Land");
-    }
-    if (analysisScaleToggle != nullptr) {
-        analysisScaleToggle->setText(useLogScale ? "Switch to Linear"
-                                                 : "Switch to Log");
-    }
-
-    QAbstractAxis* activeAxis =
-        useLogScale ? static_cast<QAbstractAxis*>(analysisAxisYLog)
-                    : static_cast<QAbstractAxis*>(analysisAxisYLinear);
-    QAbstractAxis* inactiveAxis =
-        useLogScale ? static_cast<QAbstractAxis*>(analysisAxisYLinear)
-                    : static_cast<QAbstractAxis*>(analysisAxisYLog);
-
-    for (PlayerAnalysisSeries& playerSeries : analysisSeries) {
-        if (playerSeries.series != nullptr && inactiveAxis != nullptr) {
-            playerSeries.series->detachAxis(inactiveAxis);
-        }
-    }
-    if (inactiveAxis != nullptr &&
-        analysisChart->axes(Qt::Vertical).contains(inactiveAxis)) {
-        analysisChart->removeAxis(inactiveAxis);
-    }
-    if (activeAxis != nullptr &&
-        !analysisChart->axes(Qt::Vertical).contains(activeAxis)) {
-        analysisChart->addAxis(activeAxis, Qt::AlignLeft);
-    }
-
-    updateAnalysisAxisRanges();
-
-    for (PlayerAnalysisSeries& playerSeries : analysisSeries) {
-        if (playerSeries.series == nullptr) {
-            continue;
-        }
-        if (activeAxis != nullptr) {
-            playerSeries.series->attachAxis(activeAxis);
-        }
-        playerSeries.series->replace(
-            analysisHistoryForMode(playerSeries, showLand, useLogScale));
-    }
-}
-
-void LocalGameWindow::updateAnalysisAxisRanges() {
-    if (!analysisEnabled || analysisChart == nullptr) {
-        return;
-    }
-
-    const qreal axisMaxX = std::max<qreal>(
-        1.0, static_cast<qreal>(std::max(0, analysisSampleCount - 1)));
-    if (analysisAxisX != nullptr) {
-        analysisAxisX->setRange(0.0, axisMaxX);
-    }
-
-    const double axisMaxY =
-        analysisShowingLand
-            ? adjustedAxisMax(static_cast<double>(analysisLandMax))
-            : adjustedAxisMax(static_cast<double>(analysisArmyMax));
-    if (analysisUsingLogScale && analysisAxisYLog != nullptr) {
-        analysisAxisYLog->setRange(1.0, std::max(10.0, axisMaxY));
-    } else if (!analysisUsingLogScale && analysisAxisYLinear != nullptr) {
-        analysisAxisYLinear->setRange(0.0, axisMaxY);
-    }
-}
-
-void LocalGameWindow::updateAnalysis(const std::vector<LeaderboardRow>& rows) {
-    if (!analysisEnabled || analysisWidget == nullptr) {
-        return;
-    }
-
-    const qreal stepValue = static_cast<qreal>(analysisSampleCount);
-    army_t maxArmy = analysisArmyMax;
-    int maxLand = analysisLandMax;
-
-    std::vector<bool> updated(analysisSeries.size(), false);
-    for (const LeaderboardRow& row : rows) {
-        if (row.playerId < 0 ||
-            static_cast<size_t>(row.playerId) >= analysisSeries.size()) {
-            continue;
-        }
-
-        PlayerAnalysisSeries& series =
-            analysisSeries[static_cast<size_t>(row.playerId)];
-        appendAnalysisHistories(series, stepValue, static_cast<qreal>(row.army),
-                                static_cast<qreal>(row.land));
-
-        maxArmy = std::max(maxArmy, row.army);
-        maxLand = std::max(maxLand, row.land);
-        updated[static_cast<size_t>(row.playerId)] = true;
-    }
-
-    for (size_t i = 0; i < analysisSeries.size(); ++i) {
-        if (updated[i]) {
-            continue;
-        }
-        appendAnalysisHistories(analysisSeries[i], stepValue, 0.0, 0.0);
-    }
-
-    ++analysisSampleCount;
-    analysisArmyMax = maxArmy;
-    analysisLandMax = maxLand;
-    updateAnalysisAxisRanges();
-
-    for (PlayerAnalysisSeries& playerSeries : analysisSeries) {
-        if (playerSeries.series == nullptr) {
-            continue;
-        }
-        const QList<QPointF>& history = analysisHistoryForMode(
-            playerSeries, analysisShowingLand, analysisUsingLogScale);
-        if (!history.isEmpty()) {
-            playerSeries.series->append(history.constLast());
-        }
     }
 }
 
@@ -672,7 +335,9 @@ void LocalGameWindow::updateLeaderboard(const std::vector<RankItem>& rank) {
         rows.push_back(std::move(row));
     }
 
-    updateAnalysis(rows);
+    if (analysisChartWidget != nullptr) {
+        analysisChartWidget->updateAnalysis(rows);
+    }
     leaderboardWidget->setRows(std::move(rows));
     positionFloatingWidgets();
 }
@@ -685,13 +350,13 @@ void LocalGameWindow::positionFloatingWidgets() {
         turnLabel->raise();
     }
 
-    if (analysisWidget != nullptr) {
+    if (analysisChartWidget != nullptr) {
         const int analysisWidth = std::clamp(width() / 3, 340, 560);
         const int analysisHeight = std::clamp(height() / 2, 340, 520);
         const int x = std::max(margin, width() - analysisWidth - margin);
         const int y = std::max(margin, height() - analysisHeight - margin);
-        analysisWidget->setGeometry(x, y, analysisWidth, analysisHeight);
-        analysisWidget->raise();
+        analysisChartWidget->setGeometry(x, y, analysisWidth, analysisHeight);
+        analysisChartWidget->raise();
     }
 
     if (leaderboardWidget != nullptr) {

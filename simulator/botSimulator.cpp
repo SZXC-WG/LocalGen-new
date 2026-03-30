@@ -773,7 +773,7 @@ void printGameResult(const GameResult& result) {
             std::cout << " wins";
         }
     }
-    std::cout << " after " << result.steps << " half-turns\n";
+    std::cout << " after " << result.steps << " half-turns" << std::endl;
 }
 
 void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
@@ -789,6 +789,9 @@ void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
 }  // namespace
 
 int main(int argc, char** argv) {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
     Options options;
     if (!parseArgs(argc, argv, options)) {
         printUsage();
@@ -827,7 +830,8 @@ int main(int argc, char** argv) {
     }
     std::cout << " with bots:";
     for (const auto& name : options.bots) std::cout << ' ' << name;
-    std::cout << "\nUsing " << workerCount << " CPU worker thread(s).\n\n";
+    std::cout << "\nUsing " << workerCount << " CPU worker thread(s).\n"
+              << std::endl;
 
     std::atomic<int> nextGame{1};
     std::atomic<bool> stopRequested{false};
@@ -877,7 +881,7 @@ int main(int argc, char** argv) {
         try {
             std::rethrow_exception(workerError);
         } catch (const std::exception& ex) {
-            std::cerr << "Simulation failed: " << ex.what() << '\n';
+            std::cerr << "Simulation failed: " << ex.what() << std::endl;
             return 4;
         }
     }

@@ -1,13 +1,11 @@
 #ifndef LOCALGAMEWINDOW_H
 #define LOCALGAMEWINDOW_H
 
-#include <QColor>
 #include <QDialog>
 #include <QFrame>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QList>
-#include <QPaintEvent>
 #include <QPointF>
 #include <QPushButton>
 #include <QResizeEvent>
@@ -19,22 +17,13 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QLogValueAxis>
 #include <QtCharts/QValueAxis>
-#include <functional>
 #include <vector>
 
+#include "../leaderboardWidget/leaderboardWidget.h"
 #include "../localGameDialog/localGameDialog.h"
 #include "../mapWidget/mapWidget.h"
 #include "core/game.hpp"
 #include "core/player.hpp"
-
-struct LeaderboardRow {
-    index_t playerId = -1;
-    QString playerName;
-    army_t army = 0;
-    int land = 0;
-    QColor playerColor;
-    bool isAlive = true;
-};
 
 struct PlayerAnalysisSeries {
     QLineSeries* series = nullptr;
@@ -42,37 +31,6 @@ struct PlayerAnalysisSeries {
     QList<QPointF> linearLandHistory;
     QList<QPointF> logArmyHistory;
     QList<QPointF> logLandHistory;
-};
-
-class FloatingLeaderboardWidget : public QWidget {
-   public:
-    struct Column {
-        QString title;
-        int width = 80;
-        int minWidth = 0;
-        int maxWidth = 0;
-        std::function<QString(const LeaderboardRow&)> textProvider;
-        std::function<QColor(const LeaderboardRow&)> backgroundProvider;
-        std::function<QColor(const LeaderboardRow&)> foregroundProvider;
-    };
-
-    explicit FloatingLeaderboardWidget(QWidget* parent = nullptr);
-
-    void setColumns(std::vector<Column> columns);
-    void setRows(std::vector<LeaderboardRow> rows);
-
-   protected:
-    void paintEvent(QPaintEvent* event) override;
-
-   private:
-    std::vector<int> computeColumnWidths() const;
-    void updateFixedSize();
-
-    std::vector<Column> columns;
-    std::vector<LeaderboardRow> rows;
-    constexpr static int headerHeight = 30;
-    constexpr static int rowHeight = 28;
-    constexpr static int horizontalPadding = 12;
 };
 
 // Helper class
@@ -115,7 +73,7 @@ class LocalGameWindow : public QDialog {
     void resizeEvent(QResizeEvent* event) override;
 
     MapWidget* gameMap = nullptr;
-    FloatingLeaderboardWidget* leaderboardWidget = nullptr;
+    LeaderboardWidget* leaderboardWidget = nullptr;
     QFrame* analysisWidget = nullptr;
     QChart* analysisChart = nullptr;
     QChartView* analysisChartView = nullptr;

@@ -74,6 +74,8 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/ui/localGameDialog/localGameDialog.ui
     src/ui/mapWidget/mapWidget.cpp
     src/ui/mapWidget/mapWidget.h
+    src/ui/leaderboardWidget/leaderboardWidget.cpp
+    src/ui/leaderboardWidget/leaderboardWidget.h
     src/ui/localGameWindow/localGameWindow.cpp
     src/ui/localGameWindow/localGameWindow.h
     src/ui/mapCreatorWindow/mapCreatorWindow.cpp

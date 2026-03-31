@@ -69,6 +69,9 @@ class Player {
     virtual void onText(turn_t turn, const GameMessageText& msg) {}
 
    public:
+    std::deque<Move>& getMoveQueue() { return moveQueue; }
+
+   public:
     inline Move step() {
         if (moveQueue.empty()) return Move();
         Move move = moveQueue.front();

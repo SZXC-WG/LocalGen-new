@@ -83,19 +83,16 @@ class GcBot : public BasicBot {
             return -tile.army;
         };
 
-        for (pos_t i = 0; i <= height + 1; ++i) {
-            for (pos_t j = 0; j <= width + 1; ++j) {
-                TileInfo& tile = tileAt(i, j);
-                tile.dist = 32767;
-                tile.eval = -INF;
-            }
+        for (TileInfo& tile : tiles) {
+            tile.dist = 32767;
+            tile.eval = -INF;
+            tile.par = Coord(-1, -1);
         }
 
         std::queue<Coord> q;
         q.push(st);
         tileAt(st).dist = 0;
         tileAt(st).eval = 0;
-        tileAt(st).par = Coord(-1, -1);
 
         while (!q.empty()) {
             Coord cur = q.front();
@@ -122,11 +119,10 @@ class GcBot : public BasicBot {
     }
 
     Coord moveTowards(Coord st, Coord dest) const {
-        int maxIterations = height * width;
         Coord nxt;
         while ((nxt = tileAt(dest).par) != st) {
             dest = nxt;
-            if (dest.x == -1 || dest.y == -1 || --maxIterations <= 0) {
+            if (dest.x == -1 || dest.y == -1) {
                 return st;
             }
         }
@@ -208,9 +204,12 @@ class GcBot : public BasicBot {
                                  tile.occupier == -1)
                                     ? seenArmy
                                     : (seenArmy + tile.army) / 2;
-                } else if (!tile.known) {
-                    tile.type = type;
-                    if (tile.occupier == id) tile.occupier = view.occupier;
+                } else {
+                    if (!tile.known) tile.type = type;
+                    if (tile.occupier == id) {
+                        tile.occupier = view.occupier;
+                        tile.army = view.army;
+                    }
                 }
             }
         }

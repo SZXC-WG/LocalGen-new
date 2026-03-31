@@ -36,6 +36,7 @@ struct Options {
     int maxSteps = 600;
     int threads = 0;
     bool remainIndex = true;
+    bool silent = false;
     std::string mapPath;
     Board customBoard;
     std::vector<std::string> bots = {"XiaruizeBot", "GcBot"};
@@ -577,6 +578,7 @@ void printUsage() {
         << "  --threads N        CPU worker threads (default: auto)\n"
         << "  --steps N          Maximum half-turn steps per game (default: "
            "600)\n"
+        << "  --silent           Only print the final summary table\n"
         << "  --shuffle          Randomize player index mapping in simulator\n"
         << "  --bots A B ...     Bot names to simulate (default: XiaruizeBot "
            "GcBot)\n";
@@ -603,6 +605,8 @@ bool parseArgs(int argc, char** argv, Options& options) {
         } else if (arg == "--map") {
             if (i + 1 >= argc) return false;
             options.mapPath = argv[++i];
+        } else if (arg == "--silent") {
+            options.silent = true;
         } else if (arg == "--shuffle") {
             options.remainIndex = false;
         } else if (arg == "--bots") {
@@ -822,16 +826,19 @@ int main(int argc, char** argv) {
 
     const int workerCount = detectWorkerCount(options);
 
-    std::cout << "Running " << options.games << " games on ";
-    if (options.mapPath.empty()) {
-        std::cout << options.width << 'x' << options.height << " random maps";
-    } else {
-        std::cout << "custom map " << options.mapPath;
+    if (!options.silent) {
+        std::cout << "Running " << options.games << " games on ";
+        if (options.mapPath.empty()) {
+            std::cout << options.width << 'x' << options.height
+                      << " random maps";
+        } else {
+            std::cout << "custom map " << options.mapPath;
+        }
+        std::cout << " with bots:";
+        for (const auto& name : options.bots) std::cout << ' ' << name;
+        std::cout << "\nUsing " << workerCount << " CPU worker thread(s).\n"
+                  << std::endl;
     }
-    std::cout << " with bots:";
-    for (const auto& name : options.bots) std::cout << ' ' << name;
-    std::cout << "\nUsing " << workerCount << " CPU worker thread(s).\n"
-              << std::endl;
 
     std::atomic<int> nextGame{1};
     std::atomic<bool> stopRequested{false};
@@ -850,7 +857,7 @@ int main(int argc, char** argv) {
 
             try {
                 GameResult result = runSingleGame(options, gameNumber);
-                {
+                if (!options.silent) {
                     std::lock_guard<std::mutex> lock(outputMutex);
                     printGameResult(result);
                 }
@@ -895,7 +902,7 @@ int main(int argc, char** argv) {
         updateTrueSkillRatings(ratings, result.ranksByBot);
     }
 
-    std::cout << "\nSummary\n";
+    if (!options.silent) std::cout << "\nSummary\n";
     printSummaryTable(options, stats, ratings);
 
     return 0;

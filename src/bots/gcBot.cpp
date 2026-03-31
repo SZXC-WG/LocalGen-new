@@ -75,7 +75,7 @@ class GcBot : public BasicBot {
     void evaluateRouteCosts(Coord st) {
         const army_t cityBonus = tileAt(st).army / 12;
         auto gv = [&](const TileInfo& tile) -> value_t {
-            if (tile.type == TILE_SWAMP) return -1;
+            if (tile.type == TILE_SWAMP) return -2;
             if (tile.type == TILE_OBSTACLE) return 0;
             if (!tile.known) return 2;
             if (tile.occupier == id) return tile.army - 1;
@@ -99,6 +99,17 @@ class GcBot : public BasicBot {
             q.pop();
             TileInfo& tile = tileAt(cur);
             tile.eval += gv(tile);
+
+            if (tile.type == TILE_SWAMP) {
+                for (auto [dx, dy] : delta) {
+                    pos_t nx = cur.x + dx, ny = cur.y + dy;
+                    if (1 <= nx && nx <= height && 1 <= ny && ny <= width &&
+                        tileAt(nx, ny).type == TILE_OBSTACLE) {
+                        tile.eval++;
+                        break;
+                    }
+                }
+            }
 
             for (auto [dx, dy] : delta) {
                 pos_t nx = cur.x + dx, ny = cur.y + dy;

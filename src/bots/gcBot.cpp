@@ -345,7 +345,7 @@ class GcBot : public BasicBot {
                 const TileInfo& pTile = tileAt(prevTarget);
                 if (pTile.occupier != id && !isImpassableTile(pTile.type)) {
                     value_t prevBlockValue = computeTileValue(prevTarget);
-                    if (std::abs(prevBlockValue - maxBlockValue) < 25) {
+                    if (maxBlockValue - prevBlockValue < 25) {
                         targetPos = prevTarget;
                     }
                 }

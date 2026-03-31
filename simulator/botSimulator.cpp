@@ -733,11 +733,11 @@ std::vector<RankItem> rankByPlayer(const std::vector<RankItem>& rank,
     return byPlayer;
 }
 
-std::size_t findBotIndex(const std::vector<std::string>& botNames,
-                         const std::string& name) {
-    auto it = std::find(botNames.begin(), botNames.end(), name);
-    if (it == botNames.end()) return 0;
-    return static_cast<std::size_t>(std::distance(botNames.begin(), it));
+std::size_t botIndexForPlayer(const BasicGame& game, index_t playerId) {
+    // Each simulator bot gets a unique team id equal to its original index,
+    // so the team id stays as a stable bot mapping even when player slots are
+    // shuffled inside BasicGame.
+    return static_cast<std::size_t>(game.getTeam(playerId));
 }
 
 GameResult runSingleGame(const Options& options, int gameNumber) {
@@ -753,10 +753,9 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
 
     std::vector<Player*> players;
     std::vector<index_t> teams;
-    std::vector<std::string> names;
     players.reserve(options.bots.size());
-    teams.reserve(options.bots.size());
-    names.reserve(options.bots.size());
+    teams.resize(options.bots.size());
+    std::iota(teams.begin(), teams.end(), 0);
 
     for (std::size_t i = 0; i < options.bots.size(); ++i) {
         const std::string& botName = options.bots[i];
@@ -771,11 +770,9 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
             bot = new TimedBot(bot);
         }
         players.push_back(bot);
-        teams.push_back(static_cast<index_t>(i));
-        names.push_back(botName);
     }
 
-    BasicGame game(options.remainIndex, players, teams, names, board);
+    BasicGame game(options.remainIndex, players, teams, options.bots, board);
     const int initResult = game.init();
     if (initResult != 0) {
         std::ostringstream err;
@@ -798,23 +795,24 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
         static_cast<int>(game.getAlivePlayers().size()) > 1 &&
         result.steps >= options.maxSteps;
     if (!finalRank.empty()) {
-        result.winnerName = game.getName(finalRank.front().player);
-        result.statsDelta[findBotIndex(options.bots, result.winnerName)].wins++;
+        const std::size_t winnerIndex =
+            botIndexForPlayer(game, finalRank.front().player);
+        result.winnerName = options.bots[winnerIndex];
+        result.statsDelta[winnerIndex].wins++;
     }
 
     for (std::size_t i = 0; i < finalRank.size(); ++i) {
-        const std::string playerName = game.getName(finalRank[i].player);
-        const std::size_t botIndex = findBotIndex(options.bots, playerName);
+        const std::size_t botIndex =
+            botIndexForPlayer(game, finalRank[i].player);
         result.ranksByBot[botIndex] = static_cast<int>(i);
         result.statsDelta[botIndex].totalRank += static_cast<long long>(i) + 1;
     }
 
     for (int playerID = 0; playerID < static_cast<int>(options.bots.size());
          ++playerID) {
-        const std::string playerName = game.getName(playerID);
-        const std::size_t botIndex = findBotIndex(options.bots, playerName);
         if (playerID >= 0 && playerID < static_cast<int>(byPlayer.size())) {
             const RankItem& item = byPlayer[playerID];
+            const std::size_t botIndex = botIndexForPlayer(game, playerID);
             BotStats& botStats = result.statsDelta[botIndex];
             botStats.totalArmy += item.army;
             botStats.totalLand += item.land;
@@ -823,12 +821,8 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
     }
 
     if (options.measureLatency) {
-        for (int playerID = 0; playerID < static_cast<int>(options.bots.size());
-             ++playerID) {
-            if (auto* timed = dynamic_cast<TimedBot*>(players[playerID])) {
-                const std::string playerName = game.getName(playerID);
-                const std::size_t botIndex =
-                    findBotIndex(options.bots, playerName);
+        for (std::size_t botIndex = 0; botIndex < players.size(); ++botIndex) {
+            if (auto* timed = dynamic_cast<TimedBot*>(players[botIndex])) {
                 result.statsDelta[botIndex].totalLatencyMicroseconds +=
                     timed->totalMicroseconds();
                 result.statsDelta[botIndex].totalLatencyCalls +=

@@ -159,7 +159,6 @@ class Board {
                     for (index_t player = 0; player < numPlayers;
                          ++player, base += RC)
                         visionCache[base] = true;
-                    continue;
                 }
                 index_t player = tile.occupier;
                 if (player == -1) {

@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <filesystem>
@@ -29,6 +30,41 @@
 
 namespace {
 
+class TimedBot : public BasicBot {
+   public:
+    explicit TimedBot(BasicBot* inner) : inner_(inner) {}
+    ~TimedBot() override { delete inner_; }
+
+    void init(index_t playerId, const GameConstantsPack& constants) override {
+        inner_->init(playerId, constants);
+    }
+
+    void requestMove(const BoardView& boardView,
+                     const std::vector<RankItem>& rank) override {
+        auto start = std::chrono::steady_clock::now();
+        inner_->requestMove(boardView, rank);
+        auto end = std::chrono::steady_clock::now();
+        totalTime_ += std::chrono::duration<double, std::micro>(end - start);
+        ++callCount_;
+        moveQueue = std::move(inner_->getMoveQueue());
+    }
+
+    void onGameEvent(const GameEvent& event) override {
+        inner_->onGameEvent(event);
+    }
+
+    double totalMicroseconds() const { return totalTime_.count(); }
+    long long callCount() const { return callCount_; }
+    double averageMicroseconds() const {
+        return callCount_ > 0 ? totalTime_.count() / callCount_ : 0.0;
+    }
+
+   private:
+    BasicBot* inner_;
+    std::chrono::duration<double, std::micro> totalTime_{0};
+    long long callCount_ = 0;
+};
+
 struct Options {
     int games = 8;
     int width = 20;
@@ -37,6 +73,7 @@ struct Options {
     int threads = 0;
     bool remainIndex = true;
     bool silent = false;
+    bool measureLatency = false;
     std::string mapPath;
     Board customBoard;
     std::vector<std::string> bots = {"XiaruizeBot", "GcBot"};
@@ -48,6 +85,8 @@ struct BotStats {
     long long totalRank = 0;
     long long totalArmy = 0;
     long long totalLand = 0;
+    double totalLatencyMicroseconds = 0.0;
+    long long totalLatencyCalls = 0;
 };
 
 struct GameResult {
@@ -392,14 +431,24 @@ void printTableRow(const TableRow& row, const std::vector<std::size_t>& widths,
     std::cout << '\n';
 }
 
+std::string formatLatency(double microseconds) {
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(2) << microseconds << " us";
+    return out.str();
+}
+
 void printSummaryTable(const Options& options,
                        const std::vector<BotStats>& stats,
                        const std::vector<TrueSkillRating>& ratings) {
-    const TableRow header = {"Bot",      "TrueSkill",  "TS 95% CI", "Wins",
-                             "Win Rate", "Win 95% CI", "Avg Rank",  "Survived",
-                             "Avg Army", "Avg Land"};
-    const std::vector<bool> leftAligned = {true, false, true,  false, false,
-                                           true, false, false, false, false};
+    TableRow header = {"Bot",      "TrueSkill",  "TS 95% CI", "Wins",
+                       "Win Rate", "Win 95% CI", "Avg Rank",  "Survived",
+                       "Avg Army", "Avg Land"};
+    std::vector<bool> leftAligned = {true, false, true,  false, false,
+                                     true, false, false, false, false};
+    if (options.measureLatency) {
+        header.push_back("Avg Latency");
+        leftAligned.push_back(false);
+    }
 
     std::vector<SummaryRow> rows;
     rows.reserve(options.bots.size());
@@ -415,25 +464,34 @@ void printSummaryTable(const Options& options,
         const std::string upperBound =
             alignTextRight(formatPercent(winRate.upperBound), 7);
 
+        TableRow cells = {
+            options.bots[i],
+            formatFixed(ratings[i].mu),
+            "[" + formatFixed(skillInterval.lowerBound) + ", " +
+                formatFixed(skillInterval.upperBound) + "]",
+            std::to_string(botStats.wins),
+            formatPercent(winRate.rate),
+            "[" + lowerBound + ", " + upperBound + "]",
+            formatFixed(static_cast<double>(botStats.totalRank) /
+                        options.games),
+            std::to_string(botStats.survivalCount),
+            formatFixed(static_cast<double>(botStats.totalArmy) /
+                        options.games),
+            formatFixed(static_cast<double>(botStats.totalLand) /
+                        options.games),
+        };
+        if (options.measureLatency) {
+            const double avgLatency = botStats.totalLatencyCalls > 0
+                                          ? botStats.totalLatencyMicroseconds /
+                                                botStats.totalLatencyCalls
+                                          : 0.0;
+            cells.push_back(formatLatency(avgLatency));
+        }
+
         rows.push_back({
             ratings[i].mu,
             botStats.wins,
-            {
-                options.bots[i],
-                formatFixed(ratings[i].mu),
-                "[" + formatFixed(skillInterval.lowerBound) + ", " +
-                    formatFixed(skillInterval.upperBound) + "]",
-                std::to_string(botStats.wins),
-                formatPercent(winRate.rate),
-                "[" + lowerBound + ", " + upperBound + "]",
-                formatFixed(static_cast<double>(botStats.totalRank) /
-                            options.games),
-                std::to_string(botStats.survivalCount),
-                formatFixed(static_cast<double>(botStats.totalArmy) /
-                            options.games),
-                formatFixed(static_cast<double>(botStats.totalLand) /
-                            options.games),
-            },
+            std::move(cells),
         });
     }
 
@@ -580,6 +638,8 @@ void printUsage() {
            "600)\n"
         << "  --silent           Only print the final summary table\n"
         << "  --shuffle          Randomize player index mapping in simulator\n"
+        << "  --latency          Measure and report average requestMove() "
+           "latency per bot\n"
         << "  --bots A B ...     Bot names to simulate (default: XiaruizeBot "
            "GcBot)\n";
 }
@@ -607,6 +667,8 @@ bool parseArgs(int argc, char** argv, Options& options) {
             options.mapPath = argv[++i];
         } else if (arg == "--silent") {
             options.silent = true;
+        } else if (arg == "--latency") {
+            options.measureLatency = true;
         } else if (arg == "--shuffle") {
             options.remainIndex = false;
         } else if (arg == "--bots") {
@@ -705,6 +767,9 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
             err << "Failed to create bot: " << botName;
             throw std::runtime_error(err.str());
         }
+        if (options.measureLatency) {
+            bot = new TimedBot(bot);
+        }
         players.push_back(bot);
         teams.push_back(static_cast<index_t>(i));
         names.push_back(botName);
@@ -757,6 +822,21 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
         }
     }
 
+    if (options.measureLatency) {
+        for (int playerID = 0; playerID < static_cast<int>(options.bots.size());
+             ++playerID) {
+            if (auto* timed = dynamic_cast<TimedBot*>(players[playerID])) {
+                const std::string playerName = game.getName(playerID);
+                const std::size_t botIndex =
+                    findBotIndex(options.bots, playerName);
+                result.statsDelta[botIndex].totalLatencyMicroseconds +=
+                    timed->totalMicroseconds();
+                result.statsDelta[botIndex].totalLatencyCalls +=
+                    timed->callCount();
+            }
+        }
+    }
+
     return result;
 }
 
@@ -787,6 +867,9 @@ void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
         stats[i].totalRank += result.statsDelta[i].totalRank;
         stats[i].totalArmy += result.statsDelta[i].totalArmy;
         stats[i].totalLand += result.statsDelta[i].totalLand;
+        stats[i].totalLatencyMicroseconds +=
+            result.statsDelta[i].totalLatencyMicroseconds;
+        stats[i].totalLatencyCalls += result.statsDelta[i].totalLatencyCalls;
     }
 }
 

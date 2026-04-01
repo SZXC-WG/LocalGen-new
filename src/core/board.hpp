@@ -230,12 +230,11 @@ class Board {
                     if (increaseAllArmy) ++tile.army;
                     break;
                 case TILE_SWAMP:
-                    if (tile.army > 0) --tile.army;
+                    if (tile.army > 0) {
+                        if (--tile.army == 0) tile.occupier = -1;
+                    }
                     break;
                 default: break;
-            }
-            if (tile.army == 0) {
-                if (tile.type == TILE_SWAMP) tile.occupier = -1;
             }
             if (tile.army < 0) {
                 tile.occupier = -1;

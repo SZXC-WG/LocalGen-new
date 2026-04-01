@@ -8,9 +8,26 @@ We welcome every kind of contribution, including but not limited to:
 - Improving an existing bot
 - Fixing bugs in existing bots
 
-If you believe a bot doesn’t belong here, please open an issue so we can discuss it.
+If you believe a bot doesn't belong here, please open an issue so we can discuss it.
 
----
+### Current Bot Overview
+
+Here is a summary of current bot implementations included in this directory. The implementation and time complexity values below are rough **per-turn strict worst-case** estimates. Here, $n$ is the number of map tiles, and $k$ is the number of candidate source stacks considered by a multi-source planner. Some advanced bots are typically faster on ordinary maps.
+
+| Bot | Author | Enabled | Impl Complexity | Time Complexity | Algorithm Summary |
+| --- | --- | --- | --- | --- | --- |
+| DummyBot | AppOfficer | ❌ | Low | $O(n)$ | Example Heuristic Greedy |
+| SmartRandomBot | AppOfficer / GoodCoder666 | ✅ | Low | $O(n)$ | Largest-Stack Greedy |
+| XrzBot | xiaruize0911 | ❌ | Low | $O(n)$ | Focused Random Greedy |
+| ZlyBot | AppOfficer | ✅ | Medium | $O(n)$ | Single-Focus BFS Heuristic |
+| ZlyBot v2 | AppOfficer | ✅ | Medium | $O(n \log n)$ | Memory-Aware Weighted Search |
+| ZlyBot v2.1 | AppOfficer | ✅ | Medium | $O(n \log n)$ | Dual-Focus Defensive Search |
+| SzlyBot | GoodCoder666 | ✅ | Medium | $O(n)$ | Terrain-Weighted BFS Heuristic |
+| GcBot | GoodCoder666 | ✅ | Medium | $O(n)$ | Adaptive Heuristic BFS |
+| XiaruizeBot | xiaruize0911 | ✅ | High | $O(kn^2)$ | Multi-Source Strategic Search |
+| KutuBot | pinkHC | ✅ | High | $O(n \log n)$ | Duel-Oriented Weighted Planner |
+| LyBot | pinkHC | ❌ | High | $O(n^2)$ | Multiplayer Objective Planner |
+| oimbot | oimasterkafuu | ✅ | High | $O(n^3)$ | Stance-Based Strategic Planner |
 
 ### Adding a New Bot
 
@@ -27,8 +44,6 @@ Before submitting a bot to this folder, make sure it satisfies **all** of the fo
 6. The bot is registered via the `REGISTER_BOT` macro.
 
 See `dummyBot.cpp` for a reference implementation.
-
----
 
 ### Submission Checklist
 

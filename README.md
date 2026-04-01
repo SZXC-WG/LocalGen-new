@@ -58,7 +58,7 @@ LocalGen’s development is organized across three groups of branches:
 - **`release`**:  
   This branch is used to store older version releases (v1-v4) and related resources like maps and fonts. For newer version releases, head over to the [releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
 
-If you'd like to contribute, please submit a pull request to the `v5.0` branch. We appreciate your help!
+If you'd like to contribute, please submit a pull request to the `master` branch. We appreciate your help!
 
 > [!CAUTION]
 >

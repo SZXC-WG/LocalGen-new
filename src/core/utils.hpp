@@ -42,7 +42,7 @@ inline Coord operator+(const Coord& lhs, const Coord& rhs) {
 }
 
 namespace std {
-/// Hash function for Coord, enables use in std::unordered_map.
+/// Hash function for Coord, enabling use in `std::unordered_map`.
 template <>
 struct hash<Coord> {
     inline size_t operator()(const Coord& c) const {

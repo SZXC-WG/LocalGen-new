@@ -188,6 +188,25 @@ class GcBot : public BasicBot {
         }
     }
 
+    Move selectOpening() {
+        Coord coo = seenGeneral[id];
+        army_t minArmy = tileAt(coo).army - 1;
+        lastPos = coo;
+        for (auto [dx, dy] : delta) {
+            auto nx = coo.x + dx, ny = coo.y + dy;
+            if (accessible(nx, ny)) {
+                const TileInfo& tile = tileAt(nx, ny);
+                if (tile.type != TILE_CITY && tile.army >= 0) continue;
+                if (tile.army < minArmy) {
+                    minArmy = tile.army;
+                    lastPos = Coord(nx, ny);
+                }
+            }
+        }
+        if (lastPos == coo) return Move();
+        return Move(MoveType::MOVE_ARMY, coo, lastPos, false);
+    }
+
    public:
     GcBot() : rnd(std::random_device{}()) {}
 
@@ -222,24 +241,7 @@ class GcBot : public BasicBot {
             [this](const RankItem& item) { return item.player == id; });
 
         if (turn < 13 && self.land == 1) {
-            Coord coo = seenGeneral[id];
-            army_t minArmy = tileAt(coo).army - 1;
-            lastPos = coo;
-            for (auto [dx, dy] : delta) {
-                auto nx = coo.x + dx, ny = coo.y + dy;
-                if (accessible(nx, ny)) {
-                    const TileInfo& tile = tileAt(nx, ny);
-                    if (tile.type != TILE_CITY && tile.army >= 0) continue;
-                    if (tile.army < minArmy) {
-                        minArmy = tile.army;
-                        lastPos = Coord(nx, ny);
-                    }
-                }
-            }
-            if (lastPos != coo) {
-                moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, lastPos,
-                                       false);
-            }
+            moveQueue.push_back(selectOpening());
             return;
         }
 

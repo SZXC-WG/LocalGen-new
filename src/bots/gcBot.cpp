@@ -27,11 +27,8 @@ class GcBot : public BasicBot {
     pos_t height, width, W;
     index_t playerCnt;
     index_t id;
-    config::Config config;
 
     turn_t halfTurn, turn;
-
-    std::vector<RankItem> rank;
 
     struct TileInfo {
         tile_type_e type = TILE_PLAIN;
@@ -162,42 +159,7 @@ class GcBot : public BasicBot {
         return maxCoo;
     }
 
-   public:
-    GcBot() : rnd(std::random_device{}()) {}
-
-    void init(index_t playerId, const GameConstantsPack& constants) override {
-        id = playerId;
-        height = constants.mapHeight;
-        width = constants.mapWidth;
-        W = width + 2;
-        playerCnt = constants.playerCount;
-        config = constants.config;
-
-        halfTurn = turn = 0;
-
-        std::fill(tileTypeValue, tileTypeValue + 9, -INF);
-        tileTypeValue[TILE_SPAWN] = 0;
-
-        prevTarget = Coord(-1, -1);
-        lastPos = Coord(-1, -1);
-
-        seenGeneral.assign(playerCnt, Coord(-1, -1));
-        tiles.resize((height + 2) * W);
-    }
-
-    void requestMove(const BoardView& board,
-                     const std::vector<RankItem>& _rank) override {
-        ++halfTurn;
-        turn += (halfTurn & 1);
-
-        rank = _rank;
-        std::sort(begin(rank), end(rank),
-                  [](RankItem lhs, RankItem rhs) -> bool {
-                      return lhs.player < rhs.player;
-                  });
-
-        moveQueue.clear();
-
+    void updateMemory(const BoardView& board) {
         for (pos_t i = 1; i <= height; ++i) {
             for (pos_t j = 1; j <= width; ++j) {
                 const TileView& view = board.tileAt(i, j);
@@ -224,8 +186,42 @@ class GcBot : public BasicBot {
                 }
             }
         }
+    }
 
-        if (turn < 13 && rank[id].land == 1) {
+   public:
+    GcBot() : rnd(std::random_device{}()) {}
+
+    void init(index_t playerId, const GameConstantsPack& constants) override {
+        id = playerId;
+        height = constants.mapHeight;
+        width = constants.mapWidth;
+        W = width + 2;
+        playerCnt = constants.playerCount;
+
+        halfTurn = turn = 0;
+
+        std::fill(tileTypeValue, tileTypeValue + 9, -INF);
+        tileTypeValue[TILE_SPAWN] = 0;
+
+        prevTarget = Coord(-1, -1);
+        lastPos = Coord(-1, -1);
+
+        seenGeneral.assign(playerCnt, Coord(-1, -1));
+        tiles.resize((height + 2) * W);
+    }
+
+    void requestMove(const BoardView& board,
+                     const std::vector<RankItem>& rank) override {
+        ++halfTurn;
+        turn += (halfTurn & 1);
+        moveQueue.clear();
+        updateMemory(board);
+
+        const RankItem& self = *std::find_if(
+            rank.begin(), rank.end(),
+            [this](const RankItem& item) { return item.player == id; });
+
+        if (turn < 13 && self.land == 1) {
             Coord coo = seenGeneral[id];
             army_t minArmy = tileAt(coo).army - 1;
             lastPos = coo;
@@ -248,7 +244,7 @@ class GcBot : public BasicBot {
         }
 
         const double armyStrength =
-            std::log(std::min(static_cast<army_t>(3000), rank[id].army) + 1.0);
+            std::log(std::min(static_cast<army_t>(3000), self.army) + 1.0);
         tileTypeValue[TILE_PLAIN] = 55 - static_cast<value_t>(5 * armyStrength);
         tileTypeValue[TILE_SWAMP] =
             -500 + static_cast<value_t>(50 * armyStrength);
@@ -269,12 +265,13 @@ class GcBot : public BasicBot {
 
         value_t minArmy = INF;
         index_t targetId = -1;
-        for (index_t i = 0; i < playerCnt; ++i) {
-            if (i != id && seenGeneral[i] != Coord(-1, -1) && rank[i].alive) {
-                value_t thatArmy = rank[i].army;
+        for (const RankItem& item : rank) {
+            index_t that = item.player;
+            if (that != id && item.alive && seenGeneral[that].x != -1) {
+                value_t thatArmy = item.army;
                 if (thatArmy < minArmy) {
                     minArmy = thatArmy;
-                    targetId = i;
+                    targetId = that;
                 }
             }
         }
@@ -320,7 +317,7 @@ class GcBot : public BasicBot {
                                  unknownPlains.end());
                 targetPos = unknownPlains[k].second;
                 maxBlockValue =
-                    static_cast<value_t>(4.0 * std::sqrt(rank[id].army)) -
+                    static_cast<value_t>(4.0 * std::sqrt(self.army)) -
                     tileAt(targetPos).dist * 3;
             }
 
@@ -356,7 +353,7 @@ class GcBot : public BasicBot {
                 if (pTile.occupier != id && !isImpassableTile(pTile.type)) {
                     value_t prevBlockValue = computeTileValue(prevTarget);
                     value_t keepTargetMargin =
-                        std::max(25.0, 0.03 * std::pow(rank[id].army, 0.86));
+                        std::max(25.0, 0.03 * std::pow(self.army, 0.86));
                     if (maxBlockValue - prevBlockValue < keepTargetMargin) {
                         targetPos = prevTarget;
                     }

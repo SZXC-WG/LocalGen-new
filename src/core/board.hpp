@@ -225,21 +225,16 @@ class Board {
             switch (tile.type) {
                 case TILE_CITY:
                 case TILE_GENERAL:
-                case TILE_CAPTURED_GENERAL: ++tile.army;
-                case TILE_BLANK:
-                    if (increaseAllArmy) ++tile.army;
-                    break;
+                case TILE_CAPTURED_GENERAL: ++tile.army; break;
                 case TILE_SWAMP:
-                    if (tile.army > 0) {
-                        if (--tile.army == 0) tile.occupier = -1;
+                    if (tile.army > 0 && --tile.army == 0) {
+                        tile.occupier = -1;
+                        continue;
                     }
                     break;
                 default: break;
             }
-            if (tile.army < 0) {
-                tile.occupier = -1;
-                tile.army = 0;
-            }
+            if (increaseAllArmy) ++tile.army;
         }
     }
 

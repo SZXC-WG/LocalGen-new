@@ -1,13 +1,12 @@
-// Copyright (C) 2026 oimaster
+// Copyright (C) 2026 oimasterkafuu
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
  * @file oimBot.cpp
  *
  * Built-in oimbot for LocalGen.
- * Developed by oimaster.
  *
- * @author oimaster
+ * @author oimasterkafuu
  */
 
 #ifndef LGEN_BOTS_OIMBOT

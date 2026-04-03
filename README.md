@@ -55,9 +55,6 @@ LocalGen’s development is organized across three groups of branches:
   Versions 2 to 5 of LocalGen are built with [EGE Graphics](https://xege.org) (24.04), and we’re working on creating an object-oriented system based on it.  
   **Note:** Releases for this branch are **Windows-only** due to EGE 24.04’s limitations. However, if you want to run it on Linux or macOS, [**Wine**](https://www.winehq.org) might be an option. (We have tested, it worked well on a Ubuntu 22.04 LTS machine.)
 
-- **`release`**:  
-  This branch is used to store older version releases (v1-v4) and related resources like maps and fonts. For newer version releases, head over to the [releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
-
 If you'd like to contribute, please submit a pull request to the `master` branch. We appreciate your help!
 
 > [!CAUTION]
@@ -74,7 +71,7 @@ If you'd like to contribute, please submit a pull request to the `master` branch
 
 ## Disclaimer
 
-The `LocalGen-new` project (hereinafter referred to as "LocalGen") is an independent, open-source project developed by the SZXC-WG community. LocalGen is in no way affiliated with, associated with, endorsed by, sponsored by, or connected to `generals.io` or its original developers.
+The "Local Generals.io" project (hereinafter referred to as "LocalGen") is an independent, open-source project developed by the SZXC-WG community. LocalGen is in no way affiliated with, associated with, endorsed by, sponsored by, or connected to `generals.io` or its original developers.
 
 `generals.io`, along with its name, logo, and all associated assets, are the exclusive trademarks and properties of their respective owners. All rights to the original online game are reserved by them.
 

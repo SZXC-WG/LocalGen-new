@@ -1,11 +1,12 @@
+// Copyright (C) 2026 pinkHC
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * @file KutuBot.cpp
  *
  * Unified strategic KutuBot for LocalGen v6.
  *
- * @copyright Copyright (c) SZXC Work Group.
- * @copyright Copyright (c) 2026 pinkHC.
- * Distributed under the GNU General Public License v3.0.
+ * @author pinkHC
  */
 
 #ifndef LGEN_BOTS_KUTUBOT

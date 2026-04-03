@@ -71,3 +71,19 @@ If you'd like to contribute, please submit a pull request to the `master` branch
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=SZXC-WG/LocalGen-new&type=Date)](https://star-history.com/#SZXC-WG/LocalGen-new&Date)
+
+## Disclaimer
+
+The `LocalGen-new` project (hereinafter referred to as "LocalGen") is an independent, open-source project developed by the SZXC-WG community. LocalGen is in no way affiliated with, associated with, endorsed by, sponsored by, or connected to `generals.io` or its original developers.
+
+`generals.io`, along with its name, logo, and all associated assets, are the exclusive trademarks and properties of their respective owners. All rights to the original online game are reserved by them.
+
+LocalGen is a strictly unofficial, fan-made tool designed for local, offline environments. Its primary purpose is to provide an isolated space for local gameplay, educational purposes, and AI/bot development. LocalGen does not connect to, interact with, or attempt to replicate the proprietary backend services of the official `generals.io` platform.
+
+Please note:
+
+- Any bugs, issues, or feature requests regarding LocalGen should be directed solely to the issue tracker of this repository and should not be reported to the `generals.io` support team.
+- The use of LocalGen does not imply any endorsement by `generals.io`, nor does it grant any special rights or privileges on the official `generals.io` servers.
+- Users must comply with the Terms of Service of `generals.io` when using the official platform. The developers of LocalGen bear no responsibility for how individual users choose to utilize this tool in relation to the original game.
+
+By using LocalGen, you acknowledge and agree to this disclaimer.

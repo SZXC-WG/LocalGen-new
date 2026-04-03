@@ -1,3 +1,6 @@
+// Copyright (C) 2026 xiaruize0911
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * @file xiaruizeBot.cpp
  *
@@ -5,6 +8,8 @@
  * Core idea: enumerate several strong source stacks, build a weighted path map
  * for each source, score all targets globally, then execute the first step of
  * the best source-target plan.
+ *
+ * @author xiaruize0911
  */
 
 #ifndef LGEN_BOTS_XIARUIZEBOT

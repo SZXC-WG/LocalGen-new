@@ -1,10 +1,12 @@
+// Copyright (C) 2026 AppOfficer
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * @file zlyBot_v2.cpp
  *
  * ZlyBot v2 from LocalGen v5.
- * Author: AppOfficer
  *
- * @copyright Copyright (c) SZXC Work Group.
+ * @author AppOfficer
  */
 
 #ifndef LGEN_BOTS_ZLYBOT_V2

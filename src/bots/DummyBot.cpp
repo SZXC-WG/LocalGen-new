@@ -1,3 +1,6 @@
+// Copyright (C) 2026 SZXC Work Group
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * @file dummyBot.cpp
  *
@@ -9,8 +12,6 @@
  * The bot implemented a pretty basic algorithm, just being an example.
  *
  * Like this file, bot codes should be put into the `src/bots` folder.
- *
- * @copyright Copyright (c) SZXC Work Group.
  */
 
 #ifndef LGEN_BOTS_DUMMYBOT

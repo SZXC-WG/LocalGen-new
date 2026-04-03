@@ -1,10 +1,12 @@
+// Copyright (C) 2026 xiaruize0911
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * @file xrzBot.cpp
  *
  * XrzBot from LocalGen v5.
- * Author: xiaruize0911
  *
- * @copyright Copyright (c) SZXC Work Group.
+ * @author xiaruize0911
  */
 
 #ifndef LGEN_BOTS_XRZBOT

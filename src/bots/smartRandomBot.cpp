@@ -1,9 +1,12 @@
+// Copyright (C) 2026 SZXC Work Group
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * @file SmartRandomBot.cpp
  *
  * Legacy `smartRandomBot` from LocalGen v5.
  *
- * @copyright Copyright (c) SZXC Work Group.
+ * @authors AppOfficer; GoodCoder666
  */
 
 #ifndef LGEN_BOTS_SMARTRANDOMBOT

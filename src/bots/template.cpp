@@ -1,7 +1,12 @@
+// Copyright (C) 2026 %AUTHORNAME%
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * @file template.cpp
  *
  * This is a template file.
+ *
+ * @author %AUTHORNAME%
  */
 
 #ifndef /* LGEN_BOTS_%BOTNAME% */

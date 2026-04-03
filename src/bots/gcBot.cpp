@@ -1,10 +1,12 @@
+// Copyright (C) 2026 GoodCoder666
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * @file gcBot.cpp
  *
  * GcBot
- * Author: GoodCoder666
  *
- * @copyright Copyright (c) SZXC Work Group.
+ * @author GoodCoder666
  */
 
 #ifndef LGEN_BOTS_GCBOT

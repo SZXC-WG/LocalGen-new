@@ -1,7 +1,12 @@
+// Copyright (C) 2026 pinkHC
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * @file LyBot.cpp
  *
  * LyBot is a multiplayer-oriented built-in bot for LocalGen v6.
+ *
+ * @author pinkHC
  */
 
 #ifndef LGEN_BOTS_LYBOT
@@ -161,7 +166,8 @@ class LyBot : public BasicBot {
 
     inline bool isFriendlyOccupier(index_t occupier) const {
         return occupier == id ||
-               (occupier >= 0 && occupier < static_cast<index_t>(teams.size()) &&
+               (occupier >= 0 &&
+                occupier < static_cast<index_t>(teams.size()) &&
                 teams[occupier] == teams[id]);
     }
 
@@ -244,7 +250,8 @@ class LyBot : public BasicBot {
 
             for (Coord d : kDirs) {
                 Coord nxt = cur + d;
-                if (!inside(nxt) || !isPassable(memory[idx(nxt)].type)) continue;
+                if (!inside(nxt) || !isPassable(memory[idx(nxt)].type))
+                    continue;
                 const size_t nextIndex = idx(nxt);
                 touchNode(forwardSearch, nextIndex);
                 const int nd = curDist + stepCost(nxt);
@@ -355,7 +362,8 @@ class LyBot : public BasicBot {
             for (pos_t y = 1; y <= width; ++y) {
                 Coord c{x, y};
                 const TileMemory& mem = memory[idx(c)];
-                if (!isPassable(mem.type) || mem.visible || mem.type == TILE_CITY)
+                if (!isPassable(mem.type) || mem.visible ||
+                    mem.type == TILE_CITY)
                     continue;
                 if (myGeneral != Coord{-1, -1} && manhattan(c, myGeneral) < 11)
                     continue;
@@ -392,7 +400,8 @@ class LyBot : public BasicBot {
 
         for (index_t player = 0; player < playerCnt; ++player) {
             if (player == id) continue;
-            if (knownGenerals[player] == Coord{-1, -1}) resetCandidateMask(player);
+            if (knownGenerals[player] == Coord{-1, -1})
+                resetCandidateMask(player);
         }
 
         for (pos_t x = 1; x <= height; ++x) {
@@ -404,8 +413,9 @@ class LyBot : public BasicBot {
                 mem.visible = tile.visible;
                 if (!tile.visible) {
                     if (!mem.everSeen) mem.type = tile.type;
-                    if (mem.occupier >= 0 && !isFriendlyOccupier(mem.occupier) &&
-                        mem.army > 0 && mem.lastSeenTurn >= 0 &&
+                    if (mem.occupier >= 0 &&
+                        !isFriendlyOccupier(mem.occupier) && mem.army > 0 &&
+                        mem.lastSeenTurn >= 0 &&
                         static_cast<int>(fullTurn) - mem.lastSeenTurn <= 4) {
                         mem.army = std::max<army_t>(1, mem.army - 1);
                     }
@@ -419,7 +429,8 @@ class LyBot : public BasicBot {
                 mem.lastSeenTurn = static_cast<int>(fullTurn);
 
                 if (tile.type == TILE_GENERAL && tile.occupier >= 0) {
-                    if (knownGenerals[tile.occupier] != c) sawNewGeneralThisTurn = true;
+                    if (knownGenerals[tile.occupier] != c)
+                        sawNewGeneralThisTurn = true;
                     knownGenerals[tile.occupier] = c;
                     auto& heat = predictedGeneralScore[tile.occupier];
                     auto& mask = candidateGeneralMask[tile.occupier];
@@ -432,7 +443,8 @@ class LyBot : public BasicBot {
                 if (tile.occupier >= 0 && !isFriendlyOccupier(tile.occupier) &&
                     !wasVisible) {
                     newlyVisibleEnemyTiles[tile.occupier]++;
-                    reinforceGeneralNeighborhood(tile.occupier, c, 18.0, 8, true);
+                    reinforceGeneralNeighborhood(tile.occupier, c, 18.0, 8,
+                                                 true);
                 }
             }
         }
@@ -441,7 +453,8 @@ class LyBot : public BasicBot {
             for (pos_t y = 1; y <= width; ++y) {
                 Coord c{x, y};
                 const TileView& tile = board.tileAt(c);
-                if (!tile.visible || tile.occupier < 0 || isFriendlyOccupier(tile.occupier))
+                if (!tile.visible || tile.occupier < 0 ||
+                    isFriendlyOccupier(tile.occupier))
                     continue;
                 reinforceGeneralNeighborhood(tile.occupier, c, 9.0, 5, false);
             }
@@ -450,7 +463,8 @@ class LyBot : public BasicBot {
 
     Coord chooseTargetPlayerGeneral(index_t player) const {
         if (player < 0 || player >= playerCnt) return Coord{-1, -1};
-        if (knownGenerals[player] != Coord{-1, -1}) return knownGenerals[player];
+        if (knownGenerals[player] != Coord{-1, -1})
+            return knownGenerals[player];
         double bestScore = -1e100;
         Coord best{-1, -1};
         const auto& heat = predictedGeneralScore[player];
@@ -459,11 +473,13 @@ class LyBot : public BasicBot {
             for (pos_t y = 1; y <= width; ++y) {
                 Coord c{x, y};
                 const TileMemory& mem = memory[idx(c)];
-                if (!isPassable(mem.type) || mem.visible || mem.type == TILE_CITY)
+                if (!isPassable(mem.type) || mem.visible ||
+                    mem.type == TILE_CITY)
                     continue;
                 if (!mask[idx(c)]) continue;
                 double score = heat[idx(c)];
-                if (myGeneral != Coord{-1, -1}) score -= manhattan(c, myGeneral) * 0.12;
+                if (myGeneral != Coord{-1, -1})
+                    score -= manhattan(c, myGeneral) * 0.12;
                 if (score > bestScore) {
                     bestScore = score;
                     best = c;
@@ -508,7 +524,8 @@ class LyBot : public BasicBot {
             q.pop();
             for (Coord d : kDirs) {
                 Coord nxt = cur + d;
-                if (!inside(nxt) || !isPassable(memory[idx(nxt)].type)) continue;
+                if (!inside(nxt) || !isPassable(memory[idx(nxt)].type))
+                    continue;
                 if (distFromGeneral[idx(nxt)] != kInf) continue;
                 distFromGeneral[idx(nxt)] = distFromGeneral[idx(cur)] + 1;
                 q.push(nxt);
@@ -530,7 +547,8 @@ class LyBot : public BasicBot {
         for (pos_t x = 1; x <= height; ++x) {
             for (pos_t y = 1; y <= width; ++y) {
                 Coord c{x, y};
-                if (distFromGeneral[idx(c)] <= coreRadius) coreZoneMask[idx(c)] = 1;
+                if (distFromGeneral[idx(c)] <= coreRadius)
+                    coreZoneMask[idx(c)] = 1;
             }
         }
         for (Coord city : ownedCitiesCache) {
@@ -574,24 +592,27 @@ class LyBot : public BasicBot {
                 reserve += static_cast<army_t>(
                     std::max(0.0, enemyPressure[idx(c)] * 0.12));
             }
-            if (tile.type == TILE_CITY && distFromGeneral[idx(c)] <= coreRadius + 4) {
+            if (tile.type == TILE_CITY &&
+                distFromGeneral[idx(c)] <= coreRadius + 4) {
                 reserve = std::max<army_t>(
-                    reserve, 2 + static_cast<army_t>(
-                                    std::max(0.0, enemyPressure[idx(c)] * 0.08)));
+                    reserve, 2 + static_cast<army_t>(std::max(
+                                     0.0, enemyPressure[idx(c)] * 0.08)));
             }
             const int flow = pathFlow[idx(c)];
             const int degree = passableDegree(c);
-            if (flow >= std::max(2, static_cast<int>(frontierTiles.size() / 12)) &&
+            if (flow >=
+                    std::max(2, static_cast<int>(frontierTiles.size() / 12)) &&
                 degree <= 2 && distFromGeneral[idx(c)] >= 2 &&
                 distFromGeneral[idx(c)] <= coreRadius + 6) {
                 chokeMask[idx(c)] = 1;
                 reserve = std::max<army_t>(
                     reserve, 1 + flow / 3 +
-                                 static_cast<army_t>(
-                                     std::max(0.0, enemyPressure[idx(c)] * 0.05)));
+                                 static_cast<army_t>(std::max(
+                                     0.0, enemyPressure[idx(c)] * 0.05)));
             }
             if (coreZoneMask[idx(c)] &&
-                enemyPressure[idx(c)] > std::max(4.0, rankById[id].army * 0.01)) {
+                enemyPressure[idx(c)] >
+                    std::max(4.0, rankById[id].army * 0.01)) {
                 reserve = std::max<army_t>(
                     reserve, static_cast<army_t>(enemyPressure[idx(c)] * 0.05));
             }
@@ -601,13 +622,14 @@ class LyBot : public BasicBot {
 
     bool hasGeneralThreatNow() const {
         if (myGeneral == Coord{-1, -1}) return false;
-        return enemyPressure[idx(myGeneral)] > board.tileAt(myGeneral).army * 0.6;
+        return enemyPressure[idx(myGeneral)] >
+               board.tileAt(myGeneral).army * 0.6;
     }
 
     bool shouldRunHeavyRefresh() const {
         if (playerCnt < 3) return false;
-        const int aliveCount =
-            static_cast<int>(std::count(aliveById.begin(), aliveById.end(), true));
+        const int aliveCount = static_cast<int>(
+            std::count(aliveById.begin(), aliveById.end(), true));
         const int area = static_cast<int>(height * width);
         const int interval = area >= 1600 ? 8 : (area >= 900 ? 6 : 4);
         if (lastHeavyRefreshTurn < 0) return true;
@@ -615,26 +637,29 @@ class LyBot : public BasicBot {
         if (sawNewGeneralThisTurn) return true;
         if (previousGeneralThreatState != hasGeneralThreatNow()) return true;
         if (currentObjective == Coord{-1, -1}) return true;
-        if (inside(currentObjective) && board.tileAt(currentObjective).occupier == id)
+        if (inside(currentObjective) &&
+            board.tileAt(currentObjective).occupier == id)
             return true;
         if (fullTurn - lastHeavyRefreshTurn >= interval) return true;
         return false;
     }
 
     double targetPlayerScore(index_t player) const {
-        if (player < 0 || player >= playerCnt || player == id || !aliveById[player] ||
-            teams[player] == teams[id]) {
+        if (player < 0 || player >= playerCnt || player == id ||
+            !aliveById[player] || teams[player] == teams[id]) {
             return -1e100;
         }
         const army_t myArmy = rankById[id].army;
         const pos_t myLand = rankById[id].land;
         int weakSignals = 0;
         double score = 0.0;
-        if (myArmy >= rankById[player].army + std::max<army_t>(10, rankById[player].army / 5)) {
+        if (myArmy >= rankById[player].army +
+                          std::max<army_t>(10, rankById[player].army / 5)) {
             ++weakSignals;
             score += 80.0;
         }
-        if (myLand >= rankById[player].land + std::max<pos_t>(6, rankById[player].land / 4)) {
+        if (myLand >= rankById[player].land +
+                          std::max<pos_t>(6, rankById[player].land / 4)) {
             ++weakSignals;
             score += 65.0;
         }
@@ -654,7 +679,8 @@ class LyBot : public BasicBot {
                 }
             }
         }
-        if (newlyVisibleEnemyTiles[player] > 0) score += newlyVisibleEnemyTiles[player] * 12.0;
+        if (newlyVisibleEnemyTiles[player] > 0)
+            score += newlyVisibleEnemyTiles[player] * 12.0;
         if (weakSignals < 2) score -= 120.0;
         score += std::max<army_t>(0, -playerArmyDelta[player]) * 1.4;
         score += std::max<pos_t>(0, -playerLandDelta[player]) * 5.0;
@@ -678,11 +704,14 @@ class LyBot : public BasicBot {
         index_t best = -1;
         double bestScore = -1e100;
         for (index_t player = 0; player < playerCnt; ++player) {
-            if (player == id || !aliveById[player] || teams[player] == teams[id]) continue;
+            if (player == id || !aliveById[player] ||
+                teams[player] == teams[id])
+                continue;
             double score = 0.0;
             Coord guess = chooseTargetPlayerGeneral(player);
             if (guess != Coord{-1, -1} && myGeneral != Coord{-1, -1}) {
-                score += std::max(0.0, 90.0 - manhattan(guess, myGeneral) * 2.0);
+                score +=
+                    std::max(0.0, 90.0 - manhattan(guess, myGeneral) * 2.0);
             }
             score += std::max<army_t>(0, 220 - rankById[player].army) * 0.25;
             score += std::max<pos_t>(0, 130 - rankById[player].land) * 0.4;
@@ -701,16 +730,17 @@ class LyBot : public BasicBot {
         if (currentTargetPlayer < 0 || !aliveById[currentTargetPlayer] ||
             fullTurn > static_cast<turn_t>(targetLockUntil)) {
             currentTargetPlayer = suggested;
-            targetLockUntil = static_cast<int>(fullTurn) +
-                              (height * width >= 1600 ? 16 : 12);
+            targetLockUntil =
+                static_cast<int>(fullTurn) + (height * width >= 1600 ? 16 : 12);
             return currentTargetPlayer;
         }
         const double currentScore = targetPlayerScore(currentTargetPlayer);
         const double nextScore = targetPlayerScore(suggested);
-        if (suggested != currentTargetPlayer && nextScore > currentScore + 70.0) {
+        if (suggested != currentTargetPlayer &&
+            nextScore > currentScore + 70.0) {
             currentTargetPlayer = suggested;
-            targetLockUntil = static_cast<int>(fullTurn) +
-                              (height * width >= 1600 ? 16 : 12);
+            targetLockUntil =
+                static_cast<int>(fullTurn) + (height * width >= 1600 ? 16 : 12);
         }
         return currentTargetPlayer;
     }
@@ -746,7 +776,8 @@ class LyBot : public BasicBot {
             return Move(MoveType::MOVE_ARMY, from, to, false);
         }
         if (remainFull < reserve && reserve <= 2 && !chokeMask[idx(from)] &&
-            from != myGeneral && src.type != TILE_CITY && enemyPressure[idx(from)] < 3.0) {
+            from != myGeneral && src.type != TILE_CITY &&
+            enemyPressure[idx(from)] < 3.0) {
             return Move(MoveType::MOVE_ARMY, from, to, false);
         }
         if (remainHalf >= reserve && halfAttack > 0) {
@@ -773,11 +804,12 @@ class LyBot : public BasicBot {
             return false;
         const TileView& src = board.tileAt(move.from);
         if (src.occupier != id || src.army <= 1) return false;
-        const army_t remain =
-            move.takeHalf ? (src.army - (src.army >> 1)) : 1;
+        const army_t remain = move.takeHalf ? (src.army - (src.army >> 1)) : 1;
         if (remain < reserveArmy[idx(move.from)]) return false;
         if (move.from == myGeneral) {
-            if (remain <= std::max<army_t>(1, static_cast<army_t>(enemyPressure[idx(myGeneral)])))
+            if (remain <=
+                std::max<army_t>(
+                    1, static_cast<army_t>(enemyPressure[idx(myGeneral)])))
                 return false;
         }
         return true;
@@ -844,14 +876,17 @@ class LyBot : public BasicBot {
                 Coord c{x, y};
                 const TileView& tile = board.tileAt(c);
                 if (!isEnemyTile(tile) || tile.army <= 1) continue;
-                if (distFromGeneral[idx(c)] == kInf || distFromGeneral[idx(c)] > 16)
+                if (distFromGeneral[idx(c)] == kInf ||
+                    distFromGeneral[idx(c)] > 16)
                     continue;
                 double score = tile.army * 2.8 - distFromGeneral[idx(c)] * 7.0;
                 if (score > 0) candidates.emplace_back(score, c);
             }
         }
         std::sort(candidates.begin(), candidates.end(),
-                  [](const auto& lhs, const auto& rhs) { return lhs.first > rhs.first; });
+                  [](const auto& lhs, const auto& rhs) {
+                      return lhs.first > rhs.first;
+                  });
         if (candidates.size() > 6) candidates.resize(6);
 
         std::optional<ThreatInfo> best;
@@ -865,7 +900,8 @@ class LyBot : public BasicBot {
                 double bestPressure = enemyPressure[idx(cur)];
                 for (Coord d : kDirs) {
                     Coord cand = cur + d;
-                    if (!inside(cand) || !isPassable(memory[idx(cand)].type)) continue;
+                    if (!inside(cand) || !isPassable(memory[idx(cand)].type))
+                        continue;
                     if (distFromGeneral[idx(cand)] >= bestDist) continue;
                     if (distFromGeneral[idx(cand)] < bestDist ||
                         enemyPressure[idx(cand)] < bestPressure) {
@@ -894,16 +930,18 @@ class LyBot : public BasicBot {
     std::optional<Move> chooseDefenseMove() {
         auto threat = analyzeGeneralThreat();
         if (!threat.has_value()) return std::nullopt;
-        const bool urgent = threat->enemyArmy >= board.tileAt(myGeneral).army - 1 ||
-                            threat->route.size() <= 5 ||
-                            enemyPressure[idx(myGeneral)] > board.tileAt(myGeneral).army * 0.7;
+        const bool urgent =
+            threat->enemyArmy >= board.tileAt(myGeneral).army - 1 ||
+            threat->route.size() <= 5 ||
+            enemyPressure[idx(myGeneral)] > board.tileAt(myGeneral).army * 0.7;
         if (!urgent) return std::nullopt;
 
         for (Coord d : kDirs) {
             Coord from = threat->intercept + d;
             if (!inside(from)) continue;
             const TileView& tile = board.tileAt(from);
-            if (tile.occupier != id || tile.army <= estimatedArmyAt(threat->intercept) + 1)
+            if (tile.occupier != id ||
+                tile.army <= estimatedArmyAt(threat->intercept) + 1)
                 continue;
             auto moveOpt = buildReserveAwareMove(from, threat->intercept, true);
             if (moveOpt.has_value() && moveLooksSafe(*moveOpt)) return moveOpt;
@@ -920,7 +958,9 @@ class LyBot : public BasicBot {
             sources.emplace_back(score, source);
         }
         std::sort(sources.begin(), sources.end(),
-                  [](const auto& lhs, const auto& rhs) { return lhs.first > rhs.first; });
+                  [](const auto& lhs, const auto& rhs) {
+                      return lhs.first > rhs.first;
+                  });
         if (sources.size() > 3) sources.resize(3);
 
         CandidateMove best;
@@ -931,11 +971,13 @@ class LyBot : public BasicBot {
                 return cost;
             });
             if (path.distance(idx(threat->intercept)) >= kInf) continue;
-            std::vector<Coord> route = reconstructPath(source, threat->intercept, path);
+            std::vector<Coord> route =
+                reconstructPath(source, threat->intercept, path);
             if (route.empty()) continue;
             auto moveOpt = buildReserveAwareMove(source, route.front(), false);
             if (!moveOpt.has_value() || !moveLooksSafe(*moveOpt)) continue;
-            double score = board.tileAt(source).army * 2.0 - path.distance(idx(threat->intercept)) * 4.0;
+            double score = board.tileAt(source).army * 2.0 -
+                           path.distance(idx(threat->intercept)) * 4.0;
             if (route.front() == threat->intercept) score += 20.0;
             if (score > best.score) {
                 best.score = score;
@@ -959,11 +1001,13 @@ class LyBot : public BasicBot {
             for (pos_t y = 1; y <= width; ++y) {
                 Coord c{x, y};
                 const TileView& tile = board.tileAt(c);
-                if (!isPassable(memory[idx(c)].type) || tile.occupier == id) continue;
+                if (!isPassable(memory[idx(c)].type) || tile.occupier == id)
+                    continue;
                 double score = 0.0;
                 if (!memory[idx(c)].everSeen) score += bigMap ? 100.0 : 85.0;
                 if (!tile.visible) score += 30.0;
-                if (tile.type == TILE_CITY) score += 240.0 - estimatedArmyAt(c) * 2.8;
+                if (tile.type == TILE_CITY)
+                    score += 240.0 - estimatedArmyAt(c) * 2.8;
                 if (isEnemyTile(tile)) score += 130.0 + tile.army * 0.3;
                 if (tile.occupier == targetPlayer) score += 90.0;
                 if (tile.type == TILE_SWAMP) score -= 30.0;
@@ -973,7 +1017,7 @@ class LyBot : public BasicBot {
                 }
                 if (targetGuess != Coord{-1, -1}) {
                     score += std::max(0.0, (bigMap ? 65.0 : 45.0) -
-                                                manhattan(c, targetGuess) * 1.2);
+                                               manhattan(c, targetGuess) * 1.2);
                 }
                 const int centerDist = std::abs(c.x * 2 - (height + 1)) +
                                        std::abs(c.y * 2 - (width + 1));
@@ -1000,8 +1044,11 @@ class LyBot : public BasicBot {
         }
 
         std::sort(best.begin(), best.end(),
-                  [](const auto& lhs, const auto& rhs) { return lhs.first > rhs.first; });
-        for (const auto& item : best) objectiveCandidates.push_back(item.second);
+                  [](const auto& lhs, const auto& rhs) {
+                      return lhs.first > rhs.first;
+                  });
+        for (const auto& item : best)
+            objectiveCandidates.push_back(item.second);
     }
 
     void maybeHeavyRefresh() {
@@ -1009,8 +1056,8 @@ class LyBot : public BasicBot {
         recomputeDefenseZones();
         currentTargetPlayer = chooseLockedTargetPlayer();
         recomputeObjectiveCandidates(currentTargetPlayer);
-        const int aliveCount =
-            static_cast<int>(std::count(aliveById.begin(), aliveById.end(), true));
+        const int aliveCount = static_cast<int>(
+            std::count(aliveById.begin(), aliveById.end(), true));
         const int area = static_cast<int>(height * width);
         const int openingTurns = area >= 1600 ? 26 : (area >= 900 ? 22 : 16);
         const bool aggressiveWindow =
@@ -1018,7 +1065,8 @@ class LyBot : public BasicBot {
             targetPlayerScore(currentTargetPlayer) > 170.0;
         if (lockedObjective != Coord{-1, -1} &&
             fullTurn <= static_cast<turn_t>(objectiveLockUntil) &&
-            inside(lockedObjective) && board.tileAt(lockedObjective).occupier != id) {
+            inside(lockedObjective) &&
+            board.tileAt(lockedObjective).occupier != id) {
             currentObjective = lockedObjective;
         } else if (aggressiveWindow && currentTargetPlayer >= 0) {
             Coord generalGuess = chooseTargetPlayerGeneral(currentTargetPlayer);
@@ -1034,35 +1082,40 @@ class LyBot : public BasicBot {
             currentObjective = objectiveCandidates.front();
         }
         lastHeavyRefreshTurn = static_cast<int>(fullTurn);
-        lastAliveCount =
-            static_cast<int>(std::count(aliveById.begin(), aliveById.end(), true));
+        lastAliveCount = static_cast<int>(
+            std::count(aliveById.begin(), aliveById.end(), true));
         previousGeneralThreatState = hasGeneralThreatNow();
     }
 
     std::optional<Move> chooseObjectiveMove(index_t targetPlayer) {
         if (currentObjective == Coord{-1, -1}) return std::nullopt;
-        if (!inside(currentObjective) || board.tileAt(currentObjective).occupier == id) {
+        if (!inside(currentObjective) ||
+            board.tileAt(currentObjective).occupier == id) {
             for (Coord c : objectiveCandidates) {
                 if (inside(c) && board.tileAt(c).occupier != id) {
                     currentObjective = c;
                     break;
                 }
             }
-            if (board.tileAt(currentObjective).occupier == id) return std::nullopt;
+            if (board.tileAt(currentObjective).occupier == id)
+                return std::nullopt;
         }
 
         std::vector<std::pair<double, Coord>> sources;
         for (Coord source : friendlyTilesCache) {
             const TileView& tile = board.tileAt(source);
             if (tile.army <= reserveArmy[idx(source)] + 1) continue;
-            double score = tile.army - manhattan(source, currentObjective) * 1.8;
+            double score =
+                tile.army - manhattan(source, currentObjective) * 1.8;
             if (source == myGeneral) score -= 7.0;
             if (chokeMask[idx(source)]) score -= 10.0;
             if (tile.type == TILE_CITY) score -= 4.0;
             sources.emplace_back(score, source);
         }
         std::sort(sources.begin(), sources.end(),
-                  [](const auto& lhs, const auto& rhs) { return lhs.first > rhs.first; });
+                  [](const auto& lhs, const auto& rhs) {
+                      return lhs.first > rhs.first;
+                  });
         if (sources.size() > (height * width >= 1600 ? 2u : 4u))
             sources.resize(height * width >= 1600 ? 2u : 4u);
 
@@ -1074,13 +1127,16 @@ class LyBot : public BasicBot {
                 const TileMemory& mem = memory[idx(c)];
                 if (mem.type == TILE_SWAMP) cost += 8;
                 if (!mem.everSeen) cost += 1;
-                if (board.tileAt(c).occupier >= 0 && !isFriendlyOccupier(board.tileAt(c).occupier))
+                if (board.tileAt(c).occupier >= 0 &&
+                    !isFriendlyOccupier(board.tileAt(c).occupier))
                     cost += std::min<army_t>(estimatedArmyAt(c), 90);
-                if (targetGuess != Coord{-1, -1}) cost += manhattan(c, targetGuess) / 8;
+                if (targetGuess != Coord{-1, -1})
+                    cost += manhattan(c, targetGuess) / 8;
                 return std::max(1, cost);
             });
             if (path.distance(idx(currentObjective)) >= kInf) continue;
-            std::vector<Coord> route = reconstructPath(source, currentObjective, path);
+            std::vector<Coord> route =
+                reconstructPath(source, currentObjective, path);
             if (route.empty()) continue;
             auto moveOpt = buildReserveAwareMove(source, route.front(), false);
             if (!moveOpt.has_value() || !moveLooksSafe(*moveOpt) ||
@@ -1088,7 +1144,8 @@ class LyBot : public BasicBot {
                 continue;
             double score = base - path.distance(idx(currentObjective)) * 2.5;
             if (route.front() == currentObjective) score += 25.0;
-            if (board.tileAt(currentObjective).occupier == targetPlayer) score += 30.0;
+            if (board.tileAt(currentObjective).occupier == targetPlayer)
+                score += 30.0;
             if (score > best.score) {
                 best.score = score;
                 best.valid = true;
@@ -1181,7 +1238,8 @@ class LyBot : public BasicBot {
         const size_t total = static_cast<size_t>((height + 2) * W);
         memory.assign(total, TileMemory{});
         knownGenerals.assign(playerCnt, Coord{-1, -1});
-        predictedGeneralScore.assign(playerCnt, std::vector<double>(total, 0.0));
+        predictedGeneralScore.assign(playerCnt,
+                                     std::vector<double>(total, 0.0));
         candidateGeneralMask.assign(playerCnt, std::vector<uint8_t>(total, 0));
         newlyVisibleEnemyTiles.assign(playerCnt, 0);
         rankById.assign(playerCnt, RankItem{});

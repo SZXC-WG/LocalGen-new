@@ -1,8 +1,13 @@
+// Copyright (C) 2026 oimaster
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 /**
  * @file oimBot.cpp
  *
  * Built-in oimbot for LocalGen.
  * Developed by oimaster.
+ *
+ * @author oimaster
  */
 
 #ifndef LGEN_BOTS_OIMBOT
@@ -577,7 +582,8 @@ class OimBot : public BasicBot {
 
     Coord chooseTargetPlayerGeneral(index_t player) const {
         if (player < 0 || player >= playerCnt) return Coord{-1, -1};
-        if (knownGenerals[player] != Coord{-1, -1}) return knownGenerals[player];
+        if (knownGenerals[player] != Coord{-1, -1})
+            return knownGenerals[player];
         if (player < static_cast<index_t>(targetGeneralCacheStamp.size()) &&
             targetGeneralCacheStamp[player] == decisionSerial) {
             return targetGeneralCache[player];
@@ -820,13 +826,9 @@ class OimBot : public BasicBot {
         return std::max(1, penalty);
     }
 
-    const std::vector<Coord>& ourTiles() const {
-        return friendlyTilesCache;
-    }
+    const std::vector<Coord>& ourTiles() const { return friendlyTilesCache; }
 
-    const std::vector<Coord>& ownedCities() const {
-        return ownedCitiesCache;
-    }
+    const std::vector<Coord>& ownedCities() const { return ownedCitiesCache; }
 
     Coord strongestFriendlyTile(bool includeGeneral = true,
                                 std::optional<Coord> near = std::nullopt,
@@ -891,15 +893,15 @@ class OimBot : public BasicBot {
     bool canReasonablyCommitToCity(Coord city, Coord source) const {
         if (city == Coord{-1, -1} || source == Coord{-1, -1}) return false;
         if (!isNeutralCity(board.tileAt(city))) return true;
-        auto reversePath =
-            weightedReversePath(city, [&](Coord c) { return attackPenalty(c, true); });
+        auto reversePath = weightedReversePath(
+            city, [&](Coord c) { return attackPenalty(c, true); });
         return canReasonablyCommitToCity(city, source, reversePath);
     }
 
     bool anyReasonableCityCommit(Coord city, army_t minSourceArmy = 2) const {
         if (!isNeutralCity(board.tileAt(city))) return true;
-        auto reversePath =
-            weightedReversePath(city, [&](Coord c) { return attackPenalty(c, true); });
+        auto reversePath = weightedReversePath(
+            city, [&](Coord c) { return attackPenalty(c, true); });
         for (Coord source : ourTiles()) {
             const TileView& src = board.tileAt(source);
             if (src.army < minSourceArmy) continue;
@@ -1101,9 +1103,7 @@ class OimBot : public BasicBot {
         return distFromGeneralCache;
     }
 
-    army_t largestFriendlyArmy() const {
-        return largestFriendlyArmyCache;
-    }
+    army_t largestFriendlyArmy() const { return largestFriendlyArmyCache; }
 
     int currentCycleOffset(int cycleTurns = 50) const {
         if (cycleTurns <= 0) return 0;
@@ -1410,9 +1410,10 @@ class OimBot : public BasicBot {
                     if (route.empty()) continue;
 
                     double targetValue = target == myGeneral ? 140.0 : 55.0;
-                    double pressure = tile.army * 3.2 -
-                                      pathFromEnemy.distance(idx(target)) * 11.0 +
-                                      targetValue;
+                    double pressure =
+                        tile.army * 3.2 -
+                        pathFromEnemy.distance(idx(target)) * 11.0 +
+                        targetValue;
                     if (target == myGeneral &&
                         board.tileAt(myGeneral).army < tile.army + 4)
                         pressure += 35.0;
@@ -1457,9 +1458,10 @@ class OimBot : public BasicBot {
                     if (pathFromEnemy.distance(idx(target)) >= kInf) continue;
                     auto route = reconstructPath(enemy, target, pathFromEnemy);
                     if (route.empty()) continue;
-                    double pressure = mem.army * 2.4 -
-                                      pathFromEnemy.distance(idx(target)) * 10.0 +
-                                      (target == myGeneral ? 110.0 : 35.0);
+                    double pressure =
+                        mem.army * 2.4 -
+                        pathFromEnemy.distance(idx(target)) * 10.0 +
+                        (target == myGeneral ? 110.0 : 35.0);
                     ThreatInfo info;
                     info.source = enemy;
                     info.target = target;
@@ -1542,8 +1544,7 @@ class OimBot : public BasicBot {
                     if (attackCorridorMask[idx(source)]) score += 12.0;
                     if (attackCorridorMask[idx(route.first)]) score += 16.0;
                     if (lockedObjective != Coord{-1, -1}) {
-                        score -=
-                            manhattan(route.first, lockedObjective) * 0.6;
+                        score -= manhattan(route.first, lockedObjective) * 0.6;
                     }
                 }
                 if (defenseMode && myGeneral != Coord{-1, -1})
@@ -1957,7 +1958,8 @@ class OimBot : public BasicBot {
         targetGeneralCacheStamp.assign(playerCnt, -1);
         timingPlanCache.assign(playerCnt, TimingPlan{});
         timingPlanCacheStamp.assign(playerCnt, -1);
-        distFromGeneralCache.assign(static_cast<size_t>((height + 2) * W), kInf);
+        distFromGeneralCache.assign(static_cast<size_t>((height + 2) * W),
+                                    kInf);
         distFromGeneralCacheStamp = -1;
         distFromGeneralSource = Coord{-1, -1};
         openingLaunchTurn = computeOpeningLaunchTurn();

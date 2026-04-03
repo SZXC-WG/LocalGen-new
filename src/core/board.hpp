@@ -223,6 +223,7 @@ class Board {
         for (auto& tile : tiles) {
             if (tile.occupier == -1) continue;
             switch (tile.type) {
+                case TILE_DESERT:           continue;
                 case TILE_CITY:
                 case TILE_GENERAL:
                 case TILE_CAPTURED_GENERAL: ++tile.army; break;

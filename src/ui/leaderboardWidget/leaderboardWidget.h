@@ -1,3 +1,6 @@
+// Copyright (C) 2026 SZXC Work Group
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #ifndef LEADERBOARDWIDGET_H
 #define LEADERBOARDWIDGET_H
 

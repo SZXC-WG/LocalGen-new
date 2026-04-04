@@ -25,7 +25,7 @@ Here is a summary of current bot implementations included in this directory. The
 | SzlyBot | GoodCoder666 | ✅ | Medium | $O(n)$ | Terrain-Weighted BFS Heuristic |
 | GcBot | GoodCoder666 | ✅ | Medium | $O(n)$ | Adaptive Heuristic BFS |
 | XiaruizeBot | xiaruize0911 | ✅ | High | $O(kn^2)$ | Multi-Source Strategic Search |
-| KutuBot | pinkHC | ✅ | High | $O(n \log n)$ | Duel-Oriented Weighted Planner |
+| KutuBot | pinkHC | ✅ | High | $O(n \log n)$ | Unified Strategic Objective Planner |
 | LyBot | pinkHC | ❌ | High | $O(n^2)$ | Multiplayer Objective Planner |
 | oimbot | oimasterkafuu | ✅ | High | $O(n^3)$ | Stance-Based Strategic Planner |
 

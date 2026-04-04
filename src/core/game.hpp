@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -611,41 +612,121 @@ inline std::vector<RankItem> BasicGame::ranklist() {
 }
 
 inline int BasicGame::initSpawn() {
-    const int playerCount = static_cast<int>(players.size());
-    std::vector<index_t> playerSequence(playerCount);
-    std::iota(playerSequence.begin(), playerSequence.end(), 0);
-    std::shuffle(playerSequence.begin(), playerSequence.end(), rng);
-    std::vector<Coord> spawnCandidates;
-    auto assign = [&]() -> void {
-        for (int i = 0; i < playerCount; ++i)
-            spawnCoord[playerSequence[i]] = spawnCandidates[i];
-    };
-    int spawnCount = 0;
-    for (int i = 1; i <= board.row; ++i) {
-        for (int j = 1; j <= board.col; ++j) {
-            if (board.tileAt(i, j).type == TILE_SPAWN) {
-                spawnCandidates.emplace_back(i, j);
-                ++spawnCount;
-            }
-        }
-    }
-    std::shuffle(spawnCandidates.begin(), spawnCandidates.end(), rng);
-    if (spawnCount >= playerCount) return assign(), 0;
+    spawnCoord.assign(players.size(), Coord{});
 
-    int blankCount = 0;
-    for (int i = 1; i <= board.row; ++i) {
-        for (int j = 1; j <= board.col; ++j) {
-            const Tile& tile = board.tileAt(i, j);
-            if (tile.type == TILE_PLAIN && tile.army == 0) {
-                spawnCandidates.emplace_back(i, j);
-                ++blankCount;
-            }
+    const int playerCount = static_cast<int>(players.size());
+    if (playerCount == 0) return 0;
+
+    std::vector<index_t> unassigned(playerCount);
+    std::iota(unassigned.begin(), unassigned.end(), 0);
+
+    auto collectTiles = [&](auto predicate) -> std::vector<std::pair<Coord, const Tile*>> {
+        std::vector<std::pair<Coord, const Tile*>> result;
+        for (int i = 1; i <= board.row; ++i)
+            for (int j = 1; j <= board.col; ++j)
+                if (predicate(board.tileAt(i, j)))
+                    result.emplace_back(Coord(i, j), &board.tileAt(i, j));
+        return result;
+    };
+
+    // Phase 1: Collect spawns by label
+    std::unordered_map<unsigned, std::vector<Coord>> fixedSpawns;
+    std::vector<Coord> flexibleSpawns;
+
+    auto allSpawns = collectTiles(
+        [](const Tile& t) { return t.type == TILE_SPAWN; });
+    for (const auto& [coord, tile] : allSpawns) {
+        if (tile->spawnTeam == 0)
+            flexibleSpawns.push_back(coord);
+        else
+            fixedSpawns[tile->spawnTeam].push_back(coord);
+    }
+
+    // Phase 2: Build random label -> team mapping
+    std::unordered_set<index_t> teamSet(teams.begin(), teams.end());
+    std::vector<index_t> teamList(teamSet.begin(), teamSet.end());
+    std::vector<unsigned> labelList;
+    labelList.reserve(fixedSpawns.size());
+    for (const auto& [label, _] : fixedSpawns) {
+        labelList.push_back(label);
+    }
+
+    std::shuffle(teamList.begin(), teamList.end(), rng);
+    std::shuffle(labelList.begin(), labelList.end(), rng);
+
+    std::unordered_map<unsigned, index_t> labelToTeam;
+    const size_t mappingCount = std::min(labelList.size(), teamList.size());
+    for (size_t i = 0; i < mappingCount; ++i) {
+        labelToTeam[labelList[i]] = teamList[i];
+    }
+
+    // Phase 3: Group players and spawns by team
+    std::unordered_map<index_t, std::vector<index_t>> teamPlayers;
+    for (index_t p = 0; p < playerCount; ++p) {
+        teamPlayers[teams[p]].push_back(p);
+    }
+
+    std::unordered_map<index_t, std::vector<Coord>> teamSpawns;
+    for (auto& [label, spawns] : fixedSpawns) {
+        auto it = labelToTeam.find(label);
+        if (it == labelToTeam.end()) {
+            // Label not mapped to any team, convert to flexible
+            flexibleSpawns.insert(flexibleSpawns.end(),
+                                  std::make_move_iterator(spawns.begin()),
+                                  std::make_move_iterator(spawns.end()));
+        } else {
+            index_t team = it->second;
+            teamSpawns[team].insert(teamSpawns[team].end(),
+                                    std::make_move_iterator(spawns.begin()),
+                                    std::make_move_iterator(spawns.end()));
         }
     }
-    std::shuffle(spawnCandidates.begin() + spawnCount, spawnCandidates.end(),
-                 rng);
-    if (spawnCount + blankCount >= playerCount) return assign(), 0;
-    return 1;
+
+    // Phase 4: Assign fixed spawns per team
+    for (auto& [team, spawns] : teamSpawns) {
+        auto& playersInTeam = teamPlayers[team];
+        std::shuffle(playersInTeam.begin(), playersInTeam.end(), rng);
+        std::shuffle(spawns.begin(), spawns.end(), rng);
+
+        const size_t count = std::min(playersInTeam.size(), spawns.size());
+        for (size_t i = 0; i < count; ++i) {
+            index_t player = playersInTeam[i];
+            spawnCoord[player] = spawns[i];
+            auto it = std::find(unassigned.begin(), unassigned.end(), player);
+            *it = unassigned.back();
+            unassigned.pop_back();
+        }
+        // Excess spawns convert to flexible
+        for (size_t i = count; i < spawns.size(); ++i) {
+            flexibleSpawns.push_back(std::move(spawns[i]));
+        }
+    }
+
+    // Phase 5: Assign flexible spawns to unassigned players
+    std::shuffle(unassigned.begin(), unassigned.end(), rng);
+    std::shuffle(flexibleSpawns.begin(), flexibleSpawns.end(), rng);
+
+    const size_t assigned = std::min(unassigned.size(), flexibleSpawns.size());
+    for (size_t i = 0; i < assigned; ++i)
+        spawnCoord[unassigned[i]] = flexibleSpawns[i];
+
+    unassigned.erase(unassigned.begin(), unassigned.begin() + assigned);
+
+    // Phase 6: Use blank tiles if still not enough spawns
+    if (!unassigned.empty()) {
+        auto blankTiles = collectTiles(
+            [](const Tile& t) { return t.type == TILE_PLAIN && t.army == 0; });
+        std::shuffle(blankTiles.begin(), blankTiles.end(), rng);
+
+        if (blankTiles.size() >= unassigned.size()) {
+            for (size_t i = 0; i < unassigned.size(); ++i)
+                spawnCoord[unassigned[i]] = blankTiles[i].first;
+            return 0;
+        }
+        return 1;  // Not enough spawn points or blank tiles
+    }
+
+    return 0;
 }
 
 inline int BasicGame::init() {

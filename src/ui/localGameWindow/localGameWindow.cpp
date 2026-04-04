@@ -346,28 +346,25 @@ void LocalGameWindow::updateLeaderboard(const std::vector<RankItem>& rank) {
 }
 
 void LocalGameWindow::positionFloatingWidgets() {
-    const int margin = 6;
+    const int turnLabelMargin = 6;
 
     if (turnLabel != nullptr) {
-        turnLabel->move(margin, margin);
+        turnLabel->move(turnLabelMargin, turnLabelMargin);
         turnLabel->raise();
     }
 
     if (analysisChartWidget != nullptr) {
         const int analysisWidth = std::clamp(width() / 3, 340, 560);
         const int analysisHeight = std::clamp(height() / 2, 340, 520);
-        const int x = std::max(margin, width() - analysisWidth - margin);
-        const int y = std::max(margin, height() - analysisHeight - margin);
+        const int x = std::max(0, width() - analysisWidth);
+        const int y = std::max(0, height() - analysisHeight);
         analysisChartWidget->setGeometry(x, y, analysisWidth, analysisHeight);
         analysisChartWidget->raise();
     }
 
     if (leaderboardWidget != nullptr) {
-        int x = width() - leaderboardWidget->width() - margin;
-        if (x < margin) {
-            x = margin;
-        }
-        leaderboardWidget->move(x, margin);
+        const int x = std::max(0, width() - leaderboardWidget->width());
+        leaderboardWidget->move(x, 0);
         leaderboardWidget->raise();
     }
 

@@ -620,7 +620,8 @@ inline int BasicGame::initSpawn() {
     std::vector<index_t> unassigned(playerCount);
     std::iota(unassigned.begin(), unassigned.end(), 0);
 
-    auto collectTiles = [&](auto predicate) -> std::vector<std::pair<Coord, const Tile*>> {
+    auto collectTiles =
+        [&](auto predicate) -> std::vector<std::pair<Coord, const Tile*>> {
         std::vector<std::pair<Coord, const Tile*>> result;
         for (int i = 1; i <= board.row; ++i)
             for (int j = 1; j <= board.col; ++j)
@@ -633,8 +634,8 @@ inline int BasicGame::initSpawn() {
     std::unordered_map<unsigned, std::vector<Coord>> fixedSpawns;
     std::vector<Coord> flexibleSpawns;
 
-    auto allSpawns = collectTiles(
-        [](const Tile& t) { return t.type == TILE_SPAWN; });
+    auto allSpawns =
+        collectTiles([](const Tile& t) { return t.type == TILE_SPAWN; });
     for (const auto& [coord, tile] : allSpawns) {
         if (tile->spawnTeam == 0)
             flexibleSpawns.push_back(coord);
@@ -682,6 +683,8 @@ inline int BasicGame::initSpawn() {
         }
     }
 
+    std::vector<Coord> excessFixedSpawns;
+
     // Phase 4: Assign fixed spawns per team
     for (auto& [team, spawns] : teamSpawns) {
         auto& playersInTeam = teamPlayers[team];
@@ -693,24 +696,41 @@ inline int BasicGame::initSpawn() {
             index_t player = playersInTeam[i];
             spawnCoord[player] = spawns[i];
             auto it = std::find(unassigned.begin(), unassigned.end(), player);
-            *it = unassigned.back();
-            unassigned.pop_back();
+            if (it != unassigned.end()) {
+                *it = unassigned.back();
+                unassigned.pop_back();
+            }
         }
-        // Excess spawns convert to flexible
+        // Excess spawns held separately, released only if spawnTeam==0 runs out
         for (size_t i = count; i < spawns.size(); ++i) {
-            flexibleSpawns.push_back(std::move(spawns[i]));
+            excessFixedSpawns.push_back(std::move(spawns[i]));
         }
     }
 
-    // Phase 5: Assign flexible spawns to unassigned players
+    // Phase 5a: Assign spawnTeam==0 flexible spawns first
     std::shuffle(unassigned.begin(), unassigned.end(), rng);
     std::shuffle(flexibleSpawns.begin(), flexibleSpawns.end(), rng);
 
-    const size_t assigned = std::min(unassigned.size(), flexibleSpawns.size());
-    for (size_t i = 0; i < assigned; ++i)
+    const size_t flexAssigned =
+        std::min(unassigned.size(), flexibleSpawns.size());
+    for (size_t i = 0; i < flexAssigned; ++i)
         spawnCoord[unassigned[i]] = flexibleSpawns[i];
 
-    unassigned.erase(unassigned.begin(), unassigned.begin() + assigned);
+    unassigned.erase(unassigned.begin(), unassigned.begin() + flexAssigned);
+
+    // Phase 5b: If still unassigned, release excess fixed spawns as flexible
+    if (!unassigned.empty() && !excessFixedSpawns.empty()) {
+        std::shuffle(unassigned.begin(), unassigned.end(), rng);
+        std::shuffle(excessFixedSpawns.begin(), excessFixedSpawns.end(), rng);
+
+        const size_t excessAssigned =
+            std::min(unassigned.size(), excessFixedSpawns.size());
+        for (size_t i = 0; i < excessAssigned; ++i)
+            spawnCoord[unassigned[i]] = excessFixedSpawns[i];
+
+        unassigned.erase(unassigned.begin(),
+                         unassigned.begin() + excessAssigned);
+    }
 
     // Phase 6: Use blank tiles if still not enough spawns
     if (!unassigned.empty()) {

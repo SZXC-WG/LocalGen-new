@@ -9,6 +9,7 @@
 #include <QPainterPath>
 #include <QSvgRenderer>
 #include <QWheelEvent>
+#include <algorithm>
 #include <cmath>
 
 MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled,
@@ -88,7 +89,7 @@ void MapWidget::fitCenter() {
 
     qreal scaleX = availableWidth / mapPixelWidth;
     qreal scaleY = availableHeight / mapPixelHeight;
-    scale = qMin(scaleX, scaleY);
+    scale = std::min(scaleX, scaleY);
 
     qreal scaledMapWidth = mapPixelWidth * scale;
     qreal scaledMapHeight = mapPixelHeight * scale;
@@ -190,9 +191,10 @@ QPixmap& MapWidget::getTextPixmap(const QString& text, qreal physicalScale,
 
     // Font height on screen = cell height * ratio, bounded by min/max
     qreal screenCellHeight = cellSize * scale;
-    qreal targetFontHeight = qBound(
-        minFontPixelSize, screenCellHeight * fontHeightRatio, maxFontPixelSize);
-    int fontPixelSize = qMax(1, qRound(targetFontHeight * dpr));
+    qreal targetFontHeight = std::clamp(screenCellHeight * fontHeightRatio,
+                                        minFontPixelSize, maxFontPixelSize);
+    int fontPixelSize =
+        std::max(1, static_cast<int>(std::lround(targetFontHeight * dpr)));
 
     static QFont font("Quicksand");
     font.setPixelSize(fontPixelSize);
@@ -228,22 +230,26 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     const qreal cellPixelSize = cellSize * scale;
     const qreal physicalScale = scale * dpr;
     const qreal invScale = 1.0 / physicalScale;
-    const int physicalCellSize = qMax(1, qRound(cellPixelSize * dpr));
+    const int physicalCellSize =
+        std::max(1, static_cast<int>(std::lround(cellPixelSize * dpr)));
 
     const int bigPhysicalSize =
-        qMax(1, qRound((cellSize - padding * 2) * physicalScale));
-    const int smallPhysicalSize =
-        qMax(1, qRound(0.2 * cellSize * physicalScale));
+        std::max(1, static_cast<int>(
+                        std::lround((cellSize - padding * 2) * physicalScale)));
+    const int smallPhysicalSize = std::max(
+        1, static_cast<int>(std::lround(0.2 * cellSize * physicalScale)));
     const QRect bigRect(0, 0, bigPhysicalSize, bigPhysicalSize),
         smallRect(0, 0, smallPhysicalSize, smallPhysicalSize),
         textRect(0, 0, physicalCellSize, physicalCellSize);
 
     // Visible grid range
-    const int startCol = qMax(0, static_cast<int>(-offset.x() / cellPixelSize));
-    const int startRow = qMax(0, static_cast<int>(-offset.y() / cellPixelSize));
-    const int endCol = qMin(
+    const int startCol =
+        std::max(0, static_cast<int>(-offset.x() / cellPixelSize));
+    const int startRow =
+        std::max(0, static_cast<int>(-offset.y() / cellPixelSize));
+    const int endCol = std::min(
         w - 1, static_cast<int>((-offset.x() + width()) / cellPixelSize) + 1);
-    const int endRow = qMin(
+    const int endRow = std::min(
         h - 1, static_cast<int>((-offset.y() + height()) / cellPixelSize) + 1);
 
     // Chunks for batched rendering
@@ -381,7 +387,7 @@ void MapWidget::paintEvent(QPaintEvent* event) {
 
     // Text cache - prevent memory bloat
     qsizetype maxCacheSize =
-        qMax(2 * textChunks.size(), static_cast<qsizetype>(w * h) / 5);
+        std::max(2 * textChunks.size(), static_cast<qsizetype>(w * h) / 5);
     if (textPixmapCache.size() > maxCacheSize) {
         textPixmapCache.clear();
     }
@@ -398,7 +404,7 @@ void MapWidget::zoomAt(const QPointF& widgetPos, qreal zoomMultiplier) {
 
     const qreal previousScale = scale;
     const qreal nextScale =
-        qBound(minScale, previousScale * zoomMultiplier, maxScale);
+        std::clamp(previousScale * zoomMultiplier, minScale, maxScale);
     if (qFuzzyCompare(previousScale, nextScale)) return;
 
     const QPointF anchor = (widgetPos - offset) / previousScale;

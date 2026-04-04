@@ -23,6 +23,7 @@
 #include <QTimer>
 #include <QToolButton>
 #include <QVBoxLayout>
+#include <algorithm>
 
 #include "core/board.hpp"
 #include "core/map.hpp"
@@ -724,8 +725,7 @@ void MapCreatorWindow::updateHintBar() {
     QWidget* floatingPanel = hintContainer->findChild<QWidget*>();
     if (floatingPanel) {
         floatingPanel->adjustSize();
-        int panelWidth = floatingPanel->sizeHint().width();
-        panelWidth = qMax(panelWidth, 100);
+        const int panelWidth = std::max(floatingPanel->sizeHint().width(), 100);
         floatingPanel->setFixedWidth(panelWidth);
         hintContainer->setFixedWidth(panelWidth);
         hintContainer->move((width() - hintContainer->width()) / 2,

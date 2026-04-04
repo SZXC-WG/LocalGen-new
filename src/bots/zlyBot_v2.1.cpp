@@ -13,7 +13,6 @@
 #define LGEN_BOTS_ZLYBOT_V2_1
 
 #include <queue>
-#include <random>
 
 #include "core/bot.h"
 #include "core/game.hpp"
@@ -72,14 +71,17 @@ class ZlyBot_v2_1 : public BasicBot {
     inline size_t idx(pos_t x, pos_t y) const {
         return static_cast<size_t>(x * W + y);
     }
+    inline size_t idx(Coord coo) const {
+        return static_cast<size_t>(coo.x * W + coo.y);
+    }
 
     inline void recordNewMove(Coord pos) {
         prevMoves.emplace_back(pos);
-        inPrevMoves[idx(pos.x, pos.y)] = true;
+        inPrevMoves[idx(pos)] = true;
         if (prevMoves.size() > 20) {
             auto front = prevMoves.front();
             prevMoves.pop_front();
-            inPrevMoves[idx(front.x, front.y)] = false;
+            inPrevMoves[idx(front)] = false;
         }
     }
 
@@ -98,104 +100,102 @@ class ZlyBot_v2_1 : public BasicBot {
     }
     inline army_t armyAt(pos_t x, pos_t y) { return tileArmyMemory[idx(x, y)]; }
 
+    template <typename WeightFunc>
+    void dijkstra(Coord start, std::vector<value_t>& dist, WeightFunc weight) {
+        std::fill(dist.begin(), dist.end(), DIST_INF);
+        dist[idx(start)] = 0;
+        std::priority_queue<std::pair<value_t, Coord>,
+                            std::vector<std::pair<value_t, Coord>>,
+                            std::greater<>>
+            queue;
+        queue.emplace(0, start);
+        while (!queue.empty()) {
+            auto [curDist, cur] = queue.top();
+            queue.pop();
+            if (curDist > dist[idx(cur.x, cur.y)]) continue;
+            for (int i = 0; i < 4; ++i) {
+                Coord next = cur + delta[i];
+                if (next.x < 1 || next.x > height || next.y < 1 ||
+                    next.y > width)
+                    continue;
+                if (isImpassableTile(typeAt(next.x, next.y))) continue;
+                value_t newDist = curDist + weight(next.x, next.y);
+                if (newDist < dist[idx(next)]) {
+                    dist[idx(next)] = newDist;
+                    queue.emplace(newDist, next);
+                }
+            }
+        }
+    }
+
+    void dijkstraBFS(Coord start, std::vector<value_t>& dist) {
+        std::fill(dist.begin(), dist.end(), DIST_INF);
+        dist[idx(start)] = 0;
+        std::priority_queue<std::pair<value_t, Coord>,
+                            std::vector<std::pair<value_t, Coord>>,
+                            std::greater<>>
+            queue;
+        queue.emplace(0, start);
+        while (!queue.empty()) {
+            auto [curDist, cur] = queue.top();
+            queue.pop();
+            if (curDist > dist[idx(cur)]) continue;
+            for (int i = 0; i < 4; ++i) {
+                Coord next = cur + delta[i];
+                if (next.x < 1 || next.x > height || next.y < 1 ||
+                    next.y > width)
+                    continue;
+                if (isImpassableTile(typeAt(next.x, next.y))) continue;
+                value_t newDist = curDist + 1;
+                if (newDist < dist[idx(next)]) {
+                    dist[idx(next)] = newDist;
+                    queue.emplace(newDist, next);
+                }
+            }
+        }
+    }
+
+    BotMode updateMode(value_t homeZoneDangerAver, bool homeZoneThreat,
+                       value_t homeZoneDanger) {
+        if ((mode == BotMode::ATTACK && homeZoneDangerAver > 5) ||
+            (mode == BotMode::EXPLORE && homeZoneDangerAver > 0) ||
+            homeZoneThreat) {
+            return BotMode::DEFEND;
+        }
+        if (mode == BotMode::DEFEND && homeZoneDanger <= 0) {
+            return BotMode::EXPLORE;
+        }
+        return mode;
+    }
+
     void calcData(Coord foc0, Coord foc1) {
-        {
-            std::fill(dist0.begin(), dist0.end(), DIST_INF);
-            dist0[idx(foc0.x, foc0.y)] = 0;
-            std::priority_queue<std::pair<value_t, Coord>,
-                                std::vector<std::pair<value_t, Coord>>,
-                                std::greater<>>
-                queue;
-            queue.emplace(0, foc0);
-            while (!queue.empty()) {
-                auto [curDist, cur] = queue.top();
-                queue.pop();
-                if (curDist > dist0[idx(cur.x, cur.y)]) continue;
-                for (int i = 0; i < 4; ++i) {
-                    Coord next = cur + delta[i];
-                    if (next.x < 1 || next.x > height || next.y < 1 ||
-                        next.y > width)
-                        continue;
-                    if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                    value_t newDist = curDist + 10;
-                    if (board.tileAt(next).visible) {
-                        if (board.tileAt(next).occupier != id)
-                            newDist +=
-                                std::max(armyAt(next.x, next.y), army_t(0));
-                    } else
-                        newDist += std::max(armyAt(next.x, next.y), army_t(0));
-                    if (typeAt(next.x, next.y) == TILE_SWAMP) newDist += 100;
-                    if (newDist < dist0[idx(next.x, next.y)]) {
-                        dist0[idx(next.x, next.y)] = newDist;
-                        queue.emplace(newDist, next);
-                    }
-                }
+        auto edgeWeight = [&](pos_t x, pos_t y) -> value_t {
+            value_t w = 10;
+            if (board.tileAt(x, y).visible) {
+                if (board.tileAt(x, y).occupier != id)
+                    w += std::max(armyAt(x, y), army_t(0));
+            } else {
+                w += std::max(armyAt(x, y), army_t(0));
             }
-        }
-        {
-            std::fill(dist1.begin(), dist1.end(), DIST_INF);
-            dist1[idx(foc1.x, foc1.y)] = 0;
-            std::priority_queue<std::pair<value_t, Coord>,
-                                std::vector<std::pair<value_t, Coord>>,
-                                std::greater<>>
-                queue;
-            queue.emplace(0, foc1);
-            while (!queue.empty()) {
-                auto [curDist, cur] = queue.top();
-                queue.pop();
-                if (curDist > dist1[idx(cur.x, cur.y)]) continue;
-                for (int i = 0; i < 4; ++i) {
-                    Coord next = cur + delta[i];
-                    if (next.x < 1 || next.x > height || next.y < 1 ||
-                        next.y > width)
-                        continue;
-                    if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                    value_t newDist = curDist + 10;
-                    if (board.tileAt(next).visible) {
-                        if (board.tileAt(next).occupier != id)
-                            newDist +=
-                                std::max(armyAt(next.x, next.y), army_t(0));
-                    } else
-                        newDist += std::max(armyAt(next.x, next.y), army_t(0));
-                    if (typeAt(next.x, next.y) == TILE_SWAMP) newDist += 100;
-                    if (newDist < dist1[idx(next.x, next.y)]) {
-                        dist1[idx(next.x, next.y)] = newDist;
-                        queue.emplace(newDist, next);
-                    }
-                }
-            }
-        }
+            if (typeAt(x, y) == TILE_SWAMP) w += 100;
+            return w;
+        };
+
+        dijkstra(foc0, dist0, edgeWeight);
+        dijkstra(foc1, dist1, edgeWeight);
+
         {
             homeZone.clear();
-            std::fill(distToSpawn.begin(), distToSpawn.end(), DIST_INF);
-            distToSpawn[idx(spawnCoord.x, spawnCoord.y)] = 0;
-            std::priority_queue<std::pair<value_t, Coord>,
-                                std::vector<std::pair<value_t, Coord>>,
-                                std::greater<>>
-                queue;
-            queue.emplace(0, spawnCoord);
+            dijkstraBFS(spawnCoord, distToSpawn);
             auto defenseDist = std::min(
                 20, std::max(3, static_cast<int>(rank[id].land / 15.0)));
-            while (!queue.empty()) {
-                auto [curDist, cur] = queue.top();
-                queue.pop();
-                if (curDist > distToSpawn[idx(cur.x, cur.y)]) continue;
-                if (curDist <= defenseDist &&
-                    !(typeAt(cur.x, cur.y) == TILE_SWAMP &&
-                      (!board.tileAt(cur).visible ||
-                       board.tileAt(cur).occupier == -1)))
-                    homeZone.emplace_back(cur);
-                for (int i = 0; i < 4; ++i) {
-                    Coord next = cur + delta[i];
-                    if (next.x < 1 || next.x > height || next.y < 1 ||
-                        next.y > width)
-                        continue;
-                    if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                    value_t newDist = curDist + 1;
-                    if (newDist < distToSpawn[idx(next.x, next.y)]) {
-                        distToSpawn[idx(next.x, next.y)] = newDist;
-                        queue.emplace(newDist, next);
-                    }
+            for (pos_t i = 1; i <= height; ++i) {
+                for (pos_t j = 1; j <= width; ++j) {
+                    if (distToSpawn[idx(i, j)] <= defenseDist &&
+                        !(typeAt(i, j) == TILE_SWAMP &&
+                          (!board.tileAt(i, j).visible ||
+                           board.tileAt(i, j).occupier == -1)))
+                        homeZone.emplace_back(i, j);
                 }
             }
         }
@@ -283,15 +283,15 @@ class ZlyBot_v2_1 : public BasicBot {
                             std::vector<std::pair<value_t, Coord>>,
                             std::greater<std::pair<value_t, Coord>>>
             q;
-        routeDp[idx(start.x, start.y)] = 0;
+        routeDp[idx(start)] = 0;
         q.emplace(0, start);
         while (!q.empty()) {
             Coord cur = q.top().second;
             value_t curVal = q.top().first;
             q.pop();
-            if (curVal > routeDp[idx(cur.x, cur.y)]) continue;
-            if (routeVis[idx(cur.x, cur.y)]) continue;
-            routeVis[idx(cur.x, cur.y)] = true;
+            if (curVal > routeDp[idx(cur)]) continue;
+            if (routeVis[idx(cur)]) continue;
+            routeVis[idx(cur)] = true;
             if (cur == desti) break;
             for (int i = 0; i < 4; ++i) {
                 Coord next = cur + delta[i];
@@ -299,12 +299,12 @@ class ZlyBot_v2_1 : public BasicBot {
                     next.y > width)
                     continue;
                 if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                if (routeVis[idx(next.x, next.y)]) continue;
-                if (inPrevMoves[idx(next.x, next.y)]) continue;
+                if (routeVis[idx(next)]) continue;
+                if (inPrevMoves[idx(next)]) continue;
                 value_t nextVal = curVal + UnitedInc(next.x, next.y);
-                if (nextVal < routeDp[idx(next.x, next.y)]) {
-                    routeDp[idx(next.x, next.y)] = nextVal;
-                    routePrev[idx(next.x, next.y)] = cur;
+                if (nextVal < routeDp[idx(next)]) {
+                    routeDp[idx(next)] = nextVal;
+                    routePrev[idx(next)] = cur;
                     q.emplace(nextVal, next);
                 }
             }
@@ -313,7 +313,7 @@ class ZlyBot_v2_1 : public BasicBot {
         Coord cur = desti;
         while (cur != Coord(-1, -1)) {
             route.push_front(cur);
-            cur = routePrev[idx(cur.x, cur.y)];
+            cur = routePrev[idx(cur)];
         }
         route.pop_front();
         if (route.empty() && start != desti) {
@@ -491,7 +491,7 @@ class ZlyBot_v2_1 : public BasicBot {
         for (auto pos : homeZone) {
             if (!board.tileAt(pos).visible ||
                 board.tileAt(pos).occupier != id) {
-                homeZoneDanger += tileDanger[idx(pos.x, pos.y)] + 10;
+                homeZoneDanger += tileDanger[idx(pos)] + 10;
             }
             if (board.tileAt(pos).visible && board.tileAt(pos).occupier != -1 &&
                 board.tileAt(pos).occupier != id &&
@@ -501,20 +501,23 @@ class ZlyBot_v2_1 : public BasicBot {
         value_t homeZoneDangerAver =
             homeZoneDanger / static_cast<value_t>(homeZone.size());
 
-        if ((mode == BotMode::ATTACK && homeZoneDangerAver > 5) ||
-            (mode == BotMode::EXPLORE && homeZoneDangerAver > 0) ||
-            homeZoneThreat) {
-            mode = BotMode::DEFEND;
-            focus[1] = findMaxArmyPosInHomeZone();
-        } else if (mode == BotMode::DEFEND && homeZoneDanger <= 0) {
-            mode = BotMode::EXPLORE;
-        }
+        mode = updateMode(homeZoneDangerAver, homeZoneThreat, homeZoneDanger);
+        if (mode == BotMode::DEFEND) focus[1] = findMaxArmyPosInHomeZone();
 
         if (mode == BotMode::ATTACK) {
             findRoute(focus[0], generals[targetOppoId]);
             if (!route.empty()) {
                 Move ret =
                     Move(MoveType::MOVE_ARMY, focus[0], route.front(), false);
+
+                const army_t takenArmy =
+                    board.tileAt(focus[0]).army >> ret.takeHalf;
+                if (board.tileAt(route.front()).occupier != id)
+                    tileArmyMemory[idx(route.front())] -= takenArmy;
+                else
+                    tileArmyMemory[idx(route.front())] += takenArmy;
+                tileArmyMemory[idx(focus[0])] -= takenArmy;
+
                 focus[0] = route.front();
                 route.pop_front();
                 leastUsage = std::min((pos_t)route.size(), pos_t(0));
@@ -536,6 +539,17 @@ class ZlyBot_v2_1 : public BasicBot {
             if (!route.empty()) {
                 Move ret =
                     Move(MoveType::MOVE_ARMY, focus[0], route.front(), false);
+                if (focus[0] == generals[id])
+                    ret.takeHalf = true;  // only take half army at general
+
+                const army_t takenArmy =
+                    board.tileAt(focus[0]).army >> ret.takeHalf;
+                if (board.tileAt(route.front()).occupier != id)
+                    tileArmyMemory[idx(route.front())] -= takenArmy;
+                else
+                    tileArmyMemory[idx(route.front())] += takenArmy;
+                tileArmyMemory[idx(focus[0])] -= takenArmy;
+
                 focus[0] = route.front();
                 route.pop_front();
                 leastUsage = std::min((pos_t)route.size(), pos_t(0));
@@ -545,8 +559,8 @@ class ZlyBot_v2_1 : public BasicBot {
             Coord bestTarget = focus[1];
             value_t bestDanger = -INF;
             for (auto pos : homeZone) {
-                if (tileDanger[idx(pos.x, pos.y)] > bestDanger) {
-                    bestDanger = tileDanger[idx(pos.x, pos.y)];
+                if (tileDanger[idx(pos)] > bestDanger) {
+                    bestDanger = tileDanger[idx(pos)];
                     bestTarget = pos;
                 }
             }
@@ -556,6 +570,15 @@ class ZlyBot_v2_1 : public BasicBot {
                     Move(MoveType::MOVE_ARMY, focus[1], route.front(), false);
                 if (focus[1] == generals[id])
                     ret.takeHalf = true;  // only take half army at general
+
+                const army_t takenArmy =
+                    board.tileAt(focus[1]).army >> ret.takeHalf;
+                if (board.tileAt(route.front()).occupier != id)
+                    tileArmyMemory[idx(route.front())] -= takenArmy;
+                else
+                    tileArmyMemory[idx(route.front())] += takenArmy;
+                tileArmyMemory[idx(focus[1])] -= takenArmy;
+
                 focus[1] = route.front();
                 route.pop_front();
                 leastUsage = std::min((pos_t)route.size(), pos_t(0));

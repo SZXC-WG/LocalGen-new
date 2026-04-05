@@ -282,11 +282,12 @@ class Board {
     };
 
    public:
-    static Board generate(int width, int height) {
+    static Board generate(int width, int height,
+                          std::mt19937::result_type seed) {
         const int area = width * height;
         Board board(height, width);
 
-        std::mt19937 rng(std::random_device{}());
+        std::mt19937 rng(seed);
         std::uniform_int_distribution<int> dist_row(1, height),
             dist_col(1, width), dist_tile(0, 9), dist_army(40, 49),
             dist_numMountains(area / 7, area / 7 + area / 20),

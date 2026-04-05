@@ -17,6 +17,7 @@
 #include <iostream>
 #include <limits>
 #include <mutex>
+#include <random>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -747,8 +748,9 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
                              static_cast<int>(options.bots.size()));
     result.statsDelta.resize(options.bots.size());
 
+    auto seed = std::random_device{}();
     Board board = options.mapPath.empty()
-                      ? Board::generate(options.width, options.height)
+                      ? Board::generate(options.width, options.height, seed)
                       : options.customBoard;
 
     std::vector<Player*> players;

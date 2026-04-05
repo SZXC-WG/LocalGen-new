@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QRandomGenerator>
 #include <QResizeEvent>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -102,7 +103,8 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
 
     Board initialBoard;
     if (config.mapFilePath.isEmpty()) {
-        initialBoard = Board::generate(config.mapWidth, config.mapHeight);
+        std::mt19937::result_type seed = QRandomGenerator::global()->generate();
+        initialBoard = Board::generate(config.mapWidth, config.mapHeight, seed);
     } else {
         QString errMsg;
         MapDocument mapDoc = openMap_v6(config.mapFilePath, errMsg);

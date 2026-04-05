@@ -90,6 +90,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/core/message.hpp
     src/core/move.hpp
     src/core/player.hpp
+    src/core/randomMapGenerator.hpp
     src/core/tile.hpp
     src/core/utils.hpp
     res/res.qrc
@@ -113,6 +114,7 @@ add_executable(LocalGen-bot-simulator
     src/core/message.hpp
     src/core/move.hpp
     src/core/player.hpp
+    src/core/randomMapGenerator.hpp
     src/core/tile.hpp
     src/core/utils.hpp
 )

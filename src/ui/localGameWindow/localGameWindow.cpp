@@ -104,7 +104,8 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     Board initialBoard;
     if (config.mapFilePath.isEmpty()) {
         std::mt19937::result_type seed = QRandomGenerator::global()->generate();
-        initialBoard = Board::generate(config.mapWidth, config.mapHeight, seed);
+        initialBoard = Board::generate(config.mapWidth, config.mapHeight,
+                                       config.players.size(), seed);
     } else {
         QString errMsg;
         MapDocument mapDoc = openMap_v6(config.mapFilePath, errMsg);

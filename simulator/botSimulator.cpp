@@ -749,9 +749,11 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
     result.statsDelta.resize(options.bots.size());
 
     auto seed = std::random_device{}();
-    Board board = options.mapPath.empty()
-                      ? Board::generate(options.width, options.height, seed)
-                      : options.customBoard;
+    Board board =
+        options.mapPath.empty()
+            ? Board::generate(options.width, options.height,
+                              static_cast<int>(options.bots.size()), seed)
+            : options.customBoard;
 
     std::vector<Player*> players;
     std::vector<index_t> teams;

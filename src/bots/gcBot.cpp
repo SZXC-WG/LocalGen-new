@@ -210,43 +210,12 @@ class GcBot : public BasicBot {
         return Move(MoveType::MOVE_ARMY, coo, lastPos, false);
     }
 
-   public:
-    GcBot() : rnd(std::random_device{}()) {}
-
-    void init(index_t playerId, const GameConstantsPack& constants) override {
-        id = playerId;
-        height = constants.mapHeight;
-        width = constants.mapWidth;
-        W = width + 2;
-        playerCnt = constants.playerCount;
-
-        halfTurn = turn = 0;
-
-        std::fill(tileTypeValue, tileTypeValue + 9, -INF);
-        tileTypeValue[TILE_SPAWN] = 0;
-
-        prevTarget = Coord(-1, -1);
-        lastPos = Coord(-1, -1);
-
-        seenGeneral.assign(playerCnt, Coord(-1, -1));
-        tiles.resize((height + 2) * W);
-    }
-
-    void requestMove(const BoardView& board,
-                     const std::vector<RankItem>& rank) override {
-        ++halfTurn;
-        turn += (halfTurn & 1);
-        moveQueue.clear();
-        updateMemory(board);
-
+    Move calcMove(const std::vector<RankItem>& rank) {
         const RankItem& self = *std::find_if(
             rank.begin(), rank.end(),
             [this](const RankItem& item) { return item.player == id; });
 
-        if (turn < 13 && self.land == 1) {
-            moveQueue.push_back(selectOpening());
-            return;
-        }
+        if (turn < 13 && self.land == 1) return selectOpening();
 
         const double armyStrength =
             std::log(std::min(static_cast<army_t>(3000), self.army) + 1.0);
@@ -371,16 +340,14 @@ class GcBot : public BasicBot {
 
         if (targetPos.x == -1) {
             lastPos = Coord(-1, -1);
-            moveQueue.emplace_back(MoveType::EMPTY);
-            return;
+            return Move();
         }
 
         if (tileAt(coo).type == TILE_SWAMP || dis(rnd) > 0.07 ||
             tileAt(targetPos).eval > 150) {
             Coord nextPos = moveTowards(coo, targetPos);
             lastPos = nextPos;
-            moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, nextPos, false);
-            return;
+            return Move(MoveType::MOVE_ARMY, coo, nextPos, false);
         }
 
         evaluateRouteCosts(targetPos);
@@ -403,14 +370,44 @@ class GcBot : public BasicBot {
 
         if (newFocus == Coord(-1, -1)) {
             lastPos = Coord(-1, -1);
-            moveQueue.emplace_back(MoveType::EMPTY);
-            return;
+            return Move();
         }
 
         evaluateRouteCosts(newFocus);
         Coord nextPos = moveTowards(newFocus, targetPos);
         lastPos = nextPos;
-        moveQueue.emplace_back(MoveType::MOVE_ARMY, newFocus, nextPos, false);
+        return Move(MoveType::MOVE_ARMY, newFocus, nextPos, false);
+    }
+
+   public:
+    GcBot() : rnd(std::random_device{}()) {}
+
+    void init(index_t playerId, const GameConstantsPack& constants) override {
+        id = playerId;
+        height = constants.mapHeight;
+        width = constants.mapWidth;
+        W = width + 2;
+        playerCnt = constants.playerCount;
+
+        halfTurn = turn = 0;
+
+        std::fill(tileTypeValue, tileTypeValue + 9, -INF);
+        tileTypeValue[TILE_SPAWN] = 0;
+
+        prevTarget = Coord(-1, -1);
+        lastPos = Coord(-1, -1);
+
+        seenGeneral.assign(playerCnt, Coord(-1, -1));
+        tiles.resize((height + 2) * W);
+    }
+
+    void requestMove(const BoardView& board,
+                     const std::vector<RankItem>& rank) override {
+        ++halfTurn;
+        turn += (halfTurn & 1);
+        updateMemory(board);
+        moveQueue.clear();
+        moveQueue.push_back(calcMove(rank));
     }
 };
 

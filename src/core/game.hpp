@@ -209,6 +209,7 @@ class BasicGame {
     std::vector<index_t> teams;
     std::vector<bool> alive;
     std::vector<int> killCount;
+    std::vector<turn_t> eliminatedTurn;
     std::vector<Coord> spawnCoord;
 
     inline bool isValidPlayer(index_t player) const {
@@ -433,6 +434,7 @@ inline void BasicGame::takeOver(index_t p1, index_t p2) {
 inline void BasicGame::capture(index_t p1, index_t p2) {
     ++killCount[p1];
     alive[p2] = false;
+    eliminatedTurn[p2] = curTurn << 1 | curHalfTurnPhase;
     for (auto& tile : board.tiles) {
         if (tile.occupier == p2) {
             tile.occupier = p1;
@@ -475,6 +477,7 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
     std::vector<index_t> randId(_players.size());
     std::iota(randId.begin(), randId.end(), 0);
     if (!remainIndex) std::shuffle(randId.begin(), randId.end(), rng);
+    eliminatedTurn.assign(players.size(), std::numeric_limits<turn_t>::max());
     for (std::size_t i = 0; i < players.size(); ++i) {
         players[randId[i]] = _players[i];
         names[randId[i]] = name[i];
@@ -548,6 +551,7 @@ inline void BasicGame::step() {
         } else if (move.type == MoveType::SURRENDER) {
             surrenderQueue.emplace_back(player, 50);
             alive[player] = false;
+            eliminatedTurn[player] = curTurn << 1 | curHalfTurnPhase;
             broadcast(curTurn, GameMessageSurrender{player});
         }
     }
@@ -609,10 +613,13 @@ inline std::vector<RankItem> BasicGame::ranklist() {
     }
 
     std::sort(rank.begin(), rank.end(),
-              [](const RankItem& lhs, const RankItem& rhs) {
+              [&](const RankItem& lhs, const RankItem& rhs) {
                   if (lhs.killCount == 0 && rhs.killCount > 0) return false;
                   if (lhs.killCount > 0 && rhs.killCount == 0) return true;
                   if (lhs.army != rhs.army) return lhs.army > rhs.army;
+                  if (eliminatedTurn[lhs.player] != eliminatedTurn[rhs.player])
+                      return eliminatedTurn[lhs.player] >
+                             eliminatedTurn[rhs.player];
                   return lhs.player < rhs.player;
               });
     return rank;

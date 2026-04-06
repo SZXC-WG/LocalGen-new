@@ -30,10 +30,10 @@ struct BoardView {
     std::vector<TileView> tiles;
 
     inline TileView& tileAt(pos_t x, pos_t y) {
-        return tiles.at(x * (col + 2) + y);
+        return tiles[x * (col + 2) + y];
     };
     inline const TileView& tileAt(pos_t x, pos_t y) const {
-        return tiles.at(x * (col + 2) + y);
+        return tiles[x * (col + 2) + y];
     };
 
     inline TileView& tileAt(Coord pos) { return tileAt(pos.x, pos.y); };
@@ -48,11 +48,9 @@ class Board {
     pos_t row = 0, col = 0;
     std::vector<Tile> tiles;
 
-    inline Tile& tileAt(pos_t x, pos_t y) {
-        return tiles.at(x * (col + 2) + y);
-    };
+    inline Tile& tileAt(pos_t x, pos_t y) { return tiles[x * (col + 2) + y]; };
     inline const Tile& tileAt(pos_t x, pos_t y) const {
-        return tiles.at(x * (col + 2) + y);
+        return tiles[x * (col + 2) + y];
     };
     inline Tile& tileAt(Coord pos) { return tileAt(pos.x, pos.y); };
     inline const Tile& tileAt(Coord pos) const { return tileAt(pos.x, pos.y); };

@@ -36,7 +36,4 @@ struct Move {
         : type(_type), from(_from), to(_to), takeHalf(_takeHalf) {}
 };
 
-/// A pure empty move.
-constexpr Move EMPTY_MOVE;
-
 #endif  // LGEN_CORE_MOVE_HPP

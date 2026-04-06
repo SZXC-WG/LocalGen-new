@@ -49,9 +49,9 @@ class GcBot : public BasicBot {
     Coord lastPos;
     std::mt19937 rnd;
 
-    inline TileInfo& tileAt(pos_t x, pos_t y) { return tiles.at(x * W + y); }
+    inline TileInfo& tileAt(pos_t x, pos_t y) { return tiles[x * W + y]; }
     inline const TileInfo& tileAt(pos_t x, pos_t y) const {
-        return tiles.at(x * W + y);
+        return tiles[x * W + y];
     }
 
     inline TileInfo& tileAt(Coord coo) { return tileAt(coo.x, coo.y); }

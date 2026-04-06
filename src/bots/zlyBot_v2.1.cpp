@@ -45,28 +45,33 @@ class ZlyBot_v2_1 : public BasicBot {
         return teamIds[player1] == teamIds[player2];
     }
 
+    struct TileInfo {
+        tile_type_e type = tile_type_e(-1);
+        army_t army = 0;
+        index_t occupier = -1;
+        bool visible = false;
+        bool isSeenBefore = false;
+        bool inPrevMoves = false;
+        bool routeVis = false;
+        value_t value = 0;
+        value_t danger = 0;
+        value_t dist0 = DIST_INF;
+        value_t dist1 = DIST_INF;
+        value_t distToSpawn = DIST_INF;
+        Coord routePrev{-1, -1};
+        value_t routeDp = INF;
+    };
+
+    std::vector<TileInfo> tiles;
     Coord focus[2];
     std::vector<bool> alive;
     std::vector<Coord> generals;
     std::deque<Coord> route;
     pos_t leastUsage;
     value_t tileTypeWeight[16];
-    std::vector<value_t> tileValue;
-    std::vector<value_t> tileDanger;
-    std::vector<value_t> dist0;
-    std::vector<value_t> dist1;
-    std::vector<value_t> distToSpawn;
     std::vector<Coord> homeZone;
-    std::vector<tile_type_e> tileTypeMemory;
-    std::vector<army_t> tileArmyMemory;
     std::deque<Coord> prevMoves;
-    std::vector<bool> inPrevMoves;
-    std::vector<bool> isSeenBefore;
     Coord spawnCoord;
-
-    std::vector<bool> routeVis;
-    std::vector<Coord> routePrev;
-    std::vector<value_t> routeDp;
 
     inline size_t idx(pos_t x, pos_t y) const {
         return static_cast<size_t>(x * W + y);
@@ -75,35 +80,42 @@ class ZlyBot_v2_1 : public BasicBot {
         return static_cast<size_t>(coo.x * W + coo.y);
     }
 
+    inline TileInfo& tileAt(pos_t x, pos_t y) { return tiles[idx(x, y)]; }
+    inline const TileInfo& tileAt(pos_t x, pos_t y) const {
+        return tiles[idx(x, y)];
+    }
+    inline TileInfo& tileAt(Coord coo) { return tiles[idx(coo)]; }
+    inline const TileInfo& tileAt(Coord coo) const { return tiles[idx(coo)]; }
+
     inline void recordNewMove(Coord pos) {
         prevMoves.emplace_back(pos);
-        inPrevMoves[idx(pos)] = true;
+        tileAt(pos).inPrevMoves = true;
         if (prevMoves.size() > 20) {
             auto front = prevMoves.front();
             prevMoves.pop_front();
-            inPrevMoves[idx(front)] = false;
+            tileAt(front).inPrevMoves = false;
         }
     }
 
     inline tile_type_e typeAt(pos_t x, pos_t y) {
-        if (tileTypeMemory.at(idx(x, y)) != tile_type_e(-1))
-            return tileTypeMemory[idx(x, y)];
+        TileInfo& t = tileAt(x, y);
+        if (t.type != tile_type_e(-1))
+            return t.type;
         else if (board.tileAt(x, y).visible)
-            return tileTypeMemory[idx(x, y)] = board.tileAt(x, y).type;
+            return t.type = board.tileAt(x, y).type;
         else if (board.tileAt(x, y).type == TILE_MOUNTAIN ||
                  board.tileAt(x, y).type == TILE_CITY)
-            return tileTypeMemory[idx(x, y)] = TILE_OBSTACLE;
+            return t.type = TILE_OBSTACLE;
         else if (board.tileAt(x, y).type == TILE_SPAWN)
-            return tileTypeMemory[idx(x, y)] = TILE_BLANK;
+            return t.type = TILE_BLANK;
         else
             return board.tileAt(x, y).type;
     }
-    inline army_t armyAt(pos_t x, pos_t y) { return tileArmyMemory[idx(x, y)]; }
 
-    template <typename WeightFunc>
-    void dijkstra(Coord start, std::vector<value_t>& dist, WeightFunc weight) {
-        std::fill(dist.begin(), dist.end(), DIST_INF);
-        dist[idx(start)] = 0;
+    template <typename DistPtr, typename WeightFunc>
+    void dijkstra(Coord start, DistPtr dist, WeightFunc weight) {
+        for (TileInfo& t : tiles) t.*dist = DIST_INF;
+        tileAt(start).*dist = 0;
         std::priority_queue<std::pair<value_t, Coord>,
                             std::vector<std::pair<value_t, Coord>>,
                             std::greater<>>
@@ -112,7 +124,7 @@ class ZlyBot_v2_1 : public BasicBot {
         while (!queue.empty()) {
             auto [curDist, cur] = queue.top();
             queue.pop();
-            if (curDist > dist[idx(cur.x, cur.y)]) continue;
+            if (curDist > tileAt(cur).*dist) continue;
             for (int i = 0; i < 4; ++i) {
                 Coord next = cur + delta[i];
                 if (next.x < 1 || next.x > height || next.y < 1 ||
@@ -120,19 +132,19 @@ class ZlyBot_v2_1 : public BasicBot {
                     continue;
                 if (isImpassableTile(typeAt(next.x, next.y))) continue;
                 value_t newDist = curDist + weight(next.x, next.y);
-                if (newDist < dist[idx(next)]) {
-                    dist[idx(next)] = newDist;
+                if (newDist < tileAt(next).*dist) {
+                    tiles[idx(next)].*dist = newDist;
                     queue.emplace(newDist, next);
                 }
             }
         }
     }
 
-    void dijkstraBFS(Coord start, std::vector<value_t>& dist) {
-        std::fill(dist.begin(), dist.end(), DIST_INF);
-        dist[idx(start)] = 0;
+    void dijkstraBFS(Coord start) {
+        for (TileInfo& t : tiles) t.distToSpawn = DIST_INF;
+        tileAt(start).distToSpawn = 0;
         std::vector<Coord> queue;
-        queue.reserve(dist.size());
+        queue.reserve(tiles.size());
         queue.emplace_back(start);
         size_t head = 0;
         while (head < queue.size()) {
@@ -143,11 +155,10 @@ class ZlyBot_v2_1 : public BasicBot {
                     next.y > width)
                     continue;
                 if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                value_t newDist = dist[idx(cur)] + 1;
-                if (newDist < dist[idx(next)]) {
-                    dist[idx(next)] = newDist;
-                    queue.emplace_back(next);
-                }
+                TileInfo& nt = tileAt(next);
+                if (nt.distToSpawn != DIST_INF) continue;
+                nt.distToSpawn = tileAt(cur).distToSpawn + 1;
+                queue.emplace_back(next);
             }
         }
     }
@@ -167,31 +178,31 @@ class ZlyBot_v2_1 : public BasicBot {
 
     void calcData(Coord foc0, Coord foc1) {
         auto edgeWeight = [&](pos_t x, pos_t y) -> value_t {
+            const TileInfo& t = tileAt(x, y);
             value_t w = 10;
-            if (board.tileAt(x, y).visible) {
-                if (board.tileAt(x, y).occupier != id)
-                    w += std::max(armyAt(x, y), army_t(0));
+            if (t.visible) {
+                if (t.occupier != id) w += std::max(t.army, army_t(0));
             } else {
-                w += std::max(armyAt(x, y), army_t(0));
+                w += std::max(t.army, army_t(0));
             }
             if (typeAt(x, y) == TILE_SWAMP) w += 100;
             return w;
         };
 
-        dijkstra(foc0, dist0, edgeWeight);
-        dijkstra(foc1, dist1, edgeWeight);
+        dijkstra(foc0, &TileInfo::dist0, edgeWeight);
+        dijkstra(foc1, &TileInfo::dist1, edgeWeight);
 
         {
             homeZone.clear();
-            dijkstraBFS(spawnCoord, distToSpawn);
+            dijkstraBFS(spawnCoord);
             auto defenseDist = std::min(
                 20, std::max(3, static_cast<int>(rank[id].land / 15.0)));
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
-                    if (distToSpawn[idx(i, j)] <= defenseDist &&
+                    const TileInfo& t = tileAt(i, j);
+                    if (t.distToSpawn <= defenseDist &&
                         !(typeAt(i, j) == TILE_SWAMP &&
-                          (!board.tileAt(i, j).visible ||
-                           board.tileAt(i, j).occupier == -1)))
+                          (!t.visible || t.occupier == -1)))
                         homeZone.emplace_back(i, j);
                 }
             }
@@ -199,47 +210,42 @@ class ZlyBot_v2_1 : public BasicBot {
 
         for (pos_t i = 1; i <= height; ++i) {
             for (pos_t j = 1; j <= width; ++j) {
-                if (board.tileAt(i, j).occupier == id) {
-                    tileValue[idx(i, j)] = -INF;
-                    tileDanger[idx(i, j)] = -INF;
+                TileInfo& t = tileAt(i, j);
+                if (t.occupier == id) {
+                    t.value = -INF;
+                    t.danger = -INF;
                 } else {
-                    tileValue[idx(i, j)] = tileTypeWeight[typeAt(i, j)];
-                    tileValue[idx(i, j)] -= dist0[idx(i, j)];
-                    tileValue[idx(i, j)] -= armyAt(i, j);
-                    tileDanger[idx(i, j)] = -tileTypeWeight[typeAt(i, j)];
-                    tileDanger[idx(i, j)] -= distToSpawn[idx(i, j)] * 2;
-                    tileDanger[idx(i, j)] -= dist1[idx(i, j)];
-                    tileValue[idx(i, j)] -= isSeenBefore[idx(i, j)] *
-                                            (turn - 100000.0 / rank[id].army);
-                    if (board.tileAt(i, j).visible &&
-                        board.tileAt(i, j).occupier != -1) {
+                    tile_type_e tt = typeAt(i, j);
+                    t.value = tileTypeWeight[tt];
+                    t.value -= t.dist0;
+                    t.value -= t.army;
+                    t.danger = -tileTypeWeight[tt];
+                    t.danger -= t.distToSpawn * 2;
+                    t.danger -= t.dist1;
+                    t.value -= t.isSeenBefore *
+                               (turn - 100000.0 / rank[id].army);
+                    if (t.visible && t.occupier != -1) {
                         army_t adjacent_minimum_same_player = INF;
                         for (int k = 0; k < 4; ++k) {
                             Coord adja = Coord(i, j) + delta[k];
                             if (adja.x < 1 || adja.x > height || adja.y < 1 ||
                                 adja.y > width)
                                 continue;
-                            if (board.tileAt(adja).visible &&
-                                board.tileAt(adja).occupier ==
-                                    board.tileAt(i, j).occupier)
+                            const TileInfo& at = tileAt(adja);
+                            if (at.visible && at.occupier == t.occupier)
                                 adjacent_minimum_same_player =
                                     std::min(adjacent_minimum_same_player,
-                                             board.tileAt(adja).army);
+                                             at.army);
                         }
                         if (adjacent_minimum_same_player == INF)
-                            adjacent_minimum_same_player =
-                                board.tileAt(i, j).army;
-                        tileValue[idx(i, j)] +=
-                            2 * (board.tileAt(i, j).army -
-                                 adjacent_minimum_same_player);
+                            adjacent_minimum_same_player = t.army;
+                        t.value += 2 * (t.army - adjacent_minimum_same_player);
                     }
-                    if (board.tileAt(i, j).visible) {
-                        if (board.tileAt(i, j).occupier != -1)
-                            tileDanger[idx(i, j)] +=
-                                2 * board.tileAt(i, j).army;
+                    if (t.visible) {
+                        if (t.occupier != -1)
+                            t.danger += 2 * t.army;
                         else
-                            tileDanger[idx(i, j)] -=
-                                board.tileAt(i, j).army / 2;
+                            t.danger -= t.army / 2;
                     }
                 }
             }
@@ -251,10 +257,8 @@ class ZlyBot_v2_1 : public BasicBot {
         auto ArmyInc = [&](int x, int y) -> value_t {
             if (x < 1 || x > height || y < 1 || y > width) return INF;
             if (isImpassableTile(typeAt(x, y))) return INF;
-            if (board.tileAt(x, y).occupier == id)
-                return -board.tileAt(x, y).army;
-            else
-                return armyAt(x, y);
+            if (tileAt(x, y).occupier == id) return -tileAt(x, y).army;
+            return tileAt(x, y).army;
         };
         auto TypeInc = [&](int x, int y) -> value_t {
             switch (typeAt(x, y)) {
@@ -273,22 +277,24 @@ class ZlyBot_v2_1 : public BasicBot {
         auto UnitedInc = [&](int x, int y) -> value_t {
             return DisInc * 1000 + ArmyInc(x, y) + TypeInc(x, y);
         };
-        std::fill(routeVis.begin(), routeVis.end(), false);
-        std::fill(routePrev.begin(), routePrev.end(), Coord(-1, -1));
-        std::fill(routeDp.begin(), routeDp.end(), INF);
+        for (TileInfo& t : tiles) {
+            t.routeDp = INF;
+            t.routePrev = Coord(-1, -1);
+            t.routeVis = false;
+        }
         std::priority_queue<std::pair<value_t, Coord>,
                             std::vector<std::pair<value_t, Coord>>,
                             std::greater<std::pair<value_t, Coord>>>
             q;
-        routeDp[idx(start)] = 0;
+        tileAt(start).routeDp = 0;
         q.emplace(0, start);
         while (!q.empty()) {
             Coord cur = q.top().second;
             value_t curVal = q.top().first;
             q.pop();
-            if (curVal > routeDp[idx(cur)]) continue;
-            if (routeVis[idx(cur)]) continue;
-            routeVis[idx(cur)] = true;
+            if (curVal > tileAt(cur).routeDp) continue;
+            if (tileAt(cur).routeVis) continue;
+            tileAt(cur).routeVis = true;
             if (cur == desti) break;
             for (int i = 0; i < 4; ++i) {
                 Coord next = cur + delta[i];
@@ -296,12 +302,12 @@ class ZlyBot_v2_1 : public BasicBot {
                     next.y > width)
                     continue;
                 if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                if (routeVis[idx(next)]) continue;
-                if (inPrevMoves[idx(next)]) continue;
+                if (tileAt(next).routeVis) continue;
+                if (tileAt(next).inPrevMoves) continue;
                 value_t nextVal = curVal + UnitedInc(next.x, next.y);
-                if (nextVal < routeDp[idx(next)]) {
-                    routeDp[idx(next)] = nextVal;
-                    routePrev[idx(next)] = cur;
+                if (nextVal < tileAt(next).routeDp) {
+                    tileAt(next).routeDp = nextVal;
+                    tileAt(next).routePrev = cur;
                     q.emplace(nextVal, next);
                 }
             }
@@ -310,7 +316,7 @@ class ZlyBot_v2_1 : public BasicBot {
         Coord cur = desti;
         while (cur != Coord(-1, -1)) {
             route.push_front(cur);
-            cur = routePrev[idx(cur)];
+            cur = tileAt(cur).routePrev;
         }
         route.pop_front();
         if (route.empty() && start != desti) {
@@ -329,9 +335,9 @@ class ZlyBot_v2_1 : public BasicBot {
         Coord maxCoo = generals[id];
         for (pos_t i = 1; i <= height; ++i) {
             for (pos_t j = 1; j <= width; ++j) {
-                if (board.tileAt(i, j).occupier == id &&
-                    board.tileAt(i, j).army > maxArmy) {
-                    maxArmy = board.tileAt(i, j).army;
+                const TileInfo& t = tileAt(i, j);
+                if (t.occupier == id && t.army > maxArmy) {
+                    maxArmy = t.army;
                     maxCoo = Coord(i, j);
                 }
             }
@@ -343,9 +349,10 @@ class ZlyBot_v2_1 : public BasicBot {
         army_t maxArmy = 0;
         Coord maxCoo = spawnCoord;
         for (auto pos : homeZone) {
-            if (board.tileAt(pos).visible && board.tileAt(pos).occupier == id) {
-                if (board.tileAt(pos).army > maxArmy) {
-                    maxArmy = board.tileAt(pos).army;
+            const TileInfo& t = tileAt(pos);
+            if (t.visible && t.occupier == id) {
+                if (t.army > maxArmy) {
+                    maxArmy = t.army;
                     maxCoo = pos;
                 }
             }
@@ -380,18 +387,7 @@ class ZlyBot_v2_1 : public BasicBot {
         alive.assign(constants.playerCount, true);
         generals.assign(constants.playerCount, Coord(-1, -1));
 
-        tileValue.assign((height + 2) * W, 0);
-        tileDanger.assign((height + 2) * W, 0);
-        dist0.assign((height + 2) * W, DIST_INF);
-        dist1.assign((height + 2) * W, DIST_INF);
-        distToSpawn.assign((height + 2) * W, DIST_INF);
-        tileTypeMemory.assign((height + 2) * W, tile_type_e(-1));
-        tileArmyMemory.assign((height + 2) * W, 0);
-        inPrevMoves.assign((height + 2) * W, false);
-        isSeenBefore.assign((height + 2) * W, false);
-        routeVis.assign((height + 2) * W, false);
-        routePrev.assign((height + 2) * W, Coord(-1, -1));
-        routeDp.assign((height + 2) * W, INF);
+        tiles.assign((height + 2) * W, TileInfo{});
         mode = BotMode::EXPLORE;
     }
 
@@ -414,50 +410,53 @@ class ZlyBot_v2_1 : public BasicBot {
 
         for (pos_t i = 1; i <= height; ++i) {
             for (pos_t j = 1; j <= width; ++j) {
-                if (tileArmyMemory[idx(i, j)] > 0) --tileArmyMemory[idx(i, j)];
-                if (board.tileAt(i, j).visible ||
-                    board.tileAt(i, j).type == TILE_SWAMP) {
-                    isSeenBefore[idx(i, j)] = true;
+                TileInfo& t = tileAt(i, j);
+                const TileView& view = board.tileAt(i, j);
+
+                if (t.army > 0) --t.army;
+
+                if (view.visible || view.type == TILE_SWAMP) {
+                    t.isSeenBefore = true;
                 }
-                if (board.tileAt(i, j).visible) {
-                    tileTypeMemory[idx(i, j)] = board.tileAt(i, j).type;
-                    tileArmyMemory[idx(i, j)] = board.tileAt(i, j).army;
-                } else if (!isSeenBefore[idx(i, j)]) {
-                    switch (typeAt(i, j)) {
-                        case TILE_BLANK: tileArmyMemory[idx(i, j)] = 0; break;
-                        case TILE_SWAMP: tileArmyMemory[idx(i, j)] = 0; break;
-                        case TILE_MOUNTAIN:
-                            tileArmyMemory[idx(i, j)] = INF;
-                            break;
-                        case TILE_SPAWN:
-                            tileArmyMemory[idx(i, j)] = -INF;
-                            break;
-                        case TILE_CITY:   tileArmyMemory[idx(i, j)] = 40; break;
-                        case TILE_DESERT: tileArmyMemory[idx(i, j)] = 40; break;
-                        case TILE_LOOKOUT:
-                            tileArmyMemory[idx(i, j)] = INF;
-                            break;
-                        case TILE_OBSERVATORY:
-                            tileArmyMemory[idx(i, j)] = INF;
-                            break;
-                        case TILE_OBSTACLE:
-                            tileArmyMemory[idx(i, j)] = 40;
-                            break;
+                if (view.visible) {
+                    t.type = view.type;
+                    t.army = view.army;
+                    t.occupier = view.occupier;
+                    t.visible = true;
+                } else {
+                    t.visible = false;
+                    t.occupier = -1;
+                    if (!t.isSeenBefore) {
+                        switch (typeAt(i, j)) {
+                            case TILE_BLANK: t.army = 0; break;
+                            case TILE_SWAMP: t.army = 0; break;
+                            case TILE_MOUNTAIN:
+                            case TILE_LOOKOUT:
+                            case TILE_OBSERVATORY:
+                                t.army = INF;
+                                break;
+                            case TILE_SPAWN:
+                                t.army = -INF;
+                                break;
+                            case TILE_CITY:
+                            case TILE_DESERT:
+                            case TILE_OBSTACLE:
+                                t.army = 40;
+                                break;
+                            default: break;
+                        }
                     }
                 }
-                if (board.tileAt(i, j).visible &&
-                    board.tileAt(i, j).type == TILE_GENERAL)
-                    generals[board.tileAt(i, j).occupier] = Coord(i, j);
+                if (view.visible && view.type == TILE_GENERAL)
+                    generals[view.occupier] = Coord(i, j);
             }
         }
         if (generals[id] != Coord(-1, -1)) spawnCoord = generals[id];
-        if (board.tileAt(focus[0]).occupier != id ||
-            board.tileAt(focus[0]).army == 0) {
+        if (tileAt(focus[0]).occupier != id || tileAt(focus[0]).army == 0) {
             focus[0] = findMaxArmyPos();
             leastUsage = 0;
         }
-        if (board.tileAt(focus[1]).occupier != id ||
-            board.tileAt(focus[1]).army == 0) {
+        if (tileAt(focus[1]).occupier != id || tileAt(focus[1]).army == 0) {
             focus[1] = findMaxArmyPosInHomeZone();
         }
         if (leastUsage != 0) {
@@ -485,14 +484,14 @@ class ZlyBot_v2_1 : public BasicBot {
 
         bool homeZoneThreat = false;
         value_t homeZoneDanger = 0;
+        const TileInfo& spawnTile = tileAt(spawnCoord);
         for (auto pos : homeZone) {
-            if (!board.tileAt(pos).visible ||
-                board.tileAt(pos).occupier != id) {
-                homeZoneDanger += tileDanger[idx(pos)] + 10;
+            const TileInfo& t = tileAt(pos);
+            if (!t.visible || t.occupier != id) {
+                homeZoneDanger += t.danger + 10;
             }
-            if (board.tileAt(pos).visible && board.tileAt(pos).occupier != -1 &&
-                board.tileAt(pos).occupier != id &&
-                board.tileAt(pos).army > board.tileAt(spawnCoord).army)
+            if (t.visible && t.occupier != -1 && t.occupier != id &&
+                t.army > spawnTile.army)
                 homeZoneThreat = true;
         }
         value_t homeZoneDangerAver =
@@ -508,12 +507,12 @@ class ZlyBot_v2_1 : public BasicBot {
                     Move(MoveType::MOVE_ARMY, focus[0], route.front(), false);
 
                 const army_t takenArmy =
-                    board.tileAt(focus[0]).army >> ret.takeHalf;
-                if (board.tileAt(route.front()).occupier != id)
-                    tileArmyMemory[idx(route.front())] -= takenArmy;
+                    tileAt(focus[0]).army >> ret.takeHalf;
+                if (tileAt(route.front()).occupier != id)
+                    tileAt(route.front()).army -= takenArmy;
                 else
-                    tileArmyMemory[idx(route.front())] += takenArmy;
-                tileArmyMemory[idx(focus[0])] -= takenArmy;
+                    tileAt(route.front()).army += takenArmy;
+                tileAt(focus[0]).army -= takenArmy;
 
                 focus[0] = route.front();
                 route.pop_front();
@@ -525,9 +524,9 @@ class ZlyBot_v2_1 : public BasicBot {
             value_t bestValue = -INF;
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
-                    if (!isImpassableTile(typeAt(i, j)) &&
-                        tileValue[idx(i, j)] > bestValue) {
-                        bestValue = tileValue[idx(i, j)];
+                    const TileInfo& t = tileAt(i, j);
+                    if (!isImpassableTile(typeAt(i, j)) && t.value > bestValue) {
+                        bestValue = t.value;
                         bestTarget = Coord(i, j);
                     }
                 }
@@ -537,15 +536,15 @@ class ZlyBot_v2_1 : public BasicBot {
                 Move ret =
                     Move(MoveType::MOVE_ARMY, focus[0], route.front(), false);
                 if (focus[0] == generals[id])
-                    ret.takeHalf = true;  // only take half army at general
+                    ret.takeHalf = true;
 
                 const army_t takenArmy =
-                    board.tileAt(focus[0]).army >> ret.takeHalf;
-                if (board.tileAt(route.front()).occupier != id)
-                    tileArmyMemory[idx(route.front())] -= takenArmy;
+                    tileAt(focus[0]).army >> ret.takeHalf;
+                if (tileAt(route.front()).occupier != id)
+                    tileAt(route.front()).army -= takenArmy;
                 else
-                    tileArmyMemory[idx(route.front())] += takenArmy;
-                tileArmyMemory[idx(focus[0])] -= takenArmy;
+                    tileAt(route.front()).army += takenArmy;
+                tileAt(focus[0]).army -= takenArmy;
 
                 focus[0] = route.front();
                 route.pop_front();
@@ -556,8 +555,9 @@ class ZlyBot_v2_1 : public BasicBot {
             Coord bestTarget = focus[1];
             value_t bestDanger = -INF;
             for (auto pos : homeZone) {
-                if (tileDanger[idx(pos)] > bestDanger) {
-                    bestDanger = tileDanger[idx(pos)];
+                const TileInfo& t = tileAt(pos);
+                if (t.danger > bestDanger) {
+                    bestDanger = t.danger;
                     bestTarget = pos;
                 }
             }
@@ -566,15 +566,15 @@ class ZlyBot_v2_1 : public BasicBot {
                 Move ret =
                     Move(MoveType::MOVE_ARMY, focus[1], route.front(), false);
                 if (focus[1] == generals[id])
-                    ret.takeHalf = true;  // only take half army at general
+                    ret.takeHalf = true;
 
                 const army_t takenArmy =
-                    board.tileAt(focus[1]).army >> ret.takeHalf;
-                if (board.tileAt(route.front()).occupier != id)
-                    tileArmyMemory[idx(route.front())] -= takenArmy;
+                    tileAt(focus[1]).army >> ret.takeHalf;
+                if (tileAt(route.front()).occupier != id)
+                    tileAt(route.front()).army -= takenArmy;
                 else
-                    tileArmyMemory[idx(route.front())] += takenArmy;
-                tileArmyMemory[idx(focus[1])] -= takenArmy;
+                    tileAt(route.front()).army += takenArmy;
+                tileAt(focus[1]).army -= takenArmy;
 
                 focus[1] = route.front();
                 route.pop_front();

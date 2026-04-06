@@ -20,7 +20,7 @@
 class ZlyBot_v2_1 : public BasicBot {
    private:
     using value_t = intmax_t;
-    constexpr static pos_t DIST_INF = 32767;
+    constexpr static pos_t DIST_INF = 1048576;
     constexpr static int64_t INF = 10'000'000'000'000'000LL;
     constexpr static Coord delta[] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
 
@@ -223,8 +223,8 @@ class ZlyBot_v2_1 : public BasicBot {
                     t.danger = -tileTypeWeight[tt];
                     t.danger -= t.distToSpawn * 2;
                     t.danger -= t.dist1;
-                    t.value -= t.isSeenBefore *
-                               (turn - 100000.0 / rank[id].army);
+                    t.value -=
+                        t.isSeenBefore * (turn - 100000.0 / rank[id].army);
                     if (t.visible && t.occupier != -1) {
                         army_t adjacent_minimum_same_player = INF;
                         for (int k = 0; k < 4; ++k) {
@@ -234,9 +234,8 @@ class ZlyBot_v2_1 : public BasicBot {
                                 continue;
                             const TileInfo& at = tileAt(adja);
                             if (at.visible && at.occupier == t.occupier)
-                                adjacent_minimum_same_player =
-                                    std::min(adjacent_minimum_same_player,
-                                             at.army);
+                                adjacent_minimum_same_player = std::min(
+                                    adjacent_minimum_same_player, at.army);
                         }
                         if (adjacent_minimum_same_player == INF)
                             adjacent_minimum_same_player = t.army;
@@ -428,22 +427,16 @@ class ZlyBot_v2_1 : public BasicBot {
                     t.occupier = -1;
                     if (!t.isSeenBefore) {
                         switch (typeAt(i, j)) {
-                            case TILE_BLANK: t.army = 0; break;
-                            case TILE_SWAMP: t.army = 0; break;
+                            case TILE_BLANK:       t.army = 0; break;
+                            case TILE_SWAMP:       t.army = 0; break;
                             case TILE_MOUNTAIN:
                             case TILE_LOOKOUT:
-                            case TILE_OBSERVATORY:
-                                t.army = INF;
-                                break;
-                            case TILE_SPAWN:
-                                t.army = -INF;
-                                break;
+                            case TILE_OBSERVATORY: t.army = INF; break;
+                            case TILE_SPAWN:       t.army = -INF; break;
                             case TILE_CITY:
                             case TILE_DESERT:
-                            case TILE_OBSTACLE:
-                                t.army = 40;
-                                break;
-                            default: break;
+                            case TILE_OBSTACLE:    t.army = 40; break;
+                            default:               break;
                         }
                     }
                 }
@@ -506,8 +499,7 @@ class ZlyBot_v2_1 : public BasicBot {
                 Move ret =
                     Move(MoveType::MOVE_ARMY, focus[0], route.front(), false);
 
-                const army_t takenArmy =
-                    tileAt(focus[0]).army >> ret.takeHalf;
+                const army_t takenArmy = tileAt(focus[0]).army >> ret.takeHalf;
                 if (tileAt(route.front()).occupier != id)
                     tileAt(route.front()).army -= takenArmy;
                 else
@@ -525,7 +517,8 @@ class ZlyBot_v2_1 : public BasicBot {
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
                     const TileInfo& t = tileAt(i, j);
-                    if (!isImpassableTile(typeAt(i, j)) && t.value > bestValue) {
+                    if (!isImpassableTile(typeAt(i, j)) &&
+                        t.value > bestValue) {
                         bestValue = t.value;
                         bestTarget = Coord(i, j);
                     }
@@ -535,11 +528,9 @@ class ZlyBot_v2_1 : public BasicBot {
             if (!route.empty()) {
                 Move ret =
                     Move(MoveType::MOVE_ARMY, focus[0], route.front(), false);
-                if (focus[0] == generals[id])
-                    ret.takeHalf = true;
+                if (focus[0] == generals[id]) ret.takeHalf = true;
 
-                const army_t takenArmy =
-                    tileAt(focus[0]).army >> ret.takeHalf;
+                const army_t takenArmy = tileAt(focus[0]).army >> ret.takeHalf;
                 if (tileAt(route.front()).occupier != id)
                     tileAt(route.front()).army -= takenArmy;
                 else
@@ -565,11 +556,9 @@ class ZlyBot_v2_1 : public BasicBot {
             if (!route.empty()) {
                 Move ret =
                     Move(MoveType::MOVE_ARMY, focus[1], route.front(), false);
-                if (focus[1] == generals[id])
-                    ret.takeHalf = true;
+                if (focus[1] == generals[id]) ret.takeHalf = true;
 
-                const army_t takenArmy =
-                    tileAt(focus[1]).army >> ret.takeHalf;
+                const army_t takenArmy = tileAt(focus[1]).army >> ret.takeHalf;
                 if (tileAt(route.front()).occupier != id)
                     tileAt(route.front()).army -= takenArmy;
                 else

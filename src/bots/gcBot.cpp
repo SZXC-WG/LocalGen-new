@@ -26,7 +26,7 @@ class GcBot : public BasicBot {
     constexpr static value_t INF = 10'000'000'000'000'000LL;
     constexpr static Coord delta[] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
 
-    pos_t height, width, W;
+    pos_t height, width;
     index_t playerCnt;
     index_t id;
 
@@ -51,9 +51,9 @@ class GcBot : public BasicBot {
     Coord lastPos;
     std::mt19937 rnd;
 
-    inline TileInfo& tileAt(pos_t x, pos_t y) { return tiles[x * W + y]; }
+    inline TileInfo& tileAt(pos_t x, pos_t y) { return tiles[x * width + y]; }
     inline const TileInfo& tileAt(pos_t x, pos_t y) const {
-        return tiles[x * W + y];
+        return tiles[x * width + y];
     }
 
     inline TileInfo& tileAt(Coord coo) { return tileAt(coo.x, coo.y); }
@@ -61,12 +61,16 @@ class GcBot : public BasicBot {
         return tileAt(coo.x, coo.y);
     }
 
+    inline bool inBoard(pos_t x, pos_t y) const {
+        return x >= 0 && x < height && y >= 0 && y < width;
+    }
     inline bool accessible(pos_t x, pos_t y) const {
-        if (x < 1 || x > height || y < 1 || y > width) return false;
+        if (!inBoard(x, y)) return false;
         tile_type_e type = tileAt(x, y).type;
         return !isImpassableTile(type) && type != TILE_OBSTACLE;
     }
 
+    inline bool inBoard(Coord coo) const { return inBoard(coo.x, coo.y); }
     inline bool accessible(Coord coo) const { return accessible(coo.x, coo.y); }
 
     inline int approxDist(Coord st, Coord dest) const {
@@ -103,7 +107,7 @@ class GcBot : public BasicBot {
             if (tile.type == TILE_SWAMP) {
                 for (auto [dx, dy] : delta) {
                     pos_t nx = cur.x + dx, ny = cur.y + dy;
-                    if (1 <= nx && nx <= height && 1 <= ny && ny <= width &&
+                    if (inBoard(nx, ny) &&
                         tileAt(nx, ny).type == TILE_OBSTACLE) {
                         tile.eval++;
                         break;
@@ -143,8 +147,8 @@ class GcBot : public BasicBot {
     Coord maxArmyPos() const {
         value_t maxArmy = 0;
         Coord maxCoo = seenGeneral[id];
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
+        for (pos_t i = 0; i < height; ++i) {
+            for (pos_t j = 0; j < width; ++j) {
                 const TileInfo& tile = tileAt(i, j);
                 if (tile.occupier == id) {
                     value_t weightedArmy = tile.army;
@@ -163,9 +167,9 @@ class GcBot : public BasicBot {
     }
 
     void updateMemory(const BoardView& board) {
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
-                const TileView& view = board.tileAt(i, j);
+        for (pos_t i = 0; i < height; ++i) {
+            for (pos_t j = 0; j < width; ++j) {
+                const TileView& view = board.tileAt(i + 1, j + 1);
                 TileInfo& tile = tileAt(i, j);
                 tile_type_e type =
                     view.type == TILE_DESERT ? TILE_PLAIN : view.type;
@@ -262,8 +266,8 @@ class GcBot : public BasicBot {
             value_t maxBlockValue = -INF;
 
             unknownPlains.clear();
-            for (pos_t i = 1; i <= height; ++i) {
-                for (pos_t j = 1; j <= width; ++j) {
+            for (pos_t i = 0; i < height; ++i) {
+                for (pos_t j = 0; j < width; ++j) {
                     const TileInfo& tile = tileAt(i, j);
                     if (tile.dist >= 500 || tile.eval <= -100 ||
                         (tile.type != TILE_PLAIN && tile.type != TILE_SWAMP))
@@ -306,8 +310,8 @@ class GcBot : public BasicBot {
                 return tileValue;
             };
 
-            for (pos_t i = 1; i <= height; ++i) {
-                for (pos_t j = 1; j <= width; ++j) {
+            for (pos_t i = 0; i < height; ++i) {
+                for (pos_t j = 0; j < width; ++j) {
                     Coord pos(i, j);
                     const TileInfo& tile = tileAt(pos);
                     if (tile.occupier != id && tile.dist < 500 &&
@@ -354,8 +358,8 @@ class GcBot : public BasicBot {
 
         value_t maxWeight = -INF;
         Coord newFocus(-1, -1);
-        for (pos_t i = 1; i <= height; ++i) {
-            for (pos_t j = 1; j <= width; ++j) {
+        for (pos_t i = 0; i < height; ++i) {
+            for (pos_t j = 0; j < width; ++j) {
                 const TileInfo& tile = tileAt(i, j);
                 if (tile.occupier == id && tile.army > 1) {
                     value_t weight = tile.eval - 30 * tile.dist;
@@ -386,7 +390,6 @@ class GcBot : public BasicBot {
         id = playerId;
         height = constants.mapHeight;
         width = constants.mapWidth;
-        W = width + 2;
         playerCnt = constants.playerCount;
 
         halfTurn = turn = 0;
@@ -398,7 +401,7 @@ class GcBot : public BasicBot {
         lastPos = Coord(-1, -1);
 
         seenGeneral.assign(playerCnt, Coord(-1, -1));
-        tiles.resize((height + 2) * W);
+        tiles.resize(height * width);
     }
 
     void requestMove(const BoardView& board,
@@ -407,7 +410,10 @@ class GcBot : public BasicBot {
         turn += (halfTurn & 1);
         updateMemory(board);
         moveQueue.clear();
-        moveQueue.push_back(calcMove(rank));
+        Move move = calcMove(rank);
+        if (move.type == MoveType::MOVE_ARMY)
+            ++move.from.x, ++move.from.y, ++move.to.x, ++move.to.y;
+        moveQueue.push_back(move);
     }
 };
 

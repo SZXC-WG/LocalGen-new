@@ -174,11 +174,12 @@ struct GameConstantsPack {
 };
 
 struct RankItem {
-    index_t player = -1;
     army_t army = 0;
+    index_t player = -1;
     pos_t land = 0;
-    bool alive = false;
+    int killCount = 0;
     turn_t surrLeft = static_cast<turn_t>(-1);
+    bool alive = false;
 };
 
 /// Move priority categories (based on generals.io priority system).
@@ -207,6 +208,7 @@ class BasicGame {
     std::vector<std::string> names;
     std::vector<index_t> teams;
     std::vector<bool> alive;
+    std::vector<int> killCount;
     std::vector<Coord> spawnCoord;
 
     inline bool isValidPlayer(index_t player) const {
@@ -429,6 +431,7 @@ inline void BasicGame::takeOver(index_t p1, index_t p2) {
     // No need to broadcast: this is a low-level operation.
 }
 inline void BasicGame::capture(index_t p1, index_t p2) {
+    ++killCount[p1];
     alive[p2] = false;
     for (auto& tile : board.tiles) {
         if (tile.occupier == p2) {
@@ -453,6 +456,7 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
       teams(_players.size()),
       board(_board),
       alive(_players.size()),
+      killCount(_players.size()),
       spawnCoord(_players.size()) {
     if (_players.empty()) {
         throw std::invalid_argument("BasicGame requires at least one player");
@@ -589,6 +593,7 @@ inline std::vector<RankItem> BasicGame::ranklist() {
     std::vector<RankItem> rank(players.size());
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         rank[i].player = i;
+        rank[i].killCount = killCount[i];
         rank[i].alive = alive[i];
     }
 
@@ -605,6 +610,8 @@ inline std::vector<RankItem> BasicGame::ranklist() {
 
     std::sort(rank.begin(), rank.end(),
               [](const RankItem& lhs, const RankItem& rhs) {
+                  if (lhs.killCount == 0 && rhs.killCount > 0) return false;
+                  if (lhs.killCount > 0 && rhs.killCount == 0) return true;
                   if (lhs.army != rhs.army) return lhs.army > rhs.army;
                   return lhs.player < rhs.player;
               });

@@ -43,6 +43,7 @@ class GcBot : public BasicBot {
     };
 
     std::vector<TileInfo> tiles;
+    std::vector<Coord> bfsQueue;
     std::vector<Coord> seenGeneral;
     value_t tileTypeValue[9];
     Coord prevTarget;
@@ -88,14 +89,13 @@ class GcBot : public BasicBot {
             tile.par = Coord(-1, -1);
         }
 
-        std::queue<Coord> q;
-        q.push(st);
+        bfsQueue.clear();
+        bfsQueue.push_back(st);
         tileAt(st).dist = 0;
         tileAt(st).eval = 0;
 
-        while (!q.empty()) {
-            Coord cur = q.front();
-            q.pop();
+        for (std::size_t i = 0; i < bfsQueue.size(); ++i) {
+            Coord cur = bfsQueue[i];
             TileInfo& tile = tileAt(cur);
             tile.eval += gv(tile);
 
@@ -119,7 +119,7 @@ class GcBot : public BasicBot {
                     nTile.dist = nd;
                     nTile.eval = tile.eval;
                     nTile.par = cur;
-                    q.emplace(nx, ny);
+                    bfsQueue.emplace_back(nx, ny);
                 } else if (nd == nTile.dist && tile.eval > nTile.eval) {
                     nTile.eval = tile.eval;
                     nTile.par = cur;

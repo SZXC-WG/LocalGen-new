@@ -45,6 +45,7 @@ class GcBot : public BasicBot {
     std::vector<TileInfo> tiles;
     std::vector<Coord> bfsQueue;
     std::vector<Coord> seenGeneral;
+    std::vector<std::pair<value_t, Coord>> unknownPlains;
     value_t tileTypeValue[9];
     Coord prevTarget;
     Coord lastPos;
@@ -291,7 +292,7 @@ class GcBot : public BasicBot {
                    tileAt(prevTarget).known) {
             value_t maxBlockValue = -INF;
 
-            std::vector<std::pair<value_t, Coord>> unknownPlains;
+            unknownPlains.clear();
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
                     const TileInfo& tile = tileAt(i, j);

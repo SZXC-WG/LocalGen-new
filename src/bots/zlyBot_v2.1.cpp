@@ -132,8 +132,9 @@ class ZlyBot_v2_1 : public BasicBot {
                     continue;
                 if (isImpassableTile(typeAt(next.x, next.y))) continue;
                 value_t newDist = curDist + weight(next.x, next.y);
-                if (newDist < tileAt(next).*dist) {
-                    tiles[idx(next)].*dist = newDist;
+                TileInfo& nt = tileAt(next);
+                if (newDist < nt.*dist) {
+                    nt.*dist = newDist;
                     queue.emplace(newDist, next);
                 }
             }
@@ -254,28 +255,26 @@ class ZlyBot_v2_1 : public BasicBot {
 
     void findRoute(Coord start, Coord desti) {
         auto DisInc = 1;
-        auto ArmyInc = [&](int x, int y) -> value_t {
+        auto UnitedInc = [&](int x, int y) -> value_t {
             if (x < 1 || x > height || y < 1 || y > width) return INF;
-            if (isImpassableTile(typeAt(x, y))) return INF;
-            if (tileAt(x, y).occupier == id) return -tileAt(x, y).army;
-            return tileAt(x, y).army;
-        };
-        auto TypeInc = [&](int x, int y) -> value_t {
-            switch (typeAt(x, y)) {
-                case TILE_BLANK:       return 0;
-                case TILE_SWAMP:       return 10;
+            tile_type_e tt = typeAt(x, y);
+            if (isImpassableTile(tt)) return INF;
+            const TileInfo& t = tileAt(x, y);
+            value_t armyCost = (t.occupier == id) ? -t.army : t.army;
+            value_t typeCost = 0;
+            switch (tt) {
+                case TILE_BLANK:       typeCost = 0; break;
+                case TILE_SWAMP:       typeCost = 10; break;
                 case TILE_MOUNTAIN:    return INF;
-                case TILE_SPAWN:       return 0;
-                case TILE_CITY:        return 1;
-                case TILE_DESERT:      return 0;
+                case TILE_SPAWN:       typeCost = 0; break;
+                case TILE_CITY:        typeCost = 1; break;
+                case TILE_DESERT:      typeCost = 0; break;
                 case TILE_LOOKOUT:     return INF;
                 case TILE_OBSERVATORY: return INF;
-                case TILE_OBSTACLE:    return 5;
+                case TILE_OBSTACLE:    typeCost = 5; break;
                 default:               return INF;
             }
-        };
-        auto UnitedInc = [&](int x, int y) -> value_t {
-            return DisInc * 1000 + ArmyInc(x, y) + TypeInc(x, y);
+            return DisInc * 1000 + armyCost + typeCost;
         };
         for (TileInfo& t : tiles) {
             t.routeDp = INF;
@@ -302,12 +301,13 @@ class ZlyBot_v2_1 : public BasicBot {
                     next.y > width)
                     continue;
                 if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                if (tileAt(next).routeVis) continue;
-                if (tileAt(next).inPrevMoves) continue;
+                TileInfo& nt = tileAt(next);
+                if (nt.routeVis) continue;
+                if (nt.inPrevMoves) continue;
                 value_t nextVal = curVal + UnitedInc(next.x, next.y);
-                if (nextVal < tileAt(next).routeDp) {
-                    tileAt(next).routeDp = nextVal;
-                    tileAt(next).routePrev = cur;
+                if (nextVal < nt.routeDp) {
+                    nt.routeDp = nextVal;
+                    nt.routePrev = cur;
                     q.emplace(nextVal, next);
                 }
             }

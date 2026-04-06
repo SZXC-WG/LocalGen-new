@@ -131,25 +131,22 @@ class ZlyBot_v2_1 : public BasicBot {
     void dijkstraBFS(Coord start, std::vector<value_t>& dist) {
         std::fill(dist.begin(), dist.end(), DIST_INF);
         dist[idx(start)] = 0;
-        std::priority_queue<std::pair<value_t, Coord>,
-                            std::vector<std::pair<value_t, Coord>>,
-                            std::greater<>>
-            queue;
-        queue.emplace(0, start);
-        while (!queue.empty()) {
-            auto [curDist, cur] = queue.top();
-            queue.pop();
-            if (curDist > dist[idx(cur)]) continue;
+        std::vector<Coord> queue;
+        queue.reserve(dist.size());
+        queue.emplace_back(start);
+        size_t head = 0;
+        while (head < queue.size()) {
+            Coord cur = queue[head++];
             for (int i = 0; i < 4; ++i) {
                 Coord next = cur + delta[i];
                 if (next.x < 1 || next.x > height || next.y < 1 ||
                     next.y > width)
                     continue;
                 if (isImpassableTile(typeAt(next.x, next.y))) continue;
-                value_t newDist = curDist + 1;
+                value_t newDist = dist[idx(cur)] + 1;
                 if (newDist < dist[idx(next)]) {
                     dist[idx(next)] = newDist;
-                    queue.emplace(newDist, next);
+                    queue.emplace_back(next);
                 }
             }
         }

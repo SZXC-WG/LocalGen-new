@@ -17,7 +17,6 @@
 #include <cmath>
 #include <cstdint>
 #include <deque>
-#include <functional>
 #include <iostream>
 #include <limits>
 #include <numeric>
@@ -37,23 +36,28 @@ class KutuBot : public BasicBot {
     static constexpr int kInf = 1000000000;
     static constexpr int kRecentEdgeWindow = 16;
     static constexpr bool kEnableDecisionTrace = false;
+    static constexpr double kPredictionDecay = 0.986;
+    static constexpr double kThreatEpsilon = 1e-9;
 
     struct TileMemory {
-        tile_type_e type = TILE_BLANK;
         army_t army = 0;
         index_t occupier = -1;
-        bool everSeen = false;
-        bool visible = false;
         int lastSeenTurn = -1;
         int estimatedTurn = -1;
+        tile_type_e type = TILE_BLANK;
+        bool everSeen = false;
+        bool visible = false;
     };
 
     struct PathResult {
-        bool reachable = false;
         const std::vector<int>* dist = nullptr;
         const std::vector<int>* stamp = nullptr;
         const std::vector<Coord>* parent = nullptr;
+        const std::vector<Coord>* firstStep = nullptr;
+        const std::vector<int>* depth = nullptr;
+        const std::vector<int>* friendlyLead = nullptr;
         int activeStamp = 0;
+        bool reachable = false;
 
         int distance(size_t node) const {
             if (dist == nullptr || stamp == nullptr || node >= dist->size()) {
@@ -70,13 +74,108 @@ class KutuBot : public BasicBot {
             return (*stamp)[node] == activeStamp ? (*parent)[node]
                                                  : Coord{-1, -1};
         }
+
+        Coord firstStepAt(size_t node) const {
+            if (firstStep == nullptr || stamp == nullptr ||
+                node >= firstStep->size()) {
+                return Coord{-1, -1};
+            }
+            return (*stamp)[node] == activeStamp ? (*firstStep)[node]
+                                                 : Coord{-1, -1};
+        }
+
+        int edgeDepthAt(size_t node) const {
+            if (depth == nullptr || stamp == nullptr || node >= depth->size()) {
+                return kInf;
+            }
+            return (*stamp)[node] == activeStamp ? (*depth)[node] : kInf;
+        }
+
+        int friendlyLeadAt(size_t node) const {
+            if (friendlyLead == nullptr || stamp == nullptr ||
+                node >= friendlyLead->size()) {
+                return 0;
+            }
+            return (*stamp)[node] == activeStamp ? (*friendlyLead)[node] : 0;
+        }
     };
 
     struct SearchWorkspace {
         std::vector<int> dist;
         std::vector<int> stamp;
         std::vector<Coord> parent;
+        std::vector<Coord> firstStep;
+        std::vector<int> depth;
+        std::vector<int> friendlyLead;
         std::vector<std::pair<int, Coord>> heap;
+        int activeStamp = 1;
+    };
+
+    struct ThreatSeed {
+        double bias = 0.0;
+        Coord target{-1, -1};
+        int rank = 0;
+    };
+
+    struct ThreatPathResult {
+        const std::vector<double>* adjustedCost = nullptr;
+        const std::vector<int>* rawDist = nullptr;
+        const std::vector<int>* steps = nullptr;
+        const std::vector<int>* stamp = nullptr;
+        const std::vector<int>* seedIndex = nullptr;
+        const std::vector<Coord>* parent = nullptr;
+        int activeStamp = 0;
+        bool reachable = false;
+
+        double cost(size_t node) const {
+            if (adjustedCost == nullptr || stamp == nullptr ||
+                node >= adjustedCost->size()) {
+                return 1e100;
+            }
+            return (*stamp)[node] == activeStamp ? (*adjustedCost)[node]
+                                                 : 1e100;
+        }
+
+        int distance(size_t node) const {
+            if (rawDist == nullptr || stamp == nullptr || node >= rawDist->size()) {
+                return kInf;
+            }
+            return (*stamp)[node] == activeStamp ? (*rawDist)[node] : kInf;
+        }
+
+        int stepCount(size_t node) const {
+            if (steps == nullptr || stamp == nullptr || node >= steps->size()) {
+                return kInf;
+            }
+            return (*stamp)[node] == activeStamp ? (*steps)[node] : kInf;
+        }
+
+        int seedAt(size_t node) const {
+            if (seedIndex == nullptr || stamp == nullptr ||
+                node >= seedIndex->size()) {
+                return -1;
+            }
+            return (*stamp)[node] == activeStamp ? (*seedIndex)[node] : -1;
+        }
+
+        Coord parentAt(size_t node) const {
+            if (parent == nullptr || stamp == nullptr ||
+                node >= parent->size()) {
+                return Coord{-1, -1};
+            }
+            return (*stamp)[node] == activeStamp ? (*parent)[node]
+                                                 : Coord{-1, -1};
+        }
+    };
+
+    struct ThreatWorkspace {
+        std::vector<double> adjustedCost;
+        std::vector<int> rawDist;
+        std::vector<int> steps;
+        std::vector<int> stamp;
+        std::vector<int> seedIndex;
+        std::vector<Coord> parent;
+        std::vector<std::pair<double, Coord>> heap;
         int activeStamp = 1;
     };
 
@@ -89,9 +188,9 @@ class KutuBot : public BasicBot {
     enum class FocusMode : uint8_t { EXPAND, ATTACK, DEFEND, CONVERT };
 
     struct ObjectiveOption {
+        double score = -1e100;
         Coord target{-1, -1};
         index_t targetPlayer = -1;
-        double score = -1e100;
         bool attack = false;
         bool defend = false;
         bool city = false;
@@ -100,20 +199,20 @@ class KutuBot : public BasicBot {
 
     struct StrategicPlan {
         Move move{};
-        Coord source{-1, -1};
-        Coord target{-1, -1};
-        Coord firstStep{-1, -1};
         std::vector<Coord> route;
-        index_t targetPlayer = -1;
-        FocusMode mode = FocusMode::EXPAND;
+        double objectiveScore = -1e100;
+        double totalScore = -1e100;
         army_t sourceArmy = 0;
         army_t commitArmy = 0;
         army_t reserve = 0;
         army_t corridorSupport = 0;
         army_t need = 0;
+        Coord source{-1, -1};
+        Coord target{-1, -1};
+        Coord firstStep{-1, -1};
+        index_t targetPlayer = -1;
         int pathCost = kInf;
-        double objectiveScore = -1e100;
-        double totalScore = -1e100;
+        FocusMode mode = FocusMode::EXPAND;
         bool rally = false;
         bool usingRally = false;
         bool valid = false;
@@ -121,24 +220,24 @@ class KutuBot : public BasicBot {
 
     struct CandidateMove {
         Move move{};
+        double score = -1e100;
+        double riskPenalty = 0.0;
         Coord source{-1, -1};
         Coord target{-1, -1};
         FocusMode mode = FocusMode::EXPAND;
-        double score = -1e100;
-        double riskPenalty = 0.0;
         bool tactical = false;
         bool relievesCore = false;
         bool valid = false;
     };
 
     struct ThreatInfo {
+        std::vector<Coord> route;
+        double pressure = -1e100;
+        army_t sourceArmy = 0;
         Coord source{-1, -1};
         Coord target{-1, -1};
         Coord intercept{-1, -1};
-        std::vector<Coord> route;
-        army_t sourceArmy = 0;
         int turns = kInf;
-        double pressure = -1e100;
         bool visibleSource = false;
         bool recentSource = false;
         bool valid = false;
@@ -173,8 +272,12 @@ class KutuBot : public BasicBot {
     std::vector<TileMemory> memory;
     std::vector<Coord> knownGenerals;
     std::vector<std::vector<double>> predictedGeneralScore;
-    std::vector<std::vector<uint8_t>> candidateGeneralMask;
+    std::vector<double> predictedGeneralScale;
+    std::vector<uint8_t> baseGeneralCandidateMask;
+    std::vector<Coord> baseGeneralCandidateList;
     std::vector<int> newlyVisibleEnemyTiles;
+    std::vector<Coord> cachedGeneralGuess;
+    std::vector<uint8_t> cachedGeneralHasEvidence;
 
     std::vector<Coord> friendlyTilesCache;
     std::vector<Coord> frontierTiles;
@@ -188,8 +291,13 @@ class KutuBot : public BasicBot {
     std::vector<int> pathFlow;
     std::vector<uint8_t> coreZoneMask;
     std::vector<uint8_t> chokeMask;
+    std::vector<Coord> generalPathParent;
+    std::vector<Coord> generalBfsOrder;
 
     army_t largestFriendlyArmyCache = 0;
+    army_t cachedGeneralAdjacentThreat = 0;
+    double cachedGeneralLocalPressure = 0.0;
+    bool cachedRelaxedGeneralOpening = false;
     Coord myGeneral{-1, -1};
     Coord currentObjective{-1, -1};
     Coord lockedObjective{-1, -1};
@@ -201,6 +309,9 @@ class KutuBot : public BasicBot {
 
     SearchWorkspace forwardSearch;
     mutable SearchWorkspace reverseSearch;
+    mutable ThreatWorkspace closeThreatSearch;
+    mutable ThreatWorkspace limitedThreatSearch;
+    mutable ThreatWorkspace positiveThreatSearch;
     std::deque<RecentEdge> recentEdges;
     std::unordered_map<std::uint64_t, int> recentEdgeCounts;
 
@@ -253,6 +364,11 @@ class KutuBot : public BasicBot {
 
     static bool minHeapCompare(const std::pair<int, Coord>& lhs,
                                const std::pair<int, Coord>& rhs) {
+        return lhs.first > rhs.first;
+    }
+
+    static bool minThreatHeapCompare(const std::pair<double, Coord>& lhs,
+                                     const std::pair<double, Coord>& rhs) {
         return lhs.first > rhs.first;
     }
 
@@ -324,6 +440,9 @@ class KutuBot : public BasicBot {
             workspace.dist.assign(total, kInf);
             workspace.stamp.assign(total, 0);
             workspace.parent.assign(total, Coord{-1, -1});
+            workspace.firstStep.assign(total, Coord{-1, -1});
+            workspace.depth.assign(total, kInf);
+            workspace.friendlyLead.assign(total, 0);
             workspace.heap.reserve(total);
         }
         if (workspace.activeStamp == std::numeric_limits<int>::max()) {
@@ -340,95 +459,179 @@ class KutuBot : public BasicBot {
         workspace.stamp[node] = workspace.activeStamp;
         workspace.dist[node] = kInf;
         workspace.parent[node] = Coord{-1, -1};
+        workspace.firstStep[node] = Coord{-1, -1};
+        workspace.depth[node] = kInf;
+        workspace.friendlyLead[node] = 0;
     }
 
-    PathResult weightedPath(Coord start,
-                            const std::function<int(Coord)>& stepCost) {
+    void prepareThreatWorkspace(ThreatWorkspace& workspace) const {
+        const size_t total = static_cast<size_t>((height + 2) * W);
+        if (workspace.adjustedCost.size() != total) {
+            workspace.adjustedCost.assign(total, 1e100);
+            workspace.rawDist.assign(total, kInf);
+            workspace.steps.assign(total, kInf);
+            workspace.stamp.assign(total, 0);
+            workspace.seedIndex.assign(total, -1);
+            workspace.parent.assign(total, Coord{-1, -1});
+            workspace.heap.reserve(total);
+        }
+        if (workspace.activeStamp == std::numeric_limits<int>::max()) {
+            std::fill(workspace.stamp.begin(), workspace.stamp.end(), 0);
+            workspace.activeStamp = 1;
+        } else {
+            ++workspace.activeStamp;
+        }
+        workspace.heap.clear();
+    }
+
+    void touchThreatNode(ThreatWorkspace& workspace, size_t node) const {
+        if (workspace.stamp[node] == workspace.activeStamp) return;
+        workspace.stamp[node] = workspace.activeStamp;
+        workspace.adjustedCost[node] = 1e100;
+        workspace.rawDist[node] = kInf;
+        workspace.steps[node] = kInf;
+        workspace.seedIndex[node] = -1;
+        workspace.parent[node] = Coord{-1, -1};
+    }
+
+    bool betterThreatCandidate(const ThreatWorkspace& workspace, size_t node,
+                               double adjustedCost, int rawDist, int steps,
+                               int seedIndex,
+                               const std::vector<ThreatSeed>& seeds) const {
+        const double current = workspace.adjustedCost[node];
+        if (adjustedCost + kThreatEpsilon < current) return true;
+        if (current + kThreatEpsilon < adjustedCost) return false;
+
+        const int currentSeed = workspace.seedIndex[node];
+        const int currentRank =
+            currentSeed >= 0 ? seeds[currentSeed].rank
+                             : std::numeric_limits<int>::max();
+        const int candidateRank = seeds[seedIndex].rank;
+        if (candidateRank != currentRank) return candidateRank < currentRank;
+        if (rawDist != workspace.rawDist[node]) return rawDist < workspace.rawDist[node];
+        return steps < workspace.steps[node];
+    }
+
+    template <typename StepCostFn>
+    PathResult weightedPath(Coord start, const StepCostFn& stepCost) {
         PathResult result;
         if (!inside(start)) return result;
 
-        prepareWorkspace(forwardSearch);
+        SearchWorkspace& workspace = forwardSearch;
+        prepareWorkspace(workspace);
+        auto& dist = workspace.dist;
+        auto& stamp = workspace.stamp;
+        auto& parent = workspace.parent;
+        auto& firstStep = workspace.firstStep;
+        auto& depth = workspace.depth;
+        auto& friendlyLead = workspace.friendlyLead;
+        auto& heap = workspace.heap;
         const size_t startIndex = idx(start);
-        touchNode(forwardSearch, startIndex);
-        forwardSearch.dist[startIndex] = 0;
-        forwardSearch.heap.emplace_back(0, start);
-        std::push_heap(forwardSearch.heap.begin(), forwardSearch.heap.end(),
-                       minHeapCompare);
+        touchNode(workspace, startIndex);
+        dist[startIndex] = 0;
+        depth[startIndex] = 0;
+        friendlyLead[startIndex] = 0;
+        heap.emplace_back(0, start);
+        std::push_heap(heap.begin(), heap.end(), minHeapCompare);
 
-        while (!forwardSearch.heap.empty()) {
-            std::pop_heap(forwardSearch.heap.begin(), forwardSearch.heap.end(),
-                          minHeapCompare);
-            const auto [curDist, cur] = forwardSearch.heap.back();
-            forwardSearch.heap.pop_back();
-            if (curDist != forwardSearch.dist[idx(cur)]) continue;
+        while (!heap.empty()) {
+            std::pop_heap(heap.begin(), heap.end(), minHeapCompare);
+            const auto [curDist, cur] = heap.back();
+            heap.pop_back();
+            const size_t curIndex = idx(cur);
+            if (curDist != dist[curIndex]) continue;
+
+            const int curDepth = depth[curIndex];
+            const int curLead = friendlyLead[curIndex];
+            const Coord curFirstStep = firstStep[curIndex];
 
             for (Coord d : kDirs) {
                 Coord nxt = cur + d;
                 if (!inside(nxt)) continue;
-                if (!isPassable(memory[idx(nxt)].type)) continue;
                 const size_t nextIndex = idx(nxt);
-                touchNode(forwardSearch, nextIndex);
+                if (!isPassable(memory[nextIndex].type)) continue;
+                touchNode(workspace, nextIndex);
                 const int nd = curDist + stepCost(nxt);
-                if (nd < forwardSearch.dist[nextIndex]) {
-                    forwardSearch.dist[nextIndex] = nd;
-                    forwardSearch.parent[nextIndex] = cur;
-                    forwardSearch.heap.emplace_back(nd, nxt);
-                    std::push_heap(forwardSearch.heap.begin(),
-                                   forwardSearch.heap.end(), minHeapCompare);
+                if (nd < dist[nextIndex]) {
+                    dist[nextIndex] = nd;
+                    parent[nextIndex] = cur;
+                    firstStep[nextIndex] =
+                        cur == start ? nxt : curFirstStep;
+                    depth[nextIndex] = curDepth + 1;
+                    friendlyLead[nextIndex] =
+                        curLead == curDepth && board.tileAt(nxt).occupier == id
+                            ? curDepth + 1
+                            : curLead;
+                    heap.emplace_back(nd, nxt);
+                    std::push_heap(heap.begin(), heap.end(), minHeapCompare);
                 }
             }
         }
 
         result.reachable = true;
-        result.dist = &forwardSearch.dist;
-        result.stamp = &forwardSearch.stamp;
-        result.parent = &forwardSearch.parent;
-        result.activeStamp = forwardSearch.activeStamp;
+        result.dist = &dist;
+        result.stamp = &stamp;
+        result.parent = &parent;
+        result.firstStep = &firstStep;
+        result.depth = &depth;
+        result.friendlyLead = &friendlyLead;
+        result.activeStamp = workspace.activeStamp;
         return result;
     }
 
-    PathResult weightedReversePath(
-        Coord goal, const std::function<int(Coord)>& stepCost) const {
+    template <typename StepCostFn>
+    PathResult weightedReversePath(Coord goal,
+                                   const StepCostFn& stepCost) const {
         PathResult result;
         if (!inside(goal)) return result;
 
         SearchWorkspace& workspace = reverseSearch;
         prepareWorkspace(workspace);
+        auto& dist = workspace.dist;
+        auto& stamp = workspace.stamp;
+        auto& parent = workspace.parent;
+        auto& firstStep = workspace.firstStep;
+        auto& depth = workspace.depth;
+        auto& friendlyLead = workspace.friendlyLead;
+        auto& heap = workspace.heap;
         const size_t goalIndex = idx(goal);
         touchNode(workspace, goalIndex);
-        workspace.dist[goalIndex] = 0;
-        workspace.heap.emplace_back(0, goal);
-        std::push_heap(workspace.heap.begin(), workspace.heap.end(),
-                       minHeapCompare);
+        dist[goalIndex] = 0;
+        heap.emplace_back(0, goal);
+        std::push_heap(heap.begin(), heap.end(), minHeapCompare);
 
-        while (!workspace.heap.empty()) {
-            std::pop_heap(workspace.heap.begin(), workspace.heap.end(),
-                          minHeapCompare);
-            const auto [curDist, cur] = workspace.heap.back();
-            workspace.heap.pop_back();
-            if (curDist != workspace.dist[idx(cur)]) continue;
+        while (!heap.empty()) {
+            std::pop_heap(heap.begin(), heap.end(), minHeapCompare);
+            const auto [curDist, cur] = heap.back();
+            heap.pop_back();
+            const size_t curIndex = idx(cur);
+            if (curDist != dist[curIndex]) continue;
+
+            const int stepIntoCur = stepCost(cur);
 
             for (Coord d : kDirs) {
                 Coord prev = cur + d;
                 if (!inside(prev)) continue;
-                if (!isPassable(memory[idx(prev)].type)) continue;
                 const size_t prevIndex = idx(prev);
+                if (!isPassable(memory[prevIndex].type)) continue;
                 touchNode(workspace, prevIndex);
-                const int nd = curDist + stepCost(cur);
-                if (nd < workspace.dist[prevIndex]) {
-                    workspace.dist[prevIndex] = nd;
-                    workspace.parent[prevIndex] = cur;
-                    workspace.heap.emplace_back(nd, prev);
-                    std::push_heap(workspace.heap.begin(), workspace.heap.end(),
-                                   minHeapCompare);
+                const int nd = curDist + stepIntoCur;
+                if (nd < dist[prevIndex]) {
+                    dist[prevIndex] = nd;
+                    parent[prevIndex] = cur;
+                    heap.emplace_back(nd, prev);
+                    std::push_heap(heap.begin(), heap.end(), minHeapCompare);
                 }
             }
         }
 
         result.reachable = true;
-        result.dist = &workspace.dist;
-        result.stamp = &workspace.stamp;
-        result.parent = &workspace.parent;
+        result.dist = &dist;
+        result.stamp = &stamp;
+        result.parent = &parent;
+        result.firstStep = &firstStep;
+        result.depth = &depth;
+        result.friendlyLead = &friendlyLead;
         result.activeStamp = workspace.activeStamp;
         return result;
     }
@@ -462,9 +665,107 @@ class KutuBot : public BasicBot {
         return route;
     }
 
+    ThreatPathResult multiSourceThreatReversePath(
+        const std::vector<ThreatSeed>& seeds, int maxRawDist,
+        ThreatWorkspace& workspace) const {
+        ThreatPathResult result;
+        if (seeds.empty()) return result;
+
+        prepareThreatWorkspace(workspace);
+        for (size_t seedIndex = 0; seedIndex < seeds.size(); ++seedIndex) {
+            const ThreatSeed& seed = seeds[seedIndex];
+            if (!inside(seed.target)) continue;
+            const size_t node = idx(seed.target);
+            touchThreatNode(workspace, node);
+            const double adjustedCost = -seed.bias / 10.5;
+            if (!betterThreatCandidate(workspace, node, adjustedCost, 0, 0,
+                                       static_cast<int>(seedIndex), seeds)) {
+                continue;
+            }
+            workspace.adjustedCost[node] = adjustedCost;
+            workspace.rawDist[node] = 0;
+            workspace.steps[node] = 0;
+            workspace.seedIndex[node] = static_cast<int>(seedIndex);
+            workspace.parent[node] = Coord{-1, -1};
+            workspace.heap.emplace_back(adjustedCost, seed.target);
+            std::push_heap(workspace.heap.begin(), workspace.heap.end(),
+                           minThreatHeapCompare);
+        }
+
+        while (!workspace.heap.empty()) {
+            std::pop_heap(workspace.heap.begin(), workspace.heap.end(),
+                          minThreatHeapCompare);
+            const auto [curCost, cur] = workspace.heap.back();
+            workspace.heap.pop_back();
+            const size_t curNode = idx(cur);
+            if (curCost > workspace.adjustedCost[curNode] + kThreatEpsilon) {
+                continue;
+            }
+
+            const int curRawDist = workspace.rawDist[curNode];
+            if (curRawDist >= maxRawDist) continue;
+            const int stepCost =
+                1 + (memory[curNode].type == TILE_SWAMP ? 5 : 0);
+
+            for (Coord d : kDirs) {
+                Coord prev = cur + d;
+                if (!inside(prev)) continue;
+                if (!isPassable(memory[idx(prev)].type)) continue;
+                const int candRawDist = curRawDist + stepCost;
+                if (candRawDist > maxRawDist) continue;
+
+                const size_t prevNode = idx(prev);
+                touchThreatNode(workspace, prevNode);
+                const int seedIndex = workspace.seedIndex[curNode];
+                const int candSteps = workspace.steps[curNode] + 1;
+                const double candCost = curCost + stepCost;
+                if (!betterThreatCandidate(workspace, prevNode, candCost,
+                                           candRawDist, candSteps, seedIndex,
+                                           seeds)) {
+                    continue;
+                }
+
+                workspace.adjustedCost[prevNode] = candCost;
+                workspace.rawDist[prevNode] = candRawDist;
+                workspace.steps[prevNode] = candSteps;
+                workspace.seedIndex[prevNode] = seedIndex;
+                workspace.parent[prevNode] = cur;
+                workspace.heap.emplace_back(candCost, prev);
+                std::push_heap(workspace.heap.begin(), workspace.heap.end(),
+                               minThreatHeapCompare);
+            }
+        }
+
+        result.reachable = true;
+        result.adjustedCost = &workspace.adjustedCost;
+        result.rawDist = &workspace.rawDist;
+        result.steps = &workspace.steps;
+        result.stamp = &workspace.stamp;
+        result.seedIndex = &workspace.seedIndex;
+        result.parent = &workspace.parent;
+        result.activeStamp = workspace.activeStamp;
+        return result;
+    }
+
+    std::vector<Coord> reconstructThreatRoute(Coord start,
+                                              const ThreatPathResult& path) const {
+        std::vector<Coord> route;
+        if (!inside(start)) return route;
+        Coord cur = start;
+        int guard = height * width + 5;
+        while (cur != Coord{-1, -1} && guard-- > 0) {
+            Coord nxt = path.parentAt(idx(cur));
+            if (nxt == Coord{-1, -1}) break;
+            route.push_back(nxt);
+            cur = nxt;
+        }
+        return route;
+    }
+
     void computeGeneralDistances() {
         const size_t total = static_cast<size_t>((height + 2) * W);
         distFromGeneral.assign(total, kInf);
+        generalBfsOrder.clear();
         if (myGeneral == Coord{-1, -1}) return;
 
         std::queue<Coord> q;
@@ -473,6 +774,7 @@ class KutuBot : public BasicBot {
         while (!q.empty()) {
             Coord cur = q.front();
             q.pop();
+            generalBfsOrder.push_back(cur);
             for (Coord d : kDirs) {
                 Coord nxt = cur + d;
                 if (!inside(nxt)) continue;
@@ -482,6 +784,46 @@ class KutuBot : public BasicBot {
                 q.push(nxt);
             }
         }
+    }
+
+    void renormalizePredictionPlayer(index_t player) {
+        if (player < 0 || player >= playerCnt) return;
+        double scale = predictedGeneralScale[player];
+        if (std::abs(scale - 1.0) <= 1e-12) return;
+        if (scale == 0.0) {
+            std::fill(predictedGeneralScore[player].begin(),
+                      predictedGeneralScore[player].end(), 0.0);
+            predictedGeneralScale[player] = 1.0;
+            return;
+        }
+        for (double& score : predictedGeneralScore[player]) score *= scale;
+        predictedGeneralScale[player] = 1.0;
+    }
+
+    void advancePredictionDecay() {
+        for (index_t player = 0; player < playerCnt; ++player) {
+            if (player == id) continue;
+            predictedGeneralScale[player] *= kPredictionDecay;
+            if (predictedGeneralScale[player] < 1e-6) {
+                renormalizePredictionPlayer(player);
+            }
+        }
+    }
+
+    double predictionScoreAt(index_t player, Coord c) const {
+        return predictedGeneralScore[player][idx(c)] *
+               predictedGeneralScale[player];
+    }
+
+    void addPredictionScore(index_t player, Coord c, double delta) {
+        if (delta == 0.0 || player < 0 || player >= playerCnt || !inside(c)) {
+            return;
+        }
+        if (predictedGeneralScale[player] < 1e-9) {
+            renormalizePredictionPlayer(player);
+        }
+        predictedGeneralScore[player][idx(c)] +=
+            delta / predictedGeneralScale[player];
     }
 
     bool tileGrowsEveryTurn(tile_type_e type) const {
@@ -556,63 +898,28 @@ class KutuBot : public BasicBot {
         }
     }
 
-    void resetCandidateMask(index_t player) {
-        auto& mask = candidateGeneralMask[player];
-        std::fill(mask.begin(), mask.end(), 0);
-        for (pos_t x = 1; x <= height; ++x) {
-            for (pos_t y = 1; y <= width; ++y) {
-                Coord c{x, y};
-                const TileMemory& mem = memory[idx(c)];
-                if (!isPassable(mem.type) || mem.visible ||
-                    mem.type == TILE_CITY) {
-                    continue;
-                }
-                if (myGeneral != Coord{-1, -1} && manhattan(c, myGeneral) < 9) {
-                    continue;
-                }
-                mask[idx(c)] = 1;
-            }
-        }
-    }
-
     void reinforceGeneralNeighborhood(index_t player, Coord anchor,
                                       double baseScore, int maxDist,
                                       bool fogOnly) {
-        auto& mask = candidateGeneralMask[player];
-        auto& heat = predictedGeneralScore[player];
-        for (pos_t x = 1; x <= height; ++x) {
-            for (pos_t y = 1; y <= width; ++y) {
-                Coord c{x, y};
+        for (int dx = -maxDist; dx <= maxDist; ++dx) {
+            const int rem = maxDist - std::abs(dx);
+            for (int dy = -rem; dy <= rem; ++dy) {
+                Coord c{static_cast<pos_t>(anchor.x + dx),
+                        static_cast<pos_t>(anchor.y + dy)};
+                if (!inside(c)) continue;
                 const TileMemory& mem = memory[idx(c)];
                 if (!isPassable(mem.type) || mem.type == TILE_CITY) continue;
                 if (fogOnly && mem.visible) continue;
-                if (manhattan(c, anchor) > maxDist) continue;
-                if (myGeneral != Coord{-1, -1} && manhattan(c, myGeneral) < 9) {
-                    continue;
-                }
-                mask[idx(c)] = 1;
-                heat[idx(c)] +=
+                const double gain =
                     std::max(0.0, baseScore - manhattan(c, anchor) * 2.2);
+                addPredictionScore(player, c, gain);
             }
-        }
-    }
-
-    void decayPredictions() {
-        for (index_t player = 0; player < playerCnt; ++player) {
-            if (player == id) continue;
-            for (double& score : predictedGeneralScore[player]) score *= 0.986;
         }
     }
 
     void rememberVisibleBoard() {
-        decayPredictions();
+        advancePredictionDecay();
         newlyVisibleEnemyTiles.assign(playerCnt, 0);
-
-        for (index_t player = 0; player < playerCnt; ++player) {
-            if (player == id) continue;
-            if (knownGenerals[player] == Coord{-1, -1})
-                resetCandidateMask(player);
-        }
 
         for (pos_t x = 1; x <= height; ++x) {
             for (pos_t y = 1; y <= width; ++y) {
@@ -641,12 +948,6 @@ class KutuBot : public BasicBot {
 
                 if (tile.type == TILE_GENERAL && tile.occupier >= 0) {
                     knownGenerals[tile.occupier] = c;
-                    auto& heat = predictedGeneralScore[tile.occupier];
-                    auto& mask = candidateGeneralMask[tile.occupier];
-                    std::fill(heat.begin(), heat.end(), 0.0);
-                    std::fill(mask.begin(), mask.end(), 0);
-                    heat[idx(c)] = 1e9;
-                    mask[idx(c)] = 1;
                 }
 
                 if (tile.occupier >= 0 && tile.occupier != id && !wasVisible) {
@@ -665,6 +966,27 @@ class KutuBot : public BasicBot {
                     continue;
                 }
                 reinforceGeneralNeighborhood(tile.occupier, c, 9.0, 4, false);
+            }
+        }
+    }
+
+    void buildBaseGeneralCandidateMask() {
+        std::fill(baseGeneralCandidateMask.begin(),
+                  baseGeneralCandidateMask.end(), 0);
+        baseGeneralCandidateList.clear();
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord c{x, y};
+                const TileMemory& mem = memory[idx(c)];
+                if (!isPassable(mem.type) || mem.visible ||
+                    mem.type == TILE_CITY) {
+                    continue;
+                }
+                if (myGeneral != Coord{-1, -1} && manhattan(c, myGeneral) < 9) {
+                    continue;
+                }
+                baseGeneralCandidateMask[idx(c)] = 1;
+                baseGeneralCandidateList.push_back(c);
             }
         }
     }
@@ -711,24 +1033,33 @@ class KutuBot : public BasicBot {
         }
     }
 
-    Coord chooseTargetPlayerGeneral(index_t player) const {
-        if (player < 0 || player >= playerCnt) return Coord{-1, -1};
-        if (knownGenerals[player] != Coord{-1, -1})
-            return knownGenerals[player];
-        double bestScore = -1e100;
-        Coord best{-1, -1};
-        const auto& heat = predictedGeneralScore[player];
-        const auto& mask = candidateGeneralMask[player];
-        for (pos_t x = 1; x <= height; ++x) {
-            for (pos_t y = 1; y <= width; ++y) {
-                Coord c{x, y};
-                const TileMemory& mem = memory[idx(c)];
-                if (!isPassable(mem.type) || mem.visible ||
-                    mem.type == TILE_CITY) {
-                    continue;
-                }
-                if (!mask[idx(c)]) continue;
-                double score = heat[idx(c)];
+    void refreshGeneralGuessCache(const SituationMetrics& metrics) {
+        std::fill(cachedGeneralGuess.begin(), cachedGeneralGuess.end(),
+                  Coord{-1, -1});
+        std::fill(cachedGeneralHasEvidence.begin(),
+                  cachedGeneralHasEvidence.end(), 0);
+
+        for (index_t player = 0; player < playerCnt; ++player) {
+            if (player == id) continue;
+
+            cachedGeneralHasEvidence[player] =
+                knownGenerals[player] != Coord{-1, -1} ||
+                visibleEnemyCountByPlayer[player] > 0 ||
+                newlyVisibleEnemyTiles[player] > 0 ||
+                metrics.contactDensity > 0.035 ||
+                metrics.conversionAdvantage > 12.0;
+
+            if (knownGenerals[player] != Coord{-1, -1}) {
+                cachedGeneralGuess[player] = knownGenerals[player];
+                continue;
+            }
+
+            double bestScore = -1e100;
+            Coord best{-1, -1};
+            const std::vector<double>& scores = predictedGeneralScore[player];
+            const double scale = predictedGeneralScale[player];
+            for (Coord c : baseGeneralCandidateList) {
+                double score = scores[idx(c)] * scale;
                 if (myGeneral != Coord{-1, -1}) {
                     score -= manhattan(c, myGeneral) * 0.18;
                 }
@@ -737,8 +1068,18 @@ class KutuBot : public BasicBot {
                     best = c;
                 }
             }
+            cachedGeneralGuess[player] = best;
         }
-        return best;
+    }
+
+    Coord chooseTargetPlayerGeneral(index_t player) const {
+        if (player < 0 || player >= playerCnt) return Coord{-1, -1};
+        if (knownGenerals[player] != Coord{-1, -1})
+            return knownGenerals[player];
+        if (player >= 0 && player < static_cast<index_t>(cachedGeneralGuess.size())) {
+            return cachedGeneralGuess[player];
+        }
+        return Coord{-1, -1};
     }
 
     int passableDegree(Coord c) const {
@@ -750,6 +1091,23 @@ class KutuBot : public BasicBot {
         return degree;
     }
 
+    const std::vector<std::array<int, 3>>& pressureKernel(int radius) const {
+        static const auto kernels = [] {
+            std::array<std::vector<std::array<int, 3>>, 7> result;
+            for (int r = 0; r <= 6; ++r) {
+                for (int dx = -r; dx <= r; ++dx) {
+                    const int rem = r - std::abs(dx);
+                    for (int dy = -rem; dy <= rem; ++dy) {
+                        result[r].push_back(
+                            {dx, dy, std::abs(dx) + std::abs(dy)});
+                    }
+                }
+            }
+            return result;
+        }();
+        return kernels[std::clamp(radius, 0, 6)];
+    }
+
     void addPressure(std::vector<double>& pressure, Coord source, army_t army,
                      double baseMultiplier, double stepLoss) const {
         if (!inside(source) || army <= 0) return;
@@ -759,17 +1117,15 @@ class KutuBot : public BasicBot {
                 1,
             2, 6);
         const double capped = std::min<double>(army, 120.0) * baseMultiplier;
-        for (int dx = -radius; dx <= radius; ++dx) {
-            for (int dy = -radius; dy <= radius; ++dy) {
-                const int dist = std::abs(dx) + std::abs(dy);
-                if (dist > radius) continue;
-                Coord c{static_cast<pos_t>(source.x + dx),
-                        static_cast<pos_t>(source.y + dy)};
-                if (!inside(c)) continue;
-                if (!isPassable(memory[idx(c)].type)) continue;
-                const double gain = std::max(0.0, capped - dist * stepLoss);
-                pressure[idx(c)] += gain;
-            }
+        const auto& kernel = pressureKernel(radius);
+        for (const auto& offset : kernel) {
+            Coord c{static_cast<pos_t>(source.x + offset[0]),
+                    static_cast<pos_t>(source.y + offset[1])};
+            if (!inside(c)) continue;
+            const size_t node = idx(c);
+            if (!isPassable(memory[node].type)) continue;
+            const double gain = std::max(0.0, capped - offset[2] * stepLoss);
+            pressure[node] += gain;
         }
     }
 
@@ -833,31 +1189,45 @@ class KutuBot : public BasicBot {
             }
         }
 
+        refreshGeneralSafetyCache();
+
+        std::fill(generalPathParent.begin(), generalPathParent.end(),
+                  Coord{-1, -1});
+        for (Coord c : generalBfsOrder) {
+            if (c == myGeneral) continue;
+            const int curDist = distFromGeneral[idx(c)];
+            if (curDist == kInf) continue;
+
+            Coord best{-1, -1};
+            double bestPressure = 0.0;
+            bool found = false;
+            for (Coord d : kDirs) {
+                Coord cand = c + d;
+                if (!inside(cand)) continue;
+                if (!isPassable(memory[idx(cand)].type)) continue;
+                if (distFromGeneral[idx(cand)] != curDist - 1) continue;
+                const double candPressure = enemyPressure[idx(cand)];
+                if (!found || candPressure < bestPressure) {
+                    found = true;
+                    best = cand;
+                    bestPressure = candPressure;
+                }
+            }
+            generalPathParent[idx(c)] = best;
+        }
+
         for (Coord frontier : frontierTiles) {
             if (distFromGeneral[idx(frontier)] == kInf) continue;
-            Coord cur = frontier;
-            int guard = area + 5;
-            while (cur != myGeneral && guard-- > 0) {
-                pathFlow[idx(cur)]++;
-                Coord next = cur;
-                int bestDist = distFromGeneral[idx(cur)];
-                double bestPressure = enemyPressure[idx(cur)];
-                for (Coord d : kDirs) {
-                    Coord cand = cur + d;
-                    if (!inside(cand)) continue;
-                    if (!isPassable(memory[idx(cand)].type)) continue;
-                    if (distFromGeneral[idx(cand)] >= bestDist) continue;
-                    if (distFromGeneral[idx(cand)] < bestDist ||
-                        enemyPressure[idx(cand)] < bestPressure) {
-                        next = cand;
-                        bestDist = distFromGeneral[idx(cand)];
-                        bestPressure = enemyPressure[idx(cand)];
-                    }
-                }
-                if (next == cur) break;
-                cur = next;
+            pathFlow[idx(frontier)]++;
+        }
+        for (auto it = generalBfsOrder.rbegin(); it != generalBfsOrder.rend();
+             ++it) {
+            const Coord cur = *it;
+            if (cur == myGeneral) continue;
+            const Coord parent = generalPathParent[idx(cur)];
+            if (parent != Coord{-1, -1}) {
+                pathFlow[idx(parent)] += pathFlow[idx(cur)];
             }
-            pathFlow[idx(myGeneral)]++;
         }
 
         for (Coord c : friendlyTilesCache) {
@@ -987,11 +1357,10 @@ class KutuBot : public BasicBot {
 
         double score = 0.0;
         Coord guess = chooseTargetPlayerGeneral(player);
-        const bool hasGuessEvidence = knownGenerals[player] != Coord{-1, -1} ||
-                                      visibleEnemyCountByPlayer[player] > 0 ||
-                                      newlyVisibleEnemyTiles[player] > 0 ||
-                                      metrics.contactDensity > 0.035 ||
-                                      metrics.conversionAdvantage > 12.0;
+        const bool hasGuessEvidence =
+            player >= 0 &&
+            player < static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
+            cachedGeneralHasEvidence[player];
         if (knownGenerals[player] != Coord{-1, -1}) {
             score += 120.0;
         } else if (guess != Coord{-1, -1} && hasGuessEvidence) {
@@ -1172,21 +1541,31 @@ class KutuBot : public BasicBot {
         return threat;
     }
 
-    bool relaxedGeneralOpening() const {
-        if (myGeneral == Coord{-1, -1}) return false;
-        if (fullTurn >= 40) return false;
-        if (adjacentEnemyThreat(myGeneral) > 0) return false;
-        const double localPressure =
+    void refreshGeneralSafetyCache() {
+        cachedGeneralAdjacentThreat = 0;
+        cachedGeneralLocalPressure = 0.0;
+        cachedRelaxedGeneralOpening = false;
+        if (myGeneral == Coord{-1, -1}) return;
+
+        cachedGeneralAdjacentThreat = adjacentEnemyThreat(myGeneral);
+        cachedGeneralLocalPressure =
             std::max(0.0, enemyPressure[idx(myGeneral)] -
                               friendlyPressure[idx(myGeneral)] * 0.55);
-        if (localPressure > 4.0) return false;
+        if (fullTurn >= 40 || cachedGeneralAdjacentThreat > 0 ||
+            cachedGeneralLocalPressure > 4.0) {
+            return;
+        }
 
         int visibleEnemyTiles = 0;
         for (index_t player = 0; player < playerCnt; ++player) {
             if (player == id || isFriendlyOccupier(player)) continue;
             visibleEnemyTiles += visibleEnemyCountByPlayer[player];
         }
-        return visibleEnemyTiles == 0;
+        cachedRelaxedGeneralOpening = visibleEnemyTiles == 0;
+    }
+
+    bool relaxedGeneralOpening() const {
+        return cachedRelaxedGeneralOpening;
     }
 
     bool movePassesHardSafety(const Move& move) const {
@@ -1197,13 +1576,10 @@ class KutuBot : public BasicBot {
         const army_t remain = moveRemainingArmy(move);
         if (remain <= 0) return false;
         if (move.from == myGeneral) {
-            const army_t adjacentThreat = adjacentEnemyThreat(myGeneral);
-            const double localPressure =
-                std::max(0.0, enemyPressure[idx(myGeneral)] -
-                                  friendlyPressure[idx(myGeneral)] * 0.55);
-            if (remain <= adjacentThreat) return false;
-            if (!relaxedGeneralOpening() && localPressure > 8.0 &&
-                remain <= adjacentThreat + 1) {
+            if (remain <= cachedGeneralAdjacentThreat) return false;
+            if (!cachedRelaxedGeneralOpening &&
+                cachedGeneralLocalPressure > 8.0 &&
+                remain <= cachedGeneralAdjacentThreat + 1) {
                 return false;
             }
         }
@@ -1221,7 +1597,8 @@ class KutuBot : public BasicBot {
         if (remain < reserve) {
             penalty +=
                 (reserve - remain) *
-                (move.from == myGeneral ? (relaxedGeneralOpening() ? 4.0 : 10.0)
+                (move.from == myGeneral ? (cachedRelaxedGeneralOpening ? 4.0
+                                                                       : 10.0)
                                         : 7.5);
         }
 
@@ -1235,8 +1612,9 @@ class KutuBot : public BasicBot {
             penalty += 5.0 + localPressure * 0.18;
         }
         if (move.from == myGeneral) {
-            const army_t adjacentThreat = adjacentEnemyThreat(myGeneral);
-            penalty += std::max<army_t>(0, adjacentThreat + 1 - remain) * 18.0;
+            penalty +=
+                std::max<army_t>(0, cachedGeneralAdjacentThreat + 1 - remain) *
+                18.0;
             penalty += std::max(0.0, metrics.coreRisk - remain * 0.9) * 0.40;
         } else if (coreZoneMask[idx(move.from)] && remain <= 2) {
             penalty += 6.0;
@@ -1295,14 +1673,17 @@ class KutuBot : public BasicBot {
     army_t supportAlongRoute(Coord source,
                              const std::vector<Coord>& route) const {
         army_t support = 0;
-        const size_t corridorLen = std::min<size_t>(route.size(), 4);
+        std::array<Coord, 4> corridor{};
+        const size_t corridorLen =
+            std::min<size_t>(route.size(), corridor.size());
+        for (size_t i = 0; i < corridorLen; ++i) corridor[i] = route[i];
         for (Coord friendly : friendlyTilesCache) {
             if (friendly == source) continue;
             const army_t available = availableArmy(friendly);
             if (available <= 0) continue;
             bool nearCorridor = false;
             for (size_t i = 0; i < corridorLen; ++i) {
-                if (manhattan(friendly, route[i]) <= 1) {
+                if (manhattan(friendly, corridor[i]) <= 1) {
                     nearCorridor = true;
                     break;
                 }
@@ -1347,12 +1728,17 @@ class KutuBot : public BasicBot {
         if (!plan.valid || plan.source == Coord{-1, -1}) return std::nullopt;
 
         CandidateMove best;
-        const size_t corridorLen = std::min<size_t>(plan.route.size(), 4);
+        std::array<Coord, 4> corridor{};
+        size_t corridorLen = 0;
+        for (size_t i = 0; i < plan.route.size() && corridorLen < corridor.size();
+             ++i) {
+            if (board.tileAt(plan.route[i]).occupier != id) continue;
+            corridor[corridorLen++] = plan.route[i];
+        }
         auto corridorDistance = [&](Coord c) {
             int bestDist = manhattan(c, plan.source);
             for (size_t i = 0; i < corridorLen; ++i) {
-                if (board.tileAt(plan.route[i]).occupier != id) continue;
-                bestDist = std::min(bestDist, manhattan(c, plan.route[i]));
+                bestDist = std::min(bestDist, manhattan(c, corridor[i]));
             }
             return bestDist;
         };
@@ -1593,63 +1979,122 @@ class KutuBot : public BasicBot {
             if (coreZoneMask[idx(city)]) keyTargets.push_back(city);
         }
 
+        std::vector<ThreatSeed> allSeeds;
+        std::vector<ThreatSeed> limitedSeeds;
+        std::vector<ThreatSeed> positiveSeeds;
+        allSeeds.reserve(keyTargets.size());
+        limitedSeeds.reserve(keyTargets.size());
+        positiveSeeds.reserve(keyTargets.size());
+
+        for (size_t rank = 0; rank < keyTargets.size(); ++rank) {
+            const Coord target = keyTargets[rank];
+            const double targetPressure =
+                enemyPressure[idx(target)] - friendlyPressure[idx(target)];
+            ThreatSeed seed{
+                targetPressure * 0.9 + (target == myGeneral ? 55.0 : 24.0),
+                target,
+                static_cast<int>(rank),
+            };
+            allSeeds.push_back(seed);
+            if (targetPressure > 0.0) {
+                positiveSeeds.push_back(seed);
+            } else {
+                limitedSeeds.push_back(seed);
+            }
+        }
+
+        const ThreatPathResult closePath =
+            multiSourceThreatReversePath(allSeeds, 4, closeThreatSearch);
+        const ThreatPathResult limitedPath =
+            multiSourceThreatReversePath(limitedSeeds, 5, limitedThreatSearch);
+        const ThreatPathResult positivePath =
+            multiSourceThreatReversePath(positiveSeeds, 14, positiveThreatSearch);
+
         std::optional<ThreatInfo> best;
-        for (Coord target : keyTargets) {
-            auto reversePath = weightedReversePath(target, [&](Coord step) {
-                int cost = 1;
-                if (memory[idx(step)].type == TILE_SWAMP) cost += 5;
-                return cost;
-            });
-            if (!reversePath.reachable) continue;
+        for (pos_t x = 1; x <= height; ++x) {
+            for (pos_t y = 1; y <= width; ++y) {
+                Coord source{x, y};
+                army_t sourceArmy = 0;
+                bool valid = false;
+                bool visibleSource = false;
+                bool recentSource = false;
+                const TileView& tile = board.tileAt(source);
+                if (isEnemyTile(tile) && tile.army > 1) {
+                    sourceArmy = tile.army;
+                    valid = true;
+                    visibleSource = true;
+                } else if (recentEnemyAt(source, 2) &&
+                           memory[idx(source)].army > 1) {
+                    sourceArmy = memory[idx(source)].army;
+                    valid = true;
+                    recentSource = true;
+                }
+                if (!valid) continue;
 
-            for (pos_t x = 1; x <= height; ++x) {
-                for (pos_t y = 1; y <= width; ++y) {
-                    Coord source{x, y};
-                    army_t sourceArmy = 0;
-                    bool valid = false;
-                    bool visibleSource = false;
-                    bool recentSource = false;
-                    const TileView& tile = board.tileAt(source);
-                    if (isEnemyTile(tile) && tile.army > 1) {
-                        sourceArmy = tile.army;
-                        valid = true;
-                        visibleSource = true;
-                    } else if (recentEnemyAt(source, 2) &&
-                               memory[idx(source)].army > 1) {
-                        sourceArmy = memory[idx(source)].army;
-                        valid = true;
-                        recentSource = true;
+                const ThreatPathResult* sourceBestPath = nullptr;
+                const ThreatSeed* sourceBestSeed = nullptr;
+                double sourceBestPressure = -1e100;
+                int sourceBestRank = std::numeric_limits<int>::max();
+                auto considerPath = [&](const ThreatPathResult& path,
+                                        const std::vector<ThreatSeed>& seeds) {
+                    if (!path.reachable) return;
+                    const size_t node = idx(source);
+                    const int seedIndex = path.seedAt(node);
+                    if (seedIndex < 0 || seedIndex >= static_cast<int>(seeds.size())) {
+                        return;
                     }
-                    if (!valid) continue;
+                    const int dist = path.distance(node);
+                    if (dist >= kInf) return;
+                    const int turns = path.stepCount(node);
+                    if (turns >= kInf || turns <= 0) return;
 
-                    const int dist = reversePath.distance(idx(source));
-                    if (dist >= kInf || dist > 14) continue;
-                    auto route =
-                        reconstructReversePath(source, target, reversePath);
-                    if (route.empty()) continue;
-                    const double targetPressure = enemyPressure[idx(target)] -
-                                                  friendlyPressure[idx(target)];
-                    if (!visibleSource && !recentSource) continue;
-                    if (targetPressure <= 0.0 && dist > 5) continue;
-                    if (recentSource && !coreZoneMask[idx(source)] && dist > 4)
-                        continue;
+                    const ThreatSeed& seed = seeds[seedIndex];
+                    const double pressure =
+                        sourceArmy * 2.2 - dist * 10.5 + seed.bias;
 
-                    ThreatInfo info;
-                    info.source = source;
-                    info.target = target;
-                    info.route = route;
-                    info.intercept =
-                        route[std::min<size_t>(1, route.size() - 1)];
-                    info.sourceArmy = sourceArmy;
-                    info.turns = static_cast<int>(route.size());
-                    info.visibleSource = visibleSource;
-                    info.recentSource = recentSource;
-                    info.pressure = sourceArmy * 2.2 - dist * 10.5 +
-                                    targetPressure * 0.9 +
-                                    (target == myGeneral ? 55.0 : 24.0);
-                    info.valid = true;
-                    if (!best.has_value() || info.pressure > best->pressure)
-                        best = info;
+                    if (sourceBestPath == nullptr ||
+                        pressure > sourceBestPressure + kThreatEpsilon ||
+                        (std::abs(pressure - sourceBestPressure) <=
+                             kThreatEpsilon &&
+                         seed.rank < sourceBestRank)) {
+                        sourceBestPath = &path;
+                        sourceBestSeed = &seed;
+                        sourceBestPressure = pressure;
+                        sourceBestRank = seed.rank;
+                    }
+                };
+
+                if (recentSource && !coreZoneMask[idx(source)]) {
+                    considerPath(closePath, allSeeds);
+                } else {
+                    considerPath(limitedPath, limitedSeeds);
+                    considerPath(positivePath, positiveSeeds);
+                }
+
+                if (sourceBestPath == nullptr || sourceBestSeed == nullptr) {
+                    continue;
+                }
+
+                std::vector<Coord> route =
+                    reconstructThreatRoute(source, *sourceBestPath);
+                if (route.empty()) continue;
+
+                ThreatInfo info;
+                info.source = source;
+                info.target = sourceBestSeed->target;
+                info.route = std::move(route);
+                info.intercept =
+                    info.route[std::min<size_t>(1, info.route.size() - 1)];
+                info.sourceArmy = sourceArmy;
+                info.turns = sourceBestPath->stepCount(idx(source));
+                info.visibleSource = visibleSource;
+                info.recentSource = recentSource;
+                info.pressure = sourceBestPressure;
+                info.valid = true;
+
+                if (!best.has_value() ||
+                    info.pressure > best->pressure + kThreatEpsilon) {
+                    best = std::move(info);
                 }
             }
         }
@@ -1695,16 +2140,16 @@ class KutuBot : public BasicBot {
         }
 
         std::vector<ObjectiveOption> defenseObjectives;
-        defenseObjectives.push_back(ObjectiveOption{threat->intercept,
-                                                    currentTargetPlayer, 240.0,
+        defenseObjectives.push_back(ObjectiveOption{240.0, threat->intercept,
+                                                    currentTargetPlayer,
                                                     true, true, false, false});
-        defenseObjectives.push_back(ObjectiveOption{threat->source,
-                                                    currentTargetPlayer, 210.0,
+        defenseObjectives.push_back(ObjectiveOption{210.0, threat->source,
+                                                    currentTargetPlayer,
                                                     true, true, false, false});
         for (size_t i = 0; i < threat->route.size() && i < 3; ++i) {
             defenseObjectives.push_back(
-                ObjectiveOption{threat->route[i], currentTargetPlayer,
-                                190.0 - i * 14.0, true, true, false, false});
+                ObjectiveOption{190.0 - i * 14.0, threat->route[i],
+                                currentTargetPlayer, true, true, false, false});
         }
 
         StrategicPlan best;
@@ -1810,9 +2255,9 @@ class KutuBot : public BasicBot {
         };
 
         if (threat.has_value()) {
-            addObjective(ObjectiveOption{threat->intercept, targetPlayer, 250.0,
+            addObjective(ObjectiveOption{250.0, threat->intercept, targetPlayer,
                                          true, true, false, false});
-            addObjective(ObjectiveOption{threat->source, targetPlayer, 220.0,
+            addObjective(ObjectiveOption{220.0, threat->source, targetPlayer,
                                          true, true, false, false});
         }
 
@@ -1826,15 +2271,14 @@ class KutuBot : public BasicBot {
                                           metrics.conversionAdvantage > 8.0;
         const bool canChaseGuess =
             targetPlayer >= 0 &&
-            (knownGenerals[targetPlayer] != Coord{-1, -1} ||
-             enemyContactSignal > 0 || metrics.contactDensity > 0.035 ||
-             metrics.conversionAdvantage > 12.0);
+            targetPlayer < static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
+            cachedGeneralHasEvidence[targetPlayer];
         if (targetGuess != Coord{-1, -1} && canChaseGuess) {
-            addObjective(ObjectiveOption{targetGuess, targetPlayer, 230.0, true,
+            addObjective(ObjectiveOption{230.0, targetGuess, targetPlayer, true,
                                          false, false, false});
             for (Coord d : kDirs) {
                 Coord adj = targetGuess + d;
-                addObjective(ObjectiveOption{adj, targetPlayer, 180.0, true,
+                addObjective(ObjectiveOption{180.0, adj, targetPlayer, true,
                                              false, false, false});
             }
         }
@@ -1911,8 +2355,8 @@ class KutuBot : public BasicBot {
                 if (score <= -1e90) continue;
 
                 ObjectiveOption option{
-                    c,          occupier >= 0 ? occupier : targetPlayer,
-                    score,      enemy,
+                    score,      c,
+                    occupier >= 0 ? occupier : targetPlayer, enemy,
                     false,      city,
                     exploration};
                 const bool nearTargetGuess = targetGuess != Coord{-1, -1} &&
@@ -2107,17 +2551,14 @@ class KutuBot : public BasicBot {
                         score -= 38.0;
                     }
 
-                    std::vector<Coord> route =
-                        reconstructPath(source, target, path);
-                    if (route.empty()) continue;
-                    const int lead = friendlyLeadSteps(route);
+                    const Coord firstStep = path.firstStepAt(idx(target));
+                    if (firstStep == Coord{-1, -1}) continue;
+                    const int lead = path.friendlyLeadAt(idx(target));
                     score -= lead * 20.0;
                     if (lead == 0) score += 18.0;
                     if (lead > 2 && !city) score -= 20.0;
-                    if (!immediateAdvancePossible(source, route.front()))
-                        continue;
-                    Move move(MoveType::MOVE_ARMY, source, route.front(),
-                              false);
+                    if (!immediateAdvancePossible(source, firstStep)) continue;
+                    Move move(MoveType::MOVE_ARMY, source, firstStep, false);
                     const double riskPenalty = moveRiskPenalty(move, metrics);
                     if (riskPenalty >= 1e8) continue;
                     score -= riskPenalty;
@@ -2219,7 +2660,7 @@ class KutuBot : public BasicBot {
                 objectives.insert(
                     objectives.begin(),
                     ObjectiveOption{
-                        lockedObjective, targetPlayer, 220.0, true, false,
+                        220.0, lockedObjective, targetPlayer, true, false,
                         board.tileAt(lockedObjective).type == TILE_CITY,
                         false});
             }
@@ -2271,8 +2712,13 @@ class KutuBot : public BasicBot {
         knownGenerals.assign(playerCnt, Coord{-1, -1});
         predictedGeneralScore.assign(playerCnt,
                                      std::vector<double>(total, 0.0));
-        candidateGeneralMask.assign(playerCnt, std::vector<uint8_t>(total, 0));
+        predictedGeneralScale.assign(playerCnt, 1.0);
+        baseGeneralCandidateMask.assign(total, 0);
+        baseGeneralCandidateList.clear();
+        baseGeneralCandidateList.reserve(height * width);
         newlyVisibleEnemyTiles.assign(playerCnt, 0);
+        cachedGeneralGuess.assign(playerCnt, Coord{-1, -1});
+        cachedGeneralHasEvidence.assign(playerCnt, 0);
         rankById.assign(playerCnt, RankItem{});
         prevRankById.clear();
         aliveById.assign(playerCnt, true);
@@ -2286,12 +2732,17 @@ class KutuBot : public BasicBot {
         pathFlow.assign(total, 0);
         coreZoneMask.assign(total, 0);
         chokeMask.assign(total, 0);
+        generalPathParent.assign(total, Coord{-1, -1});
+        generalBfsOrder.clear();
 
         friendlyTilesCache.clear();
         frontierTiles.clear();
         ownedCitiesCache.clear();
         objectiveCandidates.clear();
         largestFriendlyArmyCache = 0;
+        cachedGeneralAdjacentThreat = 0;
+        cachedGeneralLocalPressure = 0.0;
+        cachedRelaxedGeneralOpening = false;
         myGeneral = Coord{-1, -1};
         currentObjective = Coord{-1, -1};
         lockedObjective = Coord{-1, -1};
@@ -2316,8 +2767,10 @@ class KutuBot : public BasicBot {
         myGeneral = Coord{-1, -1};
         rememberVisibleBoard();
         rebuildTurnCaches();
+        buildBaseGeneralCandidateMask();
         recomputeSituationMaps();
         const SituationMetrics metrics = computeSituationMetrics();
+        refreshGeneralGuessCache(metrics);
 
         std::optional<Move> candidate = selectStrategicMove(metrics);
         if (!candidate.has_value() || !moveLooksSafe(*candidate)) {

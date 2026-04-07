@@ -46,20 +46,24 @@ class ZlyBot_v2_1 : public BasicBot {
     }
 
     struct TileInfo {
-        tile_type_e type = tile_type_e(-1);
+        // 8-byte aligned fields
         army_t army = 0;
-        index_t occupier = -1;
-        bool visible = false;
-        bool isSeenBefore = false;
-        bool inPrevMoves = false;
-        bool routeVis = false;
         value_t value = 0;
         value_t danger = 0;
         value_t dist0 = DIST_INF;
         value_t dist1 = DIST_INF;
         value_t distToSpawn = DIST_INF;
-        Coord routePrev{-1, -1};
         value_t routeDp = INF;
+        // 4-byte aligned fields
+        tile_type_e type = tile_type_e(-1);
+        index_t occupier = -1;
+        // 8-byte aligned struct (contains two 4-byte fields)
+        Coord routePrev{-1, -1};
+        // 1-byte aligned fields
+        bool visible = false;
+        bool isSeenBefore = false;
+        bool inPrevMoves = false;
+        bool routeVis = false;
     };
 
     std::vector<TileInfo> tiles;

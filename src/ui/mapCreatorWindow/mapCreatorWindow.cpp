@@ -27,6 +27,7 @@
 
 #include "core/board.hpp"
 #include "core/map.hpp"
+#include "ui/comboBoxPopupCompatibility.hpp"
 
 namespace {
 constexpr int METADATA_SIDEBAR_EXPANDED_WIDTH = 236;
@@ -645,6 +646,7 @@ void MapCreatorWindow::setupHintBar() {
     valueSpinBox->setVisible(false);
 
     teamComboBox = new QComboBox(floatingPanel);
+    ComboBoxPopupCompatibility::configureForManagedPopup(teamComboBox);
     teamComboBox->addItem("");
     for (char c = 'A'; c <= 'Z'; ++c) {
         teamComboBox->addItem(QString(c));

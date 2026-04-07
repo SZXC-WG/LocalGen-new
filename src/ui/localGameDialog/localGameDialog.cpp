@@ -16,10 +16,12 @@
 
 #include "core/bot.h"
 #include "core/map.hpp"
+#include "ui/comboBoxPopupCompatibility.hpp"
 #include "ui_localGameDialog.h"
 
 namespace {
 
+const QString HumanPlayerId = QStringLiteral("Human");
 constexpr int MapPathRole = Qt::UserRole;
 constexpr int MapWidthRole = Qt::UserRole + 1;
 constexpr int MapHeightRole = Qt::UserRole + 2;
@@ -52,6 +54,7 @@ LocalGameDialog::LocalGameDialog(QWidget* parent)
     setWindowFlags(flags);
 
     ui->setupUi(this);
+    ComboBoxPopupCompatibility::configureForManagedPopup(ui->comboBox_gameMap);
     randomMapWidth = ui->spinBox_mapWidth->value();
     randomMapHeight = ui->spinBox_mapHeight->value();
     populateAvailableMaps();
@@ -70,13 +73,10 @@ LocalGameConfig LocalGameDialog::config() const {
         ui->comboBox_gameMap->currentData(MapPathRole).toString();
     config.mapWidth = ui->spinBox_mapWidth->value();
     config.mapHeight = ui->spinBox_mapHeight->value();
-    int numPlayers = ui->spinBox_numPlayers->value();
     auto& players = config.players;
-    players.resize(numPlayers);
-    QLayout* layout = ui->groupBox_players->layout();
-    for (int i = 0; i < numPlayers; ++i) {
-        QWidget* playerWidget = layout->itemAt(i + 1)->widget();
-        players[i] = playerWidget->findChild<QComboBox*>()->currentText();
+    players.resize(playerCombos.size());
+    for (int i = 0; i < playerCombos.size(); ++i) {
+        players[i] = playerCombos[i]->currentData().toString();
     }
     return config;
 }
@@ -146,6 +146,9 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
     int requiredCount = numPlayers + 1;
     while (layout->count() > requiredCount) {
         QLayoutItem* item = layout->takeAt(layout->count() - 1);
+        if (!playerCombos.isEmpty()) {
+            playerCombos.removeLast();
+        }
         item->widget()->deleteLater();
         delete item;
     }
@@ -158,14 +161,20 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
         QLabel* playerLabel = new QLabel(tr("Player %1").arg(layout->count()));
         playerLabel->setFont(font);
         QComboBox* playerCombo = new QComboBox();
-        if (layout->count() == 1) playerCombo->addItem(tr("Human"));
-        playerCombo->addItems(botNames);
+        ComboBoxPopupCompatibility::configureForManagedPopup(playerCombo);
+        if (layout->count() == 1) {
+            playerCombo->addItem(tr("Human"), HumanPlayerId);
+        }
+        for (const QString& botName : botNames) {
+            playerCombo->addItem(botName, botName);
+        }
         playerCombo->setCurrentIndex(
             layout->count() == 1 ? 0 : rng->bounded(playerCombo->count()));
         playerCombo->setSizePolicy(QSizePolicy::Expanding,
                                    QSizePolicy::Preferred);
         playerCombo->setStyleSheet("color: teal;");
         playerCombo->setFont(comboFont);
+        playerCombos.append(playerCombo);
         QHBoxLayout* playerLayout = new QHBoxLayout();
         playerLayout->addWidget(playerLabel);
         playerLayout->addWidget(playerCombo);

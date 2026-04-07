@@ -308,6 +308,8 @@ class ZlyBot_v2_1 : public BasicBot {
                 if (nt.routeVis) continue;
                 if (nt.inPrevMoves) continue;
                 value_t nextVal = curVal + UnitedInc(next.x, next.y);
+                if (mode == BotMode::EXPLORE || mode == BotMode::DEFEND)
+                    nextVal >>= 1;
                 if (nextVal < nt.routeDp) {
                     nt.routeDp = nextVal;
                     nt.routePrev = cur;

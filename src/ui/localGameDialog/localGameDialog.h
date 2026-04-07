@@ -4,8 +4,10 @@
 #ifndef LOCALGAMEDIALOG_H
 #define LOCALGAMEDIALOG_H
 
+#include <QComboBox>
 #include <QDialog>
 #include <QStringList>
+#include <QVector>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -43,6 +45,7 @@ class LocalGameDialog : public QDialog {
     void populateAvailableMaps();
 
     Ui::LocalGameDialog* ui;
+    QVector<QComboBox*> playerCombos;
     int randomMapWidth = 20;
     int randomMapHeight = 20;
     bool updatingMapControls = false;

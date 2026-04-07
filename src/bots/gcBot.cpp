@@ -42,6 +42,7 @@ class GcBot : public BasicBot {
         bool known = false;
     };
 
+    std::vector<value_t> distPenalty;
     std::vector<TileInfo> tiles;
     std::vector<Coord> bfsQueue;
     std::vector<Coord> seenGeneral;
@@ -304,8 +305,7 @@ class GcBot : public BasicBot {
                 value_t tileValue = tileTypeValue[tile.type] + tile.eval / 5 -
                                     (tile.dist + tile.army / 2);
                 if (seenGeneral[id].x != -1) {
-                    tileValue -= static_cast<value_t>(
-                        std::sqrt(approxDist(pos, seenGeneral[id]) * 40.0));
+                    tileValue -= distPenalty[approxDist(pos, seenGeneral[id])];
                 }
                 return tileValue;
             };
@@ -402,6 +402,12 @@ class GcBot : public BasicBot {
 
         seenGeneral.assign(playerCnt, Coord(-1, -1));
         tiles.resize(height * width);
+
+        int maxManhattanDist = height + width;
+        distPenalty.resize(maxManhattanDist);
+        for (int i = 0; i < maxManhattanDist; ++i) {
+            distPenalty[i] = static_cast<value_t>(std::sqrt(i * 40.0));
+        }
     }
 
     void requestMove(const BoardView& board,

@@ -33,12 +33,12 @@ class GcBot : public BasicBot {
     turn_t halfTurn, turn;
 
     struct TileInfo {
-        tile_type_e type = TILE_PLAIN;
         army_t army = -1;
         Coord par{-1, -1};
         value_t eval = 0;
         pos_t dist = 0;
         index_t occupier = -1;
+        tile_type_e type = TILE_PLAIN;
         bool known = false;
     };
 

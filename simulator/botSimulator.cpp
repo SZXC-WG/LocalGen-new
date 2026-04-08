@@ -86,6 +86,7 @@ struct BotStats {
     long long totalRank = 0;
     long long totalArmy = 0;
     long long totalLand = 0;
+    int totalKills = 0;
     double totalLatencyMicroseconds = 0.0;
     long long totalLatencyCalls = 0;
 };
@@ -442,10 +443,10 @@ void printSummaryTable(const Options& options,
                        const std::vector<BotStats>& stats,
                        const std::vector<TrueSkillRating>& ratings) {
     TableRow header = {"Bot",      "TrueSkill",  "TS 95% CI", "Wins",
-                       "Win Rate", "Win 95% CI", "Avg Rank",  "Survived",
-                       "Avg Army", "Avg Land"};
-    std::vector<bool> leftAligned = {true, false, true,  false, false,
-                                     true, false, false, false, false};
+                       "Win Rate", "Win 95% CI", "Avg Rank",  "Avg Kill",
+                       "Survived", "Avg Army",   "Avg Land"};
+    std::vector<bool> leftAligned = {true,  false, true,  false, false, true,
+                                     false, false, false, false, false};
     if (options.measureLatency) {
         header.push_back("Avg Latency");
         leftAligned.push_back(false);
@@ -474,6 +475,8 @@ void printSummaryTable(const Options& options,
             formatPercent(winRate.rate),
             "[" + lowerBound + ", " + upperBound + "]",
             formatFixed(static_cast<double>(botStats.totalRank) /
+                        options.games),
+            formatFixed(static_cast<double>(botStats.totalKills) /
                         options.games),
             std::to_string(botStats.survivalCount),
             formatFixed(static_cast<double>(botStats.totalArmy) /
@@ -820,6 +823,7 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
             BotStats& botStats = result.statsDelta[botIndex];
             botStats.totalArmy += item.army;
             botStats.totalLand += item.land;
+            botStats.totalKills += item.killCount;
             botStats.survivalCount += item.alive ? 1 : 0;
         }
     }
@@ -865,6 +869,7 @@ void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
         stats[i].totalRank += result.statsDelta[i].totalRank;
         stats[i].totalArmy += result.statsDelta[i].totalArmy;
         stats[i].totalLand += result.statsDelta[i].totalLand;
+        stats[i].totalKills += result.statsDelta[i].totalKills;
         stats[i].totalLatencyMicroseconds +=
             result.statsDelta[i].totalLatencyMicroseconds;
         stats[i].totalLatencyCalls += result.statsDelta[i].totalLatencyCalls;

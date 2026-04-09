@@ -53,6 +53,10 @@ cmake --build build --config Release
 
 Then find the executable under `build/Release`.
 
+> [!NOTE]
+>
+> To create a portable app package, consider applying `windeployqt`, `macdeployqt` or other similar utilities post-build.
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=SZXC-WG/LocalGen-new&type=Date)](https://star-history.com/#SZXC-WG/LocalGen-new&Date)

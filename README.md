@@ -42,6 +42,17 @@ Absolutely! We welcome any form of contribution.
 - For v6: Check out the instructions in `docs/bot-contributions.md` and `src/bots/README.md`.
 - For v5: Check out the instructions at [#31](../../issues/31) for more details.
 
+## Building the project
+
+You'll need Qt 6.7+, CMake 3.19+, and Ninja 1.10+ installed under PATH. Run the following commands, replacing the toolchain path with the actual file path on your system (typically `$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake`):
+
+```bash
+cmake -B build -S . -G Ninja -DCMAKE_TOOLCHAIN_FILE=/path/to/qt.toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+```
+
+Then find the executable under `build/Release`.
+
 ## Contributing
 
 LocalGen’s development is organized across three groups of branches:

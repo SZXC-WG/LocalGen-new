@@ -45,7 +45,35 @@ class ZlyBot_v2_1 : public BasicBot {
         return teamIds[player1] == teamIds[player2];
     }
 
+    struct RouteNode {
+        Coord pos;
+        value_t dist;
+        value_t friendArmy;
+        value_t oppoArmy;
+        value_t typeCost;
+        inline value_t united() const {
+            return dist * 1000 - (friendArmy - oppoArmy) + typeCost;
+        }
+    };
+    struct RouteNodeLess {
+        inline bool operator()(const RouteNode& lhs,
+                               const RouteNode& rhs) const {
+            return lhs.united() < rhs.united();
+        }
+    };
+    struct RouteNodeGreater {
+        inline bool operator()(const RouteNode& lhs,
+                               const RouteNode& rhs) const {
+            return lhs.united() > rhs.united();
+        }
+    };
+    constexpr static RouteNodeLess routeComparerLess{};
+    constexpr static RouteNodeGreater routeComparerGreater{};
+    constexpr static RouteNode ROUTE_INF =
+        RouteNode{{-1, -1}, DIST_INF, -INF, INF, 0};
+
     struct TileInfo {
+        RouteNode routeDp = ROUTE_INF;
         // 8-byte aligned fields
         army_t army = 0;
         value_t value = 0;
@@ -53,7 +81,6 @@ class ZlyBot_v2_1 : public BasicBot {
         value_t dist0 = DIST_INF;
         value_t dist1 = DIST_INF;
         value_t distToSpawn = DIST_INF;
-        value_t routeDp = INF;
         // 4-byte aligned fields
         tile_type_e type = tile_type_e(-1);
         index_t occupier = -1;
@@ -115,6 +142,7 @@ class ZlyBot_v2_1 : public BasicBot {
         else
             return board.tileAt(x, y).type;
     }
+    inline tile_type_e typeAt(Coord pos) { return typeAt(pos.x, pos.y); }
 
     template <typename DistPtr, typename WeightFunc>
     void dijkstra(Coord start, DistPtr dist, WeightFunc weight) {
@@ -257,49 +285,58 @@ class ZlyBot_v2_1 : public BasicBot {
     }
 
     void findRoute(Coord start, Coord desti) {
-        auto DisInc = 1;
-        auto UnitedInc = [&](int x, int y) -> value_t {
-            if (x < 1 || x > height || y < 1 || y > width) return INF;
-            tile_type_e tt = typeAt(x, y);
-            if (isImpassableTile(tt)) return INF;
-            const TileInfo& t = tileAt(x, y);
-            value_t armyCost = (t.occupier == id) ? -t.army : t.army;
-            value_t typeCost = 0;
-            switch (tt) {
-                case TILE_BLANK:       typeCost = 0; break;
-                case TILE_SWAMP:       typeCost = 10; break;
-                case TILE_MOUNTAIN:    return INF;
-                case TILE_SPAWN:       typeCost = 0; break;
-                case TILE_CITY:        typeCost = 1; break;
-                case TILE_DESERT:      typeCost = 0; break;
-                case TILE_LOOKOUT:     return INF;
-                case TILE_OBSERVATORY: return INF;
-                case TILE_OBSTACLE:    typeCost = 5; break;
-                default:               return INF;
+        constexpr value_t DIST_INC = 1;
+
+        auto typeCost = [](tile_type_e type) -> value_t {
+            switch (type) {
+                case TILE_BLANK:    return 0; break;
+                case TILE_SWAMP:    return 10; break;
+                case TILE_SPAWN:    return 0; break;
+                case TILE_CITY:     return 1; break;
+                case TILE_DESERT:   return 0; break;
+                case TILE_OBSTACLE: return 5; break;
+                default:            return INF;
             }
-            return DisInc * 1000 + armyCost + typeCost;
         };
+        auto incNode = [&](RouteNode ori, Coord next) -> RouteNode {
+            if (std::clamp(next.x, 1, height) != next.x ||
+                std::clamp(next.y, 1, width) != next.y)
+                return ROUTE_INF;
+            const tile_type_e tt = typeAt(next);
+            if (isImpassableTile(tt)) return ROUTE_INF;
+            ori.dist += DIST_INC;
+            const TileInfo& t = tileAt(next);
+            if (ori.pos == spawnCoord &&
+                (mode == BotMode::EXPLORE || mode == BotMode::DEFEND))
+                ori.friendArmy >>= 1;
+            if (inSameTeam(t.occupier, id))
+                ori.friendArmy += t.army;
+            else
+                ori.oppoArmy += t.army;
+            ori.typeCost += typeCost(tt);
+            ori.pos = next;
+            return ori;
+        };
+
         for (TileInfo& t : tiles) {
-            t.routeDp = INF;
+            t.routeDp = ROUTE_INF;
             t.routePrev = Coord(-1, -1);
             t.routeVis = false;
         }
-        std::priority_queue<std::pair<value_t, Coord>,
-                            std::vector<std::pair<value_t, Coord>>,
-                            std::greater<std::pair<value_t, Coord>>>
+        std::priority_queue<RouteNode, std::vector<RouteNode>, RouteNodeGreater>
             q;
-        tileAt(start).routeDp = 0;
-        q.emplace(0, start);
+        tileAt(start).routeDp = RouteNode{start, 0, tileAt(start).army, 0, 0};
+        q.emplace(tileAt(start).routeDp);
         while (!q.empty()) {
-            Coord cur = q.top().second;
-            value_t curVal = q.top().first;
+            RouteNode cur = q.top();
             q.pop();
-            if (curVal > tileAt(cur).routeDp) continue;
-            if (tileAt(cur).routeVis) continue;
-            tileAt(cur).routeVis = true;
-            if (cur == desti) break;
+            TileInfo& ct = tileAt(cur.pos);
+            if (ct.routeVis) continue;
+            if (routeComparerGreater(cur, ct.routeDp)) continue;
+            ct.routeVis = true;
+            if (cur.pos == desti) break;
             for (int i = 0; i < 4; ++i) {
-                Coord next = cur + delta[i];
+                Coord next = cur.pos + delta[i];
                 if (next.x < 1 || next.x > height || next.y < 1 ||
                     next.y > width)
                     continue;
@@ -307,14 +344,11 @@ class ZlyBot_v2_1 : public BasicBot {
                 TileInfo& nt = tileAt(next);
                 if (nt.routeVis) continue;
                 if (nt.inPrevMoves) continue;
-                value_t nextVal = curVal + UnitedInc(next.x, next.y);
-                if (cur == spawnCoord &&
-                    (mode == BotMode::EXPLORE || mode == BotMode::DEFEND))
-                    nextVal >>= 1;
-                if (nextVal < nt.routeDp) {
-                    nt.routeDp = nextVal;
-                    nt.routePrev = cur;
-                    q.emplace(nextVal, next);
+                auto nextNode = incNode(cur, next);
+                if (routeComparerLess(nextNode, nt.routeDp)) {
+                    nt.routeDp = nextNode;
+                    nt.routePrev = cur.pos;
+                    q.emplace(nextNode);
                 }
             }
         }
@@ -381,7 +415,7 @@ class ZlyBot_v2_1 : public BasicBot {
         leastUsage = 0;
 
         focus[0] = focus[1] = Coord(0, 0);
-        tileTypeWeight[TILE_BLANK] = 300 - 25 * 10 + 10;
+        tileTypeWeight[TILE_BLANK] = 60;
         tileTypeWeight[TILE_SWAMP] = -1500000000;
         tileTypeWeight[TILE_MOUNTAIN] = -INF;
         tileTypeWeight[TILE_SPAWN] = 10;

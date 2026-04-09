@@ -44,7 +44,7 @@ Absolutely! We welcome any form of contribution.
 
 ## Building the project
 
-You'll need Qt 6.7+, CMake 3.19+, and Ninja 1.10+ installed under PATH. Run the following commands, replacing the toolchain path with the actual file path on your system (typically `$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake`):
+You'll need Qt 6.7+, CMake 3.19+, and Ninja 1.10+ installed under PATH. Run the following commands, using the actual Qt6 toolchain path on your system (typically `$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake`):
 
 ```bash
 cmake -B build -S . -G Ninja -DCMAKE_TOOLCHAIN_FILE=/path/to/qt.toolchain.cmake -DCMAKE_BUILD_TYPE=Release
@@ -67,14 +67,6 @@ LocalGen’s development is organized across three groups of branches:
   **Note:** Releases for this branch are **Windows-only** due to EGE 24.04’s limitations. However, if you want to run it on Linux or macOS, [**Wine**](https://www.winehq.org) might be an option. (We have tested, it worked well on a Ubuntu 22.04 LTS machine.)
 
 If you'd like to contribute, please submit a pull request to the `master` branch. We appreciate your help!
-
-> [!CAUTION]
->
-> You’re currently viewing the `master` branch, which is dedicated to v6. This version is still under active development and not yet finished.
->
-> To download older, stable versions of the game, head to the [releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
->
-> If you want to build the project yourself, please visit one of the `v5.x` branches. Enjoy!
 
 ## Star History
 

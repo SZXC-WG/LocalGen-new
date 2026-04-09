@@ -51,7 +51,7 @@ If your bot meets the above requirements:
 
 1. Place the source file in `src/bots/`.
 2. Give the file a clear, unique name (e.g., `MyUniqueBot.cpp`).
-3. Add that file to the `PROJECT_SOURCES` list in the top-level `CMakeLists.txt`.
+3. Add it to `LOCALGEN_BOT_SOURCES` in `CMakeLists.txt`.
 4. Commit your changes and open a pull request. 🎉
 
 If your bot does **not** meet all of these requirements, please read our [contribution guide](../../CONTRIBUTING.md#contributing-a-bot) for alternative contribution paths.

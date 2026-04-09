@@ -54,4 +54,4 @@ If your bot meets the above requirements:
 3. Add that file to the `PROJECT_SOURCES` list in the top-level `CMakeLists.txt`.
 4. Commit your changes and open a pull request. 🎉
 
-If your bot does **not** meet all of these requirements, please read `docs/bot contributions.md` for alternative contribution paths.
+If your bot does **not** meet all of these requirements, please read our [contribution guide](../../CONTRIBUTING.md#contributing-a-bot) for alternative contribution paths.

@@ -53,21 +53,6 @@ cmake --build build --config Release
 
 Then find the executable under `build/Release`.
 
-## Contributing
-
-LocalGen’s development is organized across three groups of branches:
-
-- **`master` | `v6.x`**:  
-  The `master` branch serves as the main development branch for version 6.  
-  **Starting from v6, we will be migrating the UI to the Qt library**, aiming for better performance and cross-platform support. The source code will also undergo a significant refactor to improve maintainability.
-
-- **`v5.x`**:  
-  This branch covers version 5, which is now going to **long-term maintenance**.  
-  Versions 2 to 5 of LocalGen are built with [EGE Graphics](https://xege.org) (24.04), and we’re working on creating an object-oriented system based on it.  
-  **Note:** Releases for this branch are **Windows-only** due to EGE 24.04’s limitations. However, if you want to run it on Linux or macOS, [**Wine**](https://www.winehq.org) might be an option. (We have tested, it worked well on a Ubuntu 22.04 LTS machine.)
-
-If you'd like to contribute, please submit a pull request to the `master` branch. We appreciate your help!
-
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=SZXC-WG/LocalGen-new&type=Date)](https://star-history.com/#SZXC-WG/LocalGen-new&Date)

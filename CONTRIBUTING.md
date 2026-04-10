@@ -13,7 +13,7 @@ The LocalGen project evolved with different UI frameworks.
 | Project Version(s) | UI framework | Build System      | Repo / Branch                                                |
 | ------------------ | ------------ | ----------------- | ------------------------------------------------------------ |
 | v1                 | Terminal     | MinGW Makefiles   | Local-Generals.io / [main](https://github.com/SZXC-WG/Local-Generals.io/tree/main) |
-| v2~v4              | EGE 24.04    | MinGW Makefiles   | LocalGen-new / (no independent branch)                       |
+| v2~v4              | EGE 20.08    | MinGW Makefiles   | LocalGen-new / (no independent branch)                       |
 | v5                 | EGE 24.04    | CMake / Makefiles | LocalGen-new / [v5.0](https://github.com/SZXC-WG/LocalGen-new/tree/v5.0) |
 | v6                 | Qt 6.7+      | CMake / Ninja     | LocalGen-new / master (this branch)                          |
 

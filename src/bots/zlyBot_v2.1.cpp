@@ -49,7 +49,7 @@ class ZlyBot_v2_1 : public BasicBot {
         value_t oppoArmy;
         value_t typeCost;
         inline value_t united() const {
-            return dist * 1000 - (friendArmy - oppoArmy) + typeCost;
+            return dist * 200 - (friendArmy - oppoArmy) + typeCost;
         }
     };
     struct RouteNodeLess {
@@ -97,6 +97,7 @@ class ZlyBot_v2_1 : public BasicBot {
     std::deque<Coord> route;
     pos_t leastUsage;
     value_t tileTypeWeight[16];
+    pos_t homeZoneMaxRange;
     std::vector<Coord> homeZone;
     std::deque<Coord> prevMoves;
     Coord spawnCoord;
@@ -225,8 +226,9 @@ class ZlyBot_v2_1 : public BasicBot {
         {
             homeZone.clear();
             dijkstraBFS(spawnCoord);
-            auto defenseDist = std::min(
-                20, std::max(3, static_cast<int>(rank[id].land / 15.0)));
+            auto defenseDist =
+                std::min(homeZoneMaxRange,
+                         std::max(3, static_cast<int>(rank[id].land / 15.0)));
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
                     const TileInfo& t = tileAt(i, j);
@@ -409,6 +411,9 @@ class ZlyBot_v2_1 : public BasicBot {
         config = constants.config;
 
         halfTurn = turn = 0;
+
+        homeZoneMaxRange =
+            std::max(static_cast<pos_t>(10), std::max(height, width) >> 1);
         leastUsage = 0;
 
         focus[0] = focus[1] = Coord(0, 0);

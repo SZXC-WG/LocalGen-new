@@ -45,9 +45,8 @@ jobs:
 
       - name: Configure build
         run: >-
-          cmake -B build/codeql -S . -G Ninja
+          cmake -B build/codeql -S . -G "Ninja Multi-Config"
           -DCMAKE_TOOLCHAIN_FILE=$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake
-          -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: cmake --build build/codeql --config Release

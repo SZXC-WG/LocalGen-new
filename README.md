@@ -47,7 +47,7 @@ Absolutely! We welcome any form of contribution.
 You'll need Qt 6.7+, CMake 3.19+, and Ninja 1.10+ installed under PATH. Run the following commands, using the actual Qt6 toolchain path on your system (typically `$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake`):
 
 ```bash
-cmake -B build -S . -G Ninja -DCMAKE_TOOLCHAIN_FILE=/path/to/qt.toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+cmake -B build -S . -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=/path/to/qt.toolchain.cmake
 cmake --build build --config Release
 ```
 

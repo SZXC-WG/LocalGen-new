@@ -9,9 +9,6 @@
  * @author pinkHC
  */
 
-#ifndef LGEN_BOTS_KUTUBOT
-#define LGEN_BOTS_KUTUBOT
-
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -137,7 +134,8 @@ class KutuBot : public BasicBot {
         }
 
         int distance(size_t node) const {
-            if (rawDist == nullptr || stamp == nullptr || node >= rawDist->size()) {
+            if (rawDist == nullptr || stamp == nullptr ||
+                node >= rawDist->size()) {
                 return kInf;
             }
             return (*stamp)[node] == activeStamp ? (*rawDist)[node] : kInf;
@@ -503,12 +501,13 @@ class KutuBot : public BasicBot {
         if (current + kThreatEpsilon < adjustedCost) return false;
 
         const int currentSeed = workspace.seedIndex[node];
-        const int currentRank =
-            currentSeed >= 0 ? seeds[currentSeed].rank
-                             : std::numeric_limits<int>::max();
+        const int currentRank = currentSeed >= 0
+                                    ? seeds[currentSeed].rank
+                                    : std::numeric_limits<int>::max();
         const int candidateRank = seeds[seedIndex].rank;
         if (candidateRank != currentRank) return candidateRank < currentRank;
-        if (rawDist != workspace.rawDist[node]) return rawDist < workspace.rawDist[node];
+        if (rawDist != workspace.rawDist[node])
+            return rawDist < workspace.rawDist[node];
         return steps < workspace.steps[node];
     }
 
@@ -555,8 +554,7 @@ class KutuBot : public BasicBot {
                 if (nd < dist[nextIndex]) {
                     dist[nextIndex] = nd;
                     parent[nextIndex] = cur;
-                    firstStep[nextIndex] =
-                        cur == start ? nxt : curFirstStep;
+                    firstStep[nextIndex] = cur == start ? nxt : curFirstStep;
                     depth[nextIndex] = curDepth + 1;
                     friendlyLead[nextIndex] =
                         curLead == curDepth && board.tileAt(nxt).occupier == id
@@ -747,8 +745,8 @@ class KutuBot : public BasicBot {
         return result;
     }
 
-    std::vector<Coord> reconstructThreatRoute(Coord start,
-                                              const ThreatPathResult& path) const {
+    std::vector<Coord> reconstructThreatRoute(
+        Coord start, const ThreatPathResult& path) const {
         std::vector<Coord> route;
         if (!inside(start)) return route;
         Coord cur = start;
@@ -1076,7 +1074,8 @@ class KutuBot : public BasicBot {
         if (player < 0 || player >= playerCnt) return Coord{-1, -1};
         if (knownGenerals[player] != Coord{-1, -1})
             return knownGenerals[player];
-        if (player >= 0 && player < static_cast<index_t>(cachedGeneralGuess.size())) {
+        if (player >= 0 &&
+            player < static_cast<index_t>(cachedGeneralGuess.size())) {
             return cachedGeneralGuess[player];
         }
         return Coord{-1, -1};
@@ -1564,9 +1563,7 @@ class KutuBot : public BasicBot {
         cachedRelaxedGeneralOpening = visibleEnemyTiles == 0;
     }
 
-    bool relaxedGeneralOpening() const {
-        return cachedRelaxedGeneralOpening;
-    }
+    bool relaxedGeneralOpening() const { return cachedRelaxedGeneralOpening; }
 
     bool movePassesHardSafety(const Move& move) const {
         if (move.type != MoveType::MOVE_ARMY) return false;
@@ -1595,11 +1592,10 @@ class KutuBot : public BasicBot {
         double penalty = 0.0;
 
         if (remain < reserve) {
-            penalty +=
-                (reserve - remain) *
-                (move.from == myGeneral ? (cachedRelaxedGeneralOpening ? 4.0
-                                                                       : 10.0)
-                                        : 7.5);
+            penalty += (reserve - remain) *
+                       (move.from == myGeneral
+                            ? (cachedRelaxedGeneralOpening ? 4.0 : 10.0)
+                            : 7.5);
         }
 
         const double localPressure =
@@ -1730,8 +1726,8 @@ class KutuBot : public BasicBot {
         CandidateMove best;
         std::array<Coord, 4> corridor{};
         size_t corridorLen = 0;
-        for (size_t i = 0; i < plan.route.size() && corridorLen < corridor.size();
-             ++i) {
+        for (size_t i = 0;
+             i < plan.route.size() && corridorLen < corridor.size(); ++i) {
             if (board.tileAt(plan.route[i]).occupier != id) continue;
             corridor[corridorLen++] = plan.route[i];
         }
@@ -2007,8 +2003,8 @@ class KutuBot : public BasicBot {
             multiSourceThreatReversePath(allSeeds, 4, closeThreatSearch);
         const ThreatPathResult limitedPath =
             multiSourceThreatReversePath(limitedSeeds, 5, limitedThreatSearch);
-        const ThreatPathResult positivePath =
-            multiSourceThreatReversePath(positiveSeeds, 14, positiveThreatSearch);
+        const ThreatPathResult positivePath = multiSourceThreatReversePath(
+            positiveSeeds, 14, positiveThreatSearch);
 
         std::optional<ThreatInfo> best;
         for (pos_t x = 1; x <= height; ++x) {
@@ -2040,7 +2036,8 @@ class KutuBot : public BasicBot {
                     if (!path.reachable) return;
                     const size_t node = idx(source);
                     const int seedIndex = path.seedAt(node);
-                    if (seedIndex < 0 || seedIndex >= static_cast<int>(seeds.size())) {
+                    if (seedIndex < 0 ||
+                        seedIndex >= static_cast<int>(seeds.size())) {
                         return;
                     }
                     const int dist = path.distance(node);
@@ -2141,11 +2138,11 @@ class KutuBot : public BasicBot {
 
         std::vector<ObjectiveOption> defenseObjectives;
         defenseObjectives.push_back(ObjectiveOption{240.0, threat->intercept,
-                                                    currentTargetPlayer,
-                                                    true, true, false, false});
+                                                    currentTargetPlayer, true,
+                                                    true, false, false});
         defenseObjectives.push_back(ObjectiveOption{210.0, threat->source,
-                                                    currentTargetPlayer,
-                                                    true, true, false, false});
+                                                    currentTargetPlayer, true,
+                                                    true, false, false});
         for (size_t i = 0; i < threat->route.size() && i < 3; ++i) {
             defenseObjectives.push_back(
                 ObjectiveOption{190.0 - i * 14.0, threat->route[i],
@@ -2271,7 +2268,8 @@ class KutuBot : public BasicBot {
                                           metrics.conversionAdvantage > 8.0;
         const bool canChaseGuess =
             targetPlayer >= 0 &&
-            targetPlayer < static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
+            targetPlayer <
+                static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
             cachedGeneralHasEvidence[targetPlayer];
         if (targetGuess != Coord{-1, -1} && canChaseGuess) {
             addObjective(ObjectiveOption{230.0, targetGuess, targetPlayer, true,
@@ -2355,9 +2353,8 @@ class KutuBot : public BasicBot {
                 if (score <= -1e90) continue;
 
                 ObjectiveOption option{
-                    score,      c,
-                    occupier >= 0 ? occupier : targetPlayer, enemy,
-                    false,      city,
+                    score,      c,     occupier >= 0 ? occupier : targetPlayer,
+                    enemy,      false, city,
                     exploration};
                 const bool nearTargetGuess = targetGuess != Coord{-1, -1} &&
                                              canChaseGuess &&
@@ -2784,5 +2781,3 @@ class KutuBot : public BasicBot {
 };
 
 static BotRegistrar<KutuBot> kutu_bot_reg("KutuBot");
-
-#endif  // LGEN_BOTS_KUTUBOT

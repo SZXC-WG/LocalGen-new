@@ -9,9 +9,6 @@
  * @author oimasterkafuu
  */
 
-#ifndef LGEN_BOTS_OIMBOT
-#define LGEN_BOTS_OIMBOT
-
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -1993,5 +1990,3 @@ class OimBot : public BasicBot {
 };
 
 static BotRegistrar<OimBot> oim_bot_reg("oimbot");
-
-#endif  // LGEN_BOTS_OIMBOT

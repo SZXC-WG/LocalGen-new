@@ -9,9 +9,6 @@
  * @authors AppOfficer; GoodCoder666
  */
 
-#ifndef LGEN_BOTS_SMARTRANDOMBOT
-#define LGEN_BOTS_SMARTRANDOMBOT
-
 #include <algorithm>
 #include <deque>
 #include <random>
@@ -110,5 +107,3 @@ class SmartRandomBot : public BasicBot {
 
 // Do not forget to register your bot.
 static BotRegistrar<SmartRandomBot> smartRandomBot_reg("SmartRandomBot");
-
-#endif  // LGEN_BOTS_SMARTRANDOMBOT

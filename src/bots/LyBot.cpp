@@ -9,9 +9,6 @@
  * @author pinkHC
  */
 
-#ifndef LGEN_BOTS_LYBOT
-#define LGEN_BOTS_LYBOT
-
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -1302,5 +1299,3 @@ class LyBot : public BasicBot {
 };
 
 static BotRegistrar<LyBot> ly_bot_reg("LyBot");
-
-#endif  // LGEN_BOTS_LYBOT

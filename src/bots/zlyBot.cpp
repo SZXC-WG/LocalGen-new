@@ -9,9 +9,6 @@
  * @author AppOfficer
  */
 
-#ifndef LGEN_BOTS_ZLYBOT
-#define LGEN_BOTS_ZLYBOT
-
 #include <queue>
 #include <random>
 
@@ -330,5 +327,3 @@ class ZlyBot : public BasicBot {
 };
 
 static BotRegistrar<ZlyBot> zlyBot_reg("ZlyBot");
-
-#endif  // LGEN_BOTS_ZLYBOT

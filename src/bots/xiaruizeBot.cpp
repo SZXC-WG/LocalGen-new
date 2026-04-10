@@ -12,9 +12,6 @@
  * @author xiaruize0911
  */
 
-#ifndef LGEN_BOTS_XIARUIZEBOT
-#define LGEN_BOTS_XIARUIZEBOT
-
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -1394,5 +1391,3 @@ class XiaruizeBot : public BasicBot {
 };
 
 static BotRegistrar<XiaruizeBot> xiaruizeBot_reg("XiaruizeBot");
-
-#endif  // LGEN_BOTS_XIARUIZEBOT

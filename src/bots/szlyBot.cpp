@@ -9,9 +9,6 @@
  * @author GoodCoder666
  */
 
-#ifndef LGEN_BOTS_SZLYBOT
-#define LGEN_BOTS_SZLYBOT
-
 #include <array>
 #include <cmath>
 #include <queue>
@@ -361,5 +358,3 @@ class SzlyBot : public BasicBot {
 };
 
 static BotRegistrar<SzlyBot> szlyBot_reg("SzlyBot");
-
-#endif  // LGEN_BOTS_SZLYBOT

@@ -9,9 +9,6 @@
  * @author GoodCoder666
  */
 
-#ifndef LGEN_BOTS_GCBOT
-#define LGEN_BOTS_GCBOT
-
 #include <algorithm>
 #include <queue>
 #include <random>
@@ -424,5 +421,3 @@ class GcBot : public BasicBot {
 };
 
 static BotRegistrar<GcBot> gcBot_reg("GcBot");
-
-#endif  // LGEN_BOTS_GCBOT

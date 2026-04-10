@@ -9,9 +9,6 @@
  * @author xiaruize0911
  */
 
-#ifndef LGEN_BOTS_XRZBOT
-#define LGEN_BOTS_XRZBOT
-
 #include <random>
 #include <vector>
 
@@ -186,5 +183,3 @@ class XrzBot : public BasicBot {
 };
 
 static BotRegistrar<XrzBot> xrzBot_reg("XrzBot");
-
-#endif

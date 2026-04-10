@@ -14,9 +14,6 @@
  * Like this file, bot codes should be put into the `src/bots` folder.
  */
 
-#ifndef LGEN_BOTS_DUMMYBOT
-#define LGEN_BOTS_DUMMYBOT
-
 // Remember to include the bot header file.
 // Without this, you can't define your bot class, and the registry won't work.
 #include "core/bot.h"
@@ -135,5 +132,3 @@ class DummyBot : public BasicBot {
 // Do not forget to register your bot.
 // And, append it to the CMakeLists.txt (not for this one).
 static BotRegistrar<DummyBot> dummyBot_reg("DummyBot");
-
-#endif  // LGEN_BOTS_DUMMYBOT

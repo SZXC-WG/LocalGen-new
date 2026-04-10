@@ -10,12 +10,13 @@
 
 The LocalGen project evolved with different UI frameworks.
 
-| Project Version(s) | UI framework | Build System      | Repo / Branch                                                |
-| ------------------ | ------------ | ----------------- | ------------------------------------------------------------ |
-| v1                 | Terminal     | MinGW Makefiles   | Local-Generals.io / [main](https://github.com/SZXC-WG/Local-Generals.io/tree/main) |
-| v2~v4              | EGE 20.08    | MinGW Makefiles   | LocalGen-new / (no independent branch)                       |
-| v5                 | EGE 24.04    | CMake / Makefiles | LocalGen-new / [v5.0](https://github.com/SZXC-WG/LocalGen-new/tree/v5.0) |
-| v6                 | Qt 6.7+      | CMake / Ninja     | LocalGen-new / master (this branch)                          |
+| Project Version(s) | UI framework | Build System      | Repo / Branch                                                                      |
+| ------------------ | ------------ | ----------------- | ---------------------------------------------------------------------------------- |
+| prev               | Terminal     | MinGW Makefiles   | Local-Generals.io / [main](https://github.com/SZXC-WG/Local-Generals.io/tree/main) |
+| v1                 | Terminal     | MinGW Makefiles   | LocalGen-new / (no independent branch)                                             |
+| v2~v4              | EGE 20.08    | MinGW Makefiles   | LocalGen-new / (no independent branch)                                             |
+| v5                 | EGE 24.04    | CMake / Makefiles | LocalGen-new / [v5.0](https://github.com/SZXC-WG/LocalGen-new/tree/v5.0)           |
+| v6                 | Qt 6.7+      | CMake / Ninja     | LocalGen-new / master (this branch)                                                |
 
 Versions 1 to 4 are no longer maintained; v5 only accepts fixes for security issues and critical bugs. Version 6 is the current latest version, offering cross-platform support, a new modular backend design, better performance, and smarter bots. We highly encourage you to submit pull requests to `master` (the v6 branch) to contribute.
 

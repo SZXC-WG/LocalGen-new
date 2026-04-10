@@ -4,18 +4,20 @@
 >
 > *This is an unfinished early draft of our contribution guide, for reference only. Some stuff here may be wrong or outdated; don't take them seriously.* :joy:
 
-LocalGen’s development is organized across three groups of branches:
+## Project overview
 
-- **`master` | `v6.x`**:  
-  The `master` branch serves as the main development branch for version 6.  
-  **Starting from v6, we will be migrating the UI to the Qt library**, aiming for better performance and cross-platform support. The source code will also undergo a significant refactor to improve maintainability.
+*Before contributing, please read this section to get a full view of the project.*
 
-- **`v5.x`**:  
-  This branch covers version 5, which is now going to **long-term maintenance**.  
-  Versions 2 to 5 of LocalGen are built with [EGE Graphics](https://xege.org) (24.04), and we’re working on creating an object-oriented system based on it.  
-  **Note:** Releases for this branch are **Windows-only** due to EGE 24.04’s limitations. However, if you want to run it on Linux or macOS, [**Wine**](https://www.winehq.org) might be an option. (We have tested, it worked well on a Ubuntu 22.04 LTS machine.)
+The LocalGen project evolved with different UI frameworks.
 
-If you'd like to contribute, please submit a pull request to the `master` branch. We appreciate your help!
+| Project Version(s) | UI framework | Build System      | Repo / Branch                                                |
+| ------------------ | ------------ | ----------------- | ------------------------------------------------------------ |
+| v1                 | Terminal     | MinGW Makefiles   | Local-Generals.io / [main](https://github.com/SZXC-WG/Local-Generals.io/tree/main) |
+| v2~v4              | EGE 24.04    | MinGW Makefiles   | LocalGen-new / (no independent branch)                       |
+| v5                 | EGE 24.04    | CMake / Makefiles | LocalGen-new / [v5.0](https://github.com/SZXC-WG/LocalGen-new/tree/v5.0) |
+| v6                 | Qt 6.7+      | CMake / Ninja     | LocalGen-new / master (this branch)                          |
+
+Versions 1 to 4 are no longer maintained; v5 only accepts fixes for security issues and critical bugs. Version 6 is the current latest version, offering cross-platform support, a new modular backend design, better performance, and smarter bots. We highly encourage you to submit pull requests to `master` (the v6 branch) to contribute.
 
 ## Contributing a bot
 

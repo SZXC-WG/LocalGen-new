@@ -32,11 +32,6 @@ LocalGen v6 recognises two kinds of bots:
    - Written in C++ for maximum integration and speed.  
    - Instantly usable in both *Local Game* and *Web Game* modes.  
 
-2. **External bots**  
-   - Stand-alone executables written in whatever language you prefer.  
-   - Communicate with the game via a lightweight network protocol.  
-   - Can be listed in the external-bot registry so the game launches and supervises them automatically.  
-
 ---
 
 ### How You Can Contribute  
@@ -55,14 +50,7 @@ We gladly accept:
    - Unit tests and/or replay files demonstrating behaviour.  
    - A brief performance report (CPU time, memory usage).  
 
-#### Contributing an External Bot  
-
-1. Implement the communication protocol defined in the *External-Bot API* spec.  
-2. Provide either a ready-to-run binary or a reliable build script.  
-3. In your PR state clearly:  
-   - How to install dependencies and launch the bot.  
-   - Supported OSes / runtime environments.  
-   - Expected performance (average turn time, peak memory).  
+You can use the provided bot simulator to test your bot.
 
 ---
 

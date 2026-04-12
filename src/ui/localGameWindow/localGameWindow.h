@@ -51,6 +51,7 @@ class LocalGameWindow : public QDialog {
     void scheduleNextHalfTurn(double delayMs);
     void stopGameLoop();
     void positionFloatingWidgets();
+    void updateLogOverlay();
 
    protected:
     void keyPressEvent(QKeyEvent* event) override;
@@ -63,6 +64,7 @@ class LocalGameWindow : public QDialog {
     BasicGame* game = nullptr;
     QTimer* halfTurnTimer = nullptr;
     QLabel* turnLabel = nullptr;
+    QLabel* logOverlay = nullptr;
     bool gameRunning = false;
     bool analysisEnabled = false;
     double halfTurnDurationMs = 500.0;

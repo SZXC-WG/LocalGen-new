@@ -74,6 +74,9 @@ class Player {
    public:
     std::deque<Move>& getMoveQueue() { return moveQueue; }
 
+    /// Return a log info string for in-game overlay. Empty by default.
+    virtual std::string getLogInfo() const { return ""; }
+
    public:
     inline Move step() {
         if (moveQueue.empty()) return Move();

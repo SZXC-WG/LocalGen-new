@@ -199,6 +199,18 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     turnLabel->move(10, 10);
     turnLabel->raise();
 
+    logOverlay = new QLabel(this);
+    logOverlay->setFont(QFont("Consolas", 9));
+    logOverlay->setStyleSheet(
+        "QLabel { background-color: rgba(0, 0, 0, 180); "
+        "color: #00FF88; padding: 8px 12px; "
+        "border-radius: 4px; }");
+    logOverlay->setTextFormat(Qt::RichText);
+    logOverlay->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    logOverlay->setWordWrap(true);
+    logOverlay->move(10, 50);
+    logOverlay->raise();
+
     if (analysisEnabled) {
         std::vector<QColor> colors;
         std::vector<QString> playerNames;
@@ -275,6 +287,7 @@ void LocalGameWindow::runHalfTurn() {
     QElapsedTimer elapsedTimer;
     elapsedTimer.start();
     game->step();
+    updateLogOverlay();
     if (!game->isAlive(humanPlayerId) ||
         static_cast<int>(game->getAlivePlayers().size()) <= 1) {
         if (humanPlayer != nullptr) {
@@ -348,12 +361,43 @@ void LocalGameWindow::updateLeaderboard(const std::vector<RankItem>& rank) {
     positionFloatingWidgets();
 }
 
+void LocalGameWindow::updateLogOverlay() {
+    if (logOverlay == nullptr || game == nullptr) return;
+    QString text;
+    for (index_t i = 0; i < game->getPlayerCount(); ++i) {
+        if (!game->isAlive(i)) continue;
+        std::string info = game->getPlayer(i)->getLogInfo();
+        if (info.empty()) continue;
+        QString escaped = QString::fromStdString(info).toHtmlEscaped();
+        escaped.replace(QLatin1String("\n"), QLatin1String("<br>"));
+        QColor c = playerColor(i);
+        QString hex = QString("#%1%2%3")
+                          .arg(c.red(), 2, 16, QChar('0'))
+                          .arg(c.green(), 2, 16, QChar('0'))
+                          .arg(c.blue(), 2, 16, QChar('0'));
+        text += QString("<font color=\"%1\"><b>%2</b></font><br>"
+                        "<font face=\"Consolas\" size=\"3\">%3</font><br><br>")
+                    .arg(hex, QString::fromStdString(game->getName(i)), escaped);
+    }
+    logOverlay->setText(text);
+    logOverlay->adjustSize();
+    positionFloatingWidgets();
+}
+
 void LocalGameWindow::positionFloatingWidgets() {
     const int turnLabelMargin = 6;
 
     if (turnLabel != nullptr) {
         turnLabel->move(turnLabelMargin, turnLabelMargin);
         turnLabel->raise();
+    }
+
+    if (logOverlay != nullptr) {
+        const int logMaxWidth = std::min(width() / 3, 400);
+        const int logMaxHeight = std::min(height() / 2, 300);
+        logOverlay->setMaximumSize(logMaxWidth, logMaxHeight);
+        logOverlay->move(turnLabelMargin, turnLabel->y() + turnLabel->height() + turnLabelMargin);
+        logOverlay->raise();
     }
 
     if (analysisChartWidget != nullptr) {

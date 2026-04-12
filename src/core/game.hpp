@@ -227,6 +227,7 @@ class BasicGame {
     inline std::vector<index_t> getTeams() const { return teams; }
     inline std::string getName(index_t player) const { return names[player]; }
     inline std::vector<std::string> getNames() const { return names; }
+    inline Player* getPlayer(index_t player) const { return players[player]; }
 
     inline const BoardView& view(index_t player) const {
         BoardView& playerView = playerViews.at(player);

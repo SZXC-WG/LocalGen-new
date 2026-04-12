@@ -9,7 +9,9 @@
  * @author AppOfficer
  */
 
+#include <cmath>
 #include <queue>
+#include <string>
 
 #include "core/bot.h"
 #include "core/game.hpp"
@@ -226,9 +228,9 @@ class ZlyBot_v2_1 : public BasicBot {
         {
             homeZone.clear();
             dijkstraBFS(spawnCoord);
-            auto defenseDist =
-                std::min(homeZoneMaxRange,
-                         std::max(3, static_cast<int>(rank[id].land / 15.0)));
+            auto defenseDist = std::min(
+                homeZoneMaxRange,
+                std::max(3, static_cast<int>(std::sqrt(rank[id].land) - 5.0)));
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
                     const TileInfo& t = tileAt(i, j);
@@ -253,7 +255,7 @@ class ZlyBot_v2_1 : public BasicBot {
                     t.value -= t.army;
                     t.danger = -tileTypeWeight[tt];
                     t.danger -= t.distToSpawn * 2;
-                    t.danger -= t.dist1;
+                    t.danger -= t.dist1 / 2;
                     t.value -=
                         t.isSeenBefore * (turn - 100000.0 / rank[id].army);
                     if (t.visible && t.occupier != -1) {
@@ -440,6 +442,7 @@ class ZlyBot_v2_1 : public BasicBot {
 
         board = boardView;
         rank = _rank;
+
         std::sort(begin(rank), end(rank),
                   [](RankItem lhs, RankItem rhs) -> bool {
                       return lhs.player < rhs.player;

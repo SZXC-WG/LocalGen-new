@@ -20,6 +20,21 @@ The LocalGen project evolved with different UI frameworks.
 
 Versions 1 to 4 are no longer maintained; v5 only accepts fixes for security issues and critical bugs. Version 6 is the current latest version, offering cross-platform support, a new modular backend design, better performance, and smarter bots. We highly encourage you to submit pull requests to `master` (the v6 branch) to contribute. The guide below is for v6.
 
+## Building the project
+
+> This section is for developers/contributors. The "Building the project" section in the README is for users who want to build the project themselves.
+
+You'll need Qt 6.7+, CMake 3.19+, and Ninja 1.10+ installed under PATH. The project can be built with the following commands, using the actual Qt6 toolchain path on your system (typically `$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake`):
+
+```bash
+cmake -B build -S . -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=/path/to/qt.toolchain.cmake
+cmake --build build --config [config]
+```
+
+Here, `[config]` can be `Debug` or `Release`. Use `Debug` to test for bugs, and `Release` to measure performance. You should test in both configs before submitting a PR.
+
+If you use VS Code (or any of its derivatives), there is the [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) extension as an alternative for building the project. We've already configured `settings.json` for it to work out-of-the-box. (You still need to manually select the `Debug`/`Release` variant.)
+
 ## Contributing a bot
 
 ### Bot Types  

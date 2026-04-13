@@ -44,7 +44,7 @@ We gladly accept:
 
 **To create a bot from scratch:**
 
-1. Read `src/bots/README.md` for API details and build instructions.  
+1. Read the [bot README](./src/bots/README.md) for API details and build instructions.  
 2. Implement your bot following the project’s C++ style guide.  
 3. Open a pull request that includes:  
    - Unit tests and/or replay files demonstrating behaviour.  

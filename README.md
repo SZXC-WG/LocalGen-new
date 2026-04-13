@@ -39,7 +39,7 @@ Got a new idea or discovered a bug? We welcome contributions! Simply **open an i
 
 Absolutely! We welcome any form of contribution.
 
-- For v6: Check out the instructions in `CONTRIBUTING.md` and [`src/bots/README.md`](./src/bots/README.md).
+- For v6: Check out the instructions in the [contribution guide](./CONTRIBUTING.md) and the [bot README](./src/bots/README.md).
 - For v5: Check out the instructions at [#31](../../issues/31) for more details.
 
 ## Building the project

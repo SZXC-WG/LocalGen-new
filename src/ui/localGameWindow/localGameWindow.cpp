@@ -183,12 +183,13 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     resize(800, 600);
 
     turnLabel = new QLabel("Turn 0", this);
-    turnLabel->setFont(QFont("Quicksand", 18, QFont::Bold));
-    turnLabel->setStyleSheet(
-        "QLabel { background-color: white; "
-        "color: black; padding: 8px 16px; "
-        "font-size: 18px; font-weight: bold; "
-        "border-radius: 4px; }");
+    turnLabel->setFont(QFont("Quicksand", 12, QFont::Bold));
+    turnLabel->setAutoFillBackground(true);
+    QPalette palette = turnLabel->palette();
+    palette.setColor(QPalette::Window, Qt::white);
+    palette.setColor(QPalette::WindowText, Qt::black);
+    turnLabel->setPalette(palette);
+    turnLabel->setContentsMargins(16, 8, 16, 8);
     turnLabel->setMinimumWidth(120);
     turnLabel->setAlignment(Qt::AlignCenter);
     turnLabel->move(10, 10);

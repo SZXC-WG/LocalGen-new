@@ -33,14 +33,9 @@ Interested? Get started by downloading **LocalGen** from the [releases page](htt
 
 Got a new idea or discovered a bug? We welcome contributions! Simply **open an issue or submit a pull request**, and we’ll get back to you as soon as possible.
 
+To contribute your own bot, check out the instructions in the [contribution guide](./CONTRIBUTING.md) and the [bot README](./src/bots/README.md).
+
 ## [Releases (Changelog)](http://github.com/SZXC-WG/LocalGen-new/releases)
-
-## Weak Robots? Time to Write a New One!
-
-Absolutely! We welcome any form of contribution.
-
-- For v6: Check out the instructions in the [contribution guide](./CONTRIBUTING.md) and the [bot README](./src/bots/README.md).
-- For v5: Check out the instructions at [#31](../../issues/31) for more details.
 
 ## Building the project
 

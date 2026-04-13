@@ -18,21 +18,21 @@ The LocalGen project evolved with different UI frameworks.
 | v5                 | EGE 24.04    | CMake / Makefiles | LocalGen-new / [v5.0](https://github.com/SZXC-WG/LocalGen-new/tree/v5.0)           |
 | v6                 | Qt 6.7+      | CMake / Ninja     | LocalGen-new / master (this branch)                                                |
 
-Versions 1 to 4 are no longer maintained; v5 only accepts fixes for security issues and critical bugs. Version 6 is the current latest version, offering cross-platform support, a new modular backend design, better performance, and smarter bots. We highly encourage you to submit pull requests to `master` (the v6 branch) to contribute.
+Versions 1 to 4 are no longer maintained; v5 only accepts fixes for security issues and critical bugs. Version 6 is the current latest version, offering cross-platform support, a new modular backend design, better performance, and smarter bots. We highly encourage you to submit pull requests to `master` (the v6 branch) to contribute. The guide below is for v6.
 
 ## Contributing a bot
 
 ### Bot Types  
 
-LocalGen v6 recognises two kinds of bots:
+Currently, LocalGen v6 only accepts bots directly compiled into the executable, also known as *built-in bots*:
 
-1. **Built-in bots**  
-   - Source lives in `src/bots/`.  
-   - Compiled together with the core executable.  
-   - Written in C++ for maximum integration and speed.  
-   - Instantly usable in both *Local Game* and *Web Game* modes.  
+- Source lives in `src/bots/`.
 
----
+- Compiled together with the core executable.
+  
+- Written in C++ for maximum integration and speed.
+
+- Instantly usable in both *Local Game* and *Web Game* modes.
 
 ### How You Can Contribute  
 
@@ -42,7 +42,7 @@ We gladly accept:
 - Feature upgrades to existing bots.  
 - Bug fixes and performance tweaks.  
 
-#### Contributing a Built-in Bot  
+**To create a bot from scratch:**
 
 1. Read `src/bots/README.md` for API details and build instructions.  
 2. Implement your bot following the project’s C++ style guide.  
@@ -52,9 +52,7 @@ We gladly accept:
 
 You can use the provided bot simulator to test your bot.
 
----
-
-### Community Standards  
+### Bot Community Standards  
 
 - **Code quality** — keep it clean, readable, and well-documented.  
 - **Thorough testing** — supply results on multiple maps and player counts.  

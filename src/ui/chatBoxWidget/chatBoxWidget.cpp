@@ -11,25 +11,49 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QPalette>
 #include <QScrollBar>
 #include <QSizePolicy>
 #include <QVBoxLayout>
+#include <algorithm>
 
 namespace {
+
+QFont makeQuicksandFont(int pointSize, QFont::Weight weight) {
+    return QFont("Quicksand", pointSize, weight);
+}
+
+void applyForegroundPalette(QWidget* widget, const QColor& color) {
+    QPalette palette = widget->palette();
+    palette.setColor(QPalette::WindowText, color);
+    palette.setColor(QPalette::Text, color);
+    palette.setColor(QPalette::ButtonText, color);
+    widget->setPalette(palette);
+}
+
+void applyBackgroundPalette(QWidget* widget, const QColor& color) {
+    QPalette palette = widget->palette();
+    palette.setColor(QPalette::Window, color);
+    palette.setColor(QPalette::Base, color);
+    widget->setPalette(palette);
+}
 
 QWidget* createColorChip(const QColor& color, QWidget* parent) {
     QFrame* chip = new QFrame(parent);
     chip->setFixedSize(12, 12);
-    chip->setStyleSheet(QString("QFrame { background-color: %1; border-radius: "
-                                "0px; border: none; }")
-                            .arg(color.name()));
+    chip->setFrameShape(QFrame::NoFrame);
+    chip->setAutoFillBackground(true);
+
+    applyBackgroundPalette(chip, color);
+
     return chip;
 }
 
-QLabel* createSegmentLabel(const QString& text, const QString& style,
-                           QWidget* parent) {
+QLabel* createSegmentLabel(const QString& text, const QColor& color,
+                           const QFont& font, QWidget* parent) {
     QLabel* label = new QLabel(text, parent);
-    label->setStyleSheet(style);
+    label->setFont(font);
+    applyForegroundPalette(label, color);
     label->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     label->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     return label;
@@ -48,10 +72,8 @@ QWidget* createPlayerMentionWidget(const ChatMessageSegment& segment,
         createColorChip(segment.playerColor, mentionWidget), 0,
         Qt::AlignVCenter);
     mentionLayout->addWidget(
-        createSegmentLabel(segment.text,
-                           "QLabel { color: rgb(240, 244, 248); "
-                           "font: 700 10pt 'Quicksand'; }",
-                           mentionWidget));
+        createSegmentLabel(segment.text, QColor(240, 244, 248),
+                           makeQuicksandFont(10, QFont::Bold), mentionWidget));
 
     return mentionWidget;
 }
@@ -71,28 +93,24 @@ QWidget* createMessageRowWidget(const ChatMessageEntry& entry,
         if (segment.isPlayerMention) {
             layout->addWidget(createPlayerMentionWidget(segment, rowWidget));
         } else {
-            layout->addWidget(
-                createSegmentLabel(segment.text,
-                                   "QLabel { color: rgb(240, 244, 248); "
-                                   "font: 600 10pt 'Quicksand'; }",
-                                   rowWidget));
+            layout->addWidget(createSegmentLabel(
+                segment.text, QColor(240, 244, 248),
+                makeQuicksandFont(10, QFont::DemiBold), rowWidget));
         }
     }
 
     QLabel* turnLabel =
-        createSegmentLabel(entry.turnText,
-                           "QLabel { color: rgba(184, 189, 196, 220); "
-                           "font: 600 9pt 'Quicksand'; }",
-                           rowWidget);
+        createSegmentLabel(entry.turnText, QColor(184, 189, 196, 220),
+                           makeQuicksandFont(9, QFont::DemiBold), rowWidget);
     turnLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     turnLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     layout->addWidget(turnLabel);
     layout->addStretch(1);
 
     const int boldHeight =
-        QFontMetrics(QFont("Quicksand", 10, QFont::Bold)).height();
+        QFontMetrics(makeQuicksandFont(10, QFont::Bold)).height();
     const int mediumHeight =
-        QFontMetrics(QFont("Quicksand", 9, QFont::DemiBold)).height();
+        QFontMetrics(makeQuicksandFont(9, QFont::DemiBold)).height();
     rowWidget->setMinimumHeight(std::max(boldHeight, mediumHeight) + 4);
 
     return rowWidget;
@@ -102,70 +120,34 @@ QWidget* createMessageRowWidget(const ChatMessageEntry& entry,
 
 ChatBoxWidget::ChatBoxWidget(QWidget* parent) : QFrame(parent) {
     setFocusPolicy(Qt::NoFocus);
-    setObjectName("chatBoxWidget");
-    setFrameShape(QFrame::NoFrame);
-    setStyleSheet(
-        "QFrame#chatBoxWidget {"
-        "background-color: rgba(0, 0, 0, 127);"
-        "border: 1px solid rgba(255, 255, 255, 36);"
-        "border-radius: 3px;"
-        "}"
-        "QLabel {"
-        "color: rgb(240, 244, 248);"
-        "font: 700 10pt 'Quicksand';"
-        "}"
-        "QListWidget {"
-        "background-color: transparent;"
-        "color: rgb(240, 244, 248);"
-        "border: none;"
-        "padding: 6px 8px 4px 8px;"
-        "outline: none;"
-        "}"
-        "QListWidget::item {"
-        "padding: 0px;"
-        "margin: 0px;"
-        "border: none;"
-        "}"
-        "QListWidget::item:selected {"
-        "background: transparent;"
-        "}"
-        "QScrollBar:vertical {"
-        "background: transparent;"
-        "width: 10px;"
-        "margin: 6px 2px 6px 0px;"
-        "}"
-        "QScrollBar::handle:vertical {"
-        "background: rgba(255, 255, 255, 58);"
-        "border-radius: 4px;"
-        "min-height: 24px;"
-        "}"
-        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {"
-        "height: 0px;"
-        "background: transparent;"
-        "}"
-        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
-        "background: transparent;"
-        "}"
-        "QLineEdit {"
-        "background-color: rgb(246, 246, 246);"
-        "color: rgb(36, 36, 36);"
-        "border: none;"
-        "border-top: 1px solid rgba(0, 0, 0, 34);"
-        "border-radius: 0px;"
-        "padding: 8px 12px;"
-        "font: 500 9pt 'Quicksand';"
-        "}"
-        "QLineEdit::placeholder { color: rgb(126, 130, 137); }"
-        "QLineEdit:disabled {"
-        "color: rgb(126, 130, 137);"
-        "background-color: rgb(238, 238, 238);"
-        "}");
+    setFrameShape(QFrame::Box);
+    setFrameShadow(QFrame::Plain);
+    setLineWidth(1);
+    setAutoFillBackground(true);
+    setBackgroundRole(QPalette::Window);
+    setForegroundRole(QPalette::WindowText);
+
+    QPalette panelPalette = palette();
+    const QColor panelBackground(0, 0, 0, 127);
+    const QColor panelBorder(255, 255, 255, 36);
+    panelPalette.setColor(QPalette::Window, panelBackground);
+    panelPalette.setColor(QPalette::WindowText, panelBorder);
+    panelPalette.setColor(QPalette::Mid, panelBorder);
+    panelPalette.setColor(QPalette::Dark, panelBorder);
+    setPalette(panelPalette);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    historyList = new QListWidget(this);
+    QWidget* historyContainer = new QWidget(this);
+    historyContainer->setAttribute(Qt::WA_TranslucentBackground, true);
+
+    QVBoxLayout* historyLayout = new QVBoxLayout(historyContainer);
+    historyLayout->setContentsMargins(8, 6, 8, 4);
+    historyLayout->setSpacing(0);
+
+    historyList = new QListWidget(historyContainer);
     historyList->setSelectionMode(QAbstractItemView::NoSelection);
     historyList->setFocusPolicy(Qt::NoFocus);
     historyList->setWordWrap(true);
@@ -174,10 +156,39 @@ ChatBoxWidget::ChatBoxWidget(QWidget* parent) : QFrame(parent) {
     historyList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     historyList->setFrameShape(QFrame::NoFrame);
     historyList->setSpacing(1);
-    layout->addWidget(historyList, 1);
+    historyList->setAutoFillBackground(false);
+
+    QPalette historyPalette = historyList->palette();
+    historyPalette.setColor(QPalette::Base, Qt::transparent);
+    historyPalette.setColor(QPalette::Text, QColor(240, 244, 248));
+    historyList->setPalette(historyPalette);
+
+    QWidget* historyViewport = historyList->viewport();
+    historyViewport->setAutoFillBackground(false);
+    historyViewport->setAttribute(Qt::WA_TranslucentBackground, true);
+
+    QScrollBar* scrollBar = historyList->verticalScrollBar();
+    scrollBar->setFixedWidth(10);
+    historyLayout->addWidget(historyList);
+    layout->addWidget(historyContainer, 1);
 
     inputLine = new QLineEdit(this);
     inputLine->setFixedHeight(42);
+    inputLine->setFrame(false);
+    inputLine->setFont(makeQuicksandFont(9, QFont::Medium));
+    inputLine->setTextMargins(12, 8, 12, 8);
+
+    QPalette inputPalette = inputLine->palette();
+    inputPalette.setColor(QPalette::Base, Qt::white);
+    inputPalette.setColor(QPalette::Text, QColor(0, 128, 128));
+    inputPalette.setColor(QPalette::PlaceholderText, QColor(117, 117, 117));
+    inputPalette.setColor(QPalette::Disabled, QPalette::Base, Qt::white);
+    inputPalette.setColor(QPalette::Disabled, QPalette::Text,
+                          QColor(117, 117, 117));
+    inputPalette.setColor(QPalette::Disabled, QPalette::PlaceholderText,
+                          QColor(117, 117, 117));
+    inputLine->setPalette(inputPalette);
+
     inputLine->setPlaceholderText("Press [Enter] to chat.");
     connect(inputLine, &QLineEdit::returnPressed, this,
             &ChatBoxWidget::emitPendingMessage);

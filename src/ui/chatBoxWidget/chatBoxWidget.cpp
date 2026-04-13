@@ -62,43 +62,32 @@ QWidget* createMessageRowWidget(const ChatMessageEntry& entry,
     rowWidget->setAttribute(Qt::WA_TranslucentBackground, true);
     rowWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    QHBoxLayout* rowLayout = new QHBoxLayout(rowWidget);
-    rowLayout->setContentsMargins(0, 1, 0, 1);
-    rowLayout->setSpacing(0);
-
-    QWidget* contentWidget = new QWidget(rowWidget);
-    QHBoxLayout* contentLayout = new QHBoxLayout(contentWidget);
-    contentLayout->setContentsMargins(0, 0, 0, 0);
-    contentLayout->setSpacing(8);
+    QHBoxLayout* layout = new QHBoxLayout(rowWidget);
+    layout->setContentsMargins(0, 1, 0, 1);
+    layout->setSpacing(8);
 
     for (const ChatMessageSegment& segment : entry.segments) {
-        if (segment.text.isEmpty()) {
-            continue;
-        }
-
+        if (segment.text.isEmpty()) continue;
         if (segment.isPlayerMention) {
-            contentLayout->addWidget(
-                createPlayerMentionWidget(segment, contentWidget));
-            continue;
+            layout->addWidget(createPlayerMentionWidget(segment, rowWidget));
+        } else {
+            layout->addWidget(
+                createSegmentLabel(segment.text,
+                                   "QLabel { color: rgb(240, 244, 248); "
+                                   "font: 600 10pt 'Quicksand'; }",
+                                   rowWidget));
         }
-
-        contentLayout->addWidget(
-            createSegmentLabel(segment.text,
-                               "QLabel { color: rgb(240, 244, 248); "
-                               "font: 600 10pt 'Quicksand'; }",
-                               contentWidget));
     }
 
     QLabel* turnLabel =
         createSegmentLabel(entry.turnText,
                            "QLabel { color: rgba(184, 189, 196, 220); "
                            "font: 600 9pt 'Quicksand'; }",
-                           contentWidget);
+                           rowWidget);
     turnLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     turnLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
-    contentLayout->addWidget(turnLabel);
-    contentLayout->addStretch(1);
-    rowLayout->addWidget(contentWidget, 1);
+    layout->addWidget(turnLabel);
+    layout->addStretch(1);
 
     const int boldHeight =
         QFontMetrics(QFont("Quicksand", 10, QFont::Bold)).height();

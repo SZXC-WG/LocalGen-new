@@ -229,15 +229,13 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         humanPlayerId = humanPlayer->playerId;
     }
 
-    if (game != nullptr) {
-        game->setEventCallback(
-            [this](const GameEvent& event) { handleGameEvent(event); });
-        updateLeaderboard(game->ranklist());
-        gameRunning = true;
-        refreshChatInputState();
-        positionFloatingWidgets();
-        scheduleNextHalfTurn(0.0);
-    }
+    game->setEventCallback(
+        [this](const GameEvent& event) { handleGameEvent(event); });
+    updateLeaderboard(game->ranklist());
+    gameRunning = true;
+    refreshChatInputState();
+    positionFloatingWidgets();
+    scheduleNextHalfTurn(0.0);
 }
 
 LocalGameWindow::~LocalGameWindow() {
@@ -255,21 +253,13 @@ bool LocalGameWindow::canHumanChat() const {
 }
 
 void LocalGameWindow::handleChatSubmission(const QString& message) {
-    if (chatBox == nullptr || !canHumanChat()) {
-        return;
-    }
+    if (!canHumanChat()) return;
     game->sendPlayerMessage(humanPlayerId, message.toStdString());
     chatBox->clearInput();
-    if (gameMap != nullptr) {
-        gameMap->setFocus(Qt::ShortcutFocusReason);
-    }
+    gameMap->setFocus(Qt::ShortcutFocusReason);
 }
 
 void LocalGameWindow::handleGameEvent(const GameEvent& event) {
-    if (chatBox == nullptr) {
-        return;
-    }
-
     chatBox->appendMessage(formatChatMessage(event));
 }
 
@@ -321,10 +311,6 @@ QString LocalGameWindow::playerDisplayName(index_t playerId) const {
 }
 
 void LocalGameWindow::refreshChatInputState() {
-    if (chatBox == nullptr) {
-        return;
-    }
-
     QString placeholder;
     if (game == nullptr) {
         placeholder = "Chat is unavailable.";
@@ -395,9 +381,7 @@ void LocalGameWindow::runHalfTurn() {
 }
 
 void LocalGameWindow::scheduleNextHalfTurn(double delayMs) {
-    if (!gameRunning || halfTurnTimer == nullptr) {
-        return;
-    }
+    if (!gameRunning) return;
     int waitMs = static_cast<int>(std::lround(delayMs));
     if (waitMs < 0) waitMs = 0;
     halfTurnTimer->start(waitMs);
@@ -415,10 +399,6 @@ void LocalGameWindow::stopGameLoop() {
 }
 
 void LocalGameWindow::updateLeaderboard(const std::vector<RankItem>& rank) {
-    if (leaderboardWidget == nullptr || game == nullptr) {
-        return;
-    }
-
     std::vector<LeaderboardRow> rows;
     rows.reserve(rank.size());
     for (const auto& item : rank) {

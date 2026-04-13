@@ -383,7 +383,6 @@ void LocalGameWindow::runHalfTurn() {
 void LocalGameWindow::scheduleNextHalfTurn(double delayMs) {
     if (!gameRunning) return;
     int waitMs = static_cast<int>(std::lround(delayMs));
-    if (waitMs < 0) waitMs = 0;
     halfTurnTimer->start(waitMs);
 }
 
@@ -472,9 +471,8 @@ void LocalGameWindow::positionFloatingWidgets() {
 }
 
 bool LocalGameWindow::eventFilter(QObject* watched, QEvent* event) {
-    if (watched == gameMap && event != nullptr &&
-        event->type() == QEvent::KeyPress && canHumanChat() &&
-        chatBox != nullptr) {
+    if (watched == gameMap && event->type() == QEvent::KeyPress &&
+        canHumanChat() && chatBox != nullptr) {
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
         if (keyEvent->key() == Qt::Key_Return ||
             keyEvent->key() == Qt::Key_Enter) {

@@ -418,8 +418,6 @@ bool MapWidget::isTouchpadScrollEvent(const QWheelEvent* event) const {
 }
 
 bool MapWidget::handleNativeGesture(QNativeGestureEvent* event) {
-    if (event == nullptr) return false;
-
     switch (event->gestureType()) {
         case Qt::BeginNativeGesture:
         case Qt::EndNativeGesture:

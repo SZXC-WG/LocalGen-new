@@ -21,10 +21,6 @@ double adjustedAxisMax(double value) {
 
 void styleAnalysisAxis(QAbstractAxis* axis, const QColor& foreground,
                        const QColor& gridColor) {
-    if (axis == nullptr) {
-        return;
-    }
-
     axis->setLabelsFont(QFont("Quicksand", 9, QFont::Medium));
     axis->setTitleFont(QFont("Quicksand", 10, QFont::DemiBold));
     axis->setLabelsColor(foreground);
@@ -259,9 +255,6 @@ void AnalysisChartWidget::updateAnalysis(
     updateAxisRanges();
 
     for (PlayerAnalysisSeries& playerSeries : seriesData) {
-        if (playerSeries.series == nullptr) {
-            continue;
-        }
         const QList<QPointF>& history =
             historyForMode(playerSeries, showingLand, usingLogScale);
         if (!history.isEmpty()) {
@@ -271,23 +264,14 @@ void AnalysisChartWidget::updateAnalysis(
 }
 
 void AnalysisChartWidget::refreshChart() {
-    if (chart == nullptr) {
-        return;
-    }
-
     const bool showLand = showingLand;
     const bool useLogScale = usingLogScale;
     chart->setTitle(
         QString("%1 Trend (%2)")
             .arg(showLand ? "Land" : "Army", useLogScale ? "Log" : "Linear"));
 
-    if (metricToggle != nullptr) {
-        metricToggle->setText(showLand ? "Switch to Army" : "Switch to Land");
-    }
-    if (scaleToggle != nullptr) {
-        scaleToggle->setText(useLogScale ? "Switch to Linear"
-                                         : "Switch to Log");
-    }
+    metricToggle->setText(showLand ? "Switch to Army" : "Switch to Land");
+    scaleToggle->setText(useLogScale ? "Switch to Linear" : "Switch to Log");
 
     QAbstractAxis* activeAxis = useLogScale
                                     ? static_cast<QAbstractAxis*>(axisYLog)
@@ -297,50 +281,33 @@ void AnalysisChartWidget::refreshChart() {
                                       : static_cast<QAbstractAxis*>(axisYLog);
 
     for (PlayerAnalysisSeries& playerSeries : seriesData) {
-        if (playerSeries.series != nullptr && inactiveAxis != nullptr) {
-            playerSeries.series->detachAxis(inactiveAxis);
-        }
+        playerSeries.series->detachAxis(inactiveAxis);
     }
-    if (inactiveAxis != nullptr &&
-        chart->axes(Qt::Vertical).contains(inactiveAxis)) {
+
+    if (chart->axes(Qt::Vertical).contains(inactiveAxis))
         chart->removeAxis(inactiveAxis);
-    }
-    if (activeAxis != nullptr &&
-        !chart->axes(Qt::Vertical).contains(activeAxis)) {
+    if (!chart->axes(Qt::Vertical).contains(activeAxis))
         chart->addAxis(activeAxis, Qt::AlignLeft);
-    }
 
     updateAxisRanges();
 
     for (PlayerAnalysisSeries& playerSeries : seriesData) {
-        if (playerSeries.series == nullptr) {
-            continue;
-        }
-        if (activeAxis != nullptr) {
-            playerSeries.series->attachAxis(activeAxis);
-        }
+        playerSeries.series->attachAxis(activeAxis);
         playerSeries.series->replace(
             historyForMode(playerSeries, showLand, useLogScale));
     }
 }
 
 void AnalysisChartWidget::updateAxisRanges() {
-    if (chart == nullptr) {
-        return;
-    }
-
     const qreal axisMaxX =
         std::max<qreal>(1.0, static_cast<qreal>(std::max(0, sampleCount - 1)));
-    if (axisX != nullptr) {
-        axisX->setRange(0.0, axisMaxX);
-    }
+    axisX->setRange(0.0, axisMaxX);
 
     const double axisMaxY = showingLand
                                 ? adjustedAxisMax(static_cast<double>(landMax))
                                 : adjustedAxisMax(static_cast<double>(armyMax));
-    if (usingLogScale && axisYLog != nullptr) {
+    if (usingLogScale)
         axisYLog->setRange(1.0, std::max(10.0, axisMaxY));
-    } else if (!usingLogScale && axisYLinear != nullptr) {
+    else
         axisYLinear->setRange(0.0, axisMaxY);
-    }
 }

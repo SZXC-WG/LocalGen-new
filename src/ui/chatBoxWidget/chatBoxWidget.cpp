@@ -210,29 +210,21 @@ void ChatBoxWidget::appendMessage(const ChatMessageEntry& message) {
 
     while (historyList->count() > maxHistoryEntries) {
         QListWidgetItem* oldItem = historyList->item(0);
-        if (oldItem != nullptr) {
-            QWidget* oldWidget = historyList->itemWidget(oldItem);
-            if (oldWidget != nullptr) {
-                historyList->removeItemWidget(oldItem);
-                delete oldWidget;
-            }
-            oldItem = historyList->takeItem(0);
-            delete oldItem;
-        }
+        QWidget* oldWidget = historyList->itemWidget(oldItem);
+        historyList->removeItemWidget(oldItem);
+        delete oldWidget;
+        oldItem = historyList->takeItem(0);
+        delete oldItem;
     }
     historyList->scrollToBottom();
-    if (QScrollBar* scrollBar = historyList->verticalScrollBar();
-        scrollBar != nullptr) {
-        scrollBar->setValue(scrollBar->maximum());
-    }
+    QScrollBar* scrollBar = historyList->verticalScrollBar();
+    scrollBar->setValue(scrollBar->maximum());
 }
 
 void ChatBoxWidget::clearInput() { inputLine->clear(); }
 
 void ChatBoxWidget::focusInput() {
-    if (inputLine == nullptr || !inputLine->isEnabled()) {
-        return;
-    }
+    if (!inputLine->isEnabled()) return;
     inputLine->setFocus(Qt::ShortcutFocusReason);
 }
 

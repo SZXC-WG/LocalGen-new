@@ -35,18 +35,10 @@ QPushButton* createToggleButton(const QString& text, QWidget* parent) {
     button->setCheckable(true);
     button->setFocusPolicy(Qt::NoFocus);
     button->setCursor(Qt::PointingHandCursor);
-    button->setStyleSheet(
-        "QPushButton {"
-        "background-color: rgba(240, 244, 248, 28);"
-        "color: rgb(240, 244, 248);"
-        "border: 1px solid rgba(240, 244, 248, 110);"
-        "border-radius: 14px;"
-        "padding: 5px 12px;"
-        "font: 600 10pt 'Quicksand';"
-        "}"
-        "QPushButton:checked {"
-        "background-color: rgba(73, 160, 255, 90);"
-        "}");
+    button->setFont(QFont("Quicksand", 10, QFont::Bold));
+    QPalette pal = button->palette();
+    pal.setColor(QPalette::ButtonText, Qt::white);
+    button->setPalette(pal);
     return button;
 }
 
@@ -140,14 +132,11 @@ AnalysisChartWidget::AnalysisChartWidget(
     const QColor foreground(240, 244, 248);
     const QColor gridColor(240, 244, 248, 64);
 
-    setFocusPolicy(Qt::NoFocus);
-    setObjectName("analysisWidget");
-    setStyleSheet(
-        "QFrame#analysisWidget {"
-        "background-color: rgba(18, 21, 26, 232);"
-        "border: 2px solid rgba(240, 244, 248, 180);"
-        "border-radius: 6px;"
-        "}");
+    setAutoFillBackground(true);
+    QPalette widgetPal = palette();
+    widgetPal.setColor(QPalette::Window, QColor(18, 21, 26, 232));
+    setPalette(widgetPal);
+    setFrameShape(QFrame::NoFrame);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(8, 8, 8, 8);
@@ -186,7 +175,7 @@ AnalysisChartWidget::AnalysisChartWidget(
     chartView->setFrameShape(QFrame::NoFrame);
     chartView->setRubberBand(QChartView::NoRubberBand);
     chartView->setRenderHint(QPainter::Antialiasing, true);
-    chartView->setStyleSheet("background: transparent;");
+    chartView->setBackgroundBrush(Qt::transparent);
     mainLayout->addWidget(chartView, 1);
 
     connect(metricToggle, &QPushButton::toggled, this, [this](bool checked) {

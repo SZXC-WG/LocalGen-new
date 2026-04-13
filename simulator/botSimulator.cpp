@@ -23,6 +23,7 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "core/bot.h"
@@ -725,14 +726,10 @@ bool loadCustomMap(Options& options, std::string& errorMessage) {
     return true;
 }
 
-std::vector<RankItem> rankByPlayer(const std::vector<RankItem>& rank,
-                                   std::size_t playerCount) {
-    std::vector<RankItem> byPlayer(playerCount);
+std::vector<RankItem> rankByPlayer(const std::vector<RankItem>& rank) {
+    std::vector<RankItem> byPlayer(rank.size());
     for (const RankItem& item : rank) {
-        if (item.player >= 0 &&
-            item.player < static_cast<index_t>(playerCount)) {
-            byPlayer[item.player] = item;
-        }
+        byPlayer[item.player] = item;
     }
     return byPlayer;
 }
@@ -767,15 +764,7 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
     for (std::size_t i = 0; i < options.bots.size(); ++i) {
         const std::string& botName = options.bots[i];
         BasicBot* bot = BotFactory::instance().create(botName);
-        if (bot == nullptr) {
-            for (Player* player : players) delete player;
-            std::ostringstream err;
-            err << "Failed to create bot: " << botName;
-            throw std::runtime_error(err.str());
-        }
-        if (options.measureLatency) {
-            bot = new TimedBot(bot);
-        }
+        if (options.measureLatency) bot = new TimedBot(bot);
         players.push_back(bot);
     }
 
@@ -795,18 +784,15 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
     }
 
     std::vector<RankItem> finalRank = game.ranklist();
-    const std::vector<RankItem> byPlayer =
-        rankByPlayer(finalRank, options.bots.size());
+    const std::vector<RankItem> byPlayer = rankByPlayer(finalRank);
 
     result.stepLimitReached =
         static_cast<int>(game.getAlivePlayers().size()) > 1 &&
         result.steps >= options.maxSteps;
-    if (!finalRank.empty()) {
-        const std::size_t winnerIndex =
-            botIndexForPlayer(game, finalRank.front().player);
-        result.winnerName = options.bots[winnerIndex];
-        result.statsDelta[winnerIndex].wins++;
-    }
+    const std::size_t winnerIndex =
+        botIndexForPlayer(game, finalRank.front().player);
+    result.winnerName = options.bots[winnerIndex];
+    result.statsDelta[winnerIndex].wins++;
 
     for (std::size_t i = 0; i < finalRank.size(); ++i) {
         const std::size_t botIndex =
@@ -815,27 +801,23 @@ GameResult runSingleGame(const Options& options, int gameNumber) {
         result.statsDelta[botIndex].totalRank += static_cast<long long>(i) + 1;
     }
 
-    for (int playerID = 0; playerID < static_cast<int>(options.bots.size());
-         ++playerID) {
-        if (playerID >= 0 && playerID < static_cast<int>(byPlayer.size())) {
-            const RankItem& item = byPlayer[playerID];
-            const std::size_t botIndex = botIndexForPlayer(game, playerID);
-            BotStats& botStats = result.statsDelta[botIndex];
-            botStats.totalArmy += item.army;
-            botStats.totalLand += item.land;
-            botStats.totalKills += item.killCount;
-            botStats.survivalCount += item.alive ? 1 : 0;
-        }
+    for (index_t playerId = 0; playerId < static_cast<index_t>(byPlayer.size());
+         ++playerId) {
+        const RankItem& item = byPlayer[playerId];
+        const std::size_t botIndex = botIndexForPlayer(game, playerId);
+        BotStats& botStats = result.statsDelta[botIndex];
+        botStats.totalArmy += item.army;
+        botStats.totalLand += item.land;
+        botStats.totalKills += item.killCount;
+        botStats.survivalCount += item.alive ? 1 : 0;
     }
 
     if (options.measureLatency) {
         for (std::size_t botIndex = 0; botIndex < players.size(); ++botIndex) {
-            if (auto* timed = dynamic_cast<TimedBot*>(players[botIndex])) {
-                result.statsDelta[botIndex].totalLatencyMicroseconds +=
-                    timed->totalMicroseconds();
-                result.statsDelta[botIndex].totalLatencyCalls +=
-                    timed->callCount();
-            }
+            const auto* timed = static_cast<TimedBot*>(players[botIndex]);
+            result.statsDelta[botIndex].totalLatencyMicroseconds +=
+                timed->totalMicroseconds();
+            result.statsDelta[botIndex].totalLatencyCalls += timed->callCount();
         }
     }
 
@@ -850,16 +832,9 @@ int detectWorkerCount(const Options& options) {
 }
 
 void printGameResult(const GameResult& result) {
-    std::cout << "Game " << result.gameNumber << ": ";
-    if (!result.winnerName.empty()) {
-        std::cout << result.winnerName;
-        if (result.stepLimitReached) {
-            std::cout << " leads at step limit";
-        } else {
-            std::cout << " wins";
-        }
-    }
-    std::cout << " after " << result.steps << " half-turns" << std::endl;
+    std::cout << "Game " << result.gameNumber << ": " << result.winnerName
+              << (result.stepLimitReached ? " leads at step limit" : " wins")
+              << " after " << result.steps << " half-turns" << std::endl;
 }
 
 void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
@@ -895,12 +870,10 @@ int main(int argc, char** argv) {
     }
 
     const auto registeredBots = BotFactory::instance().list();
-    std::unordered_map<std::string, bool> registered;
-    for (const auto& name : registeredBots) {
-        registered[name] = true;
-    }
+    const std::unordered_set<std::string> registered(registeredBots.begin(),
+                                                     registeredBots.end());
     for (const auto& botName : options.bots) {
-        if (!registered.count(botName)) {
+        if (registered.find(botName) == registered.end()) {
             std::cerr << "Unknown bot: " << botName << "\nAvailable bots:";
             for (const auto& name : registeredBots) {
                 std::cerr << ' ' << name;

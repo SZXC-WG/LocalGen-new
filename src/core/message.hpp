@@ -48,6 +48,7 @@ using GameMessageData = std::variant<GameMessageWin, GameMessageCapture,
 // The complete Event wrapper
 struct GameEvent {
     turn_t turn;
+    uint8_t halfTurnPhase = 0;
     GameMessageData data;
 };
 

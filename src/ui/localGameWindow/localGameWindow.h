@@ -5,9 +5,9 @@
 #define LOCALGAMEWINDOW_H
 
 #include <QDialog>
+#include <QEvent>
 #include <QKeyEvent>
 #include <QLabel>
-#include <QPushButton>
 #include <QResizeEvent>
 #include <QString>
 #include <QTimer>
@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "../analysisChartWidget/analysisChartWidget.h"
+#include "../chatBoxWidget/chatBoxWidget.h"
 #include "../leaderboardWidget/leaderboardWidget.h"
 #include "../localGameDialog/localGameDialog.h"
 #include "../mapWidget/mapWidget.h"
@@ -45,6 +46,12 @@ class LocalGameWindow : public QDialog {
     ~LocalGameWindow();
 
    private:
+    bool canHumanChat() const;
+    void handleChatSubmission(const QString& message);
+    void handleGameEvent(const GameEvent& event);
+    ChatMessageEntry formatChatMessage(const GameEvent& event) const;
+    QString playerDisplayName(index_t playerId) const;
+    void refreshChatInputState();
     void updateView(const BoardView& boardView);
     void updateLeaderboard(const std::vector<RankItem>& rank);
     void runHalfTurn();
@@ -53,10 +60,12 @@ class LocalGameWindow : public QDialog {
     void positionFloatingWidgets();
 
    protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
 
     MapWidget* gameMap = nullptr;
+    ChatBoxWidget* chatBox = nullptr;
     LeaderboardWidget* leaderboardWidget = nullptr;
     AnalysisChartWidget* analysisChartWidget = nullptr;
     HumanPlayer* humanPlayer = nullptr;

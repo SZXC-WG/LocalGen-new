@@ -5,14 +5,8 @@
 
 #include <QElapsedTimer>
 #include <QFont>
-#include <QFontMetrics>
-#include <QHBoxLayout>
 #include <QMessageBox>
-#include <QPaintEvent>
-#include <QPainter>
 #include <QRandomGenerator>
-#include <QResizeEvent>
-#include <QTimer>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <cmath>
@@ -126,6 +120,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
 
     gameMap = new MapWidget(this, initialBoard.getWidth(),
                             initialBoard.getHeight(), true, 25);
+    gameMap->installEventFilter(this);
     halfTurnTimer = new QTimer(this);
     halfTurnTimer->setSingleShot(true);
     halfTurnTimer->setTimerType(Qt::PreciseTimer);
@@ -199,6 +194,10 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     turnLabel->move(10, 10);
     turnLabel->raise();
 
+    chatBox = new ChatBoxWidget(this);
+    connect(chatBox, &ChatBoxWidget::messageSubmitted, this,
+            &LocalGameWindow::handleChatSubmission);
+
     if (analysisEnabled) {
         std::vector<QColor> colors;
         std::vector<QString> playerNames;
@@ -231,9 +230,12 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     }
 
     if (game != nullptr) {
+        game->setEventCallback(
+            [this](const GameEvent& event) { handleGameEvent(event); });
         updateLeaderboard(game->ranklist());
-        positionFloatingWidgets();
         gameRunning = true;
+        refreshChatInputState();
+        positionFloatingWidgets();
         scheduleNextHalfTurn(0.0);
     }
 }
@@ -241,10 +243,95 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
 LocalGameWindow::~LocalGameWindow() {
     stopGameLoop();
     if (game != nullptr) {
+        game->setEventCallback({});
         delete game;
         game = nullptr;
         humanPlayer = nullptr;
     }
+}
+
+bool LocalGameWindow::canHumanChat() const {
+    return game != nullptr && humanPlayerId >= 0;
+}
+
+void LocalGameWindow::handleChatSubmission(const QString& message) {
+    if (chatBox == nullptr || !canHumanChat()) {
+        return;
+    }
+    game->sendPlayerMessage(humanPlayerId, message.toStdString());
+    chatBox->clearInput();
+}
+
+void LocalGameWindow::handleGameEvent(const GameEvent& event) {
+    if (chatBox == nullptr) {
+        return;
+    }
+
+    chatBox->appendMessage(formatChatMessage(event));
+}
+
+ChatMessageEntry LocalGameWindow::formatChatMessage(
+    const GameEvent& event) const {
+    ChatMessageEntry entry;
+    entry.turnText = QString::number(event.turn);
+    if (event.halfTurnPhase != 0) {
+        entry.turnText.append('.');
+    }
+
+    auto appendText = [&entry](const QString& text) {
+        if (!text.isEmpty()) {
+            entry.segments.push_back(ChatMessageSegment{text, false, {}});
+        }
+    };
+    auto appendPlayer = [this, &entry](index_t playerId,
+                                       const QString& suffix = QString()) {
+        entry.segments.push_back(ChatMessageSegment{
+            playerDisplayName(playerId) + suffix, true, playerColor(playerId)});
+    };
+
+    std::visit(overloaded{[&](const GameMessageWin& msg) {
+                              appendPlayer(msg.winner);
+                              appendText("wins!");
+                          },
+                          [&](const GameMessageCapture& msg) {
+                              appendPlayer(msg.capturer);
+                              appendText("captured");
+                              appendPlayer(msg.captured, ".");
+                          },
+                          [&](const GameMessageSurrender& msg) {
+                              appendPlayer(msg.player);
+                              appendText("surrendered.");
+                          },
+                          [&](const GameMessageText& msg) {
+                              appendPlayer(msg.sender, ":");
+                              appendText(QString::fromStdString(msg.text));
+                          }},
+               event.data);
+    return entry;
+}
+
+QString LocalGameWindow::playerDisplayName(index_t playerId) const {
+    if (game != nullptr && playerId >= 0 && playerId < game->getPlayerCount()) {
+        return QString::fromStdString(game->getName(playerId));
+    }
+    return QString("Player %1").arg(playerId);
+}
+
+void LocalGameWindow::refreshChatInputState() {
+    if (chatBox == nullptr) {
+        return;
+    }
+
+    QString placeholder;
+    if (game == nullptr) {
+        placeholder = "Chat is unavailable.";
+    } else if (humanPlayerId < 0) {
+        placeholder = "Only a human player can chat.";
+    } else {
+        placeholder = "Press [Enter] to chat.";
+    }
+
+    chatBox->setInputEnabled(canHumanChat(), placeholder);
 }
 
 void LocalGameWindow::updateView(const BoardView& boardView) {
@@ -371,7 +458,49 @@ void LocalGameWindow::positionFloatingWidgets() {
         leaderboardWidget->raise();
     }
 
+    if (chatBox != nullptr) {
+        int rightBoundary = width();
+        if (analysisChartWidget != nullptr) {
+            rightBoundary = std::min(rightBoundary, analysisChartWidget->x());
+        }
+        if (leaderboardWidget != nullptr) {
+            rightBoundary = std::min(rightBoundary, leaderboardWidget->x());
+        }
+
+        const int x = 0;
+        const int availableWidth = std::max(0, rightBoundary - x);
+        const int desiredWidth = std::clamp(width() / 4, 280, 380);
+        const int panelWidth = std::min(desiredWidth, availableWidth);
+        const int availableHeight = std::max(0, height());
+        const int desiredHeight = std::clamp(height() / 3, 220, 340);
+        const int panelHeight = std::min(desiredHeight, availableHeight);
+        const int y = std::max(0, height() - panelHeight);
+
+        if (panelWidth > 0 && panelHeight > 0) {
+            chatBox->setGeometry(x, y, panelWidth, panelHeight);
+            chatBox->show();
+            chatBox->raise();
+        } else {
+            chatBox->hide();
+        }
+    }
+
     if (turnLabel != nullptr) turnLabel->raise();
+}
+
+bool LocalGameWindow::eventFilter(QObject* watched, QEvent* event) {
+    if (watched == gameMap && event != nullptr &&
+        event->type() == QEvent::KeyPress && canHumanChat() &&
+        chatBox != nullptr) {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        if (keyEvent->key() == Qt::Key_Return ||
+            keyEvent->key() == Qt::Key_Enter) {
+            chatBox->focusInput();
+            return true;
+        }
+    }
+
+    return QDialog::eventFilter(watched, event);
 }
 
 void LocalGameWindow::keyPressEvent(QKeyEvent* event) {

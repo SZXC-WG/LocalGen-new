@@ -16,8 +16,10 @@
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <numeric>
 #include <optional>
 #include <random>
@@ -247,9 +249,14 @@ class BasicGame {
    public:
     inline config::Config getConfig() const { return conf; }
     inline void setConfig(config::ConfigPatch patch) { conf = conf | patch; }
+    inline void setEventCallback(
+        std::function<void(const GameEvent&)> callback) {
+        eventCallback = std::move(callback);
+    }
 
    public:
     void broadcast(turn_t turn, const GameMessageData& messageData);
+    void sendPlayerMessage(index_t sender, std::string text);
 
    protected:
     /// Calculate distance from a certain coordinate.
@@ -261,6 +268,7 @@ class BasicGame {
     Board board;
 
     std::deque<std::pair<index_t, turn_t>> surrenderQueue;
+    std::function<void(const GameEvent&)> eventCallback;
 
     void neutralize(index_t player);
     void takeOver(index_t p1, index_t p2);
@@ -578,6 +586,12 @@ inline void BasicGame::step() {
         }
     }
 
+    // check win condition
+    std::vector<index_t> alivePlayers = getAlivePlayers();
+    if (alivePlayers.size() == 1) {
+        broadcast(curTurn, GameMessageWin{alivePlayers.front()});
+    }
+
     // update board
     if (curHalfTurnPhase == 0) {
         board.update(curTurn > 0 && curTurn % 25 == 0);
@@ -588,7 +602,7 @@ inline void BasicGame::step() {
 
     // request moves (for next turn)
     std::vector<RankItem> rank = ranklist();
-    for (index_t i : getAlivePlayers()) {
+    for (index_t i : alivePlayers) {
         players[i]->requestMove(view(i), rank);
     }
 }
@@ -795,12 +809,20 @@ inline int BasicGame::init() {
     return 0;
 }
 
+inline void BasicGame::sendPlayerMessage(index_t sender, std::string text) {
+    if (!isValidPlayer(sender) || text.empty()) return;
+    const auto isSpace = [](unsigned char ch) { return std::isspace(ch) != 0; };
+    if (std::all_of(text.begin(), text.end(), isSpace)) return;
+    broadcast(curTurn, GameMessageText{sender, std::move(text)});
+}
+
 inline void BasicGame::broadcast(turn_t turn,
                                  const GameMessageData& messageData) {
-    GameEvent event{turn, messageData};
+    GameEvent event{turn, curHalfTurnPhase, messageData};
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         players[i]->onGameEvent(event);
     }
+    if (eventCallback) eventCallback(event);
 }
 
 #endif  // LGEN_CORE_GAME_HPP

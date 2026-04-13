@@ -260,6 +260,9 @@ void LocalGameWindow::handleChatSubmission(const QString& message) {
     }
     game->sendPlayerMessage(humanPlayerId, message.toStdString());
     chatBox->clearInput();
+    if (gameMap != nullptr) {
+        gameMap->setFocus(Qt::ShortcutFocusReason);
+    }
 }
 
 void LocalGameWindow::handleGameEvent(const GameEvent& event) {

@@ -221,8 +221,6 @@ void ChatBoxWidget::appendMessage(const ChatMessageEntry& message) {
     scrollBar->setValue(scrollBar->maximum());
 }
 
-void ChatBoxWidget::clearInput() { inputLine->clear(); }
-
 void ChatBoxWidget::focusInput() {
     if (!inputLine->isEnabled()) return;
     inputLine->setFocus(Qt::ShortcutFocusReason);
@@ -231,15 +229,13 @@ void ChatBoxWidget::focusInput() {
 void ChatBoxWidget::setInputEnabled(bool enabled, const QString& placeholder) {
     inputLine->setEnabled(enabled);
     inputLine->setPlaceholderText(placeholder);
-    if (!enabled) {
-        inputLine->clear();
-    }
+    if (!enabled) inputLine->clear();
 }
 
 void ChatBoxWidget::emitPendingMessage() {
     const QString message = inputLine->text();
-    if (message.isEmpty()) {
-        return;
+    if (!message.isEmpty()) {
+        inputLine->clear();
+        emit messageSubmitted(message);
     }
-    emit messageSubmitted(message);
 }

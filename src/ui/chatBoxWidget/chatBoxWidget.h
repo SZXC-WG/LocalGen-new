@@ -30,7 +30,6 @@ class ChatBoxWidget : public QFrame {
     explicit ChatBoxWidget(QWidget* parent = nullptr);
 
     void appendMessage(const ChatMessageEntry& message);
-    void clearInput();
     void focusInput();
     void setInputEnabled(bool enabled, const QString& placeholder = QString());
 

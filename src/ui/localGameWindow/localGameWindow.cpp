@@ -255,8 +255,6 @@ bool LocalGameWindow::canHumanChat() const {
 void LocalGameWindow::handleChatSubmission(const QString& message) {
     if (!canHumanChat()) return;
     game->sendPlayerMessage(humanPlayerId, message.toStdString());
-    chatBox->clearInput();
-    gameMap->setFocus(Qt::ShortcutFocusReason);
 }
 
 void LocalGameWindow::handleGameEvent(const GameEvent& event) {

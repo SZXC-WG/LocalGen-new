@@ -31,6 +31,8 @@ class ZlyBot_v2_1 : public BasicBot {
     index_t id, team;
     std::vector<index_t> teamIds;
     config::Config config;
+    army_t totalArmy;
+    pos_t totalLand;
 
     turn_t halfTurn, turn;
 
@@ -45,13 +47,17 @@ class ZlyBot_v2_1 : public BasicBot {
     }
 
     struct RouteNode {
+        value_t totalArmy;
         Coord pos;
         value_t dist;
         value_t friendArmy;
         value_t oppoArmy;
         value_t typeCost;
         inline value_t united() const {
-            return dist * 200 - (friendArmy - oppoArmy) + typeCost;
+            return static_cast<value_t>(std::sqrt(dist) * 500) -
+                   (friendArmy > oppoArmy * 100 ? totalArmy
+                                                : (friendArmy - oppoArmy)) +
+                   typeCost;
         }
     };
     struct RouteNodeLess {
@@ -69,7 +75,7 @@ class ZlyBot_v2_1 : public BasicBot {
     constexpr static RouteNodeLess routeComparerLess{};
     constexpr static RouteNodeGreater routeComparerGreater{};
     constexpr static RouteNode ROUTE_INF =
-        RouteNode{{-1, -1}, DIST_INF, -INF, INF, 0};
+        RouteNode{0, {-1, -1}, DIST_INF, -INF, INF, 0};
 
     struct TileInfo {
         RouteNode routeDp = ROUTE_INF;
@@ -326,7 +332,8 @@ class ZlyBot_v2_1 : public BasicBot {
         }
         std::priority_queue<RouteNode, std::vector<RouteNode>, RouteNodeGreater>
             q;
-        tileAt(start).routeDp = RouteNode{start, 0, tileAt(start).army, 0, 0};
+        tileAt(start).routeDp =
+            RouteNode{totalArmy, start, 0, tileAt(start).army, 0, 0};
         q.emplace(tileAt(start).routeDp);
         while (!q.empty()) {
             RouteNode cur = q.top();
@@ -450,6 +457,8 @@ class ZlyBot_v2_1 : public BasicBot {
         for (index_t i = 0; i < playerCnt; ++i) {
             alive[i] = rank[i].alive;
         }
+        totalArmy = rank[id].army;
+        totalLand = rank[id].land;
 
         moveQueue.clear();
 

@@ -139,7 +139,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     teams.reserve(config.players.size() + 1);
     names.reserve(config.players.size() + 1);
 
-    for (QString name : config.players) {
+    for (const QString& name : config.players) {
         if (name == "Human") {
             humanPlayer = new HumanPlayer();
             humanPlayer->setBoardViewHandler(

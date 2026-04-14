@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 >
-> *This is an unfinished early draft of our contribution guide, for reference only. Some stuff here may be wrong or outdated; don't take them seriously.* :joy:
+> *This is an unfinished early draft of our contribution guide. Some details here may not apply.*
 
 ## Project overview
 
@@ -37,43 +37,38 @@ If you use VS Code (or any of its derivatives), there is the [CMake Tools](https
 
 ## Contributing a bot
 
-### Bot Types  
+### Bot Types
 
 Currently, LocalGen v6 only accepts bots directly compiled into the executable, also known as *built-in bots*:
 
 - Source lives in `src/bots/`.
-
 - Compiled together with the core executable.
-  
 - Written in C++ for maximum integration and speed.
-
 - Instantly usable in both *Local Game* and *Web Game* modes.
 
-### How You Can Contribute  
+### How You Can Contribute
 
 We gladly accept:
 
-- Brand-new bots.  
-- Feature upgrades to existing bots.  
-- Bug fixes and performance tweaks.  
+- Brand-new bots.
+- Feature upgrades to existing bots.
+- Bug fixes and performance tweaks.
 
 **To create a bot from scratch:**
 
-1. Read the [bot README](./src/bots/README.md) for API details and build instructions.  
-2. Implement your bot following the project’s C++ style guide.  
-3. Open a pull request that includes:  
-   - Unit tests and/or replay files demonstrating behaviour.  
-   - A brief performance report (CPU time, memory usage).  
+1. Read the [bot README](./src/bots/README.md) for API details and build instructions.
+2. Implement your bot following the project’s C++ style guide.
+3. Open a pull request that includes:
+   - Brief algorithm notes (strategy type, time complexity, etc.)
+   - A performance report against other bots, obtained by our bot simulator.
 
-You can use the provided bot simulator to test your bot.
+### Bot Community Standards
 
-### Bot Community Standards  
-
-- **Code quality** — keep it clean, readable, and well-documented.  
-- **Thorough testing** — supply results on multiple maps and player counts.  
-- **Strategic depth** — we don’t accept “random-move” placeholders.  
-- **Robust performance**  
-  - Average per-turn time must stay within the engine’s frame limit.  
-  - The bot should survive thousands of turns with no significant memory leaks.  
+- **Code quality** — keep it clean, readable, and well-documented.
+- **Thorough testing** — supply results on multiple maps and player counts.
+- **Strategic depth** — we don’t accept “random-move” placeholders.
+- **Robust performance**
+  - Average per-turn time must stay within the engine’s frame limit.
+  - The bot should survive thousands of turns with no significant memory leaks.
 
 Happy hacking — and may your generals rule the battlefield! 🚩

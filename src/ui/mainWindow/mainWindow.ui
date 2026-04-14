@@ -139,7 +139,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="btnLocalGame">
+       <widget class="GeneralsButton" name="btnLocalGame">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -158,19 +158,10 @@
         <property name="text">
          <string> Local Game</string>
         </property>
-        <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::GoHome"/>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="btnWebGame">
+       <widget class="GeneralsButton" name="btnWebGame">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -189,19 +180,10 @@
         <property name="text">
          <string> Web Game</string>
         </property>
-        <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::NetworkWireless"/>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="btnLoadReplay">
+       <widget class="GeneralsButton" name="btnLoadReplay">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -220,19 +202,10 @@
         <property name="text">
          <string> Load Replay</string>
         </property>
-        <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::SystemLogOut"/>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="btnCreateMap">
+       <widget class="GeneralsButton" name="btnCreateMap">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -250,15 +223,6 @@
         </property>
         <property name="text">
          <string> Create Map</string>
-        </property>
-        <property name="icon">
-         <iconset theme="QIcon::ThemeIcon::FolderNew"/>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
         </property>
        </widget>
       </item>
@@ -290,6 +254,13 @@
    </property>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GeneralsButton</class>
+   <extends>QPushButton</extends>
+   <header>ui/utils/generalsButton.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../res/res.qrc"/>
  </resources>

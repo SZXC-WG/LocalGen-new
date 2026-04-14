@@ -84,6 +84,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/ui/localGameWindow/localGameWindow.h
     src/ui/mapCreatorWindow/mapCreatorWindow.cpp
     src/ui/mapCreatorWindow/mapCreatorWindow.h
+    src/ui/utils/generalsButton.hpp
     ${LOCALGEN_BOT_SOURCES}
     src/core/board.hpp
     src/core/bot.h

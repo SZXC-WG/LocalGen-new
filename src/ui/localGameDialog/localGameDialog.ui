@@ -378,7 +378,7 @@
    <item>
     <layout class="QHBoxLayout" name="buttonLayout">
      <item>
-      <widget class="QPushButton" name="btnStartGame">
+      <widget class="GeneralsButton" name="btnStartGame">
        <property name="font">
         <font>
          <family>Quicksand</family>
@@ -396,7 +396,7 @@ background-color: white;</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnCancel">
+      <widget class="GeneralsButton" name="btnCancel">
        <property name="font">
         <font>
          <family>Quicksand</family>
@@ -430,6 +430,13 @@ background-color: white;</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GeneralsButton</class>
+   <extends>QPushButton</extends>
+   <header>ui/utils/generalsButton.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

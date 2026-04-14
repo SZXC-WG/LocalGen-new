@@ -254,8 +254,7 @@ bool LocalGameWindow::canHumanChat() const {
 }
 
 void LocalGameWindow::handleChatSubmission(const QString& message) {
-    if (!canHumanChat()) return;
-    game->sendPlayerMessage(humanPlayerId, message.toStdString());
+    if (canHumanChat()) humanPlayer->sendMessage(message.toStdString());
 }
 
 void LocalGameWindow::handleGameEvent(const GameEvent& event) {
@@ -352,10 +351,7 @@ void LocalGameWindow::runHalfTurn() {
     game->step();
     if (!game->isAlive(humanPlayerId) ||
         static_cast<int>(game->getAlivePlayers().size()) <= 1) {
-        if (humanPlayer != nullptr) {
-            humanPlayer = nullptr;
-            gameMap->bindMoveQueue(nullptr);
-        }
+        gameMap->bindMoveQueue(nullptr);
         updateView(game->fullView());
     }
     updateLeaderboard(game->ranklist());

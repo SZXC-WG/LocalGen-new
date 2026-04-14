@@ -797,6 +797,9 @@ inline int BasicGame::init() {
     }
 
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
+        players[i]->setSendMessageCallback([this, i](const std::string& text) {
+            this->sendPlayerMessage(i, text);
+        });
         players[i]->init(
             i, GameConstantsPack{board.getHeight(), board.getWidth(),
                                  static_cast<index_t>(players.size()), teams,

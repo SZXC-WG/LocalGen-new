@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -31,6 +32,7 @@ struct RankItem;
 class Player {
    protected:
     std::deque<Move> moveQueue;
+    std::function<void(const std::string&)> sendMessageCb;
 
    public:
     Player() = default;
@@ -43,6 +45,15 @@ class Player {
     }
 
    public:
+    inline void setSendMessageCallback(
+        std::function<void(const std::string&)> cb) {
+        sendMessageCb = std::move(cb);
+    }
+
+    inline void sendMessage(const std::string& text) {
+        if (sendMessageCb) sendMessageCb(text);
+    }
+
     virtual void init(index_t playerId, const GameConstantsPack& constants) = 0;
 
     virtual void requestMove(const BoardView& boardView,

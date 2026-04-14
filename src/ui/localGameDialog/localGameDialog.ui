@@ -380,9 +380,9 @@
      <colorrole role="Text">
       <brush brushstyle="SolidPattern">
        <color alpha="179">
-        <red>17</red>
-        <green>17</green>
-        <blue>17</blue>
+        <red>0</red>
+        <green>96</green>
+        <blue>96</blue>
        </color>
       </brush>
      </colorrole>

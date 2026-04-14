@@ -385,10 +385,6 @@ class BasicGame {
    public:
     inline void setInitialBoard(Board initial) { initialBoard = initial; }
     inline Board getInitialBoard() { return initialBoard; }
-
-   protected:
-    struct ReplayUnit {};
-    std::vector<ReplayUnit> replay;
 };
 
 inline std::vector<pos_t> BasicGame::calcDist(Coord pos) {

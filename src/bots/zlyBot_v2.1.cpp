@@ -537,7 +537,14 @@ class ZlyBot_v2_1 : public BasicBot {
             homeZoneDanger / static_cast<value_t>(homeZone.size());
 
         mode = updateMode(homeZoneDangerAver, homeZoneThreat, homeZoneDanger);
-        if (mode == BotMode::DEFEND) focus[1] = findMaxArmyPosInHomeZone();
+        if (mode == BotMode::DEFEND) {
+            auto newFocus1 = findMaxArmyPosInHomeZone();
+            if (focus[1] != newFocus1) {
+                if (!(tileAt(focus[1]).occupier == id &&
+                      tileAt(focus[1]).army > tileAt(newFocus1).army))
+                    focus[1] = newFocus1;
+            }
+        }
 
         if (mode == BotMode::ATTACK) {
             findRoute(focus[0], generals[targetOppoId]);

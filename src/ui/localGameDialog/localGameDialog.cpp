@@ -3,6 +3,7 @@
 
 #include "localGameDialog.h"
 
+#include <QAbstractItemView>
 #include <QComboBox>
 #include <QCoreApplication>
 #include <QDir>
@@ -13,6 +14,7 @@
 #include <QLabel>
 #include <QRandomGenerator>
 #include <QStringList>
+#include <algorithm>
 
 #include "../utils/comboBoxPopupCompatibility.hpp"
 #include "core/bot.h"
@@ -136,6 +138,13 @@ void LocalGameDialog::populateAvailableMaps() {
         mapCombo->setItemData(index, choice.width, MapWidthRole);
         mapCombo->setItemData(index, choice.height, MapHeightRole);
     }
+
+    QFontMetrics fm(mapCombo->font());
+    int maxWidth = 0;
+    for (int i = 0; i < mapCombo->count(); ++i)
+        maxWidth =
+            std::max(maxWidth, fm.horizontalAdvance(mapCombo->itemText(i)));
+    mapCombo->view()->setMinimumWidth(maxWidth + 30);
 
     mapCombo->setCurrentIndex(0);
     on_comboBox_gameMap_currentIndexChanged(0);

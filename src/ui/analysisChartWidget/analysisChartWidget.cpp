@@ -30,8 +30,8 @@ void styleAnalysisAxis(QAbstractAxis* axis, const QColor& foreground,
     axis->setMinorGridLineColor(gridColor);
 }
 
-QPushButton* createToggleButton(const QString& text, QWidget* parent) {
-    QPushButton* button = new QPushButton(text, parent);
+QAbstractButton* createToggleButton(const QString& text, QWidget* parent) {
+    QAbstractButton* button = new QPushButton(text, parent);
     button->setCheckable(true);
     button->setFocusPolicy(Qt::NoFocus);
     button->setCursor(Qt::PointingHandCursor);
@@ -178,11 +178,12 @@ AnalysisChartWidget::AnalysisChartWidget(
     chartView->setBackgroundBrush(Qt::transparent);
     mainLayout->addWidget(chartView, 1);
 
-    connect(metricToggle, &QPushButton::toggled, this, [this](bool checked) {
-        showingLand = checked;
-        refreshChart();
-    });
-    connect(scaleToggle, &QPushButton::toggled, this, [this](bool checked) {
+    connect(metricToggle, &QAbstractButton::toggled, this,
+            [this](bool checked) {
+                showingLand = checked;
+                refreshChart();
+            });
+    connect(scaleToggle, &QAbstractButton::toggled, this, [this](bool checked) {
         usingLogScale = checked;
         refreshChart();
     });

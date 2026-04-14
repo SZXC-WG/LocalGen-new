@@ -47,8 +47,8 @@ class AnalysisChartWidget : public QFrame {
     QValueAxis* axisX = nullptr;
     QValueAxis* axisYLinear = nullptr;
     QLogValueAxis* axisYLog = nullptr;
-    QPushButton* metricToggle = nullptr;
-    QPushButton* scaleToggle = nullptr;
+    QAbstractButton* metricToggle = nullptr;
+    QAbstractButton* scaleToggle = nullptr;
 
     bool showingLand = false;
     bool usingLogScale = false;

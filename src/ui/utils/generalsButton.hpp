@@ -3,20 +3,21 @@
 
 #include <qmath.h>
 
+#include <QAbstractButton>
 #include <QEnterEvent>
 #include <QPainter>
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
-#include <QPushButton>
 #include <QStaticText>
 
-class GeneralsButton : public QPushButton {
+class GeneralsButton : public QAbstractButton {
     Q_OBJECT
     Q_PROPERTY(QColor bgColor READ bgColor WRITE setBgColor)
     Q_PROPERTY(QPointF shadowOffset READ shadowOffset WRITE setShadowOffset)
 
    public:
-    explicit GeneralsButton(QWidget* parent = nullptr) : QPushButton(parent) {
+    explicit GeneralsButton(QWidget* parent = nullptr)
+        : QAbstractButton(parent) {
         setCursor(Qt::PointingHandCursor);
 
         m_bgColor = Qt::white;
@@ -81,7 +82,7 @@ class GeneralsButton : public QPushButton {
     }
 
     void enterEvent(QEnterEvent* event) override {
-        QPushButton::enterEvent(event);
+        QAbstractButton::enterEvent(event);
         m_animGroup->setDirection(QAbstractAnimation::Forward);
         if (m_animGroup->state() != QAbstractAnimation::Running) {
             m_animGroup->start();
@@ -89,7 +90,7 @@ class GeneralsButton : public QPushButton {
     }
 
     void leaveEvent(QEvent* event) override {
-        QPushButton::leaveEvent(event);
+        QAbstractButton::leaveEvent(event);
         m_animGroup->setDirection(QAbstractAnimation::Backward);
         if (m_animGroup->state() != QAbstractAnimation::Running) {
             m_animGroup->start();
@@ -101,7 +102,7 @@ class GeneralsButton : public QPushButton {
             m_staticText.prepare(QTransform(), font());
             updateGeometry();
         }
-        return QPushButton::event(e);
+        return QAbstractButton::event(e);
     }
 
     QSize sizeHint() const override {

@@ -172,7 +172,6 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
             layout->count() == 1 ? 0 : rng->bounded(playerCombo->count()));
         playerCombo->setSizePolicy(QSizePolicy::Expanding,
                                    QSizePolicy::Preferred);
-        playerCombo->setStyleSheet("color: teal;");
         playerCombo->setFont(comboFont);
         playerCombos.append(playerCombo);
         QHBoxLayout* playerLayout = new QHBoxLayout();

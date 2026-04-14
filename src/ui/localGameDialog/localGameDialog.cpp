@@ -14,9 +14,9 @@
 #include <QRandomGenerator>
 #include <QStringList>
 
+#include "../utils/comboBoxPopupCompatibility.hpp"
 #include "core/bot.h"
 #include "core/map.hpp"
-#include "ui/comboBoxPopupCompatibility.hpp"
 #include "ui_localGameDialog.h"
 
 namespace {

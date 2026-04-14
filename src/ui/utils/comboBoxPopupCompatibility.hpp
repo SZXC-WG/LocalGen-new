@@ -26,8 +26,8 @@ inline void configureForManagedPopup(QComboBox* combo,
                                      int maxVisibleItems = 10) {
     combo->setMaxVisibleItems(maxVisibleItems);
 #ifdef Q_OS_LINUX
-    const QString baseStyleKey = combo->style() ? combo->style()->name()
-                                                : QString();
+    const QString baseStyleKey =
+        combo->style() ? combo->style()->name() : QString();
     auto* popupStyle = new ManagedPopupStyle(baseStyleKey);
     popupStyle->setParent(combo);
     combo->setStyle(popupStyle);

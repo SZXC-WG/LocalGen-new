@@ -25,9 +25,9 @@
 #include <QVBoxLayout>
 #include <algorithm>
 
+#include "../utils/comboBoxPopupCompatibility.hpp"
 #include "core/board.hpp"
 #include "core/map.hpp"
-#include "ui/comboBoxPopupCompatibility.hpp"
 
 namespace {
 constexpr int METADATA_SIDEBAR_EXPANDED_WIDTH = 236;

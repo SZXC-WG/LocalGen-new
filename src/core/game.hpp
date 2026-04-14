@@ -257,6 +257,9 @@ class BasicGame {
    public:
     void broadcast(turn_t turn, const GameMessageData& messageData);
     void sendPlayerMessage(index_t sender, std::string text);
+    void sendSystemMessage(std::string text) {
+        broadcast(curTurn, GameMessageText{-1, std::move(text)});
+    }
 
    protected:
     /// Calculate distance from a certain coordinate.
@@ -495,6 +498,31 @@ inline BasicGame::~BasicGame() {
 }
 
 inline void BasicGame::step() {
+    // send initial notice
+    if (curTurn == 0 && curHalfTurnPhase == 0) {
+        bool hasTile[TILE_TYPE_COUNT] = {false};
+        for (Tile& tile : board.tiles) hasTile[tile.type] = true;
+        std::vector<std::string> specialTiles;
+        if (hasTile[TILE_SWAMP]) specialTiles.push_back("swamps");
+        if (hasTile[TILE_DESERT]) specialTiles.push_back("deserts");
+        if (hasTile[TILE_LOOKOUT]) specialTiles.push_back("lookouts");
+        if (hasTile[TILE_OBSERVATORY]) specialTiles.push_back("observatories");
+        if (!specialTiles.empty()) {
+            std::string tileList = specialTiles[0];
+            for (std::size_t i = 1; i < specialTiles.size(); ++i) {
+                tileList += ", ";
+                tileList += specialTiles[i];
+            }
+            int specialTileCount = static_cast<int>(specialTiles.size());
+            if (specialTileCount == 1) {
+                sendSystemMessage("1 special tile is enabled: " + tileList);
+            } else {
+                sendSystemMessage(std::to_string(specialTileCount) +
+                                  " special tiles are enabled: " + tileList);
+            }
+        }
+    }
+
     // collect moves
     std::vector<std::pair<index_t, Move>> moves;
     for (index_t i : getAlivePlayers()) {

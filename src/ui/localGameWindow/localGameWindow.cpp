@@ -294,7 +294,8 @@ ChatMessageEntry LocalGameWindow::formatChatMessage(
                               appendText("surrendered.");
                           },
                           [&](const GameMessageText& msg) {
-                              appendPlayer(msg.sender, ":");
+                              if (msg.sender != -1)
+                                  appendPlayer(msg.sender, ":");
                               appendText(QString::fromStdString(msg.text));
                           }},
                event.data);

@@ -1,3 +1,6 @@
+// Copyright (C) 2026 SZXC Work Group
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 #include "mapWidget.h"
 
 #include <QApplication>

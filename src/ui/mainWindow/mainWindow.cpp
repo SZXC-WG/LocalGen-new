@@ -21,6 +21,7 @@ void MainWindow::on_btnLocalGame_clicked() {
     // Keep this as an independent top-level window so it stays on its
     // current virtual desktop instead of following the main window.
     LocalGameDialog dialog(nullptr);
+    dialog.setPalette(this->palette());
     int result = dialog.exec();
     if (result == QDialog::Accepted) {
         // Use the same top-level window behavior for the in-game window.

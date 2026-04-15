@@ -47,16 +47,20 @@ class ZlyBot_v2_1 : public BasicBot {
     }
 
     struct RouteNode {
+        // constants
         value_t totalArmy;
+        // core values
         Coord pos;
         value_t dist;
         value_t friendArmy;
         value_t oppoArmy;
         value_t typeCost;
+        // caches
+        value_t distPenalty;
         inline value_t united() const {
-            return static_cast<value_t>(std::pow(dist, 0.9) * 300) -
-                   (friendArmy > oppoArmy * 100 ? totalArmy
-                                                : (friendArmy - oppoArmy)) +
+            return distPenalty -
+                   (friendArmy > oppoArmy * 20 ? totalArmy
+                                               : (friendArmy - oppoArmy)) +
                    typeCost;
         }
     };
@@ -236,7 +240,7 @@ class ZlyBot_v2_1 : public BasicBot {
             dijkstraBFS(spawnCoord);
             auto defenseDist = std::min(
                 homeZoneMaxRange,
-                std::max(3, static_cast<int>(std::sqrt(rank[id].land) - 5.0)));
+                std::max(3, static_cast<int>(std::sqrt(rank[id].land) - 4.0)));
             for (pos_t i = 1; i <= height; ++i) {
                 for (pos_t j = 1; j <= width; ++j) {
                     const TileInfo& t = tileAt(i, j);
@@ -317,11 +321,14 @@ class ZlyBot_v2_1 : public BasicBot {
                 (mode == BotMode::EXPLORE || mode == BotMode::DEFEND))
                 ori.friendArmy >>= 1;
             if (inSameTeam(t.occupier, id))
-                ori.friendArmy += t.army;
+                ori.friendArmy += (t.army - 1);
             else
-                ori.oppoArmy += t.army;
+                ori.oppoArmy += (t.army + 1);
             ori.typeCost += typeCost(tt);
             ori.pos = next;
+            // calculate cache
+            ori.distPenalty =
+                static_cast<value_t>(std::pow(ori.dist, 0.9) * 200);
             return ori;
         };
 

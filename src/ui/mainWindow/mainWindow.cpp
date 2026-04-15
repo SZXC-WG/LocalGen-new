@@ -23,7 +23,9 @@ void MainWindow::on_btnLocalGame_clicked() {
     if (dialog.exec() == QDialog::Accepted) {
         LocalGameWindow window(this, dialog.config());
         if (window.layout() == nullptr) return;
+        this->hide();
         window.exec();
+        this->show();
     }
 }
 
@@ -40,5 +42,7 @@ void MainWindow::on_btnLoadReplay_clicked() {
 
 void MainWindow::on_btnCreateMap_clicked() {
     MapCreatorWindow window(this);
+    this->hide();
     window.exec();
+    this->show();
 }

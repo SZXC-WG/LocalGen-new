@@ -41,13 +41,8 @@ MapCreatorWindow::MapCreatorWindow(QWidget* parent)
       networkManager(nullptr),
       metadataSidebarExpanded(true),
       selectedTool(MOUNTAIN) {
-    // Treat the editor like an independent top-level window rather than a
-    // transient dialog attached to the main menu.
-    Qt::WindowFlags flags = windowFlags();
-    flags |= Qt::Window;
-    flags |= Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint;
-    flags &= ~Qt::Dialog;
-    setWindowFlags(flags);
+    setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint |
+                   Qt::WindowMinimizeButtonHint);
 
     setWindowTitle("Map Creator");
     QPalette pal = palette();

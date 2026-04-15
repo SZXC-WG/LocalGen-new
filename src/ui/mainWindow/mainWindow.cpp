@@ -18,14 +18,10 @@ MainWindow::MainWindow(QWidget* parent)
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::on_btnLocalGame_clicked() {
-    // Keep this as an independent top-level window so it stays on its
-    // current virtual desktop instead of following the main window.
-    LocalGameDialog dialog(nullptr);
+    LocalGameDialog dialog(this);
     dialog.setPalette(this->palette());
-    int result = dialog.exec();
-    if (result == QDialog::Accepted) {
-        // Use the same top-level window behavior for the in-game window.
-        LocalGameWindow window(nullptr, dialog.config());
+    if (dialog.exec() == QDialog::Accepted) {
+        LocalGameWindow window(this, dialog.config());
         if (window.layout() == nullptr) return;
         window.exec();
     }
@@ -43,7 +39,6 @@ void MainWindow::on_btnLoadReplay_clicked() {
 }
 
 void MainWindow::on_btnCreateMap_clicked() {
-    // Open the map creator as its own top-level window for desktop isolation.
-    MapCreatorWindow window(nullptr);
+    MapCreatorWindow window(this);
     window.exec();
 }

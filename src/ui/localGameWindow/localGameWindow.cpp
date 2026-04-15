@@ -82,13 +82,8 @@ inline DisplayTile toDisplayTile(const TileView& tile) {
 
 LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     : QDialog(parent) {
-    // Present the gameplay UI as a regular top-level window to keep it on the
-    // current virtual desktop.
-    Qt::WindowFlags flags = windowFlags();
-    flags |= Qt::Window;
-    flags |= Qt::WindowMaximizeButtonHint | Qt::WindowMinimizeButtonHint;
-    flags &= ~Qt::Dialog;
-    setWindowFlags(flags);
+    setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint |
+                   Qt::WindowMinimizeButtonHint);
 
     setWindowTitle("Local Game");
     QPalette pal = palette();

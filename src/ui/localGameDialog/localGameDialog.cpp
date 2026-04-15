@@ -48,13 +48,6 @@ QStringList toQStringList(const std::vector<std::string>& vec) {
 
 LocalGameDialog::LocalGameDialog(QWidget* parent)
     : QDialog(parent), ui(new Ui::LocalGameDialog) {
-    // Promote this dialog to a regular top-level window so desktop switching
-    // treats it like the main window.
-    Qt::WindowFlags flags = windowFlags();
-    flags |= Qt::Window;
-    flags &= ~Qt::Dialog;
-    setWindowFlags(flags);
-
     ui->setupUi(this);
     ComboBoxPopupCompatibility::configureForManagedPopup(ui->comboBox_gameMap);
     randomMapWidth = ui->spinBox_mapWidth->value();

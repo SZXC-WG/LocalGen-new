@@ -187,8 +187,6 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     turnLabel->setContentsMargins(16, 8, 16, 8);
     turnLabel->setMinimumWidth(120);
     turnLabel->setAlignment(Qt::AlignCenter);
-    turnLabel->move(10, 10);
-    turnLabel->raise();
 
     chatBox = new ChatBoxWidget(this);
     connect(chatBox, &ChatBoxWidget::messageSubmitted, this,
@@ -409,13 +407,6 @@ void LocalGameWindow::updateLeaderboard(const std::vector<RankItem>& rank) {
 }
 
 void LocalGameWindow::positionFloatingWidgets() {
-    const int turnLabelMargin = 6;
-
-    if (turnLabel != nullptr) {
-        turnLabel->move(turnLabelMargin, turnLabelMargin);
-        turnLabel->raise();
-    }
-
     if (analysisChartWidget != nullptr) {
         const int analysisWidth = std::clamp(width() / 3, 340, 560);
         const int analysisHeight = std::clamp(height() / 2, 340, 520);
@@ -458,7 +449,10 @@ void LocalGameWindow::positionFloatingWidgets() {
         }
     }
 
-    if (turnLabel != nullptr) turnLabel->raise();
+    if (turnLabel != nullptr) {
+        turnLabel->move(6, 6);
+        turnLabel->raise();
+    }
 }
 
 bool LocalGameWindow::eventFilter(QObject* watched, QEvent* event) {

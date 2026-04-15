@@ -54,7 +54,7 @@ class ZlyBot_v2_1 : public BasicBot {
         value_t oppoArmy;
         value_t typeCost;
         inline value_t united() const {
-            return static_cast<value_t>(std::sqrt(dist) * 500) -
+            return static_cast<value_t>(std::pow(dist, 0.9) * 300) -
                    (friendArmy > oppoArmy * 100 ? totalArmy
                                                 : (friendArmy - oppoArmy)) +
                    typeCost;

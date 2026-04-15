@@ -6,6 +6,7 @@
 
 #include <QDialog>
 #include <QEvent>
+#include <QFrame>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QResizeEvent>
@@ -72,6 +73,7 @@ class LocalGameWindow : public QDialog {
     BasicGame* game = nullptr;
     QTimer* halfTurnTimer = nullptr;
     QLabel* turnLabel = nullptr;
+    QFrame* turnLabelShadow = nullptr;
     bool gameRunning = false;
     bool analysisEnabled = false;
     double halfTurnDurationMs = 500.0;

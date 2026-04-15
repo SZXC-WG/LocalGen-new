@@ -177,10 +177,16 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     setLayout(layout);
     resize(800, 600);
 
+    turnLabelShadow = new QFrame(this);
+    turnLabelShadow->setAutoFillBackground(true);
+    QPalette palette = turnLabelShadow->palette();
+    palette.setColor(QPalette::Window, QColor(0, 128, 128));
+    turnLabelShadow->setPalette(palette);
+
     turnLabel = new QLabel("Turn 0", this);
     turnLabel->setFont(QFont("Quicksand", 12, QFont::Bold));
     turnLabel->setAutoFillBackground(true);
-    QPalette palette = turnLabel->palette();
+    palette = turnLabel->palette();
     palette.setColor(QPalette::Window, Qt::white);
     palette.setColor(QPalette::WindowText, Qt::black);
     turnLabel->setPalette(palette);
@@ -451,6 +457,9 @@ void LocalGameWindow::positionFloatingWidgets() {
 
     if (turnLabel != nullptr) {
         turnLabel->move(6, 6);
+        turnLabelShadow->setGeometry(
+            turnLabel->geometry().adjusted(2, 2, 2, 2));
+        turnLabelShadow->raise();
         turnLabel->raise();
     }
 }

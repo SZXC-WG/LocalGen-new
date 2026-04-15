@@ -1,6 +1,8 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#pragma once
+
 /**
  * @file utils.hpp
  *
@@ -8,9 +10,6 @@
  *
  * Utility functions and definitions
  */
-
-#ifndef LGEN_CORE_UTILS_HPP
-#define LGEN_CORE_UTILS_HPP
 
 #include <cstdint>
 #include <functional>
@@ -61,5 +60,3 @@ struct overloaded : Ts... {
 };
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
-
-#endif  // LGEN_CORE_UTILS_HPP

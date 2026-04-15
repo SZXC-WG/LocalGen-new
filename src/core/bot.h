@@ -1,6 +1,8 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#pragma once
+
 /**
  * @file bot.h
  *
@@ -8,9 +10,6 @@
  *
  * Basic bot infrastructure: abstract class + static factory/registry.
  */
-
-#ifndef LGEN_CORE_BOT_H
-#define LGEN_CORE_BOT_H
 
 #include <functional>
 #include <string>
@@ -59,5 +58,3 @@ struct BotRegistrar {
             name, []() -> BasicBot* { return new T(); });
     }
 };
-
-#endif  // LGEN_CORE_BOT_H

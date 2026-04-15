@@ -1,6 +1,8 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#pragma once
+
 /**
  * @file player.hpp
  *
@@ -10,9 +12,6 @@
  *
  * Players are basic participants of games.
  */
-
-#ifndef LGEN_CORE_PLAYER_HPP
-#define LGEN_CORE_PLAYER_HPP
 
 #include <cstdint>
 #include <deque>
@@ -93,5 +92,3 @@ class Player {
         return move;
     }
 };
-
-#endif  // LGEN_CORE_PLAYER_HPP

@@ -1,8 +1,7 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef CHATBOXWIDGET_H
-#define CHATBOXWIDGET_H
+#pragma once
 
 #include <QColor>
 #include <QFrame>
@@ -44,5 +43,3 @@ class ChatBoxWidget : public QFrame {
 
     static constexpr int maxHistoryEntries = 100;
 };
-
-#endif  // CHATBOXWIDGET_H

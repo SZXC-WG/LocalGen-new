@@ -1,6 +1,8 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#pragma once
+
 /**
  * @file game.hpp
  *
@@ -10,9 +12,6 @@
  *
  * Core game operations
  */
-
-#ifndef LGEN_CORE_GAME_HPP
-#define LGEN_CORE_GAME_HPP
 
 #include <algorithm>
 #include <array>
@@ -851,5 +850,3 @@ inline void BasicGame::broadcast(turn_t turn,
     }
     if (eventCallback) eventCallback(event);
 }
-
-#endif  // LGEN_CORE_GAME_HPP

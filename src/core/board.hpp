@@ -1,6 +1,8 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#pragma once
+
 /**
  * @file board.hpp
  *
@@ -10,9 +12,6 @@
  *
  * Container of maps.
  */
-
-#ifndef LGEN_CORE_BOARD_HPP
-#define LGEN_CORE_BOARD_HPP
 
 #include <cassert>
 #include <random>
@@ -288,5 +287,3 @@ class Board {
 };
 
 #include "mapgen.hpp"
-
-#endif  // LGEN_CORE_BOARD_HPP

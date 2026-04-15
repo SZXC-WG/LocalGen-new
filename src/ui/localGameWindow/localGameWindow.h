@@ -1,8 +1,7 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef LOCALGAMEWINDOW_H
-#define LOCALGAMEWINDOW_H
+#pragma once
 
 #include <QDialog>
 #include <QEvent>
@@ -81,5 +80,3 @@ class LocalGameWindow : public QDialog {
     index_t humanPlayerId = -2;
     int generalRow = -1, generalCol = -1;
 };
-
-#endif  // LOCALGAMEWINDOW_H

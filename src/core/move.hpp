@@ -1,6 +1,8 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#pragma once
+
 /**
  * @file move.hpp
  *
@@ -10,9 +12,6 @@
  *
  * Moves are basic operations of players.
  */
-
-#ifndef LGEN_CORE_MOVE_HPP
-#define LGEN_CORE_MOVE_HPP
 
 #include "utils.hpp"
 
@@ -35,5 +34,3 @@ struct Move {
     constexpr Move(MoveType _type, Coord _from, Coord _to, bool _takeHalf)
         : type(_type), from(_from), to(_to), takeHalf(_takeHalf) {}
 };
-
-#endif  // LGEN_CORE_MOVE_HPP

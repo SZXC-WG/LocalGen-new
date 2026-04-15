@@ -1,5 +1,7 @@
-#ifndef MAPCREATORWINDOW_H
-#define MAPCREATORWINDOW_H
+// Copyright (C) 2026 SZXC Work Group
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
 
 #include <QComboBox>
 #include <QDateTime>
@@ -105,5 +107,3 @@ class MapCreatorWindow : public QDialog {
         ERASE
     } selectedTool;
 };
-
-#endif  // MAPCREATORWINDOW_H

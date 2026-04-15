@@ -1,5 +1,7 @@
-#ifndef GENERALSBUTTON_HPP
-#define GENERALSBUTTON_HPP
+// Copyright (C) 2026 SZXC Work Group
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
 
 #include <qmath.h>
 
@@ -133,5 +135,3 @@ class GeneralsButton : public QAbstractButton {
         }
     }
 };
-
-#endif  // GENERALSBUTTON_HPP

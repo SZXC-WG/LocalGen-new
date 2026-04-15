@@ -1,8 +1,7 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef LOCALGEN_UI_COMBOBOXPOPUPCOMPATIBILITY_HPP
-#define LOCALGEN_UI_COMBOBOXPOPUPCOMPATIBILITY_HPP
+#pragma once
 
 #include <QComboBox>
 #include <QProxyStyle>
@@ -35,5 +34,3 @@ inline void configureForManagedPopup(QComboBox* combo,
 }
 
 }  // namespace ComboBoxPopupCompatibility
-
-#endif  // LOCALGEN_UI_COMBOBOXPOPUPCOMPATIBILITY_HPP

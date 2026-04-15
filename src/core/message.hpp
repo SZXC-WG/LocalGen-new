@@ -1,6 +1,8 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#pragma once
+
 /**
  * @file message.hpp
  *
@@ -10,9 +12,6 @@
  *
  * Defines the GameEvent and GameMessage data structures.
  */
-
-#ifndef LGEN_CORE_MESSAGE_HPP
-#define LGEN_CORE_MESSAGE_HPP
 
 #include <string>
 #include <variant>
@@ -51,5 +50,3 @@ struct GameEvent {
     uint8_t halfTurnPhase = 0;
     GameMessageData data;
 };
-
-#endif  // LGEN_CORE_MESSAGE_HPP

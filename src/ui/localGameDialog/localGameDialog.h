@@ -1,8 +1,7 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef LOCALGAMEDIALOG_H
-#define LOCALGAMEDIALOG_H
+#pragma once
 
 #include <QComboBox>
 #include <QDialog>
@@ -50,5 +49,3 @@ class LocalGameDialog : public QDialog {
     int randomMapHeight = 20;
     bool updatingMapControls = false;
 };
-
-#endif  // LOCALGAMEDIALOG_H

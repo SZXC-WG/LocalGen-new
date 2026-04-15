@@ -1,8 +1,7 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef ANALYSISCHARTWIDGET_H
-#define ANALYSISCHARTWIDGET_H
+#pragma once
 
 #include <QColor>
 #include <QFrame>
@@ -57,5 +56,3 @@ class AnalysisChartWidget : public QFrame {
     int landMax = 0;
     std::vector<PlayerAnalysisSeries> seriesData;
 };
-
-#endif  // ANALYSISCHARTWIDGET_H

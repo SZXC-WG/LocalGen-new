@@ -1,5 +1,7 @@
-#ifndef MAPWIDGET_H
-#define MAPWIDGET_H
+// Copyright (C) 2026 SZXC Work Group
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
 
 #include <QEvent>
 #include <QHash>
@@ -119,5 +121,3 @@ class MapWidget : public QWidget {
     QVector<QPainter::PixmapFragment> tileChunks[11];
     QHash<QString, QVector<QPainter::PixmapFragment>> textChunks;
 };
-
-#endif  // MAPWIDGET_H

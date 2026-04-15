@@ -1,8 +1,7 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef LEADERBOARDWIDGET_H
-#define LEADERBOARDWIDGET_H
+#pragma once
 
 #include <QColor>
 #include <QPaintEvent>
@@ -52,5 +51,3 @@ class LeaderboardWidget : public QWidget {
     constexpr static int rowHeight = 28;
     constexpr static int horizontalPadding = 12;
 };
-
-#endif  // LEADERBOARDWIDGET_H

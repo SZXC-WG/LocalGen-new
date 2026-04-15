@@ -1,8 +1,7 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 
@@ -28,5 +27,3 @@ class MainWindow : public QMainWindow {
    private:
     Ui::MainWindow* ui;
 };
-
-#endif  // MAINWINDOW_H

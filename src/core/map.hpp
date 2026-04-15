@@ -1,8 +1,10 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#pragma once
+
 /**
- * @file board.hpp
+ * @file map.hpp
  *
  * LocalGen Module: core
  *
@@ -10,9 +12,6 @@
  *
  * Supports: `.lg` (v5); `.lgmp` (v6); and `.json` (official).
  */
-
-#ifndef LGEN_CORE_MAP_HPP
-#define LGEN_CORE_MAP_HPP
 
 #include <QBitArray>
 #include <QByteArray>
@@ -403,5 +402,3 @@ inline void saveMap_v6(const QString& filename, const MapDocument& doc,
 
     mapFile.close();
 };
-
-#endif  // LGEN_CORE_MAP_HPP

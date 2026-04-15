@@ -1,5 +1,7 @@
-#ifndef LGEN_CORE_MAPGEN_HPP
-#define LGEN_CORE_MAPGEN_HPP
+// Copyright (C) 2026 SZXC Work Group
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#pragma once
 
 #include <algorithm>
 #include <chrono>
@@ -581,5 +583,3 @@ inline Board Board::generate(int width, int height, int spawnCount,
     return generateBoard(width, height, spawnCount, seed, placeSwamp,
                          placeLookout, placeObservatory, mountainDensity);
 }
-
-#endif  // LGEN_CORE_MAPGEN_HPP

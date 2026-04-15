@@ -1,6 +1,8 @@
 // Copyright (C) 2026 SZXC Work Group
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+#pragma once
+
 /**
  * @file tile.hpp
  *
@@ -10,9 +12,6 @@
  *
  * Tiles are basic elements of map boards.
  */
-
-#ifndef LGEN_CORE_TILE_HPP
-#define LGEN_CORE_TILE_HPP
 
 #include "utils.hpp"
 
@@ -96,5 +95,3 @@ struct TileView {
         }
     };
 };
-
-#endif  // LGEN_CORE_TILE_HPP

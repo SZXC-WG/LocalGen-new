@@ -90,10 +90,10 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/core/bot.h
     src/core/game.hpp
     src/core/map.hpp
+    src/core/mapgen.hpp
     src/core/message.hpp
     src/core/move.hpp
     src/core/player.hpp
-    src/core/randomMapGenerator.hpp
     src/core/tile.hpp
     src/core/utils.hpp
     res/res.qrc
@@ -114,10 +114,10 @@ add_executable(LocalGen-bot-simulator
     src/core/bot.h
     src/core/game.hpp
     src/core/map.hpp
+    src/core/mapgen.hpp
     src/core/message.hpp
     src/core/move.hpp
     src/core/player.hpp
-    src/core/randomMapGenerator.hpp
     src/core/tile.hpp
     src/core/utils.hpp
 )

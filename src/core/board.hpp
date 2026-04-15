@@ -287,6 +287,6 @@ class Board {
                           double mountainDensity = 0.3);
 };
 
-#include "randomMapGenerator.hpp"
+#include "mapgen.hpp"
 
 #endif  // LGEN_CORE_BOARD_HPP

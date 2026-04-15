@@ -1,9 +1,5 @@
-#ifndef LGEN_CORE_RANDOM_MAP_GENERATOR_HPP
-#define LGEN_CORE_RANDOM_MAP_GENERATOR_HPP
-
-#ifndef LGEN_CORE_BOARD_HPP
-#error "Include board.hpp before randomMapGenerator.hpp"
-#endif
+#ifndef LGEN_CORE_MAPGEN_HPP
+#define LGEN_CORE_MAPGEN_HPP
 
 #include <algorithm>
 #include <chrono>
@@ -586,4 +582,4 @@ inline Board Board::generate(int width, int height, int spawnCount,
                          placeLookout, placeObservatory, mountainDensity);
 }
 
-#endif  // LGEN_CORE_RANDOM_MAP_GENERATOR_HPP
+#endif  // LGEN_CORE_MAPGEN_HPP

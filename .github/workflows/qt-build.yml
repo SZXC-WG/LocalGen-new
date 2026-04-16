@@ -76,7 +76,7 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
             mkdir -p deploy
-            cp build/Release/LocalGen-new.exe deploy/
+            mv build/Release/{LocalGen-new.exe,maps} deploy/
             if [[ "${{ matrix.qt_arch }}" == *"llvm"* ]]; then
               windeployqt --no-opengl-sw --no-translations --no-compiler-runtime deploy/*.exe
               cp "$QT_ROOT_DIR/bin/"{libc++.dll,libunwind.dll} deploy/

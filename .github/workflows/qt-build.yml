@@ -78,16 +78,15 @@ jobs:
             mkdir -p deploy
             cp build/Release/LocalGen-new.exe deploy/
             if [[ "${{ matrix.qt_arch }}" == *"llvm"* ]]; then
-              windeployqt --release --no-translations --no-compiler-runtime deploy/*.exe
+              windeployqt --no-opengl-sw --no-translations --no-compiler-runtime deploy/*.exe
               COMPILER_BIN="$QT_ROOT_DIR/bin"
               cp "$COMPILER_BIN/libc++.dll" deploy/
               cp "$COMPILER_BIN/libunwind.dll" deploy/
             else
-              windeployqt --release --no-translations --compiler-runtime deploy/*.exe
+              windeployqt --release --no-opengl-sw --no-translations --compiler-runtime deploy/*.exe
             fi
             7z a -tzip -mx=9 "${{ matrix.name }}.zip" ./deploy/*
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            macdeployqt --help
             macdeployqt build/Release/LocalGen-new.app
             cd build/Release
             env GZIP=-9 tar -czvf "../../${{ matrix.name }}.tar.gz" LocalGen-new.app

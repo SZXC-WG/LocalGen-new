@@ -85,7 +85,7 @@ jobs:
             fi
             7z a -tzip -mx=9 "${{ matrix.name }}.zip" ./deploy/*
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            macdeployqt build/Release/LocalGen-new.app -dmg
+            macdeployqt build/Release/LocalGen-new.app -dmg -codesign=-
             mv build/Release/*.dmg "${{ matrix.name }}.dmg"
           fi
 

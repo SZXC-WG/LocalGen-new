@@ -69,3 +69,28 @@ jobs:
         run: |
           cmake -B build -S . -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake
           cmake --build build --config Release
+
+      - name: Deploy and Package
+        if: matrix.os != 'ubuntu-latest'
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            mkdir -p deploy
+            cp build/Release/LocalGen-new.exe deploy/
+            windeployqt --compiler-runtime deploy/*.exe
+            7z a -tzip -mx=9 "${{ matrix.name }}.zip" ./deploy/*
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            macdeployqt build/Release/LocalGen-new.app
+            cd build/Release
+            env GZIP=-9 tar -czvf "../../${{ matrix.name }}.tar.gz" LocalGen-new.app
+          fi
+
+      - name: Upload Artifact
+        if: matrix.os != 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            *.zip
+            *.tar.gz
+          compression-level: 0

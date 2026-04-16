@@ -85,9 +85,8 @@ jobs:
             fi
             7z a -tzip -mx=9 "${{ matrix.name }}.zip" ./deploy/*
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            macdeployqt build/Release/LocalGen-new.app
-            cd build/Release
-            env GZIP=-9 tar -czvf "../../${{ matrix.name }}.tar.gz" LocalGen-new.app
+            macdeployqt build/Release/LocalGen-new.app -dmg
+            mv build/Release/*.dmg "${{ matrix.name }}.dmg"
           fi
 
       - name: Upload Artifact
@@ -96,7 +95,6 @@ jobs:
         with:
           path: |
             *.zip
-            *.tar.gz
-          compression-level: 0
+            *.dmg
           archive: false
           if-no-files-found: error

@@ -79,9 +79,7 @@ jobs:
             cp build/Release/LocalGen-new.exe deploy/
             if [[ "${{ matrix.qt_arch }}" == *"llvm"* ]]; then
               windeployqt --no-opengl-sw --no-translations --no-compiler-runtime deploy/*.exe
-              COMPILER_BIN="$QT_ROOT_DIR/bin"
-              cp "$COMPILER_BIN/libc++.dll" deploy/
-              cp "$COMPILER_BIN/libunwind.dll" deploy/
+              cp "$QT_ROOT_DIR/bin/"{libc++.dll,libunwind.dll} deploy/
             else
               windeployqt --release --no-opengl-sw --no-translations --compiler-runtime deploy/*.exe
             fi

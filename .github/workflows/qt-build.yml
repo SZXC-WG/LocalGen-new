@@ -79,7 +79,8 @@ jobs:
             cp build/Release/LocalGen-new.exe deploy/
             if [[ "${{ matrix.qt_arch }}" == *"llvm"* ]]; then
               windeployqt --no-compiler-runtime deploy/*.exe
-              COMPILER_BIN="$QT_ROOT_DIR/bin"
+              ls $QT_ROOT_DIR/bin
+              COMPILER_BIN="$(dirname "$(which clang++)")"
               cp "$COMPILER_BIN/libc++.dll" deploy/
               cp "$COMPILER_BIN/libunwind.dll" deploy/
               cp "$COMPILER_BIN/libwinpthread-1.dll" deploy/

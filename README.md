@@ -50,7 +50,12 @@ Then find the executable under `build/Release`.
 
 > [!NOTE]
 >
-> To create a portable app package, consider applying `windeployqt`, `macdeployqt` or other similar utilities post-build.
+> On Windows, create a portable package with `windeployqt` after the build.
+>
+> On macOS, the build already deploys `build/Release/LocalGen-new.app`. To sanitize, ad-hoc sign, and package it into a Finder-launchable DMG, run `bash scripts/package-macos-dmg.sh build/Release/LocalGen-new.app`.
+>
+> Avoid `macdeployqt ... -dmg` here: recent Qt/macOS combinations can leave disallowed bundle metadata on copied frameworks, which breaks the app signature inside the generated DMG.
+
 
 ## Star History
 

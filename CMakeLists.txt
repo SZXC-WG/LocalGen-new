@@ -130,11 +130,23 @@ target_include_directories(LocalGen-bot-simulator PRIVATE
 target_link_libraries(LocalGen-bot-simulator PRIVATE Qt6::Core)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/res/maps
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/maps
+    COMMAND ${CMAKE_COMMAND} -E env COPYFILE_DISABLE=1
+        ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/res/maps
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/maps
     COMMENT "Copying maps to output directory"
 )
+
+if(APPLE)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND "${MACDEPLOYQT_EXECUTABLE}"
+            "$<TARGET_BUNDLE_DIR:${PROJECT_NAME}>"
+            -always-overwrite
+            $<$<CONFIG:Debug>:-use-debug-libs>
+        COMMENT "Deploying Qt frameworks and plugins into app bundle"
+        VERBATIM
+    )
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_ICON_FILE icon.icns

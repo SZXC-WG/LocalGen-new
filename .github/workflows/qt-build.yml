@@ -85,8 +85,7 @@ jobs:
             fi
             7z a -tzip -mx=9 "${{ matrix.name }}.zip" ./deploy/*
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            macdeployqt build/Release/LocalGen-new.app -dmg -codesign=-
-            mv build/Release/*.dmg "${{ matrix.name }}.dmg"
+            bash scripts/package-macos-dmg.sh --skip-deploy build/Release/LocalGen-new.app "${{ matrix.name }}.dmg"
           fi
 
       - name: Upload Artifact

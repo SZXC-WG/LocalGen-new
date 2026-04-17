@@ -328,11 +328,6 @@ class BasicGame {
     inline bool compareMovePriority(
         const std::pair<index_t, Move>& a, const std::pair<index_t, Move>& b,
         const std::unordered_map<Coord, index_t>& moveOutMap) const {
-        const MoveType& tA = a.second.type;
-        const MoveType& tB = b.second.type;
-        if (tA != tB)
-            return static_cast<uint8_t>(tA) < static_cast<uint8_t>(tB);
-
         if (conf.MoveProcessMethod == config::MoveProcessMode::FULL) {
             // Priority category (higher enum value = higher priority)
             MovePriority pA = getMovePriority(a.first, a.second, moveOutMap);
@@ -529,16 +524,21 @@ inline void BasicGame::step() {
         Move move;
         while ((move = player->step()).type != MoveType::EMPTY &&
                !board.available(i, move));
-        if (move.type != MoveType::EMPTY) moves.emplace_back(i, move);
+        if (move.type == MoveType::MOVE_ARMY) {
+            moves.emplace_back(i, move);
+        } else if (move.type == MoveType::SURRENDER) {
+            surrenderQueue.emplace_back(i, 50);
+            alive[i] = false;
+            eliminatedTurn[i] = curTurn << 1 | curHalfTurnPhase;
+            broadcast(curTurn, GameMessageSurrender{i});
+        }
     }
 
     // build move-out map for chase detection
     // moveOutMap[coord] = player_index means that player is moving out of coord
     std::unordered_map<Coord, index_t> moveOutMap;
     for (const auto& [player, move] : moves) {
-        if (move.type == MoveType::MOVE_ARMY) {
-            moveOutMap[move.from] = player;
-        }
+        moveOutMap[move.from] = player;
     }
 
     // sort moves by priority system
@@ -557,33 +557,27 @@ inline void BasicGame::step() {
     for (auto [player, move] : moves) {
         if (!alive[player] || !board.available(player, move))
             continue;  // skip just-captured players or invalid moves
-        if (move.type == MoveType::MOVE_ARMY) {
-            Tile& fromTile = board.tileAt(move.from);
-            Tile& toTile = board.tileAt(move.to);
 
-            army_t takenArmy =
-                move.takeHalf ? (fromTile.army >> 1) : (fromTile.army - 1);
+        Tile& fromTile = board.tileAt(move.from);
+        Tile& toTile = board.tileAt(move.to);
 
-            fromTile.army -= takenArmy;
-            if (isValidPlayer(toTile.occupier) &&
-                inSameTeam(toTile.occupier, player)) {
-                toTile.occupier = player;
-                toTile.army += takenArmy;
-            } else {
-                toTile.army -= takenArmy;
-                if (toTile.army < 0) {
-                    toTile.army = -toTile.army;
-                    if (toTile.type == TILE_GENERAL) {
-                        capture(player, toTile.occupier);
-                    }
-                    toTile.occupier = player;
+        army_t takenArmy =
+            move.takeHalf ? (fromTile.army >> 1) : (fromTile.army - 1);
+
+        fromTile.army -= takenArmy;
+        if (isValidPlayer(toTile.occupier) &&
+            inSameTeam(toTile.occupier, player)) {
+            toTile.occupier = player;
+            toTile.army += takenArmy;
+        } else {
+            toTile.army -= takenArmy;
+            if (toTile.army < 0) {
+                toTile.army = -toTile.army;
+                if (toTile.type == TILE_GENERAL) {
+                    capture(player, toTile.occupier);
                 }
+                toTile.occupier = player;
             }
-        } else if (move.type == MoveType::SURRENDER) {
-            surrenderQueue.emplace_back(player, 50);
-            alive[player] = false;
-            eliminatedTurn[player] = curTurn << 1 | curHalfTurnPhase;
-            broadcast(curTurn, GameMessageSurrender{player});
         }
     }
 

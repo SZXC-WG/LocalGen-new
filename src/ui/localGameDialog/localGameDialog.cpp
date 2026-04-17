@@ -9,6 +9,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QFont>
+#include <QFrame>
 #include <QHBoxLayout>
 #include <QHash>
 #include <QLabel>
@@ -23,7 +24,6 @@
 
 namespace {
 
-const QString HumanPlayerId = QStringLiteral("Human");
 constexpr int MapPathRole = Qt::UserRole;
 constexpr int MapWidthRole = Qt::UserRole + 1;
 constexpr int MapHeightRole = Qt::UserRole + 2;
@@ -69,9 +69,12 @@ LocalGameConfig LocalGameDialog::config() const {
     config.mapWidth = ui->spinBox_mapWidth->value();
     config.mapHeight = ui->spinBox_mapHeight->value();
     auto& players = config.players;
-    players.resize(playerCombos.size());
-    for (int i = 0; i < playerCombos.size(); ++i) {
-        players[i] = playerCombos[i]->currentData().toString();
+    int numPlayers = ui->gridLayout_players->count();
+    players.resize(numPlayers);
+    for (int i = 0; i < numPlayers; ++i) {
+        QLayoutItem* item = ui->gridLayout_players->itemAt(i);
+        QComboBox* combo = item->widget()->findChild<QComboBox*>();
+        players[i] = combo->currentText();
     }
     return config;
 }
@@ -144,45 +147,51 @@ void LocalGameDialog::populateAvailableMaps() {
 }
 
 void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
-    QLayout* layout = ui->groupBox_players->layout();
-    int requiredCount = numPlayers + 1;
+    QGridLayout* layout = ui->gridLayout_players;
+    int requiredCount = numPlayers;
+
     while (layout->count() > requiredCount) {
         QLayoutItem* item = layout->takeAt(layout->count() - 1);
-        if (!playerCombos.isEmpty()) {
-            playerCombos.removeLast();
-        }
         item->widget()->deleteLater();
         delete item;
     }
     if (layout->count() == requiredCount) return;
+
     const QStringList botNames = toQStringList(BotFactory::instance().list());
     const QFont& font = ui->labNumPlayers->font();
     const QFont& comboFont = ui->comboBox_gameMap->font();
     QRandomGenerator* rng = QRandomGenerator::global();
+
+    const int columns = 2;
     while (layout->count() < requiredCount) {
-        QLabel* playerLabel = new QLabel(tr("Player %1").arg(layout->count()));
+        int index = layout->count();
+
+        QFrame* cardFrame = new QFrame();
+        cardFrame->setFrameShape(QFrame::StyledPanel);
+        cardFrame->setFrameShadow(QFrame::Raised);
+
+        QHBoxLayout* cardLayout = new QHBoxLayout(cardFrame);
+        cardLayout->setContentsMargins(8, 4, 8, 4);
+
+        QLabel* playerLabel = new QLabel(tr("P%1").arg(index + 1));
         playerLabel->setFont(font);
+
         QComboBox* playerCombo = new QComboBox();
         ComboBoxPopupCompatibility::configureForManagedPopup(playerCombo);
-        if (layout->count() == 1) {
-            playerCombo->addItem(tr("Human"), HumanPlayerId);
-        }
+        if (index == 0) playerCombo->addItem("Human");
         for (const QString& botName : botNames) {
-            playerCombo->addItem(botName, botName);
+            playerCombo->addItem(botName);
         }
         playerCombo->setCurrentIndex(
-            layout->count() == 1 ? 0 : rng->bounded(playerCombo->count()));
+            index == 0 ? 0 : rng->bounded(playerCombo->count()));
         playerCombo->setSizePolicy(QSizePolicy::Expanding,
                                    QSizePolicy::Preferred);
         playerCombo->setFont(comboFont);
-        playerCombos.append(playerCombo);
-        QHBoxLayout* playerLayout = new QHBoxLayout();
-        playerLayout->addWidget(playerLabel);
-        playerLayout->addWidget(playerCombo);
-        playerLayout->setContentsMargins(0, 0, 0, 0);
-        QWidget* playerWidget = new QWidget();
-        playerWidget->setLayout(playerLayout);
-        layout->addWidget(playerWidget);
+
+        cardLayout->addWidget(playerLabel);
+        cardLayout->addWidget(playerCombo);
+
+        layout->addWidget(cardFrame, index / columns, index % columns);
     }
 }
 

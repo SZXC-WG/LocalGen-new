@@ -44,7 +44,6 @@ class LocalGameDialog : public QDialog {
     void populateAvailableMaps();
 
     Ui::LocalGameDialog* ui;
-    QVector<QComboBox*> playerCombos;
     int randomMapWidth = 20;
     int randomMapHeight = 20;
     bool updatingMapControls = false;

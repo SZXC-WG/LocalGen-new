@@ -20,7 +20,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="gameSettingsLayout">
      <item>
       <widget class="QGroupBox" name="groupBox_basicSettings">
        <property name="font">
@@ -304,11 +304,14 @@
         </item>
        </layout>
       </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout_players"/>
+      </item>
      </layout>
     </widget>
    </item>
    <item>
-    <spacer name="spacer_2">
+    <spacer name="buttonsSpacer">
      <property name="orientation">
       <enum>Qt::Orientation::Vertical</enum>
      </property>

@@ -567,7 +567,9 @@ inline void BasicGame::step() {
         fromTile.army -= takenArmy;
         if (isValidPlayer(toTile.occupier) &&
             inSameTeam(toTile.occupier, player)) {
-            toTile.occupier = player;
+            if (toTile.type != TILE_GENERAL) {
+                toTile.occupier = player;
+            }
             toTile.army += takenArmy;
         } else {
             toTile.army -= takenArmy;

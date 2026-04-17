@@ -317,9 +317,9 @@ class BasicGame {
     inline MovePriority getMovePriority(
         index_t player, const Move& move,
         const std::unordered_map<Coord, index_t>& moveOutMap) const {
+        if (isAttackGeneral(player, move)) return MovePriority::ATTACK_GENERAL;
         if (isChaseMove(player, move, moveOutMap)) return MovePriority::CHASE;
         if (isDefensiveMove(player, move)) return MovePriority::DEFENSIVE;
-        if (isAttackGeneral(player, move)) return MovePriority::ATTACK_GENERAL;
         return MovePriority::NORMAL;
     }
 

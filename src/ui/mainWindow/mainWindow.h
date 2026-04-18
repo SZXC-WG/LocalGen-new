@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QMainWindow>
+class QContextMenuEvent;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -23,6 +24,9 @@ class MainWindow : public QMainWindow {
     void on_btnWebGame_clicked();
     void on_btnLoadReplay_clicked();
     void on_btnCreateMap_clicked();
+
+   protected:
+    void contextMenuEvent(QContextMenuEvent* event) override;
 
    private:
     Ui::MainWindow* ui;

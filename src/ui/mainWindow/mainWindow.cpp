@@ -3,6 +3,9 @@
 
 #include "mainWindow.h"
 
+#include <QApplication>
+#include <QContextMenuEvent>
+#include <QMenu>
 #include <QMessageBox>
 
 #include "../localGameDialog/localGameDialog.h"
@@ -53,4 +56,20 @@ void MainWindow::on_btnCreateMap_clicked() {
     this->hide();
     window.exec();
     this->show();
+}
+
+void MainWindow::contextMenuEvent(QContextMenuEvent* event) {
+    QMenu menu(this);
+    menu.addAction(tr("About"), this, [this]() {
+        QMessageBox::about(this, tr("About LocalGen"),
+                           tr("<h3>Local Generals.io</h3>"
+#ifdef APP_VERSION_STRING
+                              "<p>Version " APP_VERSION_STRING "</p>"
+#endif
+                              "<p>An unofficial local clone of generals.io.</p>"
+                              "<p>Copyright &copy; 2026 SZXC Work Group</p>"
+                              "<p>Licensed under GPL-3.0-or-later.</p>"));
+    });
+    menu.addAction(tr("About Qt"), qApp, &QApplication::aboutQt);
+    menu.exec(event->globalPos());
 }

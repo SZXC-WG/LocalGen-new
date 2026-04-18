@@ -16,12 +16,8 @@
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-#ifndef APP_VERSION_STRING
-#warning "APP_VERSION_STRING not defined, version unknown."
-#else
     this->setWindowTitle("LocalGen " APP_VERSION_STRING);
     ui->labVersion->setText("version " APP_VERSION_STRING);
-#endif
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -60,10 +56,8 @@ void MainWindow::on_btnCreateMap_clicked() {
 
 const QString aboutText = QStringLiteral(
     "<h3>Local Generals.io</h3>"
-#ifdef APP_VERSION_STRING
     "<p>Version " APP_VERSION_STRING
     "</p>"
-#endif
     "<p>An unofficial local clone of generals.io.</p>"
     "<p>Copyright &copy; 2026 SZXC Work Group</p>"
     "<p>This program is free software: you can redistribute it and/or modify"

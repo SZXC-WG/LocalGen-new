@@ -58,18 +58,28 @@ void MainWindow::on_btnCreateMap_clicked() {
     this->show();
 }
 
+const QString aboutText = QStringLiteral(
+    "<h3>Local Generals.io</h3>"
+#ifdef APP_VERSION_STRING
+    "<p>Version " APP_VERSION_STRING
+    "</p>"
+#endif
+    "<p>An unofficial local clone of generals.io.</p>"
+    "<p>Copyright &copy; 2026 SZXC Work Group</p>"
+    "<p>This program is free software: you can redistribute it and/or modify"
+    " it under the terms of the GNU General Public License as published by"
+    " the Free Software Foundation, either version 3 of the License, or"
+    " any later version. There is NO warranty; not even for"
+    " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</p>"
+    "<p>The source code for LocalGen is available at "
+    "<a href=\"https://github.com/SZXC-WG/LocalGen-new\">"
+    "https://github.com/SZXC-WG/LocalGen-new</a>.</p>");
+
 void MainWindow::contextMenuEvent(QContextMenuEvent* event) {
     QMenu menu(this);
-    menu.addAction(tr("About"), this, [this]() {
-        QMessageBox::about(this, tr("About LocalGen"),
-                           tr("<h3>Local Generals.io</h3>"
-#ifdef APP_VERSION_STRING
-                              "<p>Version " APP_VERSION_STRING "</p>"
-#endif
-                              "<p>An unofficial local clone of generals.io.</p>"
-                              "<p>Copyright &copy; 2026 SZXC Work Group</p>"
-                              "<p>Licensed under GPL-3.0-or-later.</p>"));
+    menu.addAction("About", this, [this]() {
+        QMessageBox::about(this, "About LocalGen", aboutText);
     });
-    menu.addAction(tr("About Qt"), qApp, &QApplication::aboutQt);
+    menu.addAction("About Qt", qApp, &QApplication::aboutQt);
     menu.exec(event->globalPos());
 }

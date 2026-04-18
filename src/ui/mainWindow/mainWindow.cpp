@@ -13,6 +13,12 @@
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
+#ifndef APP_VERSION_STRING
+#warning "APP_VERSION_STRING not defined, version unknown."
+#else
+    this->setWindowTitle("LocalGen " APP_VERSION_STRING);
+    ui->labVersion->setText("version " APP_VERSION_STRING);
+#endif
 }
 
 MainWindow::~MainWindow() { delete ui; }

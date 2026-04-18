@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.19)
 
-project(LocalGen-new VERSION 6.0.0 LANGUAGES CXX)
+set(LOCALGEN_FULL_VERSION "6.0.0-dev")
+string(REGEX MATCH "^([0-9]+(\\.[0-9]+(\\.[0-9]+)?)?)" _DUMMY "${LOCALGEN_FULL_VERSION}")
+set(LOCALGEN_NUMERIC_VERSION "${CMAKE_MATCH_1}")
+
+project(LocalGen-new VERSION ${LOCALGEN_NUMERIC_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -63,6 +67,10 @@ qt_standard_project_setup()
 set(CMAKE_AUTORCC ON)
 
 qt_add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    APP_VERSION_STRING="${LOCALGEN_FULL_VERSION}"
+)
 
 target_sources(${PROJECT_NAME} PRIVATE
     src/main.cpp

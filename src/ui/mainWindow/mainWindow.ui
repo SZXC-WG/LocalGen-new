@@ -485,7 +485,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>LocalGen 6.0.0</string>
+   <string>LocalGen</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../../res/res.qrc">
@@ -613,7 +613,7 @@
        </font>
       </property>
       <property name="text">
-       <string>version 6.0.0 (alpha)</string>
+       <string>version unknown</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignmentFlag::AlignCenter</set>

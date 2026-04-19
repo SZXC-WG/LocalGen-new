@@ -90,6 +90,7 @@ fi
 
 staging_dir="$(mktemp -d "${TMPDIR:-/tmp}/${app_name}.dmg.XXXXXX")"
 rw_image="$staging_dir/${app_name}-rw.sparseimage"
+mount_point="$staging_dir/mount"
 mounted_volume=""
 
 cleanup() {
@@ -112,8 +113,9 @@ hdiutil create \
     -type SPARSE \
     "$rw_image"
 
-attach_output="$(hdiutil attach -nobrowse -readwrite "$rw_image")"
-mounted_volume="$(printf '%s\n' "$attach_output" | awk '/\/Volumes\// {print $3; exit}')"
+mkdir -p "$mount_point"
+hdiutil attach -nobrowse -readwrite -mountpoint "$mount_point" "$rw_image" >/dev/null
+mounted_volume="$mount_point"
 
 if [[ -z "$mounted_volume" || ! -d "$mounted_volume" ]]; then
     echo "Failed to mount writable disk image." >&2

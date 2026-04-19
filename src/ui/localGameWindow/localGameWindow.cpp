@@ -233,7 +233,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         [this](const GameEvent& event) { handleGameEvent(event); });
     updateLeaderboard(game->ranklist());
     gameRunning = true;
-    refreshChatInputState();
+    chatBox->setInputEnabled(canHumanChat());
     positionFloatingWidgets();
     scheduleNextHalfTurn(0.0);
 }
@@ -306,19 +306,6 @@ QString LocalGameWindow::playerDisplayName(index_t playerId) const {
         return QString::fromStdString(game->getName(playerId));
     }
     return QString("Player %1").arg(playerId);
-}
-
-void LocalGameWindow::refreshChatInputState() {
-    QString placeholder;
-    if (game == nullptr) {
-        placeholder = "Chat is unavailable.";
-    } else if (humanPlayerId < 0) {
-        placeholder = "Only a human player can chat.";
-    } else {
-        placeholder = "Press [Enter] to chat.";
-    }
-
-    chatBox->setInputEnabled(canHumanChat(), placeholder);
 }
 
 void LocalGameWindow::updateView(const BoardView& boardView) {

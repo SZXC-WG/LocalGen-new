@@ -51,7 +51,6 @@ class LocalGameWindow : public QDialog {
     void handleGameEvent(const GameEvent& event);
     ChatMessageEntry formatChatMessage(const GameEvent& event) const;
     QString playerDisplayName(index_t playerId) const;
-    void refreshChatInputState();
     void updateView(const BoardView& boardView);
     void updateLeaderboard(const std::vector<RankItem>& rank);
     void runHalfTurn();

@@ -226,9 +226,9 @@ void ChatBoxWidget::focusInput() {
     inputLine->setFocus(Qt::ShortcutFocusReason);
 }
 
-void ChatBoxWidget::setInputEnabled(bool enabled, const QString& placeholder) {
+void ChatBoxWidget::setInputEnabled(bool enabled) {
+    inputLine->setVisible(enabled);
     inputLine->setEnabled(enabled);
-    inputLine->setPlaceholderText(placeholder);
     if (!enabled) inputLine->clear();
 }
 

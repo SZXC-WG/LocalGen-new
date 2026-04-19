@@ -30,7 +30,7 @@ class ChatBoxWidget : public QFrame {
 
     void appendMessage(const ChatMessageEntry& message);
     void focusInput();
-    void setInputEnabled(bool enabled, const QString& placeholder = QString());
+    void setInputEnabled(bool enabled);
 
    signals:
     void messageSubmitted(const QString& message);

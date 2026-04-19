@@ -53,6 +53,8 @@ fi
 
 app_path="$(cd "$(dirname "$app_input")" && pwd)/$(basename "$app_input")"
 app_name="$(basename "$app_path" .app)"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+license_source="$(cd "$script_dir/.." && pwd)/LICENSE"
 
 if [[ -n "$output_input" ]]; then
     case "$output_input" in
@@ -121,6 +123,9 @@ fi
 mounted_app="$mounted_volume/${app_name}.app"
 
 COPYFILE_DISABLE=1 ditto --norsrc "$app_path" "$mounted_app"
+if [[ -f "$license_source" ]]; then
+    COPYFILE_DISABLE=1 ditto --norsrc "$license_source" "$mounted_volume/LICENSE.txt"
+fi
 codesign --force --deep --sign - "$mounted_app"
 codesign --verify --deep --strict "$mounted_app"
 ln -s /Applications "$mounted_volume/Applications"

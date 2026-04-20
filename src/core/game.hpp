@@ -597,7 +597,7 @@ inline void BasicGame::step() {
         // will be taken over by the team mate whose general is closest to
         // theirs. Here, "closest" means to have the least distance, where
         // "distance" is the length of the shortest path not passing any
-        // impassable tiles defined by `isImpassibleTile(type)`.
+        // impassable tiles defined by `isImpassableTile(type)`.
         if (tMate == player) {
             neutralize(player);
         } else {

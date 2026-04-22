@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
 
-set(LOCALGEN_FULL_VERSION "6.0.0-beta.1")
+set(LOCALGEN_FULL_VERSION "6.0.0-dev")
 string(REGEX MATCH "^([0-9]+(\\.[0-9]+(\\.[0-9]+)?)?)" _DUMMY "${LOCALGEN_FULL_VERSION}")
 set(LOCALGEN_NUMERIC_VERSION "${CMAKE_MATCH_1}")
 

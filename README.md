@@ -27,7 +27,7 @@ Welcome to the **Local Generals.io (LocalGen)** project!
 
 With LocalGen, you can now play **[generals.io](http://generals.io)** **entirely offline**!
 
-Enjoy the game with **ready-to-use** bots or challenge your friends over the **same LAN** network!
+Play immediately with **out-of-the-box** bots or challenge your friends over the **same LAN** network!
 
 Interested? Get started by downloading **LocalGen** from the [releases page](http://github.com/SZXC-WG/LocalGen-new/releases).
 

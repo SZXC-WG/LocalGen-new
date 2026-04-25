@@ -559,10 +559,12 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
             return;
         case Qt::Key_0:
             scale *= zoomFactor;
+            if (scale > maxScale) scale = maxScale;
             update();
             return;
         case Qt::Key_9:
             scale /= zoomFactor;
+            if (scale < minScale) scale = minScale;
             update();
             return;
     }

@@ -69,7 +69,6 @@ class MapWidget : public QWidget {
    private:
     // Helper functions
     QPoint mapToGrid(const QPoint& pos) const;
-    void panBy(const QPointF& delta);
     void zoomAt(const QPointF& widgetPos, qreal zoomMultiplier);
     bool isTouchpadScrollEvent(const QWheelEvent* event) const;
     bool handleNativeGesture(QNativeGestureEvent* event);

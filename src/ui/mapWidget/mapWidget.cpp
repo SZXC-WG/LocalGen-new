@@ -396,12 +396,6 @@ void MapWidget::paintEvent(QPaintEvent* event) {
     }
 }
 
-void MapWidget::panBy(const QPointF& delta) {
-    if (delta.isNull()) return;
-    offset += delta;
-    update();
-}
-
 void MapWidget::zoomAt(const QPointF& widgetPos, qreal zoomMultiplier) {
     if (zoomMultiplier <= 0.0) return;
 
@@ -443,9 +437,11 @@ void MapWidget::wheelEvent(QWheelEvent* event) {
     if (isTouchpadScrollEvent(event)) {
         QPointF panDelta = event->pixelDelta();
         if (panDelta.isNull()) {
-            panDelta = QPointF(event->angleDelta()) / 8.0;
+            offset += QPointF(event->angleDelta()) / 8.0;
+        } else {
+            offset += panDelta;
         }
-        panBy(panDelta);
+        update();
         event->accept();
         return;
     }

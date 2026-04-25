@@ -364,7 +364,8 @@ class OimBot : public BasicBot {
     bool duelMode() const {
         int enemyCount = 0;
         for (index_t player = 0; player < playerCnt; ++player) {
-            if (player == id || !aliveById[player] || isFriendlyOccupier(player)) {
+            if (player == id || !aliveById[player] ||
+                isFriendlyOccupier(player)) {
                 continue;
             }
             ++enemyCount;
@@ -464,8 +465,8 @@ class OimBot : public BasicBot {
                 dst.type != TILE_GENERAL && mem.type != TILE_GENERAL) {
                 bonus += 2.5;
             }
-            bonus +=
-                std::min(8.0, std::max(0.0, localExpansionPotential(to)) * 0.75);
+            bonus += std::min(
+                8.0, std::max(0.0, localExpansionPotential(to)) * 0.75);
         }
         return bonus;
     }
@@ -504,9 +505,12 @@ class OimBot : public BasicBot {
                 if (!inside(far) || far == c) continue;
                 const TileView& farTile = board.tileAt(far);
                 const TileMemory& farMem = memory[idx(far)];
-                if (!isPassable(farMem.type) || isFriendlyTile(farTile)) continue;
-                if (!farMem.everSeen) score += 1.2;
-                else if (!farTile.visible) score += 0.7;
+                if (!isPassable(farMem.type) || isFriendlyTile(farTile))
+                    continue;
+                if (!farMem.everSeen)
+                    score += 1.2;
+                else if (!farTile.visible)
+                    score += 0.7;
             }
         }
         return score;
@@ -519,17 +523,16 @@ class OimBot : public BasicBot {
 
     bool shouldAvoidOpeningSwamp(Coord c) const {
         if (!inside(c)) return false;
-        const tile_type_e type =
-            board.tileAt(c).visible ? board.tileAt(c).type : memory[idx(c)].type;
+        const tile_type_e type = board.tileAt(c).visible ? board.tileAt(c).type
+                                                         : memory[idx(c)].type;
         return fullTurn <= 30 && type == TILE_SWAMP;
     }
 
     bool inOpeningPhase(const SituationMetrics& metrics) const {
         if (!duelMode()) return false;
         if (mapArea() > 450) return false;
-        const int limit =
-            duelMode() ? (mapArea() >= 500 ? 26 : 20)
-                       : (mapArea() >= 500 ? 22 : 16);
+        const int limit = duelMode() ? (mapArea() >= 500 ? 26 : 20)
+                                     : (mapArea() >= 500 ? 22 : 16);
         if (fullTurn > limit) return false;
         if (metrics.contactDensity > 0.06) return false;
         if (metrics.coreRisk > 9.0) return false;
@@ -553,7 +556,8 @@ class OimBot : public BasicBot {
         const Coord enemyGuess = chooseTargetPlayerGeneral(targetPlayer);
         const bool canChaseGuess =
             targetPlayer >= 0 &&
-            targetPlayer < static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
+            targetPlayer <
+                static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
             cachedGeneralHasEvidence[targetPlayer];
         const int reach =
             std::clamp(4 + static_cast<int>(board.tileAt(source).army / 8) +
@@ -567,10 +571,12 @@ class OimBot : public BasicBot {
             if (!tile.visible) cost -= 1;
             if (shouldAvoidOpeningSwamp(c)) cost += 24;
             if (mem.type == TILE_CITY || tile.type == TILE_CITY) {
-                cost += std::max<int>(4, static_cast<int>(estimatedArmyAt(c) / 3));
+                cost +=
+                    std::max<int>(4, static_cast<int>(estimatedArmyAt(c) / 3));
             }
             if (isEnemyTile(tile))
-                cost += std::max<int>(0, static_cast<int>(estimatedArmyAt(c) / 4));
+                cost +=
+                    std::max<int>(0, static_cast<int>(estimatedArmyAt(c) / 4));
             return std::max(1, cost);
         });
 
@@ -587,13 +593,15 @@ class OimBot : public BasicBot {
                 if (shouldAvoidOpeningSwamp(target)) continue;
 
                 const bool enemy = isEnemyTile(tile);
-                const bool city = tile.type == TILE_CITY || mem.type == TILE_CITY;
+                const bool city =
+                    tile.type == TILE_CITY || mem.type == TILE_CITY;
                 double score = 0.0;
                 if (!mem.everSeen) score += 120.0;
                 if (!tile.visible) score += 36.0;
                 if (tile.occupier < 0 && !city) score += 18.0;
                 score += localExpansionPotential(target) * 8.5;
-                score += captureTimingBonus(source, path.firstStepAt(idx(target)));
+                score +=
+                    captureTimingBonus(source, path.firstStepAt(idx(target)));
                 score -= dist * 9.0;
 
                 const int centerDist = std::abs(target.x * 2 - (height + 1)) +
@@ -606,15 +614,19 @@ class OimBot : public BasicBot {
                     score += 220.0 - estimatedArmyAt(target) * 5.5;
                 }
                 if (enemy) {
-                    if (board.tileAt(source).army - 1 <= estimatedArmyAt(target)) continue;
+                    if (board.tileAt(source).army - 1 <=
+                        estimatedArmyAt(target))
+                        continue;
                     score += 46.0 + estimatedArmyAt(target) * 0.8;
                 }
                 if (target == openingTarget &&
                     fullTurn <= static_cast<turn_t>(openingTargetUntil)) {
                     score += 28.0;
                 }
-                if (enemyGuess != Coord{-1, -1} && canChaseGuess && fullTurn >= 8) {
-                    score += std::max(0.0, 28.0 - manhattan(target, enemyGuess) * 1.6);
+                if (enemyGuess != Coord{-1, -1} && canChaseGuess &&
+                    fullTurn >= 8) {
+                    score += std::max(
+                        0.0, 28.0 - manhattan(target, enemyGuess) * 1.6);
                 }
                 if (score > bestScore) {
                     bestScore = score;
@@ -634,8 +646,8 @@ class OimBot : public BasicBot {
         return move;
     }
 
-    std::optional<Move> chooseOpeningRolloutMove(index_t targetPlayer,
-                                                 const SituationMetrics& metrics) {
+    std::optional<Move> chooseOpeningRolloutMove(
+        index_t targetPlayer, const SituationMetrics& metrics) {
         if (!inOpeningPhase(metrics) || myGeneral == Coord{-1, -1}) {
             return std::nullopt;
         }
@@ -650,7 +662,8 @@ class OimBot : public BasicBot {
             const TileView& tile = board.tileAt(source);
             if (tile.army <= 1) continue;
             double score = tile.army * 7.0 - reserveArmy[idx(source)] * 1.4;
-            if (source == myGeneral) score += relaxedGeneralOpening() ? 8.0 : 2.0;
+            if (source == myGeneral)
+                score += relaxedGeneralOpening() ? 8.0 : 2.0;
             score += duelExpansionHeatAt(source) * 0.20;
             score += localExpansionPotential(source) * 1.2;
             if (std::find(frontierTiles.begin(), frontierTiles.end(), source) !=
@@ -668,15 +681,16 @@ class OimBot : public BasicBot {
         const Coord enemyGuess = chooseTargetPlayerGeneral(targetPlayer);
         const bool hasEnemyGuess = inside(enemyGuess);
         const double guessWeight =
-            hasEnemyGuess
-                ? (targetPlayer >= 0 &&
-                           targetPlayer <
-                               static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
-                       cachedGeneralHasEvidence[targetPlayer]
-                       ? 1.0
-                       : 0.55)
-                : 0.0;
-        const int horizon = std::clamp(3 + static_cast<int>(fullTurn / 6), 3, 5);
+            hasEnemyGuess ? (targetPlayer >= 0 &&
+                                     targetPlayer <
+                                         static_cast<index_t>(
+                                             cachedGeneralHasEvidence.size()) &&
+                                     cachedGeneralHasEvidence[targetPlayer]
+                                 ? 1.0
+                                 : 0.55)
+                          : 0.0;
+        const int horizon =
+            std::clamp(3 + static_cast<int>(fullTurn / 6), 3, 5);
         const size_t total = static_cast<size_t>((height + 2) * W);
         std::vector<uint8_t> pathMark(total, 0);
 
@@ -685,8 +699,8 @@ class OimBot : public BasicBot {
         };
         auto stepGetsGlobalGrowthTick = [&](int offset) {
             const int futureHalfTurn = static_cast<int>(halfTurn) + offset;
-            const int futureFullTurn =
-                static_cast<int>(fullTurn) + (((futureHalfTurn & 1) == 1) ? 0 : 1);
+            const int futureFullTurn = static_cast<int>(fullTurn) +
+                                       (((futureHalfTurn & 1) == 1) ? 0 : 1);
             return ((futureHalfTurn & 1) == 1) && futureFullTurn > 1 &&
                    ((futureFullTurn - 1) % 25 == 0);
         };
@@ -701,7 +715,8 @@ class OimBot : public BasicBot {
                 return tail;
             }
 
-            double bestFuture = movingArmy * 4.0 + duelExpansionHeatAt(cur) * 1.2;
+            double bestFuture =
+                movingArmy * 4.0 + duelExpansionHeatAt(cur) * 1.2;
             for (Coord d : kDirs) {
                 Coord nxt = cur + d;
                 if (!inside(nxt)) continue;
@@ -710,7 +725,8 @@ class OimBot : public BasicBot {
                 const TileView& tile = board.tileAt(nxt);
                 const TileMemory& mem = memory[node];
                 if (!isPassable(mem.type)) continue;
-                const index_t occupier = tile.visible ? tile.occupier : mem.occupier;
+                const index_t occupier =
+                    tile.visible ? tile.occupier : mem.occupier;
                 if (isFriendlyOccupier(occupier)) continue;
 
                 const army_t defense = estimatedArmyAt(nxt);
@@ -719,12 +735,16 @@ class OimBot : public BasicBot {
                 if (after <= 0) continue;
 
                 const bool enemy = isEnemyOccupier(occupier);
-                const bool city = tile.type == TILE_CITY || mem.type == TILE_CITY;
+                const bool city =
+                    tile.type == TILE_CITY || mem.type == TILE_CITY;
                 const bool exploration = !mem.everSeen || !tile.visible;
                 double gain = 0.0;
-                if (!mem.everSeen) gain += 44.0;
-                else if (!tile.visible) gain += 24.0;
-                else if (occupier < 0) gain += 12.0;
+                if (!mem.everSeen)
+                    gain += 44.0;
+                else if (!tile.visible)
+                    gain += 24.0;
+                else if (occupier < 0)
+                    gain += 12.0;
                 if (enemy) gain += 9.0;
                 gain += localExpansionPotential(nxt) * 7.8;
                 gain += duelExpansionHeatAt(nxt) * 2.1;
@@ -733,14 +753,16 @@ class OimBot : public BasicBot {
                                        std::abs(nxt.y * 2 - (width + 1));
                 gain += std::max(0.0, 20.0 - centerDist * 0.55);
                 if (hasEnemyGuess) {
-                    gain += std::max(0.0, 26.0 - manhattan(nxt, enemyGuess) * 1.7) *
-                            guessWeight;
+                    gain +=
+                        std::max(0.0, 26.0 - manhattan(nxt, enemyGuess) * 1.7) *
+                        guessWeight;
                 }
                 if (city) {
                     gain += 38.0 - estimatedArmyAt(nxt) * 1.1;
                     if (fullTurn + depth < 18) gain -= 18.0;
                 }
-                if (mem.type == TILE_SWAMP || tile.type == TILE_SWAMP) gain -= 26.0;
+                if (mem.type == TILE_SWAMP || tile.type == TILE_SWAMP)
+                    gain -= 26.0;
                 if (stepGetsGrowthTick(depth)) gain += 7.0;
                 if (stepGetsGlobalGrowthTick(depth)) gain += 12.0;
                 if (enemy && stepGetsGrowthTick(depth)) gain += 4.0;
@@ -778,7 +800,8 @@ class OimBot : public BasicBot {
                 const TileView& dst = board.tileAt(to);
                 const TileMemory& mem = memory[idx(to)];
                 if (!isPassable(mem.type)) continue;
-                const index_t occupier = dst.visible ? dst.occupier : mem.occupier;
+                const index_t occupier =
+                    dst.visible ? dst.occupier : mem.occupier;
                 if (isFriendlyOccupier(occupier)) continue;
 
                 const army_t defense = estimatedArmyAt(to);
@@ -794,11 +817,14 @@ class OimBot : public BasicBot {
                 score += captureTimingBonus(source, to);
                 score += localExpansionPotential(to) * 7.5;
                 score += duelExpansionHeatAt(to) * 2.6;
-                if (!mem.everSeen) score += 52.0;
-                else if (!dst.visible) score += 28.0;
+                if (!mem.everSeen)
+                    score += 52.0;
+                else if (!dst.visible)
+                    score += 28.0;
                 if (hasEnemyGuess) {
-                    score += std::max(0.0, 32.0 - manhattan(to, enemyGuess) * 1.9) *
-                             guessWeight;
+                    score +=
+                        std::max(0.0, 32.0 - manhattan(to, enemyGuess) * 1.9) *
+                        guessWeight;
                 }
                 pathMark[idx(source)] = 1;
                 pathMark[idx(to)] = 1;
@@ -858,9 +884,9 @@ class OimBot : public BasicBot {
     void traceDecision(const char* label, const CandidateMove& move,
                        const SituationMetrics& metrics) const {
         if (!kEnableDecisionTrace || !move.valid) return;
-        std::cerr << "[OimBot] " << label << " target=(" << move.target.x
-                  << "," << move.target.y << ") source=(" << move.source.x
-                  << "," << move.source.y << ") mode=" << modeName(move.mode)
+        std::cerr << "[OimBot] " << label << " target=(" << move.target.x << ","
+                  << move.target.y << ") source=(" << move.source.x << ","
+                  << move.source.y << ") mode=" << modeName(move.mode)
                   << " score=" << move.score
                   << " riskPenalty=" << move.riskPenalty
                   << " tactical=" << (move.tactical ? 1 : 0)
@@ -1511,8 +1537,8 @@ class OimBot : public BasicBot {
         hiddenReserveEstimate.assign(playerCnt, 0);
         hiddenReserveDelta.assign(playerCnt, 0);
         for (index_t player = 0; player < playerCnt; ++player) {
-            hiddenReserveEstimate[player] =
-                std::max<army_t>(0, rankById[player].army - visibleArmyByPlayer[player]);
+            hiddenReserveEstimate[player] = std::max<army_t>(
+                0, rankById[player].army - visibleArmyByPlayer[player]);
             if (player < static_cast<index_t>(prevHiddenReserve.size())) {
                 hiddenReserveDelta[player] =
                     hiddenReserveEstimate[player] - prevHiddenReserve[player];
@@ -1590,7 +1616,8 @@ class OimBot : public BasicBot {
         Coord enemyGuess = chooseTargetPlayerGeneral(targetPlayer);
         const bool hasEnemyGuess =
             inside(enemyGuess) && targetPlayer >= 0 &&
-            targetPlayer < static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
+            targetPlayer <
+                static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
             cachedGeneralHasEvidence[targetPlayer];
 
         std::vector<int> enemyDist(total, -1);
@@ -1606,7 +1633,8 @@ class OimBot : public BasicBot {
                     Coord nxt = cur + d;
                     if (!inside(nxt)) continue;
                     const size_t node = idx(nxt);
-                    if (enemyDist[node] != -1 || !isPassable(memory[node].type)) {
+                    if (enemyDist[node] != -1 ||
+                        !isPassable(memory[node].type)) {
                         continue;
                     }
                     enemyDist[node] = curDist + 1;
@@ -1662,11 +1690,13 @@ class OimBot : public BasicBot {
                 if (!startMem.everSeen) score += 14.0 * landTempoMultiplier;
                 if (!startTile.visible) score += 5.0;
                 if (startTile.occupier < 0) score += 3.0;
-                if (startMem.type == TILE_SWAMP || startTile.type == TILE_SWAMP) {
+                if (startMem.type == TILE_SWAMP ||
+                    startTile.type == TILE_SWAMP) {
                     score -= 8.0;
                 }
                 if (startMem.type == TILE_CITY || startTile.type == TILE_CITY) {
-                    score += std::max(0.0, 18.0 - estimatedArmyAt(start) * 0.18);
+                    score +=
+                        std::max(0.0, 18.0 - estimatedArmyAt(start) * 0.18);
                 }
 
                 while (!q.empty()) {
@@ -1702,8 +1732,8 @@ class OimBot : public BasicBot {
                             cell += 3.0;
                         }
                         if (tile.type == TILE_CITY || mem.type == TILE_CITY) {
-                            cell += std::max(0.0,
-                                             10.0 - estimatedArmyAt(nxt) * 0.08);
+                            cell += std::max(
+                                0.0, 10.0 - estimatedArmyAt(nxt) * 0.08);
                         }
                         if (tile.type == TILE_SWAMP || mem.type == TILE_SWAMP) {
                             cell -= 2.6;
@@ -2033,11 +2063,12 @@ class OimBot : public BasicBot {
         score += std::max<pos_t>(0, -playerLandDelta[player]) * 4.5;
         score += metrics.conversionAdvantage * 1.2;
         const double intel = intelWeight();
+        score += std::max<army_t>(0, 36 - hiddenReserveEstimate[player]) * 0.9 *
+                 intel;
+        score -= std::max<army_t>(0, hiddenReserveEstimate[player] - 48) *
+                 0.12 * intel;
         score +=
-            std::max<army_t>(0, 36 - hiddenReserveEstimate[player]) * 0.9 * intel;
-        score -=
-            std::max<army_t>(0, hiddenReserveEstimate[player] - 48) * 0.12 * intel;
-        score += std::max<army_t>(0, -hiddenReserveDelta[player]) * 0.55 * intel;
+            std::max<army_t>(0, -hiddenReserveDelta[player]) * 0.55 * intel;
         score -= std::max<army_t>(0, hiddenReserveDelta[player]) * 0.25 * intel;
 
         if (guess != Coord{-1, -1}) {
@@ -2500,10 +2531,10 @@ class OimBot : public BasicBot {
                   [](const SourceSeed& lhs, const SourceSeed& rhs) {
                       return lhs.score > rhs.score;
                   });
-        const int sourceLimit = std::clamp(
-            4 + static_cast<int>(metrics.mobilityScore * 0.08) +
-                static_cast<int>(expansionBias * 0.12),
-            4, 10);
+        const int sourceLimit =
+            std::clamp(4 + static_cast<int>(metrics.mobilityScore * 0.08) +
+                           static_cast<int>(expansionBias * 0.12),
+                       4, 10);
         if (static_cast<int>(seeds.size()) > sourceLimit) {
             seeds.resize(sourceLimit);
         }
@@ -2723,11 +2754,13 @@ class OimBot : public BasicBot {
                     if (isEnemyOccupier(sourcePlayer)) {
                         const double intel = intelWeight();
                         pressure +=
-                            std::min<army_t>(hiddenReserveEstimate[sourcePlayer], 40) *
+                            std::min<army_t>(
+                                hiddenReserveEstimate[sourcePlayer], 40) *
                             (seed.target == myGeneral ? 0.16 : 0.09) * intel;
-                        pressure +=
-                            std::max<army_t>(0, hiddenReserveDelta[sourcePlayer]) *
-                            (seed.target == myGeneral ? 0.45 : 0.20) * intel;
+                        pressure += std::max<army_t>(
+                                        0, hiddenReserveDelta[sourcePlayer]) *
+                                    (seed.target == myGeneral ? 0.45 : 0.20) *
+                                    intel;
                     }
 
                     if (sourceBestPath == nullptr ||
@@ -2817,8 +2850,13 @@ class OimBot : public BasicBot {
         }
 
         ObjectiveOption counter{
-            360.0 + std::max(0.0, metrics.conversionAdvantage * 2.0), target,
-            threatPlayer, true, false, false, false};
+            360.0 + std::max(0.0, metrics.conversionAdvantage * 2.0),
+            target,
+            threatPlayer,
+            true,
+            false,
+            false,
+            false};
         StrategicPlan plan = evaluateObjectivePlan(counter, metrics);
         if (!plan.valid || plan.usingRally) return std::nullopt;
         if (plan.route.empty()) return std::nullopt;
@@ -2919,14 +2957,15 @@ class OimBot : public BasicBot {
                   [](const SourceSeed& lhs, const SourceSeed& rhs) {
                       return lhs.score > rhs.score;
                   });
-        const size_t seedLimit = static_cast<size_t>(
-            std::clamp(mapArea() >= 520 ? 8 : 6, 5, 8));
+        const size_t seedLimit =
+            static_cast<size_t>(std::clamp(mapArea() >= 520 ? 8 : 6, 5, 8));
         if (seeds.size() > seedLimit) seeds.resize(seedLimit);
 
         const Coord targetGuess = chooseTargetPlayerGeneral(targetPlayer);
         const bool hasTargetGuess =
             inside(targetGuess) && targetPlayer >= 0 &&
-            targetPlayer < static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
+            targetPlayer <
+                static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
             cachedGeneralHasEvidence[targetPlayer];
         const double landTempoMultiplier = [&]() {
             const int turnsUntil = turnsUntilNextGlobalGrowth();
@@ -2942,15 +2981,19 @@ class OimBot : public BasicBot {
                 int cost = 2;
                 const TileMemory& mem = memory[idx(c)];
                 const TileView& tile = board.tileAt(c);
-                if (!mem.everSeen) cost -= 1;
-                else if (!tile.visible) cost -= 1;
-                if (mem.type == TILE_SWAMP || tile.type == TILE_SWAMP) cost += 5;
+                if (!mem.everSeen)
+                    cost -= 1;
+                else if (!tile.visible)
+                    cost -= 1;
+                if (mem.type == TILE_SWAMP || tile.type == TILE_SWAMP)
+                    cost += 5;
                 if (mem.type == TILE_CITY || tile.type == TILE_CITY) {
-                    cost += std::max<int>(3, static_cast<int>(estimatedArmyAt(c) / 6));
+                    cost += std::max<int>(
+                        3, static_cast<int>(estimatedArmyAt(c) / 6));
                 }
                 if (isEnemyOccupier(visibleOrRememberedOccupier(c))) {
-                    cost +=
-                        std::max<int>(0, static_cast<int>(estimatedArmyAt(c) / 8));
+                    cost += std::max<int>(
+                        0, static_cast<int>(estimatedArmyAt(c) / 8));
                 }
                 return std::max(1, cost);
             });
@@ -3060,7 +3103,8 @@ class OimBot : public BasicBot {
             if (available <= 0) continue;
             double score = available * 8.4 - reserveArmy[idx(source)] * 1.0;
             score -= manhattan(source, target) * 1.4;
-            if (source == myGeneral) score -= relaxedGeneralOpening() ? 1.0 : 3.0;
+            if (source == myGeneral)
+                score -= relaxedGeneralOpening() ? 1.0 : 3.0;
             if (chokeMask[idx(source)]) score -= 5.0;
             seeds.push_back(SourceSeed{source, score});
         }
@@ -3079,12 +3123,15 @@ class OimBot : public BasicBot {
                 const TileView& tile = board.tileAt(c);
                 if (!mem.everSeen) cost -= 1;
                 if (!tile.visible) cost -= 1;
-                if (mem.type == TILE_SWAMP || tile.type == TILE_SWAMP) cost += 10;
+                if (mem.type == TILE_SWAMP || tile.type == TILE_SWAMP)
+                    cost += 10;
                 if (mem.type == TILE_CITY || tile.type == TILE_CITY) {
-                    cost += std::max<int>(5, static_cast<int>(estimatedArmyAt(c) / 4));
+                    cost += std::max<int>(
+                        5, static_cast<int>(estimatedArmyAt(c) / 4));
                 }
                 if (isEnemyOccupier(visibleOrRememberedOccupier(c))) {
-                    cost += std::max<int>(0, static_cast<int>(estimatedArmyAt(c) / 6));
+                    cost += std::max<int>(
+                        0, static_cast<int>(estimatedArmyAt(c) / 6));
                 }
                 return std::max(1, cost);
             });
@@ -3144,7 +3191,8 @@ class OimBot : public BasicBot {
         const Coord targetGuess = chooseTargetPlayerGeneral(targetPlayer);
         const bool hasTargetGuess =
             inside(targetGuess) && targetPlayer >= 0 &&
-            targetPlayer < static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
+            targetPlayer <
+                static_cast<index_t>(cachedGeneralHasEvidence.size()) &&
             cachedGeneralHasEvidence[targetPlayer];
 
         for (Coord from : friendlyTilesCache) {
@@ -3174,9 +3222,12 @@ class OimBot : public BasicBot {
                 if (riskPenalty >= 1e8) continue;
 
                 double score = 0.0;
-                if (!mem.everSeen) score += 96.0;
-                else if (!dst.visible) score += 44.0;
-                else if (occupier < 0) score += 18.0;
+                if (!mem.everSeen)
+                    score += 96.0;
+                else if (!dst.visible)
+                    score += 44.0;
+                else if (occupier < 0)
+                    score += 18.0;
                 score += duelExpansionHeatAt(to) * 2.25;
                 score += localExpansionPotential(to) * 7.2;
                 score += captureTimingBonus(from, to);
@@ -3328,11 +3379,10 @@ class OimBot : public BasicBot {
             targetPlayer >= 0 ? visibleEnemyCountByPlayer[targetPlayer] +
                                     newlyVisibleEnemyTiles[targetPlayer]
                               : 0;
-        const bool shouldPressureTarget = enemyContactSignal > 0 ||
-                                          metrics.contactDensity > 0.045 ||
-                                          (duelSmallAggression > 0.0 &&
-                                           fullTurn >= 16) ||
-                                          metrics.conversionAdvantage > 8.0;
+        const bool shouldPressureTarget =
+            enemyContactSignal > 0 || metrics.contactDensity > 0.045 ||
+            (duelSmallAggression > 0.0 && fullTurn >= 16) ||
+            metrics.conversionAdvantage > 8.0;
         const double expansionBias = expansionUrgency(metrics);
         const double expansionIntel = duelMode() ? 1.0 : 0.0;
         const bool canChaseGuess =
@@ -3343,17 +3393,14 @@ class OimBot : public BasicBot {
              (duelSmallAggression > 0.0 && fullTurn >= 12 &&
               targetGuess != Coord{-1, -1}));
         if (targetGuess != Coord{-1, -1} && canChaseGuess) {
-            addObjective(
-                ObjectiveOption{230.0 - expansionBias * 2.6 +
-                                    duelSmallAggression * 36.0,
-                                targetGuess,
-                                targetPlayer, true, false, false, false});
+            addObjective(ObjectiveOption{
+                230.0 - expansionBias * 2.6 + duelSmallAggression * 36.0,
+                targetGuess, targetPlayer, true, false, false, false});
             for (Coord d : kDirs) {
                 Coord adj = targetGuess + d;
                 addObjective(ObjectiveOption{
                     180.0 - expansionBias * 2.0 + duelSmallAggression * 28.0,
-                    adj, targetPlayer, true,
-                    false, false, false});
+                    adj, targetPlayer, true, false, false, false});
             }
         }
 
@@ -3404,7 +3451,8 @@ class OimBot : public BasicBot {
                     score += duelExpansionHeatAt(c) * 0.95 * expansionIntel *
                              duelExpansionPlanningWeight();
                 }
-                if (!enemy) score += localExpansionPotential(c) * 2.8 * expansionIntel;
+                if (!enemy)
+                    score += localExpansionPotential(c) * 2.8 * expansionIntel;
                 if (!tile.visible) score += 20.0;
                 if (mem.type == TILE_SWAMP) score -= 42.0;
                 if (currentObjective == c) score += 10.0;
@@ -3615,7 +3663,8 @@ class OimBot : public BasicBot {
                                  expansionIntel * duelExpansionPlanningWeight();
                     }
                     if (!enemy)
-                        score += localExpansionPotential(target) * 3.0 * expansionIntel;
+                        score += localExpansionPotential(target) * 3.0 *
+                                 expansionIntel;
                     if (!tile.visible) score += 22.0;
                     if (enemy) score += 28.0 + estimatedArmyAt(target) * 0.10;
                     if (occupier == targetPlayer) score += 18.0;
@@ -3755,7 +3804,8 @@ class OimBot : public BasicBot {
             return direct.move;
         }
 
-        if (auto rolloutOpening = chooseOpeningRolloutMove(targetPlayer, metrics)) {
+        if (auto rolloutOpening =
+                chooseOpeningRolloutMove(targetPlayer, metrics)) {
             return rolloutOpening;
         }
 
@@ -3763,7 +3813,8 @@ class OimBot : public BasicBot {
             return opening;
         }
 
-        if (auto tinyPressure = chooseTinyDuelPressureMove(targetPlayer, metrics)) {
+        if (auto tinyPressure =
+                chooseTinyDuelPressureMove(targetPlayer, metrics)) {
             return tinyPressure;
         }
 
@@ -3771,7 +3822,8 @@ class OimBot : public BasicBot {
             return tempo;
         }
 
-        if (auto bloom = chooseDuelExpansionCaptureMove(targetPlayer, metrics)) {
+        if (auto bloom =
+                chooseDuelExpansionCaptureMove(targetPlayer, metrics)) {
             return bloom;
         }
 
@@ -3807,10 +3859,10 @@ class OimBot : public BasicBot {
                    metrics.conversionAdvantage < 8.0) {
             plannedMargin -= expansionBias * 0.9;
         }
-        if (planned.valid &&
-            (!economic.valid || planned.score + plannedMargin >= economic.score ||
-             planned.mode == FocusMode::ATTACK ||
-             planned.mode == FocusMode::CONVERT)) {
+        if (planned.valid && (!economic.valid ||
+                              planned.score + plannedMargin >= economic.score ||
+                              planned.mode == FocusMode::ATTACK ||
+                              planned.mode == FocusMode::CONVERT)) {
             traceCompetition(direct, planned, economic, "planned");
             traceDecision("planned", planned, metrics);
             return planned.move;

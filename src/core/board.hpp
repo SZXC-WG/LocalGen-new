@@ -94,7 +94,7 @@ class Board {
     /// Vision system.
    protected:
     /// visionCache[n][x][y], flattened into 1D for better performance.
-    std::vector<bool> visionCache;
+    std::vector<uint8_t> visionCache;
 
    public:
     /// Update the vision cache. Must be called after a board update.

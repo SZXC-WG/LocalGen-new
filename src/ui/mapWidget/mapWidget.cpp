@@ -31,6 +31,7 @@ MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled,
     setMouseTracking(true);
     setAttribute(Qt::WA_AcceptTouchEvents, true);
     setFocusEnabled(focusEnabled);
+    setMinimumSize(2 * fitMargin + 10, 2 * fitMargin + 10);
     realloc(width, height);
 }
 

@@ -87,10 +87,13 @@ class MapWidget : public QWidget {
     // Constants
     static constexpr qreal cellSize = 32.0, zoomFactor = 1.1,
                            paddingFactor = 0.109375;
-    static constexpr qreal minScale = 0.3679, maxScale = 7.389;
+    static constexpr qreal defaultMinScale = 0.3679, defaultMaxScale = 7.389;
     static constexpr qreal minFontPixelSize = 8.0, maxFontPixelSize = 18.0,
                            fontHeightRatio = 0.375;
     const int fitMargin;
+
+    // Allowed scale range - adjusted dynamically based on map size
+    qreal minScale = defaultMinScale, maxScale = defaultMaxScale;
 
     // State variables
     int focusRow, focusCol;

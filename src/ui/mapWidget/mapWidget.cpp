@@ -95,6 +95,9 @@ void MapWidget::fitCenter() {
     qreal scaleY = availableHeight / mapPixelHeight;
     scale = std::min(scaleX, scaleY);
 
+    minScale = std::min(defaultMinScale, scale * 0.8);
+    maxScale = std::max(defaultMaxScale, scale * 1.2);
+
     qreal scaledMapWidth = mapPixelWidth * scale;
     qreal scaledMapHeight = mapPixelHeight * scale;
 

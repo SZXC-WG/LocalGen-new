@@ -31,7 +31,6 @@ MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled,
     setMouseTracking(true);
     setAttribute(Qt::WA_AcceptTouchEvents, true);
     setFocusEnabled(focusEnabled);
-    setMinimumSize(2 * fitMargin + 10, 2 * fitMargin + 10);
     realloc(width, height);
 }
 
@@ -77,6 +76,7 @@ void MapWidget::setMapHeight(int h) {
 void MapWidget::realloc(int w, int h) {
     _mapWidth = w, _mapHeight = h;
     displayTiles.resize(h * w);
+    setMinimumSize(2 * fitMargin + w, 2 * fitMargin + h);
     update();
 }
 

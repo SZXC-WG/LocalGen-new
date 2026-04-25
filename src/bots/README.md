@@ -27,7 +27,7 @@ Here is a summary of current bot implementations included in this directory. The
 | XiaruizeBot | xiaruize0911 | ✅ | High | $O(kn^2)$ | Multi-Source Strategic Search |
 | KutuBot | pinkHC | ✅ | High | $O(n \log n)$ | Unified Strategic Objective Planner |
 | LyBot | pinkHC | ❌ | High | $O(n^2)$ | Multiplayer Objective Planner |
-| oimbot | oimasterkafuu | ✅ | High | $O(n^3)$ | Stance-Based Strategic Planner |
+| oimbot | oimasterkafuu | ✅ | High | $O(n^2)$ | Memory-Aware Threat/Objective Planner |
 
 ### Adding a New Bot
 

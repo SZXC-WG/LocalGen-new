@@ -7,23 +7,22 @@
   "license": "GPL-3.0",
   "default_branch": "master",
   "created_at": "2023-01-05T12:00:40Z",
-  "updated_at": "2026-04-19T14:55:37Z",
-  "pushed_at": "2026-04-19T14:55:33Z",
-  "stargazers_count": 22,
+  "updated_at": "2026-04-27T03:00:50Z",
+  "pushed_at": "2026-04-27T03:00:46Z",
+  "stargazers_count": 23,
   "watchers_count": 4,
   "forks_count": 9,
   "open_issues_count": 3,
   "topics": [
     "cmake",
     "cpp",
-    "cpp14",
     "cpp17",
     "fast-paced-game",
     "generals-io",
     "local-game",
     "qt",
     "qt6",
-    "websocket",
+    "websockets",
     "xege"
   ],
   "project_name": "Local Generals.io",
@@ -52,7 +51,7 @@
   "discussions_url": "https://github.com/SZXC-WG/LocalGen-new/discussions",
   "actions_url": "https://github.com/SZXC-WG/LocalGen-new/actions",
   "contributors_url": "https://github.com/SZXC-WG/LocalGen-new/graphs/contributors",
-  "release_count": 23,
+  "release_count": 24,
   "contributor_count": 10,
-  "synced_at": "2026-04-20T05:35:34.414782+00:00"
+  "synced_at": "2026-04-27T05:49:11.401962+00:00"
 }

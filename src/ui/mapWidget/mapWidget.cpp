@@ -107,20 +107,18 @@ void MapWidget::fitCenter() {
     update();
 }
 
-static void drawArrow(QPainter& painter, const QPointF& p1, const QPointF& p2,
+static void drawArrow(QPainter& painter, const QPointF& p1, int dx, int dy,
                       qreal length, qreal width) {
     // 1. Calculate geometry
-    auto angle = std::atan2(p2.y() - p1.y(), p2.x() - p1.x());
-    QPointF arrowEnd =
-        p1 + QPointF(std::cos(angle) * length, std::sin(angle) * length);
+    QPointF arrowEnd(p1.x() + dx * length, p1.y() + dy * length);
 
-    qreal arrowHeadLen = length / 3.0;
-    QPointF left =
-        arrowEnd - QPointF(std::cos(angle + M_PI / 4) * arrowHeadLen,
-                           std::sin(angle + M_PI / 4) * arrowHeadLen);
-    QPointF right =
-        arrowEnd - QPointF(std::cos(angle - M_PI / 4) * arrowHeadLen,
-                           std::sin(angle - M_PI / 4) * arrowHeadLen);
+    constexpr qreal lnScale = 0.23570226039551587;  // sqrt(2) / 6
+    const qreal C = length * lnScale;
+    const qreal c_dx = C * dx;
+    const qreal c_dy = C * dy;
+
+    QPointF left(arrowEnd.x() - c_dx + c_dy, arrowEnd.y() - c_dy - c_dx);
+    QPointF right(arrowEnd.x() - c_dx - c_dy, arrowEnd.y() - c_dy + c_dx);
 
     QPainterPath path;
     path.moveTo(p1);
@@ -385,8 +383,8 @@ void MapWidget::paintEvent(QPaintEvent* event) {
                     (startRow <= r2 && r2 <= endRow && startCol <= c2 &&
                      c2 <= endCol)) {
                     QPointF p1((c1 + 0.5) * cellSize, (r1 + 0.5) * cellSize);
-                    QPointF p2((c2 + 0.5) * cellSize, (r2 + 0.5) * cellSize);
-                    drawArrow(painter, p1, p2, cellSize * 0.3, 1.5 / scale);
+                    drawArrow(painter, p1, c2 - c1, r2 - r1, cellSize * 0.3,
+                              1.5 / scale);
                 }
             }
         }

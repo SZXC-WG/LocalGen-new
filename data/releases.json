@@ -1,5 +1,5 @@
 {
-  "synced_at": "2026-05-25T07:10:15.066580+00:00",
+  "synced_at": "2026-06-01T08:30:07.096070+00:00",
   "items": [
     {
       "name": "v6.0.0-beta.1",
@@ -29,7 +29,7 @@
           "name": "LocalGen-6.0.0-beta.1-windows-x64-portable.zip",
           "size": 15011701,
           "size_human": "14.3 MB",
-          "download_count": 6,
+          "download_count": 11,
           "content_type": "application/x-zip-compressed",
           "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v6.0.0-beta.1/LocalGen-6.0.0-beta.1-windows-x64-portable.zip",
           "updated_at": "2026-04-22T07:35:28Z"
@@ -64,7 +64,7 @@
           "name": "LGen_win64_v4.3.2D.zip",
           "size": 2171141,
           "size_human": "2.1 MB",
-          "download_count": 16,
+          "download_count": 17,
           "content_type": "application/x-zip-compressed",
           "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v4.3.2D/LGen_win64_v4.3.2D.zip",
           "updated_at": "2025-06-29T13:06:40Z"
@@ -344,7 +344,7 @@
           "name": "LocalGen_v4.2.0_win64.zip",
           "size": 2184134,
           "size_human": "2.1 MB",
-          "download_count": 8,
+          "download_count": 10,
           "content_type": "application/x-zip-compressed",
           "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v4.2.0/LocalGen_v4.2.0_win64.zip",
           "updated_at": "2023-09-02T05:12:22Z"

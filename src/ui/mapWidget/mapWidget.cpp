@@ -51,11 +51,10 @@ void MapWidget::setMapWidth(int w) {
 
     if (_mapWidth > 0 && _mapHeight > 0) {
         std::vector<DisplayTile> newTiles(_mapHeight * w);
-        int minW = std::min(w, _mapWidth);
+        int copyW = std::min(w, _mapWidth);
         for (int r = 0; r < _mapHeight; ++r) {
-            for (int c = 0; c < minW; ++c) {
-                newTiles[r * w + c] = displayTiles[r * _mapWidth + c];
-            }
+            std::copy_n(displayTiles.begin() + r * _mapWidth, copyW,
+                        newTiles.begin() + r * w);
         }
         displayTiles = std::move(newTiles);
     } else {

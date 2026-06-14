@@ -205,14 +205,15 @@ QPixmap& MapWidget::getTextPixmap(const QString& text, qreal physicalScale,
     font.setPixelSize(fontPixelSize);
 
     // Truncate text if too wide, keeping at least 1 character
-    QString displayText = text;
     QFontMetrics fm(font);
-    if (fm.horizontalAdvance(displayText) > physicalSize) {
-        while (displayText.length() > 1 &&
-               fm.horizontalAdvance(displayText + "...") > physicalSize) {
-            displayText.chop(1);
+    QString displayText;
+    if (text.size() <= 1) {
+        displayText = text;
+    } else {
+        displayText = fm.elidedText(text, Qt::ElideRight, physicalSize);
+        if (!displayText.startsWith(text[0])) {
+            displayText = text[0] + displayText;
         }
-        displayText += "...";
     }
 
     QPainter p(&px);

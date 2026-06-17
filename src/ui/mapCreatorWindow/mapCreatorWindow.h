@@ -34,7 +34,6 @@ class MapCreatorWindow : public QDialog {
     void onMapClicked(int r, int c);
 
    private slots:
-    void onToolSelected();
     void setupSliders();
     void setupMetadataSidebar();
     void onOpenMap();

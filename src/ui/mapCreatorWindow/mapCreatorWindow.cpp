@@ -101,7 +101,6 @@ void MapCreatorWindow::setupToolbar() {
         QIcon icon(toolIcons[i]);
         btn->setIcon(icon);
         btn->setIconSize(QSize(30, 30));
-        btn->setProperty("toolIndex", i);
         btn->setStyleSheet(
             "QPushButton {"
             "    border: 2px solid transparent;"
@@ -114,23 +113,16 @@ void MapCreatorWindow::setupToolbar() {
             "    border: 2px solid #d0d0d0;"
             "}");
 
-        connect(btn, &QPushButton::clicked, this,
-                &MapCreatorWindow::onToolSelected);
+        connect(btn, &QPushButton::clicked, this, [this, i]() {
+            selectedTool = static_cast<ToolType>(i);
+            updateToolButtonStyles();
+            updateHintBar();
+        });
         toolButtons.append(btn);
         toolLayout->addWidget(btn);
     }
 
     updateToolButtonStyles();
-}
-
-void MapCreatorWindow::onToolSelected() {
-    QPushButton* sender = qobject_cast<QPushButton*>(this->sender());
-    if (sender) {
-        selectedTool =
-            static_cast<ToolType>(sender->property("toolIndex").toInt());
-        updateToolButtonStyles();
-        updateHintBar();
-    }
 }
 
 void MapCreatorWindow::updateToolButtonStyles() {

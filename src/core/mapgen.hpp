@@ -12,33 +12,31 @@
 
 namespace {
 
-static uint32_t splitmix64(uint64_t& x) {
-    uint64_t z = (x += 0x9E3779B97F4A7C15ull);
+inline std::uint64_t splitmix64(std::uint64_t& x) {
+    std::uint64_t z = (x += 0x9E3779B97F4A7C15ull);
     z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
     z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
     z = z ^ (z >> 31);
-    uint32_t result = static_cast<uint32_t>(z ^ (z >> 32));
-    return result == 0u ? 1u : result;
+    return z ? z : 0x9E3779B97F4A7C15ull;
 }
 
-inline std::uint32_t fastRand(std::uint32_t& state) {
-    state ^= state << 13;
-    state ^= state >> 17;
-    state ^= state << 5;
-    return state;
+// xorshift64*
+inline std::uint32_t fastRand(std::uint64_t& state) {
+    state ^= state >> 12;
+    state ^= state << 25;
+    state ^= state >> 27;
+    return (state * 0x2545F4914F6CDD1Dull) >> 32;
 }
 
-inline int uniformInclusive(std::uint32_t& state, int low, int high) {
-    if (high <= low) return low;
+inline int uniformInclusive(std::uint64_t& state, int low, int high) {
     const std::uint32_t span = static_cast<std::uint32_t>(high - low + 1);
     return low + static_cast<int>(fastRand(state) % span);
 }
 
-inline int uniformPercentageCount(std::uint32_t& state, int total,
+inline int uniformPercentageCount(std::uint64_t& state, int total,
                                   int lowPercent, int highPercent) {
-    if (total <= 0 || highPercent <= 0) return 0;
-    const int low = std::max(0, total * lowPercent / 100);
-    const int high = std::max(low, total * highPercent / 100);
+    const int low = total * lowPercent / 100;
+    const int high = total * highPercent / 100;
     return uniformInclusive(state, low, high);
 }
 
@@ -541,9 +539,10 @@ class Generator {
     bool placeLookout_;
     bool placeObservatory_;
     double mountainDensity_;
-    std::uint32_t searchSeed_;
-    std::uint32_t decorateSeed_;
-    std::uint32_t cityArmySeed_;
+
+    std::uint64_t searchSeed_;
+    std::uint64_t decorateSeed_;
+    std::uint64_t cityArmySeed_;
 
     std::vector<tile_type_e> grid_;
     std::vector<tile_type_e> bestGrid_;

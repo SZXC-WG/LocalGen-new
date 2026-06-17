@@ -217,8 +217,6 @@ void ChatBoxWidget::appendMessage(const ChatMessageEntry& message) {
         delete oldItem;
     }
     historyList->scrollToBottom();
-    QScrollBar* scrollBar = historyList->verticalScrollBar();
-    scrollBar->setValue(scrollBar->maximum());
 }
 
 void ChatBoxWidget::focusInput() {

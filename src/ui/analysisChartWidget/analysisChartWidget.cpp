@@ -53,10 +53,9 @@ qreal smoothedLinearValue(const QList<QPointF>& history, qreal rawValue) {
 
 qreal smoothedLogValue(const QList<QPointF>& history, qreal rawValue) {
     constexpr qreal smoothingAlpha = 0.65;
-    const qreal rawLogValue = std::log10(std::max<qreal>(1.0, rawValue));
-    if (history.isEmpty() || rawValue <= 0.0) {
-        return std::pow(static_cast<qreal>(10.0), rawLogValue);
-    }
+    if (rawValue < 1.0) return 1.0;
+    if (history.isEmpty()) return rawValue;
+    const qreal rawLogValue = std::log10(rawValue);
     const qreal previousSmoothedLog =
         std::log10(std::max<qreal>(1.0, history.constLast().y()));
     const qreal smoothedLog =

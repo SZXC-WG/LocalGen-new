@@ -702,12 +702,8 @@ void MapCreatorWindow::updateHintBar() {
         valueLabel->setVisible(true);
         valueSpinBox->setVisible(true);
         teamComboBox->setVisible(false);
-
-        if (selectedTool == CITY) {
-            valueLabel->setText("City Strength:");
-        } else {
-            valueLabel->setText("Neutral Army Strength:");
-        }
+        valueLabel->setText(selectedTool == CITY ? "City Strength:"
+                                                 : "Neutral Army Strength:");
     } else if (selectedTool == SPAWN) {
         hintLabel->setVisible(false);
         valueLabel->setVisible(true);

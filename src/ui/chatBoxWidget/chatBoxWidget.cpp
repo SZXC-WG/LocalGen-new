@@ -181,12 +181,12 @@ ChatBoxWidget::ChatBoxWidget(QWidget* parent) : QFrame(parent) {
     QPalette inputPalette = inputLine->palette();
     inputPalette.setColor(QPalette::Base, Qt::white);
     inputPalette.setColor(QPalette::Text, QColor(0, 128, 128));
-    inputPalette.setColor(QPalette::PlaceholderText, QColor(117, 117, 117));
+    QColor disabledColor(117, 117, 117);
+    inputPalette.setColor(QPalette::PlaceholderText, disabledColor);
     inputPalette.setColor(QPalette::Disabled, QPalette::Base, Qt::white);
-    inputPalette.setColor(QPalette::Disabled, QPalette::Text,
-                          QColor(117, 117, 117));
+    inputPalette.setColor(QPalette::Disabled, QPalette::Text, disabledColor);
     inputPalette.setColor(QPalette::Disabled, QPalette::PlaceholderText,
-                          QColor(117, 117, 117));
+                          disabledColor);
     inputLine->setPalette(inputPalette);
 
     inputLine->setPlaceholderText("Press [Enter] to chat.");

@@ -202,9 +202,11 @@ void LocalGameDialog::on_comboBox_gameMap_currentIndexChanged(int index) {
         ui->comboBox_gameMap->itemData(index, MapPathRole).toString();
 
     updatingMapControls = true;
-    if (mapFilePath.isEmpty()) {
-        ui->spinBox_mapWidth->setEnabled(true);
-        ui->spinBox_mapHeight->setEnabled(true);
+    bool isRandom = mapFilePath.isEmpty();
+    ui->spinBox_mapWidth->setEnabled(isRandom);
+    ui->spinBox_mapHeight->setEnabled(isRandom);
+
+    if (isRandom) {
         ui->spinBox_mapWidth->setValue(randomMapWidth);
         ui->spinBox_mapHeight->setValue(randomMapHeight);
     } else {
@@ -212,8 +214,6 @@ void LocalGameDialog::on_comboBox_gameMap_currentIndexChanged(int index) {
             ui->comboBox_gameMap->itemData(index, MapWidthRole).toInt());
         ui->spinBox_mapHeight->setValue(
             ui->comboBox_gameMap->itemData(index, MapHeightRole).toInt());
-        ui->spinBox_mapWidth->setEnabled(false);
-        ui->spinBox_mapHeight->setEnabled(false);
     }
     updatingMapControls = false;
 }

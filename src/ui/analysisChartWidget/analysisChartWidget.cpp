@@ -260,12 +260,10 @@ void AnalysisChartWidget::refreshChart() {
     metricToggle->setText(showingLand ? "Switch to Army" : "Switch to Land");
     scaleToggle->setText(usingLogScale ? "Switch to Linear" : "Switch to Log");
 
-    QAbstractAxis* activeAxis = usingLogScale
-                                    ? static_cast<QAbstractAxis*>(axisYLog)
-                                    : static_cast<QAbstractAxis*>(axisYLinear);
-    QAbstractAxis* inactiveAxis = usingLogScale
-                                      ? static_cast<QAbstractAxis*>(axisYLinear)
-                                      : static_cast<QAbstractAxis*>(axisYLog);
+    QAbstractAxis* activeAxis =
+        usingLogScale ? static_cast<QAbstractAxis*>(axisYLog) : axisYLinear;
+    QAbstractAxis* inactiveAxis =
+        usingLogScale ? static_cast<QAbstractAxis*>(axisYLinear) : axisYLog;
 
     for (PlayerAnalysisSeries& playerSeries : seriesData) {
         playerSeries.series->detachAxis(inactiveAxis);
@@ -290,9 +288,8 @@ void AnalysisChartWidget::updateAxisRanges() {
         std::max<qreal>(1.0, static_cast<qreal>(std::max(0, sampleCount - 1)));
     axisX->setRange(0.0, axisMaxX);
 
-    const double axisMaxY = showingLand
-                                ? adjustedAxisMax(static_cast<double>(landMax))
-                                : adjustedAxisMax(static_cast<double>(armyMax));
+    const double axisMaxY =
+        adjustedAxisMax(static_cast<double>(showingLand ? landMax : armyMax));
     if (usingLogScale)
         axisYLog->setRange(1.0, std::max(10.0, axisMaxY));
     else

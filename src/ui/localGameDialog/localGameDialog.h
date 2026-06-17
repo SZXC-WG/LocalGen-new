@@ -37,14 +37,9 @@ class LocalGameDialog : public QDialog {
     void on_btnCancel_clicked();
     void on_spinBox_numPlayers_valueChanged(int);
     void on_comboBox_gameMap_currentIndexChanged(int);
-    void on_spinBox_mapWidth_valueChanged(int);
-    void on_spinBox_mapHeight_valueChanged(int);
 
    private:
     void populateAvailableMaps();
 
     Ui::LocalGameDialog* ui;
-    int randomMapWidth = 20;
-    int randomMapHeight = 20;
-    bool updatingMapControls = false;
 };

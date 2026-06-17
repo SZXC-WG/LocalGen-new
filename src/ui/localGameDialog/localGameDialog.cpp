@@ -14,6 +14,7 @@
 #include <QHash>
 #include <QLabel>
 #include <QRandomGenerator>
+#include <QScrollBar>
 #include <QStringList>
 #include <algorithm>
 
@@ -51,8 +52,6 @@ LocalGameDialog::LocalGameDialog(QWidget* parent)
     : QDialog(parent), ui(new Ui::LocalGameDialog) {
     ui->setupUi(this);
     ComboBoxPopupCompatibility::configureForManagedPopup(ui->comboBox_gameMap);
-    randomMapWidth = ui->spinBox_mapWidth->value();
-    randomMapHeight = ui->spinBox_mapHeight->value();
     populateAvailableMaps();
     on_spinBox_numPlayers_valueChanged(ui->spinBox_numPlayers->value());
 }
@@ -136,12 +135,10 @@ void LocalGameDialog::populateAvailableMaps() {
         mapCombo->setItemData(index, choice.height, MapHeightRole);
     }
 
-    QFontMetrics fm(mapCombo->font());
-    int maxWidth = 0;
-    for (int i = 0; i < mapCombo->count(); ++i)
-        maxWidth =
-            std::max(maxWidth, fm.horizontalAdvance(mapCombo->itemText(i)));
-    mapCombo->view()->setMinimumWidth(maxWidth + 30);
+    auto* popupView = mapCombo->view();
+    popupView->setMinimumWidth(
+        popupView->sizeHintForColumn(0) +
+        popupView->verticalScrollBar()->sizeHint().width());
 
     mapCombo->setCurrentIndex(0);
     on_comboBox_gameMap_currentIndexChanged(0);
@@ -200,27 +197,14 @@ void LocalGameDialog::on_comboBox_gameMap_currentIndexChanged(int index) {
     const QString mapFilePath =
         ui->comboBox_gameMap->itemData(index, MapPathRole).toString();
 
-    updatingMapControls = true;
     bool isRandom = mapFilePath.isEmpty();
     ui->spinBox_mapWidth->setEnabled(isRandom);
     ui->spinBox_mapHeight->setEnabled(isRandom);
 
-    if (isRandom) {
-        ui->spinBox_mapWidth->setValue(randomMapWidth);
-        ui->spinBox_mapHeight->setValue(randomMapHeight);
-    } else {
+    if (!isRandom) {
         ui->spinBox_mapWidth->setValue(
             ui->comboBox_gameMap->itemData(index, MapWidthRole).toInt());
         ui->spinBox_mapHeight->setValue(
             ui->comboBox_gameMap->itemData(index, MapHeightRole).toInt());
     }
-    updatingMapControls = false;
-}
-
-void LocalGameDialog::on_spinBox_mapWidth_valueChanged(int value) {
-    if (!updatingMapControls) randomMapWidth = value;
-}
-
-void LocalGameDialog::on_spinBox_mapHeight_valueChanged(int value) {
-    if (!updatingMapControls) randomMapHeight = value;
 }

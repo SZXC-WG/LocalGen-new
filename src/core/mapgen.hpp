@@ -396,12 +396,9 @@ class Generator {
                 }
             }
 
-            int maxArea = area_[0];
-            int minArea = area_[0];
-            for (int i = 1; i < searchSpawnCount_; ++i) {
-                maxArea = std::max(maxArea, area_[i]);
-                minArea = std::min(minArea, area_[i]);
-            }
+            const auto [minAreaIt, maxAreaIt] = std::minmax_element(
+                area_.begin(), area_.begin() + searchSpawnCount_);
+            const int minArea = *minAreaIt, maxArea = *maxAreaIt;
 
             int spawnPenalty = 0;
             for (int spawn : spawns_) {

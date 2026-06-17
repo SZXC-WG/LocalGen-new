@@ -12,10 +12,13 @@
 
 namespace {
 
-inline std::uint32_t makeSeed(std::uint64_t value, std::uint32_t salt) {
-    std::uint32_t state =
-        static_cast<std::uint32_t>(value ^ (value >> 32) ^ salt);
-    return state == 0 ? 1u : state;
+static uint32_t splitmix64(uint64_t& x) {
+    uint64_t z = (x += 0x9E3779B97F4A7C15ull);
+    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
+    z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
+    z = z ^ (z >> 31);
+    uint32_t result = static_cast<uint32_t>(z ^ (z >> 32));
+    return result == 0u ? 1u : result;
 }
 
 inline std::uint32_t fastRand(std::uint32_t& state) {
@@ -41,9 +44,9 @@ inline int uniformPercentageCount(std::uint32_t& state, int total,
 
 class Generator {
    public:
-    Generator(int width, int height, int spawnCount,
-              std::mt19937::result_type seed, bool placeSwamp,
-              bool placeLookout, bool placeObservatory, double mountainDensity)
+    Generator(int width, int height, int spawnCount, std::uint64_t seed,
+              bool placeSwamp, bool placeLookout, bool placeObservatory,
+              double mountainDensity)
         : width_(width),
           height_(height),
           totalTiles_(width_ > 0 && height_ > 0 ? width_ * height_ : 0),
@@ -53,11 +56,6 @@ class Generator {
           placeLookout_(placeLookout),
           placeObservatory_(placeObservatory),
           mountainDensity_(mountainDensity),
-          searchSeed_(makeSeed(static_cast<std::uint64_t>(seed), 0x20260520u)),
-          decorateSeed_(
-              makeSeed(static_cast<std::uint64_t>(seed), 0xA341316Cu)),
-          cityArmySeed_(
-              makeSeed(static_cast<std::uint64_t>(seed), 0xC8013EA4u)),
           grid_(totalTiles_, TILE_BLANK),
           bestGrid_(totalTiles_, TILE_BLANK),
           visited_(totalTiles_, 0),
@@ -77,6 +75,9 @@ class Generator {
         maxConnectedComponent_.reserve(totalTiles_);
         spawns_.reserve(searchSpawnCount_);
         bestSpawns_.reserve(searchSpawnCount_);
+        searchSeed_ = splitmix64(seed);
+        decorateSeed_ = splitmix64(seed);
+        cityArmySeed_ = splitmix64(seed);
     }
 
     Board run() {
@@ -563,7 +564,7 @@ class Generator {
 };
 
 inline Board generateBoard(int width, int height, int spawnCount,
-                           std::mt19937::result_type seed, bool placeSwamp,
+                           std::uint64_t seed, bool placeSwamp,
                            bool placeLookout, bool placeObservatory,
                            double mountainDensity) {
     return Generator(width, height, spawnCount, seed, placeSwamp, placeLookout,
@@ -574,7 +575,7 @@ inline Board generateBoard(int width, int height, int spawnCount,
 }  // namespace
 
 inline Board Board::generate(int width, int height, int spawnCount,
-                             std::mt19937::result_type seed, bool placeSwamp,
+                             std::uint64_t seed, bool placeSwamp,
                              bool placeLookout, bool placeObservatory,
                              double mountainDensity) {
     return generateBoard(width, height, spawnCount, seed, placeSwamp,

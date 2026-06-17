@@ -11,6 +11,7 @@
 #include <atomic>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <filesystem>
 #include <iomanip>
@@ -741,18 +742,18 @@ std::size_t botIndexForPlayer(const BasicGame& game, index_t playerId) {
     return static_cast<std::size_t>(game.getTeam(playerId));
 }
 
-GameResult runSingleGame(const Options& options, int gameNumber) {
+GameResult runSingleGame(const Options& options, int gameNumber,
+                         std::uint64_t mapSeed) {
     GameResult result;
     result.gameNumber = gameNumber;
     result.ranksByBot.resize(options.bots.size(),
                              static_cast<int>(options.bots.size()));
     result.statsDelta.resize(options.bots.size());
 
-    auto seed = std::random_device{}();
     Board board =
         options.mapPath.empty()
             ? Board::generate(options.width, options.height,
-                              static_cast<int>(options.bots.size()), seed)
+                              static_cast<int>(options.bots.size()), mapSeed)
             : options.customBoard;
 
     std::vector<Player*> players;
@@ -902,6 +903,14 @@ int main(int argc, char** argv) {
     std::atomic<int> nextGame{1};
     std::atomic<bool> stopRequested{false};
     std::vector<GameResult> results(options.games);
+    std::vector<std::uint64_t> mapSeeds(options.games);
+    std::random_device rd;
+    std::seed_seq seedSequence{rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()};
+    std::mt19937_64 mapSeedGenerator{seedSequence};
+    for (std::uint64_t& seed : mapSeeds) {
+        seed = mapSeedGenerator();
+    }
+
     std::mutex outputMutex;
     std::mutex resultsMutex;
     std::mutex errorMutex;
@@ -915,7 +924,8 @@ int main(int argc, char** argv) {
             if (gameNumber > options.games) return;
 
             try {
-                GameResult result = runSingleGame(options, gameNumber);
+                GameResult result = runSingleGame(options, gameNumber,
+                                                  mapSeeds[gameNumber - 1]);
                 if (!options.silent) {
                     std::lock_guard<std::mutex> lock(outputMutex);
                     printGameResult(result);

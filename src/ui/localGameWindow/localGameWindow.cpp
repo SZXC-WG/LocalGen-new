@@ -92,7 +92,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
 
     Board initialBoard;
     if (config.mapFilePath.isEmpty()) {
-        std::mt19937::result_type seed = QRandomGenerator::global()->generate();
+        quint64 seed = QRandomGenerator64::global()->generate();
         initialBoard = Board::generate(config.mapWidth, config.mapHeight,
                                        config.players.size(), seed);
     } else {

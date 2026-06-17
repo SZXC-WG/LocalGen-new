@@ -14,7 +14,7 @@
  */
 
 #include <cassert>
-#include <random>
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -280,8 +280,8 @@ class Board {
 
    public:
     static Board generate(int width, int height, int spawnCount,
-                          std::mt19937::result_type seed,
-                          bool placeSwamp = false, bool placeLookout = false,
+                          std::uint64_t seed, bool placeSwamp = false,
+                          bool placeLookout = false,
                           bool placeObservatory = false,
                           double mountainDensity = 0.3);
 };

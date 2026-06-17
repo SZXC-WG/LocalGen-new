@@ -4,7 +4,6 @@
 #pragma once
 
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <limits>
@@ -90,7 +89,7 @@ class Generator {
     }
 
    private:
-    static constexpr int kBlindSearchBudgetMs = 85;
+    static constexpr int kNumCandidates = 96;
     static constexpr double kComponentPenaltyWeight = 60.0;
     static constexpr int kDirections[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
@@ -98,16 +97,7 @@ class Generator {
         return row >= 0 && row < height_ && col >= 0 && col < width_;
     }
 
-    inline long long elapsedMs(
-        const std::chrono::steady_clock::time_point& start) const {
-        return std::chrono::duration_cast<std::chrono::milliseconds>(
-                   std::chrono::steady_clock::now() - start)
-            .count();
-    }
-
     void generateBasicTerrain() {
-        const auto start = std::chrono::steady_clock::now();
-
         int targetMountains =
             static_cast<int>(std::lround(totalTiles_ * mountainDensity_));
         targetMountains = std::clamp(targetMountains, 0, totalTiles_ * 3 / 5);
@@ -115,7 +105,8 @@ class Generator {
         double baseMargin = 0.06;
         double bestScore = 1e15;
 
-        while (elapsedMs(start) < kBlindSearchBudgetMs || bestSpawns_.empty()) {
+        for (int cand = 0; cand < kNumCandidates || bestSpawns_.empty();
+             ++cand) {
             std::fill(grid_.begin(), grid_.end(), TILE_BLANK);
 
             const double currentMargin =
@@ -157,7 +148,7 @@ class Generator {
 
             if (currentMountains < targetMountains) {
                 baseMargin += 0.02;
-                if (elapsedMs(start) < kBlindSearchBudgetMs) continue;
+                if (cand + 1 < kNumCandidates) continue;
             } else if (currentMountains > targetMountains) {
                 int candidateTail = 0;
                 std::fill(isCandidate_.begin(), isCandidate_.end(), 0);

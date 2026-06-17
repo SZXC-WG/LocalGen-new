@@ -38,6 +38,7 @@ struct LocalMapChoice {
 
 QStringList toQStringList(const std::vector<std::string>& vec) {
     QStringList list;
+    list.reserve(vec.size());
     for (const auto& str : vec) {
         list.append(QString::fromStdString(str));
     }
@@ -179,9 +180,7 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
         QComboBox* playerCombo = new QComboBox();
         ComboBoxPopupCompatibility::configureForManagedPopup(playerCombo);
         if (index == 0) playerCombo->addItem("Human");
-        for (const QString& botName : botNames) {
-            playerCombo->addItem(botName);
-        }
+        playerCombo->addItems(botNames);
         playerCombo->setCurrentIndex(
             index == 0 ? 0 : rng->bounded(playerCombo->count()));
         playerCombo->setSizePolicy(QSizePolicy::Expanding,

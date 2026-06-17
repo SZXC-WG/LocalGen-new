@@ -39,7 +39,8 @@ void LeaderboardWidget::paintEvent(QPaintEvent* event) {
     borderPen.setWidth(2);
     painter.setPen(borderPen);
 
-    std::vector<int> columnWidths = computeColumnWidths();
+    if (columnWidths.size() != columns.size())
+        columnWidths = computeColumnWidths();
 
     QFont headerFont = font();
     headerFont.setBold(true);
@@ -142,10 +143,9 @@ std::vector<int> LeaderboardWidget::computeColumnWidths() const {
 }
 
 void LeaderboardWidget::updateFixedSize() {
-    int totalWidth = 0;
-    for (int columnWidth : computeColumnWidths()) {
-        totalWidth += columnWidth;
-    }
+    columnWidths = computeColumnWidths();
+    int totalWidth =
+        std::accumulate(columnWidths.begin(), columnWidths.end(), 0);
     int height = headerHeight + static_cast<int>(rows.size()) * rowHeight;
     setFixedSize(totalWidth, height);
 }

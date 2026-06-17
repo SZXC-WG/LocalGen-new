@@ -47,6 +47,7 @@ class LeaderboardWidget : public QWidget {
 
     std::vector<Column> columns;
     std::vector<LeaderboardRow> rows;
+    std::vector<int> columnWidths;
     constexpr static int headerHeight = 30;
     constexpr static int rowHeight = 28;
     constexpr static int horizontalPadding = 12;

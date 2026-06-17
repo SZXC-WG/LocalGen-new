@@ -283,7 +283,7 @@ class Board {
                           std::uint64_t seed, bool placeSwamp = false,
                           bool placeLookout = false,
                           bool placeObservatory = false,
-                          double mountainDensity = 0.3);
+                          double mountainDensity = 0.25);
 };
 
 #include "mapgen.hpp"

@@ -843,6 +843,14 @@ void MapCreatorWindow::fromBoard(const Board& board) {
     }
 }
 
+void MapCreatorWindow::loadMapDocument(const MapDocument& doc) {
+    fromBoard(doc.board);
+    setMapMetadata(doc.metadata);
+    map->fitCenter();
+    widthSlider->setValue(map->mapWidth());
+    heightSlider->setValue(map->mapHeight());
+}
+
 const QString MapCreatorWindow::mapFileFilter =
     "All Supported Maps (*.lgmp *.lg *.json);;"
     "Official Generals.io Map (*.json);;"
@@ -878,12 +886,7 @@ void MapCreatorWindow::onOpenMap() {
         return;
     }
 
-    this->fromBoard(doc.board);
-    this->setMapMetadata(doc.metadata);
-
-    map->fitCenter();
-    widthSlider->setValue(map->mapWidth());
-    heightSlider->setValue(map->mapHeight());
+    loadMapDocument(doc);
 }
 
 void MapCreatorWindow::onImportFromWeb() {
@@ -933,11 +936,7 @@ void MapCreatorWindow::onImportFromWeb() {
             QMessageBox::critical(this, "Error", errMsg);
             return;
         }
-        this->fromBoard(doc.board);
-        this->setMapMetadata(doc.metadata);
-        map->fitCenter();
-        widthSlider->setValue(map->mapWidth());
-        heightSlider->setValue(map->mapHeight());
+        loadMapDocument(doc);
     });
 }
 

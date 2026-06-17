@@ -27,9 +27,7 @@ void LeaderboardWidget::setRows(std::vector<LeaderboardRow> rows) {
 
 void LeaderboardWidget::paintEvent(QPaintEvent* event) {
     Q_UNUSED(event);
-    if (columns.empty()) {
-        return;
-    }
+    if (columns.empty()) return;
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, false);
@@ -38,9 +36,6 @@ void LeaderboardWidget::paintEvent(QPaintEvent* event) {
     QPen borderPen(Qt::black);
     borderPen.setWidth(2);
     painter.setPen(borderPen);
-
-    if (columnWidths.size() != columns.size())
-        columnWidths = computeColumnWidths();
 
     QFont headerFont = font();
     headerFont.setBold(true);

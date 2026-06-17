@@ -219,11 +219,9 @@ void LocalGameDialog::on_comboBox_gameMap_currentIndexChanged(int index) {
 }
 
 void LocalGameDialog::on_spinBox_mapWidth_valueChanged(int value) {
-    if (updatingMapControls || !ui->spinBox_mapWidth->isEnabled()) return;
-    randomMapWidth = value;
+    if (!updatingMapControls) randomMapWidth = value;
 }
 
 void LocalGameDialog::on_spinBox_mapHeight_valueChanged(int value) {
-    if (updatingMapControls || !ui->spinBox_mapHeight->isEnabled()) return;
-    randomMapHeight = value;
+    if (!updatingMapControls) randomMapHeight = value;
 }

@@ -336,8 +336,8 @@ void LocalGameWindow::runHalfTurn() {
     QElapsedTimer elapsedTimer;
     elapsedTimer.start();
     game->step();
-    if (!game->isAlive(humanPlayerId) ||
-        static_cast<int>(game->getAlivePlayers().size()) <= 1) {
+    const bool gameOver = game->getAlivePlayers().size() <= 1;
+    if (!game->isAlive(humanPlayerId) || gameOver) {
         gameMap->bindMoveQueue(nullptr);
         updateView(game->fullView());
     }
@@ -353,7 +353,7 @@ void LocalGameWindow::runHalfTurn() {
 
     double elapsedMs = static_cast<double>(elapsedTimer.nsecsElapsed()) / 1e6;
 
-    if (game->getAlivePlayers().size() <= 1) {
+    if (gameOver) {
         stopGameLoop();
         return;
     }

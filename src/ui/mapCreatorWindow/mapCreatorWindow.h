@@ -64,6 +64,7 @@ class MapCreatorWindow : public QDialog {
     // DisplayBoard <-> Board conversion
     Board toBoard() const;
     void fromBoard(const Board& board);
+    void loadMapDocument(const MapDocument& doc);
 
     QNetworkAccessManager* networkManager;
 

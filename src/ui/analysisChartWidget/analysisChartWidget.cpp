@@ -253,19 +253,17 @@ void AnalysisChartWidget::updateAnalysis(
 }
 
 void AnalysisChartWidget::refreshChart() {
-    const bool showLand = showingLand;
-    const bool useLogScale = usingLogScale;
-    chart->setTitle(
-        QString("%1 Trend (%2)")
-            .arg(showLand ? "Land" : "Army", useLogScale ? "Log" : "Linear"));
+    chart->setTitle(QString("%1 Trend (%2)")
+                        .arg(showingLand ? "Land" : "Army",
+                             usingLogScale ? "Log" : "Linear"));
 
-    metricToggle->setText(showLand ? "Switch to Army" : "Switch to Land");
-    scaleToggle->setText(useLogScale ? "Switch to Linear" : "Switch to Log");
+    metricToggle->setText(showingLand ? "Switch to Army" : "Switch to Land");
+    scaleToggle->setText(usingLogScale ? "Switch to Linear" : "Switch to Log");
 
-    QAbstractAxis* activeAxis = useLogScale
+    QAbstractAxis* activeAxis = usingLogScale
                                     ? static_cast<QAbstractAxis*>(axisYLog)
                                     : static_cast<QAbstractAxis*>(axisYLinear);
-    QAbstractAxis* inactiveAxis = useLogScale
+    QAbstractAxis* inactiveAxis = usingLogScale
                                       ? static_cast<QAbstractAxis*>(axisYLinear)
                                       : static_cast<QAbstractAxis*>(axisYLog);
 
@@ -283,7 +281,7 @@ void AnalysisChartWidget::refreshChart() {
     for (PlayerAnalysisSeries& playerSeries : seriesData) {
         playerSeries.series->attachAxis(activeAxis);
         playerSeries.series->replace(
-            historyForMode(playerSeries, showLand, useLogScale));
+            historyForMode(playerSeries, showingLand, usingLogScale));
     }
 }
 

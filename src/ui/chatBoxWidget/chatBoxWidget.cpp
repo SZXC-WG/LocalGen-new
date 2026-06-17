@@ -209,12 +209,10 @@ void ChatBoxWidget::appendMessage(const ChatMessageEntry& message) {
     historyList->setItemWidget(item, rowWidget);
 
     while (historyList->count() > maxHistoryEntries) {
-        QListWidgetItem* oldItem = historyList->item(0);
-        QWidget* oldWidget = historyList->itemWidget(oldItem);
-        historyList->removeItemWidget(oldItem);
-        delete oldWidget;
-        oldItem = historyList->takeItem(0);
-        delete oldItem;
+        if (QListWidgetItem* oldItem = historyList->takeItem(0)) {
+            delete historyList->itemWidget(oldItem);
+            delete oldItem;
+        }
     }
     historyList->scrollToBottom();
 }

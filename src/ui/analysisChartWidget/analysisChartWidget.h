@@ -31,7 +31,7 @@ class AnalysisChartWidget : public QFrame {
     Q_OBJECT
 
    public:
-    explicit AnalysisChartWidget(QWidget* parent, int playerCount,
+    explicit AnalysisChartWidget(QWidget* parent, size_t playerCount,
                                  const std::vector<QColor>& playerColors,
                                  const std::vector<QString>& playerNames);
 

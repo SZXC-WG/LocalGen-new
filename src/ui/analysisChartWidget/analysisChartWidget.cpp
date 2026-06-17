@@ -126,7 +126,8 @@ QChart* createChart(const QString& title, QValueAxis*& outAxisX) {
 }  // namespace
 
 AnalysisChartWidget::AnalysisChartWidget(
-    QWidget* parent, int playerCount, const std::vector<QColor>& playerColors,
+    QWidget* parent, size_t playerCount,
+    const std::vector<QColor>& playerColors,
     const std::vector<QString>& playerNames)
     : QFrame(parent) {
     const QColor foreground(240, 244, 248);
@@ -188,21 +189,18 @@ AnalysisChartWidget::AnalysisChartWidget(
         refreshChart();
     });
 
-    seriesData.resize(static_cast<size_t>(playerCount));
-    for (int i = 0; i < playerCount; ++i) {
-        const QColor& color = playerColors[static_cast<size_t>(i)];
-        const QString& name = playerNames[static_cast<size_t>(i)];
-
-        QPen pen(color);
+    seriesData.resize(playerCount);
+    for (size_t i = 0; i < playerCount; ++i) {
+        QPen pen(playerColors[i]);
         pen.setWidth(2);
 
         QLineSeries* lineSeries = new QLineSeries(chart);
-        lineSeries->setName(name);
+        lineSeries->setName(playerNames[i]);
         lineSeries->setPen(pen);
         chart->addSeries(lineSeries);
         lineSeries->attachAxis(axisX);
 
-        seriesData[static_cast<size_t>(i)].series = lineSeries;
+        seriesData[i].series = lineSeries;
     }
 
     refreshChart();

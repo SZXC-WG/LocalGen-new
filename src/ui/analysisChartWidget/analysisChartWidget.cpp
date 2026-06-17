@@ -47,8 +47,8 @@ qreal smoothedLinearValue(const QList<QPointF>& history, qreal rawValue) {
     if (history.isEmpty() || rawValue <= 0.0) {
         return rawValue;
     }
-    return history.constLast().y() +
-           smoothingAlpha * (rawValue - history.constLast().y());
+    qreal lastValue = history.constLast().y();
+    return lastValue + smoothingAlpha * (rawValue - lastValue);
 }
 
 qreal smoothedLogValue(const QList<QPointF>& history, qreal rawValue) {
@@ -201,7 +201,6 @@ AnalysisChartWidget::AnalysisChartWidget(
         lineSeries->setPen(pen);
         chart->addSeries(lineSeries);
         lineSeries->attachAxis(axisX);
-        lineSeries->attachAxis(axisYLinear);
 
         seriesData[static_cast<size_t>(i)].series = lineSeries;
     }

@@ -17,6 +17,7 @@ struct LeaderboardRow {
     QString playerName;
     army_t army = 0;
     int land = 0;
+    int killCount = 0;
     QColor playerColor;
     bool isAlive = true;
 };
@@ -31,6 +32,7 @@ class LeaderboardWidget : public QWidget {
         std::function<QString(const LeaderboardRow&)> textProvider;
         std::function<QColor(const LeaderboardRow&)> backgroundProvider;
         std::function<QColor(const LeaderboardRow&)> foregroundProvider;
+        bool showKillIcon = false;
     };
 
     explicit LeaderboardWidget(QWidget* parent = nullptr);
@@ -51,4 +53,6 @@ class LeaderboardWidget : public QWidget {
     constexpr static int headerHeight = 30;
     constexpr static int rowHeight = 28;
     constexpr static int horizontalPadding = 12;
+    constexpr static int killIconLeftPadding = 6;
+    constexpr static int killIconSize = 12;
 };

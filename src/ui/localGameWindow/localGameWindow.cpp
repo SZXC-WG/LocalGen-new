@@ -214,7 +214,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         {{"Player", 0, 140, 260,
           [](const LeaderboardRow& row) { return row.playerName; },
           [](const LeaderboardRow& row) { return row.playerColor; },
-          [](const LeaderboardRow&) { return QColor(Qt::white); }},
+          [](const LeaderboardRow&) { return QColor(Qt::white); }, true},
          {"Army", 72, 0, 0,
           [](const LeaderboardRow& row) { return QString::number(row.army); },
           [](const LeaderboardRow&) { return QColor(Qt::white); },
@@ -387,6 +387,7 @@ void LocalGameWindow::updateLeaderboard(const std::vector<RankItem>& rank) {
         row.playerId = item.player;
         row.playerName = QString::fromStdString(game->getName(item.player));
         row.army = item.army, row.land = item.land;
+        row.killCount = item.killCount;
         row.playerColor = playerColor(item.player);
         row.isAlive = game->isAlive(item.player);
         rows.push_back(std::move(row));

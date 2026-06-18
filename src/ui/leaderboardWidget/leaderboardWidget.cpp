@@ -6,6 +6,7 @@
 #include <QFont>
 #include <QFontMetrics>
 #include <QPainter>
+#include <QSvgRenderer>
 #include <algorithm>
 
 LeaderboardWidget::LeaderboardWidget(QWidget* parent) : QWidget(parent) {
@@ -83,9 +84,24 @@ void LeaderboardWidget::paintEvent(QPaintEvent* event) {
             painter.drawRect(cellRect);
             painter.setPen(foreground);
 
+            QRect textRect = cellRect;
+            if (column.showKillIcon && row.killCount > 0) {
+                static QSvgRenderer skullRenderer(
+                    QString(":/images/svg/skull.svg"));
+                const QRectF iconRect(
+                    cellRect.left() + killIconLeftPadding,
+                    cellRect.top() + (cellRect.height() - killIconSize) / 2.0,
+                    killIconSize, killIconSize);
+                skullRenderer.render(&painter, iconRect);
+
+                textRect.setLeft(cellRect.left() +
+                                 (killIconLeftPadding + killIconSize));
+            }
+
             QString displayText = metrics.elidedText(
-                text, Qt::ElideRight, cellRect.width() - horizontalPadding);
-            painter.drawText(cellRect, Qt::AlignCenter, displayText);
+                text, Qt::ElideRight,
+                std::max(0, textRect.width() - horizontalPadding));
+            painter.drawText(textRect, Qt::AlignCenter, displayText);
 
             painter.setPen(borderPen);
             rowX += columnWidths[i];

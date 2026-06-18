@@ -24,6 +24,7 @@ set(LOCALGEN_BOT_SOURCES
     src/bots/zlyBot_v2.cpp
     src/bots/zlyBot_v2.1.cpp
     src/bots/gcBot.cpp
+    src/bots/ktqBot.cpp
     src/bots/oimBot.cpp
     src/bots/KutuBot.cpp
 )

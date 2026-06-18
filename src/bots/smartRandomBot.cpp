@@ -71,7 +71,6 @@ class SmartRandomBot : public BasicBot {
             std::ptrdiff_t lastCount;
         };
         std::vector<node> p;
-        int pl = 0;
         for (int i = 1; i <= 4; ++i) {
             int nx = coo.x + dx[i], ny = coo.y + dy[i];
             if (nx < 1 || nx > boardView.row || ny < 1 || ny > boardView.col)
@@ -105,5 +104,4 @@ class SmartRandomBot : public BasicBot {
     }
 };
 
-// Do not forget to register your bot.
 static BotRegistrar<SmartRandomBot> smartRandomBot_reg("SmartRandomBot");

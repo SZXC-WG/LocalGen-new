@@ -18,6 +18,7 @@ Here is a summary of current bot implementations included in this directory. The
 | --- | --- | --- | --- | --- | --- |
 | DummyBot | AppOfficer | ❌ | Low | $O(n)$ | Example Heuristic Greedy |
 | SmartRandomBot | AppOfficer / GoodCoder666 | ✅ | Low | $O(n)$ | Largest-Stack Greedy |
+| KtqBot | ktq1124298818 / GoodCoder666 | ✅ | Low | $O(n)$ | Single-Focus Local Greedy |
 | XrzBot | xiaruize0911 | ❌ | Low | $O(n)$ | Focused Random Greedy |
 | ZlyBot | AppOfficer | ✅ | Medium | $O(n)$ | Single-Focus BFS Heuristic |
 | ZlyBot v2 | AppOfficer | ✅ | Medium | $O(n \log n)$ | Memory-Aware Weighted Search |

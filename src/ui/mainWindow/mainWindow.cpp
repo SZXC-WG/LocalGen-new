@@ -72,6 +72,9 @@ const QString aboutText = QStringLiteral(
     " along with this program. If not, see <a "
     "href=\"https://www.gnu.org/licenses/\">https://www.gnu.org/licenses/</"
     "a>.</p>"
+    "<p>Bundled Quicksand fonts are licensed separately under the SIL Open"
+    " Font License 1.1 and are not covered by LocalGen's GPL-3.0-or-later"
+    " license.</p>"
     "<p>The source code for LocalGen is available at "
     "<a href=\"https://github.com/SZXC-WG/LocalGen-new\">"
     "https://github.com/SZXC-WG/LocalGen-new</a>.</p>");

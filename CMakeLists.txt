@@ -146,6 +146,14 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMENT "Copying maps to output directory"
 )
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E env COPYFILE_DISABLE=1
+        ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/res/fonts
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/fonts
+    COMMENT "Copying fonts to output directory"
+)
+
 if(APPLE)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND "${MACDEPLOYQT_EXECUTABLE}"

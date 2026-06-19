@@ -12,38 +12,44 @@
 
 #include "ui/mainWindow/mainWindow.h"
 
-namespace {
+static void loadFonts() {
+    const QStringList fontFileNames = {
+        "Quicksand-Regular.ttf",
+        "Quicksand-Medium.ttf",
+        "Quicksand-Bold.ttf",
+    };
 
-void loadFonts() {
-    const QString fontPath = QDir(QCoreApplication::applicationDirPath())
-                                 .filePath("fonts/Quicksand[wght].ttf");
-    const QFileInfo fontFile(fontPath);
-    if (!fontFile.exists()) {
-        QMessageBox::warning(
-            nullptr, "Font Warning",
-            QString("Required font file not found:\n%1").arg(fontPath));
-        return;
+    QStringList warnings;
+    const QDir appDir(QCoreApplication::applicationDirPath());
+    for (const QString& fontFileName : fontFileNames) {
+        const QString fontPath = appDir.filePath("fonts/" + fontFileName);
+        const QFileInfo fontFile(fontPath);
+        if (!fontFile.exists()) {
+            warnings
+                << QString("Required font file not found:\n%1").arg(fontPath);
+            continue;
+        }
+
+        const int fontId = QFontDatabase::addApplicationFont(fontPath);
+        if (fontId < 0) {
+            warnings << QString("Failed to load font file:\n%1").arg(fontPath);
+            continue;
+        }
+
+        const QStringList fontFamilies =
+            QFontDatabase::applicationFontFamilies(fontId);
+        if (!fontFamilies.contains("Quicksand")) {
+            warnings << QString(
+                            "Bundled font family should include \"Quicksand\", "
+                            "but got: %1")
+                            .arg(fontFamilies.join(", "));
+        }
     }
 
-    const int fontId = QFontDatabase::addApplicationFont(fontPath);
-    if (fontId < 0) {
-        QMessageBox::warning(
-            nullptr, "Font Warning",
-            QString("Failed to load font file:\n%1").arg(fontPath));
-        return;
-    }
-
-    const QString fontFamily =
-        QFontDatabase::applicationFontFamilies(fontId).at(0);
-    if (fontFamily != "Quicksand") {
-        QMessageBox::warning(
-            nullptr, "Font Warning",
-            QString("Bundled font family should be \"Quicksand\", but got: %1")
-                .arg(fontFamily));
+    if (!warnings.isEmpty()) {
+        QMessageBox::warning(nullptr, "Font Warning", warnings.join("\n\n"));
     }
 }
-
-}  // namespace
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);

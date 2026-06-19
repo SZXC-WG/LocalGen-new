@@ -61,8 +61,7 @@ class GeneralsButton : public QAbstractButton {
     }
 
    protected:
-    void paintEvent(QPaintEvent* event) override {
-        Q_UNUSED(event);
+    void paintEvent(QPaintEvent*) override {
         QPainter painter(this);
 
         const qreal maxShadow = 3.0;

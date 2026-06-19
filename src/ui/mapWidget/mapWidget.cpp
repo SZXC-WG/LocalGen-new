@@ -224,7 +224,7 @@ QPixmap& MapWidget::getTextPixmap(const QString& text, qreal physicalScale,
     return px;
 }
 
-void MapWidget::paintEvent(QPaintEvent* event) {
+void MapWidget::paintEvent(QPaintEvent*) {
     // Constants
     const int h = _mapHeight, w = _mapWidth;
     const qreal dpr = devicePixelRatioF();

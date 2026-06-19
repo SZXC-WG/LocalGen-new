@@ -13,7 +13,6 @@
 
 LeaderboardWidget::LeaderboardWidget(QWidget* parent) : QWidget(parent) {
     setFont(QFont("Quicksand", 10, QFont::Medium));
-    setAttribute(Qt::WA_TranslucentBackground, true);
 }
 
 void LeaderboardWidget::setRows(std::vector<LeaderboardRow> rows) {

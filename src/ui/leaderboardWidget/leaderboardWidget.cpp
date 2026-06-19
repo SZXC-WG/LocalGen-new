@@ -14,98 +14,78 @@ LeaderboardWidget::LeaderboardWidget(QWidget* parent) : QWidget(parent) {
     setAttribute(Qt::WA_TranslucentBackground, true);
 }
 
-void LeaderboardWidget::setColumns(std::vector<Column> columns) {
-    this->columns = std::move(columns);
-    updateFixedSize();
-    update();
-}
-
 void LeaderboardWidget::setRows(std::vector<LeaderboardRow> rows) {
     this->rows = std::move(rows);
-    updateFixedSize();
+    setFixedSize(
+        playerColumnWidth() + scoreColumnWidth * 2,
+        headerHeight + static_cast<int>(this->rows.size()) * rowHeight);
     update();
 }
 
-void LeaderboardWidget::paintEvent(QPaintEvent* event) {
-    Q_UNUSED(event);
-    if (columns.empty()) return;
-
+void LeaderboardWidget::paintEvent(QPaintEvent*) {
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing, false);
     painter.setRenderHint(QPainter::TextAntialiasing, true);
 
     QPen borderPen(Qt::black);
     borderPen.setWidth(2);
-    painter.setPen(borderPen);
 
     QFont headerFont = font();
     headerFont.setBold(true);
 
-    int x = 0;
-    for (size_t i = 0; i < columns.size(); ++i) {
-        const auto& column = columns[i];
-        QRect cellRect(x, 0, columnWidths[i], headerHeight);
-        painter.fillRect(cellRect, Qt::white);
-        painter.drawRect(cellRect);
-        painter.setFont(headerFont);
-        painter.setPen(Qt::black);
-        painter.drawText(cellRect, Qt::AlignCenter, column.title);
+    const int playerWidth = playerColumnWidth();
+    auto drawCell = [&](const QRect& cellRect, const QColor& background,
+                        const QColor& foreground, const QString& text) {
+        painter.fillRect(cellRect, background);
         painter.setPen(borderPen);
-        x += columnWidths[i];
-    }
+        painter.drawRect(cellRect);
+        painter.setPen(foreground);
+        painter.drawText(cellRect, Qt::AlignCenter, text);
+        painter.setPen(borderPen);
+    };
+
+    painter.setFont(headerFont);
+    painter.setPen(borderPen);
+    drawCell(QRect(0, 0, playerWidth, headerHeight), Qt::white, Qt::black,
+             QStringLiteral("Player"));
+    drawCell(QRect(playerWidth, 0, scoreColumnWidth, headerHeight), Qt::white,
+             Qt::black, QStringLiteral("Army"));
+    drawCell(QRect(playerWidth + scoreColumnWidth, 0, scoreColumnWidth,
+                   headerHeight),
+             Qt::white, Qt::black, QStringLiteral("Land"));
 
     QFont bodyFont = font();
     bodyFont.setBold(false);
     painter.setFont(bodyFont);
-    QFontMetrics metrics(bodyFont);
 
     int y = headerHeight;
     for (const auto& row : rows) {
-        int rowX = 0;
-        for (size_t i = 0; i < columns.size(); ++i) {
-            const auto& column = columns[i];
-            QRect cellRect(rowX, y, columnWidths[i], rowHeight);
-            QColor background = Qt::white;
-            QColor foreground = Qt::black;
-            QString text;
+        const QRect playerRect(0, y, playerWidth, rowHeight);
 
-            if (column.backgroundProvider) {
-                background = column.backgroundProvider(row);
-            }
-            if (column.foregroundProvider) {
-                foreground = column.foregroundProvider(row);
-            }
-            if (column.textProvider) {
-                text = column.textProvider(row);
-            }
+        painter.fillRect(playerRect, row.playerColor);
+        painter.setPen(borderPen);
+        painter.drawRect(playerRect);
+        painter.setPen(Qt::white);
 
-            painter.fillRect(cellRect, background);
-            painter.setPen(borderPen);
-            painter.drawRect(cellRect);
-            painter.setPen(foreground);
+        QRect playerTextRect = playerRect;
+        if (row.hasKill) {
+            static QSvgRenderer skullRenderer(
+                QString(":/images/svg/skull.svg"));
+            const QRect iconRect(playerRect.left() + killIconLeftPadding,
+                                 playerRect.top() + killIconTopPadding,
+                                 killIconSize, killIconSize);
+            skullRenderer.render(&painter, iconRect);
 
-            QRect textRect = cellRect;
-            if (column.showKillIcon && row.killCount > 0) {
-                static QSvgRenderer skullRenderer(
-                    QString(":/images/svg/skull.svg"));
-                const QRectF iconRect(
-                    cellRect.left() + killIconLeftPadding,
-                    cellRect.top() + (cellRect.height() - killIconSize) / 2.0,
-                    killIconSize, killIconSize);
-                skullRenderer.render(&painter, iconRect);
-
-                textRect.setLeft(cellRect.left() +
-                                 (killIconLeftPadding + killIconSize));
-            }
-
-            QString displayText = metrics.elidedText(
-                text, Qt::ElideRight,
-                std::max(0, textRect.width() - horizontalPadding));
-            painter.drawText(textRect, Qt::AlignCenter, displayText);
-
-            painter.setPen(borderPen);
-            rowX += columnWidths[i];
+            playerTextRect.setLeft(playerRect.left() + killIconLeftPadding +
+                                   killIconSize);
         }
+
+        painter.drawText(playerTextRect, Qt::AlignCenter, row.playerName);
+
+        drawCell(QRect(playerWidth, y, scoreColumnWidth, rowHeight), Qt::white,
+                 Qt::black, QString::number(row.army));
+        drawCell(QRect(playerWidth + scoreColumnWidth, y, scoreColumnWidth,
+                       rowHeight),
+                 Qt::white, Qt::black, QString::number(row.land));
 
         if (!row.isAlive) {
             painter.fillRect(QRect(0, y, width(), rowHeight),
@@ -115,48 +95,18 @@ void LeaderboardWidget::paintEvent(QPaintEvent* event) {
         y += rowHeight;
     }
 
-    QPen outerBorderPen(Qt::black);
-    outerBorderPen.setWidth(3);
-    painter.setPen(outerBorderPen);
-    painter.setBrush(Qt::NoBrush);
+    borderPen.setWidth(3);
+    painter.setPen(borderPen);
     painter.drawRect(rect().adjusted(1, 1, -1, -1));
 }
 
-std::vector<int> LeaderboardWidget::computeColumnWidths() const {
-    std::vector<int> widths;
-    widths.reserve(columns.size());
-
+int LeaderboardWidget::playerColumnWidth() const {
     QFontMetrics metrics(font());
-    for (const auto& column : columns) {
-        int width = column.width;
-        if (width <= 0) {
-            int maxTextWidth = metrics.horizontalAdvance(column.title);
-            if (column.textProvider) {
-                for (const auto& row : rows) {
-                    maxTextWidth = std::max(
-                        maxTextWidth,
-                        metrics.horizontalAdvance(column.textProvider(row)));
-                }
-            }
-            width = maxTextWidth + horizontalPadding * 2;
-        }
-
-        if (column.minWidth > 0) {
-            width = std::max(width, column.minWidth);
-        }
-        if (column.maxWidth > 0) {
-            width = std::min(width, column.maxWidth);
-        }
-        widths.push_back(width);
+    int maxTextWidth = metrics.horizontalAdvance(QStringLiteral("Player"));
+    for (const auto& row : rows) {
+        maxTextWidth =
+            std::max(maxTextWidth, metrics.horizontalAdvance(row.playerName));
     }
 
-    return widths;
-}
-
-void LeaderboardWidget::updateFixedSize() {
-    columnWidths = computeColumnWidths();
-    int totalWidth =
-        std::accumulate(columnWidths.begin(), columnWidths.end(), 0);
-    int height = headerHeight + static_cast<int>(rows.size()) * rowHeight;
-    setFixedSize(totalWidth, height);
+    return std::clamp(maxTextWidth + horizontalPadding * 2, 140, 260);
 }

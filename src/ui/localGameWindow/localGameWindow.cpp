@@ -210,19 +210,6 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     }
 
     leaderboardWidget = new LeaderboardWidget(this);
-    leaderboardWidget->setColumns(
-        {{"Player", 0, 140, 260,
-          [](const LeaderboardRow& row) { return row.playerName; },
-          [](const LeaderboardRow& row) { return row.playerColor; },
-          [](const LeaderboardRow&) { return QColor(Qt::white); }, true},
-         {"Army", 72, 0, 0,
-          [](const LeaderboardRow& row) { return QString::number(row.army); },
-          [](const LeaderboardRow&) { return QColor(Qt::white); },
-          [](const LeaderboardRow&) { return QColor(Qt::black); }},
-         {"Land", 72, 0, 0,
-          [](const LeaderboardRow& row) { return QString::number(row.land); },
-          [](const LeaderboardRow&) { return QColor(Qt::white); },
-          [](const LeaderboardRow&) { return QColor(Qt::black); }}});
 
     if (humanPlayer != nullptr) {
         gameMap->bindMoveQueue(humanPlayer->getMoveQueue());
@@ -380,22 +367,23 @@ void LocalGameWindow::stopGameLoop() {
 }
 
 void LocalGameWindow::updateLeaderboard(const std::vector<RankItem>& rank) {
+    if (analysisChartWidget != nullptr) {
+        analysisChartWidget->updateAnalysis(rank);
+    }
+
     std::vector<LeaderboardRow> rows;
     rows.reserve(rank.size());
     for (const auto& item : rank) {
         LeaderboardRow row;
-        row.playerId = item.player;
         row.playerName = QString::fromStdString(game->getName(item.player));
-        row.army = item.army, row.land = item.land;
-        row.killCount = item.killCount;
+        row.army = item.army;
         row.playerColor = playerColor(item.player);
-        row.isAlive = game->isAlive(item.player);
+        row.land = item.land;
+        row.hasKill = item.killCount > 0;
+        row.isAlive = item.alive;
         rows.push_back(std::move(row));
     }
 
-    if (analysisChartWidget != nullptr) {
-        analysisChartWidget->updateAnalysis(rows);
-    }
     leaderboardWidget->setRows(std::move(rows));
     positionFloatingWidgets();
 }

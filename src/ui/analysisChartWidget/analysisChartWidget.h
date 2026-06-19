@@ -16,8 +16,7 @@
 #include <QtCharts/QValueAxis>
 #include <vector>
 
-#include "../leaderboardWidget/leaderboardWidget.h"
-#include "core/utils.hpp"
+#include "core/game.hpp"
 
 struct PlayerAnalysisSeries {
     QLineSeries* series = nullptr;
@@ -35,7 +34,7 @@ class AnalysisChartWidget : public QFrame {
                                  const std::vector<QColor>& playerColors,
                                  const std::vector<QString>& playerNames);
 
-    void updateAnalysis(const std::vector<LeaderboardRow>& rows);
+    void updateAnalysis(const std::vector<RankItem>& rank);
 
    private:
     void refreshChart();

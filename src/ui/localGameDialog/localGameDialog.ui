@@ -77,9 +77,6 @@
           <property name="text">
            <string>Enable sounds</string>
           </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
          </widget>
         </item>
         <item>

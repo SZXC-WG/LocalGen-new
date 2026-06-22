@@ -1,5 +1,5 @@
 {
-  "synced_at": "2026-06-15T08:56:40.001861+00:00",
+  "synced_at": "2026-06-22T08:53:18.530415+00:00",
   "items": [
     {
       "name": "v6.0.0-beta.1",
@@ -20,7 +20,7 @@
           "name": "LocalGen-6.0.0-beta.1-macos-x64.dmg",
           "size": 27307379,
           "size_human": "26.0 MB",
-          "download_count": 3,
+          "download_count": 4,
           "content_type": "application/octet-stream",
           "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v6.0.0-beta.1/LocalGen-6.0.0-beta.1-macos-x64.dmg",
           "updated_at": "2026-04-22T07:35:20Z"
@@ -29,7 +29,7 @@
           "name": "LocalGen-6.0.0-beta.1-windows-x64-portable.zip",
           "size": 15011701,
           "size_human": "14.3 MB",
-          "download_count": 13,
+          "download_count": 14,
           "content_type": "application/x-zip-compressed",
           "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v6.0.0-beta.1/LocalGen-6.0.0-beta.1-windows-x64-portable.zip",
           "updated_at": "2026-04-22T07:35:28Z"

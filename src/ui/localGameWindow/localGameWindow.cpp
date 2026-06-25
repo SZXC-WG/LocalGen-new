@@ -210,6 +210,8 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     }
 
     leaderboardWidget = new LeaderboardWidget(this);
+    connect(leaderboardWidget, &LeaderboardWidget::preferredSizeChanged, this,
+            &LocalGameWindow::positionFloatingWidgets);
 
     if (humanPlayer != nullptr) {
         gameMap->bindMoveQueue(humanPlayer->getMoveQueue());

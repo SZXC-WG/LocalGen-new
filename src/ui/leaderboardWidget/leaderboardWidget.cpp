@@ -5,21 +5,24 @@
 
 #include <QFont>
 #include <QFontMetrics>
-#include <QLine>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QSvgRenderer>
-#include <QVector>
 #include <algorithm>
 
 LeaderboardWidget::LeaderboardWidget(QWidget* parent) : QWidget(parent) {
     setFont(QFont("Quicksand", 10, QFont::Medium));
+    setCursor(Qt::PointingHandCursor);
+    layout = makeLayout();
 }
 
 void LeaderboardWidget::setRows(std::vector<LeaderboardRow> rows) {
     this->rows = std::move(rows);
-    setFixedSize(
-        playerColumnWidth() + scoreColumnWidth * 2,
-        headerHeight + static_cast<int>(this->rows.size()) * rowHeight);
+    borderLines.clear();
+    borderLines.reserve(rows.size() + 6);
+    deadPlayerRects.clear();
+    deadPlayerRects.reserve(rows.size());
+    refreshSize();
     update();
 }
 
@@ -31,93 +34,90 @@ void LeaderboardWidget::paintEvent(QPaintEvent*) {
     QPen borderPen(Qt::black);
     borderPen.setWidth(2);
 
-    QFont headerFont = font();
-    headerFont.setBold(true);
-
-    const int playerWidth = playerColumnWidth();
-    const int armyColumnX = playerWidth;
-    const int landColumnX = playerWidth + scoreColumnWidth;
+    const int armyColumnX = layout.player;
+    const int landColumnX = armyColumnX + layout.army;
 
     // 1. Background
     painter.fillRect(rect(), Qt::white);
 
-    // 2. Player color blocks
-    int y = headerHeight;
-    for (const auto& row : rows) {
-        painter.fillRect(QRect(0, y, playerWidth, rowHeight), row.playerColor);
-        y += rowHeight;
-    }
-
-    // 3. Text & icons
+    // 2. Header
+    QFont headerFont = font();
+    headerFont.setBold(true);
     painter.setFont(headerFont);
     painter.setPen(Qt::black);
-    painter.drawText(QRect(0, 0, playerWidth, headerHeight), Qt::AlignCenter,
-                     QStringLiteral("Player"));
-    painter.drawText(QRect(armyColumnX, 0, scoreColumnWidth, headerHeight),
+    if (!collapsed) {
+        painter.drawText(QRect(0, 0, layout.player, layout.header),
+                         Qt::AlignCenter, QStringLiteral("Player"));
+    }
+    painter.drawText(QRect(armyColumnX, 0, layout.army, layout.header),
                      Qt::AlignCenter, QStringLiteral("Army"));
-    painter.drawText(QRect(landColumnX, 0, scoreColumnWidth, headerHeight),
+    painter.drawText(QRect(landColumnX, 0, layout.land, layout.header),
                      Qt::AlignCenter, QStringLiteral("Land"));
 
+    // 3. Body (text & icons)
     QFont bodyFont = font();
     bodyFont.setBold(false);
     painter.setFont(bodyFont);
 
-    static QSvgRenderer skullRenderer(QString(":/images/svg/skull.svg"));
+    static QSvgRenderer skullRenderer(QStringLiteral(":/images/svg/skull.svg"));
 
-    y = headerHeight;
+    int y = layout.header;
     for (const auto& row : rows) {
-        const QRect playerRect(0, y, playerWidth, rowHeight);
-
+        painter.fillRect(QRect(0, y, layout.player, layout.row),
+                         row.playerColor);
         painter.setPen(Qt::white);
 
-        QRect playerTextRect = playerRect;
         if (row.hasKill) {
-            const QRect iconRect(playerRect.left() + killIconLeftPadding,
-                                 playerRect.top() + killIconTopPadding,
-                                 killIconSize, killIconSize);
-            skullRenderer.render(&painter, iconRect);
-
-            playerTextRect.setLeft(playerRect.left() + killIconLeftPadding +
-                                   killIconSize);
+            int iconX = killIconLeftPadding;
+            if (collapsed) {
+                iconX = (layout.player - killIconSize) / 2;
+            }
+            skullRenderer.render(
+                &painter, QRect(iconX, y + (layout.row - killIconSize) / 2,
+                                killIconSize, killIconSize));
         }
 
-        painter.drawText(playerTextRect, Qt::AlignCenter, row.playerName);
+        if (!collapsed) {
+            const int textLeft =
+                row.hasKill ? killIconLeftPadding + killIconSize : 0;
+            painter.drawText(
+                QRect(textLeft, y, layout.player - textLeft, layout.row),
+                Qt::AlignCenter, row.playerName);
+        }
 
         painter.setPen(Qt::black);
-        painter.drawText(QRect(armyColumnX, y, scoreColumnWidth, rowHeight),
+        painter.drawText(QRect(armyColumnX, y, layout.army, layout.row),
                          Qt::AlignCenter, QString::number(row.army));
-        painter.drawText(QRect(landColumnX, y, scoreColumnWidth, rowHeight),
+        painter.drawText(QRect(landColumnX, y, layout.land, layout.row),
                          Qt::AlignCenter, QString::number(row.land));
-
-        y += rowHeight;
+        y += layout.row;
     }
 
-    // 4. Table borders
-    QVector<QLine> borderLines;
+    // 4. Borders
+    painter.setPen(borderPen);
+    painter.drawRect(rect().adjusted(1, 1, -1, -1));
+    borderLines.clear();
     borderLines.reserve(rows.size() + 6);
     borderLines.append(QLine(0, 0, width(), 0));
-    borderLines.append(QLine(0, headerHeight, width(), headerHeight));
+    borderLines.append(QLine(0, layout.header, width(), layout.header));
     for (int row = 1; row <= static_cast<int>(rows.size()); ++row) {
-        const int lineY = headerHeight + row * rowHeight;
+        const int lineY = layout.header + row * layout.row;
         borderLines.append(QLine(0, lineY, width(), lineY));
     }
     borderLines.append(QLine(0, 0, 0, height()));
     borderLines.append(QLine(armyColumnX, 0, armyColumnX, height()));
     borderLines.append(QLine(landColumnX, 0, landColumnX, height()));
     borderLines.append(QLine(width(), 0, width(), height()));
-
-    painter.setPen(borderPen);
-    painter.drawRect(rect().adjusted(1, 1, -1, -1));
     painter.drawLines(borderLines);
 
     // 5. Dead player overlays
-    QVector<QRect> deadPlayerRects;
-    y = headerHeight;
+    deadPlayerRects.clear();
+    y = layout.header;
     for (const auto& row : rows) {
         if (!row.isAlive) {
-            deadPlayerRects.append(QRect(0, y, width(), rowHeight));
+            deadPlayerRects.append(QRect(0, y, width(), layout.row));
         }
-        y += rowHeight;
+        y += layout.row;
     }
     if (!deadPlayerRects.isEmpty()) {
         painter.setPen(Qt::NoPen);
@@ -126,13 +126,65 @@ void LeaderboardWidget::paintEvent(QPaintEvent*) {
     }
 }
 
-int LeaderboardWidget::playerColumnWidth() const {
-    QFontMetrics metrics(font());
-    int maxTextWidth = metrics.horizontalAdvance(QStringLiteral("Player"));
-    for (const auto& row : rows) {
-        maxTextWidth =
-            std::max(maxTextWidth, metrics.horizontalAdvance(row.playerName));
+void LeaderboardWidget::mousePressEvent(QMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        collapsed = !collapsed;
+        refreshSize();
+        update();
+        event->accept();
+        return;
     }
 
-    return std::clamp(maxTextWidth + horizontalPadding * 2, 140, 260);
+    QWidget::mousePressEvent(event);
+}
+
+void LeaderboardWidget::refreshSize() {
+    layout = makeLayout();
+    const int preferredWidth = layout.width();
+    const int preferredHeight = layout.height(static_cast<int>(rows.size()));
+    const bool changed =
+        preferredWidth != width() || preferredHeight != height();
+    setFixedSize(preferredWidth, preferredHeight);
+    if (changed) {
+        emit preferredSizeChanged();
+    }
+}
+
+LeaderboardWidget::Layout LeaderboardWidget::makeLayout() const {
+    QFontMetrics metrics(font());
+    if (!collapsed) {
+        int playerWidth = metrics.horizontalAdvance(QStringLiteral("Player"));
+        for (const auto& row : rows) {
+            playerWidth = std::max(playerWidth,
+                                   metrics.horizontalAdvance(row.playerName));
+        }
+        return {std::clamp(playerWidth + horizontalPadding * 2, 140, 260),
+                scoreColumnWidth, scoreColumnWidth, headerHeight, rowHeight};
+    }
+
+    QFont headerFont = font();
+    headerFont.setBold(true);
+    QFontMetrics headerMetrics(headerFont);
+
+    bool hasKill = false;
+    int armyWidth = headerMetrics.horizontalAdvance(QStringLiteral("Army"));
+    int landWidth = headerMetrics.horizontalAdvance(QStringLiteral("Land"));
+    for (const auto& row : rows) {
+        hasKill = hasKill || row.hasKill;
+        armyWidth = std::max(
+            armyWidth, metrics.horizontalAdvance(QString::number(row.army)));
+        landWidth = std::max(
+            landWidth, metrics.horizontalAdvance(QString::number(row.land)));
+    }
+
+    return {hasKill ? std::max(collapsedColorStripWidth,
+                               killIconSize + collapsedHorizontalPadding * 2)
+                    : collapsedColorStripWidth,
+            armyWidth + collapsedHorizontalPadding * 2,
+            landWidth + collapsedHorizontalPadding * 2,
+            std::max(collapsedHeaderHeight,
+                     headerMetrics.height() + collapsedVerticalPadding * 2),
+            std::max({collapsedRowHeight,
+                      metrics.height() + collapsedVerticalPadding * 2,
+                      killIconSize + collapsedVerticalPadding * 2})};
 }

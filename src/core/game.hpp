@@ -132,7 +132,6 @@ class BasicGame {
    protected:
     /// Calculate distance from a certain coordinate.
     /// The route can't pass impassable tiles.
-    /// This function is reserved for future use.
     std::vector<pos_t> calcDist(Coord pos);
 
    protected:

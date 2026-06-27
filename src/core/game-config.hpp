@@ -21,18 +21,28 @@ namespace config {
 enum class VisionMode : uint8_t { NEAR8, NEAR4 };
 enum class MoveProcessMode : uint8_t { FULL, PARITY };
 
-#define GAME_CONFIG_UNIT_LIST(F)                        \
-    F(bool, RanklistShowLand, true)                     \
-    F(bool, RanklistShowArmy, true)                     \
-    F(bool, RanklistShowPlayerIndex, true)              \
-    F(bool, RanklistShowPlayerName, true)               \
-    F(bool, RanklistShowTeamIndex, true)                \
-    F(bool, RanklistShowColor, true)                    \
-    F(VisionMode, OverallVisionMode, VisionMode::NEAR8) \
-    F(int, OverallVisionRange, 1)                       \
-    F(int, CityVisionRange, 1)                          \
-    F(int, SpawnVisionRange, 1)                         \
-    F(MoveProcessMode, MoveProcessMethod, MoveProcessMode::FULL)
+#define GAME_CONFIG_UNIT_LIST(F)                                 \
+    /* ---- Display settings ---- */                             \
+    F(bool, RanklistShowLand, true)                              \
+    F(bool, RanklistShowArmy, true)                              \
+    F(bool, RanklistShowPlayerName, true)                        \
+    F(bool, RanklistShowColor, true)                             \
+    /* ---- Vision settings ---- */                              \
+    F(VisionMode, OverallVisionMode, VisionMode::NEAR8)          \
+    F(int, OverallVisionRange, 1)                                \
+    F(int, CityVisionRange, 1)                                   \
+    F(int, SpawnVisionRange, 1)                                  \
+    /* ---- Move settings ---- */                                \
+    F(MoveProcessMode, MoveProcessMethod, MoveProcessMode::FULL) \
+    /* ---- Modifier flags ---- */                               \
+    F(bool, MistyVeilEnabled, false)                             \
+    F(bool, LeapfrogEnabled, false)                              \
+    F(bool, CityStateEnabled, false)                             \
+    F(bool, DefenselessEnabled, false)                           \
+    F(bool, DefectionEnabled, false)                             \
+    F(bool, SlipperyEnabled, false)                              \
+    F(bool, FadingSmogEnabled, false)                            \
+    F(int, FadingSmogInterval, 25)
 
 struct Config {
 #define DECL(type, name, def) type name = def;
@@ -110,9 +120,21 @@ constexpr inline ConfigPatch operator&(const ConfigPatch& lhs,
 }
 #undef IF_ASSIGN_OPTIONAL
 
-#define GAME_CONFIG_MODIFIER_LIST(F)                                    \
-    F(Watchtower, unit::CityVisionRange(3) | unit::SpawnVisionRange(3)) \
-    F(MistyVeil, unit::OverallVisionRange(0))
+#define GAME_CONFIG_MODIFIER_LIST(F)                                         \
+    /* ---- Vision modifiers ---- */                                         \
+    F(Watchtower, unit::CityVisionRange(5) | unit::SpawnVisionRange(5))      \
+    F(MistyVeil, unit::MistyVeilEnabled(true) | unit::OverallVisionRange(0)) \
+    F(CrystalClear, unit::OverallVisionRange(100))                           \
+    F(FadingSmog,                                                            \
+      unit::FadingSmogEnabled(true) | unit::FadingSmogInterval(25))          \
+    /* ---- Behavioral modifiers ---- */                                     \
+    F(Leapfrog, unit::LeapfrogEnabled(true))                                 \
+    F(CityState, unit::CityStateEnabled(true))                               \
+    F(Defenseless, unit::DefenselessEnabled(true))                           \
+    F(Defection, unit::DefectionEnabled(true))                               \
+    F(Slippery, unit::SlipperyEnabled(true))                                 \
+    /* ---- Display modifiers ---- */                                        \
+    F(SilentWar, unit::RanklistShowLand(false) | unit::RanklistShowArmy(false))
 
 namespace modifier {
 #define MODIFIER(name, value) constexpr ConfigPatch name = value;

@@ -31,7 +31,6 @@ enum class MoveProcessMode : uint8_t { FULL, PARITY };
     F(VisionMode, OverallVisionMode, VisionMode::NEAR8)          \
     F(int, OverallVisionRange, 1)                                \
     F(int, CityVisionRange, 1)                                   \
-    F(int, SpawnVisionRange, 1)                                  \
     /* ---- Move settings ---- */                                \
     F(MoveProcessMode, MoveProcessMethod, MoveProcessMode::FULL) \
     /* ---- Modifier flags ---- */                               \
@@ -41,8 +40,7 @@ enum class MoveProcessMode : uint8_t { FULL, PARITY };
     F(bool, DefenselessEnabled, false)                           \
     F(bool, DefectionEnabled, false)                             \
     F(bool, SlipperyEnabled, false)                              \
-    F(bool, FadingSmogEnabled, false)                            \
-    F(int, FadingSmogInterval, 25)
+    F(int, FadingSmogInterval, 0)
 
 struct Config {
 #define DECL(type, name, def) type name = def;
@@ -122,11 +120,10 @@ constexpr inline ConfigPatch operator&(const ConfigPatch& lhs,
 
 #define GAME_CONFIG_MODIFIER_LIST(F)                                         \
     /* ---- Vision modifiers ---- */                                         \
-    F(Watchtower, unit::CityVisionRange(5) | unit::SpawnVisionRange(5))      \
+    F(Watchtower, unit::CityVisionRange(5))                                  \
     F(MistyVeil, unit::MistyVeilEnabled(true) | unit::OverallVisionRange(0)) \
     F(CrystalClear, unit::OverallVisionRange(100))                           \
-    F(FadingSmog,                                                            \
-      unit::FadingSmogEnabled(true) | unit::FadingSmogInterval(25))          \
+    F(FadingSmog, unit::FadingSmogInterval(25))                              \
     /* ---- Behavioral modifiers ---- */                                     \
     F(Leapfrog, unit::LeapfrogEnabled(true))                                 \
     F(CityState, unit::CityStateEnabled(true))                               \

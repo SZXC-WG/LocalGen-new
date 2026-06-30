@@ -25,12 +25,12 @@ void LGgame::capture(int p1, int p2) {
         std::chrono::nanoseconds bg =
             std::chrono::steady_clock::now().time_since_epoch();
         if ((!inReplay) && (!inServer))
-            MessageBoxW(
-                nullptr,
-                wstring(L"YOU ARE KILLED BY PLAYER " + playerInfo[p1].name +
-                        L" AT TURN " + to_wstring(LGgame::curTurn) + L".")
-                    .c_str(),
-                L"", MB_OK | MB_SYSTEMMODAL);
+            MessageBoxW(nullptr,
+                        wstring(L"YOU ARE KILLED BY PLAYER " +
+                                playerInfo[p1].name + L" AT TURN " +
+                                to_wstring((LGgame::curTurn + 1) >> 1) + L".")
+                            .c_str(),
+                        L"", MB_OK | MB_SYSTEMMODAL);
         std::chrono::nanoseconds ed =
             std::chrono::steady_clock::now().time_since_epoch();
         LGgame::beginTime += ed - bg;
@@ -1144,7 +1144,8 @@ int GAME() {
                     LGgame::beginTime;
                 fpslen = textwidth((L"FPS: " + to_wstring(getfps())).c_str());
                 turnlen = textwidth(
-                    (L"Turn " + to_wstring(LGgame::curTurn) + L".").c_str());
+                    (L"Turn " + to_wstring((LGgame::curTurn + 1) >> 1) + L".")
+                        .c_str());
                 rspeedlen = textwidth(
                     (L"Real Speed: " +
                      to_wstring(LGgame::curTurn * 1.0L /
@@ -1174,12 +1175,12 @@ int GAME() {
                 settextjustify(CENTER_TEXT, TOP_TEXT);
                 xyprintf(screenszr - rspeedlen / 2 - 5, 0, L"Real Speed: %Lf",
                          LGgame::curTurn * 1.0L /
-                             (timePassed.count() / 1'000'000'000.0L));
+                             (timePassed.count() / 1'000'000'000.0L) / 2.0L);
                 xyprintf(screenszr - rspeedlen - 10 - fpslen / 2 - 5, 0,
                          L"FPS: %f", getfps());
                 xyprintf(
                     screenszr - rspeedlen - 10 - fpslen - 10 - turnlen / 2 - 5,
-                    0, L"Turn %d.", LGgame::curTurn);
+                    0, L"Turn %d.", (LGgame::curTurn + 1) >> 1);
                 timePassed =
                     std::chrono::steady_clock::now().time_since_epoch() -
                     LGgame::beginTime;

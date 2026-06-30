@@ -562,10 +562,10 @@ void initPages();
 
 pageS p_settings;
 
-inline int
-getHeightPerBlock();  // get LGGraphics::windowData.heightPerBlock; deprecated
-inline int
-getWidthPerBlock();  // get LGGraphics::windowData.widthPerBlock; deprecated
+// get LGGraphics::windowData.heightPerBlock; deprecated
+LG_DEPRECATED inline int getHeightPerBlock();
+// get LGGraphics::windowData.widthPerBlock; deprecated
+LG_DEPRECATED inline int getWidthPerBlock();
 
 /**** others ****/
 

@@ -708,7 +708,7 @@ void localOptions() {
 
     doMapSelect();
 
-    LGgame::init(cheatCode, plCnt, stDel);
+    LGgame::init(cheatCode, plCnt, stDel * 2);
     int ret = LGlocal::GAME();
 }
 

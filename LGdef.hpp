@@ -560,7 +560,7 @@ void init();
 void initPages();
 }  // namespace LGGraphics
 
-pageS p_settings;
+page::Page p_settings;
 
 // get LGGraphics::windowData.heightPerBlock; deprecated
 LG_DEPRECATED inline int getHeightPerBlock();

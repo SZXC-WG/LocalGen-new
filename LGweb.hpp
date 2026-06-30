@@ -176,7 +176,7 @@ int LGserver::GAME() {
     std::thread th(sockListen);
     th.detach();
     int plCnt = 0, rbCnt = LGgame::playerCnt;
-    rectBUTTON startBox;
+    button::Rect startBox;
     lisCon = true;
 
     LGgame::initGenerals(LGgame::playerCoo);
@@ -252,7 +252,7 @@ int LGserver::GAME() {
     printMap(LGgame::cheatCode, LGgame::playerCoo[1]);
     LGgame::curTurn = 0;
     bool gameEnd = 0;
-    rectBUTTON fpsbut;
+    button::Rect fpsbut;
     fpsbut.move(0, 1400 * LGGraphics::windowData.zoomX);
     fpsbut.size(20 * LGGraphics::windowData.zoomY,
                 200 * LGGraphics::windowData.zoomX);
@@ -261,7 +261,7 @@ int LGserver::GAME() {
     fpsbut.fontsize(20 * LGGraphics::windowData.zoomY, 0);
     fpsbut.bgcolor(RED);
     fpsbut.textcolor(WHITE);
-    rectBUTTON turnbut;
+    button::Rect turnbut;
     turnbut.move(0, 1250 * LGGraphics::windowData.zoomX)
         .size(20 * LGGraphics::windowData.zoomY,
               150 * LGGraphics::windowData.zoomX)
@@ -340,8 +340,9 @@ int LGserver::GAME() {
         // 		            ("PLAYER " + playerInfo[std::__lg(ed)].name + "
         // WON!" + "\n" + 		             "THE game WILL CONTINUE." + "\n" +
         // "YOU CAN PRESS [ESC] TO EXIT.") 		            .c_str(), "game
-        // END", MB_OK | MB_SYSTEMMODAL); 		gameEnd = 1; 		LGgame::cheatCode =
-        // 1048575; 		zipSendBuf(); 		sockBroadcast();
+        // END", MB_OK | MB_SYSTEMMODAL); 		gameEnd = 1;
+        // LGgame::cheatCode = 1048575; 		zipSendBuf();
+        // sockBroadcast();
         // 	}
         // }
 
@@ -540,7 +541,7 @@ int LGclient::GAME() {
     LGgame::inClient = true;
     std::mt19937 mtrd(
         std::chrono::system_clock::now().time_since_epoch().count());
-    rectBUTTON quitBox, IPfin;
+    button::Rect quitBox, IPfin;
     sys_edit IPbox;
     int plCnt;
     lisCon = true;
@@ -668,7 +669,7 @@ int LGclient::GAME() {
     printMap(LGgame::cheatCode, LGgame::playerCoo[playerNumber]);
     bool gameEnd = 0;
     int movLin, movCol;
-    rectBUTTON fpsbut;
+    button::Rect fpsbut;
     fpsbut.move(0, 1400 * LGGraphics::windowData.zoomX);
     fpsbut.size(20 * LGGraphics::windowData.zoomY,
                 200 * LGGraphics::windowData.zoomX);
@@ -677,7 +678,7 @@ int LGclient::GAME() {
     fpsbut.fontsize(20 * LGGraphics::windowData.zoomY, 0);
     fpsbut.bgcolor(RED);
     fpsbut.textcolor(WHITE);
-    rectBUTTON turnbut;
+    button::Rect turnbut;
     turnbut.move(0, 1250 * LGGraphics::windowData.zoomX)
         .size(20 * LGGraphics::windowData.zoomY,
               150 * LGGraphics::windowData.zoomX)

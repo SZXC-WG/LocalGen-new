@@ -21,29 +21,30 @@ _GLIB_NAMESPACE_HEAD
 
 namespace images {
 
-	void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
-		if(dstimg == NULL || srcimg == NULL) return;
-		getimage(dstimg, srcimg, 0, 0, getwidth(srcimg), getheight(srcimg));
-	}
-	void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
-		if((pimg == NULL) || (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
-			return;
+void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
+    if (dstimg == NULL || srcimg == NULL) return;
+    getimage(dstimg, srcimg, 0, 0, getwidth(srcimg), getheight(srcimg));
+}
+void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
+    if ((pimg == NULL) ||
+        (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
+        return;
 
-		PIMAGE zoomImage = newimage(zoomWidth, zoomHeight);
-		putimage(zoomImage, 0, 0, zoomWidth, zoomHeight, pimg, 0, 0, getwidth(pimg), getheight(pimg));
-		delimage(pimg);
+    PIMAGE zoomImage = newimage(zoomWidth, zoomHeight);
+    putimage(zoomImage, 0, 0, zoomWidth, zoomHeight, pimg, 0, 0, getwidth(pimg),
+             getheight(pimg));
+    delimage(pimg);
 
-		pimg = zoomImage;
-	}
-	void setWindowTransparent(bool enable, int alpha) {
-		HWND egeHwnd = getHWnd();
-		LONG nRet = ::GetWindowLong(egeHwnd, GWL_EXSTYLE);
-		nRet |= WS_EX_LAYERED;
-		::SetWindowLong(egeHwnd, GWL_EXSTYLE, nRet);
-		if(!enable)
-			alpha = 0xFF;
-		SetLayeredWindowAttributes(egeHwnd, 0, alpha, LWA_ALPHA);
-	}
+    pimg = zoomImage;
+}
+void setWindowTransparent(bool enable, int alpha) {
+    HWND egeHwnd = getHWnd();
+    LONG nRet = ::GetWindowLong(egeHwnd, GWL_EXSTYLE);
+    nRet |= WS_EX_LAYERED;
+    ::SetWindowLong(egeHwnd, GWL_EXSTYLE, nRet);
+    if (!enable) alpha = 0xFF;
+    SetLayeredWindowAttributes(egeHwnd, 0, alpha, LWA_ALPHA);
+}
 
 }  // namespace images
 

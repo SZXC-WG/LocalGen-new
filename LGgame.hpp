@@ -682,7 +682,7 @@ int GAME() {
                              std::min(900 / mapH, 900 / mapW), mapH, mapW);
     LGGraphics::init();
 
-    rectBUTTON speedUpBut, speedDownBut;
+    button::Rect speedUpBut, speedDownBut;
     speedUpBut.move(LGGraphics::zoomX(0), LGGraphics::zoomY(0))
         .size(LGGraphics::zoomX(25), LGGraphics::zoomY(25))
         .addtext(L"∧")

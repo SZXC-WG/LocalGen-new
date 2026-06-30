@@ -91,7 +91,7 @@ void initWindowSize() {
     setcolor(WHITE);
     xyprintf(250, 250, L"Please Select Window Size:");
     settextjustify(LEFT_TEXT, TOP_TEXT);
-    rectBUTTON scrsz[13];
+    button::Rect scrsz[13];
     constexpr int wwlen = 12,
                   window_width[] = {480,  640,  800,  854,  960,  1024,
                                     1280, 1366, 1600, 1920, 2160, 3840};
@@ -156,7 +156,7 @@ void initname() {
     cleardevice();
     int scrw = windowData.zoomX * 1600, scrh = windowData.zoomY * 900;
     sys_edit nameBox;
-    rectBUTTON submitButton;
+    button::Rect submitButton;
     setfillcolor(WHITE);
     bar(scrw / 2 - 120, scrh / 2 - 80, scrw / 2 + 120, scrh / 2 + 80);
     setcolor(BLACK);
@@ -245,9 +245,9 @@ WelcomePageStartLabel:;
     xyprintf(330 * windowData.zoomX, 750 * windowData.zoomY,
              "version %d.%d.%d (build %d)", VER_MAJOR, VER_MINOR, VER_RELEASE,
              VER_BUILD);
-    rectBUTTON local, web, replay, createmap;
-    rectBUTTON donate;
-    circBUTTON settings, repo;
+    button::Rect local, web, replay, createmap;
+    button::Rect donate;
+    button::Circ settings, repo;
     local.size(600 * windowData.zoomX, 100 * windowData.zoomY)
         .move(700 * windowData.zoomX, 100 * windowData.zoomY)
         .addtext(L"local game")
@@ -346,7 +346,7 @@ WelcomePageStartLabel:;
         .enableButtonShadow = false;
     repo.display();
 
-    // rectCBOX cbox_test;
+    // Rect cbox_test;
     // cbox_test
     // .size(20 * windowData.zoomX, 20 * windowData.zoomY)
     // .move(20 * windowData.zoomX, 20 * windowData.zoomY)
@@ -425,30 +425,30 @@ void settingsPage() {
         p_settings.display(NULL);
         for (auto it : p_settings.gContent()) {
             switch (it.iType) {
-                case ITEM_SUBPAGE: {
+                case page::ItemType::SUBPAGE: {
                     it.info.subPage;
                 } break;
-                // case ITEM_LINETEXT: { it.info.lText; } break;
-                // case ITEM_CONDTEXT: { it.info.cdtnText->print(); } break;
-                case ITEM_RECTBUTTON: {
+                // case TEXT_LINE: { it.info.lText; } break;
+                // case TEXT_COND: { it.info.cdtnText->print(); } break;
+                case page::ItemType::BUTTON_RECT: {
                     if (it.info.rButton->status == 2) {
                         it.info.rButton->clickEvent();
                         it.info.rButton->status = 0;
                     }
                 } break;
-                case ITEM_CIRCBUTTON: {
+                case page::ItemType::BUTTON_CIRC: {
                     if (it.info.cButton->status == 2) {
                         it.info.cButton->clickEvent();
                         it.info.cButton->status = 0;
                     }
                 } break;
-                case ITEM_RECTCHKBOX: {
+                case page::ItemType::CHKBOX_RECT: {
                     if (it.info.rChkBox->status == 2) {
                         it.info.rChkBox->changeState();
                         it.info.rChkBox->status = 0;
                     }
                 } break;
-                case ITEM_RECTCHKBOX_WITH_TEXT: {
+                case page::ItemType::CHKBOX_RECT_WITH_TEXT: {
                     if (it.info.cBText->checkBox.status == 2) {
                         it.info.cBText->checkBox.changeState();
                         it.info.cBText->checkBox.status = 0;
@@ -487,7 +487,7 @@ void testPage() {
     LGgame::team[9].push_back(9);
     LGgame::team[9].push_back(10);
     LGgame::team[9].push_back(11);
-    rectBUTTON teamButton[13], selectButton, forceStart;
+    button::Rect teamButton[13], selectButton, forceStart;
     for (int i = 1; i <= 12; ++i) {
         teamButton[i]
             .size(50, 30)
@@ -601,7 +601,7 @@ void localOptions() {
 
     /** select/import map **/
 
-    rectBUTTON mapbut[505];
+    button::Rect mapbut[505];
     int shiftval = 0;
     static const int butH = 150;
     for (int i = 1; i <= mapNum; ++i) {
@@ -718,10 +718,10 @@ void webOptions() {
     setbkcolor(bgColor);
     setbkcolor_f(bgColor);
 
-    rectBUTTON serverBox;
-    rectBUTTON clientBox;
-    rectBUTTON mapbut[505];
-    rectBUTTON impfin;
+    button::Rect serverBox;
+    button::Rect clientBox;
+    button::Rect mapbut[505];
+    button::Rect impfin;
     sys_edit impbox;
     int shiftval = 0, ret;
 
@@ -959,14 +959,14 @@ void replayPage() {
     for (int i = 1; i <= LGgame::playerCnt; ++i) LGgame::isAlive[i] = 1;
     printMap(1048575, {-1, -1});
 
-    rectBUTTON jumpbut;
+    button::Rect jumpbut;
     sys_edit jumpbox;
-    rectBUTTON jumpsmbut;
-    rectBUTTON stepbybut;
-    rectBUTTON exitbut;
-    rectBUTTON backbut;
-    rectBUTTON nextbut;
-    rectBUTTON autobut;
+    button::Rect jumpsmbut;
+    button::Rect stepbybut;
+    button::Rect exitbut;
+    button::Rect backbut;
+    button::Rect nextbut;
+    button::Rect autobut;
 
     jumpbut.textalign(CENTER_TEXT, CENTER_TEXT)
         .bgcolor(WHITE)
@@ -1075,7 +1075,7 @@ void createMapPage() {
     settextjustify(LEFT_TEXT, TOP_TEXT);
     int scrw = windowData.zoomX * 1600, scrh = windowData.zoomY * 900;
     sys_edit citynumBox, plainnumBox, savenameBox;
-    rectBUTTON saveButton, cancelButton, loadButton;
+    button::Rect saveButton, cancelButton, loadButton;
     citynumBox.create();
     citynumBox.size(zoomX(80), zoomY(30));
     citynumBox.move(scrw / 2 + zoomX(5), scrh - zoomY(110));
@@ -1521,7 +1521,7 @@ void doMapSelect() {
             amninput.visible(true);
             amxinput.visible(true);
         }
-        rectBUTTON heib, widb, amnb, amxb, endb;
+        button::Rect heib, widb, amnb, amxb, endb;
         heib.move(1020 * windowData.zoomX, 6 * windowData.zoomY)
             .size(100 * windowData.zoomX, 38 * windowData.zoomY)
             .bgcolor(WHITE)
@@ -1667,11 +1667,11 @@ void doMapSelect() {
 
 void importGameSettings() {
     sys_edit speedBox;
-    rectBUTTON speedSubmit;
-    rectBUTTON plCntBox[20]; /* 2~16 */
-    rectBUTTON checkBox[20]; /* 2~16 */
-    rectBUTTON checkOA;
-    rectBUTTON gameBox;
+    button::Rect speedSubmit;
+    button::Rect plCntBox[20]; /* 2~16 */
+    button::Rect checkBox[20]; /* 2~16 */
+    button::Rect checkOA;
+    button::Rect gameBox;
     plCnt = LGset::defaultPlayerNum;
     stDel = LGset::defaultSpeed;
     settextjustify(CENTER_TEXT, CENTER_TEXT);
@@ -1881,30 +1881,30 @@ void init() {
 }
 
 void initPages() {
-    itemS tmp;  // temp variable for items
+    page::Item tmp;  // temp variable for items
 
     // settings page
     p_settings.size(zoomX(1600), zoomY(900))
         .move(zoomX(0), zoomY(0))
         .dSize(zoomX(1600), zoomY(900))
         .setBgColor(LGGraphics::bgColor);
-    tmp.iType = ITEM_LINETEXT;
-    tmp.info.lText = new lineTextS;
+    tmp.iType = page::ItemType::TEXT_LINE;
+    tmp.info.lText = new text::Line;
     tmp.locX = zoomX(100);
     tmp.locY = zoomY(20);
     tmp.downLoc();
     tmp.info.lText->push_back(
-        singleTextS(WHITE, L"Settings", LGset::mainFontName, -zoomY(50), 0));
+        text::Single(WHITE, L"Settings", LGset::mainFontName, -zoomY(50), 0));
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
-    tmp.info.cBText = new rCBOXtextS;
+    tmp.iType = page::ItemType::CHKBOX_RECT_WITH_TEXT;
+    tmp.info.cBText = new checkbox::RectWithText;
     tmp.locX = zoomX(100);
     tmp.locY = zoomY(120);
     tmp.downLoc();
     tmp.info.cBText->bgColor = LGGraphics::bgColor;
     tmp.info.cBText->boxText.push_back(
-        singleTextS(WHITE, L"Enable god power (originated from v1.0.0 bug)",
-                    LGset::mainFontName, -zoomY(20), 0));
+        text::Single(WHITE, L"Enable god power (originated from v1.0.0 bug)",
+                     LGset::mainFontName, -zoomY(20), 0));
     tmp.info.cBText->checkBox.size(zoomX(20), zoomY(20))
         .frame(2)
         .variable(&LGset::enableGodPower)
@@ -1913,15 +1913,15 @@ void initPages() {
         .framecolor(WHITE);
     tmp.info.cBText->blankWidth = zoomX(10);
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
-    tmp.info.cBText = new rCBOXtextS;
+    tmp.iType = page::ItemType::CHKBOX_RECT_WITH_TEXT;
+    tmp.info.cBText = new checkbox::RectWithText;
     tmp.locX = zoomX(100);
     tmp.locY = zoomY(150);
     tmp.downLoc();
     tmp.info.cBText->bgColor = LGGraphics::bgColor;
     tmp.info.cBText->boxText.push_back(
-        singleTextS(WHITE, L"Enable gong sound when starting game",
-                    LGset::mainFontName, -zoomY(20), 0));
+        text::Single(WHITE, L"Enable gong sound when starting game",
+                     LGset::mainFontName, -zoomY(20), 0));
     tmp.info.cBText->checkBox.size(zoomX(20), zoomY(20))
         .frame(2)
         .variable(&LGset::enableGongSound)
@@ -1930,13 +1930,13 @@ void initPages() {
         .framecolor(WHITE);
     tmp.info.cBText->blankWidth = zoomX(10);
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
-    tmp.info.cBText = new rCBOXtextS;
+    tmp.iType = page::ItemType::CHKBOX_RECT_WITH_TEXT;
+    tmp.info.cBText = new checkbox::RectWithText;
     tmp.locX = zoomX(100);
     tmp.locY = zoomY(180);
     tmp.downLoc();
     tmp.info.cBText->bgColor = LGGraphics::bgColor;
-    tmp.info.cBText->boxText.push_back(singleTextS(
+    tmp.info.cBText->boxText.push_back(text::Single(
         WHITE, L"Enable analysis in game", LGset::mainFontName, -zoomY(20), 0));
     tmp.info.cBText->checkBox.size(zoomX(20), zoomY(20))
         .frame(2)
@@ -1946,16 +1946,16 @@ void initPages() {
         .framecolor(WHITE);
     tmp.info.cBText->blankWidth = zoomX(10);
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_VARINTTEXT;
+    tmp.iType = page::ItemType::TEXT_VARINT;
     tmp.info.vIText =
-        new varIntTextS(&LGset::game::gameMode, WHITE, L"Game Mode: ",
-                        LGset::mainFontName, -zoomY(20), 0);
+        new text::VarInt(&LGset::game::gameMode, WHITE, L"Game Mode: ",
+                         LGset::mainFontName, -zoomY(20), 0);
     tmp.locX = zoomX(100);
     tmp.locY = zoomY(210);
     tmp.downLoc();
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_CIRCBUTTON;
-    tmp.info.cButton = new circBUTTON;
+    tmp.iType = page::ItemType::BUTTON_CIRC;
+    tmp.info.cButton = new button::Circ;
     tmp.locX = zoomX(260);
     tmp.locY = zoomY(225);  // centre
     tmp.downLoc();
@@ -1971,7 +1971,7 @@ void initPages() {
     tmp.info.cButton->enableButtonShadow = false;
     tmp.info.cButton->event([&]() -> void { LGset::game::gameMode = 0; });
     p_settings.addItem(tmp);
-    tmp.info.cButton = new circBUTTON;
+    tmp.info.cButton = new button::Circ;
     tmp.locX = zoomX(300);
     tmp.locY = zoomY(225);  // centre
     tmp.downLoc();
@@ -1987,7 +1987,7 @@ void initPages() {
     tmp.info.cButton->enableButtonShadow = false;
     tmp.info.cButton->event([&]() -> void { LGset::game::gameMode = 1; });
     p_settings.addItem(tmp);
-    tmp.info.cButton = new circBUTTON;
+    tmp.info.cButton = new button::Circ;
     tmp.locX = zoomX(340);
     tmp.locY = zoomY(225);  // centre
     tmp.downLoc();
@@ -2003,22 +2003,22 @@ void initPages() {
     tmp.info.cButton->enableButtonShadow = false;
     tmp.info.cButton->event([&]() -> void { LGset::game::gameMode = 2; });
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_LINETEXT;
-    tmp.info.lText = new lineTextS;
+    tmp.iType = page::ItemType::TEXT_LINE;
+    tmp.info.lText = new text::Line;
     tmp.locX = zoomX(800);
     tmp.locY = zoomY(110);
     tmp.downLoc();
     tmp.info.lText->push_back(
-        singleTextS(WHITE, L"Modifiers", LGset::mainFontName, -zoomY(35), 0));
+        text::Single(WHITE, L"Modifiers", LGset::mainFontName, -zoomY(35), 0));
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
-    tmp.info.cBText = new rCBOXtextS;
+    tmp.iType = page::ItemType::CHKBOX_RECT_WITH_TEXT;
+    tmp.info.cBText = new checkbox::RectWithText;
     tmp.locX = zoomX(800);
     tmp.locY = zoomY(170);
     tmp.downLoc();
     tmp.info.cBText->bgColor = LGGraphics::bgColor;
     tmp.info.cBText->boxText.push_back(
-        singleTextS(WHITE, L"Leapfrog", LGset::mainFontName, -zoomY(20), 0));
+        text::Single(WHITE, L"Leapfrog", LGset::mainFontName, -zoomY(20), 0));
     tmp.info.cBText->checkBox.size(zoomX(20), zoomY(20))
         .frame(2)
         .variable(&LGset::modifier::Leapfrog)
@@ -2027,15 +2027,15 @@ void initPages() {
         .framecolor(WHITE);
     tmp.info.cBText->blankWidth = zoomX(10);
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
-    tmp.info.cBText = new rCBOXtextS;
+    tmp.iType = page::ItemType::CHKBOX_RECT_WITH_TEXT;
+    tmp.info.cBText = new checkbox::RectWithText;
     tmp.locX = zoomX(800);
     tmp.locY = zoomY(200);
     tmp.downLoc();
     tmp.info.cBText->bgColor = LGGraphics::bgColor;
     tmp.info.cBText->boxText.push_back(
-        singleTextS(WHITE, L"City-State (unavailable)", LGset::mainFontName,
-                    -zoomY(20), 0));
+        text::Single(WHITE, L"City-State (unavailable)", LGset::mainFontName,
+                     -zoomY(20), 0));
     tmp.info.cBText->checkBox.size(zoomX(20), zoomY(20))
         .frame(2)
         .variable(&LGset::modifier::CityState)
@@ -2044,14 +2044,14 @@ void initPages() {
         .framecolor(WHITE);
     tmp.info.cBText->blankWidth = zoomX(10);
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
-    tmp.info.cBText = new rCBOXtextS;
+    tmp.iType = page::ItemType::CHKBOX_RECT_WITH_TEXT;
+    tmp.info.cBText = new checkbox::RectWithText;
     tmp.locX = zoomX(800);
     tmp.locY = zoomY(230);
     tmp.downLoc();
     tmp.info.cBText->bgColor = LGGraphics::bgColor;
     tmp.info.cBText->boxText.push_back(
-        singleTextS(WHITE, L"Misty Veil", LGset::mainFontName, -zoomY(20), 0));
+        text::Single(WHITE, L"Misty Veil", LGset::mainFontName, -zoomY(20), 0));
     tmp.info.cBText->checkBox.size(zoomX(20), zoomY(20))
         .frame(2)
         .variable(&LGset::modifier::MistyVeil)
@@ -2060,14 +2060,14 @@ void initPages() {
         .framecolor(WHITE);
     tmp.info.cBText->blankWidth = zoomX(10);
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
-    tmp.info.cBText = new rCBOXtextS;
+    tmp.iType = page::ItemType::CHKBOX_RECT_WITH_TEXT;
+    tmp.info.cBText = new checkbox::RectWithText;
     tmp.locX = zoomX(800);
     tmp.locY = zoomY(260);
     tmp.downLoc();
     tmp.info.cBText->bgColor = LGGraphics::bgColor;
     tmp.info.cBText->boxText.push_back(
-        singleTextS(WHITE, L"Silent War", LGset::mainFontName, -zoomY(20), 0));
+        text::Single(WHITE, L"Silent War", LGset::mainFontName, -zoomY(20), 0));
     tmp.info.cBText->checkBox.size(zoomX(20), zoomY(20))
         .frame(2)
         .variable(&LGset::modifier::SilentWar)
@@ -2076,14 +2076,14 @@ void initPages() {
         .framecolor(WHITE);
     tmp.info.cBText->blankWidth = zoomX(10);
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
-    tmp.info.cBText = new rCBOXtextS;
+    tmp.iType = page::ItemType::CHKBOX_RECT_WITH_TEXT;
+    tmp.info.cBText = new checkbox::RectWithText;
     tmp.locX = zoomX(800);
     tmp.locY = zoomY(290);
     tmp.downLoc();
     tmp.info.cBText->bgColor = LGGraphics::bgColor;
     tmp.info.cBText->boxText.push_back(
-        singleTextS(WHITE, L"Watchtower", LGset::mainFontName, -zoomY(20), 0));
+        text::Single(WHITE, L"Watchtower", LGset::mainFontName, -zoomY(20), 0));
     tmp.info.cBText->checkBox.size(zoomX(20), zoomY(20))
         .frame(2)
         .variable(&LGset::modifier::Watchtower)
@@ -2092,13 +2092,13 @@ void initPages() {
         .framecolor(WHITE);
     tmp.info.cBText->blankWidth = zoomX(10);
     p_settings.addItem(tmp);
-    tmp.iType = ITEM_RECTCHKBOX_WITH_TEXT;
-    tmp.info.cBText = new rCBOXtextS;
+    tmp.iType = page::ItemType::CHKBOX_RECT_WITH_TEXT;
+    tmp.info.cBText = new checkbox::RectWithText;
     tmp.locX = zoomX(800);
     tmp.locY = zoomY(350);
     tmp.downLoc();
     tmp.info.cBText->bgColor = LGGraphics::bgColor;
-    tmp.info.cBText->boxText.push_back(singleTextS(
+    tmp.info.cBText->boxText.push_back(text::Single(
         WHITE, L"Neutral Resist", LGset::mainFontName, -zoomY(20), 0));
     tmp.info.cBText->checkBox.size(zoomX(20), zoomY(20))
         .frame(2)

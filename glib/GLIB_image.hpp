@@ -21,11 +21,11 @@ _GLIB_NAMESPACE_HEAD
 
 namespace images {
 
-void copyImage(PIMAGE& dstimg, PIMAGE& srcimg) {
+void copy(PIMAGE& dstimg, PIMAGE& srcimg) {
     if (dstimg == NULL || srcimg == NULL) return;
     getimage(dstimg, srcimg, 0, 0, getwidth(srcimg), getheight(srcimg));
 }
-void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
+void zoom(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
     if ((pimg == NULL) ||
         (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
         return;
@@ -37,6 +37,7 @@ void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
 
     pimg = zoomImage;
 }
+
 void setWindowTransparent(bool enable, int alpha) {
     HWND egeHwnd = getHWnd();
     LONG nRet = ::GetWindowLong(egeHwnd, GWL_EXSTYLE);

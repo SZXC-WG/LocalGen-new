@@ -75,8 +75,8 @@ inline Rect& Rect::draw() {
     if (backgroundImage != nullptr) {
         if (getwidth(backgroundImage) != backgroundImageWidth ||
             getheight(backgroundImage) != backgroundImageHeight)
-            images::zoomImage(backgroundImage, backgroundImageWidth,
-                              backgroundImageHeight);
+            images::zoom(backgroundImage, backgroundImageWidth,
+                         backgroundImageHeight);
         putimage_withalpha(buttonImage, backgroundImage, 0, 0);
     }
     setfont(-fontHeight, fontWidth, fontName.c_str(), buttonImage);
@@ -182,7 +182,7 @@ inline Rect& Rect::framecolor(bool _enableAuto, color_t _color) {
 }
 inline Rect& Rect::bgimage(PIMAGE _img) {
     if (backgroundImage == nullptr) backgroundImage = newimage();
-    images::copyImage(backgroundImage, _img);
+    images::copy(backgroundImage, _img);
     backgroundImageWidth = getwidth(backgroundImage);
     backgroundImageHeight = getheight(backgroundImage);
     return *this;

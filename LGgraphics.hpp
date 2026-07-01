@@ -77,7 +77,7 @@ void initWindowSize() {
     xyprintf(252, 152, L"generals.io");
     setcolor(WHITE);
     xyprintf(250, 150, L"generals.io");
-    images::zoomImage(iconImg, 256, 256);
+    images::zoom(iconImg, 256, 256);
     putimage_withalpha(NULL, iconImg, 500, 10, 0, 0, getwidth(iconImg),
                        getheight(iconImg));
     setfont(20, 0, "Lucida Fax");
@@ -229,8 +229,8 @@ WelcomePageStartLabel:;
     cleardevice();
     PIMAGE zfavi = newimage();
     getimage(zfavi, "PNG", "IMAGE_FAVICON");
-    images::zoomImage(zfavi, 256 * 1.8 * windowData.zoomX,
-                      256 * 1.8 * windowData.zoomY);
+    images::zoom(zfavi, 256 * 1.8 * windowData.zoomX,
+                 256 * 1.8 * windowData.zoomY);
     putimage_withalpha(NULL, zfavi, 100 * windowData.zoomX,
                        50 * windowData.zoomY, 0, 0, getwidth(zfavi),
                        getheight(zfavi));
@@ -307,10 +307,10 @@ WelcomePageStartLabel:;
             PIMAGE donate_wc = newimage(), donate_ap = newimage();
             getimage_pngfile(donate_wc, "img/donate_wechat.png");
             getimage_pngfile(donate_ap, "img/donate_alipay.png");
-            images::zoomImage(donate_wc, 600 * windowData.zoomX,
-                              800 * windowData.zoomY);
-            images::zoomImage(donate_ap, 600 * windowData.zoomX,
-                              800 * windowData.zoomY);
+            images::zoom(donate_wc, 600 * windowData.zoomX,
+                         800 * windowData.zoomY);
+            images::zoom(donate_ap, 600 * windowData.zoomX,
+                         800 * windowData.zoomY);
             putimage(100 * windowData.zoomX, 10 * windowData.zoomY, donate_wc);
             putimage((100 + 800) * windowData.zoomX, 10 * windowData.zoomY,
                      donate_ap);
@@ -1837,27 +1837,27 @@ void init() {
     setbkmode(TRANSPARENT);
     pimg[1] = newimage();
     getimage(pimg[1], "PNG", "IMAGE_CITY");
-    // imageOperation::zoomImage(pimg[1], windowData.heightPerBlock,
+    // imageOperation::zoom(pimg[1], windowData.heightPerBlock,
     // windowData.widthPerBlock);
     pimg[2] = newimage();
     getimage(pimg[2], "PNG", "IMAGE_CROWN");
-    // imageOperation::zoomImage(pimg[2], windowData.heightPerBlock,
+    // imageOperation::zoom(pimg[2], windowData.heightPerBlock,
     // windowData.widthPerBlock);
     pimg[3] = newimage();
     getimage(pimg[3], "PNG", "IMAGE_MOUNTAIN");
-    // imageOperation::zoomImage(pimg[3], windowData.heightPerBlock,
+    // imageOperation::zoom(pimg[3], windowData.heightPerBlock,
     // windowData.widthPerBlock);
     pimg[4] = newimage();
     getimage(pimg[4], "PNG", "IMAGE_SWAMP");
-    // imageOperation::zoomImage(pimg[4], windowData.heightPerBlock,
+    // imageOperation::zoom(pimg[4], windowData.heightPerBlock,
     // windowData.widthPerBlock);
     pimg[5] = newimage();
     getimage(pimg[5], "PNG", "IMAGE_OBSTACLE");
-    // imageOperation::zoomImage(pimg[5], windowData.heightPerBlock,
+    // imageOperation::zoom(pimg[5], windowData.heightPerBlock,
     // windowData.widthPerBlock);
     pimg[6] = newimage();
     getimage(pimg[6], "PNG", "IMAGE_CURRENTON");
-    // imageOperation::zoomImage(pimg[6], windowData.heightPerBlock,
+    // imageOperation::zoom(pimg[6], windowData.heightPerBlock,
     // windowData.widthPerBlock);
     pimg[7] = newimage();
     getimage(pimg[7], "PNG", "IMAGE_ERASE");

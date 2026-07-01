@@ -138,11 +138,11 @@ void printMap(int Code, coordS coo) {
     PIMAGE npimg[14];
     for (int i = 1; i <= 13; ++i) {
         npimg[i] = newimage();
-        images::copyImage(npimg[i], pimg[i]);
-        images::zoomImage(npimg[i], blockWidth, blockHeight);
+        images::copy(npimg[i], pimg[i]);
+        images::zoom(npimg[i], blockWidth, blockHeight);
     }
-    images::copyImage(npimg[7], pimg[8]);
-    images::zoomImage(npimg[7], blockWidth / 3, blockHeight / 3);
+    images::copy(npimg[7], pimg[8]);
+    images::zoom(npimg[7], blockWidth / 3, blockHeight / 3);
     for (int curx = 1; curx <= mapH; curx++) {
         for (int cury = 1; cury <= mapW; cury++) {
             if (isVisible(curx, cury, Code)) {
@@ -411,9 +411,8 @@ void createOptions(int type, int h) {
     PIMAGE npimg[15];
     for (int i = 1; i <= 13; ++i) {
         npimg[i] = newimage();
-        images::copyImage(npimg[i], pimg[i]);
-        images::zoomImage(npimg[i], LGGraphics::zoomX(40),
-                          LGGraphics::zoomY(40));
+        images::copy(npimg[i], pimg[i]);
+        images::zoom(npimg[i], LGGraphics::zoomX(40), LGGraphics::zoomY(40));
     }
     setcolor(WHITE);
     setfont(LGGraphics::zoomY(14), 0, "Segoe UI");

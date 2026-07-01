@@ -54,14 +54,15 @@ namespace images {
  * @param dstimg destination image
  * @param srcimg source image
  */
-void copyImage(PIMAGE& dstimg, PIMAGE& srcimg);
+void copy(PIMAGE& dstimg, PIMAGE& srcimg);
 /**
  * @brief Zoom a image.
  * @param pimg target image
  * @param zoomWidth target width
  * @param zoomHeight target height
  */
-void zoomImage(PIMAGE& pimg, int zoomWidth, int zoomHeight);
+void zoom(PIMAGE& pimg, int zoomWidth, int zoomHeight);
+
 /**
  * @brief Set the Window Transparent object
  * @param enable whether enabled

@@ -18,4 +18,4 @@ file(WRITE ${BUILD_NUMBER_FILE} "${BUILD_NUMBER}\n")
 set(BUILD_NUMBER ${BUILD_NUMBER})
 
 configure_file("${CMAKE_CURRENT_LIST_DIR}/LocalGen.rc.in" "${VERSIONINFO_OUTPUT_RC}")
-configure_file("${CMAKE_CURRENT_LIST_DIR}/verinfo.h.in" "${CMAKE_CURRENT_LIST_DIR}/verinfo.h")
+configure_file("${CMAKE_CURRENT_LIST_DIR}/src/verinfo.h.in" "${CMAKE_CURRENT_LIST_DIR}/src/verinfo.h")

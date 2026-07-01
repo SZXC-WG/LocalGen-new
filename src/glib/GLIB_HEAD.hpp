@@ -18,24 +18,14 @@
 #define _GLIB_NAMESPACE_HEAD inline namespace _glib {
 #define _GLIB_NAMESPACE_TAIL }
 
+#include <graphics.h>
+
 #include <algorithm>
 #include <deque>
 #include <functional>
 #include <string>
 #include <utility>
 #include <vector>
-using std::deque;
-using std::max;
-using std::min;
-using std::string;
-using std::to_string;
-using std::to_wstring;
-using std::vector;
-using std::wstring;
-
-#include <graphics.h>
-
-#include "../LGdef.hpp"
 
 /* quick function for window visibility */
 inline __attribute__((always_inline)) bool windowIsVisible() {
@@ -72,9 +62,6 @@ void setWindowTransparent(bool enable, int alpha = 0xFF);
 
 }  // namespace images
 
-/**
- * @brief Inline namespace for texts.
- */
 namespace text {
 
 /**
@@ -83,11 +70,12 @@ namespace text {
  */
 struct Single {
     color_t color;
-    wstring text, font;
+    std::wstring text, font;
     int fontHeight, fontWidth;
     Single() {};
-    Single(color_t _color, wstring _text) : color(_color), text(_text) {};
-    Single(color_t _color, wstring _text, wstring _font, int _fH, int _fW = 0)
+    Single(color_t _color, std::wstring _text) : color(_color), text(_text) {};
+    Single(color_t _color, std::wstring _text, std::wstring _font, int _fH,
+           int _fW = 0)
         : color(_color),
           text(_text),
           font(_font),
@@ -117,16 +105,16 @@ struct Single {
 struct VarInt {
     int* var;
     color_t color;
-    wstring sbText;
-    wstring font;
+    std::wstring sbText;
+    std::wstring font;
     int fontHeight, fontWidth;
     VarInt() {};
     VarInt(int* _var) : var(_var) {};
     VarInt(int* _var, color_t _color) : var(_var), color(_color) {};
-    VarInt(int* _var, color_t _color, wstring _sbText)
+    VarInt(int* _var, color_t _color, std::wstring _sbText)
         : var(_var), color(_color), sbText(_sbText) {};
-    VarInt(int* _var, color_t _color, wstring _sbText, wstring _font, int _fH,
-           int _fW = 0)
+    VarInt(int* _var, color_t _color, std::wstring _sbText, std::wstring _font,
+           int _fH, int _fW = 0)
         : var(_var),
           color(_color),
           sbText(_sbText),
@@ -136,17 +124,17 @@ struct VarInt {
 
     int width(PIMAGE _pimg = NULL) {
         setfont(fontHeight, fontWidth, font.c_str(), _pimg);
-        return textwidth(to_wstring(*var).c_str(), _pimg);
+        return textwidth(std::to_wstring(*var).c_str(), _pimg);
     }
     int height(PIMAGE _pimg = NULL) {
         setfont(fontHeight, fontWidth, font.c_str(), _pimg);
-        return textheight(to_wstring(*var).c_str(), _pimg);
+        return textheight(std::to_wstring(*var).c_str(), _pimg);
     }
 
     void print(int _X, int _Y, PIMAGE _pimg = NULL) {
         setcolor(color, _pimg);
         setfont(fontHeight, fontWidth, font.c_str(), _pimg);
-        outtextxy(_X, _Y, (sbText + to_wstring(*var)).c_str(), _pimg);
+        outtextxy(_X, _Y, (sbText + std::to_wstring(*var)).c_str(), _pimg);
     }
 };
 
@@ -155,16 +143,16 @@ struct VarInt {
  * @brief Struct for texts on a single line.
  */
 struct Line {
-    deque<Single> text;
+    std::deque<Single> text;
     Line() {};
-    Line(deque<Single> _text) : text(_text) {};
+    Line(std::deque<Single> _text) : text(_text) {};
 
     void push_front(Single _stext) { text.push_front(_stext); }
-    void push_front(color_t _color, wstring _stext) {
+    void push_front(color_t _color, std::wstring _stext) {
         text.emplace_front(_color, _stext);
     }
     void push_back(Single _stext) { text.push_back(_stext); }
-    void push_back(color_t _color, wstring _stext) {
+    void push_back(color_t _color, std::wstring _stext) {
         text.emplace_back(_color, _stext);
     }
     void pop_front() { text.pop_front(); }
@@ -177,7 +165,7 @@ struct Line {
     }
     int height(PIMAGE _pimg = NULL) {
         int ret = 0;
-        for (auto& t : text) ret = max(ret, t.height(_pimg));
+        for (auto& t : text) ret = std::max(ret, t.height(_pimg));
         return ret;
     }
 
@@ -199,12 +187,12 @@ class Rect {
     PIMAGE buttonImage;      // image info
     PIMAGE backgroundImage;  // background image
     int backgroundImageWidth, backgroundImageHeight;
-    int buttonWidth, buttonHeight;  // width & height
-    color_t backgroundColor;        // background color
-    color_t textColor;              // text color
-    vector<wstring> text;           // text
-    wstring fontName;               // font face name
-    int fontHeight, fontWidth;      // font height & width
+    int buttonWidth, buttonHeight;   // width & height
+    color_t backgroundColor;         // background color
+    color_t textColor;               // text color
+    std::vector<std::wstring> text;  // text
+    std::wstring fontName;           // font face name
+    int fontHeight, fontWidth;       // font height & width
     int frameWidth;
     bool enableAutoFrameColor;
     color_t frameColor;
@@ -227,10 +215,10 @@ class Rect {
     inline Rect& size(int _width, int _height);
     inline Rect& bgcolor(color_t _color);
     inline Rect& textcolor(color_t _color);
-    inline Rect& addtext(wstring _text);
+    inline Rect& addtext(std::wstring _text);
     inline Rect& poptext();
     inline Rect& cleartext();
-    inline Rect& fontname(wstring _fontName);
+    inline Rect& fontname(std::wstring _fontName);
     inline Rect& fontsize(int _fontHeight, int _fontWidth);
     inline Rect& move(int _X, int _Y);
     inline Rect& textalign(int _walign = -1, int _halign = -1);
@@ -249,12 +237,12 @@ class Circ {
     PIMAGE buttonImage;  // image info
     PIMAGE backgroundImage;
     int backgroundImageWidth, backgroundImageHeight;
-    int buttonRadius;           // radius
-    color_t backgroundColor;    // background color
-    color_t textColor;          // text color
-    vector<wstring> text;       // text
-    wstring fontName;           // font face name
-    int fontHeight, fontWidth;  // font height & width
+    int buttonRadius;                // radius
+    color_t backgroundColor;         // background color
+    color_t textColor;               // text color
+    std::vector<std::wstring> text;  // text
+    std::wstring fontName;           // font face name
+    int fontHeight, fontWidth;       // font height & width
     int frameWidth;
     bool enableAutoFrameColor;
     color_t frameColor;
@@ -277,10 +265,10 @@ class Circ {
     inline Circ& radius(int _radius);
     inline Circ& bgcolor(color_t _color);
     inline Circ& textcolor(color_t _color);
-    inline Circ& addtext(wstring _text);
+    inline Circ& addtext(std::wstring _text);
     inline Circ& poptext();
     inline Circ& cleartext();
-    inline Circ& fontname(wstring _fontName);
+    inline Circ& fontname(std::wstring _fontName);
     inline Circ& fontsize(int _fontHeight, int _fontWidth);
     inline Circ& move(int _X, int _Y);
     inline Circ& textalign(int _walign = -1, int _halign = -1);
@@ -416,7 +404,7 @@ class Page {
    public:
     // specify class types
     typedef Item item_t;
-    typedef vector<item_t> ctn_t;
+    typedef std::vector<item_t> ctn_t;
     typedef ScrBar scroll_t;
 
    private:

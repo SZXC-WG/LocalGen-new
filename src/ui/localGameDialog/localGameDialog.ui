@@ -68,6 +68,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_enableSounds">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="font">
            <font>
             <family>Quicksand</family>

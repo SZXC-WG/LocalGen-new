@@ -326,9 +326,9 @@
      <colorrole role="WindowText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>17</red>
-        <green>17</green>
-        <blue>17</blue>
+        <red>109</red>
+        <green>109</green>
+        <blue>109</blue>
        </color>
       </brush>
      </colorrole>
@@ -398,9 +398,9 @@
      <colorrole role="ButtonText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>17</red>
-        <green>17</green>
-        <blue>17</blue>
+        <red>109</red>
+        <green>109</green>
+        <blue>109</blue>
        </color>
       </brush>
      </colorrole>

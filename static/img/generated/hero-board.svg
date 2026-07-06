@@ -37,7 +37,7 @@
   <text x="602" y="234" font-size="12" fill="#a9bdd7">TOOLCHAIN</text>
   <text x="602" y="256" font-size="20" fill="#eff6ff" font-weight="700">C++17 · Qt6 · CMake</text>
   <text x="602" y="302" font-size="12" fill="#a9bdd7">PROJECT SCALE</text>
-  <text x="602" y="324" font-size="20" fill="#eff6ff" font-weight="700">24 releases · 10 bots</text>
+  <text x="602" y="324" font-size="20" fill="#eff6ff" font-weight="700">26 releases · 10 bots</text>
   <text x="602" y="370" font-size="12" fill="#a9bdd7">MAINTAINED BY</text>
   <text x="602" y="392" font-size="20" fill="#eff6ff" font-weight="700">SZXC-WG</text>
 

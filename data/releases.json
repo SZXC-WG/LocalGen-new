@@ -1,18 +1,88 @@
 {
-  "synced_at": "2026-06-29T07:25:48.819979+00:00",
+  "synced_at": "2026-07-06T07:05:56.407561+00:00",
   "items": [
+    {
+      "name": "v6.0.0-beta.2",
+      "tag_name": "v6.0.0-beta.2",
+      "html_url": "https://github.com/SZXC-WG/LocalGen-new/releases/tag/v6.0.0-beta.2",
+      "body": "## What's changed\r\n\r\n### New features\r\n\r\n- Allowed scaling range of the map is now based on map size.\r\n- Players with non-zero kills are marked using a skull icon.\r\n- Support clicking on the leaderboard to toggle collapse.\r\n\r\n### Bots\r\n\r\n- Refactored `oimbot` to be generally faster and stronger. (#54)\r\n- Imported `KtqBot` from LocalGen v5.\r\n\r\n### Other improvements\r\n\r\n- Map generator is improved.\r\n- Fonts are now bundled into distributions.\r\n- Improved quality of SVG resources.\r\n- Performance improvements.\r\n- Several minor code refactors.\r\n- Improved project documentation.",
+      "summary": "## What's changed ### New features - Allowed scaling range of the map is now based on map size. - Players with non-zero kills are marked using a skull icon. - Support clicking on the leaderboard to toggle collapse. ### Bots - Refactored `oimbot` to be generally faster and stronger. (#54) - Imported `KtqBot` from LocalGen v5. ### Other improvements - Map generator is improved. - Fonts are now bundled into distributions. - Improved quality of SVG resources. - Performance improvements. - Several minor code refactors. - Improved project documentation.",
+      "draft": false,
+      "prerelease": false,
+      "published_at": "2026-07-03T13:12:52Z",
+      "created_at": "2026-07-03T12:48:24Z",
+      "author": "GoodCoder666",
+      "is_latest": true,
+      "zipball_url": "https://api.github.com/repos/SZXC-WG/LocalGen-new/zipball/v6.0.0-beta.2",
+      "tarball_url": "https://api.github.com/repos/SZXC-WG/LocalGen-new/tarball/v6.0.0-beta.2",
+      "assets": [
+        {
+          "name": "LocalGen-6.0.0-beta.2-macos-x64.dmg",
+          "size": 27495909,
+          "size_human": "26.2 MB",
+          "download_count": 1,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v6.0.0-beta.2/LocalGen-6.0.0-beta.2-macos-x64.dmg",
+          "updated_at": "2026-07-03T13:11:53Z"
+        },
+        {
+          "name": "LocalGen-6.0.0-beta.2-windows-x64-portable.zip",
+          "size": 15198304,
+          "size_human": "14.5 MB",
+          "download_count": 7,
+          "content_type": "application/x-zip-compressed",
+          "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v6.0.0-beta.2/LocalGen-6.0.0-beta.2-windows-x64-portable.zip",
+          "updated_at": "2026-07-03T13:12:46Z"
+        }
+      ]
+    },
+    {
+      "name": "v4.3.3 (dev)",
+      "tag_name": "v4.3.3D",
+      "html_url": "https://github.com/SZXC-WG/LocalGen-new/releases/tag/v4.3.3D",
+      "body": "# Local Generals.io v4.3.3 (dev)\r\n\r\n> [!NOTE]\r\n> \r\n> This release is part of the LocalGen v5.0 life cycle, of which we do not guarantee consistency with our latest releases. **We recommend downloading the v6 beta releases instead.**\r\n\r\nThank you for your continued support, and don't forget to **star** this project!\r\n\r\nOn this special occasion, we are excited to release the **developers' version** of the new LocalGen!\r\n\r\nIn case you are still using LocalGen v4.1.0 or even older versions, we highly recommend that you upgrade to this release.\r\n\r\n**Click the download links below to start your game!**\r\n\r\n> **P.S.** If you haven’t installed the **Quicksand** font yet, please locate it in the `font` folder and install it before launching the game.\r\n\r\n## Changelog\r\n\r\n- **[Feature]** We now have shadows around your focus! This should improve focus visibility.\r\n- **[Feature]** We added the odd-even turn procedure into the game! The game should be fairer with this.\r\n- **[Feature]** Turns will now be halved when displayed, maintaining consistency with the official half-turn system.\r\n- **[Feature]** Several new preview maps from the Geography series are bundled with the game.\r\n- **[Feature]** zlyBot v2.1, our brand new bot, is now part of the game! Challenge yourself with this more balanced bot!\r\n  _Note: zlyBot v2.1 is only available under mode 0 (normal rules)._\r\n- **[Enhancement]** Meanwhile, don't forget to check the updated zlyBot v2!\r\n- **[Enhancement]** The LG special Geography 11 map should be more balanced now.\r\n- **[Bugfix]** Now all tiles' armies should increase every 25 turns properly.\r\n\r\n## Package Information\r\n\r\nLocalGen build (v1~v5) number: `3127`\r\n\r\nEither package below contains the software:\r\n\r\n- `LGen_v4.3.3D_win64.7z`\r\n  - Size: 1,821,074 bytes\r\n  - SHA256: `B405F20157DF374FD86DBA3608280A85986ACD066A980006C851EFB1CE82E99F`\r\n- `LGen_v4.3.3D_win64.zip`\r\n  - Size: 2,186,370 bytes\r\n  - SHA256: `85BAD52A27FB09AB18458BD7EBDCE3D1A940A2A9C5DD43ADD0262B9CB557CE49`\r\n\r\n**Note that LocalGen v5 is built for and under Windows x64. To run on macOS or Linux, try using [`wine`](https://www.winehq.org/).**\r\n\r\n**Full Changelog**: https://github.com/SZXC-WG/LocalGen-new/compare/v4.3.2D...v4.3.3D\r\n",
+      "summary": "# Local Generals.io v4.3.3 (dev) > [!NOTE] > > This release is part of the LocalGen v5.0 life cycle, of which we do not guarantee consistency with our latest releases. **We recommend downloading the v6 beta releases instead.** Thank you for your continued support, and don't forget to **star** this project! On this special occasion, we are excited to release the **developers' version** of the new LocalGen! In case you are still using LocalGen v4.1.0 or even older versions, we highly recommend that you upgrade to this release. **Click the download links below to start your game!** > **P.S.** If you haven’t installed the **Quicksand** font yet, please locate it in the `font` folder and install it before launching the game. ## Changelog - **[Feature]** We now have shadows around your focus! This should improve focus visibility. - **[Feature]** We added the odd-even turn procedure into the game! The game should be fairer with this. - **[Feature]** Turns will now be halved when displayed, maintaining consistency with the official half-turn system. - **[Feature]** Several new preview maps from the Geography series are bundled with the game. - **[Feature]** zlyBot v2.1, our brand new bot, is now part of the game! Challenge yourself with this more balanced bot! _Note: zlyBot v2.1 is only available under mode 0 (normal rules)._ - **[Enhancement]** Meanwhile, don't forget to check the updated zlyBot v2! - **[Enhancement]** The LG special Geography 11 map should be more balanced now. - **[Bugfix]** Now all tiles' armies should increase every 25 turns properly. ## Package Information LocalGen build (v1~v5) number: `3127` Either package below contains the software: - `LGen_v4.3.3D_win64.7z` - Size: 1,821,074 bytes - SHA256: `B405F20157DF374FD86DBA3608280A85986ACD066A980006C851EFB1CE82E99F` - `LGen_v4.3.3D_win64.zip` - Size: 2,186,370 bytes - SHA256: `85BAD52A27FB09AB18458BD7EBDCE3D1A940A2A9C5DD43ADD0262B9CB557CE49` **Note that LocalGen v5 is built for and under Windows x64. To run on macOS or Linux, try using [`wine`](https://www.winehq.org/).** **Full Changelog**: https://github.com/SZXC-WG/LocalGen-new/compare/v4.3.2D...v4.3.3D",
+      "draft": false,
+      "prerelease": true,
+      "published_at": "2026-06-30T14:33:31Z",
+      "created_at": "2026-06-30T13:41:14Z",
+      "author": "AppOfficer",
+      "is_latest": false,
+      "zipball_url": "https://api.github.com/repos/SZXC-WG/LocalGen-new/zipball/v4.3.3D",
+      "tarball_url": "https://api.github.com/repos/SZXC-WG/LocalGen-new/tarball/v4.3.3D",
+      "assets": [
+        {
+          "name": "LGen_v4.3.3D_win64.7z",
+          "size": 1821074,
+          "size_human": "1.7 MB",
+          "download_count": 0,
+          "content_type": "application/x-compressed",
+          "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v4.3.3D/LGen_v4.3.3D_win64.7z",
+          "updated_at": "2026-06-30T14:25:31Z"
+        },
+        {
+          "name": "LGen_v4.3.3D_win64.zip",
+          "size": 2186370,
+          "size_human": "2.1 MB",
+          "download_count": 0,
+          "content_type": "application/x-zip-compressed",
+          "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v4.3.3D/LGen_v4.3.3D_win64.zip",
+          "updated_at": "2026-06-30T14:25:25Z"
+        }
+      ]
+    },
     {
       "name": "v6.0.0-beta.1",
       "tag_name": "v6.0.0-beta.1",
       "html_url": "https://github.com/SZXC-WG/LocalGen-new/releases/tag/v6.0.0-beta.1",
-      "body": "Over the past year, we have been working LocalGen version 6, aiming for better performance and cross-platform compatibility. It is re-built from scratch, and no longer uses any code from previous versions. This is the first v6 beta release.\r\n\r\n## What's changed\r\n\r\n### New features\r\n\r\n- Priority system\r\n- Support more hotkeys\r\n- Customizable local game\r\n- Chat box in local game\r\n- Visible move queue\r\n- Spawn team setting (map creator)\r\n- New `.lgmp` map format - more efficient, has metadata\r\n- Metadata editor in map creator\r\n- App name changed from `LGen` to `LocalGen-new`\r\n\r\n### Bots\r\n\r\nMost v5 bots are migrated into v6, maintaining core logic but using the new API.\r\n\r\n- New active bots: KutuBot, oimbot\r\n- Improved bots: XiaruizeBot, GcBot, ZlyBot v2.1\r\n- New but disabled bot: LyBot\r\n\r\n### UI framework & build system\r\n\r\nLocalGen is now built on **Qt 6.8.3** with **CMake + Ninja**.\r\n\r\nUI redesigned: more responsive, more elegant.\r\n\r\n- New supported OS platforms: macOS, Linux\r\n- New supported compilers: Clang, MSVC\r\n- Windows release is built with **LLVM-MinGW**\r\n\r\n### Architectural Refactor\r\n\r\nLocalGen is now split up into three modules:\r\n\r\n- Core (`src/core`): The game engine, designed to work independently with C++ STL. It does not depend on Qt and can be reused in other projects. (Exception: `map.hpp` defines the map I/O logic, and uses the binary serialization from Qt Core.)\r\n- UI (`src/ui`): Front-end code, built with Qt Widgets. Map rendering is highly optimized and should be ~20x faster than that in older versions.\r\n- Bots (`src/bots`): Built-in bot implementations. See [`bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/aa7dab7a630c5919ff158aa013a2b2ceead27b41/src/bots/README.md).\r\n\r\n### Continuous Integration (CI)\r\n\r\nWe introduced the following CI tests to ensure code quality:\r\n\r\n- [`Qt Build`](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/qt-build.yml): checks compatibility on various platforms/compilers.\r\n- [`CodeQL`](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/codeql.yml): detects common code vulnerabilities.\r\n\r\n### Documentation\r\n\r\nImproved project docs with more details.\r\n\r\n### License\r\n\r\nNote that LocalGen v6 is licensed under **GPL-3.0-or-later**, while all previous versions are licensed under the MIT license.",
-      "summary": "Over the past year, we have been working LocalGen version 6, aiming for better performance and cross-platform compatibility. It is re-built from scratch, and no longer uses any code from previous versions. This is the first v6 beta release. ## What's changed ### New features - Priority system - Support more hotkeys - Customizable local game - Chat box in local game - Visible move queue - Spawn team setting (map creator) - New `.lgmp` map format - more efficient, has metadata - Metadata editor in map creator - App name changed from `LGen` to `LocalGen-new` ### Bots Most v5 bots are migrated into v6, maintaining core logic but using the new API. - New active bots: KutuBot, oimbot - Improved bots: XiaruizeBot, GcBot, ZlyBot v2.1 - New but disabled bot: LyBot ### UI framework & build system LocalGen is now built on **Qt 6.8.3** with **CMake + Ninja**. UI redesigned: more responsive, more elegant. - New supported OS platforms: macOS, Linux - New supported compilers: Clang, MSVC - Windows release is built with **LLVM-MinGW** ### Architectural Refactor LocalGen is now split up into three modules: - Core (`src/core`): The game engine, designed to work independently with C++ STL. It does not depend on Qt and can be reused in other projects. (Exception: `map.hpp` defines the map I/O logic, and uses the binary serialization from Qt Core.) - UI (`src/ui`): Front-end code, built with Qt Widgets. Map rendering is highly optimized and should be ~20x faster than that in older versions. - Bots (`src/bots`): Built-in bot implementations. See [`bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/aa7dab7a630c5919ff158aa013a2b2ceead27b41/src/bots/README.md). ### Continuous Integration (CI) We introduced the following CI tests to ensure code quality: - [`Qt Build`](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/qt-build.yml): checks compatibility on various platforms/compilers. - [`CodeQL`](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/codeql.yml): detects common code vulnerabilities. ### Documentation Improved project docs with more details. ### License Note that LocalGen v6 is licensed under **GPL-3.0-or-later**, while all previous versions are licensed under the MIT license.",
+      "body": "Over the past year, we have been working LocalGen version 6, aiming for better performance and cross-platform compatibility. It is re-built from scratch, and no longer uses any code from previous versions. This is the first v6 beta release.\r\n\r\n## What's changed\r\n\r\n### New features\r\n\r\n- Priority system\r\n- Support more hotkeys\r\n- Customizable local game\r\n- Chat box in local game\r\n- Visible move queue\r\n- Spawn team setting (map creator)\r\n- New `.lgmp` map format - more efficient, contains metadata\r\n- Metadata editor in map creator\r\n- App name changed from `LGen` to `LocalGen-new`\r\n\r\n### Bots\r\n\r\nMost v5 bots are migrated into v6, maintaining core logic but using the new API.\r\n\r\n- New active bots: KutuBot, oimbot\r\n- Improved bots: XiaruizeBot, GcBot, ZlyBot v2.1\r\n- New but disabled bot: LyBot\r\n\r\n### UI framework & build system\r\n\r\nLocalGen is now built on **Qt 6.8.3** with **CMake + Ninja**.\r\n\r\nUI redesigned: more responsive, more elegant.\r\n\r\n- New supported OS platforms: macOS, Linux\r\n- New supported compilers: Clang, MSVC\r\n- Windows release is built with **LLVM-MinGW**\r\n\r\n### Architectural Refactor\r\n\r\nLocalGen is now split up into three modules:\r\n\r\n- Core (`src/core`): The game engine, designed to work independently with C++ STL. It does not depend on Qt and can be reused in other projects. (Exception: `map.hpp` defines the map I/O logic, and uses the binary serialization from Qt Core.)\r\n- UI (`src/ui`): Front-end code, built with Qt Widgets. Map rendering is highly optimized and should be ~20x faster than that in older versions.\r\n- Bots (`src/bots`): Built-in bot implementations. See [`bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/aa7dab7a630c5919ff158aa013a2b2ceead27b41/src/bots/README.md).\r\n\r\n### Continuous Integration (CI)\r\n\r\nWe introduced the following CI tests to ensure code quality:\r\n\r\n- [`Qt Build`](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/qt-build.yml): checks compatibility on various platforms/compilers.\r\n- [`CodeQL`](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/codeql.yml): detects common code vulnerabilities.\r\n\r\n### Documentation\r\n\r\nImproved project docs with more details.\r\n\r\n### License\r\n\r\nNote that LocalGen v6 is licensed under **GPL-3.0-or-later**, while all previous versions are licensed under the MIT license.",
+      "summary": "Over the past year, we have been working LocalGen version 6, aiming for better performance and cross-platform compatibility. It is re-built from scratch, and no longer uses any code from previous versions. This is the first v6 beta release. ## What's changed ### New features - Priority system - Support more hotkeys - Customizable local game - Chat box in local game - Visible move queue - Spawn team setting (map creator) - New `.lgmp` map format - more efficient, contains metadata - Metadata editor in map creator - App name changed from `LGen` to `LocalGen-new` ### Bots Most v5 bots are migrated into v6, maintaining core logic but using the new API. - New active bots: KutuBot, oimbot - Improved bots: XiaruizeBot, GcBot, ZlyBot v2.1 - New but disabled bot: LyBot ### UI framework & build system LocalGen is now built on **Qt 6.8.3** with **CMake + Ninja**. UI redesigned: more responsive, more elegant. - New supported OS platforms: macOS, Linux - New supported compilers: Clang, MSVC - Windows release is built with **LLVM-MinGW** ### Architectural Refactor LocalGen is now split up into three modules: - Core (`src/core`): The game engine, designed to work independently with C++ STL. It does not depend on Qt and can be reused in other projects. (Exception: `map.hpp` defines the map I/O logic, and uses the binary serialization from Qt Core.) - UI (`src/ui`): Front-end code, built with Qt Widgets. Map rendering is highly optimized and should be ~20x faster than that in older versions. - Bots (`src/bots`): Built-in bot implementations. See [`bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/aa7dab7a630c5919ff158aa013a2b2ceead27b41/src/bots/README.md). ### Continuous Integration (CI) We introduced the following CI tests to ensure code quality: - [`Qt Build`](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/qt-build.yml): checks compatibility on various platforms/compilers. - [`CodeQL`](https://github.com/SZXC-WG/LocalGen-new/actions/workflows/codeql.yml): detects common code vulnerabilities. ### Documentation Improved project docs with more details. ### License Note that LocalGen v6 is licensed under **GPL-3.0-or-later**, while all previous versions are licensed under the MIT license.",
       "draft": false,
-      "prerelease": false,
+      "prerelease": true,
       "published_at": "2026-04-22T07:36:09Z",
       "created_at": "2026-04-22T07:23:14Z",
       "author": "GoodCoder666",
-      "is_latest": true,
+      "is_latest": false,
       "zipball_url": "https://api.github.com/repos/SZXC-WG/LocalGen-new/zipball/v6.0.0-beta.1",
       "tarball_url": "https://api.github.com/repos/SZXC-WG/LocalGen-new/tarball/v6.0.0-beta.1",
       "assets": [
@@ -20,7 +90,7 @@
           "name": "LocalGen-6.0.0-beta.1-macos-x64.dmg",
           "size": 27307379,
           "size_human": "26.0 MB",
-          "download_count": 5,
+          "download_count": 6,
           "content_type": "application/octet-stream",
           "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v6.0.0-beta.1/LocalGen-6.0.0-beta.1-macos-x64.dmg",
           "updated_at": "2026-04-22T07:35:20Z"
@@ -29,7 +99,7 @@
           "name": "LocalGen-6.0.0-beta.1-windows-x64-portable.zip",
           "size": 15011701,
           "size_human": "14.3 MB",
-          "download_count": 14,
+          "download_count": 15,
           "content_type": "application/x-zip-compressed",
           "browser_download_url": "https://github.com/SZXC-WG/LocalGen-new/releases/download/v6.0.0-beta.1/LocalGen-6.0.0-beta.1-windows-x64-portable.zip",
           "updated_at": "2026-04-22T07:35:28Z"

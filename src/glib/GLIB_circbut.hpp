@@ -22,10 +22,10 @@ _GLIB_NAMESPACE_HEAD
 namespace button {
 
 Circ::Circ() {
-    buttonImage = newimage();
+    buttonImage = ege::newimage();
     backgroundImage = nullptr;
     buttonRadius = 1;
-    walign = LEFT_TEXT, halign = TOP_TEXT;
+    walign = ege::LEFT_TEXT, halign = ege::TOP_TEXT;
     frameWidth = 1;
     status = 0;
     enableAutoFrameColor = true;
@@ -35,116 +35,115 @@ Circ::Circ() {
     enableButtonShadow = true;
 }
 Circ::~Circ() {
-    delimage(buttonImage);
-    delimage(backgroundImage);
+    ege::delimage(buttonImage);
+    ege::delimage(backgroundImage);
 }
 Circ::Circ(int _radius) {
     Circ();
     buttonRadius = _radius;
 }
 Circ::Circ(Circ&& but) {
-    delimage(buttonImage);
+    ege::delimage(buttonImage);
     buttonImage = but.buttonImage;
     buttonRadius = but.buttonRadius;
     backgroundColor = but.backgroundColor, textColor = but.textColor;
     text = but.text;
 }
 Circ::Circ(const Circ& but) {
-    delimage(buttonImage);
+    ege::delimage(buttonImage);
     buttonImage = but.buttonImage;
     buttonRadius = but.buttonRadius;
     backgroundColor = but.backgroundColor, textColor = but.textColor;
     text = but.text;
 }
 inline Circ& Circ::draw() {
-    delimage(buttonImage);
+    ege::delimage(buttonImage);
     if (enableShadow && enableButtonShadow)
-        buttonImage = newimage(buttonRadius * 2 + 3, buttonRadius * 2 + 3);
+        buttonImage = ege::newimage(buttonRadius * 2 + 3, buttonRadius * 2 + 3);
     else
-        buttonImage = newimage(buttonRadius * 2, buttonRadius * 2);
-    ege_enable_aa(buttonImage);
-    setbkcolor(LGGraphics::bgColor, buttonImage);
-    setbkcolor_f(LGGraphics::bgColor, buttonImage);
-    setbkmode(TRANSPARENT, buttonImage);
+        buttonImage = ege::newimage(buttonRadius * 2, buttonRadius * 2);
+    ege::ege_enable_aa(buttonImage);
+    ege::setbkcolor(0xff222222, buttonImage);
+    ege::setbkcolor_f(0xff222222, buttonImage);
+    ege::setbkmode(TRANSPARENT, buttonImage);
     if ((status == 1 || status == 2) && enableShadow && enableButtonShadow) {
-        setfillcolor(LGGraphics::mainColor, buttonImage);
-        fillellipse(buttonRadius + 3, buttonRadius + 3, buttonRadius,
-                    buttonRadius, buttonImage);
+        ege::setfillcolor(0xff008080, buttonImage);
+        ege::fillellipse(buttonRadius + 3, buttonRadius + 3, buttonRadius,
+                         buttonRadius, buttonImage);
     }
-    setfillcolor(backgroundColor, buttonImage);
-    fillellipse(buttonRadius, buttonRadius, buttonRadius, buttonRadius,
-                buttonImage);
+    ege::setfillcolor(backgroundColor, buttonImage);
+    ege::ege_fillellipse(0, 0, 2 * buttonRadius, 2 * buttonRadius, buttonImage);
     if (backgroundImage != nullptr) {
-        if (getwidth(backgroundImage) != backgroundImageWidth ||
-            getheight(backgroundImage) != backgroundImageHeight)
+        if (ege::getwidth(backgroundImage) != backgroundImageWidth ||
+            ege::getheight(backgroundImage) != backgroundImageHeight)
             images::zoom(backgroundImage, backgroundImageWidth,
                          backgroundImageHeight);
-        putimage_withalpha(buttonImage, backgroundImage,
-                           buttonRadius - backgroundImageWidth / 2,
-                           buttonRadius - backgroundImageHeight / 2);
+        ege::putimage_withalpha(buttonImage, backgroundImage,
+                                buttonRadius - backgroundImageWidth / 2,
+                                buttonRadius - backgroundImageHeight / 2);
     }
-    setfont(-fontHeight, fontWidth, fontName.c_str(), buttonImage);
-    settextjustify(walign, halign, buttonImage);
+    ege::setfont(-fontHeight, fontWidth, fontName.c_str(), buttonImage);
+    ege::settextjustify(walign, halign, buttonImage);
     int ox, oy;
-    if (walign == LEFT_TEXT)
+    if (walign == ege::LEFT_TEXT)
         ox = 0;
-    else if (walign == CENTER_TEXT)
+    else if (walign == ege::CENTER_TEXT)
         ox = buttonRadius;
     else
         ox = buttonRadius * 2 - 1;
-    if (halign == TOP_TEXT)
+    if (halign == ege::TOP_TEXT)
         oy = 0;
-    else if (halign == CENTER_TEXT)
+    else if (halign == ege::CENTER_TEXT)
         oy = (buttonRadius * 2 - fontHeight * (text.size() - 1)) / 2;
     else
         oy = buttonRadius * 2 - fontHeight * (text.size() - 1) - 1;
     for (auto s : text) {
         if (enableShadow && enableTextShadow) {
-            setcolor(0xff008080, buttonImage);
-            outtextxy(ox + textShadowWeight, oy + textShadowWeight, s.c_str(),
-                      buttonImage);
+            ege::setcolor(0xff008080, buttonImage);
+            ege::outtextxy(ox + textShadowWeight, oy + textShadowWeight,
+                           s.c_str(), buttonImage);
         }
-        setcolor(textColor, buttonImage);
-        outtextxy(ox, oy, s.c_str(), buttonImage);
+        ege::setcolor(textColor, buttonImage);
+        ege::outtextxy(ox, oy, s.c_str(), buttonImage);
         oy += fontHeight;
     }
     if (!enableShadow) {
         if (enableAutoFrameColor)
-            setcolor(0xff000000 | ~backgroundColor, buttonImage);
+            ege::setcolor(0xff000000 | ~backgroundColor, buttonImage);
         else
-            setcolor(frameColor, buttonImage);
-        setlinewidth(frameWidth, buttonImage);
+            ege::setcolor(frameColor, buttonImage);
+        ege::setlinewidth(frameWidth, buttonImage);
         if (status == 1 || status == 2)
-            ellipse(buttonRadius, buttonRadius, 0, 360, buttonRadius,
-                    buttonRadius, buttonImage);
+            ege::ellipse(buttonRadius, buttonRadius, 0, 360, buttonRadius,
+                         buttonRadius, buttonImage);
     } else {
         if (status == 1 || status == 2) {
-            setfillcolor(0x80808080, buttonImage);
-            ege_fillellipse(0, 0, buttonRadius * 2, buttonRadius * 2,
-                            buttonImage);
+            ege::setfillcolor(0x80808080, buttonImage);
+            ege::ege_fillellipse(0, 0, buttonRadius * 2, buttonRadius * 2,
+                                 buttonImage);
         }
     }
     return *this;
 }
-inline Circ& Circ::display(PIMAGE pimg) {
+inline Circ& Circ::display(ege::PIMAGE pimg) {
     draw();
-    putimage(pimg, locationX - buttonRadius, locationY - buttonRadius,
-             buttonImage);
+    ege::putimage_withalpha(pimg, buttonImage, locationX - buttonRadius,
+                            locationY - buttonRadius);
     return *this;
 }
 inline Circ& Circ::radius(int _radius) {
     buttonRadius = _radius;
     return *this;
 }
-inline Circ& Circ::bgcolor(color_t _color) {
+inline Circ& Circ::bgcolor(ege::color_t _color) {
     backgroundColor = _color;
     return *this;
 }
-inline Circ& Circ::textcolor(color_t _color) {
+inline Circ& Circ::textcolor(ege::color_t _color) {
     textColor = _color;
     return *this;
 }
-inline Circ& Circ::addtext(wstring _text) {
+inline Circ& Circ::addtext(std::wstring _text) {
     text.push_back(_text);
     return *this;
 }
@@ -156,7 +155,7 @@ inline Circ& Circ::cleartext() {
     text.clear();
     return *this;
 }
-inline Circ& Circ::fontname(wstring _fontName) {
+inline Circ& Circ::fontname(std::wstring _fontName) {
     fontName = _fontName;
     return *this;
 }
@@ -182,15 +181,15 @@ inline Circ& Circ::frame(int _width) {
     frameWidth = _width;
     return *this;
 }
-inline Circ& Circ::framecolor(bool _enableAuto, color_t _color) {
+inline Circ& Circ::framecolor(bool _enableAuto, ege::color_t _color) {
     enableAutoFrameColor = _enableAuto, frameColor = _color;
     return *this;
 }
-inline Circ& Circ::bgimage(PIMAGE _img) {
-    if (backgroundImage == nullptr) backgroundImage = newimage();
+inline Circ& Circ::bgimage(ege::PIMAGE _img) {
+    if (backgroundImage == nullptr) backgroundImage = ege::newimage();
     images::copy(backgroundImage, _img);
-    backgroundImageWidth = getwidth(backgroundImage);
-    backgroundImageHeight = getheight(backgroundImage);
+    backgroundImageWidth = ege::getwidth(backgroundImage);
+    backgroundImageHeight = ege::getheight(backgroundImage);
     return *this;
 }
 inline Circ& Circ::bgsize(int _width, int _height) {
@@ -204,21 +203,21 @@ inline Circ& Circ::delbgimage() {
 inline Circ& Circ::detect() {
     POINT mousePos;
     GetCursorPos(&mousePos);
-    ScreenToClient(getHWnd(), &mousePos);
-    double dist = hypot(mousePos.x - locationX, mousePos.y - locationY);
+    ScreenToClient(ege::getHWnd(), &mousePos);
+    double dist = std::hypot(mousePos.x - locationX, mousePos.y - locationY);
     if (dist > buttonRadius) return status = 0, *this;
-    while (mousemsg()) {
-        mouse_msg msg = getmouse();
-        if (hypot(msg.x - locationX, msg.y - locationY) <= buttonRadius &&
+    while (ege::mousemsg()) {
+        ege::mouse_msg msg = ege::getmouse();
+        if (std::hypot(msg.x - locationX, msg.y - locationY) <= buttonRadius &&
             msg.is_left() && msg.is_down())
             return status = 2, *this;
     }
     return status = 1, *this;
 }
-inline bool Circ::detect(mouse_msg _mouse) {
+inline bool Circ::detect(ege::mouse_msg _mouse) {
     _mouse.x -= locationX;
     _mouse.y -= locationY;
-    if (hypot(_mouse.x, _mouse.y) > buttonRadius) return status = 0, false;
+    if (std::hypot(_mouse.x, _mouse.y) > buttonRadius) return status = 0, false;
     if (_mouse.is_left() && _mouse.is_down())
         status = 2;
     else

@@ -51,15 +51,20 @@
 #include <io.h>
 #include <windows.h>
 
-/** definitions **/
-#define LG_DEPRECATED [[deprecated]]
-#define LG_DEPRECATED_S(str) [[deprecated(str)]]
+// <deprecated> macros
+#ifndef SZXC_DEPRECATED
+#define SZXC_DEPRECATED [[deprecated]]
+#endif  // SZXC_DEPRECATED
+#ifndef SZXC_DEPRECATED_S
+#define SZXC_DEPRECATED_S(str) [[deprecated(str)]]
+#endif  // SZXC_DEPRECATED_S
+
+#include "glib/GLIB_HEAD.hpp"
 
 /** EGE Graphics library **/
 #include <ege/sys_edit.h>  // text boxes of EGE
 #include <graphics.h>      // main file of EGE
 
-#include "glib/GLIB_HEAD.hpp"
 /** project header **/
 #include "verinfo.h"  // project information
 
@@ -329,10 +334,10 @@ struct moveS {
 
 //====value====//
 
-LG_DEPRECATED string username;  // game user's name
-PIMAGE pimg[55];                // software used images
-MapInfoS mapInfo[5005];         // storing all imported maps
-Block gameMap[505][505];        /* current game map; maximum 500*500 */
+SZXC_DEPRECATED string username;  // game user's name
+PIMAGE pimg[55];                  // software used images
+MapInfoS mapInfo[5005];           // storing all imported maps
+Block gameMap[505][505];          /* current game map; maximum 500*500 */
 playerS playerInfo[64] = {
     // player information (default written)
     {L"White", 0xffFFFFFF},      {L"Red", 0xffFF0000},
@@ -524,10 +529,10 @@ constexpr color_t mainColor = 0xff008080;   // main color
 constexpr color_t errorColor = 0xfffbbbbb;  // error color
 PIMAGE iconImg;                             // favicon image
 string fileName;                            // ???
-LG_DEPRECATED int stDel = 1;  // temporary variable for speed (deprecated)
-int plCnt = 0;                // temporary variable for count of players
-int mapSelected = 0;          // ID of the map selected
-int cheatCode = 0;            // binary code of visibility in game
+SZXC_DEPRECATED int stDel = 1;  // temporary variable for speed (deprecated)
+int plCnt = 0;                  // temporary variable for count of players
+int mapSelected = 0;            // ID of the map selected
+int cheatCode = 0;              // binary code of visibility in game
 /**
  * @brief Struct for storing printing info of map.
  */
@@ -563,9 +568,9 @@ void initPages();
 page::Page p_settings;
 
 // get LGGraphics::windowData.heightPerBlock; deprecated
-LG_DEPRECATED inline int getHeightPerBlock();
+SZXC_DEPRECATED inline int getHeightPerBlock();
 // get LGGraphics::windowData.widthPerBlock; deprecated
-LG_DEPRECATED inline int getWidthPerBlock();
+SZXC_DEPRECATED inline int getWidthPerBlock();
 
 /**** others ****/
 
@@ -604,7 +609,7 @@ vector<turnStatS> gameStats[64];
 void init(int chtC, int pC, int gS);
 bool unpassable(int t);
 void capture(int p1, int p2);
-LG_DEPRECATED_S("Will be deleted in ver.5.")
+SZXC_DEPRECATED_S("Will be deleted in ver.5.")
 int analyzeMove(int id, int mv, coordS& coo);
 int checkMove(moveS coo);
 void flushMove();

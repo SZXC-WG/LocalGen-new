@@ -119,7 +119,7 @@ inline Page& Page::move(int _locX, int _locY) {
     locY = _locY;
     return *this;
 }
-inline Page& Page::setBgColor(color_t _color) {
+inline Page& Page::setBgColor(ege::color_t _color) {
     bgColor = _color;
     return *this;
 }
@@ -159,7 +159,7 @@ inline Page& Page::detect() {
     }
     return *this;
 }
-inline bool Page::detect(mouse_msg _mouse) {
+inline bool Page::detect(ege::mouse_msg _mouse) {
     _mouse.x -= locX;
     _mouse.y -= locY;
     _mouse.x = _mouse.x * sizeX / dispSize.lX;
@@ -193,7 +193,7 @@ inline bool Page::detect(mouse_msg _mouse) {
 inline Page& Page::draw() {
     // printf("IN DRAW FUNCTION.\n");
     delimage(pageImage);
-    pageImage = newimage(sizeX, sizeY);
+    pageImage = ege::newimage(sizeX, sizeY);
     cleardevice(pageImage);
     setbkcolor(bgColor, pageImage);
     setbkcolor_f(bgColor, pageImage);
@@ -228,7 +228,7 @@ inline Page& Page::draw() {
     }
     return *this;
 }
-inline Page& Page::display(PIMAGE pimg) {
+inline Page& Page::display(ege::PIMAGE pimg) {
     draw();
     putimage(pimg, locX, locY, dispSize.lX, dispSize.lY, pageImage, 0, 0, sizeX,
              sizeY);
@@ -257,7 +257,7 @@ inline Page::ctn_t::iterator Page::getItemIt(int _pos) {
 }
 
 inline __attribute__((always_inline)) void Page::run() {
-    for (; is_run();) {
+    for (; ege::is_run();) {
         if (!windowIsVisible()) continue;  // maybe this is not true
         detect();
         // must be something here.

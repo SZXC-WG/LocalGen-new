@@ -22,10 +22,10 @@ _GLIB_NAMESPACE_HEAD
 namespace button {
 
 Rect::Rect() {
-    buttonImage = newimage();
+    buttonImage = ege::newimage();
     backgroundImage = nullptr;
     buttonWidth = buttonHeight = 1;
-    walign = LEFT_TEXT, halign = TOP_TEXT;
+    walign = ege::LEFT_TEXT, halign = ege::TOP_TEXT;
     frameWidth = 1;
     status = 0;
     enableAutoFrameColor = true;
@@ -59,70 +59,70 @@ Rect::Rect(const Rect& but) {
 inline Rect& Rect::draw() {
     delimage(buttonImage);
     if (enableShadow && enableButtonShadow)
-        buttonImage = newimage(buttonWidth + 3, buttonHeight + 3);
+        buttonImage = ege::newimage(buttonWidth + 3, buttonHeight + 3);
     else
-        buttonImage = newimage(buttonWidth, buttonHeight);
-    ege_enable_aa(buttonImage);
-    setbkcolor(LGGraphics::bgColor, buttonImage);
-    setbkcolor_f(LGGraphics::bgColor, buttonImage);
-    setbkmode(TRANSPARENT, buttonImage);
+        buttonImage = ege::newimage(buttonWidth, buttonHeight);
+    ege::ege_enable_aa(buttonImage);
+    ege::setbkcolor(0xff222222, buttonImage);
+    ege::setbkcolor_f(0xff222222, buttonImage);
+    ege::setbkmode(TRANSPARENT, buttonImage);
     if ((status == 1 || status == 2) && enableShadow && enableButtonShadow) {
-        setfillcolor(LGGraphics::mainColor, buttonImage);
+        ege::setfillcolor(0xff008080, buttonImage);
         bar(3, 3, buttonWidth + 3, buttonHeight + 3, buttonImage);
     }
-    setfillcolor(backgroundColor, buttonImage);
+    ege::setfillcolor(backgroundColor, buttonImage);
     bar(0, 0, buttonWidth, buttonHeight, buttonImage);
     if (backgroundImage != nullptr) {
-        if (getwidth(backgroundImage) != backgroundImageWidth ||
-            getheight(backgroundImage) != backgroundImageHeight)
+        if (ege::getwidth(backgroundImage) != backgroundImageWidth ||
+            ege::getheight(backgroundImage) != backgroundImageHeight)
             images::zoom(backgroundImage, backgroundImageWidth,
                          backgroundImageHeight);
         putimage_withalpha(buttonImage, backgroundImage, 0, 0);
     }
-    setfont(-fontHeight, fontWidth, fontName.c_str(), buttonImage);
-    settextjustify(walign, halign, buttonImage);
+    ege::setfont(-fontHeight, fontWidth, fontName.c_str(), buttonImage);
+    ege::settextjustify(walign, halign, buttonImage);
     int ox, oy;
-    if (walign == LEFT_TEXT)
+    if (walign == ege::LEFT_TEXT)
         ox = 0;
-    else if (walign == CENTER_TEXT)
+    else if (walign == ege::CENTER_TEXT)
         ox = buttonWidth / 2;
     else
         ox = buttonWidth - 1;
-    if (halign == TOP_TEXT)
+    if (halign == ege::TOP_TEXT)
         oy = 0;
-    else if (halign == CENTER_TEXT)
+    else if (halign == ege::CENTER_TEXT)
         oy = (buttonHeight - fontHeight * (text.size() - 1)) / 2;
     else
         oy = buttonHeight - fontHeight * (text.size() - 1) - 1;
     for (auto s : text) {
         if (enableShadow && enableTextShadow) {
-            setcolor(LGGraphics::mainColor, buttonImage);
-            outtextxy(ox + textShadowWeight, oy + textShadowWeight, s.c_str(),
-                      buttonImage);
+            ege::setcolor(0xff008080, buttonImage);
+            ege::outtextxy(ox + textShadowWeight, oy + textShadowWeight,
+                           s.c_str(), buttonImage);
         }
-        setcolor(textColor, buttonImage);
-        outtextxy(ox, oy, s.c_str(), buttonImage);
+        ege::setcolor(textColor, buttonImage);
+        ege::outtextxy(ox, oy, s.c_str(), buttonImage);
         oy += fontHeight;
     }
     if (!enableShadow) {
         if (enableAutoFrameColor)
-            setcolor(0xff000000 | ~backgroundColor, buttonImage);
+            ege::setcolor(0xff000000 | ~backgroundColor, buttonImage);
         else
-            setcolor(frameColor, buttonImage);
+            ege::setcolor(frameColor, buttonImage);
         setlinewidth(frameWidth, buttonImage);
         if (status == 1 || status == 2)
-            rectangle(1, 1, buttonWidth, buttonHeight, buttonImage);
+            ege::rectangle(1, 1, buttonWidth, buttonHeight, buttonImage);
     } else {
         if (status == 1 || status == 2) {
-            setfillcolor(0x80808080, buttonImage);
-            ege_fillrect(0, 0, buttonWidth, buttonHeight, buttonImage);
+            ege::setfillcolor(0x80808080, buttonImage);
+            ege::ege_fillrect(0, 0, buttonWidth, buttonHeight, buttonImage);
         }
     }
     return *this;
 }
-inline Rect& Rect::display(PIMAGE pimg) {
+inline Rect& Rect::display(ege::PIMAGE pimg) {
     draw();
-    putimage(pimg, locationX, locationY, buttonImage);
+    ege::putimage(pimg, locationX, locationY, buttonImage);
     return *this;
 }
 inline Rect& Rect::size(int _width, int _height) {
@@ -130,15 +130,15 @@ inline Rect& Rect::size(int _width, int _height) {
     buttonWidth = _width;
     return *this;
 }
-inline Rect& Rect::bgcolor(color_t _color) {
+inline Rect& Rect::bgcolor(ege::color_t _color) {
     backgroundColor = _color;
     return *this;
 }
-inline Rect& Rect::textcolor(color_t _color) {
+inline Rect& Rect::textcolor(ege::color_t _color) {
     textColor = _color;
     return *this;
 }
-inline Rect& Rect::addtext(wstring _text) {
+inline Rect& Rect::addtext(std::wstring _text) {
     text.push_back(_text);
     return *this;
 }
@@ -150,7 +150,7 @@ inline Rect& Rect::cleartext() {
     text.clear();
     return *this;
 }
-inline Rect& Rect::fontname(wstring _fontName) {
+inline Rect& Rect::fontname(std::wstring _fontName) {
     fontName = _fontName;
     return *this;
 }
@@ -176,15 +176,15 @@ inline Rect& Rect::frame(int _width) {
     frameWidth = _width;
     return *this;
 }
-inline Rect& Rect::framecolor(bool _enableAuto, color_t _color) {
+inline Rect& Rect::framecolor(bool _enableAuto, ege::color_t _color) {
     enableAutoFrameColor = _enableAuto, frameColor = _color;
     return *this;
 }
-inline Rect& Rect::bgimage(PIMAGE _img) {
-    if (backgroundImage == nullptr) backgroundImage = newimage();
+inline Rect& Rect::bgimage(ege::PIMAGE _img) {
+    if (backgroundImage == nullptr) backgroundImage = ege::newimage();
     images::copy(backgroundImage, _img);
-    backgroundImageWidth = getwidth(backgroundImage);
-    backgroundImageHeight = getheight(backgroundImage);
+    backgroundImageWidth = ege::getwidth(backgroundImage);
+    backgroundImageHeight = ege::getheight(backgroundImage);
     return *this;
 }
 inline Rect& Rect::bgsize(int _width, int _height) {
@@ -198,24 +198,25 @@ inline Rect& Rect::delbgimage() {
 inline Rect& Rect::detect() {
     POINT mousePos;
     GetCursorPos(&mousePos);
-    ScreenToClient(getHWnd(), &mousePos);
+    ScreenToClient(ege::getHWnd(), &mousePos);
     if (mousePos.x < locationX ||
-        mousePos.x > min(locationX + buttonWidth - 1, getwidth()) ||
+        mousePos.x > std::min(locationX + buttonWidth - 1, ege::getwidth()) ||
         mousePos.y < locationY ||
-        mousePos.y > min(locationY + buttonHeight - 1, getheight()))
+        mousePos.y > std::min(locationY + buttonHeight - 1, ege::getheight()))
         return status = 0, *this;
-    while (mousemsg()) {
-        mouse_msg msg = getmouse();
+    while (ege::mousemsg()) {
+        ege::mouse_msg msg = ege::getmouse();
         if (!(msg.x < locationX ||
-              msg.x > min(locationX + buttonWidth - 1, getwidth()) ||
+              msg.x > std::min(locationX + buttonWidth - 1, ege::getwidth()) ||
               msg.y < locationY ||
-              msg.y > min(locationY + buttonHeight - 1, getheight())) &&
+              msg.y >
+                  std::min(locationY + buttonHeight - 1, ege::getheight())) &&
             msg.is_left() && msg.is_down())
             return status = 2, *this;
     }
     return status = 1, *this;
 }
-inline bool Rect::detect(mouse_msg _mouse) {
+inline bool Rect::detect(ege::mouse_msg _mouse) {
     _mouse.x -= locationX;
     _mouse.y -= locationY;
     if (_mouse.x < 0 || _mouse.x > buttonWidth - 1 || _mouse.y < 0 ||

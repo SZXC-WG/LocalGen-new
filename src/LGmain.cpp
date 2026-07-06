@@ -24,10 +24,19 @@ use the C++14 standard.
 
 /*************** header files ***************/
 
-#include "LGdef.hpp"
+// SZXC-WG Graphics Lib (based on EGE)
+
 #include "glib/GLIB_HEAD.hpp"
+#include "glib/GLIB_circbut.hpp"
+#include "glib/GLIB_image.hpp"
+#include "glib/GLIB_page.hpp"
+#include "glib/GLIB_rectbut.hpp"
+#include "glib/GLIB_rectcbox.hpp"
+
+// LG core header files
 
 #include "LGbot.hpp"
+#include "LGdef.hpp"
 #include "LGencoding.hpp"
 #include "LGgame.hpp"
 #include "LGgraphics.hpp"
@@ -36,11 +45,6 @@ use the C++14 standard.
 #include "LGset.hpp"
 #include "LGweb.hpp"
 #include "LGzipmap.hpp"
-#include "glib/GLIB_circbut.hpp"
-#include "glib/GLIB_image.hpp"
-#include "glib/GLIB_page.hpp"
-#include "glib/GLIB_rectbut.hpp"
-#include "glib/GLIB_rectcbox.hpp"
 
 /*************** the main function ***************/
 int main(int argc, char** argv) {

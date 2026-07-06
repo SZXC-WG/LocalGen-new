@@ -21,16 +21,16 @@ _GLIB_NAMESPACE_HEAD
 
 namespace images {
 
-void copy(PIMAGE& dstimg, PIMAGE& srcimg) {
+void copy(ege::PIMAGE& dstimg, ege::PIMAGE& srcimg) {
     if (dstimg == NULL || srcimg == NULL) return;
     getimage(dstimg, srcimg, 0, 0, getwidth(srcimg), getheight(srcimg));
 }
-void zoom(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
+void zoom(ege::PIMAGE& pimg, int zoomWidth, int zoomHeight) {
     if ((pimg == NULL) ||
         (zoomWidth == getwidth(pimg) && zoomHeight == getheight(pimg)))
         return;
 
-    PIMAGE zoomImage = newimage(zoomWidth, zoomHeight);
+    ege::PIMAGE zoomImage = ege::newimage(zoomWidth, zoomHeight);
     putimage(zoomImage, 0, 0, zoomWidth, zoomHeight, pimg, 0, 0, getwidth(pimg),
              getheight(pimg));
     delimage(pimg);
@@ -39,7 +39,7 @@ void zoom(PIMAGE& pimg, int zoomWidth, int zoomHeight) {
 }
 
 void setWindowTransparent(bool enable, int alpha) {
-    HWND egeHwnd = getHWnd();
+    HWND egeHwnd = ege::getHWnd();
     LONG nRet = ::GetWindowLong(egeHwnd, GWL_EXSTYLE);
     nRet |= WS_EX_LAYERED;
     ::SetWindowLong(egeHwnd, GWL_EXSTYLE, nRet);

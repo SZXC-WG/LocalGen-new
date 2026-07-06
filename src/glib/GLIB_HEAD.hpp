@@ -12,15 +12,23 @@
 /* The full MIT license this project uses can be found here:             */
 /* http://github.com/SZXC-WG/LocalGen-new/blob/main/LICENSE.md           */
 
-#ifndef LG_GLIB_HEAD_HPP_
-#define LG_GLIB_HEAD_HPP_
+#ifndef SZXC_GLIB_HEAD_HPP_
+#define SZXC_GLIB_HEAD_HPP_
+
+#ifndef SZXC_DEPRECATED
+#define SZXC_DEPRECATED [[deprecated]]
+#endif  // SZXC_DEPRECATED
+#ifndef SZXC_DEPRECATED_S
+#define SZXC_DEPRECATED_S(str) [[deprecated(str)]]
+#endif  // SZXC_DEPRECATED_S
 
 #define _GLIB_NAMESPACE_HEAD inline namespace _glib {
 #define _GLIB_NAMESPACE_TAIL }
 
-#include <graphics.h>
+#include <ege.h>
 
 #include <algorithm>
+#include <cmath>
 #include <deque>
 #include <functional>
 #include <string>
@@ -29,7 +37,7 @@
 
 /* quick function for window visibility */
 inline __attribute__((always_inline)) bool windowIsVisible() {
-    return (::GetWindowLong(getHWnd(), GWL_STYLE) & WS_VISIBLE) != 0;
+    return (::GetWindowLong(ege::getHWnd(), GWL_STYLE) & WS_VISIBLE) != 0;
 }
 
 _GLIB_NAMESPACE_HEAD
@@ -44,14 +52,14 @@ namespace images {
  * @param dstimg destination image
  * @param srcimg source image
  */
-void copy(PIMAGE& dstimg, PIMAGE& srcimg);
+void copy(ege::PIMAGE& dstimg, ege::PIMAGE& srcimg);
 /**
  * @brief Zoom a image.
  * @param pimg target image
  * @param zoomWidth target width
  * @param zoomHeight target height
  */
-void zoom(PIMAGE& pimg, int zoomWidth, int zoomHeight);
+void zoom(ege::PIMAGE& pimg, int zoomWidth, int zoomHeight);
 
 /**
  * @brief Set the Window Transparent object
@@ -69,12 +77,13 @@ namespace text {
  * @brief Easy struct for a piece of text.
  */
 struct Single {
-    color_t color;
+    ege::color_t color;
     std::wstring text, font;
     int fontHeight, fontWidth;
     Single() {};
-    Single(color_t _color, std::wstring _text) : color(_color), text(_text) {};
-    Single(color_t _color, std::wstring _text, std::wstring _font, int _fH,
+    Single(ege::color_t _color, std::wstring _text)
+        : color(_color), text(_text) {};
+    Single(ege::color_t _color, std::wstring _text, std::wstring _font, int _fH,
            int _fW = 0)
         : color(_color),
           text(_text),
@@ -82,19 +91,19 @@ struct Single {
           fontHeight(_fH),
           fontWidth(_fW) {};
 
-    int width(PIMAGE _pimg = NULL) {
+    int width(ege::PIMAGE _pimg = NULL) {
         setfont(fontHeight, fontWidth, font.c_str(), _pimg);
         return textwidth(text.c_str(), _pimg);
     }
-    int height(PIMAGE _pimg = NULL) {
+    int height(ege::PIMAGE _pimg = NULL) {
         setfont(fontHeight, fontWidth, font.c_str(), _pimg);
         return textheight(text.c_str(), _pimg);
     }
 
-    void print(int _X, int _Y, PIMAGE _pimg = NULL) {
-        setcolor(color, _pimg);
-        setfont(fontHeight, fontWidth, font.c_str(), _pimg);
-        outtextxy(_X, _Y, text.c_str(), _pimg);
+    void print(int _X, int _Y, ege::PIMAGE _pimg = NULL) {
+        ege::setcolor(color, _pimg);
+        ege::setfont(fontHeight, fontWidth, font.c_str(), _pimg);
+        ege::outtextxy(_X, _Y, text.c_str(), _pimg);
     }
 };
 
@@ -104,17 +113,17 @@ struct Single {
  */
 struct VarInt {
     int* var;
-    color_t color;
+    ege::color_t color;
     std::wstring sbText;
     std::wstring font;
     int fontHeight, fontWidth;
     VarInt() {};
     VarInt(int* _var) : var(_var) {};
-    VarInt(int* _var, color_t _color) : var(_var), color(_color) {};
-    VarInt(int* _var, color_t _color, std::wstring _sbText)
+    VarInt(int* _var, ege::color_t _color) : var(_var), color(_color) {};
+    VarInt(int* _var, ege::color_t _color, std::wstring _sbText)
         : var(_var), color(_color), sbText(_sbText) {};
-    VarInt(int* _var, color_t _color, std::wstring _sbText, std::wstring _font,
-           int _fH, int _fW = 0)
+    VarInt(int* _var, ege::color_t _color, std::wstring _sbText,
+           std::wstring _font, int _fH, int _fW = 0)
         : var(_var),
           color(_color),
           sbText(_sbText),
@@ -122,16 +131,16 @@ struct VarInt {
           fontHeight(_fH),
           fontWidth(_fW) {};
 
-    int width(PIMAGE _pimg = NULL) {
+    int width(ege::PIMAGE _pimg = NULL) {
         setfont(fontHeight, fontWidth, font.c_str(), _pimg);
         return textwidth(std::to_wstring(*var).c_str(), _pimg);
     }
-    int height(PIMAGE _pimg = NULL) {
+    int height(ege::PIMAGE _pimg = NULL) {
         setfont(fontHeight, fontWidth, font.c_str(), _pimg);
         return textheight(std::to_wstring(*var).c_str(), _pimg);
     }
 
-    void print(int _X, int _Y, PIMAGE _pimg = NULL) {
+    void print(int _X, int _Y, ege::PIMAGE _pimg = NULL) {
         setcolor(color, _pimg);
         setfont(fontHeight, fontWidth, font.c_str(), _pimg);
         outtextxy(_X, _Y, (sbText + std::to_wstring(*var)).c_str(), _pimg);
@@ -148,28 +157,28 @@ struct Line {
     Line(std::deque<Single> _text) : text(_text) {};
 
     void push_front(Single _stext) { text.push_front(_stext); }
-    void push_front(color_t _color, std::wstring _stext) {
+    void push_front(ege::color_t _color, std::wstring _stext) {
         text.emplace_front(_color, _stext);
     }
     void push_back(Single _stext) { text.push_back(_stext); }
-    void push_back(color_t _color, std::wstring _stext) {
+    void push_back(ege::color_t _color, std::wstring _stext) {
         text.emplace_back(_color, _stext);
     }
     void pop_front() { text.pop_front(); }
     void pop_back() { text.pop_back(); }
 
-    int width(PIMAGE _pimg = NULL) {
+    int width(ege::PIMAGE _pimg = NULL) {
         int ret = 0;
         for (auto& t : text) ret += t.width(_pimg);
         return ret;
     }
-    int height(PIMAGE _pimg = NULL) {
+    int height(ege::PIMAGE _pimg = NULL) {
         int ret = 0;
         for (auto& t : text) ret = std::max(ret, t.height(_pimg));
         return ret;
     }
 
-    void print(int _X, int _Y, PIMAGE _pimg = NULL) {
+    void print(int _X, int _Y, ege::PIMAGE _pimg = NULL) {
         int x = _X, y = _Y;
         for (auto& t : text) {
             t.print(x, y, _pimg);
@@ -184,18 +193,18 @@ namespace button {
 
 class Rect {
    private:
-    PIMAGE buttonImage;      // image info
-    PIMAGE backgroundImage;  // background image
+    ege::PIMAGE buttonImage;      // image info
+    ege::PIMAGE backgroundImage;  // background image
     int backgroundImageWidth, backgroundImageHeight;
     int buttonWidth, buttonHeight;   // width & height
-    color_t backgroundColor;         // background color
-    color_t textColor;               // text color
+    ege::color_t backgroundColor;    // background color
+    ege::color_t textColor;          // text color
     std::vector<std::wstring> text;  // text
     std::wstring fontName;           // font face name
     int fontHeight, fontWidth;       // font height & width
     int frameWidth;
     bool enableAutoFrameColor;
-    color_t frameColor;
+    ege::color_t frameColor;
     int walign, halign;        // align method
     int locationX, locationY;  // location on screen
    public:
@@ -211,10 +220,10 @@ class Rect {
     Rect(Rect&& but);
     Rect(const Rect& but);
     inline Rect& draw();
-    inline Rect& display(PIMAGE pimg = NULL);
+    inline Rect& display(ege::PIMAGE pimg = NULL);
     inline Rect& size(int _width, int _height);
-    inline Rect& bgcolor(color_t _color);
-    inline Rect& textcolor(color_t _color);
+    inline Rect& bgcolor(ege::color_t _color);
+    inline Rect& textcolor(ege::color_t _color);
     inline Rect& addtext(std::wstring _text);
     inline Rect& poptext();
     inline Rect& cleartext();
@@ -224,28 +233,29 @@ class Rect {
     inline Rect& textalign(int _walign = -1, int _halign = -1);
     inline Rect& event(std::function<void()> event);
     inline Rect& frame(int _width);
-    inline Rect& framecolor(bool _enableAuto = 1, color_t _color = 0xffffffff);
-    inline Rect& bgimage(PIMAGE _img);
+    inline Rect& framecolor(bool _enableAuto = 1,
+                            ege::color_t _color = 0xffffffff);
+    inline Rect& bgimage(ege::PIMAGE _img);
     inline Rect& bgsize(int _width, int _height);
     inline Rect& delbgimage();
-    LG_DEPRECATED inline Rect& detect();
-    inline bool detect(mouse_msg _mouse);
+    SZXC_DEPRECATED inline Rect& detect();
+    inline bool detect(ege::mouse_msg _mouse);
 };
 
 class Circ {
    private:
-    PIMAGE buttonImage;  // image info
-    PIMAGE backgroundImage;
+    ege::PIMAGE buttonImage;  // image info
+    ege::PIMAGE backgroundImage;
     int backgroundImageWidth, backgroundImageHeight;
     int buttonRadius;                // radius
-    color_t backgroundColor;         // background color
-    color_t textColor;               // text color
+    ege::color_t backgroundColor;    // background color
+    ege::color_t textColor;          // text color
     std::vector<std::wstring> text;  // text
     std::wstring fontName;           // font face name
     int fontHeight, fontWidth;       // font height & width
     int frameWidth;
     bool enableAutoFrameColor;
-    color_t frameColor;
+    ege::color_t frameColor;
     int walign, halign;        // align method
     int locationX, locationY;  // location on screen
    public:
@@ -261,10 +271,10 @@ class Circ {
     Circ(Circ&& but);
     Circ(const Circ& but);
     inline Circ& draw();
-    inline Circ& display(PIMAGE pimg = NULL);
+    inline Circ& display(ege::PIMAGE pimg = NULL);
     inline Circ& radius(int _radius);
-    inline Circ& bgcolor(color_t _color);
-    inline Circ& textcolor(color_t _color);
+    inline Circ& bgcolor(ege::color_t _color);
+    inline Circ& textcolor(ege::color_t _color);
     inline Circ& addtext(std::wstring _text);
     inline Circ& poptext();
     inline Circ& cleartext();
@@ -274,12 +284,13 @@ class Circ {
     inline Circ& textalign(int _walign = -1, int _halign = -1);
     inline Circ& event(std::function<void()> event);
     inline Circ& frame(int _width);
-    inline Circ& framecolor(bool _enableAuto = 1, color_t _color = 0xffffffff);
-    inline Circ& bgimage(PIMAGE _img);
+    inline Circ& framecolor(bool _enableAuto = 1,
+                            ege::color_t _color = 0xffffffff);
+    inline Circ& bgimage(ege::PIMAGE _img);
     inline Circ& bgsize(int _width, int _height);
     inline Circ& delbgimage();
-    LG_DEPRECATED inline Circ& detect();
-    inline bool detect(mouse_msg _mouse);
+    SZXC_DEPRECATED inline Circ& detect();
+    inline bool detect(ege::mouse_msg _mouse);
 };
 }  // namespace button
 
@@ -287,13 +298,13 @@ namespace checkbox {
 
 class Rect {
    private:
-    PIMAGE boxImage;
+    ege::PIMAGE boxImage;
     int boxWidth, boxHeight;
     int locationX, locationY;
-    color_t backgroundColor;
-    color_t frameColor;
+    ege::color_t backgroundColor;
+    ege::color_t frameColor;
     int frameWidth;
-    color_t fillColor;
+    ege::color_t fillColor;
 
    public:
     bool pressed;
@@ -303,27 +314,27 @@ class Rect {
     explicit Rect();
     ~Rect();
     inline Rect& draw();
-    inline Rect& display(PIMAGE pimg = NULL);
+    inline Rect& display(ege::PIMAGE pimg = NULL);
     inline int gwidth();
     inline int gheight();
     inline std::pair<int, int> gsize();
     inline Rect& size(int _width, int _height);
-    inline Rect& bgcolor(color_t _color);
+    inline Rect& bgcolor(ege::color_t _color);
     inline Rect& move(int _X, int _Y);
     inline Rect& event(decltype(clickEvent) _event);
     inline Rect& frame(int _width);
-    inline Rect& framecolor(color_t _color);
-    inline Rect& fillcolor(color_t _color);
-    LG_DEPRECATED inline Rect& detect();
-    inline bool detect(mouse_msg _mouse);
+    inline Rect& framecolor(ege::color_t _color);
+    inline Rect& fillcolor(ege::color_t _color);
+    SZXC_DEPRECATED inline Rect& detect();
+    inline bool detect(ege::mouse_msg _mouse);
     inline Rect& variable(bool* _varPtr);
     inline Rect& changeState();
 };
 
 struct RectWithText {
     int locX, locY;
-    color_t bgColor;
-    PIMAGE textImage;
+    ege::color_t bgColor;
+    ege::PIMAGE textImage;
     checkbox::Rect checkBox;
     text::Line boxText;
     int blankWidth;
@@ -333,10 +344,10 @@ struct RectWithText {
 
     inline RectWithText& move(int _X, int _Y);
 
-    LG_DEPRECATED inline RectWithText& detect();
-    inline bool detect(mouse_msg _mouse);
+    SZXC_DEPRECATED inline RectWithText& detect();
+    inline bool detect(ege::mouse_msg _mouse);
     inline RectWithText& draw();
-    inline RectWithText& display(int _X, int _Y, PIMAGE pimg = NULL);
+    inline RectWithText& display(int _X, int _Y, ege::PIMAGE pimg = NULL);
 };
 
 }  // namespace checkbox
@@ -363,7 +374,7 @@ struct Item {
     ItemType iType;
     int locX, locY;
     union {
-        PIMAGE subImage;
+        ege::PIMAGE subImage;
         Page* subPage;
         text::VarInt* vIText;
         text::Line* lText;
@@ -408,10 +419,10 @@ class Page {
     typedef ScrBar scroll_t;
 
    private:
-    PIMAGE pageImage;
+    ege::PIMAGE pageImage;
     Page* parentPage;
     int sizeX, sizeY;
-    color_t bgColor;
+    ege::color_t bgColor;
     int locX, locY;
     struct {
         int lX, lY;
@@ -421,38 +432,38 @@ class Page {
     bool enableVBar, enableHBar;
 
    public:
-    Page() : pageImage(newimage()), parentPage(NULL) {};
-    Page(Page* _parent) : pageImage(newimage()), parentPage(_parent) {};
+    Page() : pageImage(ege::newimage()), parentPage(NULL) {};
+    Page(Page* _parent) : pageImage(ege::newimage()), parentPage(_parent) {};
     Page(Page* _parent, int _sizeX, int _sizeY, int _locX, int _locY)
         : sizeX(_sizeX),
           sizeY(_sizeY),
           locX(_locX),
           locY(_locY),
           dispSize(decltype(dispSize){_sizeX, _sizeY}) {
-        pageImage = newimage(_sizeX, _sizeY);
+        pageImage = ege::newimage(_sizeX, _sizeY);
         parentPage = _parent;
     };
-    ~Page() { delimage(pageImage); }
+    ~Page() { ege::delimage(pageImage); }
 
     inline Page& size(int _sizeX, int _sizeY);
     inline Page& width(int _sizeX);
     inline Page& height(int _sizeY);
     inline Page& move(int _locX, int _locY);
-    inline Page& setBgColor(color_t _color);
+    inline Page& setBgColor(ege::color_t _color);
     inline Page& dSize(int _sizeX, int _sizeY);
     inline Page& dWidth(int _sizeX);
     inline Page& dHeight(int _sizeY);
 
     // overall mouse & keyboard detect (for interactive items, e.g.buttons)
     // this mode of message collecting is deprecated, and will be removed.
-    LG_DEPRECATED inline Page& detect();
+    SZXC_DEPRECATED inline Page& detect();
     // overall mouse & keyboard detect (for interactive items, e.g.buttons)
     // right implementation.
-    inline bool detect(mouse_msg _mouse);
+    inline bool detect(ege::mouse_msg _mouse);
     // draw page backstage
     inline Page& draw();
     // draw page frontstage (including backstage)
-    inline Page& display(PIMAGE pimg);
+    inline Page& display(ege::PIMAGE pimg);
 
     // get the content itself
     inline ctn_t& gContent();
@@ -480,4 +491,4 @@ class Page {
 
 _GLIB_NAMESPACE_TAIL  // inline namespace glib
 
-#endif  // LG_GLIB_HEAD_HPP_
+#endif  // SZXC_GLIB_HEAD_HPP_

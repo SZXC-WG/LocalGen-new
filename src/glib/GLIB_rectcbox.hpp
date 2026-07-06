@@ -22,17 +22,17 @@ _GLIB_NAMESPACE_HEAD
 namespace checkbox {
 
 Rect::Rect() {
-    boxImage = newimage();
+    boxImage = ege::newimage();
     boxWidth = boxHeight = 1;
     frameColor = fillColor = 0xffffffff;
     status = 0;
     pressed = 0;
     varPtr = nullptr;
 };
-Rect::~Rect() { delimage(boxImage); }
+Rect::~Rect() { ege::delimage(boxImage); }
 inline Rect& Rect::draw() {
-    delimage(boxImage);
-    boxImage = newimage(boxWidth, boxHeight);
+    ege::delimage(boxImage);
+    boxImage = ege::newimage(boxWidth, boxHeight);
     setfillcolor(backgroundColor, boxImage);
     bar(0, 0, boxWidth, boxHeight, boxImage);
     setcolor(frameColor, boxImage);
@@ -52,9 +52,9 @@ inline Rect& Rect::draw() {
     }
     return *this;
 }
-inline Rect& Rect::display(PIMAGE pimg) {
+inline Rect& Rect::display(ege::PIMAGE pimg) {
     draw();
-    putimage(pimg, locationX, locationY, boxImage);
+    ege::putimage(pimg, locationX, locationY, boxImage);
     return *this;
 }
 inline int Rect::gwidth() { return boxWidth; }
@@ -66,7 +66,7 @@ inline Rect& Rect::size(int _width, int _height) {
     boxWidth = _width, boxHeight = _height;
     return *this;
 }
-inline Rect& Rect::bgcolor(color_t _color) {
+inline Rect& Rect::bgcolor(ege::color_t _color) {
     backgroundColor = _color;
     return *this;
 }
@@ -82,35 +82,35 @@ inline Rect& Rect::frame(int _width) {
     frameWidth = _width;
     return *this;
 }
-inline Rect& Rect::framecolor(color_t _color) {
+inline Rect& Rect::framecolor(ege::color_t _color) {
     frameColor = _color;
     return *this;
 }
-inline Rect& Rect::fillcolor(color_t _color) {
+inline Rect& Rect::fillcolor(ege::color_t _color) {
     fillColor = _color;
     return *this;
 }
 inline Rect& Rect::detect() {
     POINT mousePos;
     GetCursorPos(&mousePos);
-    ScreenToClient(getHWnd(), &mousePos);
+    ScreenToClient(ege::getHWnd(), &mousePos);
     if (mousePos.x < locationX ||
-        mousePos.x > min(locationX + boxWidth - 1, getwidth()) ||
+        mousePos.x > std::min(locationX + boxWidth - 1, ege::getwidth()) ||
         mousePos.y < locationY ||
-        mousePos.y > min(locationY + boxHeight - 1, getheight()))
+        mousePos.y > std::min(locationY + boxHeight - 1, ege::getheight()))
         return status = 0, *this;
-    while (mousemsg()) {
-        mouse_msg msg = getmouse();
+    while (ege::mousemsg()) {
+        ege::mouse_msg msg = ege::getmouse();
         if (!(msg.x < locationX ||
-              msg.x > min(locationX + boxWidth - 1, getwidth()) ||
+              msg.x > std::min(locationX + boxWidth - 1, ege::getwidth()) ||
               msg.y < locationY ||
-              msg.y > min(locationY + boxHeight - 1, getheight())) &&
+              msg.y > std::min(locationY + boxHeight - 1, ege::getheight())) &&
             msg.is_left() && msg.is_down())
             return status = 2, *this;
     }
     return status = 1, *this;
 }
-inline bool Rect::detect(mouse_msg _mouse) {
+inline bool Rect::detect(ege::mouse_msg _mouse) {
     _mouse.x -= locationX;
     _mouse.y -= locationY;
     if (_mouse.x < 0 || _mouse.x > boxWidth - 1 || _mouse.y < 0 ||
@@ -134,10 +134,10 @@ inline Rect& Rect::changeState() {
 }
 
 inline RectWithText::RectWithText() {
-    textImage = newimage();
+    textImage = ege::newimage();
     blankWidth = 0;
 }
-inline RectWithText::~RectWithText() { delimage(textImage); }
+inline RectWithText::~RectWithText() { ege::delimage(textImage); }
 inline RectWithText& RectWithText::move(int _X, int _Y) {
     locX = _X;
     locY = _Y;
@@ -147,28 +147,28 @@ inline RectWithText& RectWithText::detect() {
     checkBox.detect();
     return *this;
 }
-inline bool RectWithText::detect(mouse_msg _mouse) {
+inline bool RectWithText::detect(ege::mouse_msg _mouse) {
     _mouse.x -= locX;
     _mouse.y -= locY;
     return checkBox.detect(_mouse);
 }
 inline RectWithText& RectWithText::draw() {
     int totW = boxText.width(textImage) + blankWidth + checkBox.gwidth();
-    int totH = max(boxText.height(textImage), checkBox.gheight());
-    delimage(textImage);
-    textImage = newimage(totW, totH);
-    setbkcolor(bgColor, textImage);
-    setbkcolor_f(bgColor, textImage);
-    settextjustify(LEFT_TEXT, TOP_TEXT);
+    int totH = std::max(boxText.height(textImage), checkBox.gheight());
+    ege::delimage(textImage);
+    textImage = ege::newimage(totW, totH);
+    ege::setbkcolor(bgColor, textImage);
+    ege::setbkcolor_f(bgColor, textImage);
+    ege::settextjustify(ege::LEFT_TEXT, ege::TOP_TEXT);
     checkBox.move(0, totH / 2 - checkBox.gheight() / 2);
     checkBox.display(textImage);
     boxText.print(checkBox.gwidth() + blankWidth,
                   totH / 2 - boxText.height(textImage) / 2, textImage);
     return *this;
 }
-inline RectWithText& RectWithText::display(int _X, int _Y, PIMAGE pimg) {
+inline RectWithText& RectWithText::display(int _X, int _Y, ege::PIMAGE pimg) {
     draw();
-    putimage(pimg, _X, _Y, textImage);
+    ege::putimage(pimg, _X, _Y, textImage);
     return *this;
 }
 

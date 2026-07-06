@@ -14,6 +14,7 @@
 #include "core/bot.h"
 #include "core/game.hpp"
 #include "core/map.hpp"
+#include "ui/utils/surrenderConfirmDialog.hpp"
 
 void HumanPlayer::init(index_t playerId, const GameConstantsPack& constants) {
     this->playerId = playerId;
@@ -460,13 +461,10 @@ void LocalGameWindow::keyPressEvent(QKeyEvent* event) {
     int key = event->key();
     if (gameRunning && game->isAlive(humanPlayerId) && generalRow != -1) {
         if (key == Qt::Key_Escape) {
-            const QMessageBox::StandardButton result = QMessageBox::question(
-                this, "Surrender",
-                "Are you sure you want to surrender? You will lose control of "
-                "your armies and reveal the full map.",
-                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            SurrenderConfirmDialog dialog(this);
+            const bool shouldSurrender = dialog.exec() == QDialog::Accepted;
             if (gameRunning && game->isAlive(humanPlayerId) &&
-                result == QMessageBox::Yes) {
+                shouldSurrender) {
                 auto moveQueue = humanPlayer->getMoveQueue();
                 moveQueue->clear();
                 moveQueue->emplace_back(MoveType::SURRENDER);

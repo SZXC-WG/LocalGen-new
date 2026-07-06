@@ -94,6 +94,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/ui/mapCreatorWindow/mapCreatorWindow.cpp
     src/ui/mapCreatorWindow/mapCreatorWindow.h
     src/ui/utils/generalsButton.hpp
+    src/ui/utils/surrenderConfirmDialog.hpp
     ${LOCALGEN_BOT_SOURCES}
     src/core/board.hpp
     src/core/bot.h

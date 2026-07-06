@@ -70,11 +70,38 @@ jobs:
           cmake -B build -S . -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake
           cmake --build build --config Release
 
-      - name: Deploy and Package
-        if: matrix.os != 'ubuntu-latest'
+      - name: Install Linux packaging tools
+        if: matrix.os == 'ubuntu-latest'
         shell: bash
         run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
+          mkdir -p "$RUNNER_TEMP/linuxdeploy"
+          cd "$RUNNER_TEMP/linuxdeploy"
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-appimage-x86_64.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy*.AppImage
+          echo "$RUNNER_TEMP/linuxdeploy" >> "$GITHUB_PATH"
+
+      - name: Deploy and Package
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            mkdir -p AppDir/usr/bin AppDir/usr/share/doc/localgen
+            cp -a build/Release/{maps,fonts} AppDir/usr/bin/
+            cp LICENSE AppDir/usr/share/doc/localgen/LICENSE.txt
+            export APPIMAGE_EXTRACT_AND_RUN=1
+            export QMAKE="$QT_ROOT_DIR/bin/qmake"
+            export LD_LIBRARY_PATH="$QT_ROOT_DIR/lib:${LD_LIBRARY_PATH:-}"
+            export OUTPUT="${{ matrix.name }}.AppImage"
+            linuxdeploy-x86_64.AppImage \
+              --appdir AppDir \
+              --plugin qt \
+              --output appimage \
+              --executable build/Release/LocalGen-new \
+              --desktop-file res/localgen.desktop \
+              --icon-file res/img/favicon.png \
+              --icon-filename localgen
+          elif [ "$RUNNER_OS" == "Windows" ]; then
             mkdir -p deploy
             mv build/Release/{LocalGen-new.exe,maps,fonts} deploy/
             mv LICENSE deploy/LICENSE.txt
@@ -90,10 +117,10 @@ jobs:
           fi
 
       - name: Upload Artifact
-        if: matrix.os != 'ubuntu-latest'
         uses: actions/upload-artifact@v7
         with:
           path: |
+            *.AppImage
             *.zip
             *.dmg
           archive: false

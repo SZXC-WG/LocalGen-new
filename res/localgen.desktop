@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=LocalGen
+Exec=LocalGen-new
+Icon=localgen
+Categories=Game;StrategyGame;
+Terminal=false

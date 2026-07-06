@@ -37,6 +37,14 @@ To contribute your own bot, check out the instructions in the [contribution guid
 
 ## [Releases (Changelog)](http://github.com/SZXC-WG/LocalGen-new/releases)
 
+> [!IMPORTANT]
+>
+> If the provided Linux AppImage fails to run, try installing the OpenGL runtime:
+>
+> ```bash
+> sudo apt install libopengl0
+> ```
+
 ## Building the project
 
 You'll need Qt 6.7+, CMake 3.19+, and Ninja 1.10+ installed under PATH. Run the following commands, using the actual Qt6 toolchain path on your system (typically `$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake`):

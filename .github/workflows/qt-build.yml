@@ -23,26 +23,31 @@ jobs:
             os: ubuntu-latest
             qt_arch: linux_gcc_64
             qt_tools: ''
+            package_name: linux-x86_64-gcc.AppImage
 
           - name: macOS (Clang)
             os: macos-latest
             qt_arch: clang_64
             qt_tools: ''
+            package_name: macos-native-clang.dmg
 
           - name: Windows (MSVC)
             os: windows-latest
             qt_arch: win64_msvc2022_64
             qt_tools: ''
+            package_name: windows-x86_64-msvc.zip
 
           - name: Windows (MinGW)
             os: windows-latest
             qt_arch: win64_mingw
             qt_tools: 'tools_mingw1310'
+            package_name: windows-x86_64-mingw.zip
 
           - name: Windows (LLVM)
             os: windows-latest
             qt_arch: win64_llvm_mingw
             qt_tools: 'tools_llvm_mingw1706'
+            package_name: windows-x86_64-llvm-mingw.zip
 
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
@@ -83,8 +88,16 @@ jobs:
           echo "$RUNNER_TEMP/linuxdeploy" >> "$GITHUB_PATH"
 
       - name: Deploy and Package
+        id: package
         shell: bash
         run: |
+          package_name="${{ matrix.package_name }}"
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            package_name="${package_name/native/$(uname -m)}"
+          fi
+          asset_name="LocalGen-ci-${GITHUB_SHA::7}-${package_name}"
+          echo "asset_name=${asset_name}" >> "$GITHUB_OUTPUT"
+
           if [ "$RUNNER_OS" == "Linux" ]; then
             mkdir -p AppDir/usr/bin AppDir/usr/share/doc/localgen
             cp -a build/Release/{maps,fonts} AppDir/usr/bin/
@@ -92,7 +105,7 @@ jobs:
             export APPIMAGE_EXTRACT_AND_RUN=1
             export QMAKE="$QT_ROOT_DIR/bin/qmake"
             export LD_LIBRARY_PATH="$QT_ROOT_DIR/lib:${LD_LIBRARY_PATH:-}"
-            export OUTPUT="${{ matrix.name }}.AppImage"
+            export OUTPUT="$asset_name"
             linuxdeploy-x86_64.AppImage \
               --appdir AppDir \
               --plugin qt \
@@ -111,17 +124,15 @@ jobs:
             else
               windeployqt --release --no-opengl-sw --no-translations --compiler-runtime deploy/*.exe
             fi
-            7z a -tzip -mx=9 "${{ matrix.name }}.zip" ./deploy/*
+            7z a -tzip -mx=9 "$asset_name" ./deploy/*
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            bash scripts/package-macos-dmg.sh --skip-deploy build/Release/LocalGen-new.app "${{ matrix.name }}.dmg"
+            bash scripts/package-macos-dmg.sh --skip-deploy build/Release/LocalGen-new.app "$asset_name"
           fi
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
         with:
-          path: |
-            *.AppImage
-            *.zip
-            *.dmg
+          name: ${{ steps.package.outputs.asset_name }}
+          path: ${{ steps.package.outputs.asset_name }}
           archive: false
           if-no-files-found: error

@@ -60,7 +60,7 @@ Then find the executable under `build/Release`.
 >
 > On Windows, create a portable package with `windeployqt` after the build.
 >
-> On macOS, the build already deploys `build/Release/LocalGen-new.app`. To sanitize, ad-hoc sign, and package it into a Finder-launchable DMG, run `bash scripts/package-macos-dmg.sh build/Release/LocalGen-new.app`.
+> On macOS, the build creates `build/Release/LocalGen-new.app`. To deploy Qt frameworks, sanitize the DMG copy, ad-hoc sign, and package it into a Finder-launchable DMG, run `bash scripts/package-macos-dmg.sh build/Release/LocalGen-new.app LocalGen-new.dmg`.
 >
 > Avoid `macdeployqt ... -dmg` here: recent Qt/macOS combinations can leave disallowed bundle metadata on copied frameworks, which breaks the app signature inside the generated DMG.
 

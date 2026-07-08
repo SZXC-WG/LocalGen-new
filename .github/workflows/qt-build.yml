@@ -126,7 +126,7 @@ jobs:
             fi
             7z a -tzip -mx=9 "$asset_name" ./deploy/*
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            bash scripts/package-macos-dmg.sh --skip-deploy build/Release/LocalGen-new.app "$asset_name"
+            MACDEPLOYQT_EXECUTABLE="$QT_ROOT_DIR/bin/macdeployqt" bash scripts/package-macos-dmg.sh build/Release/LocalGen-new.app "$asset_name"
           fi
 
       - name: Upload Artifact

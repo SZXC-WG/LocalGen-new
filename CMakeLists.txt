@@ -155,17 +155,6 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMENT "Copying fonts to output directory"
 )
 
-if(APPLE)
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND "${MACDEPLOYQT_EXECUTABLE}"
-            "$<TARGET_BUNDLE_DIR:${PROJECT_NAME}>"
-            -always-overwrite
-            $<$<CONFIG:Debug>:-use-debug-libs>
-        COMMENT "Deploying Qt frameworks and plugins into app bundle"
-        VERBATIM
-    )
-endif()
-
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_ICON_FILE icon.icns
     MACOSX_BUNDLE_GUI_IDENTIFIER "com.example.${PROJECT_NAME}"

@@ -19,32 +19,52 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Linux (GCC)
-            os: ubuntu-latest
+          - name: Linux (GCC, x86_64)
+            os: ubuntu-24.04
             qt_arch: linux_gcc_64
             qt_tools: ''
             package_name: linux-x86_64-gcc.AppImage
 
-          - name: macOS (Clang)
-            os: macos-latest
+          - name: Linux (GCC, ARM64)
+            os: ubuntu-24.04-arm
+            qt_arch: linux_gcc_arm64
+            qt_tools: ''
+            package_name: linux-arm64-gcc.AppImage
+
+          - name: macOS (Clang, x86_64)
+            os: macos-15-intel
             qt_arch: clang_64
             qt_tools: ''
-            package_name: macos-native-clang.dmg
+            package_name: macos-x86_64-clang.dmg
 
-          - name: Windows (MSVC)
-            os: windows-latest
+          - name: macOS (Clang, ARM64)
+            os: macos-15
+            qt_arch: clang_64
+            qt_tools: ''
+            package_name: macos-arm64-clang.dmg
+
+          - name: Windows (MSVC, x86_64)
+            os: windows-2025
             qt_arch: win64_msvc2022_64
             qt_tools: ''
+            msvc_arch: amd64
             package_name: windows-x86_64-msvc.zip
 
+          - name: Windows (MSVC, ARM64)
+            os: windows-2025
+            qt_arch: win64_msvc2022_arm64_cross_compiled
+            qt_tools: ''
+            msvc_arch: amd64_arm64
+            package_name: windows-arm64-msvc.zip
+
           - name: Windows (MinGW)
-            os: windows-latest
+            os: windows-2025
             qt_arch: win64_mingw
             qt_tools: 'tools_mingw1310'
             package_name: windows-x86_64-mingw.zip
 
           - name: Windows (LLVM)
-            os: windows-latest
+            os: windows-2025
             qt_arch: win64_llvm_mingw
             qt_tools: 'tools_llvm_mingw1706'
             package_name: windows-x86_64-llvm-mingw.zip
@@ -68,6 +88,8 @@ jobs:
       - name: Setup MSVC
         if: contains(matrix.qt_arch, 'msvc')
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.msvc_arch }}
 
       - name: Build
         shell: bash
@@ -76,15 +98,16 @@ jobs:
           cmake --build build --config Release
 
       - name: Install Linux packaging tools
-        if: matrix.os == 'ubuntu-latest'
+        if: startsWith(matrix.os, 'ubuntu')
         shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/linuxdeploy"
           cd "$RUNNER_TEMP/linuxdeploy"
-          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage
-          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-appimage-x86_64.AppImage
-          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-qt-x86_64.AppImage
-          chmod +x linuxdeploy*.AppImage
+          linuxdeploy_arch="$(uname -m)"
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-${linuxdeploy_arch}.AppImage -O linuxdeploy.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-appimage-${linuxdeploy_arch}.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-qt-${linuxdeploy_arch}.AppImage
+          chmod +x *.AppImage
           echo "$RUNNER_TEMP/linuxdeploy" >> "$GITHUB_PATH"
 
       - name: Deploy and Package
@@ -92,9 +115,6 @@ jobs:
         shell: bash
         run: |
           package_name="${{ matrix.package_name }}"
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            package_name="${package_name/native/$(uname -m)}"
-          fi
           asset_name="LocalGen-ci-${GITHUB_SHA::7}-${package_name}"
           echo "asset_name=${asset_name}" >> "$GITHUB_OUTPUT"
 
@@ -106,7 +126,7 @@ jobs:
             export QMAKE="$QT_ROOT_DIR/bin/qmake"
             export LD_LIBRARY_PATH="$QT_ROOT_DIR/lib:${LD_LIBRARY_PATH:-}"
             export OUTPUT="$asset_name"
-            linuxdeploy-x86_64.AppImage \
+            linuxdeploy.AppImage \
               --appdir AppDir \
               --plugin qt \
               --output appimage \

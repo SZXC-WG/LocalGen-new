@@ -57,13 +57,13 @@ jobs:
             msvc_arch: amd64_arm64
             package_name: windows-arm64-msvc.zip
 
-          - name: Windows (MinGW)
+          - name: Windows (MinGW, x86_64)
             os: windows-2025
             qt_arch: win64_mingw
             qt_tools: 'tools_mingw1310'
             package_name: windows-x86_64-mingw.zip
 
-          - name: Windows (LLVM)
+          - name: Windows (LLVM, x86_64)
             os: windows-2025
             qt_arch: win64_llvm_mingw
             qt_tools: 'tools_llvm_mingw1706'
@@ -138,11 +138,15 @@ jobs:
             mkdir -p deploy
             mv build/Release/{LocalGen-new.exe,maps,fonts} deploy/
             mv LICENSE deploy/LICENSE.txt
+            windeployqt=("$QT_ROOT_DIR/bin/windeployqt")
+            if [[ "${{ matrix.qt_arch }}" == *"arm64"* ]]; then
+              windeployqt=("$QT_HOST_PATH/bin/windeployqt" --qtpaths "$QT_ROOT_DIR/bin/qtpaths.bat")
+            fi
             if [[ "${{ matrix.qt_arch }}" == *"llvm"* ]]; then
-              windeployqt --no-opengl-sw --no-translations --no-compiler-runtime deploy/*.exe
+              "${windeployqt[@]}" --no-opengl-sw --no-translations --no-compiler-runtime deploy/*.exe
               cp "$QT_ROOT_DIR/bin/"{libc++.dll,libunwind.dll} deploy/
             else
-              windeployqt --release --no-opengl-sw --no-translations --compiler-runtime deploy/*.exe
+              "${windeployqt[@]}" --release --no-opengl-sw --no-translations --compiler-runtime deploy/*.exe
             fi
             7z a -tzip -mx=9 "$asset_name" ./deploy/*
           elif [ "$RUNNER_OS" == "macOS" ]; then

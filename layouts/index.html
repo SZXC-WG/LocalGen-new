@@ -26,13 +26,12 @@
         <article class="stat-card"><span>{{ i18n "stats_license" }}</span><strong>{{ $project.license | default
             .Site.Params.license }}</strong></article>
         <article class="stat-card"><span>{{ i18n "stats_languages" }}</span><strong>{{ range $index, $site := $sites
-            }}{{ if gt $index 0 }} / {{ end }}{{ $site.Language.LanguageName }}{{ end }}</strong></article>
+            }}{{ if gt $index 0 }} / {{ end }}{{ $site.Language.Label }}{{ end }}</strong></article>
         <article class="stat-card"><span>{{ i18n "stats_release_count" }}</span><strong>{{ len $releases }}</strong>
         </article>
         <article class="stat-card"><span>{{ i18n "stats_contributor_count" }}</span><strong>{{ len $contributors
             }}</strong></article>
-        <article class="stat-card"><span>{{ i18n "stats_bot_count" }}</span><strong>{{ $project.bot_count | default 10
-            }}</strong></article>
+        <article class="stat-card"><span>{{ i18n "stats_bot_count" }}</span><strong>{{ len $bots }}</strong></article>
       </div>
       <div class="feature-marquee">
         <div class="feature-marquee-track" data-marquee>

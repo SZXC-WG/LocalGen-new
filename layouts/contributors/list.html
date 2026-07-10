@@ -20,7 +20,7 @@
   <section class="page-section section-muted">
     <div class="container">
       {{ if gt (len $contributors) 0 }}
-        <div class="contributor-grid full">
+        <div class="contributor-grid">
           {{ range $contributors }}
             <article class="contributor-card detailed">
               <img src="{{ .avatar_url }}" alt="{{ .login }} avatar" loading="lazy">

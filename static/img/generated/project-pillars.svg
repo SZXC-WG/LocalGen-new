@@ -1,33 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="820" height="472" viewBox="0 0 820 472" fill="none" role="img" aria-labelledby="title desc">
-  <title id="title">LocalGen generated visual</title>
-  <desc id="desc">Automatically generated visual asset for the LocalGen website.</desc>
+  <title id="title">LocalGen project pillars</title>
+  <desc id="desc">Four LocalGen pillars: offline play, LAN matches, bot research, and the Qt6 transition.</desc>
   <defs>
-    <linearGradient id="bgGlow" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#12213a" />
-      <stop offset="100%" stop-color="#0a1322" />
-    </linearGradient>
-    <linearGradient id="accentLine" x1="0" x2="1" y1="0" y2="0">
-      <stop offset="0%" stop-color="#4fd1f5" />
-      <stop offset="100%" stop-color="#8b5cf6" />
-    </linearGradient>
-    <linearGradient id="accentArea" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0%" stop-color="rgba(110,231,255,0.32)" />
-      <stop offset="100%" stop-color="rgba(110,231,255,0.02)" />
-    </linearGradient>
-    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#020617" flood-opacity="0.42" />
-    </filter>
-    
+<linearGradient id="background" x1="0" x2="1" y1="0" y2="1">
+  <stop offset="0%" stop-color="#151b18" />
+  <stop offset="100%" stop-color="#101412" />
+</linearGradient>
+<linearGradient id="panel" x1="0" x2="0" y1="0" y2="1">
+  <stop offset="0%" stop-color="#1d2521" />
+  <stop offset="100%" stop-color="#181f1b" />
+</linearGradient>
+<linearGradient id="accentLine" x1="0" x2="1" y1="0" y2="0">
+  <stop offset="0%" stop-color="#68d391" />
+  <stop offset="100%" stop-color="#f2bd64" />
+</linearGradient>
+<linearGradient id="accentArea" x1="0" x2="0" y1="0" y2="1">
+  <stop offset="0%" stop-color="#68d391" stop-opacity="0.26" />
+  <stop offset="100%" stop-color="#68d391" stop-opacity="0.02" />
+</linearGradient>
+<pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+  <path d="M 44 0 L 0 0 0 44" fill="none" stroke="#26312b" stroke-width="1" />
+</pattern>
+<filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+  <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.24" />
+</filter>
   </defs>
-  
-  <rect width="820" height="472" rx="32" fill="url(#bgGlow)" />
-  <circle cx="90" cy="90" r="88" fill="rgba(110,231,255,0.10)" />
-  <circle cx="730" cy="330" r="110" fill="rgba(139,92,246,0.09)" />
-  <g filter="url(#softShadow)"><rect x="22" y="22" width="776" height="428" rx="28" fill="#0f1c31" stroke="rgba(255,255,255,0.12)" stroke-width="1" /></g>
-  <text x="32" y="68" font-size="16" fill="#6ee7ff" font-weight="700" letter-spacing="2">PROJECT PILLARS</text>
-  <text x="32" y="96" font-size="28" font-weight="700" fill="#eff6ff">Why LocalGen feels different</text>
-    <text x="32" y="124" font-size="13" fill="#a9bdd7" text-anchor="start">The README and docs keep returning to the same promise: local-first strategy play, open</text><text x="32" y="142" font-size="13" fill="#a9bdd7" text-anchor="start">bot research, and a cleaner Qt-based future.</text>
-  <rect x="32" y="184" width="178" height="194" rx="24" fill="#101d32" stroke="rgba(255,255,255,0.08)" stroke-width="1" /><circle cx="66" cy="218" r="18" fill="#6ee7ff" fill-opacity="0.18" stroke="#6ee7ff" stroke-opacity="0.45" /><circle cx="66" cy="218" r="7" fill="#6ee7ff" /><text x="56" y="258" font-size="18" font-weight="700" fill="#eff6ff">Offline play</text><text x="56" y="288" font-size="12" fill="#a9bdd7" text-anchor="start">Play generals.io entirely</text><text x="56" y="306" font-size="12" fill="#a9bdd7" text-anchor="start">offline with ready-to-use</text><text x="56" y="324" font-size="12" fill="#a9bdd7" text-anchor="start">built-in bots.</text><rect x="56" y="332" width="130" height="28" rx="14" fill="#6ee7ff" fill-opacity="0.16" /><text x="121" y="350" text-anchor="middle" font-size="11" fill="#6ee7ff" font-weight="700">master / v6.x</text><rect x="228" y="184" width="178" height="194" rx="24" fill="#101d32" stroke="rgba(255,255,255,0.08)" stroke-width="1" /><circle cx="262" cy="218" r="18" fill="#34d399" fill-opacity="0.18" stroke="#34d399" stroke-opacity="0.45" /><circle cx="262" cy="218" r="7" fill="#34d399" /><text x="252" y="258" font-size="18" font-weight="700" fill="#eff6ff">Same-LAN battles</text><text x="252" y="288" font-size="12" fill="#a9bdd7" text-anchor="start">Set up local matches with</text><text x="252" y="306" font-size="12" fill="#a9bdd7" text-anchor="start">nearby friends without a</text><text x="252" y="324" font-size="12" fill="#a9bdd7" text-anchor="start">hosted backend.</text><rect x="252" y="332" width="130" height="28" rx="14" fill="#34d399" fill-opacity="0.16" /><text x="317" y="350" text-anchor="middle" font-size="11" fill="#34d399" font-weight="700">26 releases</text><rect x="424" y="184" width="178" height="194" rx="24" fill="#101d32" stroke="rgba(255,255,255,0.08)" stroke-width="1" /><circle cx="458" cy="218" r="18" fill="#fbbf24" fill-opacity="0.18" stroke="#fbbf24" stroke-opacity="0.45" /><circle cx="458" cy="218" r="7" fill="#fbbf24" /><text x="448" y="258" font-size="18" font-weight="700" fill="#eff6ff">Bot laboratory</text><text x="448" y="288" font-size="12" fill="#a9bdd7" text-anchor="start">Compare heuristics, ship</text><text x="448" y="306" font-size="12" fill="#a9bdd7" text-anchor="start">built-in bots, or</text><text x="448" y="324" font-size="12" fill="#a9bdd7" text-anchor="start">prototype external ones i…</text><rect x="448" y="332" width="130" height="28" rx="14" fill="#fbbf24" fill-opacity="0.16" /><text x="513" y="350" text-anchor="middle" font-size="11" fill="#fbbf24" font-weight="700">10 bots</text><rect x="620" y="184" width="178" height="194" rx="24" fill="#101d32" stroke="rgba(255,255,255,0.08)" stroke-width="1" /><circle cx="654" cy="218" r="18" fill="#8b5cf6" fill-opacity="0.18" stroke="#8b5cf6" stroke-opacity="0.45" /><circle cx="654" cy="218" r="7" fill="#8b5cf6" /><text x="644" y="258" font-size="18" font-weight="700" fill="#eff6ff">Qt6 transition</text><text x="644" y="288" font-size="12" fill="#a9bdd7" text-anchor="start">Track the active rewrite</text><text x="644" y="306" font-size="12" fill="#a9bdd7" text-anchor="start">focused on portability,</text><text x="644" y="324" font-size="12" fill="#a9bdd7" text-anchor="start">maintainability, and tool…</text><rect x="644" y="332" width="130" height="28" rx="14" fill="#8b5cf6" fill-opacity="0.16" /><text x="709" y="350" text-anchor="middle" font-size="11" fill="#8b5cf6" font-weight="700">C++17/Qt6/CMake</text>
-    <text x="32" y="436" font-size="12" fill="#a9bdd7">GPL-3.0 · SZXC-WG · source-backed from README and project guides</text>
-
+  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+<rect width="820" height="472" rx="28" fill="url(#background)" />
+<rect width="820" height="472" rx="28" fill="url(#grid)" opacity="0.32" />
+<g filter="url(#softShadow)"><rect x="18" y="18" width="784" height="436" rx="22" fill="#181f1b" stroke="#344039" stroke-width="1" /></g>
+<text x="32" y="62" font-size="12" fill="#68d391" font-weight="750" letter-spacing="1.8">PROJECT PILLARS</text>
+<text x="32" y="96" font-size="27" font-weight="750" fill="#f0f4ef">Why LocalGen feels different</text>
+<text x="32" y="124" font-size="12" fill="#9fa9a1" text-anchor="start">A local-first strategy game, an open bot laboratory, and a cleaner Qt-based future.</text>
+<rect x="32" y="180" width="178" height="198" rx="18" fill="#1d2521" stroke="#344039" stroke-width="1" /><rect x="32" y="180" width="178" height="3" rx="1.5" fill="#68d391" /><circle cx="58" cy="214" r="11" fill="#68d391" fill-opacity="0.14" stroke="#68d391" stroke-opacity="0.5" /><circle cx="58" cy="214" r="4" fill="#68d391" /><text x="52" y="248" font-size="16" font-weight="750" fill="#f0f4ef">Offline play</text><text x="52" y="276" font-size="11" fill="#9fa9a1" text-anchor="start">Play generals.io entirely</text><text x="52" y="293" font-size="11" fill="#9fa9a1" text-anchor="start">offline with ready-to-use</text><text x="52" y="310" font-size="11" fill="#9fa9a1" text-anchor="start">built-in bots.</text><rect x="52" y="337" width="138" height="25" rx="12.5" fill="#68d391" fill-opacity="0.1" /><text x="121.0" y="354" font-size="9" fill="#68d391" font-weight="750" text-anchor="middle">master / v6.x</text><rect x="228" y="180" width="178" height="198" rx="18" fill="#1d2521" stroke="#344039" stroke-width="1" /><rect x="228" y="180" width="178" height="3" rx="1.5" fill="#75aadb" /><circle cx="254" cy="214" r="11" fill="#75aadb" fill-opacity="0.14" stroke="#75aadb" stroke-opacity="0.5" /><circle cx="254" cy="214" r="4" fill="#75aadb" /><text x="248" y="248" font-size="16" font-weight="750" fill="#f0f4ef">Same-LAN battles</text><text x="248" y="276" font-size="11" fill="#9fa9a1" text-anchor="start">Set up nearby matches</text><text x="248" y="293" font-size="11" fill="#9fa9a1" text-anchor="start">without depending on a</text><text x="248" y="310" font-size="11" fill="#9fa9a1" text-anchor="start">hosted backend.</text><rect x="248" y="337" width="138" height="25" rx="12.5" fill="#75aadb" fill-opacity="0.1" /><text x="317.0" y="354" font-size="9" fill="#75aadb" font-weight="750" text-anchor="middle">26 releases</text><rect x="424" y="180" width="178" height="198" rx="18" fill="#1d2521" stroke="#344039" stroke-width="1" /><rect x="424" y="180" width="178" height="3" rx="1.5" fill="#f2bd64" /><circle cx="450" cy="214" r="11" fill="#f2bd64" fill-opacity="0.14" stroke="#f2bd64" stroke-opacity="0.5" /><circle cx="450" cy="214" r="4" fill="#f2bd64" /><text x="444" y="248" font-size="16" font-weight="750" fill="#f0f4ef">Bot laboratory</text><text x="444" y="276" font-size="11" fill="#9fa9a1" text-anchor="start">Compare heuristics, ship</text><text x="444" y="293" font-size="11" fill="#9fa9a1" text-anchor="start">built-in bots, or</text><text x="444" y="310" font-size="11" fill="#9fa9a1" text-anchor="start">prototype external ones.</text><rect x="444" y="337" width="138" height="25" rx="12.5" fill="#f2bd64" fill-opacity="0.1" /><text x="513.0" y="354" font-size="9" fill="#f2bd64" font-weight="750" text-anchor="middle">12 bots</text><rect x="620" y="180" width="178" height="198" rx="18" fill="#1d2521" stroke="#344039" stroke-width="1" /><rect x="620" y="180" width="178" height="3" rx="1.5" fill="#a58bd4" /><circle cx="646" cy="214" r="11" fill="#a58bd4" fill-opacity="0.14" stroke="#a58bd4" stroke-opacity="0.5" /><circle cx="646" cy="214" r="4" fill="#a58bd4" /><text x="640" y="248" font-size="16" font-weight="750" fill="#f0f4ef">Qt6 transition</text><text x="640" y="276" font-size="11" fill="#9fa9a1" text-anchor="start">Follow the active rewrite</text><text x="640" y="293" font-size="11" fill="#9fa9a1" text-anchor="start">for portability,</text><text x="640" y="310" font-size="11" fill="#9fa9a1" text-anchor="start">maintainability, and</text><text x="640" y="327" font-size="11" fill="#9fa9a1" text-anchor="start">tooling.</text><rect x="640" y="337" width="138" height="25" rx="12.5" fill="#a58bd4" fill-opacity="0.1" /><text x="709.0" y="354" font-size="9" fill="#a58bd4" font-weight="750" text-anchor="middle">C++17 / Qt6 / CMake</text>
+<text x="32" y="438" font-size="11" fill="#9fa9a1">GPL-3.0 · SZXC-WG · generated from project data</text>
+  </g>
 </svg>

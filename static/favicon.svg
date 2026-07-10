@@ -1,31 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none" role="img" aria-labelledby="title desc">
-  <title id="title">LocalGen generated visual</title>
-  <desc id="desc">Automatically generated visual asset for the LocalGen website.</desc>
+  <title id="title">LocalGen</title>
+  <desc id="desc">LocalGen strategy grid and star mark.</desc>
   <defs>
-    <linearGradient id="bgGlow" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#12213a" />
-      <stop offset="100%" stop-color="#0a1322" />
-    </linearGradient>
-    <linearGradient id="accentLine" x1="0" x2="1" y1="0" y2="0">
-      <stop offset="0%" stop-color="#4fd1f5" />
-      <stop offset="100%" stop-color="#8b5cf6" />
-    </linearGradient>
-    <linearGradient id="accentArea" x1="0" x2="0" y1="0" y2="1">
-      <stop offset="0%" stop-color="rgba(110,231,255,0.32)" />
-      <stop offset="100%" stop-color="rgba(110,231,255,0.02)" />
-    </linearGradient>
-    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#020617" flood-opacity="0.42" />
-    </filter>
-    
+<linearGradient id="background" x1="0" x2="1" y1="0" y2="1">
+  <stop offset="0%" stop-color="#151b18" />
+  <stop offset="100%" stop-color="#101412" />
+</linearGradient>
+<linearGradient id="panel" x1="0" x2="0" y1="0" y2="1">
+  <stop offset="0%" stop-color="#1d2521" />
+  <stop offset="100%" stop-color="#181f1b" />
+</linearGradient>
+<linearGradient id="accentLine" x1="0" x2="1" y1="0" y2="0">
+  <stop offset="0%" stop-color="#68d391" />
+  <stop offset="100%" stop-color="#f2bd64" />
+</linearGradient>
+<linearGradient id="accentArea" x1="0" x2="0" y1="0" y2="1">
+  <stop offset="0%" stop-color="#68d391" stop-opacity="0.26" />
+  <stop offset="100%" stop-color="#68d391" stop-opacity="0.02" />
+</linearGradient>
+<pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+  <path d="M 44 0 L 0 0 0 44" fill="none" stroke="#26312b" stroke-width="1" />
+</pattern>
+<filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+  <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.24" />
+</filter>
   </defs>
-  
-  <rect width="64" height="64" rx="18" fill="url(#accentLine)" />
-  <rect x="8" y="8" width="48" height="48" rx="14" fill="#08111f" fill-opacity="0.82" />
-  <rect x="14" y="14" width="16" height="16" rx="6" fill="rgba(110,231,255,0.18)" stroke="#6ee7ff" stroke-opacity="0.45" />
-  <rect x="34" y="14" width="16" height="16" rx="6" fill="rgba(139,92,246,0.18)" stroke="#8b5cf6" stroke-opacity="0.45" />
-  <rect x="14" y="34" width="16" height="16" rx="6" fill="rgba(52,211,153,0.18)" stroke="#34d399" stroke-opacity="0.45" />
-  <rect x="34" y="34" width="16" height="16" rx="6" fill="rgba(251,191,36,0.18)" stroke="#fbbf24" stroke-opacity="0.45" />
-  <path d="M32 16 L37 26 L48 27 L40 36 L42 47 L32 41 L22 47 L24 36 L16 27 L27 26 Z" fill="#fbbf24" />
-
+  <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+<rect width="64" height="64" rx="18" fill="#68d391" />
+<rect x="7" y="7" width="50" height="50" rx="14" fill="#101412" />
+<path d="M 16 21 H 48 M 16 32 H 48 M 16 43 H 48 M 21 16 V 48 M 32 16 V 48 M 43 16 V 48" stroke="#344039" />
+<path d="M32 15 L37 25 L48 27 L40 35 L42 47 L32 41 L22 47 L24 35 L16 27 L27 25 Z" fill="#f2bd64" stroke="#101412" stroke-width="1.5" />
+  </g>
 </svg>

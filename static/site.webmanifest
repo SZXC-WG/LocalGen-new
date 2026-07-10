@@ -1,6 +1,7 @@
 {
   "name": "Local Generals.io",
   "short_name": "LocalGen",
+  "description": "Play generals.io completely offline!",
   "icons": [
     {
       "src": "/favicon.svg",
@@ -15,8 +16,8 @@
       "purpose": "any"
     }
   ],
-  "theme_color": "#07111f",
-  "background_color": "#07111f",
+  "theme_color": "#101412",
+  "background_color": "#101412",
   "display": "standalone",
   "start_url": "/"
 }

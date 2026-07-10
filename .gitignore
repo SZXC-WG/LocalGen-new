@@ -1,4 +1,22 @@
-public/
-resources/_gen/
-.hugo_build.lock
+# Hugo build output and caches
+/public/
+/resources/_gen/
+/.hugo_build.lock
+/hugo_stats.json
+
+# Python bytecode and tool caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environment and development logs
 .env
+.env.*
+!.env.example
+/.hugo-server*.log
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db

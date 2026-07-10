@@ -7,7 +7,11 @@
         <small>{{ .Site.Params.organization }}</small>
       </span>
     </a>
-    <div class="header-actions">
+    <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-navigation">
+      <span class="nav-toggle-lines" aria-hidden="true"><span></span><span></span></span>
+      <span class="sr-only">Menu</span>
+    </button>
+    <div class="header-actions" id="site-navigation" data-site-navigation>
       <nav class="main-nav" aria-label="Main navigation">
         {{ range .Site.Menus.main }}
           {{ $href := .URL }}

@@ -44,38 +44,38 @@ summaryLength = 36
 
 [languages]
   [languages.en]
-    languageName = 'English'
-    languageCode = 'en-US'
+    label = 'English'
+    locale = 'en-US'
     contentDir = 'content'
     weight = 1
     title = 'LocalGen'
   [languages.zh]
-    languageName = '中文'
-    languageCode = 'zh-CN'
+    label = '中文'
+    locale = 'zh-CN'
     contentDir = 'content'
     weight = 2
     title = 'LocalGen'
   [languages.ja]
-    languageName = '日本語'
-    languageCode = 'ja-JP'
+    label = '日本語'
+    locale = 'ja-JP'
     contentDir = 'content'
     weight = 3
     title = 'LocalGen'
   [languages.ko]
-    languageName = '한국어'
-    languageCode = 'ko-KR'
+    label = '한국어'
+    locale = 'ko-KR'
     contentDir = 'content'
     weight = 4
     title = 'LocalGen'
   [languages.fr]
-    languageName = 'Français'
-    languageCode = 'fr-FR'
+    label = 'Français'
+    locale = 'fr-FR'
     contentDir = 'content'
     weight = 5
     title = 'LocalGen'
   [languages.es]
-    languageName = 'Español'
-    languageCode = 'es-ES'
+    label = 'Español'
+    locale = 'es-ES'
     contentDir = 'content'
     weight = 6
     title = 'LocalGen'

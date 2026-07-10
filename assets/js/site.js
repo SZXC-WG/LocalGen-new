@@ -14,7 +14,7 @@ function applyTheme(theme) {
   root.dataset.theme = theme;
   root.style.colorScheme = theme;
   if (themeColorMeta) {
-    themeColorMeta.setAttribute("content", theme === "light" ? "#eef4ff" : "#07111f");
+    themeColorMeta.setAttribute("content", theme === "light" ? "#f4f5f0" : "#101412");
   }
 
   const toggle = document.querySelector("[data-theme-toggle]");
@@ -29,7 +29,6 @@ function applyTheme(theme) {
   const toggleLabel = toggle.dataset.toggleLabel || toggle.getAttribute("aria-label") || "Toggle theme";
 
   toggle.setAttribute("aria-pressed", String(theme === "dark"));
-  toggle.setAttribute("data-active-theme", theme);
   toggle.setAttribute("aria-label", `${toggleLabel} (${label})`);
   toggle.setAttribute("title", `${toggleLabel} (${label})`);
   if (icon) {
@@ -119,9 +118,46 @@ function initLanguageMenu() {
   });
 }
 
+function initNavigation() {
+  const toggle = document.querySelector("[data-nav-toggle]");
+  const navigation = document.querySelector("[data-site-navigation]");
+  if (!toggle || !navigation) {
+    return;
+  }
+
+  const closeNavigation = () => {
+    navigation.classList.remove("is-open");
+    toggle.setAttribute("aria-expanded", "false");
+  };
+
+  toggle.addEventListener("click", () => {
+    const isOpen = navigation.classList.toggle("is-open");
+    toggle.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  navigation.addEventListener("click", (event) => {
+    if (event.target.closest("a")) {
+      closeNavigation();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeNavigation();
+    }
+  });
+
+  window.matchMedia("(min-width: 961px)").addEventListener("change", (event) => {
+    if (event.matches) {
+      closeNavigation();
+    }
+  });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   applyTheme(resolvedTheme());
   initThemeToggle();
+  initNavigation();
   initLanguageMenu();
   initRevealAnimations();
   initTopicTicker();

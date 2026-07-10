@@ -36,7 +36,7 @@
                 {{ with .zipball_url }}<a class="button button-secondary" href="{{ . }}">Source ZIP</a>{{ end }}
               </div>
             </div>
-            <div class="release-body prose compact-prose">{{ .body | markdownify }}</div>
+            <div class="prose compact-prose">{{ .body | markdownify }}</div>
             <div>
               <h3>{{ i18n "release_assets" }}</h3>
               {{ if gt (len .assets) 0 }}

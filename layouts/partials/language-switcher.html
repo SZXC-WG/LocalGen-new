@@ -4,7 +4,7 @@
   <details class="language-switcher" data-language-menu>
     <summary class="language-trigger" aria-label="{{ i18n "site_language" }}" title="{{ i18n "site_language" }}">
       <span class="language-trigger-label">{{ i18n "site_language" }}</span>
-      <strong>{{ .Site.Language.LanguageName }}</strong>
+      <strong>{{ .Site.Language.Label }}</strong>
       <span class="language-chevron" aria-hidden="true">▾</span>
     </summary>
     <div class="language-panel">
@@ -40,7 +40,7 @@
               {{ if eq $lang $page.Site.Language.Lang }}aria-current="page"{{ end }}
             >
               <span class="language-link-copy">
-                <strong>{{ $site.Language.LanguageName }}</strong>
+                <strong>{{ $site.Language.Label }}</strong>
                 <small>{{ upper $site.Language.Lang }}</small>
               </span>
               {{ if eq $lang $page.Site.Language.Lang }}

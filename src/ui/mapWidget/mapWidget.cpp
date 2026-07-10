@@ -17,24 +17,12 @@
 
 MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled,
                      int fitMargin)
-    : QWidget(parent),
-      scale(1.0),
-      offset(0, 0),
-      leftMouseDown(false),
-      leftMouseDragging(false),
-      rightMouseDown(false),
-      rightMouseDragging(false),
-      fitMargin(fitMargin),
-      focusRow(-1),
-      focusCol(-1),
-      lastRightClickGrid(-1, -1) {
+    : QWidget(parent), fitMargin(fitMargin) {
     setMouseTracking(true);
     setAttribute(Qt::WA_AcceptTouchEvents, true);
     setFocusEnabled(focusEnabled);
     realloc(width, height);
 }
-
-MapWidget::~MapWidget() {}
 
 bool MapWidget::event(QEvent* event) {
     if (event->type() == QEvent::NativeGesture) {
@@ -494,7 +482,6 @@ void MapWidget::mouseMoveEvent(QMouseEvent* event) {
         if (isValidGridPos(gridPos) && gridPos != lastRightClickGrid) {
             emit cellClicked(gridPos.y(), gridPos.x());
             lastRightClickGrid = gridPos;
-            rightMouseDragging = true;
         }
     }
 }
@@ -525,7 +512,6 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
         }
     } else if (event->button() == Qt::RightButton) {
         rightMouseDown = false;
-        rightMouseDragging = false;
         lastRightClickGrid = QPoint(-1, -1);
     }
 }

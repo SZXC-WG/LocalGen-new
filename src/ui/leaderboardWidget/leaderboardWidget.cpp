@@ -18,10 +18,6 @@ LeaderboardWidget::LeaderboardWidget(QWidget* parent) : QWidget(parent) {
 
 void LeaderboardWidget::setRows(std::vector<LeaderboardRow> rows) {
     this->rows = std::move(rows);
-    borderLines.clear();
-    borderLines.reserve(rows.size() + 6);
-    deadPlayerRects.clear();
-    deadPlayerRects.reserve(rows.size());
     refreshSize();
     update();
 }

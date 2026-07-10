@@ -39,11 +39,7 @@ constexpr int METADATA_SIDEBAR_COLLAPSED_HEIGHT = 156;
 constexpr int METADATA_SIDEBAR_ANIMATION_MS = 120;
 }  // namespace
 
-MapCreatorWindow::MapCreatorWindow(QWidget* parent)
-    : QDialog(parent),
-      networkManager(nullptr),
-      metadataSidebarExpanded(true),
-      selectedTool(MOUNTAIN) {
+MapCreatorWindow::MapCreatorWindow(QWidget* parent) : QDialog(parent) {
     setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint |
                    Qt::WindowMinimizeButtonHint);
 
@@ -73,8 +69,6 @@ MapCreatorWindow::MapCreatorWindow(QWidget* parent)
     setFocusPolicy(Qt::StrongFocus);
 }
 
-MapCreatorWindow::~MapCreatorWindow() {}
-
 void MapCreatorWindow::setupToolbar() {
     toolbar = new QWidget(this);
     toolbar->setFixedWidth(50);
@@ -98,20 +92,8 @@ void MapCreatorWindow::setupToolbar() {
         QPushButton* btn = new QPushButton(toolbar);
         btn->setFixedSize(40, 40);
 
-        QIcon icon(toolIcons[i]);
-        btn->setIcon(icon);
+        btn->setIcon(QIcon(toolIcons[i]));
         btn->setIconSize(QSize(30, 30));
-        btn->setStyleSheet(
-            "QPushButton {"
-            "    border: 2px solid transparent;"
-            "    border-radius: 8px;"
-            "    background-color: transparent;"
-            "}"
-            "QPushButton:hover {"
-            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 "
-            "#f0f0f0, stop:1 #e0e0e0);"
-            "    border: 2px solid #d0d0d0;"
-            "}");
 
         connect(btn, &QPushButton::clicked, this, [this, i]() {
             selectedTool = static_cast<ToolType>(i);

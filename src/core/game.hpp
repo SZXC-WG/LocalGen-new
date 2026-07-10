@@ -122,7 +122,6 @@ class BasicGame {
         eventCallback = std::move(callback);
     }
 
-   public:
     void broadcast(turn_t turn, const GameMessageData& messageData);
     void sendPlayerMessage(index_t sender, std::string text);
     void sendSystemMessage(std::string text) {
@@ -134,7 +133,6 @@ class BasicGame {
     /// The route can't pass impassable tiles.
     std::vector<pos_t> calcDist(Coord pos);
 
-   protected:
     Board board;
 
     std::deque<std::pair<index_t, turn_t>> surrenderQueue;
@@ -145,7 +143,6 @@ class BasicGame {
     void capture(index_t p1, index_t p2);
 
     /// Move priority helper functions
-   protected:
     /// Check if a move is defensive (friendly-to-friendly, including
     /// teammates).
     inline bool isDefensiveMove(index_t player, const Move& move) const {
@@ -176,9 +173,7 @@ class BasicGame {
 
         // That enemy must be moving out of the target tile
         auto it = moveOutMap.find(move.to);
-        if (it == moveOutMap.end()) return false;
-
-        return it->second == toTile.occupier;
+        return it != moveOutMap.end() && it->second == toTile.occupier;
     }
 
     /// Get the priority category of a move.
@@ -211,11 +206,7 @@ class BasicGame {
 
         // Old priority (player index) as final tiebreaker
         // phase 0: ascending, phase 1: descending
-        if (curHalfTurnPhase == 0) {
-            return a.first < b.first;
-        } else {
-            return a.first > b.first;
-        }
+        return curHalfTurnPhase == 0 ? a.first < b.first : a.first > b.first;
     }
 
    public:
@@ -225,17 +216,13 @@ class BasicGame {
               Board _board);
     ~BasicGame();
 
-   public:
     void step();
 
-   public:
     std::vector<RankItem> ranklist();
 
-   public:
     int initSpawn();
     int init();
 
-   public:
     std::vector<index_t> getAlivePlayers() const {
         std::vector<index_t> res;
         for (index_t i = 0; i < static_cast<index_t>(alive.size()); ++i) {
@@ -276,18 +263,7 @@ inline std::vector<pos_t> BasicGame::calcDist(Coord pos) {
     return dist;
 }
 
-inline void BasicGame::neutralize(index_t player) {
-    alive[player] = false;
-    for (auto& tile : board.tiles) {
-        if (tile.occupier == player) {
-            tile.occupier = -1;
-            if (tile.type == TILE_GENERAL) {
-                tile.type = TILE_CAPTURED_GENERAL;
-            }
-        }
-    }
-    // No need to broadcast: this is a low-level operation.
-}
+inline void BasicGame::neutralize(index_t player) { takeOver(-1, player); }
 inline void BasicGame::takeOver(index_t p1, index_t p2) {
     alive[p2] = false;
     for (auto& tile : board.tiles) {

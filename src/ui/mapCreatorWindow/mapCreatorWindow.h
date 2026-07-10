@@ -29,7 +29,6 @@ class MapCreatorWindow : public QDialog {
 
    public:
     explicit MapCreatorWindow(QWidget* parent = nullptr);
-    ~MapCreatorWindow();
 
     void onMapClicked(int r, int c);
 
@@ -65,7 +64,7 @@ class MapCreatorWindow : public QDialog {
     void fromBoard(const Board& board);
     void loadMapDocument(const MapDocument& doc);
 
-    QNetworkAccessManager* networkManager;
+    QNetworkAccessManager* networkManager = nullptr;
 
     static const QString mapFileFilter;
 
@@ -83,7 +82,7 @@ class MapCreatorWindow : public QDialog {
     QDateTimeEdit* creationDateEdit;
     QTextEdit* descriptionEdit;
     QPropertyAnimation* sidebarAnimation;
-    bool metadataSidebarExpanded;
+    bool metadataSidebarExpanded = true;
 
     QWidget* sliderContainer;
     QSlider* widthSlider;
@@ -105,5 +104,5 @@ class MapCreatorWindow : public QDialog {
         NEUTRAL,
         LIGHT,
         ERASE
-    } selectedTool;
+    } selectedTool = MOUNTAIN;
 };

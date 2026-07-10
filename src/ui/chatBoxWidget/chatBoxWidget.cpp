@@ -102,8 +102,6 @@ QWidget* createMessageRowWidget(const ChatMessageEntry& entry,
     QLabel* turnLabel =
         createSegmentLabel(entry.turnText, QColor(184, 189, 196, 220),
                            makeQuicksandFont(9, QFont::DemiBold), rowWidget);
-    turnLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    turnLabel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     layout->addWidget(turnLabel);
     layout->addStretch(1);
 

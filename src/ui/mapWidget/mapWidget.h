@@ -33,7 +33,6 @@ class MapWidget : public QWidget {
    public:
     explicit MapWidget(QWidget* parent, int w, int h, bool focusEnabled = true,
                        int fitMargin = 25);
-    ~MapWidget();
 
     void setFocusEnabled(bool enabled);
     inline DisplayTile& tileAt(int r, int c) {
@@ -96,15 +95,15 @@ class MapWidget : public QWidget {
     qreal minScale = defaultMinScale, maxScale = defaultMaxScale;
 
     // State variables
-    int focusRow, focusCol;
+    int focusRow = -1, focusCol = -1;
     bool takingHalfArmy = false;
 
-    qreal scale;
-    QPointF offset;
-    bool leftMouseDown, leftMouseDragging;
-    bool rightMouseDown, rightMouseDragging;
+    qreal scale = 1.0;
+    QPointF offset{0, 0};
+    bool leftMouseDown = false, leftMouseDragging = false;
+    bool rightMouseDown = false;
     QPoint leftMousePressPos, lastMousePos;
-    QPoint lastRightClickGrid;
+    QPoint lastRightClickGrid{-1, -1};
 
     int _mapWidth = 0, _mapHeight = 0;
     std::vector<DisplayTile> displayTiles;

@@ -58,9 +58,6 @@ class TimedBot : public BasicBot {
 
     double totalMicroseconds() const { return totalTime_.count(); }
     long long callCount() const { return callCount_; }
-    double averageMicroseconds() const {
-        return callCount_ > 0 ? totalTime_.count() / callCount_ : 0.0;
-    }
 
    private:
     BasicBot* inner_;
@@ -386,28 +383,22 @@ WinRateSummary calculateWinRateSummary(int wins, int totalGames) {
 
 ConfidenceInterval calculateGaussianConfidenceInterval(double mean,
                                                        double sigma) {
-    return {
-        mean - kConfidenceZ95 * sigma,
-        mean + kConfidenceZ95 * sigma,
-    };
-}
-
-std::string formatPercent(double value) {
-    std::ostringstream out;
-    out << std::fixed << std::setprecision(2)
-        << std::clamp(value, 0.0, 1.0) * 100.0 << '%';
-    return out.str();
-}
-
-std::string alignTextRight(const std::string& text, std::size_t width) {
-    std::ostringstream out;
-    out << std::right << std::setw(static_cast<int>(width)) << text;
-    return out.str();
+    return {mean - kConfidenceZ95 * sigma, mean + kConfidenceZ95 * sigma};
 }
 
 std::string formatFixed(double value) {
     std::ostringstream out;
     out << std::fixed << std::setprecision(2) << value;
+    return out.str();
+}
+
+std::string formatPercent(double value) {
+    return formatFixed(std::clamp(value, 0.0, 1.0) * 100.0) + '%';
+}
+
+std::string alignTextRight(const std::string& text, std::size_t width) {
+    std::ostringstream out;
+    out << std::right << std::setw(static_cast<int>(width)) << text;
     return out.str();
 }
 
@@ -423,22 +414,10 @@ void printTableRow(const TableRow& row, const std::vector<std::size_t>& widths,
                    const std::vector<bool>& leftAligned) {
     std::cout << '|';
     for (std::size_t i = 0; i < row.size(); ++i) {
-        std::cout << ' ';
-        if (leftAligned[i]) {
-            std::cout << std::left;
-        } else {
-            std::cout << std::right;
-        }
-        std::cout << std::setw(static_cast<int>(widths[i])) << row[i] << " |";
+        std::cout << ' ' << (leftAligned[i] ? std::left : std::right)
+                  << std::setw(static_cast<int>(widths[i])) << row[i] << " |";
     }
-    std::cout << std::left;
-    std::cout << '\n';
-}
-
-std::string formatLatency(double microseconds) {
-    std::ostringstream out;
-    out << std::fixed << std::setprecision(2) << microseconds << " us";
-    return out.str();
+    std::cout << std::left << '\n';
 }
 
 void printSummaryTable(const Options& options,
@@ -491,7 +470,7 @@ void printSummaryTable(const Options& options,
                                           ? botStats.totalLatencyMicroseconds /
                                                 botStats.totalLatencyCalls
                                           : 0.0;
-            cells.push_back(formatLatency(avgLatency));
+            cells.push_back(formatFixed(avgLatency) + " us");
         }
 
         rows.push_back({
@@ -727,14 +706,6 @@ bool loadCustomMap(Options& options, std::string& errorMessage) {
     return true;
 }
 
-std::vector<RankItem> rankByPlayer(const std::vector<RankItem>& rank) {
-    std::vector<RankItem> byPlayer(rank.size());
-    for (const RankItem& item : rank) {
-        byPlayer[item.player] = item;
-    }
-    return byPlayer;
-}
-
 std::size_t botIndexForPlayer(const BasicGame& game, index_t playerId) {
     // Each simulator bot gets a unique team id equal to its original index,
     // so the team id stays as a stable bot mapping even when player slots are
@@ -785,7 +756,6 @@ GameResult runSingleGame(const Options& options, int gameNumber,
     }
 
     std::vector<RankItem> finalRank = game.ranklist();
-    const std::vector<RankItem> byPlayer = rankByPlayer(finalRank);
 
     result.stepLimitReached =
         static_cast<int>(game.getAlivePlayers().size()) > 1 &&
@@ -796,17 +766,11 @@ GameResult runSingleGame(const Options& options, int gameNumber,
     result.statsDelta[winnerIndex].wins++;
 
     for (std::size_t i = 0; i < finalRank.size(); ++i) {
-        const std::size_t botIndex =
-            botIndexForPlayer(game, finalRank[i].player);
-        result.ranksByBot[botIndex] = static_cast<int>(i);
-        result.statsDelta[botIndex].totalRank += static_cast<long long>(i) + 1;
-    }
-
-    for (index_t playerId = 0; playerId < static_cast<index_t>(byPlayer.size());
-         ++playerId) {
-        const RankItem& item = byPlayer[playerId];
-        const std::size_t botIndex = botIndexForPlayer(game, playerId);
+        const RankItem& item = finalRank[i];
+        const std::size_t botIndex = botIndexForPlayer(game, item.player);
         BotStats& botStats = result.statsDelta[botIndex];
+        result.ranksByBot[botIndex] = static_cast<int>(i);
+        botStats.totalRank += static_cast<long long>(i) + 1;
         botStats.totalArmy += item.army;
         botStats.totalLand += item.land;
         botStats.totalKills += item.killCount;

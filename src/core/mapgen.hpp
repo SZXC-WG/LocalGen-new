@@ -553,21 +553,13 @@ class Generator {
     std::vector<int> erosionCandidates_;
 };
 
-inline Board generateBoard(int width, int height, int spawnCount,
-                           std::uint64_t seed, bool placeSwamp,
-                           bool placeLookout, bool placeObservatory,
-                           double mountainDensity) {
-    return Generator(width, height, spawnCount, seed, placeSwamp, placeLookout,
-                     placeObservatory, mountainDensity)
-        .run();
-}
-
 }  // namespace
 
 inline Board Board::generate(int width, int height, int spawnCount,
                              std::uint64_t seed, bool placeSwamp,
                              bool placeLookout, bool placeObservatory,
                              double mountainDensity) {
-    return generateBoard(width, height, spawnCount, seed, placeSwamp,
-                         placeLookout, placeObservatory, mountainDensity);
+    return Generator(width, height, spawnCount, seed, placeSwamp, placeLookout,
+                     placeObservatory, mountainDensity)
+        .run();
 }

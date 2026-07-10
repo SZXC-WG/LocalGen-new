@@ -84,7 +84,6 @@ class Player {
    public:
     std::deque<Move>& getMoveQueue() { return moveQueue; }
 
-   public:
     inline Move step() {
         if (moveQueue.empty()) return Move();
         Move move = moveQueue.front();

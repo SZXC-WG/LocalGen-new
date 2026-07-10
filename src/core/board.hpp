@@ -68,7 +68,6 @@ class Board {
         visionCache.clear();
     }
 
-   public:
     inline bool isValidPos(pos_t x, pos_t y) const {
         return x >= 1 && x <= row && y >= 1 && y <= col;
     }
@@ -78,11 +77,9 @@ class Board {
     }
     inline bool isInvalidPos(Coord pos) const { return !isValidPos(pos); }
 
-   public:
     inline int getWidth() const { return col; }
     inline int getHeight() const { return row; }
 
-   public:
     Board() = default;
     Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
         assert(row >= 0 && col >= 0);
@@ -191,7 +188,6 @@ class Board {
         return visible(pos.x, pos.y, player);
     };
 
-   public:
     bool available(index_t player, Move move) const {
         MoveType type = move.type;
         if (type == MoveType::EMPTY) return false;
@@ -218,7 +214,6 @@ class Board {
         return true;
     };
 
-   public:
     void update(bool increaseAllArmy = false) {
         for (auto& tile : tiles) {
             if (tile.occupier == -1) continue;
@@ -239,7 +234,6 @@ class Board {
         }
     }
 
-   public:
     void view(index_t player, BoardView& boardView) const {
         boardView.row = row, boardView.col = col;
         auto& tileViews = boardView.tiles;
@@ -278,7 +272,6 @@ class Board {
         return TileView(tileAt(pos), visible(pos, player));
     };
 
-   public:
     static Board generate(int width, int height, int spawnCount,
                           std::uint64_t seed, bool placeSwamp = false,
                           bool placeLookout = false,

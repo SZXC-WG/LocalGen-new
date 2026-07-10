@@ -41,6 +41,10 @@ struct MapDocument {
 namespace {
 
 constexpr quint32 MAGIC_6 = 0x4C47364D;
+constexpr int V5_TYPE_CODES[TILE_TYPE_COUNT] = {3, 0, 2, 4, 1, 5, 6, 7};
+constexpr tile_type_e V5_TILE_TYPES[TILE_TYPE_COUNT] = {
+    TILE_BLANK, TILE_SWAMP,  TILE_MOUNTAIN, TILE_SPAWN,
+    TILE_CITY,  TILE_DESERT, TILE_LOOKOUT,  TILE_OBSERVATORY};
 
 inline intmax_t PMod(intmax_t& x) {
     intmax_t res = x & 63;  // 63 = 0b111111
@@ -64,18 +68,9 @@ std::string v5Zip(const Board& board) {
             const Tile& tile = board.tileAt(i, j);
             strZip.push_back(tile.occupier + CHAR_AD);
 
-            int type = 0;
-            switch (tile.type) {
-                case TILE_BLANK:       type = 0; break;
-                case TILE_SWAMP:       type = 1; break;
-                case TILE_MOUNTAIN:    type = 2; break;
-                case TILE_SPAWN:       type = 3; break;
-                case TILE_CITY:        type = 4; break;
-                case TILE_DESERT:      type = 5; break;
-                case TILE_LOOKOUT:     type = 6; break;
-                case TILE_OBSERVATORY: type = 7; break;
-                default:               break;
-            }
+            const int type = tile.type >= 0 && tile.type < TILE_TYPE_COUNT
+                                 ? V5_TYPE_CODES[tile.type]
+                                 : 0;
 
             char ch = (type << 2) + (tile.lit << 1);
             k1 = tile.type == TILE_SPAWN ? 0 : tile.army;
@@ -110,19 +105,10 @@ Board v5Unzip(std::string strUnzip) {
             strUnzip[k] >>= 1;
             tile.lit = strUnzip[k] & 1;
             strUnzip[k] >>= 1;
-            int type = strUnzip[k++];
-
-            switch (type) {
-                case 0:  tile.type = TILE_BLANK; break;
-                case 1:  tile.type = TILE_SWAMP; break;
-                case 2:  tile.type = TILE_MOUNTAIN; break;
-                case 3:  tile.type = TILE_SPAWN; break;
-                case 4:  tile.type = TILE_CITY; break;
-                case 5:  tile.type = TILE_DESERT; break;
-                case 6:  tile.type = TILE_LOOKOUT; break;
-                case 7:  tile.type = TILE_OBSERVATORY; break;
-                default: break;
-            }
+            const int type = strUnzip[k++];
+            tile.type = type >= 0 && type < TILE_TYPE_COUNT
+                            ? V5_TILE_TYPES[type]
+                            : TILE_BLANK;
 
             if (tile.type == TILE_SPAWN)
                 tile.army = 0;

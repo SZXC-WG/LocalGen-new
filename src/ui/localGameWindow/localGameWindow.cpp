@@ -45,13 +45,11 @@ inline QColor playerColor(index_t playerId) {
 inline DisplayTile toDisplayTile(const TileView& tile) {
     DisplayTile display;
     display.type = tile.type;
-    display.lightIcon = false;
     if (!tile.visible) {
         if (tile.type == TILE_SWAMP)
             display.color.setRgb(128, 128, 128);
         else
             display.color.setRgb(57, 57, 57);
-        display.text.clear();
         display.displayBorders = false;
         return display;
     }
@@ -73,8 +71,6 @@ inline DisplayTile toDisplayTile(const TileView& tile) {
         if (tile.occupier == -1 && tile.type == TILE_NEUTRAL) {
             display.color.setRgb(128, 128, 128);
         }
-    } else {
-        display.text.clear();
     }
     return display;
 }
@@ -377,14 +373,9 @@ void LocalGameWindow::updateLeaderboard(const std::vector<RankItem>& rank) {
     std::vector<LeaderboardRow> rows;
     rows.reserve(rank.size());
     for (const auto& item : rank) {
-        LeaderboardRow row;
-        row.playerName = QString::fromStdString(game->getName(item.player));
-        row.army = item.army;
-        row.playerColor = playerColor(item.player);
-        row.land = item.land;
-        row.hasKill = item.killCount > 0;
-        row.isAlive = item.alive;
-        rows.push_back(std::move(row));
+        rows.push_back({QString::fromStdString(game->getName(item.player)),
+                        item.army, playerColor(item.player), item.land,
+                        item.killCount > 0, item.alive});
     }
 
     leaderboardWidget->setRows(std::move(rows));

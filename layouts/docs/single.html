@@ -1,0 +1,36 @@
+{{ define "main" }}
+  <section class="page-hero docs-hero">
+    <div class="container">
+      <nav class="breadcrumbs" aria-label="{{ i18n "breadcrumbs" }}">
+        <a href="{{ .Site.Home.RelPermalink }}">{{ i18n "home_label" }}</a>
+        <span aria-hidden="true">/</span>
+        <a href="{{ "docs/" | relLangURL }}">{{ i18n "project_docs" }}</a>
+      </nav>
+      <p class="eyebrow">{{ i18n "source_backed_guide" }}</p>
+      <h1>{{ .Title }}</h1>
+      {{ with .Description }}<p class="lead">{{ . }}</p>{{ end }}
+    </div>
+  </section>
+  <section class="docs-section">
+    <div class="container docs-layout">
+      <aside class="docs-sidebar">
+        {{ partial "docs-nav.html" . }}
+      </aside>
+      <article class="prose docs-article">
+        {{ .Content }}
+        <nav class="docs-pagination" aria-label="{{ i18n "docs_pagination" }}">
+          {{ with .NextInSection }}
+            <a href="{{ .RelPermalink }}" rel="prev"><small>{{ i18n "previous_doc" }}</small><strong>← {{ .Title }}</strong></a>
+          {{ end }}
+          {{ with .PrevInSection }}
+            <a href="{{ .RelPermalink }}" rel="next"><small>{{ i18n "next_doc" }}</small><strong>{{ .Title }} →</strong></a>
+          {{ end }}
+        </nav>
+      </article>
+      <aside class="docs-toc">
+        <p>{{ i18n "on_this_page" }}</p>
+        {{ .TableOfContents }}
+      </aside>
+    </div>
+  </section>
+{{ end }}

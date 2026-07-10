@@ -4,7 +4,7 @@
   "description": "Play generals.io completely offline!",
   "html_url": "https://github.com/SZXC-WG/LocalGen-new",
   "homepage": "",
-  "license": "GPL-3.0",
+  "license": "GPL-3.0-or-later",
   "default_branch": "master",
   "created_at": "2023-01-05T12:00:40Z",
   "updated_at": "2026-07-06T04:21:30Z",
@@ -28,18 +28,16 @@
   "project_name": "Local Generals.io",
   "short_name": "LocalGen",
   "organization": "SZXC-WG",
-  "version": "6.0.0",
-  "version_line": "master / v6.x",
-  "legacy_line": "v5.x",
+  "version": "6.0.0-dev",
+  "version_line": "master / v6",
+  "legacy_line": "v5.0",
   "languages": [
     "English",
-    "Chinese",
-    "Japanese",
-    "Korean",
-    "French",
-    "Spanish"
+    "Chinese"
   ],
   "bot_count": 10,
+  "documented_bot_count": 13,
+  "map_count": 46,
   "built_with": [
     "C++17",
     "Qt6",

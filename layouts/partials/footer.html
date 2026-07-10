@@ -4,7 +4,7 @@
       <h2>{{ .Site.Params.projectName }}</h2>
       <p>{{ i18n "footer_tagline" }}</p>
       <p class="muted">{{ i18n "disclaimer_short" }}</p>
-      <p class="muted footer-license">{{ i18n "website_license_summary" }} <a href="{{ "website-license/" | relLangURL }}">{{ .Site.Params.websiteLicense }}</a>.</p>
+      <p class="muted footer-license"><a href="{{ "website-license/" | relLangURL }}">{{ i18n "website_license" }}</a> · {{ i18n "website_license_summary" }}</p>
       <div class="label-row footer-labels">
         {{ range hugo.Data.project.built_with }}
           <span class="label">{{ . }}</span>
@@ -30,7 +30,7 @@
         <li><a href="{{ .Site.Params.sourceRepo }}">{{ i18n "source_repository" }}</a></li>
         <li><a href="{{ .Site.Params.websiteRepo }}">{{ i18n "website_repository" }}</a></li>
         <li><a href="{{ "website-license/" | relLangURL }}">{{ i18n "website_license" }}</a></li>
-        <li><a href="{{ .Site.Params.releasesUrl }}">Releases</a></li>
+        <li><a href="{{ .Site.Params.releasesUrl }}">{{ i18n "releases_label" }}</a></li>
         <li><a href="{{ .Site.Params.issuesUrl }}">{{ i18n "issues_label" }}</a></li>
         <li><a href="{{ .Site.Params.actionsUrl }}">{{ i18n "github_actions_label" }}</a></li>
       </ul>

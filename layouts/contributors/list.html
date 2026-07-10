@@ -23,7 +23,7 @@
         <div class="contributor-grid">
           {{ range $contributors }}
             <article class="contributor-card detailed">
-              <img src="{{ .avatar_url }}" alt="{{ .login }} avatar" loading="lazy">
+              <img src="{{ .avatar_url }}" alt="{{ printf (i18n "contributor_avatar") .login }}" loading="lazy">
               <h2 class="contributor-name"><a href="{{ .html_url }}">{{ .login }}</a></h2>
               <p class="contributor-handle">@{{ .login }}</p>
               {{ if .contributions }}

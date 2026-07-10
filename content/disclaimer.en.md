@@ -1,33 +1,26 @@
 ---
 title: "Disclaimer"
-description: "Legal and community context for presenting, using, and contributing to LocalGen."
+description: "The independence, trademark, support, and network boundaries of the LocalGen community project."
 date: 2026-04-06T17:54:17+08:00
 draft: false
 weight: 100
 ---
 
-The **Local Generals.io** project (LocalGen) is an independent, open-source project developed by the **SZXC-WG community**.
+**Local Generals.io (LocalGen)** is an independent, fan-made, open-source project developed by the SZXC-WG community.
 
-LocalGen is **not affiliated with, associated with, endorsed by, sponsored by, or connected to** `generals.io` or its original developers.
+LocalGen is **not affiliated with, associated with, endorsed by, sponsored by, or connected to** generals.io or its original developers. The `generals.io` name, logo, and related assets remain the property of their respective owners.
 
-`generals.io`, including its name, logo, and related assets, remains the property of its respective owners.
+## Intended use
 
-## What LocalGen is intended for
+LocalGen is intended for local gameplay, offline experimentation, education, and built-in bot development. It does not grant access, privileges, or status on official generals.io services and is not a replacement client for those services.
 
-LocalGen is a fan-made tool designed for:
+Current Local Game and bot simulation do not require the official backend. Map Creator does include one optional network action: importing a public map by title sends a request to the generals.io map API. That limited import should not be confused with game-server integration, affiliation, or endorsement.
 
-- local gameplay
-- offline experimentation
-- educational use
-- bot and AI development
+## Support and responsibility
 
-It does **not** connect to or attempt to reproduce the official generals.io backend services.
+- Report LocalGen bugs and feature requests to the [LocalGen issue tracker](https://github.com/SZXC-WG/LocalGen-new/issues), not to generals.io support.
+- Follow generals.io's applicable terms when using the official platform or its public services.
+- Verify licenses and permissions before redistributing source, fonts, maps, artwork, website material, or third-party assets.
+- LocalGen is provided without warranty under the terms stated by its upstream license.
 
-## Please keep in mind
-
-- report LocalGen bugs to the LocalGen repository, not to generals.io support
-- using LocalGen does not imply any special status on official generals.io servers
-- users remain responsible for complying with generals.io terms when using the original platform
-
-By using or redistributing LocalGen-related material, you acknowledge the above distinction.
-
+See [Website license]({{< relref "website-license" >}}) for the separate licensing status of this website repository.

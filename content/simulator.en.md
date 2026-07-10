@@ -1,30 +1,16 @@
 ---
 title: "Simulator"
-description: "Use the LocalGen bot simulator for reproducible bot-vs-bot testing on random or custom maps, without the Qt UI in the loop."
+description: "Evaluate LocalGen's registered bots over parallel random-map or v6-map matches from the command line."
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 70
 ---
 
-## What the simulator is for
+## Bot evaluation without the desktop UI
 
-`LocalGen-bot-simulator` is the tool you reach for when you want evidence instead of guesswork. It is a lightweight command-line companion for **bot-vs-bot evaluation**.
+`LocalGen-bot-simulator` uses the same board, game, map loader, and built-in bot registry as the desktop app. It runs free-for-all matches in worker threads and prints per-game outcomes plus an aggregate table.
 
-It uses the same core board and game logic as the main application, but removes the Qt user interface so you can focus on benchmarking, regression checking, and large-scale comparison runs.
-
-## What it can do
-
-- generate random maps
-- load custom `.lgmp` maps
-- instantiate registered bots through the shared bot system
-- run repeated matches in parallel
-- report aggregate win-rate and TrueSkill-style summaries
-
-## Why contributors use it
-
-The bot contribution guide repeatedly asks for evidence: replays, tests, and performance notes. The simulator is the cleanest way to collect that evidence when you want to compare multiple strategies under consistent settings, share meaningful benchmarks, and prove that a new idea is more than a lucky streak.
-
-## Example usage
+After a Release build, run it from `build/Release`:
 
 ```bash
 ./LocalGen-bot-simulator --games 10 --width 20 --height 20 --steps 600 --bots XiaruizeBot GcBot
@@ -32,28 +18,23 @@ The bot contribution guide repeatedly asks for evidence: replays, tests, and per
 ./LocalGen-bot-simulator --games 50 --silent --bots XiaruizeBot GcBot
 ```
 
-## A simple evaluation formula
+Windows uses `LocalGen-bot-simulator.exe` with the same options.
 
-When comparing two bots over many games, a first-pass headline metric is still the win rate:
+## What the summary reports
 
-$$
-	ext{win-rate} = \frac{W}{W + L} \times 100\%
-$$
+- FFA TrueSkill rating and 95% confidence interval
+- wins, win rate, and win-rate confidence interval
+- average rank, kills, final army, and final land
+- survival count
+- average `requestMove()` latency when `--latency` is enabled
 
-If you keep the map size fixed, a rough experiment budget can be thought of as:
+## Important semantics
 
-$$
-T_{\text{suite}} \approx G \times S \times T_{\text{turn}}(n)
-$$
+- Defaults are 8 games, a 20×20 random map, 600 **half-turns**, automatic worker count, and `XiaruizeBot GcBot`.
+- `--map` accepts only v6 `.lgmp`; when present, `--width` and `--height` are ignored.
+- At least two valid registered bot names are required. Runtime names are case-sensitive.
+- `--silent` keeps only the final summary. Without it, games print as soon as they finish, so output order may differ from game number order.
+- When the step limit is reached, the current leader is reported and counted as the winner even if several bots remain alive.
+- Runs are **not reproducible from the current CLI**: there is no seed option, and map seeds come from system randomness.
 
-where $G$ is the number of games, $S$ is the step limit, and $T_{\text{turn}}(n)$ is the average per-turn bot cost on a board of effective size $n$.
-
-## Practical notes
-
-- `--map` loads the same custom map for each simulation
-- only v6 `.lgmp` maps are supported by that flag
-- independent matches can run across CPU threads
-- `--silent` suppresses banner and per-game noise, leaving the summary table
-
-For more detail, read the mirrored [Simulator Guide]({{< relref "docs/simulator-guide" >}}).
-
+See the [complete flag reference]({{< relref "docs/simulator-guide" >}}) before publishing benchmark results.

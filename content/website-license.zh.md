@@ -1,31 +1,32 @@
 ---
 title: "网站许可证"
-description: "说明 LocalGen 网站仓库、生成式视觉素材以及第三方引用名称的许可证信息。"
+description: "说明本站、上游 LocalGen、字体、数据与商标目前分别有哪些许可证声明，以及哪些尚未声明。"
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 90
 ---
 
-## 网站许可证概览
+## 网站仓库状态
 
-这个网站的源仓库是 `SZXC-WG/szxc-wg.github.io`。
+`SZXC-WG/szxc-wg.github.io` 是本网站的源仓库。在本页核验时，仓库中**没有全局 `LICENSE` 文件，也没有其他将全部网站代码与生成视觉素材统一授权的声明**。
 
-| 范围 | 说明 |
+缺少许可证并不意味着作品会自动采用 GPL。除非具体文件带有独立声明，否则不要假定自己有权复制、修改或再分发本站布局、样式、脚本、文字或生成图像。请向仓库所有者取得许可，或等待明确的网站许可证。
+
+## 不同材料适用不同条款
+
+| 材料 | 许可证/状态 |
 | --- | --- |
-| 布局、样式、JavaScript 与生成式 SVG 视觉素材 | 若无额外声明，则按 GPL-3.0 处理 |
-| 同步而来的项目元数据与版本数据 | 来源于上游 LocalGen 项目材料 |
-| `generals.io` 等第三方名称与商标 | 仍归其各自权利人所有 |
+| 上游 `SZXC-WG/LocalGen-new` 源码 | 根据源码声明与 About 对话框，为 GPL-3.0-or-later |
+| 随附 Quicksand 字体 | SIL Open Font License 1.1 |
+| 同步的 GitHub 元数据 | 来自 GitHub/上游的事实数据，仍应保留来源说明 |
+| `generals.io` 名称、标志及相关资产 | 归各自权利人所有；描述性引用不代表背书 |
+| 本站自有代码与生成视觉素材 | 当前没有仓库级许可证声明 |
 
-## 这在实践中意味着什么？
+## 复用材料之前
 
-- 如果某个文件没有额外说明，则网站代码与生成式视觉素材按 **GPL-3.0** 理解
-- 本站使用的上游 LocalGen 美术资源，仍应归属到 LocalGen 项目本身
-- 对 `generals.io` 的提及仅用于说明来源与兼容背景，并 **不** 表示官方关联或背书
+1. 先判断材料来自本站、上游 LocalGen、字体包、GitHub 数据还是第三方。
+2. 阅读该材料本身及来源仓库附带的准确声明。
+3. 保留署名与商标边界。
+4. 如果本站自有材料没有写明授权，请主动询问，不要因为上游游戏使用 GPL 就推断本站同样适用。
 
-```text
-Repository: SZXC-WG/szxc-wg.github.io
-Source project: SZXC-WG/LocalGen-new
-Website license: GPL-3.0
-```
-
-如果你还想查看项目级许可证信息，可以继续访问 [源码仓库](https://github.com/SZXC-WG/LocalGen-new) 以及本站的[项目简介]({{< relref "about" >}})页面。
+游戏许可证与源码请访问 [LocalGen-new](https://github.com/SZXC-WG/LocalGen-new) 与[项目简介]({{< relref "about" >}})。项目与商标边界见[免责声明]({{< relref "disclaimer" >}})。

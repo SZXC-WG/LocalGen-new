@@ -1,7 +1,7 @@
 <header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="{{ .Site.Home.RelPermalink }}">
-      <img class="brand-mark" src="{{ "favicon.png" | relURL }}" alt="LocalGen avatar" width="44" height="44">
+      <img class="brand-mark" src="{{ "favicon.png" | relURL }}" alt="{{ i18n "brand_image_alt" }}" width="44" height="44">
       <span>
         <strong>{{ .Site.Params.projectShortName }}</strong>
         <small>{{ .Site.Params.organization }}</small>
@@ -9,16 +9,17 @@
     </a>
     <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-navigation">
       <span class="nav-toggle-lines" aria-hidden="true"><span></span><span></span></span>
-      <span class="sr-only">Menu</span>
+      <span class="sr-only">{{ i18n "menu_label" }}</span>
     </button>
     <div class="header-actions" id="site-navigation" data-site-navigation>
-      <nav class="main-nav" aria-label="Main navigation">
+      <nav class="main-nav" aria-label="{{ i18n "main_navigation" }}">
         {{ range .Site.Menus.main }}
           {{ $href := .URL }}
           {{ with .Page }}
             {{ $href = .RelPermalink }}
           {{ end }}
-          <a href="{{ $href }}" class="{{ if or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }}is-active{{ end }}">{{ .Name }}</a>
+          {{ $active := or ($.IsMenuCurrent "main" .) ($.HasMenuCurrent "main" .) }}
+          <a href="{{ $href }}" class="{{ if $active }}is-active{{ end }}" {{ if $active }}aria-current="page"{{ end }}>{{ .Name }}</a>
         {{ end }}
       </nav>
       <div class="utility-cluster">

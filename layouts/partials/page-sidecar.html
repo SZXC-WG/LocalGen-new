@@ -1,67 +1,72 @@
 {{ $project := hugo.Data.project }}
+{{ $releases := hugo.Data.releases.items | default (slice) }}
 {{ $slug := "" }}
-{{ with .File }}
-{{ $slug = .TranslationBaseName }}
-{{ end }}
+{{ with .File }}{{ $slug = .TranslationBaseName }}{{ end }}
 
-{{ $visual := "img/generated/project-pillars.svg" | relURL }}
-{{ $visualAlt := i18n "visual_pillars_alt" }}
-{{ $title := i18n "visual_pillars_title" }}
-{{ $caption := i18n "visual_pillars_summary" }}
-{{ $labels := slice (i18n "label_offline_first") (i18n "label_same_lan") $project.version_line }}
+{{ $title := i18n "snapshot_project_title" }}
+{{ $caption := i18n "snapshot_project_summary" }}
+{{ $labels := slice "Qt 6.7+" "C++17" "CMake" }}
+{{ $metrics := slice
+  (dict "label" (i18n "stats_version") "value" $project.version)
+  (dict "label" (i18n "stats_map_count") "value" $project.map_count)
+  (dict "label" (i18n "stats_license") "value" $project.license)
+}}
 
 {{ if or (eq .Section "releases") (eq $slug "downloads") }}
-{{ $visual = "img/generated/release-journey.svg" | relURL }}
-{{ $visualAlt = i18n "visual_release_alt" }}
-{{ $title = i18n "visual_release_title" }}
-{{ $caption = i18n "visual_release_summary" }}
-{{ $labels = slice (i18n "label_stable_builds") (i18n "label_preview_builds") (i18n "label_windows_legacy") }}
+  {{ $title = i18n "snapshot_releases_title" }}
+  {{ $caption = i18n "snapshot_releases_summary" }}
+  {{ $labels = slice (i18n "label_stable_builds") (i18n "label_preview_builds") (i18n "label_windows_legacy") }}
+  {{ $metrics = slice
+    (dict "label" (i18n "release_count_label") "value" (len $releases))
+    (dict "label" (i18n "canonical_source") "value" "GitHub")
+    (dict "label" (i18n "current_source") "value" $project.version)
+  }}
 {{ else if or (eq $slug "bots") (eq $slug "simulator") }}
-{{ $visual = "img/generated/bot-spectrum.svg" | relURL }}
-{{ $visualAlt = i18n "visual_bots_alt" }}
-{{ $title = i18n "visual_bots_title" }}
-{{ $caption = i18n "visual_bots_summary" }}
-{{ if eq $slug "simulator" }}
-{{ $labels = slice (i18n "label_cli_tool") ".lgmp" (i18n "label_parallel_runs") }}
-{{ else }}
-{{ $labels = slice (i18n "label_built_in") (i18n "label_external") "C++17" }}
-{{ end }}
-{{ else if or (eq $slug "about") (eq $slug "contribute") (eq .Section "contributors") (eq .Section "docs") }}
-{{ $visual = "img/generated/project-pillars.svg" | relURL }}
-{{ $visualAlt = i18n "visual_pillars_alt" }}
-{{ $title = i18n "visual_pillars_title" }}
-{{ $caption = i18n "visual_pillars_summary" }}
-{{ if eq $slug "contribute" }}
-{{ $labels = slice (i18n "label_pull_requests") (i18n "label_commit_rules") (i18n "label_replays_and_tests") }}
+  {{ $title = i18n "snapshot_bots_title" }}
+  {{ $caption = i18n "snapshot_bots_summary" }}
+  {{ if eq $slug "simulator" }}
+    {{ $labels = slice (i18n "label_cli_tool") ".lgmp" (i18n "label_parallel_runs") }}
+  {{ else }}
+    {{ $labels = slice (i18n "label_built_in") (i18n "label_compiled_bots") "C++17" }}
+  {{ end }}
+  {{ $metrics = slice
+    (dict "label" (i18n "compiled_label") "value" $project.bot_count)
+    (dict "label" (i18n "documented_label") "value" $project.documented_bot_count)
+    (dict "label" (i18n "simulator_threads") "value" (i18n "automatic_label"))
+  }}
 {{ else if eq .Section "docs" }}
-{{ $labels = slice (i18n "label_bilingual") (i18n "label_source_backed") (i18n "label_workflow_docs") }}
-{{ else }}
-{{ $labels = slice "C++17" "Qt6" "CMake" (printf "%s" $project.license) }}
-{{ end }}
+  {{ $title = i18n "snapshot_docs_title" }}
+  {{ $caption = i18n "snapshot_docs_summary" }}
+  {{ $labels = slice (i18n "label_bilingual") (i18n "label_source_backed") (i18n "label_workflow_docs") }}
+{{ else if eq $slug "contribute" }}
+  {{ $title = i18n "snapshot_contribute_title" }}
+  {{ $caption = i18n "snapshot_contribute_summary" }}
+  {{ $labels = slice (i18n "label_pull_requests") (i18n "label_commit_rules") (i18n "label_replays_and_tests") }}
 {{ end }}
 
-<aside class="page-sidecar stack-lg">
-  <div class="sidebar-card hero-visual-card">
+<aside class="page-sidecar">
+  <div class="sidebar-card snapshot-card">
     <p class="eyebrow">{{ $title }}</p>
-    <figure class="visual-figure">
-      <img src="{{ $visual }}" alt="{{ $visualAlt }}" loading="lazy">
-    </figure>
+    <div class="snapshot-board" aria-hidden="true">
+      {{ range seq 1 18 }}<span class="{{ if or (eq . 4) (eq . 5) (eq . 10) }}is-accent{{ else if or (eq . 13) (eq . 14) }}is-blue{{ end }}"></span>{{ end }}
+    </div>
+    <dl class="snapshot-metrics">
+      {{ range $metrics }}
+        <div><dt>{{ .label }}</dt><dd>{{ .value }}</dd></div>
+      {{ end }}
+    </dl>
     <p>{{ $caption }}</p>
     <div class="label-row">
-      {{ range $labels }}
-      <span class="label">{{ . }}</span>
-      {{ end }}
+      {{ range $labels }}<span class="label">{{ . }}</span>{{ end }}
     </div>
   </div>
 
   {{ if eq .Section "docs" }}
-  <div class="sidebar-card">
-    <h2>{{ i18n "project_docs" }}</h2>
-    <ul class="stacked-links">
-      {{ range .CurrentSection.RegularPages.ByWeight }}
-      <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
-      {{ end }}
-    </ul>
-  </div>
+    <div class="sidebar-card">
+      <h2>{{ i18n "project_docs" }}</h2>
+      <ul class="stacked-links">
+        {{ range .CurrentSection.RegularPages.ByWeight }}<li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>{{ end }}
+      </ul>
+    </div>
   {{ end }}
 </aside>

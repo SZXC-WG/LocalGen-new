@@ -24,13 +24,13 @@ summaryLength = 36
   anchor = 'smart'
 
 [params]
-  description = 'The multilingual project website for Local Generals.io by SZXC Work Group.'
+  description = 'Project documentation site for Local Generals.io.'
   organization = 'SZXC Work Group'
-  projectName = 'Local Generals.io'
+  projectName = 'LocalGen Docs'
   projectShortName = 'LocalGen'
-  projectVersion = '6.0.0'
-  license = 'GPL-3.0'
-  websiteLicense = 'GPL-3.0'
+  projectVersion = '6.0.0-dev'
+  license = 'GPL-3.0-or-later'
+  websiteLicense = 'Not declared'
   websiteRepo = 'https://github.com/SZXC-WG/szxc-wg.github.io'
   siteUrl = 'https://szxc-wg.github.io/'
   sourceRepo = 'https://github.com/SZXC-WG/LocalGen-new'
@@ -54,28 +54,4 @@ summaryLength = 36
     locale = 'zh-CN'
     contentDir = 'content'
     weight = 2
-    title = 'LocalGen'
-  [languages.ja]
-    label = '日本語'
-    locale = 'ja-JP'
-    contentDir = 'content'
-    weight = 3
-    title = 'LocalGen'
-  [languages.ko]
-    label = '한국어'
-    locale = 'ko-KR'
-    contentDir = 'content'
-    weight = 4
-    title = 'LocalGen'
-  [languages.fr]
-    label = 'Français'
-    locale = 'fr-FR'
-    contentDir = 'content'
-    weight = 5
-    title = 'LocalGen'
-  [languages.es]
-    label = 'Español'
-    locale = 'es-ES'
-    contentDir = 'content'
-    weight = 6
     title = 'LocalGen'

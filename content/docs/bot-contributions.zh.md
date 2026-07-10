@@ -1,69 +1,57 @@
 ---
 title: "Bot 贡献指南"
-description: "说明 LocalGen v6 如何欢迎内置 Bot 与外部 Bot 的开发贡献。"
+description: "按照当前 LocalGen v6 源码，添加、测试并提交内置 C++ Bot。"
 date: 2026-04-06T17:55:07+08:00
 draft: false
 weight: 20
 ---
 
-> 源文档：[`docs/bot-contributions.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/bot-contributions.md)
+> 参考来源：[`CONTRIBUTING.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/CONTRIBUTING.md)、[`src/bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md)，以及当前 Bot 注册表/CMake 源码。
 
-## 引言
+## 当前支持的集成方式
 
-Bot 一直是 LocalGen 的核心部分。但在项目早期版本中，Bot 开发的门槛较高：
+LocalGen v6 目前只接受**直接编译进应用的 Bot**。外部可执行程序、任意语言客户端与面向网络的 Bot 协议在当前仓库中均未实现。
 
-- 只能使用 C++ 编写
-- 必须和主程序一起编译
-- 接口基本写死在源码中
+内置 Bot 会同时出现在本地对局与 `LocalGen-bot-simulator` 中，因为两个目标共用同一份 `LOCALGEN_BOT_SOURCES` 列表。
 
-v6 的目标之一，就是打破这些限制，让更多贡献者能够参与进来。
+## 实现检查清单
 
-## v6 中的 Bot 类型
+1. 创建一个名称唯一、使用 C++17 的 `src/bots/MyBot.cpp` 文件。
+2. 包含 `src/core/bot.h`。
+3. 让 Bot 类继承 `BasicBot`。
+4. 实现两个必需方法：
+   - `init(index_t playerId, const GameConstantsPack& constants)`
+   - `requestMove(const BoardView& boardView, const std::vector<RankItem>& rank)`
+5. 使用当前模式注册唯一运行时名称：
 
-### 内置 Bot
+```cpp
+static BotRegistrar<MyBot> myBotRegistrar("MyBot");
+```
 
-- 源码位于 `src/bots/`
-- 与 LocalGen 主程序一起编译
-- 使用 C++ 编写
-- 在 Local Game 和 Web Game 中可以直接使用
+6. 将 `src/bots/MyBot.cpp` 加入顶层 `CMakeLists.txt` 的 `LOCALGEN_BOT_SOURCES`。
+7. 同时构建 Debug 与 Release 配置。
 
-### 外部 Bot
+上游 Bot README 提到了 `REGISTER_BOT` 宏，但当前实现公开的是 `BotRegistrar`；请以能够编译的现有源码示例为准。
 
-- 作为独立可执行文件存在
-- 可以用任意语言实现
-- 通过网络协议与 LocalGen 通信
-- 在纳入外部 Bot 列表后，可由游戏进程托管启动
+## 提交前评测
 
-## 你可以如何贡献
+请在多种地图尺寸、手工地图、对手组合与玩家数量下测试。一个有用的报告应包含：
 
-项目欢迎以下贡献：
+- 完整模拟器命令；
+- 对局数与半回合上限；
+- 随机地图或指定 `.lgmp` 地图；
+- 胜率、TrueSkill、平均排名与击杀；
+- 对性能敏感逻辑给出 `--latency` 结果；
+- 已知失败场景，以及内存/单回合复杂度。
 
-- 全新的 Bot
-- 对现有 Bot 的改进
-- Bug 修复与性能优化
+当前模拟器无法通过种子复现，因此应运行足够多的比赛，不要把单批结果描述为确定性证明。
 
-### 贡献内置 Bot
+## Pull Request 期望
 
-1. 阅读 [`src/bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md)。
-2. 遵循项目的 C++ 风格规范。
-3. 提交 Pull Request，并附带：
-	- 测试或回放材料
-	- 简要性能说明
+- 说明策略与粗略单回合最坏情况复杂度。
+- 保持代码可读，在必要处添加文档，并限制在 C++17。
+- 避免提交纯随机移动的占位 Bot。
+- 验证长局中没有明显泄漏或无限增长的工作量。
+- 启用新源文件时同步更新 Bot 阵容文档。
 
-### 贡献外部 Bot
-
-1. 实现约定好的通信协议。
-2. 提供可运行的二进制文件或可靠构建脚本。
-3. 在 PR 中写清楚：
-	- 依赖与启动方式
-	- 支持的操作系统与运行环境
-	- 预期性能表现
-
-## 社区对 Bot 的基本要求
-
-- 代码清晰，并具备必要文档
-- 在不同地图和玩家数量下进行测试
-- 不接受纯随机占位型 Bot
-- 单回合开销应保持在引擎可接受范围内
-- 长局运行中应尽量稳定，不出现明显内存泄漏
-
+当前阵容见[内置 Bot]({{< relref "docs/built-in-bots" >}})，所有评测选项见[模拟器指南]({{< relref "docs/simulator-guide" >}})。

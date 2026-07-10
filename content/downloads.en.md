@@ -1,58 +1,38 @@
 ---
 title: "Downloads"
-description: "Use the same release guidance the README gives: GitHub Releases first, stable builds for players, and caution around the in-progress v6 branch."
+description: "Choose a LocalGen release artifact, understand the current v6 development status, or build the Qt app from source."
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 20
 ---
 
-## Want to play tonight? Start here.
+## Published builds
 
-The upstream README sends users straight to the GitHub releases page, and that is still the safest place to pick up LocalGen builds:
+GitHub Releases is the canonical place for LocalGen version notes and downloadable assets:
 
-- [Open LocalGen releases on GitHub](https://github.com/SZXC-WG/LocalGen-new/releases)
+- [Open LocalGen Releases on GitHub](https://github.com/SZXC-WG/LocalGen-new/releases)
+- [Browse the release timeline on this site]({{< relref "releases" >}})
 
-The [releases section]({{< relref "releases" >}}) on this site mirrors the timeline and links back to those download pages, so you can compare versions before committing to one.
+Read the notes attached to a release before downloading. The repository's current source version is `6.0.0-dev`; a source snapshot and a published stable asset are not necessarily equivalent.
 
-## Choose the right branch on purpose
+## Platforms built by current CI
 
-The README also contains an important warning: **the `master` branch is the active v6 rewrite and is not the same thing as a finished end-user release**.
+| Platform | Current packaging targets |
+| --- | --- |
+| Linux | x86_64 and ARM64 AppImage |
+| macOS | Intel and Apple silicon DMG |
+| Windows | x86_64 and ARM64 MSVC ZIP; x86_64 MinGW and LLVM-MinGW ZIP |
 
-- If you want something proven and historically downloadable, start with **GitHub Releases**.
-- If you want to help test the future Qt direction, follow **`master` / `v6.x`** and expect active development.
+Availability varies by release, so use the asset list on that release page as the final authority. If a Linux AppImage reports a missing OpenGL runtime, the upstream README recommends installing `libopengl0` on Debian/Ubuntu systems.
 
-## Stable vs preview builds
+## After extracting or installing
 
-### For most players
+Keep the packaged `maps/` and `fonts/` directories beside the desktop executable. Local Game discovers `.lgmp` files from that `maps/` directory, and the app expects the bundled Quicksand font files at startup.
 
-Start with the **latest stable GitHub release** if you want the smoothest path from download to first match.
+The current v6 app can start an offline local match or open Map Creator. Web Game and replay loading are not ready yet, even though their buttons are visible.
 
-### For testers and contributors
+## Build the development version
 
-Use preview or development releases when you want:
+Building requires Qt 6.7+, CMake 3.19+, Ninja 1.10+, and a C++17 compiler. See [Getting Started]({{< relref "docs/getting-started" >}}) for the exact configure, build, run, and packaging commands.
 
-- the newest gameplay or bot features
-- newer map or replay behavior
-- early access to UI, tooling, and platform changes
-
-## Version lines explained
-
-- **v6 / `master`** — the active Qt rewrite and the main direction of the project
-- **v5.x** — the maintenance line behind many historical and older stable downloads
-
-## Platform notes
-
-- Newer development work is oriented around **Qt-based cross-platform support**.
-- Historical releases were often built in **Windows-first** environments.
-- Some older release notes explicitly recommend **Wine** for running Windows-targeted builds on Linux or macOS.
-
-## Before you launch an older build
-
-Several historical releases mention bundled fonts such as **Quicksand** or **Freestyle Script**. If a release note tells you to install a font from the package, follow that instruction before launching.
-
-## Want more confidence before downloading?
-
-- Read the [release history]({{< relref "releases" >}})
-- Check the [FAQ]({{< relref "faq" >}})
-- Visit the [source repository](https://github.com/SZXC-WG/LocalGen-new)
-
+For current feature answers before downloading, read the [FAQ]({{< relref "faq" >}}).

@@ -1,31 +1,32 @@
 ---
 title: "Website license"
-description: "License notes for the LocalGen website repository, generated visuals, and third-party references."
+description: "What is and is not currently declared about licensing for this website, upstream LocalGen, fonts, data, and trademarks."
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 90
 ---
 
-## Website licensing snapshot
+## Website repository status
 
-The `SZXC-WG/szxc-wg.github.io` repository is the source for this website.
+The `SZXC-WG/szxc-wg.github.io` repository is the source for this website. At the time this page was checked, it contained **no repository-wide `LICENSE` file or other declaration that licenses all site code and generated visuals**.
 
-| Area | Status |
+That absence does not place the work under GPL automatically. Unless a particular file carries its own notice, do not assume permission to copy, modify, or redistribute the website's layouts, styles, scripts, prose, or generated artwork. Ask the repository owners or wait for an explicit site license.
+
+## Separate materials, separate terms
+
+| Material | Licensing/status |
 | --- | --- |
-| Layouts, styles, JavaScript, and generated SVG visuals | GPL-3.0 unless otherwise stated |
-| Synced project metadata and release data | derived from the upstream LocalGen project materials |
-| Third-party names and trademarks such as `generals.io` | remain the property of their respective owners |
+| Upstream `SZXC-WG/LocalGen-new` source | GPL-3.0-or-later, as stated by its source notices and About dialog |
+| Bundled Quicksand fonts | SIL Open Font License 1.1 |
+| Synced GitHub metadata | factual data sourced from GitHub/upstream; source attribution still applies |
+| `generals.io` name, logo, and related assets | property of their respective owners; descriptive reference is not endorsement |
+| This website's own code and generated visuals | no repository-wide license currently declared |
 
-## What this means in practice
+## Before reusing material
 
-- unless a file states otherwise, the website code and generated visuals follow **GPL-3.0**
-- upstream LocalGen art used by this site remains attributable to the LocalGen project
-- references to `generals.io` are descriptive only and do **not** imply affiliation or endorsement
+1. Identify whether the item comes from this website, upstream LocalGen, a font package, GitHub data, or a third party.
+2. Read the notice attached to that exact item and its source repository.
+3. Preserve attribution and trademark boundaries.
+4. If no permission is stated for website-owned material, request it rather than inferring GPL coverage from the upstream game.
 
-```text
-Repository: SZXC-WG/szxc-wg.github.io
-Source project: SZXC-WG/LocalGen-new
-Website license: GPL-3.0
-```
-
-For project-level licensing details, also compare the [source repository](https://github.com/SZXC-WG/LocalGen-new) and the main [about page]({{< relref "about" >}}).
+For the game's license and source, visit [LocalGen-new](https://github.com/SZXC-WG/LocalGen-new) and the [About page]({{< relref "about" >}}). See the [disclaimer]({{< relref "disclaimer" >}}) for project and trademark boundaries.

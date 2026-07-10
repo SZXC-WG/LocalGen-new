@@ -1,14 +1,13 @@
 ---
 title: "Releases"
-description: "A curated timeline of LocalGen releases, from the earliest new-version builds to the latest developer updates."
+description: "A navigable LocalGen release timeline with direct links to the canonical GitHub release pages and assets."
 date: 2026-04-06T17:54:17+08:00
 draft: false
 weight: 30
 ---
 
-This section mirrors the public LocalGen release history and links every entry back to GitHub, where the canonical downloadable assets live.
+This timeline summarizes public LocalGen releases and links each entry back to GitHub. Use the linked GitHub page as the authority for tag names, dates, release notes, checksums when supplied, and downloadable assets.
 
-Use it when you want to choose a safe build with confidence, trace how the project evolved, or spot preview branches worth testing before they become the next stable milestone.
+The active source branch currently reports `6.0.0-dev`; that development identifier should not be treated as a published release by itself. Check whether an entry is marked stable or prerelease and verify that it offers an artifact for your platform.
 
-Locally, this site uses seeded public data. In GitHub Actions, the sync workflow refreshes the data with authenticated requests so the release timeline stays current.
-
+Release and repository metadata shown here is a synchronized snapshot and can lag behind GitHub between refreshes. For installation context, see [Downloads]({{< relref "downloads" >}}).

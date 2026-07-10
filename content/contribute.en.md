@@ -1,60 +1,54 @@
 ---
 title: "Contribute"
-description: "Contribute the way the project docs expect: target the right branch, attach evidence for bots, and use disciplined commit messages."
+description: "Build the active LocalGen v6 branch, contribute focused changes, and benchmark built-in bots with the current tools."
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 80
 ---
 
-## How to contribute
+## Where new work belongs
 
-If you can improve gameplay, bots, documentation, testing, or tooling, LocalGen has room for your contribution. The project openly welcomes help, especially through GitHub issues and pull requests.
-
-The README makes one target explicit: if you are contributing new work for the active rewrite, submit it to **`master` / `v6.x`**.
+The active development branch is **`master`**, the Qt-based v6 line. Versions 1–4 are no longer maintained; v5 accepts only security and critical bug fixes. The upstream contribution guide is marked as an early draft, so verify procedural details against current code and `CMakeLists.txt`.
 
 ## Main contribution paths
 
-- **Gameplay and engine work** on the active `master` / `v6.x` line
-- **Built-in bot contributions** through `src/bots/`
-- **External bot experiments** through the evolving network-based bot model
-- **Documentation improvements** across README and project guides
-- **Bug reports and feature requests** through the issue tracker
+- desktop UI, accessibility, and Map Creator improvements
+- core board/game logic and performance
+- built-in C++ bots under `src/bots/`
+- simulator statistics, diagnostics, and evaluation workflows
+- maps, tests, documentation, translations, CI, and packaging
+- focused bug reports and feature proposals through GitHub Issues
 
-## Recommended starting points
+External bot processes and Web Game networking are not implemented in current v6, so they should not be documented as available contribution APIs.
 
-- [Bot contribution guide]({{< relref "docs/bot-contributions" >}})
-- [Built-in bots guide]({{< relref "docs/built-in-bots" >}})
-- [Commit regulations]({{< relref "docs/commit-regulations" >}})
-- [Code of conduct]({{< relref "docs/code-of-conduct" >}})
+## Build before submitting
 
-## Commit language the project expects
+You need Qt 6.7+, CMake 3.19+, Ninja 1.10+, and a C++17 compiler:
 
-The commit regulations document recommends small, reviewable, atomic commits and a conventional subject line such as:
-
-- `feat(...)` for new features
-- `upd(...)` for updates to existing behavior
-- `fix(...)` for bug fixes
-- `docs(...)`, `style(...)`, `refactor(...)`, `chore(...)`, `test(...)`, or `ci(...)` when those better describe the change
-
-Subjects should stay short, imperative, and descriptive.
-
-```text
-feat(bot): add frontier pressure heuristic
-fix(simulator): correct replay summary formatting
-docs(website): clarify bilingual download guidance
+```bash
+cmake -B build -S . -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=/path/to/qt.toolchain.cmake
+cmake --build build --config Debug
+cmake --build build --config Release
 ```
 
-## What maintainers will look for
+Use Debug for diagnosis and Release for performance measurements. Test the desktop target and, when relevant, `LocalGen-bot-simulator`.
 
-- changes that stay focused and reviewable
-- a clear explanation of what changed and why
-- adherence to the documented commit-message conventions
-- replays, tests, or benchmark notes when contributing bots or major gameplay work
-- for external bots, dependency and runtime notes
+## A strong pull request
 
-## Ready to join in?
+- keeps one clear purpose and explains the user-visible or architectural effect
+- follows the project's C++17 and naming conventions
+- includes focused tests or manual verification notes
+- gives simulator commands and results for bot changes
+- discusses time and memory behavior when performance is relevant
+- updates documentation when behavior, controls, formats, or prerequisites change
 
-- [Issues](https://github.com/SZXC-WG/LocalGen-new/issues)
-- [Pull requests](https://github.com/SZXC-WG/LocalGen-new/pulls)
-- [Discussions](https://github.com/SZXC-WG/LocalGen-new/discussions)
+For a bot, implement `init(...)` and `requestMove(...)`, register it with `BotRegistrar`, and add its file to `LOCALGEN_BOT_SOURCES`.
 
+## Continue
+
+- [Getting Started]({{< relref "docs/getting-started" >}})
+- [Bot contribution workflow]({{< relref "docs/bot-contributions" >}})
+- [Built-in bot API and roster]({{< relref "docs/built-in-bots" >}})
+- [Commit regulations]({{< relref "docs/commit-regulations" >}})
+- [Code of Conduct]({{< relref "docs/code-of-conduct" >}})
+- [Issues](https://github.com/SZXC-WG/LocalGen-new/issues) and [Pull Requests](https://github.com/SZXC-WG/LocalGen-new/pulls)

@@ -1,85 +1,48 @@
 ---
 title: "Bots"
-description: "Read the bot model the same way the project docs describe it: built-in versus external, clear submission rules, and performance expectations."
+description: "Meet the C++ bots compiled into LocalGen v6 and learn the source-backed contribution path."
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 60
 ---
 
-## Bot ecosystem overview
+## How bots work today
 
-Bots are where LocalGen becomes more than an offline strategy game. They power quick solo matches, make LAN sessions more interesting, and turn the project into a genuine playground for AI experimentation. Better yet, the project docs explicitly invite new bot contributions.
+Current v6 supports **built-in C++ bots only**. Each bot is compiled into the desktop app and simulator, then created by name through `BotFactory`. There is no external-bot protocol, plug-in loader, model download, or inference backend in the current source.
 
-The upstream documentation distinguishes two major categories:
+## Current source roster
 
-1. **Built-in bots**
-   - stored in `src/bots/`
-   - compiled into the LocalGen executable
-   - written in C++ for deep integration and speed
+The complexity values are rough per-turn worst-case estimates from the upstream bot README. Here, $n$ is the number of map tiles and $k$ is the number of candidate source stacks considered by a multi-source planner.
 
-2. **External bots**
-   - separate executables written in any language
-   - connected through a network-facing protocol
-   - intended to broaden participation beyond C++ contributors
+| Bot / registry name | Enabled | Approx. cost | Strategy summary |
+| --- | --- | --- | --- |
+| DummyBot | No | $O(n)$ | Example heuristic greedy |
+| SmartRandomBot | Yes | $O(n)$ | Largest-stack greedy |
+| KtqBot | Yes | $O(n)$ | Single-focus local greedy |
+| XrzBot | No | $O(n)$ | Focused random greedy |
+| ZlyBot | Yes | $O(n)$ | Single-focus BFS heuristic |
+| ZlyBot v2 | Yes | $O(n \log n)$ | Memory-aware weighted search |
+| ZlyBot v2.1 | Yes | $O(n \log n)$ | Dual-focus defensive search |
+| SzlyBot | Yes | $O(n)$ | Terrain-weighted BFS heuristic |
+| GcBot | Yes | $O(n)$ | Adaptive heuristic BFS |
+| XiaruizeBot | Yes | $O(kn^2)$ | Multi-source strategic search |
+| KutuBot | Yes | $O(n \log n)$ | Unified strategic objective planner |
+| LyBot | No | $O(n^2)$ | Multiplayer objective planner |
+| `oimbot` | Yes | $O(n^2)$ | Memory-aware threat/objective planner |
 
-## Current built-in bot roster
+“Enabled” means the source file appears in `LOCALGEN_BOT_SOURCES` and is compiled into the current executables. Exact names matter on the simulator command line; `oimbot` is lowercase.
 
-| Bot | Enabled | Complexity | Approx. turn cost | Summary |
-| --- | --- | --- | --- | --- |
-| DummyBot | No | Low | $O(n)$ | Example heuristic greedy |
-| SmartRandomBot | Yes | Low | $O(n)$ | Largest-stack greedy baseline |
-| XrzBot | No | Low | $O(n)$ | Focused random greedy |
-| ZlyBot | Yes | Medium | $O(n)$ | Single-focus BFS heuristic |
-| ZlyBot v2 | Yes | Medium | $O(n \log n)$ | Memory-aware weighted search |
-| ZlyBot v2.1 | Yes | Medium | $O(n \log n)$ | Dual-focus defensive search |
-| SzlyBot | Yes | Medium | $O(n)$ | Terrain-weighted BFS heuristic |
-| GcBot | Yes | Medium | $O(n)$ | Adaptive heuristic BFS |
-| XiaruizeBot | Yes | High | $O(kn^2)$ | Multi-source strategic search |
-| KutuBot | Yes | High | $O(n \log n)$ | Unified strategic objective planner |
-| LyBot | No | High | $O(n^2)$ | Multiplayer objective planner |
-| oimBot | Yes | High | $O(n^3)$ | Stance-based strategic planner |
+## Minimal implementation contract
 
-## Reading the complexity column
+A new built-in bot should:
 
-Let $n$ denote the number of relevant tiles a bot inspects during a turn, and let $k$ denote the number of frontier candidates or strategic branches it keeps alive.
+1. use C++17 and live in one `src/bots/*.cpp` file;
+2. include `src/core/bot.h` and derive from `BasicBot`;
+3. implement `init(...)` and `requestMove(...)`;
+4. register a unique runtime name with `BotRegistrar<YourBot>`;
+5. add the file to `LOCALGEN_BOT_SOURCES` in `CMakeLists.txt`;
+6. include tests or simulator evidence and concise algorithm/performance notes in the pull request.
 
-$$
-T_{\text{match}} \approx \sum_{t=1}^{s} T_{\text{bot}}(n_t)
-$$
+Follow the pattern used by a currently compiled bot: the current code uses `BotRegistrar`, not a `REGISTER_BOT` macro.
 
-That shorthand is why a jump from $O(n)$ to $O(n \log n)$ can become visible in long simulator runs: the per-turn difference compounds over hundreds of steps, especially when you are benchmarking many games instead of playing just one.
-
-```text
-src/bots/MyBot.cpp
-├─ include src/core/bot.h
-├─ derive from BasicBot
-├─ implement init(...)
-├─ implement requestMove(...)
-├─ register the bot via the documented macro
-└─ add the file to PROJECT_SOURCES
-```
-
-## Built-in bot submission checklist
-
-The upstream built-in bot README expects every bot in `src/bots/` to satisfy all of the following:
-
-1. The implementation is written in **C++17-compatible code**.
-2. The full bot lives in a **single `*.cpp` source file**.
-3. That file includes `src/core/bot.h`.
-4. The class inherits from `BasicBot` and overrides `compute`.
-5. The bot is registered through the `REGISTER_BOT` macro.
-6. The source file is added to `PROJECT_SOURCES` in the top-level `CMakeLists.txt`.
-
-## What a strong bot contribution includes
-
-- tests, replays, or benchmark evidence
-- clear notes about performance and memory behavior
-- strategy deeper than a placeholder random walker
-- for external bots, setup instructions plus supported runtime / OS details
-
-## Ready to build something smarter?
-
-- Read the mirrored [Bot Contributions]({{< relref "docs/bot-contributions" >}}) guide
-- Check the [Built-in Bots]({{< relref "docs/built-in-bots" >}}) document for exact submission requirements
-- Explore the [simulator page]({{< relref "simulator" >}}) if you want to benchmark bots head-to-head
-
+Read the [detailed built-in bot reference]({{< relref "docs/built-in-bots" >}}), the [contribution workflow]({{< relref "docs/bot-contributions" >}}), or the [simulator guide]({{< relref "docs/simulator-guide" >}}).

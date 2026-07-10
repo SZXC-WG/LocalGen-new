@@ -1,35 +1,33 @@
 {{ define "main" }}
-  <section class="page-hero">
+  <section class="page-hero docs-index-hero">
     <div class="container narrow">
+      <div class="label-row">
+        <span class="label label-accent">{{ i18n "label_bilingual" }}</span>
+        <span class="label">{{ printf (i18n "guides_count") (len .RegularPages) }}</span>
+      </div>
       <p class="eyebrow">{{ i18n "project_docs" }}</p>
       <h1>{{ .Title }}</h1>
       {{ with .Description }}<p class="lead">{{ . }}</p>{{ end }}
-    </div>
-  </section>
-  <section class="page-section">
-    <div class="container prose">
-      {{ .Content }}
+      {{ with .Content }}<div class="docs-index-intro prose">{{ . }}</div>{{ end }}
     </div>
   </section>
   <section class="page-section section-muted">
     <div class="container">
       {{ if .RegularPages }}
-        <div class="card-grid">
-          {{ range .RegularPages.ByWeight }}
-            <article class="card">
-              <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
-              {{ with .Description }}<p>{{ . }}</p>{{ end }}
-            </article>
+        <div class="docs-card-grid">
+          {{ range $index, $page := .RegularPages.ByWeight }}
+            <a class="docs-card" href="{{ .RelPermalink }}">
+              <span class="docs-card-index">{{ printf "%02d" (add $index 1) }}</span>
+              <div>
+                <h2>{{ .Title }}</h2>
+                {{ with .Description }}<p>{{ . }}</p>{{ end }}
+              </div>
+              <span class="docs-card-arrow" aria-hidden="true">→</span>
+            </a>
           {{ end }}
         </div>
       {{ else }}
-        <article class="panel prose-panel docs-fallback-card">
-          <p>{{ i18n "docs_localized_fallback" }}</p>
-          <div class="hero-actions">
-            <a class="button button-secondary" href="{{ "/docs/" | relURL }}">{{ i18n "docs_fallback_english" }}</a>
-            <a class="button button-secondary" href="{{ "/zh/docs/" | relURL }}">{{ i18n "docs_fallback_chinese" }}</a>
-          </div>
-        </article>
+        <p>{{ i18n "docs_empty" }}</p>
       {{ end }}
     </div>
   </section>

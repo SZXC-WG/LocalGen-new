@@ -1,6 +1,6 @@
 # LocalGen project website
 
-This repository directly hosts and publishes the bilingual **Hugo** website for the **Local Generals.io (LocalGen)** project.
+This repository hosts the bilingual **Hugo** website and source-backed documentation for **Local Generals.io (LocalGen)**.
 
 Repository:
 
@@ -12,11 +12,11 @@ Published site:
 
 ## What the site includes
 
-- English and Chinese content through Hugo multilingual mode
-- project overview and branch strategy
-- download guidance and mirrored release history
-- contributor roster
-- mirrored project documentation
+- English and Chinese content through Hugo bilingual mode
+- an implementation-status overview for the current `6.0.0-dev` source
+- download, source-build, first-game, controls, and Map Creator guides
+- the current built-in Bot roster and complete simulator reference
+- a compact release archive and contributor roster
 - GitHub Pages deployment workflow
 
 ## Local development

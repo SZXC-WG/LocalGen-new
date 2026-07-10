@@ -16,15 +16,15 @@ OUTPUT_DIR = STATIC_DIR / "img" / "generated"
 
 # Shared with assets/css/main.css. The generated illustrations are intentionally
 # dark so they remain legible in both site themes.
-BG = "#101412"
-BG_SOFT = "#151b18"
-CARD_FILL = "#181f1b"
-CARD_RAISED = "#1d2521"
-CARD_BORDER = "#344039"
-GRID_LINE = "#26312b"
-TEXT_MAIN = "#f0f4ef"
-TEXT_MUTED = "#9fa9a1"
-ACCENT = "#68d391"
+BG = "#101318"
+BG_SOFT = "#14181e"
+CARD_FILL = "#181d24"
+CARD_RAISED = "#1e242c"
+CARD_BORDER = "#364149"
+GRID_LINE = "#293239"
+TEXT_MAIN = "#f1f5f6"
+TEXT_MUTED = "#a3adb2"
+ACCENT = "#38c8b5"
 BLUE = "#75aadb"
 VIOLET = "#a58bd4"
 SUCCESS = "#68d391"
@@ -331,7 +331,7 @@ def generate_bot_spectrum(project: dict[str, Any], items: list[dict[str, Any]]) 
         [
             stat_card(36, 28, "built-in", len(items), ACCENT),
             stat_card(214, 28, "enabled", enabled_count, SUCCESS),
-            stat_card(392, 28, "external-ready", project.get("version_line", "v6"), BLUE, width=190),
+            stat_card(392, 28, "compiled-in", project.get("bot_count", enabled_count), BLUE, width=190),
         ]
     )
     content = f'''
@@ -363,10 +363,10 @@ def generate_project_pillars(project: dict[str, Any]) -> Path:
     width, height = 820, 472
     card_y, card_width, card_height, gap = 180, 178, 198, 18
     pillars = [
-        ("Offline play", "Play generals.io entirely offline with ready-to-use built-in bots.", ACCENT, project.get("version_line", "v6")),
-        ("Same-LAN battles", "Set up nearby matches without depending on a hosted backend.", BLUE, f"{project['release_count']} releases"),
-        ("Bot laboratory", "Compare heuristics, ship built-in bots, or prototype external ones.", WARNING, f"{project['bot_count']} bots"),
-        ("Qt6 transition", "Follow the active rewrite for portability, maintainability, and tooling.", VIOLET, " / ".join(project.get("built_with", []))),
+        ("Local matches", "Play offline against the built-in bot roster on random or bundled maps.", ACCENT, project.get("version_line", "v6")),
+        ("Map creator", "Build and edit v6 maps with metadata in the desktop application.", BLUE, f"{project.get('map_count', 0)} maps"),
+        ("Bot laboratory", "Compare C++ bots with repeatable, parallel simulator runs.", WARNING, f"{project['bot_count']} compiled bots"),
+        ("Qt6 foundation", "Build the active cross-platform line with Qt, CMake, and Ninja.", VIOLET, " / ".join(project.get("built_with", []))),
     ]
 
     cards = []
@@ -391,7 +391,7 @@ def generate_project_pillars(project: dict[str, Any]) -> Path:
     <text x="32" y="96" font-size="27" font-weight="750" fill="{TEXT_MAIN}">Why LocalGen feels different</text>
     {text_block(32, 124, "A local-first strategy game, an open bot laboratory, and a cleaner Qt-based future.", max_chars=88, font_size=12, fill=TEXT_MUTED, line_height=18, max_lines=2)}
     {''.join(cards)}
-    <text x="32" y="438" font-size="11" fill="{TEXT_MUTED}">GPL-3.0 · {svg_text(project.get('organization', 'SZXC-WG'))} · generated from project data</text>
+    <text x="32" y="438" font-size="11" fill="{TEXT_MUTED}">{svg_text(project.get('license', 'GPL-3.0-or-later'))} · {svg_text(project.get('organization', 'SZXC-WG'))} · generated from project data</text>
     '''
     path = OUTPUT_DIR / "project-pillars.svg"
     write_svg(
@@ -400,7 +400,7 @@ def generate_project_pillars(project: dict[str, Any]) -> Path:
         height,
         content,
         title="LocalGen project pillars",
-        description="Four LocalGen pillars: offline play, LAN matches, bot research, and the Qt6 transition.",
+        description="Four LocalGen pillars: offline matches, map creation, bot research, and the Qt6 foundation.",
     )
     return path
 
@@ -458,7 +458,7 @@ def generate_hero_board(project: dict[str, Any]) -> Path:
     <text x="38" y="60" font-size="12" fill="{ACCENT}" font-weight="750" letter-spacing="1.8">OFFLINE-FIRST</text>
     <text x="38" y="96" font-size="30" fill="{TEXT_MAIN}" font-weight="750">Play, study, and extend</text>
     <text x="38" y="128" font-size="30" fill="{TEXT_MAIN}" font-weight="750">Local Generals.io.</text>
-    {text_block(38, 158, "Ready-to-use bots, same-LAN matches, replay tools, and the active Qt6 rewrite.", max_chars=74, font_size=12, fill=TEXT_MUTED, max_lines=2)}
+    {text_block(38, 158, "Local matches, bundled maps, a map creator, and a parallel bot simulator on Qt 6.", max_chars=74, font_size=12, fill=TEXT_MUTED, max_lines=2)}
     {''.join(tiles)}
     {''.join(route_paths)}
     <circle cx="250" cy="298" r="38" fill="{CARD_FILL}" stroke="{ACCENT}" stroke-width="2" />
@@ -539,7 +539,8 @@ def main() -> None:
     # Data files can be refreshed independently; derive counts from the actual
     # collections so illustrations never show stale totals.
     project["release_count"] = len(releases)
-    project["bot_count"] = len(bots)
+    project["documented_bot_count"] = len(bots)
+    project["bot_count"] = sum(bool(bot.get("enabled")) for bot in bots)
 
     generated = [
         generate_release_journey(releases),

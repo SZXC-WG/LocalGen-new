@@ -1,12 +1,13 @@
 ---
 title: "贡献者"
-description: "认识那些在玩法、Bot、版本发布和文档方面共同构建 LocalGen 的社区成员。"
+description: "参与 LocalGen 引擎、桌面界面、地图、Bot、模拟器、文档与发布工作的 GitHub 贡献者。"
 date: 2026-04-06T17:54:17+08:00
 draft: false
 weight: 40
 ---
 
-LocalGen 的发展非常依赖社区协作。本栏目展示了那些通过 GitHub 在玩法逻辑、Bot 生态、版本发布、实验流程和辅助文档等方面持续推动项目向前发展的贡献者。
+LocalGen 由 SZXC-WG 社区公开协作开发。本页展示 GitHub 贡献者的同步快照，他们的提交覆盖游戏核心、Qt 桌面界面、地图工具、内置 Bot、模拟器、文档与打包。
 
-如果这个项目让你产生了“想下载试试”“想认真测试”或“想亲自贡献”的冲动，那么这些人正是让这种吸引力成为现实的关键力量。
+GitHub 贡献者数据以提交为基础，因此可能遗漏未记录进 Git 元数据的非代码工作、共同作者、Issue 分流、测试、翻译、地图创作与社区支持。请把这份列表视为贡献的一种视角，而不是完整排名。
 
+最新权威视图请查看[上游贡献者图表](https://github.com/SZXC-WG/LocalGen-new/graphs/contributors)，想参与则请阅读[贡献指南]({{< relref "contribute" >}})。

@@ -1,69 +1,57 @@
 ---
 title: "Bot Contributions"
-description: "How LocalGen v6 welcomes built-in and external bot development contributions."
+description: "The current LocalGen v6 workflow for adding, testing, and proposing a built-in C++ bot."
 date: 2026-04-06T17:55:07+08:00
 draft: false
 weight: 20
 ---
 
-> Source document: [`docs/bot-contributions.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/bot-contributions.md)
+> Source references: [`CONTRIBUTING.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/CONTRIBUTING.md), [`src/bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md), and the current bot registry/CMake source.
 
-## Introduction
+## Supported integration today
 
-Bots have always been central to LocalGen. Earlier project versions made bot development much harder than it needed to be:
+LocalGen v6 currently accepts **bots compiled directly into the application**. External executables, arbitrary-language clients, and a network-facing bot protocol are not implemented in the current repository.
 
-- bots could only be written in C++
-- they had to be compiled into the main binary
-- the API surface was effectively hard-coded into the source tree
+A built-in bot is available to both Local Game and `LocalGen-bot-simulator` because both targets compile the same `LOCALGEN_BOT_SOURCES` list.
 
-Version 6 is meant to loosen those constraints and welcome a broader contributor base.
+## Implementation checklist
 
-## Bot types in v6
+1. Create one uniquely named `src/bots/MyBot.cpp` file using C++17.
+2. Include `src/core/bot.h`.
+3. Derive your class from `BasicBot`.
+4. Implement both required methods:
+   - `init(index_t playerId, const GameConstantsPack& constants)`
+   - `requestMove(const BoardView& boardView, const std::vector<RankItem>& rank)`
+5. Register a unique runtime name with the current pattern:
 
-### Built-in bots
+```cpp
+static BotRegistrar<MyBot> myBotRegistrar("MyBot");
+```
 
-- source lives under `src/bots/`
-- compiled together with the LocalGen executable
-- written in C++
-- directly available in Local Game and Web Game modes
+6. Add `src/bots/MyBot.cpp` to `LOCALGEN_BOT_SOURCES` in the top-level `CMakeLists.txt`.
+7. Build both Debug and Release configurations.
 
-### External bots
+The upstream bot README mentions a `REGISTER_BOT` macro, but the current implementation exposes `BotRegistrar`; follow compiled source examples.
 
-- stand-alone executables
-- may be written in any language
-- communicate with LocalGen through a network protocol
-- can be supervised by the game process once integrated into the external-bot list
+## Evaluate before proposing
 
-## How you can contribute
+Test on multiple map sizes, authored maps, opponent combinations, and player counts. A useful report includes:
 
-The project welcomes:
+- exact simulator command lines;
+- number of games and half-turn limit;
+- random versus named `.lgmp` maps;
+- win rate, TrueSkill, average rank, and kills;
+- `--latency` results for performance-sensitive logic;
+- known failure modes and memory/per-turn complexity.
 
-- brand-new bots
-- improvements to existing bots
-- bug fixes and performance optimizations
+Simulator runs are not seed-reproducible today, so use enough games and avoid presenting a single batch as deterministic proof.
 
-### Contributing a built-in bot
+## Pull request expectations
 
-1. Read [`src/bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md).
-2. Follow the project’s C++ style rules.
-3. Submit a pull request with:
-	- tests and/or replay evidence
-	- a short performance report
+- Explain the strategy and rough worst-case per-turn complexity.
+- Keep code readable, documented where needed, and within C++17.
+- Avoid a pure random-move placeholder.
+- Verify long matches do not show obvious leaks or unbounded work.
+- Update the bot roster documentation when enabling the new source.
 
-### Contributing an external bot
-
-1. Implement the documented communication protocol.
-2. Provide a working binary or reliable build script.
-3. State clearly in your PR:
-	- dependencies and launch instructions
-	- supported operating systems and runtime environments
-	- expected performance characteristics
-
-## Community standards for bots
-
-- keep the code clean and documented
-- test on different maps and player counts
-- avoid placeholder random-move bots
-- stay within the game’s practical per-turn performance limits
-- remain stable across long matches without obvious memory leaks
-
+See [Built-in Bots]({{< relref "docs/built-in-bots" >}}) for the current roster and [Simulator Guide]({{< relref "docs/simulator-guide" >}}) for all evaluation options.

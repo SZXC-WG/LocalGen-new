@@ -1,16 +1,11 @@
 {
   "synced_from": "LocalGen-new/src/bots/README.md",
-  "synced_note": "Curated from the upstream built-in bot README and contribution guides.",
+  "synced_note": "Curated from the upstream built-in bot README, CMake source list, and current bot registrations.",
   "types": [
     {
       "key": "built-in",
       "title": "Built-in bots",
       "summary": "Compiled into the LocalGen executable from src/bots/ for maximum integration and speed."
-    },
-    {
-      "key": "external",
-      "title": "External bots",
-      "summary": "Stand-alone executables that talk to LocalGen through the evolving v6 network protocol."
     }
   ],
   "items": [
@@ -31,6 +26,15 @@
       "complexity_score": 1,
       "time_complexity": "O(n)",
       "summary": "Largest-stack greedy baseline"
+    },
+    {
+      "name": "KtqBot",
+      "author": "ktq1124298818 / GoodCoder666",
+      "enabled": true,
+      "complexity": "Low",
+      "complexity_score": 1,
+      "time_complexity": "O(n)",
+      "summary": "Single-focus local greedy"
     },
     {
       "name": "XrzBot",
@@ -114,13 +118,13 @@
       "summary": "Multiplayer objective planner"
     },
     {
-      "name": "oimBot",
+      "name": "oimbot",
       "author": "oimasterkafuu",
       "enabled": true,
       "complexity": "High",
       "complexity_score": 3,
-      "time_complexity": "O(n^3)",
-      "summary": "Stance-based strategic planner"
+      "time_complexity": "O(n^2)",
+      "summary": "Memory-aware threat and objective planner"
     }
   ]
 }

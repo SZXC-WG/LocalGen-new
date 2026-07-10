@@ -3,32 +3,32 @@
   <desc id="desc">LocalGen strategy grid and star mark.</desc>
   <defs>
 <linearGradient id="background" x1="0" x2="1" y1="0" y2="1">
-  <stop offset="0%" stop-color="#151b18" />
-  <stop offset="100%" stop-color="#101412" />
+  <stop offset="0%" stop-color="#14181e" />
+  <stop offset="100%" stop-color="#101318" />
 </linearGradient>
 <linearGradient id="panel" x1="0" x2="0" y1="0" y2="1">
-  <stop offset="0%" stop-color="#1d2521" />
-  <stop offset="100%" stop-color="#181f1b" />
+  <stop offset="0%" stop-color="#1e242c" />
+  <stop offset="100%" stop-color="#181d24" />
 </linearGradient>
 <linearGradient id="accentLine" x1="0" x2="1" y1="0" y2="0">
-  <stop offset="0%" stop-color="#68d391" />
+  <stop offset="0%" stop-color="#38c8b5" />
   <stop offset="100%" stop-color="#f2bd64" />
 </linearGradient>
 <linearGradient id="accentArea" x1="0" x2="0" y1="0" y2="1">
-  <stop offset="0%" stop-color="#68d391" stop-opacity="0.26" />
-  <stop offset="100%" stop-color="#68d391" stop-opacity="0.02" />
+  <stop offset="0%" stop-color="#38c8b5" stop-opacity="0.26" />
+  <stop offset="100%" stop-color="#38c8b5" stop-opacity="0.02" />
 </linearGradient>
 <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
-  <path d="M 44 0 L 0 0 0 44" fill="none" stroke="#26312b" stroke-width="1" />
+  <path d="M 44 0 L 0 0 0 44" fill="none" stroke="#293239" stroke-width="1" />
 </pattern>
 <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
   <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.24" />
 </filter>
   </defs>
   <g font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
-<rect width="64" height="64" rx="18" fill="#68d391" />
-<rect x="7" y="7" width="50" height="50" rx="14" fill="#101412" />
-<path d="M 16 21 H 48 M 16 32 H 48 M 16 43 H 48 M 21 16 V 48 M 32 16 V 48 M 43 16 V 48" stroke="#344039" />
-<path d="M32 15 L37 25 L48 27 L40 35 L42 47 L32 41 L22 47 L24 35 L16 27 L27 25 Z" fill="#f2bd64" stroke="#101412" stroke-width="1.5" />
+<rect width="64" height="64" rx="18" fill="#38c8b5" />
+<rect x="7" y="7" width="50" height="50" rx="14" fill="#101318" />
+<path d="M 16 21 H 48 M 16 32 H 48 M 16 43 H 48 M 21 16 V 48 M 32 16 V 48 M 43 16 V 48" stroke="#364149" />
+<path d="M32 15 L37 25 L48 27 L40 35 L42 47 L32 41 L22 47 L24 35 L16 27 L27 25 Z" fill="#f2bd64" stroke="#101318" stroke-width="1.5" />
   </g>
 </svg>

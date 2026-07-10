@@ -1,54 +1,49 @@
 [[main]]
-  name = '项目简介'
-  pageRef = '/about'
-  weight = 10
-
-[[main]]
   name = '下载'
   pageRef = '/downloads'
-  weight = 20
-
-[[main]]
-  name = '版本发布'
-  pageRef = '/releases'
-  weight = 30
-
-[[main]]
-  name = '贡献者'
-  pageRef = '/contributors'
-  weight = 40
+  weight = 10
 
 [[main]]
   name = '文档'
   pageRef = '/docs'
-  weight = 50
+  weight = 20
 
 [[main]]
-  name = '机器人'
+  name = 'Bot'
   pageRef = '/bots'
-  weight = 60
+  weight = 30
 
 [[main]]
   name = '模拟器'
   pageRef = '/simulator'
-  weight = 70
+  weight = 40
+
+[[main]]
+  name = '项目简介'
+  pageRef = '/about'
+  weight = 50
 
 [[main]]
   name = '参与贡献'
   pageRef = '/contribute'
-  weight = 80
+  weight = 60
+
+[[footer]]
+  name = '版本发布'
+  pageRef = '/releases'
+  weight = 10
+
+[[footer]]
+  name = '贡献者'
+  pageRef = '/contributors'
+  weight = 20
 
 [[footer]]
   name = '常见问题'
   pageRef = '/faq'
-  weight = 10
+  weight = 30
 
 [[footer]]
   name = '免责声明'
   pageRef = '/disclaimer'
-  weight = 20
-
-[[footer]]
-  name = 'GitHub'
-  url = 'https://github.com/SZXC-WG/LocalGen-new'
-  weight = 30
+  weight = 40

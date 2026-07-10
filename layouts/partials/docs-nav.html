@@ -1,0 +1,16 @@
+{{ $page := . }}
+<nav class="docs-nav" aria-label="{{ i18n "docs_navigation" }}">
+  <a class="docs-nav-home {{ if .IsSection }}is-active{{ end }}" href="{{ "docs/" | relLangURL }}" {{ if .IsSection }}aria-current="page"{{ end }}>
+    <span>{{ i18n "project_docs" }}</span>
+    <small>{{ len .CurrentSection.RegularPages }}</small>
+  </a>
+  <ol>
+    {{ range .CurrentSection.RegularPages.ByWeight }}
+      <li>
+        <a href="{{ .RelPermalink }}" class="{{ if eq .RelPermalink $page.RelPermalink }}is-active{{ end }}" {{ if eq .RelPermalink $page.RelPermalink }}aria-current="page"{{ end }}>
+          <span>{{ .Title }}</span>
+        </a>
+      </li>
+    {{ end }}
+  </ol>
+</nav>

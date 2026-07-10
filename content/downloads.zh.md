@@ -1,58 +1,38 @@
 ---
 title: "下载"
-description: "按 README 的原始引导来下载：以 GitHub Releases 为准，普通玩家优先稳定版，同时谨慎看待仍在进行中的 v6 主线。"
+description: "选择 LocalGen 发布附件，了解当前 v6 开发状态，或从源码构建 Qt 桌面应用。"
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 20
 ---
 
-## 想今晚就开玩？从这里开始。
+## 已发布构建
 
-上游 README 直接把用户引导到 GitHub Releases，因此这里仍然是获取 LocalGen 构建产物最稳妥、最省心的入口：
+GitHub Releases 是查看 LocalGen 版本说明与下载附件的权威入口：
 
 - [打开 LocalGen GitHub Releases](https://github.com/SZXC-WG/LocalGen-new/releases)
+- [浏览本站整理的版本时间线]({{< relref "releases" >}})
 
-本网站的 [版本发布页面]({{< relref "releases" >}}) 会整理完整时间线，并链接回对应的 GitHub 下载页，方便你在下载前先做好判断。
+下载前请先阅读对应版本的说明。仓库当前源码版本是 `6.0.0-dev`；某次源码快照与正式发布的稳定附件不一定等价。
 
-## 有目的地选择分支
+## 当前 CI 构建的平台
 
-README 里还有一个非常重要的提醒：**`master` 分支对应的是正在推进中的 v6 重构，不等同于已经完成的最终用户发布版**。
+| 平台 | 当前打包目标 |
+| --- | --- |
+| Linux | x86_64 与 ARM64 AppImage |
+| macOS | Intel 与 Apple 芯片 DMG |
+| Windows | x86_64 与 ARM64 MSVC ZIP；x86_64 MinGW 与 LLVM-MinGW ZIP |
 
-- 如果你只是想下载一个更稳妥、更适合直接开局的版本，请优先从 **GitHub Releases** 开始。
-- 如果你想跟进未来的 Qt 方向并参与测试，则需要关注 **`master` / `v6.x`**，并接受它仍在开发中的事实。
+并非每个发布版本都会提供全部目标，因此请以该版本页面实际列出的附件为准。如果 Linux AppImage 提示缺少 OpenGL 运行库，上游 README 建议 Debian/Ubuntu 用户安装 `libopengl0`。
 
-## 稳定版与预览版怎么选？
+## 解压或安装之后
 
-### 对大多数玩家
+请保留桌面可执行文件旁的 `maps/` 与 `fonts/` 目录。本地对局只会从该 `maps/` 目录发现 `.lgmp` 文件，应用启动时也会读取随附的 Quicksand 字体。
 
-如果你想尽快、顺滑地开始第一局，请优先从 **GitHub 上最新稳定版** 开始。
+当前 v6 应用可以开始离线本地对局或打开地图编辑器。即使主菜单上已经出现 Web Game 与回放入口，这两项功能目前仍不可用。
 
-### 对测试者和贡献者
+## 构建开发版本
 
-如果你希望尽早体验新功能，可以使用预览版或开发版，例如：
+从源码构建需要 Qt 6.7+、CMake 3.19+、Ninja 1.10+ 与支持 C++17 的编译器。请参阅[快速开始]({{< relref "docs/getting-started" >}})中的配置、构建、运行与打包命令。
 
-- 最新 Bot 与玩法改动
-- 新的地图、回放或工具行为
-- UI、工具链与平台相关的早期更新
-
-## 版本线说明
-
-- **v6 / `master`** —— 正在进行中的 Qt 重构主线，也是项目未来方向
-- **v5.x** —— 支撑许多历史构建和旧版稳定下载的维护分支
-
-## 平台说明
-
-- 新一代开发工作正在面向 **基于 Qt 的跨平台支持**。
-- 较早期的很多版本主要在 **Windows 环境** 中构建。
-- 某些历史版本在发布说明中明确建议：若要在 Linux 或 macOS 上运行 Windows 版本，可尝试 **Wine**。
-
-## 启动旧版本前请注意
-
-多个历史版本提到需要安装随包附带的字体，例如 **Quicksand** 或 **Freestyle Script**。如果发布说明要求安装字体，请先完成这一步再启动游戏。
-
-## 下载前还想更有把握？
-
-- 查看 [版本历史]({{< relref "releases" >}})
-- 阅读 [常见问题]({{< relref "faq" >}})
-- 访问 [源码仓库](https://github.com/SZXC-WG/LocalGen-new)
-
+下载前如需确认当前功能，请阅读[常见问题]({{< relref "faq" >}})。

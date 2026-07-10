@@ -6,54 +6,55 @@
         <p class="eyebrow">{{ i18n "project_downloads" }}</p>
         <h1>{{ .Title }}</h1>
         {{ with .Description }}<p class="lead">{{ . }}</p>{{ end }}
+        <div class="hero-actions">
+          <a class="button button-primary" href="{{ .Site.Params.releasesUrl }}">{{ i18n "open_github_releases" }}</a>
+          <a class="button button-secondary" href="{{ "downloads/" | relLangURL }}">{{ i18n "download_guide" }}</a>
+        </div>
       </div>
       {{ partial "page-sidecar.html" . }}
     </div>
   </section>
   <section class="page-section">
     <div class="container">
-      <article class="prose prose-panel">
-        {{ .Content }}
-      </article>
+      <article class="prose prose-panel">{{ .Content }}</article>
     </div>
   </section>
   <section class="page-section section-muted">
-    <div class="container stack-lg">
+    <div class="container">
+      <div class="section-heading release-index-heading">
+        <div>
+          <p class="eyebrow">{{ i18n "release_archive" }}</p>
+          <h2>{{ printf (i18n "published_releases_count") (len $releases) }}</h2>
+        </div>
+        <p>{{ i18n "release_archive_summary" }}</p>
+      </div>
       {{ if gt (len $releases) 0 }}
-        {{ range $releases }}
-          <article class="release-card panel detailed">
-            <div class="release-header">
-              <div>
+        <div class="release-index-list">
+          {{ range $releases }}
+            <article class="release-index-card">
+              <div class="release-index-main">
                 <div class="card-meta">
                   <span class="badge {{ if .prerelease }}badge-preview{{ else }}badge-stable{{ end }}">{{ if .prerelease }}{{ i18n "release_prerelease" }}{{ else }}{{ i18n "release_stable" }}{{ end }}</span>
                   {{ if .is_latest }}<span class="badge badge-latest">{{ i18n "release_latest" }}</span>{{ end }}
+                  <span>{{ .tag_name }}</span>
                 </div>
-                <h2>{{ .name }}</h2>
-                <p class="muted">{{ .tag_name }} · {{ i18n "release_published" }} {{ time.Format ":date_full" (time.AsTime .published_at) }}</p>
+                <h3><a href="{{ .html_url }}">{{ .name }}</a></h3>
+                <p>{{ .summary | default .body | markdownify | plainify | truncate 220 }}</p>
               </div>
-              <div class="release-actions">
-                <a class="button button-secondary" href="{{ .html_url }}">{{ i18n "release_notes" }}</a>
-                {{ with .zipball_url }}<a class="button button-secondary" href="{{ . }}">Source ZIP</a>{{ end }}
+              <div class="release-index-meta">
+                <time datetime="{{ .published_at }}">{{ time.Format ":date_medium" (time.AsTime .published_at) }}</time>
+                {{ if gt (len .assets) 0 }}
+                  <div class="release-asset-links">
+                    {{ range first 2 .assets }}<a href="{{ .browser_download_url }}">{{ .name }}</a>{{ end }}
+                  </div>
+                {{ else }}
+                  <span class="muted">{{ i18n "source_only" }}</span>
+                {{ end }}
+                <a class="release-notes-link" href="{{ .html_url }}">{{ i18n "release_notes" }} →</a>
               </div>
-            </div>
-            <div class="prose compact-prose">{{ .body | markdownify }}</div>
-            <div>
-              <h3>{{ i18n "release_assets" }}</h3>
-              {{ if gt (len .assets) 0 }}
-                <ul class="asset-list">
-                  {{ range .assets }}
-                    <li>
-                      <a href="{{ .browser_download_url }}">{{ .name }}</a>
-                      <span>{{ .download_count }} downloads · {{ .size_human }}</span>
-                    </li>
-                  {{ end }}
-                </ul>
-              {{ else }}
-                <p>{{ i18n "asset_empty" }} <a href="{{ .html_url }}">{{ i18n "view_release_page" }}</a>.</p>
-              {{ end }}
-            </div>
-          </article>
-        {{ end }}
+            </article>
+          {{ end }}
+        </div>
       {{ else }}
         <p>{{ i18n "release_empty" }}</p>
       {{ end }}

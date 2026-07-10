@@ -3,8 +3,8 @@
   <head>
     {{ partial "head.html" . }}
   </head>
-  <body id="top">
-    <a class="skip-link" href="#main">Skip to content</a>
+  <body id="top" data-copy-label="{{ i18n "copy_code" }}" data-copied-label="{{ i18n "copied" }}">
+    <a class="skip-link" href="#main">{{ i18n "skip_to_content" }}</a>
     <div class="site-shell">
       {{ partial "header.html" . }}
       <main id="main" class="main-content">

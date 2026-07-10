@@ -1,83 +1,54 @@
 ---
 title: "About"
-description: "Understand what the README promises, how the version lines are split, and which file formats and tools matter in LocalGen."
+description: "What LocalGen v6 currently implements, how its tools fit together, and where the development boundaries are."
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 10
 ---
 
-## Why LocalGen is worth your attention
+## A local strategy game and bot workbench
 
-**Local Generals.io (LocalGen)** is more than a nostalgia project. It is a **local-first strategy sandbox** where players can jump into offline matches immediately, bot authors can test ideas seriously, and contributors can help shape the next generation of the project.
+**Local Generals.io (LocalGen)** recreates generals.io-style territory strategy in a local, open-source application. Its active `master` branch is a C++17 and Qt 6 rewrite with two executables: the `LocalGen-new` desktop app and the `LocalGen-bot-simulator` command-line evaluator.
 
-The upstream README keeps the promise grounded and practical:
+The source currently identifies itself as **`6.0.0-dev`**. That suffix matters: this is an active development line, and visible menu entries do not always represent finished features.
 
-- **Play generals.io-style matches completely offline**
-- **Launch ready-to-run built-in bots** without extra setup
-- **Battle friends over the same LAN** when local multiplayer beats waiting for an online server
+## Capability snapshot
 
-That same README also makes it clear that ideas, bug reports, and pull requests are genuinely welcome.
+| Available now | Not implemented in current v6 source |
+| --- | --- |
+| Offline local FFA against built-in bots | LAN or Web Game networking |
+| Random maps and installed `.lgmp` maps | Replay loading or playback |
+| Map Creator with `.lg`, `.lgmp`, and official JSON import | External bot executables or a bot network protocol |
+| Chat/event log, leaderboard, and optional analysis chart | Sound playback and persisted v6 settings |
+| Parallel bot simulator with aggregate statistics | Seeded/reproducible simulator runs from the CLI |
 
-## Version lines that matter
+Only the first player slot can be human, so the current desktop UI supports one human at most. Every participant is assigned a distinct team, making local games and simulator matches free-for-all.
 
-The README and release guidance make the branch split clear:
+## Technology and platform reach
 
-1. **`master` / `v6.x`**
-   - the active development branch
-   - the home of the **Qt6 rewrite**
-   - where architecture, UI, tooling, and bot interfaces are being modernized
+- **Language:** C++17
+- **UI/runtime:** Qt 6.7+ (`Widgets`, `Svg`, `Network`, and `Charts`)
+- **Build:** CMake 3.19+ with Ninja 1.10+
+- **CI targets:** Linux x86_64/ARM64, macOS Intel/Apple silicon, and Windows x86_64/ARM64
+- **Source license:** GPL-3.0-or-later; bundled Quicksand fonts use SIL OFL-1.1
 
-2. **`v5.x`**
-   - the long-term maintenance line
-   - the home of older playable releases
-   - still important if you need the historical EGE-era workflow or legacy downloads
+## Files in everyday use
 
-> The upstream README explicitly warns that the `master` branch is still in progress. If you want a smoother first experience, start with the releases page rather than assuming the newest branch is a drop-in end-user build.
+- **`.lgmp`** is the current v6 binary map format. It stores title, author, creation time, description, dimensions, and compressed tile data.
+- **`.lg`** is the legacy v5 map format. The current editor can open and save its board data, but it cannot preserve v6 metadata.
+- **Official `.json`** maps can be opened or imported into the editor, then saved as `.lg` or `.lgmp`; JSON export is not implemented.
+- **`.lgr` / `.lgra`** and **`settings.json`** are listed in the upstream associated-files reference, but current v6 has no replay loader or settings persistence implementation.
 
-## Toolchain snapshot
+## Bots are compiled code, not downloadable models
 
-- **Project name:** LocalGen-new
-- **Current development line:** `master` / `v6.x`
-- **Current version target:** `6.0.0`
-- **Primary language:** C++17
-- **Frameworks and tools:** Qt6, CMake, SVG assets, GitHub Actions
-- **License:** GPL-3.0
+Current v6 bots are C++ classes compiled into both executables and registered through `BotFactory`. There are no neural-model files, inference backends, plug-in packages, or external-bot runtime in this source tree.
 
-## File formats worth knowing
+## Explore next
 
-The associated-files guide introduces several formats that show up across gameplay, tooling, and future Qt-era configuration work:
-
-| File | Purpose | Notes |
-| --- | --- | --- |
-| `.lg` | v5 map file | Legacy map format that still expects paired configuration files. |
-| `.lgmp` | v6 map file | The modern map format; designed to stand on its own without a paired ini file. |
-| `.lgr` | Replay file | A standard replay format with roughly the same information density as generals.io replays. |
-| `.lgra` | Advanced replay file | Stores the normal replay plus richer per-turn information such as queued moves. |
-| `settings.lgsts` | v5 settings | Legacy hidden settings file. |
-| `config.lgs6` | v6 config | The Qt-era configuration file, expected to move toward a structured format such as JSON. |
-
-## Why the Qt rewrite matters
-
-Across the README and contribution docs, version 6 is framed as a structural transition toward:
-
-- **Qt-based UI modernization**
-- **cleaner architecture and maintainability**
-- **better platform reach** for Windows, macOS, and Linux workflows
-- **a more open bot ecosystem**, including future-friendly external bot integration
-
-## Capabilities already visible across the project
-
-- random and authored maps
-- replay support
-- map creation workflows
-- multiple generations of built-in bots
-- a standalone bot simulator
-- contribution docs for bots, workflows, and community standards
-
-## Where to go next
-
-- Visit the [downloads page]({{< relref "downloads" >}}) to get into your first match faster
-- Browse [releases]({{< relref "releases" >}}) to compare stable builds and previews
-- Open the [docs section]({{< relref "docs" >}}) when you want the project rules, file formats, and contribution habits in one place
-- Read the [disclaimer]({{< relref "disclaimer" >}}) before redistributing or presenting the project publicly
-
+- [Download a published build]({{< relref "downloads" >}})
+- [Compare published releases]({{< relref "releases" >}})
+- [Build from source]({{< relref "docs/getting-started" >}})
+- [Browse the documentation]({{< relref "docs" >}})
+- [Review file formats]({{< relref "docs/associated-files" >}})
+- [Read the project disclaimer]({{< relref "disclaimer" >}})
+- [Visit the upstream repository](https://github.com/SZXC-WG/LocalGen-new)

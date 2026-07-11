@@ -176,7 +176,19 @@ function initCodeCopy() {
 
   document.querySelectorAll(".prose pre").forEach((block) => {
     const code = block.querySelector("code");
-    if (!code || block.querySelector(".code-copy-button")) {
+    if (!code) {
+      return;
+    }
+
+    let container = block.closest(".highlight");
+    if (!container) {
+      container = document.createElement("div");
+      container.className = "code-block";
+      block.before(container);
+      container.appendChild(block);
+    }
+
+    if (container.querySelector(":scope > .code-copy-button")) {
       return;
     }
 
@@ -196,7 +208,7 @@ function initCodeCopy() {
         button.textContent = copyLabel;
       }
     });
-    block.appendChild(button);
+    container.appendChild(button);
   });
 }
 

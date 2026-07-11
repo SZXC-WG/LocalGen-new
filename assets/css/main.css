@@ -387,9 +387,10 @@ h3 { margin: 0 0 0.55rem; font-size: 1.08rem; line-height: 1.3; }
 .prose th, .prose td { padding: 0.75rem; border: 1px solid var(--border); text-align: left; vertical-align: top; }
 .prose th { background: var(--surface-soft); }
 .prose code { padding: 0.12rem 0.32rem; border-radius: 6px; background: var(--surface-soft); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-.prose pre, .prose .highlight { overflow: auto; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-soft); }
+.prose pre { overflow: auto; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-soft); }
 .prose pre code { padding: 0; background: transparent; }
-.prose .highlight pre { margin: 0; padding: 0; border: 0; }
+.prose .highlight { position: relative; overflow: visible; }
+.prose .highlight pre { margin: 0; }
 .prose blockquote { padding: 0.5rem 1rem; border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: var(--surface-soft); }
 .prose mjx-container { overflow-x: auto; overflow-y: hidden; }
 .prose mjx-container[display="true"] { padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-soft); }
@@ -515,10 +516,16 @@ h3 { margin: 0 0 0.55rem; font-size: 1.08rem; line-height: 1.3; }
 .docs-card-index { color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.7rem; }
 .docs-card-arrow { align-self: center; color: var(--accent); font-size: 1.15rem; }
 
-.prose pre { position: relative; padding-top: 3rem; }
-.prose .highlight pre { position: relative; padding: 3rem 1rem 1rem; }
-.code-copy-button { position: absolute; top: 0.6rem; right: 0.6rem; z-index: 1; padding: 0.3rem 0.55rem; border: 1px solid var(--border); border-radius: 7px; color: var(--muted); background: var(--surface); cursor: pointer; font-size: 0.68rem; font-weight: 750; }
+.prose .code-block { position: relative; margin: 1rem 0; }
+.prose .code-block > pre { margin: 0; }
+.code-copy-button { position: absolute; top: 0.6rem; right: 0.6rem; z-index: 1; padding: 0.3rem 0.55rem; border: 1px solid var(--border); border-radius: 7px; opacity: 0; color: var(--muted); background: var(--surface); box-shadow: 0 2px 8px rgba(0,0,0,0.18); cursor: pointer; font-size: 0.68rem; font-weight: 750; pointer-events: none; transform: translateY(-0.2rem); transition: opacity 160ms ease, transform 160ms ease, color 160ms ease, border-color 160ms ease; }
+.prose :where(.highlight, .code-block):hover > .code-copy-button,
+.prose :where(.highlight, .code-block):focus-within > .code-copy-button { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .code-copy-button:hover { color: var(--text); border-color: var(--border-strong); }
+
+@media (hover: none) {
+  .code-copy-button { opacity: 1; pointer-events: auto; transform: translateY(0); }
+}
 
 /* Compact release archive */
 .release-index-list { display: grid; gap: 0.75rem; }

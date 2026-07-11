@@ -1,22 +1,22 @@
 ---
 title: "Local Generals.io"
-description: "A source-backed guide to LocalGen's offline game, map editor, built-in bots, simulator, releases, and contributor docs."
+description: "A practical guide to playing LocalGen, creating maps, exploring bots, running simulations, and contributing."
 date: 2026-04-06T17:54:16+08:00
 draft: false
 ---
 
-**Local Generals.io (LocalGen)** is an unofficial, open-source strategy game inspired by generals.io. The current `master` branch is the Qt 6 rewrite, identified in source as **`6.0.0-dev`**.
+**Local Generals.io (LocalGen)** is an unofficial, open-source strategy game inspired by generals.io. Version 6 is a Qt 6-based work in progress, currently labeled **`6.0.0-dev`**.
 
-## What works in the current v6 source
+## What you can do with LocalGen
 
 - **Local Game** — run an offline free-for-all with one optional human and built-in C++ bots, on a generated board or an installed `.lgmp` map.
 - **Map Creator** — build and edit v5/v6 maps, attach metadata, open official map JSON, or optionally import a public map by title.
 - **Bot Simulator** — evaluate two or more registered bots over repeated, parallel matches and compare win rate, TrueSkill, rank, kills, army, land, and optional latency.
 - **In-game tools** — use a move queue, event/chat history, a collapsible leaderboard, and an optional Army/Land analysis chart.
 
-## Current development boundaries
+## Features still in development
 
-The main menu also shows **Web Game** and **Load Replay**, but both are placeholders in the current source. LAN/web multiplayer, replay playback, external bot processes, persistent v6 settings, and sound playback are not implemented yet. Local gameplay itself is offline; only the Map Creator's optional generals.io map import needs a network connection.
+**Web Game** and **Load Replay** are visible in the menu but are not available yet. LAN/web multiplayer, replay playback, external bots, saved settings, and sound are also still in development. Local Game works offline; only the optional public-map import needs an internet connection.
 
 ## Choose a path
 

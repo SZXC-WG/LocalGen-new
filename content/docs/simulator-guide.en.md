@@ -6,7 +6,7 @@ draft: false
 weight: 60
 ---
 
-> Upstream source: [`simulator/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/simulator/README.md), checked against `simulator/botSimulator.cpp`.
+For additional command-line notes, see the project's [simulator guide](https://github.com/SZXC-WG/LocalGen-new/blob/master/simulator/README.md).
 
 ## Build and run
 

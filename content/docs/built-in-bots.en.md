@@ -6,9 +6,9 @@ draft: false
 weight: 70
 ---
 
-> Upstream overview: [`src/bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md). Enabled status is checked against `LOCALGEN_BOT_SOURCES` in current `CMakeLists.txt`.
+For strategy and complexity notes, see the project's [Bot overview](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md).
 
-## Current roster
+## Built-in Bot roster
 
 | Bot | Author | Enabled | Approx. cost | Summary |
 | --- | --- | --- | --- | --- |

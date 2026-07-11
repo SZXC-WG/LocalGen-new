@@ -1,6 +1,6 @@
 ---
 title: "Downloads"
-description: "Choose a LocalGen release artifact, understand the current v6 development status, or build the Qt app from source."
+description: "Download LocalGen for your platform or build the Qt app yourself."
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 20
@@ -8,14 +8,14 @@ weight: 20
 
 ## Published builds
 
-GitHub Releases is the canonical place for LocalGen version notes and downloadable assets:
+Find the latest LocalGen release notes and downloads on GitHub Releases:
 
 - [Open LocalGen Releases on GitHub](https://github.com/SZXC-WG/LocalGen-new/releases)
 - [Browse the release timeline on this site]({{< relref "releases" >}})
 
-Read the notes attached to a release before downloading. The repository's current source version is `6.0.0-dev`; a source snapshot and a published stable asset are not necessarily equivalent.
+Read the notes attached to a release before downloading. `6.0.0-dev` is the in-progress development version, not a stable installer.
 
-## Platforms built by current CI
+## Build targets
 
 | Platform | Current packaging targets |
 | --- | --- |
@@ -23,13 +23,13 @@ Read the notes attached to a release before downloading. The repository's curren
 | macOS | Intel and Apple silicon DMG |
 | Windows | x86_64 and ARM64 MSVC ZIP; x86_64 MinGW and LLVM-MinGW ZIP |
 
-Availability varies by release, so use the asset list on that release page as the final authority. If a Linux AppImage reports a missing OpenGL runtime, the upstream README recommends installing `libopengl0` on Debian/Ubuntu systems.
+Availability varies by release, so check the file list before downloading. If a Linux AppImage reports a missing OpenGL runtime on Debian or Ubuntu, install `libopengl0`.
 
 ## After extracting or installing
 
 Keep the packaged `maps/` and `fonts/` directories beside the desktop executable. Local Game discovers `.lgmp` files from that `maps/` directory, and the app expects the bundled Quicksand font files at startup.
 
-The current v6 app can start an offline local match or open Map Creator. Web Game and replay loading are not ready yet, even though their buttons are visible.
+With v6 you can start an offline local match or open Map Creator. Web Game and replay loading are not ready yet, even though their buttons are visible.
 
 ## Build the development version
 

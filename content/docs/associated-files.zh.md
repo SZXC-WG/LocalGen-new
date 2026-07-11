@@ -1,22 +1,22 @@
 ---
 title: "关联文件"
-description: "结合当前 v6 实现状态，说明 LocalGen 地图、回放与设置文件。"
+description: "了解 LocalGen 的地图、回放与设置文件。"
 date: 2026-04-06T17:55:08+08:00
 draft: false
 weight: 50
 ---
 
-> 上游参考：[`docs/associated-files.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/associated-files.md)。下述实现细节已对照 `src/core/map.hpp` 与当前界面核验。
+更多格式说明请参阅项目的[关联文件参考](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/associated-files.md)。
 
-## 格式状态
+## v6 文件支持
 
-| 文件 | 用途 | 当前 v6 状态 |
+| 文件 | 用途 | 支持情况 |
 | --- | --- | --- |
 | `.lgmp` | v6 原生地图 | 地图编辑器可读写；本地对局与模拟器可读取 |
 | `.lg` | v5 旧地图 | 地图编辑器可读写；不会保留元数据；本地对局不直接列出 |
 | 官方 `.json` | generals.io 地图交换 | 地图编辑器可读取/导入；不能导出 JSON；不可直接开局 |
-| `.lgr` | 普通回放 | 上游参考中有定义，但当前 v6 没有读写器 |
-| `.lgra` | 高级回放 | 上游参考中有定义，但当前 v6 没有读写器 |
+| `.lgr` | 普通回放 | 已预留该格式，但暂不支持加载或保存 |
+| `.lgra` | 高级回放 | 已预留该格式，但暂不支持加载或保存 |
 | `settings.lgsts` | v5 设置 | 仅为旧版参考 |
 | `settings.json` | v6 设置 | 文档中的文件名；当前应用不会持久化设置 |
 
@@ -43,4 +43,4 @@ weight: 50
 
 把有效 `.lgmp` 放入 `LocalGen-new` 可执行文件旁的 `maps/` 目录。本地对局窗口打开时会扫描该目录，并优先使用地图元数据标题作为显示名称。
 
-回放扩展名与设置文件名仍是项目术语的一部分，但在相应读写器实现之前，不应把它们描述成可用的 v6 功能。
+v6 目前可以实际使用地图文件；回放加载与设置保存仍不可用。

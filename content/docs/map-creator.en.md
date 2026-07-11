@@ -1,6 +1,6 @@
 ---
 title: "Map Creator"
-description: "Author, inspect, import, convert, and install LocalGen maps with the current v6 editor."
+description: "Create, inspect, import, convert, and install maps with the LocalGen v6 editor."
 date: 2026-07-10T00:00:00+08:00
 draft: false
 weight: 7

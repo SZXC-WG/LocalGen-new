@@ -21,6 +21,6 @@ Current Local Game and bot simulation do not require the official backend. Map C
 - Report LocalGen bugs and feature requests to the [LocalGen issue tracker](https://github.com/SZXC-WG/LocalGen-new/issues), not to generals.io support.
 - Follow generals.io's applicable terms when using the official platform or its public services.
 - Verify licenses and permissions before redistributing source, fonts, maps, artwork, website material, or third-party assets.
-- LocalGen is provided without warranty under the terms stated by its upstream license.
+- LocalGen is provided without warranty under the terms of its license.
 
 See [Website license]({{< relref "website-license" >}}) for the separate licensing status of this website repository.

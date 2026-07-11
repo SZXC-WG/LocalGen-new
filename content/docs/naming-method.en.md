@@ -6,11 +6,11 @@ draft: false
 weight: 40
 ---
 
-> Source document: [`docs/naming-method.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/naming-method.md)
+You can also [read the naming guide on GitHub](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/naming-method.md).
 
 ## Naming conventions used in LocalGen v6
 
-The upstream project documents the following naming guidance:
+Use the following naming conventions in LocalGen v6:
 
 1. **Namespaces** use lowercase letters separated by underscores.
 2. **Classes, structs, and most types** use PascalCase.

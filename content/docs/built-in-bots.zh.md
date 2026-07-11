@@ -6,9 +6,9 @@ draft: false
 weight: 70
 ---
 
-> 上游概览：[`src/bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md)。启用状态已对照当前 `CMakeLists.txt` 中的 `LOCALGEN_BOT_SOURCES` 核验。
+策略与复杂度说明请参阅项目的 [Bot 概览](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md)。
 
-## 当前阵容
+## 内置 Bot 阵容
 
 | Bot | 作者 | 已启用 | 近似复杂度 | 简介 |
 | --- | --- | --- | --- | --- |

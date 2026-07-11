@@ -1,12 +1,12 @@
 ---
 title: "Documentation"
-description: "Practical, source-backed LocalGen v6 guides for building, playing, creating maps, evaluating bots, and contributing."
+description: "Practical LocalGen v6 guides for installing, playing, creating maps, evaluating Bots, and contributing."
 date: 2026-04-06T17:54:17+08:00
 draft: false
 weight: 50
 ---
 
-These pages combine upstream documentation with checks against the current `master` implementation. Where prose and code disagree, the guides call out the current behavior instead of presenting planned features as finished.
+Use these guides to install LocalGen, play offline matches, create maps, explore built-in Bots, run simulations, and contribute.
 
 ## Start here
 
@@ -22,9 +22,9 @@ These pages combine upstream documentation with checks against the current `mast
 
 ## Reference and community
 
-- [Associated Files]({{< relref "docs/associated-files" >}}) — implemented map formats versus documented future/legacy files
+- [Associated Files]({{< relref "docs/associated-files" >}}) — map, replay, and settings formats, including what v6 can open today
 - [Naming Method]({{< relref "docs/naming-method" >}})
 - [Commit Regulations]({{< relref "docs/commit-regulations" >}})
 - [Code of Conduct]({{< relref "docs/code-of-conduct" >}})
 
-Current v6 is `6.0.0-dev`. Web/LAN play, replay loading, external bot processes, persistent settings, and sound playback are not implemented in the checked source.
+A quick heads-up: Web/LAN play, replay loading, external Bot processes, saved settings, and sound are not available yet in `6.0.0-dev`.

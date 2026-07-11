@@ -1,22 +1,22 @@
 ---
 title: "Associated Files"
-description: "A status-aware reference for LocalGen map, replay, and settings files in the current v6 source."
+description: "A guide to LocalGen map, replay, and settings files."
 date: 2026-04-06T17:55:07+08:00
 draft: false
 weight: 50
 ---
 
-> Upstream reference: [`docs/associated-files.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/associated-files.md). Implementation details below are checked against `src/core/map.hpp` and the current UI.
+For additional format notes, see the project's [associated-files reference](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/associated-files.md).
 
-## Format status
+## File support in v6
 
-| File | Role | Current v6 status |
+| File | Role | Support |
 | --- | --- | --- |
 | `.lgmp` | Native v6 map | Read/write in Map Creator; readable by Local Game and simulator |
 | `.lg` | Legacy v5 map | Read/write in Map Creator; metadata is not preserved; not listed directly in Local Game |
 | Official `.json` | generals.io map interchange | Read/import in Map Creator; no JSON export; not directly playable |
-| `.lgr` | Standard replay | Named by the upstream reference, but no current v6 reader/writer |
-| `.lgra` | Advanced replay | Named by the upstream reference, but no current v6 reader/writer |
+| `.lgr` | Standard replay | Replay format; loading and saving are not available yet |
+| `.lgra` | Advanced replay | Advanced replay format; loading and saving are not available yet |
 | `settings.lgsts` | v5 settings | Legacy reference only |
 | `settings.json` | v6 settings | Documented filename; current app does not persist settings |
 
@@ -43,4 +43,4 @@ The editor accepts an official map object with valid `width`, `height`, `map`, `
 
 Place a valid `.lgmp` file in the `maps/` directory beside `LocalGen-new`. The picker reads that directory when the Local Game dialog opens and uses map metadata for its display name.
 
-The replay extensions and settings filenames remain useful project vocabulary, but they should not be described as working v6 features until corresponding readers/writers exist.
+Replay loading and saved settings are not available yet in v6.

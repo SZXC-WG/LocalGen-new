@@ -1,6 +1,6 @@
 ---
 title: "FAQ"
-description: "Current, source-backed answers about LocalGen v6 gameplay, maps, bots, networking, replays, and builds."
+description: "Answers about LocalGen v6 gameplay, maps, bots, networking, replays, and builds."
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 90
@@ -10,17 +10,17 @@ weight: 90
 
 No. LocalGen is an independent, fan-made open-source project. It is not affiliated with, endorsed by, sponsored by, or connected to generals.io or its original developers.
 
-## What is the current v6 status?
+## Which v6 features are available?
 
-The active `master` source identifies itself as `6.0.0-dev`. Local Game, Map Creator, and the bot simulator work; some visible menu entries remain placeholders.
+Local Game, Map Creator, and the Bot simulator are available in `6.0.0-dev`. Web Game and Load Replay are still in development.
 
 ## Can I play over a LAN or through Web Game?
 
-Not in current v6. Clicking Web Game displays a “not available yet” message. The README's older LAN wording does not match the current implementation.
+No. Web Game is not available yet, and LocalGen does not currently support LAN play.
 
 ## Can I load a replay?
 
-Not yet. `.lgr` and `.lgra` are listed in the associated-files reference, but the current Load Replay button is a placeholder and no replay reader is implemented.
+Not yet. The visible Load Replay button does not currently open `.lgr` or `.lgra` files.
 
 ## How many humans can play a Local Game?
 
@@ -36,7 +36,7 @@ Offline gameplay, local map editing, and the simulator do not. Map Creator's opt
 
 ## Can I write a bot in Python or run an external bot process?
 
-Not with the current v6 integration. Supported bots are C++17 source files compiled into LocalGen. There is no external-bot network protocol or model runtime in the repository today.
+No. LocalGen currently supports built-in C++17 Bots only; Python clients and external Bot processes are not supported.
 
 ## Are simulator runs reproducible?
 
@@ -44,7 +44,7 @@ Not exactly. The CLI has no seed option and obtains map seeds from system random
 
 ## Where are v6 settings stored?
 
-The associated-files document names `settings.json`, but the current desktop app does not implement settings persistence. Local Game choices apply to that launch only.
+Settings are not saved between launches yet. Local Game choices apply until you close the app.
 
 ## Where should I report a bug or propose a feature?
 

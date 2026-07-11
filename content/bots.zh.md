@@ -1,6 +1,6 @@
 ---
 title: "Bot"
-description: "了解编译进 LocalGen v6 的 C++ Bot，以及基于当前源码的准确贡献方式。"
+description: "了解 LocalGen v6 的内置 C++ Bot，并学习如何添加自己的 Bot。"
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 60
@@ -8,11 +8,11 @@ weight: 60
 
 ## 当前 Bot 的工作方式
 
-当前 v6 **只支持内置 C++ Bot**。每个 Bot 都会编译进桌面应用与模拟器，再由 `BotFactory` 按名称创建。当前源码中没有外部 Bot 协议、插件加载器、模型下载或推理后端。
+v6 目前**只支持内置 C++ Bot**。每个 Bot 都会随桌面应用与模拟器一起提供，再由 `BotFactory` 按名称创建。暂不支持外部 Bot 协议、插件、模型下载或推理后端。
 
-## 当前源码阵容
+## 内置 Bot 阵容
 
-复杂度来自上游 Bot README 中的粗略单回合最坏情况估计。这里的 $n$ 表示地图格子数，$k$ 表示多源规划器考虑的候选起点数量。
+下表中的复杂度是粗略的单回合最坏情况估计。这里的 $n$ 表示地图格子数，$k$ 表示多源规划器考虑的候选起点数量。
 
 | Bot / 注册名称 | 已启用 | 近似复杂度 | 策略简介 |
 | --- | --- | --- | --- |
@@ -32,7 +32,7 @@ weight: 60
 
 “已启用”表示该源文件出现在 `LOCALGEN_BOT_SOURCES` 中，并会被编译进当前可执行程序。模拟器命令行中的名称需要完全匹配；`oimbot` 使用全小写。
 
-## 最小实现约定
+## 一个 Bot 需要满足什么
 
 一个新的内置 Bot 应当：
 
@@ -43,6 +43,6 @@ weight: 60
 5. 将源文件加入 `CMakeLists.txt` 的 `LOCALGEN_BOT_SOURCES`；
 6. 在 Pull Request 中附带测试或模拟器证据，以及简洁的算法与性能说明。
 
-请参考当前已编译 Bot 的写法：现有代码使用 `BotRegistrar`，并不存在 `REGISTER_BOT` 宏。
+注册新 Bot 时请使用 `BotRegistrar`；旧说明中的 `REGISTER_BOT` 不适用于当前版本。
 
 继续阅读[内置 Bot 详细参考]({{< relref "docs/built-in-bots" >}})、[贡献流程]({{< relref "docs/bot-contributions" >}})或[模拟器指南]({{< relref "docs/simulator-guide" >}})。

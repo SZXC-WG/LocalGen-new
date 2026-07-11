@@ -6,7 +6,7 @@ draft: false
 weight: 30
 ---
 
-> 源文档：[`docs/commit-regulations.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/commit-regulations.md)
+你也可以在 [GitHub 上阅读提交规范](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/commit-regulations.md)。
 
 ## 目标
 
@@ -14,7 +14,7 @@ weight: 30
 
 ## 提交信息结构
 
-上游文档建议的结构如下：
+建议使用以下提交信息结构：
 
 ```text
 <type>(<scope>): <subject>

@@ -21,6 +21,6 @@ LocalGen 面向本地游玩、离线实验、教学与内置 Bot 开发。它不
 - 请把 LocalGen 的 Bug 与功能建议提交到 [LocalGen Issue 跟踪器](https://github.com/SZXC-WG/LocalGen-new/issues)，不要联系 generals.io 官方支持。
 - 使用官方平台或其公开服务时，请遵守 generals.io 的适用条款。
 - 再分发源码、字体、地图、美术、网站材料或第三方资产前，请核实相应许可证与授权。
-- LocalGen 按上游许可证所述条款提供，不附带担保。
+- LocalGen 按其许可证条款提供，不附带担保。
 
 本站仓库的独立授权状态见[网站许可证]({{< relref "website-license" >}})。

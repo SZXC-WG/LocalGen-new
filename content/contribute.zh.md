@@ -8,7 +8,7 @@ weight: 80
 
 ## 新工作应该提交到哪里
 
-当前活跃开发分支是基于 Qt 的 v6 主线 **`master`**。v1–v4 已停止维护；v5 只接受安全修复与严重 Bug 修复。上游贡献指南明确标记为早期草稿，因此流程细节应以当前源码和 `CMakeLists.txt` 为准。
+请从基于 Qt 6 的 **`master`** 分支开始开发。v1–v4 已停止维护，v5 只接受安全修复与严重 Bug 修复；提交 Pull Request 前请查看 `CONTRIBUTING.md` 与 `CMakeLists.txt` 中的最新要求。
 
 ## 主要贡献方向
 
@@ -19,7 +19,7 @@ weight: 80
 - 地图、测试、文档、翻译、CI 与打包
 - 通过 GitHub Issues 提交聚焦的 Bug 报告与功能建议
 
-当前 v6 尚未实现外部 Bot 进程与 Web Game 联机，因此不应把它们写成已经可用的贡献 API。
+v6 目前的 Bot 扩展方式是内置 C++ Bot；外部 Bot 与 Web Game 联机接口尚未开放。
 
 ## 提交前先完成构建
 

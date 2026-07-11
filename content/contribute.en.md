@@ -8,7 +8,7 @@ weight: 80
 
 ## Where new work belongs
 
-The active development branch is **`master`**, the Qt-based v6 line. Versions 1–4 are no longer maintained; v5 accepts only security and critical bug fixes. The upstream contribution guide is marked as an early draft, so verify procedural details against current code and `CMakeLists.txt`.
+Use **`master`** for new v6 work. Versions 1–4 are retired, while v5 is limited to security and critical fixes. Before opening a Pull Request, check `CONTRIBUTING.md` and `CMakeLists.txt` for the latest requirements.
 
 ## Main contribution paths
 
@@ -19,7 +19,7 @@ The active development branch is **`master`**, the Qt-based v6 line. Versions 1�
 - maps, tests, documentation, translations, CI, and packaging
 - focused bug reports and feature proposals through GitHub Issues
 
-External bot processes and Web Game networking are not implemented in current v6, so they should not be documented as available contribution APIs.
+For now, focus Bot contributions on built-in C++ Bots; external Bot processes and Web Game networking are not available yet.
 
 ## Build before submitting
 

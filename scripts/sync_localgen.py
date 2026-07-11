@@ -73,7 +73,7 @@ def normalize_repo(repo: dict[str, Any]) -> dict[str, Any]:
         "short_name": "LocalGen",
         "organization": OWNER,
         "version": "6.0.0-dev",
-        "version_line": "master / v6",
+        "version_line": "LocalGen v6",
         "legacy_line": "v5.0",
         "languages": ["English", "Chinese"],
         "bot_count": 10,

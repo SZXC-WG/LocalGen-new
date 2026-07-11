@@ -1,6 +1,6 @@
 ---
 title: "地图编辑器"
-description: "使用当前 v6 编辑器制作、检查、导入、转换并安装 LocalGen 地图。"
+description: "使用 LocalGen v6 编辑器制作、检查、导入、转换并安装地图。"
 date: 2026-07-10T00:00:00+08:00
 draft: false
 weight: 7

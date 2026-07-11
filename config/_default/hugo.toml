@@ -24,9 +24,9 @@ summaryLength = 36
   anchor = 'smart'
 
 [params]
-  description = 'Project documentation site for Local Generals.io.'
+  description = 'Learn to play LocalGen, create maps, and challenge built-in bots offline.'
   organization = 'SZXC Work Group'
-  projectName = 'LocalGen Docs'
+  projectName = 'LocalGen Guide'
   projectShortName = 'LocalGen'
   projectVersion = '6.0.0-dev'
   license = 'GPL-3.0-or-later'

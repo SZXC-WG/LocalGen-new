@@ -340,12 +340,12 @@ def generate_bot_spectrum(project: dict[str, Any], items: list[dict[str, Any]]) 
     <g filter="url(#softShadow)">{rounded_rect(18, 18, width - 36, height - 36, 22, fill=CARD_FILL)}</g>
     {cards}
     <text x="36" y="118" font-size="23" font-weight="750" fill="{TEXT_MAIN}">Built-in bot spectrum</text>
-    {text_block(36, 142, "Complexity and worst-case turn cost across the bots listed in the upstream guide.", max_chars=76, font_size=12, fill=TEXT_MUTED, max_lines=2)}
+    {text_block(36, 142, "Compare strategy complexity and worst-case turn cost across LocalGen Bots.", max_chars=76, font_size=12, fill=TEXT_MUTED, max_lines=2)}
     {''.join(column_labels)}
     {''.join(rows)}
     <text x="674" y="170" text-anchor="end" font-size="11" fill="{TEXT_MUTED}" font-weight="700" letter-spacing="1.2">TIME</text>
     <text x="704" y="170" font-size="11" fill="{TEXT_MUTED}" font-weight="700" letter-spacing="1.2">STATUS</text>
-    <text x="36" y="{height - 22}" font-size="11" fill="{TEXT_MUTED}">Source: upstream built-in bot README and contribution guide</text>
+    <text x="36" y="{height - 22}" font-size="11" fill="{TEXT_MUTED}">{len(items)} documented Bots · {enabled_count} included in v6</text>
     '''
     path = OUTPUT_DIR / "bot-spectrum.svg"
     write_svg(
@@ -391,7 +391,7 @@ def generate_project_pillars(project: dict[str, Any]) -> Path:
     <text x="32" y="96" font-size="27" font-weight="750" fill="{TEXT_MAIN}">Why LocalGen feels different</text>
     {text_block(32, 124, "A local-first strategy game, an open bot laboratory, and a cleaner Qt-based future.", max_chars=88, font_size=12, fill=TEXT_MUTED, line_height=18, max_lines=2)}
     {''.join(cards)}
-    <text x="32" y="438" font-size="11" fill="{TEXT_MUTED}">{svg_text(project.get('license', 'GPL-3.0-or-later'))} · {svg_text(project.get('organization', 'SZXC-WG'))} · generated from project data</text>
+    <text x="32" y="438" font-size="11" fill="{TEXT_MUTED}">{svg_text(project.get('license', 'GPL-3.0-or-later'))} · {svg_text(project.get('organization', 'SZXC-WG'))}</text>
     '''
     path = OUTPUT_DIR / "project-pillars.svg"
     write_svg(
@@ -438,7 +438,7 @@ def generate_hero_board(project: dict[str, Any]) -> Path:
         )
 
     stats = [
-        ("CURRENT BRANCH", project.get("version_line", "v6"), ACCENT),
+        ("VERSION", project.get("version", "v6"), ACCENT),
         ("TOOLCHAIN", " · ".join(project.get("built_with", [])), BLUE),
         ("PROJECT SCALE", f"{project['release_count']} releases · {project['bot_count']} bots", WARNING),
         ("MAINTAINED BY", project.get("organization", "SZXC-WG"), TEXT_MAIN),

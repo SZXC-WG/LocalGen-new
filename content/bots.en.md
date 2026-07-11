@@ -1,6 +1,6 @@
 ---
 title: "Bots"
-description: "Meet the C++ bots compiled into LocalGen v6 and learn the source-backed contribution path."
+description: "Meet LocalGen's built-in C++ bots and learn how to add your own."
 date: 2026-04-06T17:54:16+08:00
 draft: false
 weight: 60
@@ -8,11 +8,11 @@ weight: 60
 
 ## How bots work today
 
-Current v6 supports **built-in C++ bots only**. Each bot is compiled into the desktop app and simulator, then created by name through `BotFactory`. There is no external-bot protocol, plug-in loader, model download, or inference backend in the current source.
+LocalGen v6 supports **built-in C++ bots only**. Each bot is included in the desktop app and simulator, then created by name through `BotFactory`. External bot protocols, plug-ins, model downloads, and inference backends are not supported.
 
-## Current source roster
+## Built-in bot roster
 
-The complexity values are rough per-turn worst-case estimates from the upstream bot README. Here, $n$ is the number of map tiles and $k$ is the number of candidate source stacks considered by a multi-source planner.
+The complexity values are rough per-turn worst-case estimates. Here, $n$ is the number of map tiles and $k$ is the number of candidate source stacks considered by a multi-source planner.
 
 | Bot / registry name | Enabled | Approx. cost | Strategy summary |
 | --- | --- | --- | --- |
@@ -32,7 +32,7 @@ The complexity values are rough per-turn worst-case estimates from the upstream 
 
 “Enabled” means the source file appears in `LOCALGEN_BOT_SOURCES` and is compiled into the current executables. Exact names matter on the simulator command line; `oimbot` is lowercase.
 
-## Minimal implementation contract
+## What a Bot needs
 
 A new built-in bot should:
 
@@ -43,6 +43,6 @@ A new built-in bot should:
 5. add the file to `LOCALGEN_BOT_SOURCES` in `CMakeLists.txt`;
 6. include tests or simulator evidence and concise algorithm/performance notes in the pull request.
 
-Follow the pattern used by a currently compiled bot: the current code uses `BotRegistrar`, not a `REGISTER_BOT` macro.
+Register new bots with `BotRegistrar`; the older `REGISTER_BOT` pattern is not supported.
 
 Read the [detailed built-in bot reference]({{< relref "docs/built-in-bots" >}}), the [contribution workflow]({{< relref "docs/bot-contributions" >}}), or the [simulator guide]({{< relref "docs/simulator-guide" >}}).

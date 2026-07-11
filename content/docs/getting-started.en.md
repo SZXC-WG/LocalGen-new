@@ -8,7 +8,7 @@ weight: 5
 
 ## Choose a published build or source build
 
-For a packaged version, start at [GitHub Releases](https://github.com/SZXC-WG/LocalGen-new/releases) and read that release's notes and asset list. The current `master` source identifies itself as `6.0.0-dev`, so it should be treated as the active development version.
+For a packaged version, start at [GitHub Releases](https://github.com/SZXC-WG/LocalGen-new/releases) and read that release's notes and file list. To try or contribute to the latest development work, build `6.0.0-dev` from the `master` branch.
 
 ## Source prerequisites
 
@@ -65,7 +65,7 @@ On Windows, use `LocalGen-bot-simulator.exe`.
 ## Packaging notes
 
 - **Windows:** run Qt's `windeployqt` after building if you need a portable folder.
-- **macOS:** use `bash scripts/package-macos-dmg.sh build/Release/LocalGen-new.app LocalGen-new.dmg`; the upstream README advises against `macdeployqt ... -dmg` for this project.
+- **macOS:** use `bash scripts/package-macos-dmg.sh build/Release/LocalGen-new.app LocalGen-new.dmg`; avoid `macdeployqt ... -dmg` because it can produce an invalid app signature for this project.
 - **Linux:** if a packaged AppImage fails because OpenGL is missing on Debian/Ubuntu, install `libopengl0`.
 
 ## What to expect on launch

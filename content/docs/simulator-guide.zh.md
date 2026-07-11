@@ -6,7 +6,7 @@ draft: false
 weight: 60
 ---
 
-> 上游来源：[`simulator/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/simulator/README.md)，并已对照 `simulator/botSimulator.cpp` 核验。
+更多命令行说明请参阅项目的[模拟器指南](https://github.com/SZXC-WG/LocalGen-new/blob/master/simulator/README.md)。
 
 ## 构建与运行
 

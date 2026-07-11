@@ -1,20 +1,20 @@
 ---
 title: "Bot Contributions"
-description: "The current LocalGen v6 workflow for adding, testing, and proposing a built-in C++ bot."
+description: "Add, test, and propose a built-in C++ Bot for LocalGen v6."
 date: 2026-04-06T17:55:07+08:00
 draft: false
 weight: 20
 ---
 
-> Source references: [`CONTRIBUTING.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/CONTRIBUTING.md), [`src/bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md), and the current bot registry/CMake source.
+Before you begin, read [`CONTRIBUTING.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/CONTRIBUTING.md) and the [Bot guide](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md).
 
 ## Supported integration today
 
-LocalGen v6 currently accepts **bots compiled directly into the application**. External executables, arbitrary-language clients, and a network-facing bot protocol are not implemented in the current repository.
+LocalGen v6 currently accepts **Bots built directly into the application**. External executables, arbitrary-language clients, and network Bot protocols are not supported yet.
 
 A built-in bot is available to both Local Game and `LocalGen-bot-simulator` because both targets compile the same `LOCALGEN_BOT_SOURCES` list.
 
-## Implementation checklist
+## Build your Bot
 
 1. Create one uniquely named `src/bots/MyBot.cpp` file using C++17.
 2. Include `src/core/bot.h`.
@@ -31,7 +31,7 @@ static BotRegistrar<MyBot> myBotRegistrar("MyBot");
 6. Add `src/bots/MyBot.cpp` to `LOCALGEN_BOT_SOURCES` in the top-level `CMakeLists.txt`.
 7. Build both Debug and Release configurations.
 
-The upstream bot README mentions a `REGISTER_BOT` macro, but the current implementation exposes `BotRegistrar`; follow compiled source examples.
+Use `BotRegistrar` to register a Bot; the older `REGISTER_BOT` pattern is no longer supported.
 
 ## Evaluate before proposing
 

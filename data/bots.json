@@ -5,7 +5,7 @@
     {
       "key": "built-in",
       "title": "Built-in bots",
-      "summary": "Compiled into the LocalGen executable from src/bots/ for maximum integration and speed."
+      "summary": "Built-in bots run directly in LocalGen for fast, seamless matches."
     }
   ],
   "items": [

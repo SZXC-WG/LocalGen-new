@@ -1,20 +1,20 @@
 ---
 title: "Bot 贡献指南"
-description: "按照当前 LocalGen v6 源码，添加、测试并提交内置 C++ Bot。"
+description: "为 LocalGen v6 添加、测试并提交内置 C++ Bot。"
 date: 2026-04-06T17:55:07+08:00
 draft: false
 weight: 20
 ---
 
-> 参考来源：[`CONTRIBUTING.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/CONTRIBUTING.md)、[`src/bots/README.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md)，以及当前 Bot 注册表/CMake 源码。
+开始之前，请阅读 [`CONTRIBUTING.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/CONTRIBUTING.md) 与 [Bot 指南](https://github.com/SZXC-WG/LocalGen-new/blob/master/src/bots/README.md)。
 
 ## 当前支持的集成方式
 
-LocalGen v6 目前只接受**直接编译进应用的 Bot**。外部可执行程序、任意语言客户端与面向网络的 Bot 协议在当前仓库中均未实现。
+LocalGen v6 目前只接受**直接构建进应用的 Bot**。外部可执行程序、任意语言客户端与网络 Bot 协议暂不受支持。
 
 内置 Bot 会同时出现在本地对局与 `LocalGen-bot-simulator` 中，因为两个目标共用同一份 `LOCALGEN_BOT_SOURCES` 列表。
 
-## 实现检查清单
+## 构建你的 Bot
 
 1. 创建一个名称唯一、使用 C++17 的 `src/bots/MyBot.cpp` 文件。
 2. 包含 `src/core/bot.h`。
@@ -31,7 +31,7 @@ static BotRegistrar<MyBot> myBotRegistrar("MyBot");
 6. 将 `src/bots/MyBot.cpp` 加入顶层 `CMakeLists.txt` 的 `LOCALGEN_BOT_SOURCES`。
 7. 同时构建 Debug 与 Release 配置。
 
-上游 Bot README 提到了 `REGISTER_BOT` 宏，但当前实现公开的是 `BotRegistrar`；请以能够编译的现有源码示例为准。
+注册 Bot 时请使用 `BotRegistrar`；旧说明中的 `REGISTER_BOT` 不适用于当前版本。
 
 ## 提交前评测
 

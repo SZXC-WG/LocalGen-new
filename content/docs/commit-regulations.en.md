@@ -6,7 +6,7 @@ draft: false
 weight: 30
 ---
 
-> Source document: [`docs/commit-regulations.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/commit-regulations.md)
+You can also [read the commit regulations on GitHub](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/commit-regulations.md).
 
 ## Goal
 
@@ -14,7 +14,7 @@ The project’s commit regulations exist to keep the history consistent, underst
 
 ## Commit message structure
 
-The upstream guide recommends the following layout:
+Use the following commit-message layout:
 
 ```text
 <type>(<scope>): <subject>

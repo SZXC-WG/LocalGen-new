@@ -1,12 +1,12 @@
 ---
 title: "文档中心"
-description: "基于当前源码整理的 LocalGen v6 实用指南，覆盖构建、游玩、地图制作、Bot 评测与贡献。"
+description: "LocalGen v6 实用指南，覆盖安装、游玩、地图制作、Bot 评测与贡献。"
 date: 2026-04-06T17:54:17+08:00
 draft: false
 weight: 50
 ---
 
-这些页面在整理上游文档的同时，也会对照当前 `master` 实现进行核验。当文字与代码不一致时，指南会明确说明当前行为，而不会把计划功能写成已经完成。
+无论你想直接游玩、制作地图，还是开发和评测 Bot，都可以从下面的指南开始。
 
 ## 从这里开始
 
@@ -22,9 +22,9 @@ weight: 50
 
 ## 参考与社区
 
-- [关联文件]({{< relref "docs/associated-files" >}}) —— 区分已实现地图格式与仅在文档中出现的未来/旧文件
+- [关联文件]({{< relref "docs/associated-files" >}}) —— 地图、回放与设置格式，以及 v6 目前能够打开的文件
 - [命名规范]({{< relref "docs/naming-method" >}})
 - [提交规范]({{< relref "docs/commit-regulations" >}})
 - [行为准则]({{< relref "docs/code-of-conduct" >}})
 
-当前 v6 版本为 `6.0.0-dev`。Web/局域网对战、回放加载、外部 Bot 进程、设置持久化与声音播放在所核验源码中均尚未实现。
+温馨提示：`6.0.0-dev` 暂不支持 Web/局域网对战、回放加载、外部 Bot、设置保存与声音播放。

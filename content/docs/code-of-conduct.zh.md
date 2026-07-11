@@ -6,7 +6,7 @@ draft: false
 weight: 10
 ---
 
-> 源文档：[`CODE_OF_CONDUCT.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/CODE_OF_CONDUCT.md)
+你也可以在 [GitHub 上阅读行为准则](https://github.com/SZXC-WG/LocalGen-new/blob/master/CODE_OF_CONDUCT.md)。
 
 ## 我们的承诺
 

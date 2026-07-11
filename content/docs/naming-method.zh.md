@@ -6,11 +6,11 @@ draft: false
 weight: 40
 ---
 
-> 源文档：[`docs/naming-method.md`](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/naming-method.md)
+你也可以在 [GitHub 上阅读命名规范](https://github.com/SZXC-WG/LocalGen-new/blob/master/docs/naming-method.md)。
 
 ## LocalGen v6 的命名约定
 
-上游项目给出的命名建议如下：
+LocalGen v6 建议使用以下命名约定：
 
 1. **命名空间** 使用全小写，并用下划线分隔。
 2. **类、结构体与大多数类型名** 使用大驼峰命名法（PascalCase）。

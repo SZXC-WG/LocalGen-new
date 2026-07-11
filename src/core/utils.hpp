@@ -28,13 +28,13 @@ struct Coord {
     pos_t x = 0, y = 0;
     constexpr Coord() = default;
     constexpr Coord(pos_t _x, pos_t _y) : x(_x), y(_y) {}
-    inline bool operator==(const Coord& other) const {
+    bool operator==(const Coord& other) const {
         return x == other.x && y == other.y;
     }
-    inline bool operator!=(const Coord& other) const {
+    bool operator!=(const Coord& other) const {
         return x != other.x || y != other.y;
     }
-    inline bool operator<(const Coord& other) const {
+    bool operator<(const Coord& other) const {
         return x == other.x ? y < other.y : x < other.x;
     }
 };
@@ -47,7 +47,7 @@ namespace std {
 /// Hash function for Coord, enabling use in `std::unordered_map`.
 template <>
 struct hash<Coord> {
-    inline size_t operator()(const Coord& c) const {
+    size_t operator()(const Coord& c) const {
         return static_cast<size_t>(c.x) << 16 | c.y;
     }
 };

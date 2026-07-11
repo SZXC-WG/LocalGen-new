@@ -28,17 +28,13 @@ struct BoardView {
     pos_t row, col;
     std::vector<TileView> tiles;
 
-    inline TileView& tileAt(pos_t x, pos_t y) {
-        return tiles[x * (col + 2) + y];
-    };
-    inline const TileView& tileAt(pos_t x, pos_t y) const {
+    TileView& tileAt(pos_t x, pos_t y) { return tiles[x * (col + 2) + y]; };
+    const TileView& tileAt(pos_t x, pos_t y) const {
         return tiles[x * (col + 2) + y];
     };
 
-    inline TileView& tileAt(Coord pos) { return tileAt(pos.x, pos.y); };
-    inline const TileView& tileAt(Coord pos) const {
-        return tileAt(pos.x, pos.y);
-    };
+    TileView& tileAt(Coord pos) { return tileAt(pos.x, pos.y); };
+    const TileView& tileAt(Coord pos) const { return tileAt(pos.x, pos.y); };
 };
 
 /// Game map board.
@@ -47,12 +43,12 @@ class Board {
     pos_t row = 0, col = 0;
     std::vector<Tile> tiles;
 
-    inline Tile& tileAt(pos_t x, pos_t y) { return tiles[x * (col + 2) + y]; };
-    inline const Tile& tileAt(pos_t x, pos_t y) const {
+    Tile& tileAt(pos_t x, pos_t y) { return tiles[x * (col + 2) + y]; };
+    const Tile& tileAt(pos_t x, pos_t y) const {
         return tiles[x * (col + 2) + y];
     };
-    inline Tile& tileAt(Coord pos) { return tileAt(pos.x, pos.y); };
-    inline const Tile& tileAt(Coord pos) const { return tileAt(pos.x, pos.y); };
+    Tile& tileAt(Coord pos) { return tileAt(pos.x, pos.y); };
+    const Tile& tileAt(Coord pos) const { return tileAt(pos.x, pos.y); };
 
     void setWidth(pos_t _col) {
         assert(_col >= 0);
@@ -68,17 +64,15 @@ class Board {
         visionCache.clear();
     }
 
-    inline bool isValidPos(pos_t x, pos_t y) const {
+    bool isValidPos(pos_t x, pos_t y) const {
         return x >= 1 && x <= row && y >= 1 && y <= col;
     }
-    inline bool isValidPos(Coord pos) const { return isValidPos(pos.x, pos.y); }
-    inline bool isInvalidPos(pos_t x, pos_t y) const {
-        return !isValidPos(x, y);
-    }
-    inline bool isInvalidPos(Coord pos) const { return !isValidPos(pos); }
+    bool isValidPos(Coord pos) const { return isValidPos(pos.x, pos.y); }
+    bool isInvalidPos(pos_t x, pos_t y) const { return !isValidPos(x, y); }
+    bool isInvalidPos(Coord pos) const { return !isValidPos(pos); }
 
-    inline int getWidth() const { return col; }
-    inline int getHeight() const { return row; }
+    int getWidth() const { return col; }
+    int getHeight() const { return row; }
 
     Board() = default;
     Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
@@ -177,14 +171,14 @@ class Board {
     }
 
     /// Tile visibility check for a player.
-    inline bool visible(pos_t x, pos_t y, index_t player) const {
+    bool visible(pos_t x, pos_t y, index_t player) const {
         if (isInvalidPos(x, y)) return false;
         const pos_t C = col + 2, RC = (row + 2) * C;
         return visionCache[player * RC + x * C + y];
     };
 
     /// Same as above, but using %Coord.
-    inline bool visible(const Coord& pos, index_t player) const {
+    bool visible(const Coord& pos, index_t player) const {
         return visible(pos.x, pos.y, player);
     };
 
@@ -265,10 +259,10 @@ class Board {
         return boardView;
     }
 
-    inline TileView view(index_t player, pos_t row, pos_t col) const {
+    TileView view(index_t player, pos_t row, pos_t col) const {
         return TileView(tileAt(row, col), visible(row, col, player));
     }
-    inline TileView view(index_t player, Coord pos) const {
+    TileView view(index_t player, Coord pos) const {
         return TileView(tileAt(pos), visible(pos, player));
     };
 

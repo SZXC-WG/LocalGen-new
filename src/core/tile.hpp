@@ -73,7 +73,7 @@ struct TileView {
     TileView(const Tile& tile, bool vis) { updateFrom(tile, vis); }
 
     /// Tile information + visibility -> TileView
-    inline void updateFrom(const Tile& tile, bool vis) {
+    void updateFrom(const Tile& tile, bool vis) {
         visible = vis;
         if (vis) {
             occupier = tile.occupier;

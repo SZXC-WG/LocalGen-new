@@ -68,8 +68,8 @@ class BasicGame {
     uint8_t curHalfTurnPhase{};
 
    public:
-    inline turn_t getCurTurn() const { return curTurn; }
-    inline uint8_t getHalfTurnPhase() const { return curHalfTurnPhase; }
+    turn_t getCurTurn() const { return curTurn; }
+    uint8_t getHalfTurnPhase() const { return curHalfTurnPhase; }
 
    protected:
     std::vector<Player*> players;
@@ -82,31 +82,31 @@ class BasicGame {
     std::vector<turn_t> eliminatedTurn;
     std::vector<Coord> spawnCoord;
 
-    inline bool isValidPlayer(index_t player) const {
+    bool isValidPlayer(index_t player) const {
         return player >= 0 && player < static_cast<index_t>(players.size());
     }
 
    public:
-    inline bool isAlive(index_t player) const {
+    bool isAlive(index_t player) const {
         return isValidPlayer(player) && alive[player];
     }
-    inline index_t getPlayerCount() const {
+    index_t getPlayerCount() const {
         return static_cast<index_t>(players.size());
     }
-    inline index_t getTeam(index_t player) const { return teams[player]; }
-    inline std::vector<index_t> getTeams() const { return teams; }
-    inline std::string getName(index_t player) const { return names[player]; }
-    inline std::vector<std::string> getNames() const { return names; }
+    index_t getTeam(index_t player) const { return teams[player]; }
+    std::vector<index_t> getTeams() const { return teams; }
+    std::string getName(index_t player) const { return names[player]; }
+    std::vector<std::string> getNames() const { return names; }
 
-    inline const BoardView& view(index_t player) const {
+    const BoardView& view(index_t player) const {
         BoardView& playerView = playerViews.at(player);
         board.view(player, playerView);
         return playerView;
     }
 
-    inline BoardView fullView() const { return board.fullView(); }
+    BoardView fullView() const { return board.fullView(); }
 
-    inline bool inSameTeam(index_t player1, index_t player2) const {
+    bool inSameTeam(index_t player1, index_t player2) const {
         if (!isValidPlayer(player1) || !isValidPlayer(player2)) return false;
         return getTeam(player1) == getTeam(player2);
     }
@@ -115,10 +115,9 @@ class BasicGame {
     config::Config conf = config::defaultConf;
 
    public:
-    inline config::Config getConfig() const { return conf; }
-    inline void setConfig(config::ConfigPatch patch) { conf = conf | patch; }
-    inline void setEventCallback(
-        std::function<void(const GameEvent&)> callback) {
+    config::Config getConfig() const { return conf; }
+    void setConfig(config::ConfigPatch patch) { conf = conf | patch; }
+    void setEventCallback(std::function<void(const GameEvent&)> callback) {
         eventCallback = std::move(callback);
     }
 
@@ -145,7 +144,7 @@ class BasicGame {
     /// Move priority helper functions
     /// Check if a move is defensive (friendly-to-friendly, including
     /// teammates).
-    inline bool isDefensiveMove(index_t player, const Move& move) const {
+    bool isDefensiveMove(index_t player, const Move& move) const {
         if (move.type != MoveType::MOVE_ARMY) return false;
         const Tile& toTile = board.tileAt(move.to);
         return isValidPlayer(toTile.occupier) &&
@@ -153,7 +152,7 @@ class BasicGame {
     }
 
     /// Check if a move is an attack on an enemy general.
-    inline bool isAttackGeneral(index_t player, const Move& move) const {
+    bool isAttackGeneral(index_t player, const Move& move) const {
         if (move.type != MoveType::MOVE_ARMY) return false;
         const Tile& toTile = board.tileAt(move.to);
         return toTile.type == TILE_GENERAL && isValidPlayer(toTile.occupier) &&
@@ -161,7 +160,7 @@ class BasicGame {
     }
 
     /// Check if a move is a chase (target tile's enemy occupier is moving out).
-    inline bool isChaseMove(
+    bool isChaseMove(
         index_t player, const Move& move,
         const std::unordered_map<Coord, index_t>& moveOutMap) const {
         if (move.type != MoveType::MOVE_ARMY) return false;
@@ -177,7 +176,7 @@ class BasicGame {
     }
 
     /// Get the priority category of a move.
-    inline MovePriority getMovePriority(
+    MovePriority getMovePriority(
         index_t player, const Move& move,
         const std::unordered_map<Coord, index_t>& moveOutMap) const {
         if (isChaseMove(player, move, moveOutMap)) return MovePriority::CHASE;
@@ -188,7 +187,7 @@ class BasicGame {
 
     /// Compare two moves by priority.
     /// Returns true if `a` should execute before `b`.
-    inline bool compareMovePriority(
+    bool compareMovePriority(
         const std::pair<index_t, Move>& a, const std::pair<index_t, Move>& b,
         const std::unordered_map<Coord, index_t>& moveOutMap) const {
         if (conf.MoveProcessMethod == config::MoveProcessMode::FULL) {
@@ -235,8 +234,8 @@ class BasicGame {
     Board initialBoard;
 
    public:
-    inline void setInitialBoard(Board initial) { initialBoard = initial; }
-    inline Board getInitialBoard() { return initialBoard; }
+    void setInitialBoard(Board initial) { initialBoard = initial; }
+    Board getInitialBoard() { return initialBoard; }
 };
 
 inline std::vector<pos_t> BasicGame::calcDist(Coord pos) {

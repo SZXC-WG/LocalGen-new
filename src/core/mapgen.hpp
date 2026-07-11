@@ -58,7 +58,6 @@ class Generator {
           visited_(totalTiles_, 0),
           isCandidate_(totalTiles_, 0),
           customQueue_(totalTiles_),
-          maxConnectedComponent_(),
           minDistFps_(totalTiles_),
           curDist_(totalTiles_),
           owner_(totalTiles_),
@@ -66,8 +65,6 @@ class Generator {
           sumRow_(searchSpawnCount_),
           sumCol_(searchSpawnCount_),
           count_(searchSpawnCount_),
-          spawns_(),
-          bestSpawns_(),
           erosionCandidates_(totalTiles_) {
         maxConnectedComponent_.reserve(totalTiles_);
         spawns_.reserve(searchSpawnCount_);
@@ -93,7 +90,7 @@ class Generator {
     static constexpr double kComponentPenaltyWeight = 60.0;
     static constexpr int kDirections[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
-    inline bool inBounds(int row, int col) const {
+    bool inBounds(int row, int col) const {
         return row >= 0 && row < height_ && col >= 0 && col < width_;
     }
 

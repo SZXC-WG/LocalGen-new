@@ -35,12 +35,12 @@ class MapWidget : public QWidget {
                        int fitMargin = 25);
 
     void setFocusEnabled(bool enabled);
-    inline DisplayTile& tileAt(int r, int c) {
+    DisplayTile& tileAt(int r, int c) {
         return displayTiles[r * _mapWidth + c];
     }
 
-    inline int mapWidth() const { return _mapWidth; }
-    inline int mapHeight() const { return _mapHeight; }
+    int mapWidth() const { return _mapWidth; }
+    int mapHeight() const { return _mapHeight; }
 
     void setMapWidth(int w);
     void setMapHeight(int h);
@@ -72,10 +72,10 @@ class MapWidget : public QWidget {
     bool isTouchpadScrollEvent(const QWheelEvent* event) const;
     bool handleNativeGesture(QNativeGestureEvent* event);
 
-    inline bool isValidGridPos(int x, int y) const {
+    bool isValidGridPos(int x, int y) const {
         return x >= 0 && x < mapWidth() && y >= 0 && y < mapHeight();
     }
-    inline bool isValidGridPos(const QPoint& pos) const {
+    bool isValidGridPos(const QPoint& pos) const {
         return isValidGridPos(pos.x(), pos.y());
     }
 

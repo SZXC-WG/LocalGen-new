@@ -38,18 +38,17 @@ class Player {
     virtual ~Player() = default;
 
    protected:
-    inline void surrender() {
+    void surrender() {
         moveQueue.clear();
         moveQueue.emplace_back(MoveType::SURRENDER);
     }
 
    public:
-    inline void setSendMessageCallback(
-        std::function<void(const std::string&)> cb) {
+    void setSendMessageCallback(std::function<void(const std::string&)> cb) {
         sendMessageCb = std::move(cb);
     }
 
-    inline void sendMessage(const std::string& text) {
+    void sendMessage(const std::string& text) {
         if (sendMessageCb) sendMessageCb(text);
     }
 
@@ -84,7 +83,7 @@ class Player {
    public:
     std::deque<Move>& getMoveQueue() { return moveQueue; }
 
-    inline Move step() {
+    Move step() {
         if (moveQueue.empty()) return Move();
         Move move = moveQueue.front();
         moveQueue.pop_front();

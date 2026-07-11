@@ -24,7 +24,7 @@
         <div class="stat-card"><dt>{{ i18n "stats_version" }}</dt><dd>{{ $project.version | default .Site.Params.projectVersion }}</dd></div>
         <div class="stat-card"><dt>{{ i18n "stats_bot_count" }}</dt><dd>{{ $project.bot_count }}</dd></div>
         <div class="stat-card"><dt>{{ i18n "stats_map_count" }}</dt><dd>{{ $project.map_count }}</dd></div>
-        <div class="stat-card"><dt>{{ i18n "stats_license" }}</dt><dd>{{ $project.license }}</dd></div>
+        <div class="stat-card"><dt>{{ i18n "stats_license" }}</dt><dd title="{{ $project.license }}">GPLv3+</dd></div>
       </dl>
     </div>
 

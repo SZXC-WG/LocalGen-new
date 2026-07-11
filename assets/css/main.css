@@ -344,7 +344,7 @@ h3 { margin: 0 0 0.55rem; font-size: 1.08rem; line-height: 1.3; }
 .visual-figure img { width: 100%; height: auto; }
 .hero-panel p, .panel p, .card p, .sidebar-card p, .plot-card p, .release-card p, .contributor-card p { margin: 0.55rem 0 0; }
 
-.metric-strip { margin-top: 1.6rem; }
+.metric-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 1.6rem; }
 .stat-card { min-height: 94px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--surface) 62%, transparent); }
 .stat-card dt { color: var(--muted); font-size: 0.72rem; }
 .stat-card dd { margin: 0.3rem 0 0; font-size: 1.12rem; font-weight: 750; line-height: 1.25; letter-spacing: -0.025em; overflow-wrap: anywhere; }
@@ -604,7 +604,7 @@ h3 { margin: 0 0 0.55rem; font-size: 1.08rem; line-height: 1.3; }
 @media (max-width: 640px) {
   .hero-section, .page-hero { padding-top: 3rem; }
   h1 { font-size: clamp(2.6rem, 14vw, 3.7rem); }
-  .stat-grid, .plot-grid { grid-template-columns: minmax(0, 1fr); }
+  .plot-grid { grid-template-columns: minmax(0, 1fr); }
   .status-grid, .path-grid, .route-grid, .docs-card-grid, .contributor-grid-compact { grid-template-columns: minmax(0, 1fr); }
   .status-card { min-height: auto; }
   .path-card { min-height: 220px; }
@@ -621,6 +621,14 @@ h3 { margin: 0 0 0.55rem; font-size: 1.08rem; line-height: 1.3; }
   .asset-list li { flex-direction: column; }
   .hero-panel, .panel, .sidebar-card, .release-card.detailed, .contributor-card.detailed,
   .plot-card, .prose-panel, .card, .stat-card { padding: 1.15rem; border-radius: var(--radius); }
+}
+
+@media (max-width: 550px) {
+  .metric-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 279px) {
+  .metric-strip { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {

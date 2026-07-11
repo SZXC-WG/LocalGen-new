@@ -184,7 +184,7 @@
             </div>
             <h3>{{ .name }}</h3>
             <p class="muted">{{ time.Format ":date_medium" (time.AsTime .published_at) }}</p>
-            <p>{{ .summary | default .body | markdownify | plainify | truncate 170 }}</p>
+            <p class="release-notes-preview">{{ partial "release-notes-preview.html" (.body | default .summary) | truncate 170 }}</p>
             <a href="{{ .html_url }}">{{ i18n "release_notes" }}</a>
           </article>
         {{ end }}

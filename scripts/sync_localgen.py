@@ -104,7 +104,7 @@ def normalize_release(release: dict[str, Any], latest_stable_tag: str | None) ->
             }
         )
     body = release.get("body") or ""
-    summary = " ".join(line.strip() for line in body.splitlines() if line.strip())
+    summary = body.strip()
     return {
         "name": release.get("name") or release.get("tag_name"),
         "tag_name": release.get("tag_name"),

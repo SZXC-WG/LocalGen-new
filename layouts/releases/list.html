@@ -39,7 +39,7 @@
                   <span>{{ .tag_name }}</span>
                 </div>
                 <h3><a href="{{ .html_url }}">{{ .name }}</a></h3>
-                <p>{{ .summary | default .body | markdownify | plainify | truncate 220 }}</p>
+                <p class="release-notes-preview">{{ partial "release-notes-preview.html" (.body | default .summary) | truncate 220 }}</p>
               </div>
               <div class="release-index-meta">
                 <time datetime="{{ .published_at }}">{{ time.Format ":date_medium" (time.AsTime .published_at) }}</time>

@@ -91,8 +91,6 @@ const QList<QPointF>& historyForMode(const PlayerAnalysisSeries& series,
 }
 
 QChart* createChart(const QString& title, QValueAxis*& outAxisX) {
-    const QColor panelBackground(20, 23, 28, 0);
-    const QColor plotBackground(32, 37, 44, 160);
     const QColor foreground(240, 244, 248);
     const QColor gridColor(240, 244, 248, 64);
 
@@ -101,12 +99,8 @@ QChart* createChart(const QString& title, QValueAxis*& outAxisX) {
     chart->setTitleFont(QFont("Quicksand", 11, QFont::Bold));
     chart->setTitleBrush(QBrush(foreground));
     chart->setAnimationOptions(QChart::NoAnimation);
-    chart->setBackgroundBrush(QBrush(panelBackground));
-    chart->setBackgroundPen(Qt::NoPen);
-    chart->setBackgroundVisible(true);
-    chart->setPlotAreaBackgroundBrush(QBrush(plotBackground));
-    chart->setPlotAreaBackgroundPen(QPen(gridColor));
-    chart->setPlotAreaBackgroundVisible(true);
+    chart->setBackgroundVisible(false);
+    chart->setPlotAreaBackgroundVisible(false);
     chart->setMargins(QMargins(10, 10, 10, 10));
     chart->legend()->hide();
 
@@ -175,7 +169,10 @@ AnalysisChartWidget::AnalysisChartWidget(
     chartView->setFrameShape(QFrame::NoFrame);
     chartView->setRubberBand(QChartView::NoRubberBand);
     chartView->setRenderHint(QPainter::Antialiasing, true);
-    chartView->setBackgroundBrush(Qt::transparent);
+    chartView->setBackgroundBrush(QBrush(Qt::NoBrush));
+    chartView->setAutoFillBackground(false);
+    chartView->viewport()->setAutoFillBackground(false);
+    chartView->viewport()->setAttribute(Qt::WA_TranslucentBackground, true);
     mainLayout->addWidget(chartView, 1);
 
     connect(metricToggle, &QAbstractButton::toggled, this,

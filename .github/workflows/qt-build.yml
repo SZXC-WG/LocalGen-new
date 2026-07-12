@@ -94,7 +94,9 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          cmake -B build -S . -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake
+          cmake -B build -S . -G "Ninja Multi-Config" \
+            -DCMAKE_TOOLCHAIN_FILE=$QT_ROOT_DIR/lib/cmake/Qt6/qt.toolchain.cmake \
+            -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
           cmake --build build --config Release
 
       - name: Install Linux packaging tools

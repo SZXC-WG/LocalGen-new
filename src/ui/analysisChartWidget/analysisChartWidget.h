@@ -7,7 +7,7 @@
 #include <QFrame>
 #include <QList>
 #include <QPointF>
-#include <QPushButton>
+#include <QSlider>
 #include <QString>
 #include <QtCharts/QChart>
 #include <QtCharts/QChartView>
@@ -45,8 +45,8 @@ class AnalysisChartWidget : public QFrame {
     QValueAxis* axisX = nullptr;
     QValueAxis* axisYLinear = nullptr;
     QLogValueAxis* axisYLog = nullptr;
-    QAbstractButton* metricToggle = nullptr;
-    QAbstractButton* scaleToggle = nullptr;
+    QSlider* metricSwitch = nullptr;
+    QSlider* scaleSwitch = nullptr;
 
     bool showingLand = false;
     bool usingLogScale = false;

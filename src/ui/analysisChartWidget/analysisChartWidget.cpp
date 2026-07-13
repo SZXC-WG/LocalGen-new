@@ -4,6 +4,7 @@
 #include "analysisChartWidget.h"
 
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QVBoxLayout>
 #include <QtCharts/QLegend>
 #include <algorithm>
@@ -30,16 +31,37 @@ void styleAnalysisAxis(QAbstractAxis* axis, const QColor& foreground,
     axis->setMinorGridLineColor(gridColor);
 }
 
-QAbstractButton* createToggleButton(const QString& text, QWidget* parent) {
-    QAbstractButton* button = new QPushButton(text, parent);
-    button->setCheckable(true);
-    button->setFocusPolicy(Qt::NoFocus);
-    button->setCursor(Qt::PointingHandCursor);
-    button->setFont(QFont("Quicksand", 10, QFont::Bold));
-    QPalette pal = button->palette();
-    pal.setColor(QPalette::ButtonText, Qt::white);
-    button->setPalette(pal);
-    return button;
+QWidget* createHorizontalSwitch(const QString& leftText,
+                                const QString& rightText,
+                                const QString& accessibleName, QWidget* parent,
+                                QSlider*& outSwitch) {
+    QWidget* container = new QWidget(parent);
+    QHBoxLayout* layout = new QHBoxLayout(container);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(5);
+
+    auto createLabel = [container](const QString& text) {
+        QLabel* label = new QLabel(text, container);
+        label->setFont(QFont("Quicksand", 9, QFont::DemiBold));
+        QPalette palette = label->palette();
+        palette.setColor(QPalette::WindowText, QColor(240, 244, 248));
+        label->setPalette(palette);
+        return label;
+    };
+
+    layout->addWidget(createLabel(leftText));
+
+    outSwitch = new QSlider(Qt::Horizontal, container);
+    outSwitch->setRange(0, 1);
+    outSwitch->setSingleStep(1);
+    outSwitch->setPageStep(1);
+    outSwitch->setTickPosition(QSlider::NoTicks);
+    outSwitch->setFixedWidth(48);
+    outSwitch->setAccessibleName(accessibleName);
+    layout->addWidget(outSwitch);
+
+    layout->addWidget(createLabel(rightText));
+    return container;
 }
 
 qreal smoothedLinearValue(const QList<QPointF>& history, qreal rawValue) {
@@ -138,13 +160,15 @@ AnalysisChartWidget::AnalysisChartWidget(
 
     QHBoxLayout* controlsLayout = new QHBoxLayout();
     controlsLayout->setContentsMargins(0, 0, 0, 0);
+
+    QWidget* metricControl = createHorizontalSwitch(
+        "Army", "Land", "Chart metric: Army or Land", this, metricSwitch);
+    controlsLayout->addWidget(metricControl);
+
     controlsLayout->addStretch(1);
-
-    metricToggle = createToggleButton("Switch to Land", this);
-    controlsLayout->addWidget(metricToggle);
-
-    scaleToggle = createToggleButton("Switch to Log", this);
-    controlsLayout->addWidget(scaleToggle);
+    QWidget* scaleControl = createHorizontalSwitch(
+        "Linear", "Log", "Chart scale: Linear or Log", this, scaleSwitch);
+    controlsLayout->addWidget(scaleControl);
     mainLayout->addLayout(controlsLayout);
 
     chart = createChart("Army Trend", axisX);
@@ -175,13 +199,12 @@ AnalysisChartWidget::AnalysisChartWidget(
     chartView->viewport()->setAttribute(Qt::WA_TranslucentBackground, true);
     mainLayout->addWidget(chartView, 1);
 
-    connect(metricToggle, &QAbstractButton::toggled, this,
-            [this](bool checked) {
-                showingLand = checked;
-                refreshChart();
-            });
-    connect(scaleToggle, &QAbstractButton::toggled, this, [this](bool checked) {
-        usingLogScale = checked;
+    connect(metricSwitch, &QSlider::valueChanged, this, [this](int value) {
+        showingLand = value != 0;
+        refreshChart();
+    });
+    connect(scaleSwitch, &QSlider::valueChanged, this, [this](int value) {
+        usingLogScale = value != 0;
         refreshChart();
     });
 
@@ -243,9 +266,6 @@ void AnalysisChartWidget::refreshChart() {
     chart->setTitle(QString("%1 Trend (%2)")
                         .arg(showingLand ? "Land" : "Army",
                              usingLogScale ? "Log" : "Linear"));
-
-    metricToggle->setText(showingLand ? "Switch to Army" : "Switch to Land");
-    scaleToggle->setText(usingLogScale ? "Switch to Linear" : "Switch to Log");
 
     QAbstractAxis* activeAxis =
         usingLogScale ? static_cast<QAbstractAxis*>(axisYLog) : axisYLinear;

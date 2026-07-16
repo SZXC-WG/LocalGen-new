@@ -50,10 +50,6 @@ class MapCreatorWindow : public QDialog {
     QRect metadataSidebarButtonGeometry() const;
     void setMapMetadata(const MapMetadata& metadata);
     MapMetadata currentMetadata() const;
-    void resetMapMetadata(
-        const QString& mapName = QString(), const QString& author = QString(),
-        const QDateTime& creationDateTime = QDateTime::currentDateTime(),
-        const QString& description = QString());
     void updateHintBar();
     void keyPressEvent(QKeyEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;

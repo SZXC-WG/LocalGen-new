@@ -285,53 +285,32 @@ void MapCreatorWindow::setupSliders() {
     sliderRow->setContentsMargins(0, 0, 0, 0);
     sliderRow->setSpacing(5);
 
-    // Width slider
-    QLabel* widthLabel = new QLabel("W:", floatingPanel);
-    widthLabel->setFont(font);
-    widthLabel->setStyleSheet("color: black;");
-    widthSlider = new QSlider(Qt::Horizontal, floatingPanel);
-    widthSlider->setRange(1, 100);
-    widthSlider->setValue(10);
-    QLabel* widthValueLabel = new QLabel("10", floatingPanel);
-    widthValueLabel->setFont(font);
-    widthValueLabel->setStyleSheet("color: black;");
-    widthValueLabel->setAlignment(Qt::AlignCenter);
-    widthValueLabel->setFixedWidth(30);
+    auto addSlider = [&](const QString& name, QSlider*& slider,
+                         auto resizeMap) {
+        auto* label = new QLabel(name, floatingPanel);
+        label->setFont(font);
+        label->setStyleSheet("color: black;");
+        slider = new QSlider(Qt::Horizontal, floatingPanel);
+        slider->setRange(1, 100);
+        slider->setValue(10);
+        auto* valueLabel = new QLabel("10", floatingPanel);
+        valueLabel->setFont(font);
+        valueLabel->setStyleSheet("color: black;");
+        valueLabel->setAlignment(Qt::AlignCenter);
+        valueLabel->setFixedWidth(30);
+        connect(slider, &QSlider::valueChanged,
+                [this, valueLabel, resizeMap](int value) {
+                    valueLabel->setText(QString::number(value));
+                    (map->*resizeMap)(value);
+                });
+        sliderRow->addWidget(label);
+        sliderRow->addWidget(slider, 1);
+        sliderRow->addWidget(valueLabel);
+    };
 
-    connect(widthSlider, &QSlider::valueChanged,
-            [this, widthValueLabel](int value) {
-                widthValueLabel->setText(QString::number(value));
-                map->setMapWidth(value);
-            });
-
-    sliderRow->addWidget(widthLabel);
-    sliderRow->addWidget(widthSlider, 1);
-    sliderRow->addWidget(widthValueLabel);
-
+    addSlider("W:", widthSlider, &MapWidget::setMapWidth);
     sliderRow->addSpacing(10);
-
-    // Height slider
-    QLabel* heightLabel = new QLabel("H:", floatingPanel);
-    heightLabel->setFont(font);
-    heightLabel->setStyleSheet("color: black;");
-    heightSlider = new QSlider(Qt::Horizontal, floatingPanel);
-    heightSlider->setRange(1, 100);
-    heightSlider->setValue(10);
-    QLabel* heightValueLabel = new QLabel("10", floatingPanel);
-    heightValueLabel->setFont(font);
-    heightValueLabel->setStyleSheet("color: black;");
-    heightValueLabel->setAlignment(Qt::AlignCenter);
-    heightValueLabel->setFixedWidth(30);
-
-    connect(heightSlider, &QSlider::valueChanged,
-            [this, heightValueLabel](int value) {
-                heightValueLabel->setText(QString::number(value));
-                map->setMapHeight(value);
-            });
-
-    sliderRow->addWidget(heightLabel);
-    sliderRow->addWidget(heightSlider, 1);
-    sliderRow->addWidget(heightValueLabel);
+    addSlider("H:", heightSlider, &MapWidget::setMapHeight);
 
     panelLayout->addLayout(sliderRow);
 
@@ -457,7 +436,7 @@ void MapCreatorWindow::setupMetadataSidebar() {
     connect(sidebarAnimation, &QPropertyAnimation::finished, this,
             [this]() { applyMetadataSidebarState(); });
 
-    resetMapMetadata();
+    setMapMetadata({});
     updateMetadataSidebar();
 }
 
@@ -557,16 +536,6 @@ MapMetadata MapCreatorWindow::currentMetadata() const {
                 ? creationDateEdit->dateTime()
                 : QDateTime::currentDateTime(),
             descriptionEdit->toPlainText().trimmed()};
-}
-
-void MapCreatorWindow::resetMapMetadata(const QString& mapTitle,
-                                        const QString& author,
-                                        const QDateTime& creationDateTime,
-                                        const QString& description) {
-    setMapMetadata({mapTitle, author,
-                    creationDateTime.isValid() ? creationDateTime
-                                               : QDateTime::currentDateTime(),
-                    description});
 }
 
 void MapCreatorWindow::setupHintBar() {

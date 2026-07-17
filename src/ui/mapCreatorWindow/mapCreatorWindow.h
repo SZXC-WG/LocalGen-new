@@ -4,7 +4,6 @@
 #pragma once
 
 #include <QComboBox>
-#include <QDateTime>
 #include <QDateTimeEdit>
 #include <QDialog>
 #include <QKeyEvent>
@@ -17,7 +16,6 @@
 #include <QTextEdit>
 #include <QToolButton>
 #include <QWidget>
-#include <cstdint>
 
 #include "../mapWidget/mapWidget.h"
 #include "core/map.hpp"
@@ -32,14 +30,13 @@ class MapCreatorWindow : public QDialog {
 
     void onMapClicked(int r, int c);
 
-   private slots:
+   private:
     void setupSliders();
     void setupMetadataSidebar();
     void onOpenMap();
     void onSaveMap();
     void onImportFromWeb();
 
-   private:
     void setupToolbar();
     void updateToolButtonStyles();
     void setupHintBar();
@@ -47,7 +44,6 @@ class MapCreatorWindow : public QDialog {
     void updateMetadataSidebar(bool animate = false);
     void applyMetadataSidebarState();
     QRect metadataSidebarGeometry(bool expanded) const;
-    QRect metadataSidebarButtonGeometry() const;
     void setMapMetadata(const MapMetadata& metadata);
     MapMetadata currentMetadata() const;
     void updateHintBar();
@@ -62,17 +58,12 @@ class MapCreatorWindow : public QDialog {
 
     QNetworkAccessManager* networkManager = nullptr;
 
-    static const QString mapFileFilter;
-
     MapWidget* map;
     QWidget* toolbar;
     QList<QPushButton*> toolButtons;
     QWidget* sidebarContainer;
     QWidget* sidebarPanel;
-    QWidget* sidebarHeader;
-    QLabel* sidebarTitleLabel;
     QToolButton* sidebarToggleButton;
-    QWidget* metadataFormContainer;
     QLineEdit* mapTitleEdit;
     QLineEdit* authorEdit;
     QDateTimeEdit* creationDateEdit;

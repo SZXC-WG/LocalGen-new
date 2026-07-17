@@ -68,12 +68,12 @@ class SurrenderConfirmDialog : public QDialog {
         buttons->setSpacing(12);
         buttons->addStretch(1);
 
-        GeneralsButton* surrenderButton = makeButton("Surrender", panel);
-        GeneralsButton* keepPlayingButton = makeButton("Keep Playing", panel);
-        QObject::connect(surrenderButton, &QAbstractButton::clicked, this,
-                         &QDialog::accept);
-        QObject::connect(keepPlayingButton, &QAbstractButton::clicked, this,
-                         &QDialog::reject);
+        auto* surrenderButton = makeButton("Surrender", panel);
+        auto* keepPlayingButton = makeButton("Keep Playing", panel);
+        connect(surrenderButton, &QAbstractButton::clicked, this,
+                &QDialog::accept);
+        connect(keepPlayingButton, &QAbstractButton::clicked, this,
+                &QDialog::reject);
 
         buttons->addWidget(surrenderButton);
         buttons->addWidget(keepPlayingButton);
@@ -97,7 +97,7 @@ class SurrenderConfirmDialog : public QDialog {
         adjustSize();
         if (parent == nullptr) return;
 
-        const QPoint center = parent->mapToGlobal(parent->rect().center());
-        move(center.x() - width() / 2, center.y() - height() / 2);
+        move(parent->mapToGlobal(parent->rect().center()) -
+             QPoint(width() / 2, height() / 2));
     }
 };

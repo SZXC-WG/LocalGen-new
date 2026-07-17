@@ -11,31 +11,30 @@
 
 namespace {
 
-inline std::uint64_t splitmix64(std::uint64_t& x) {
+std::uint64_t splitmix64(std::uint64_t& x) {
     std::uint64_t z = (x += 0x9E3779B97F4A7C15ull);
     z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
     z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
-    z = z ^ (z >> 31);
+    z ^= z >> 31;
     return z ? z : 0x9E3779B97F4A7C15ull;
 }
 
 // xorshift64*
-inline std::uint32_t fastRand(std::uint64_t& state) {
+std::uint32_t fastRand(std::uint64_t& state) {
     state ^= state >> 12;
     state ^= state << 25;
     state ^= state >> 27;
     return (state * 0x2545F4914F6CDD1Dull) >> 32;
 }
 
-inline int uniformInclusive(std::uint64_t& state, int low, int high) {
+int uniformInclusive(std::uint64_t& state, int low, int high) {
     const std::uint32_t span = static_cast<std::uint32_t>(high - low + 1);
     return low + static_cast<int>(fastRand(state) % span);
 }
 
-inline int uniformPercentageCount(std::uint64_t& state, int total,
-                                  int lowPercent, int highPercent) {
-    const int low = total * lowPercent / 100;
-    const int high = total * highPercent / 100;
+int uniformPercentageCount(std::uint64_t& state, int total, int lowPercent,
+                           int highPercent) {
+    const int low = total * lowPercent / 100, high = total * highPercent / 100;
     return uniformInclusive(state, low, high);
 }
 
@@ -94,12 +93,32 @@ class Generator {
         return row >= 0 && row < height_ && col >= 0 && col < width_;
     }
 
+    void updateMinSpawnDistances(int start) {
+        int head = 0, tail = 0;
+        customQueue_[tail++] = start;
+        minDistFps_[start] = 0;
+        while (head < tail) {
+            const int u = customQueue_[head++];
+            const int row = u / width_, col = u % width_;
+            for (const auto& dir : kDirections) {
+                const int nr = row + dir[0], nc = col + dir[1];
+                if (!inBounds(nr, nc)) continue;
+                const int v = nr * width_ + nc;
+                if (grid_[v] != TILE_BLANK ||
+                    minDistFps_[v] <= minDistFps_[u] + 1)
+                    continue;
+                minDistFps_[v] = minDistFps_[u] + 1;
+                customQueue_[tail++] = v;
+            }
+        }
+    }
+
     void generateBasicTerrain() {
         int targetMountains =
             static_cast<int>(std::lround(totalTiles_ * mountainDensity_));
         targetMountains = std::clamp(targetMountains, 0, totalTiles_ * 3 / 5);
 
-        double baseMargin = 0.06;
+        const double baseMargin = 0.06;
         double bestScore = 1e15;
 
         for (int cand = 0; cand < kNumCandidates || bestSpawns_.empty();
@@ -115,8 +134,8 @@ class Generator {
 
             int currentMountains = 0;
             while (currentMountains < initialMountains) {
-                int row = static_cast<int>(fastRand(searchSeed_) % height_);
-                int col = static_cast<int>(fastRand(searchSeed_) % width_);
+                int row = static_cast<int>(fastRand(searchSeed_) % height_),
+                    col = static_cast<int>(fastRand(searchSeed_) % width_);
                 const int idx = row * width_ + col;
                 if (grid_[idx] != TILE_BLANK) continue;
 
@@ -125,8 +144,7 @@ class Generator {
 
                 const int blobSize =
                     1 + static_cast<int>(fastRand(searchSeed_) % 5);
-                int curRow = row;
-                int curCol = col;
+                int curRow = row, curCol = col;
                 for (int step = 1;
                      step < blobSize && currentMountains < initialMountains;
                      ++step) {
@@ -143,19 +161,14 @@ class Generator {
             }
             if (totalTiles_ - currentMountains < searchSpawnCount_) continue;
 
-            if (currentMountains < targetMountains) {
-                baseMargin += 0.02;
-                if (cand + 1 < kNumCandidates) continue;
-            } else if (currentMountains > targetMountains) {
+            if (currentMountains > targetMountains) {
                 int candidateTail = 0;
                 std::fill(isCandidate_.begin(), isCandidate_.end(), 0);
                 for (int i = 0; i < totalTiles_; ++i) {
                     if (grid_[i] != TILE_MOUNTAIN) continue;
-                    const int row = i / width_;
-                    const int col = i % width_;
+                    const int row = i / width_, col = i % width_;
                     for (const auto& dir : kDirections) {
-                        const int nr = row + dir[0];
-                        const int nc = col + dir[1];
+                        const int nr = row + dir[0], nc = col + dir[1];
                         if (!inBounds(nr, nc)) continue;
                         const int v = nr * width_ + nc;
                         if (grid_[v] != TILE_BLANK) continue;
@@ -178,11 +191,9 @@ class Generator {
 
                     grid_[u] = TILE_BLANK;
                     --currentMountains;
-                    const int row = u / width_;
-                    const int col = u % width_;
+                    const int row = u / width_, col = u % width_;
                     for (const auto& dir : kDirections) {
-                        const int nr = row + dir[0];
-                        const int nc = col + dir[1];
+                        const int nr = row + dir[0], nc = col + dir[1];
                         if (!inBounds(nr, nc)) continue;
                         const int v = nr * width_ + nc;
                         if (grid_[v] != TILE_MOUNTAIN || isCandidate_[v])
@@ -205,11 +216,9 @@ class Generator {
                 visited_[i] = 1;
                 while (head < tail) {
                     const int u = customQueue_[head++];
-                    const int row = u / width_;
-                    const int col = u % width_;
+                    const int row = u / width_, col = u % width_;
                     for (const auto& dir : kDirections) {
-                        const int nr = row + dir[0];
-                        const int nc = col + dir[1];
+                        const int nr = row + dir[0], nc = col + dir[1];
                         if (!inBounds(nr, nc)) continue;
                         const int v = nr * width_ + nc;
                         if (grid_[v] != TILE_BLANK || visited_[v]) continue;
@@ -234,55 +243,17 @@ class Generator {
             std::fill(minDistFps_.begin(), minDistFps_.end(),
                       std::numeric_limits<int>::max());
 
-            int head = 0, tail = 0;
-            customQueue_[tail++] = spawns_[0];
-            minDistFps_[spawns_[0]] = 0;
-            while (head < tail) {
-                const int u = customQueue_[head++];
-                const int row = u / width_;
-                const int col = u % width_;
-                for (const auto& dir : kDirections) {
-                    const int nr = row + dir[0];
-                    const int nc = col + dir[1];
-                    if (!inBounds(nr, nc)) continue;
-                    const int v = nr * width_ + nc;
-                    if (grid_[v] != TILE_BLANK ||
-                        minDistFps_[v] <= minDistFps_[u] + 1)
-                        continue;
-                    minDistFps_[v] = minDistFps_[u] + 1;
-                    customQueue_[tail++] = v;
-                }
-            }
+            updateMinSpawnDistances(spawns_[0]);
 
             for (int k = 1; k < searchSpawnCount_; ++k) {
-                int bestVertex = -1;
-                int maxDistance = -1;
+                int bestVertex = -1, maxDistance = -1;
                 for (int u : maxConnectedComponent_) {
                     if (minDistFps_[u] <= maxDistance) continue;
                     maxDistance = minDistFps_[u];
                     bestVertex = u;
                 }
                 spawns_.push_back(bestVertex);
-                head = 0;
-                tail = 0;
-                customQueue_[tail++] = bestVertex;
-                minDistFps_[bestVertex] = 0;
-                while (head < tail) {
-                    const int u = customQueue_[head++];
-                    const int row = u / width_;
-                    const int col = u % width_;
-                    for (const auto& dir : kDirections) {
-                        const int nr = row + dir[0];
-                        const int nc = col + dir[1];
-                        if (!inBounds(nr, nc)) continue;
-                        const int v = nr * width_ + nc;
-                        if (grid_[v] != TILE_BLANK ||
-                            minDistFps_[v] <= minDistFps_[u] + 1)
-                            continue;
-                        minDistFps_[v] = minDistFps_[u] + 1;
-                        customQueue_[tail++] = v;
-                    }
-                }
+                updateMinSpawnDistances(bestVertex);
             }
 
             for (int iter = 0; iter < 2; ++iter) {
@@ -293,8 +264,7 @@ class Generator {
                 std::fill(sumRow_.begin(), sumRow_.end(), 0);
                 std::fill(sumCol_.begin(), sumCol_.end(), 0);
 
-                head = 0;
-                tail = 0;
+                int head = 0, tail = 0;
                 for (int i = 0; i < searchSpawnCount_; ++i) {
                     owner_[spawns_[i]] = i;
                     curDist_[spawns_[i]] = 0;
@@ -307,11 +277,9 @@ class Generator {
                     ++count_[owner];
                     sumRow_[owner] += u / width_;
                     sumCol_[owner] += u % width_;
-                    const int row = u / width_;
-                    const int col = u % width_;
+                    const int row = u / width_, col = u % width_;
                     for (const auto& dir : kDirections) {
-                        const int nr = row + dir[0];
-                        const int nc = col + dir[1];
+                        const int nr = row + dir[0], nc = col + dir[1];
                         if (!inBounds(nr, nc)) continue;
                         const int v = nr * width_ + nc;
                         if (grid_[v] != TILE_BLANK ||
@@ -332,8 +300,7 @@ class Generator {
                         std::numeric_limits<long long>::max();
                     for (int v : maxConnectedComponent_) {
                         if (owner_[v] != i) continue;
-                        const long long row = v / width_;
-                        const long long col = v % width_;
+                        const long long row = v / width_, col = v % width_;
                         const long long distSq =
                             (row - meanRow) * (row - meanRow) +
                             (col - meanCol) * (col - meanCol);
@@ -350,8 +317,7 @@ class Generator {
                       std::numeric_limits<int>::max());
             std::fill(area_.begin(), area_.end(), 0);
 
-            head = 0;
-            tail = 0;
+            int head = 0, tail = 0;
             for (int i = 0; i < searchSpawnCount_; ++i) {
                 owner_[spawns_[i]] = i;
                 curDist_[spawns_[i]] = 0;
@@ -363,11 +329,9 @@ class Generator {
                 const int u = customQueue_[head++];
                 const int owner = owner_[u];
                 ++area_[owner];
-                const int row = u / width_;
-                const int col = u % width_;
+                const int row = u / width_, col = u % width_;
                 for (const auto& dir : kDirections) {
-                    const int nr = row + dir[0];
-                    const int nc = col + dir[1];
+                    const int nr = row + dir[0], nc = col + dir[1];
                     if (!inBounds(nr, nc)) continue;
                     const int v = nr * width_ + nc;
                     if (grid_[v] != TILE_BLANK) continue;
@@ -389,12 +353,10 @@ class Generator {
 
             int spawnPenalty = 0;
             for (int spawn : spawns_) {
-                const int row = spawn / width_;
-                const int col = spawn % width_;
+                const int row = spawn / width_, col = spawn % width_;
                 int openNeighbors = 0;
                 for (const auto& dir : kDirections) {
-                    const int nr = row + dir[0];
-                    const int nc = col + dir[1];
+                    const int nr = row + dir[0], nc = col + dir[1];
                     if (!inBounds(nr, nc)) continue;
                     if (grid_[nr * width_ + nc] == TILE_BLANK) ++openNeighbors;
                 }
@@ -436,11 +398,9 @@ class Generator {
         borderMountains.reserve(totalTiles_);
         for (int i = 0; i < totalTiles_; ++i) {
             if (grid_[i] != TILE_MOUNTAIN) continue;
-            const int row = i / width_;
-            const int col = i % width_;
+            const int row = i / width_, col = i % width_;
             for (const auto& dir : kDirections) {
-                const int nr = row + dir[0];
-                const int nc = col + dir[1];
+                const int nr = row + dir[0], nc = col + dir[1];
                 if (!inBounds(nr, nc)) continue;
                 const tile_type_e type = grid_[nr * width_ + nc];
                 if (type != TILE_BLANK && type != TILE_SPAWN) continue;
@@ -518,36 +478,18 @@ class Generator {
         return board;
     }
 
-    int width_;
-    int height_;
-    int totalTiles_;
-    int outputSpawnCount_;
-    int searchSpawnCount_;
-    bool placeSwamp_;
-    bool placeLookout_;
-    bool placeObservatory_;
+    int width_, height_, totalTiles_, outputSpawnCount_, searchSpawnCount_;
+    bool placeSwamp_, placeLookout_, placeObservatory_;
     double mountainDensity_;
 
-    std::uint64_t searchSeed_;
-    std::uint64_t decorateSeed_;
-    std::uint64_t cityArmySeed_;
+    std::uint64_t searchSeed_, decorateSeed_, cityArmySeed_;
 
-    std::vector<tile_type_e> grid_;
-    std::vector<tile_type_e> bestGrid_;
-    std::vector<std::uint8_t> visited_;
-    std::vector<std::uint8_t> isCandidate_;
-    std::vector<int> customQueue_;
-    std::vector<int> maxConnectedComponent_;
-    std::vector<int> minDistFps_;
-    std::vector<int> curDist_;
-    std::vector<int> owner_;
-    std::vector<int> area_;
-    std::vector<long long> sumRow_;
-    std::vector<long long> sumCol_;
-    std::vector<long long> count_;
-    std::vector<int> spawns_;
-    std::vector<int> bestSpawns_;
-    std::vector<int> erosionCandidates_;
+    std::vector<tile_type_e> grid_, bestGrid_;
+    std::vector<std::uint8_t> visited_, isCandidate_;
+    std::vector<int> customQueue_, maxConnectedComponent_, minDistFps_,
+        curDist_, owner_, area_;
+    std::vector<long long> sumRow_, sumCol_, count_;
+    std::vector<int> spawns_, bestSpawns_, erosionCandidates_;
 };
 
 }  // namespace

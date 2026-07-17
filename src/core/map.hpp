@@ -50,7 +50,8 @@ inline intmax_t PMod(intmax_t& x) {
     intmax_t res = x & 63;  // 63 = 0b111111
     x >>= 6;
     return res;
-};
+}
+
 constexpr int CHAR_AD = 48;
 
 std::string v5Zip(const Board& board) {
@@ -72,19 +73,18 @@ std::string v5Zip(const Board& board) {
                                  ? V5_TYPE_CODES[tile.type]
                                  : 0;
 
-            char ch = (type << 2) + (tile.lit << 1);
+            const char ch = (type << 2) + (tile.lit << 1);
             k1 = tile.type == TILE_SPAWN ? 0 : tile.army;
 
-            if (k1 < 0) {
-                k1 = -k1;
-                strZip.push_back(ch += CHAR_AD + 1);
-            } else
-                strZip.push_back(ch += CHAR_AD);
+            const bool negative = k1 < 0;
+            if (negative) k1 = -k1;
+
+            strZip.push_back(ch + CHAR_AD + negative);
 
             for (k2 = 1; k2 <= 8; k2++) strZip.push_back(PMod(k1) + CHAR_AD);
         }
     return strZip;
-};
+}
 
 Board v5Unzip(std::string strUnzip) {
     strUnzip.push_back('\0');
@@ -121,7 +121,7 @@ Board v5Unzip(std::string strUnzip) {
         }
 
     return board;
-};
+}
 
 }  // namespace
 
@@ -129,18 +129,16 @@ inline Board openMap_v5(const QString& filename, QString& errMsg) {
     QFile mapFile(filename);
     if (!mapFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         errMsg = "Failed to open map file.";
-        return Board();
+        return {};
     }
-    QString mapData = mapFile.readLine();
-    mapFile.close();
-    return v5Unzip(mapData.toStdString());
-};
+    return v5Unzip(mapFile.readLine().toStdString());
+}
 
 inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
     QFile mapFile(filename);
     if (!mapFile.open(QIODevice::ReadOnly)) {
         errMsg = "Failed to open map file.";
-        return MapDocument();
+        return {};
     }
 
     QDataStream ds(&mapFile);
@@ -151,7 +149,7 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
     ds >> magic;
     if (magic != MAGIC_6) {
         errMsg = "Invalid map file: bad magic number.";
-        return MapDocument();
+        return {};
     }
 
     QString mapTitle, author, description;
@@ -164,14 +162,14 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
 
     if (ds.status() != QDataStream::Ok) {
         errMsg = "Invalid or corrupted map file format.";
-        return MapDocument();
+        return {};
     }
 
     if (!creationDateTime.isValid()) {
         errMsg =
             "Invalid .lgmp metadata: creation datetime is"
             " missing or corrupted.";
-        return MapDocument();
+        return {};
     }
 
     const MapMetadata metadata{mapTitle, author, creationDateTime, description};
@@ -181,20 +179,20 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
     QByteArray raw = qUncompress(compressed);
     if (raw.isEmpty()) {
         errMsg = "Failed to decompress map data. The file is corrupted.";
-        return MapDocument();
+        return {};
     }
 
     const int expectedBits = width * height * 19;
     const int expectedBytes = (expectedBits + 7) / 8;
     if (raw.size() != expectedBytes) {
         errMsg = "Decompressed data size mismatch. The file is corrupted.";
-        return MapDocument();
+        return {};
     }
 
     QBitArray bits = QBitArray::fromBits(raw.constData(), expectedBits);
 
     // unpack tile from 19 bits
-    auto unpackTile = [](quint32 p) -> Tile {
+    auto unpackTile = [](quint32 p) {
         Tile tile;
         tile.type = static_cast<tile_type_e>((p >> 16) & 0x7);
         tile.lit = ((p >> 15) & 0x1);
@@ -218,14 +216,14 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
     }
 
     return MapDocument{metadata, board};
-};
+}
 
 inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(data, &error);
     if (error.error != QJsonParseError::NoError || !doc.isObject()) {
         errMsg = "This is not a valid JSON file.";
-        return MapDocument();
+        return {};
     }
 
     QJsonObject obj = doc.object();
@@ -234,7 +232,7 @@ inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
     QString mapStr = obj.value(QLatin1StringView("map")).toString();
     if (width <= 0 || height <= 0 || mapStr.isEmpty()) {
         errMsg = "Missing or invalid map configuration.";
-        return MapDocument();
+        return {};
     }
 
     const QString mapTitle = obj.value(QLatin1StringView("title")).toString();
@@ -248,7 +246,7 @@ inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
         errMsg =
             "Missing required metadata. Official JSON maps must include "
             "non-empty title and created_at fields.";
-        return MapDocument();
+        return {};
     }
 
     QDateTime creationDateTime =
@@ -260,7 +258,7 @@ inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
         errMsg =
             "Invalid created_at metadata. Expected an ISO-8601 datetime "
             "string.";
-        return MapDocument();
+        return {};
     }
     creationDateTime = creationDateTime.toLocalTime();
 
@@ -271,7 +269,7 @@ inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
                      "(%1) does not match width*height (%2).")
                      .arg(tileList.size())
                      .arg(width * height);
-        return MapDocument();
+        return {};
     }
 
     Board board(height, width);
@@ -319,17 +317,15 @@ inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
 
     MapMetadata metadata{mapTitle, author, creationDateTime, description};
     return MapDocument{metadata, board};
-};
+}
 
 inline MapDocument openOfficialMap(const QString& filename, QString& errMsg) {
     QFile mapFile(filename);
     if (!mapFile.open(QIODevice::ReadOnly)) {
         errMsg = "Failed to open map file.";
-        return MapDocument();
+        return {};
     }
-    QByteArray data = mapFile.readAll();
-    mapFile.close();
-    return openOfficialMap(data, errMsg);
+    return openOfficialMap(mapFile.readAll(), errMsg);
 }
 
 inline void saveMap_v5(const QString& filename, const Board& board,
@@ -340,7 +336,7 @@ inline void saveMap_v5(const QString& filename, const Board& board,
         return;
     }
     mapFile.write(QString::fromStdString(v5Zip(board)).toUtf8());
-};
+}
 
 inline void saveMap_v6(const QString& filename, const MapDocument& doc,
                        QString& errMsg) {
@@ -385,6 +381,4 @@ inline void saveMap_v6(const QString& filename, const MapDocument& doc,
     ds << MAGIC_6 << metadata.title << metadata.author
        << metadata.creationDateTime << metadata.description;
     ds << quint16(width) << quint16(height) << compressed;
-
-    mapFile.close();
-};
+}

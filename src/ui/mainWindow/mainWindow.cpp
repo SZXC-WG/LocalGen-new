@@ -81,7 +81,7 @@ const QString aboutText = QStringLiteral(
 
 void MainWindow::contextMenuEvent(QContextMenuEvent* event) {
     QMenu menu(this);
-    menu.addAction("About", this, [this]() {
+    menu.addAction("About", this, [this] {
         QMessageBox::about(this, "About LocalGen", aboutText);
     });
     menu.addAction("About Qt", qApp, &QApplication::aboutQt);

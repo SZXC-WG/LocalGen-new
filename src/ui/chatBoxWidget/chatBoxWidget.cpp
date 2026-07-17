@@ -23,28 +23,16 @@ QFont makeQuicksandFont(int pointSize, QFont::Weight weight) {
     return QFont("Quicksand", pointSize, weight);
 }
 
-void applyForegroundPalette(QWidget* widget, const QColor& color) {
-    QPalette palette = widget->palette();
-    palette.setColor(QPalette::WindowText, color);
-    palette.setColor(QPalette::Text, color);
-    palette.setColor(QPalette::ButtonText, color);
-    widget->setPalette(palette);
-}
-
-void applyBackgroundPalette(QWidget* widget, const QColor& color) {
-    QPalette palette = widget->palette();
-    palette.setColor(QPalette::Window, color);
-    palette.setColor(QPalette::Base, color);
-    widget->setPalette(palette);
-}
-
 QWidget* createColorChip(const QColor& color, QWidget* parent) {
     QFrame* chip = new QFrame(parent);
     chip->setFixedSize(12, 12);
     chip->setFrameShape(QFrame::NoFrame);
     chip->setAutoFillBackground(true);
 
-    applyBackgroundPalette(chip, color);
+    QPalette palette = chip->palette();
+    palette.setColor(QPalette::Window, color);
+    palette.setColor(QPalette::Base, color);
+    chip->setPalette(palette);
 
     return chip;
 }
@@ -53,7 +41,11 @@ QLabel* createSegmentLabel(const QString& text, const QColor& color,
                            const QFont& font, QWidget* parent) {
     QLabel* label = new QLabel(text, parent);
     label->setFont(font);
-    applyForegroundPalette(label, color);
+    QPalette palette = label->palette();
+    palette.setColor(QPalette::WindowText, color);
+    palette.setColor(QPalette::Text, color);
+    palette.setColor(QPalette::ButtonText, color);
+    label->setPalette(palette);
     label->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     label->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     return label;
@@ -99,17 +91,15 @@ QWidget* createMessageRowWidget(const ChatMessageEntry& entry,
         }
     }
 
-    QLabel* turnLabel =
+    layout->addWidget(
         createSegmentLabel(entry.turnText, QColor(184, 189, 196, 220),
-                           makeQuicksandFont(9, QFont::DemiBold), rowWidget);
-    layout->addWidget(turnLabel);
+                           makeQuicksandFont(9, QFont::DemiBold), rowWidget));
     layout->addStretch(1);
 
-    const int boldHeight =
-        QFontMetrics(makeQuicksandFont(10, QFont::Bold)).height();
-    const int mediumHeight =
-        QFontMetrics(makeQuicksandFont(9, QFont::DemiBold)).height();
-    rowWidget->setMinimumHeight(std::max(boldHeight, mediumHeight) + 4);
+    rowWidget->setMinimumHeight(
+        4 +
+        std::max(QFontMetrics(makeQuicksandFont(10, QFont::Bold)).height(),
+                 QFontMetrics(makeQuicksandFont(9, QFont::DemiBold)).height()));
 
     return rowWidget;
 }
@@ -126,9 +116,8 @@ ChatBoxWidget::ChatBoxWidget(QWidget* parent) : QFrame(parent) {
     setForegroundRole(QPalette::WindowText);
 
     QPalette panelPalette = palette();
-    const QColor panelBackground(0, 0, 0, 127);
     const QColor panelBorder(255, 255, 255, 36);
-    panelPalette.setColor(QPalette::Window, panelBackground);
+    panelPalette.setColor(QPalette::Window, QColor(0, 0, 0, 127));
     panelPalette.setColor(QPalette::WindowText, panelBorder);
     panelPalette.setColor(QPalette::Mid, panelBorder);
     panelPalette.setColor(QPalette::Dark, panelBorder);
@@ -165,8 +154,7 @@ ChatBoxWidget::ChatBoxWidget(QWidget* parent) : QFrame(parent) {
     historyViewport->setAutoFillBackground(false);
     historyViewport->setAttribute(Qt::WA_TranslucentBackground, true);
 
-    QScrollBar* scrollBar = historyList->verticalScrollBar();
-    scrollBar->setFixedWidth(10);
+    historyList->verticalScrollBar()->setFixedWidth(10);
     historyLayout->addWidget(historyList);
     layout->addWidget(historyContainer, 1);
 
@@ -198,11 +186,10 @@ void ChatBoxWidget::appendMessage(const ChatMessageEntry& message) {
         return;
     }
 
-    auto* item = new QListWidgetItem();
+    QListWidgetItem* item = new QListWidgetItem();
     QWidget* rowWidget = createMessageRowWidget(message, historyList);
     rowWidget->ensurePolished();
-    const QSize rowSize = rowWidget->sizeHint();
-    item->setSizeHint(QSize(rowSize.width(), rowSize.height() + 2));
+    item->setSizeHint(rowWidget->sizeHint() + QSize(0, 2));
     historyList->addItem(item);
     historyList->setItemWidget(item, rowWidget);
 

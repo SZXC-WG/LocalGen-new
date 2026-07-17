@@ -48,8 +48,7 @@ class AnalysisChartWidget : public QFrame {
     QSlider* metricSwitch = nullptr;
     QSlider* scaleSwitch = nullptr;
 
-    bool showingLand = false;
-    bool usingLogScale = false;
+    bool showingLand = false, usingLogScale = false;
     int sampleCount = 0;
     army_t armyMax = 0;
     int landMax = 0;

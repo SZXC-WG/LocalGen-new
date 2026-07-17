@@ -58,8 +58,8 @@ struct Tile {
     bool lit = false;
 
     Tile() = default;
-    Tile(index_t _occupier, tile_type_e _type, army_t _army, bool _lit = false)
-        : occupier(_occupier), type(_type), army(_army), lit(_lit) {};
+    Tile(index_t occupier, tile_type_e type, army_t army, bool lit = false)
+        : occupier(occupier), type(type), army(army), lit(lit) {}
 };
 
 /// Tile information visible to a specific player.
@@ -74,8 +74,7 @@ struct TileView {
 
     /// Tile information + visibility -> TileView
     void updateFrom(const Tile& tile, bool vis) {
-        visible = vis;
-        if (vis) {
+        if (visible = vis) {
             occupier = tile.occupier;
             type = tile.type == TILE_CAPTURED_GENERAL ? TILE_CITY : tile.type;
             army = tile.army;
@@ -93,5 +92,5 @@ struct TileView {
             }
             army = 0;
         }
-    };
+    }
 };

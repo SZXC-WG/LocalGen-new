@@ -54,15 +54,11 @@ class LeaderboardWidget : public QWidget {
     QVector<QRect> deadPlayerRects;
     bool collapsed = false;
 
-    constexpr static int headerHeight = 30;
-    constexpr static int rowHeight = 28;
-    constexpr static int collapsedHeaderHeight = 24;
-    constexpr static int collapsedRowHeight = 22;
-    constexpr static int scoreColumnWidth = 72;
-    constexpr static int horizontalPadding = 12;
-    constexpr static int collapsedHorizontalPadding = 6;
-    constexpr static int collapsedVerticalPadding = 3;
-    constexpr static int collapsedColorStripWidth = 14;
-    constexpr static int killIconSize = 12;
-    constexpr static int killIconLeftPadding = 6;
+    static constexpr int headerHeight = 30, collapsedHeaderHeight = 24;
+    static constexpr int rowHeight = 28, collapsedRowHeight = 22;
+    static constexpr int scoreColumnWidth = 72, horizontalPadding = 12;
+    static constexpr int collapsedHorizontalPadding = 6,
+                         collapsedVerticalPadding = 3,
+                         collapsedColorStripWidth = 14;
+    static constexpr int killIconSize = 12, killIconLeftPadding = 6;
 };

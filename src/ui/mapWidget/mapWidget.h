@@ -21,7 +21,7 @@
 
 struct DisplayTile {
     tile_type_e type = TILE_BLANK;
-    QColor color = QColor(220, 220, 220);  // Default color for TILE_BLANK
+    QColor color{220, 220, 220};  // Default color for TILE_BLANK
     QString text;
     bool lightIcon = false;
     bool displayBorders = true;
@@ -69,7 +69,6 @@ class MapWidget : public QWidget {
     // Helper functions
     QPoint mapToGrid(const QPoint& pos) const;
     void zoomAt(const QPointF& widgetPos, qreal zoomMultiplier);
-    bool isTouchpadScrollEvent(const QWheelEvent* event) const;
     bool handleNativeGesture(QNativeGestureEvent* event);
 
     bool isValidGridPos(int x, int y) const {

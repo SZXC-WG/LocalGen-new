@@ -3,8 +3,6 @@
 
 #include "mapCreatorWindow.h"
 
-#include <QComboBox>
-#include <QDateTimeEdit>
 #include <QEasingCurve>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -12,31 +10,54 @@
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QInputDialog>
-#include <QKeyEvent>
-#include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-#include <QPushButton>
 #include <QResizeEvent>
-#include <QSlider>
-#include <QTextEdit>
 #include <QTimer>
-#include <QToolButton>
 #include <QVBoxLayout>
 #include <algorithm>
 
 #include "../utils/comboBoxPopupCompatibility.hpp"
-#include "core/board.hpp"
-#include "core/map.hpp"
 
 namespace {
-constexpr int METADATA_SIDEBAR_EXPANDED_WIDTH = 236;
-constexpr int METADATA_SIDEBAR_COLLAPSED_WIDTH = 42;
-constexpr int METADATA_SIDEBAR_COLLAPSED_HEIGHT = 156;
-constexpr int METADATA_SIDEBAR_ANIMATION_MS = 120;
+
+constexpr int SIDEBAR_WIDTH = 236, TOGGLE_WIDTH = 42, TOGGLE_HEIGHT = 156,
+              ANIMATION_MS = 120;
+
+constexpr auto SELECTED_TOOL_STYLE =
+    "QPushButton {"
+    "    border: 2px solid #333333;"
+    "    border-radius: 8px;"
+    "    background-color: #f0f0f0;"
+    "    color: black;"
+    "}"
+    "QPushButton:hover {"
+    "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, "
+    "stop:0 #f0f0f0, stop:1 #e0e0e0);"
+    "    border: 2px solid #333333;"
+    "}";
+
+constexpr auto DEFAULT_TOOL_STYLE =
+    "QPushButton {"
+    "    border: 2px solid transparent;"
+    "    border-radius: 8px;"
+    "    background-color: transparent;"
+    "    opacity: 0.4;"
+    "}"
+    "QPushButton:hover {"
+    "    background-color: #e8e8e8;"
+    "    border: 2px solid transparent;"
+    "    opacity: 0.6;"
+    "}";
+
+constexpr auto MAP_FILE_FILTER =
+    "All Supported Maps (*.lgmp *.lg *.json);;"
+    "Official Generals.io Map (*.json);;"
+    "LocalGen v5 (*.lg) - Legacy Format;;"
+    "LocalGen v6 (*.lgmp) - Current Format;;";
+
 }  // namespace
 
 MapCreatorWindow::MapCreatorWindow(QWidget* parent) : QDialog(parent) {
@@ -95,7 +116,7 @@ void MapCreatorWindow::setupToolbar() {
         btn->setIcon(QIcon(toolIcons[i]));
         btn->setIconSize(QSize(30, 30));
 
-        connect(btn, &QPushButton::clicked, this, [this, i]() {
+        connect(btn, &QPushButton::clicked, this, [this, i] {
             selectedTool = static_cast<ToolType>(i);
             updateToolButtonStyles();
             updateHintBar();
@@ -109,60 +130,24 @@ void MapCreatorWindow::setupToolbar() {
 
 void MapCreatorWindow::updateToolButtonStyles() {
     for (int i = 0; i < toolButtons.size(); ++i) {
-        QPushButton* btn = toolButtons[i];
-        if (i == selectedTool) {
-            btn->setStyleSheet(
-                "QPushButton {"
-                "    border: 2px solid #333333;"
-                "    border-radius: 8px;"
-                "    background-color: #f0f0f0;"
-                "    color: black;"
-                "}"
-                "QPushButton:hover {"
-                "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, "
-                "stop:0 #f0f0f0, stop:1 #e0e0e0);"
-                "    border: 2px solid #333333;"
-                "}");
-        } else {
-            btn->setStyleSheet(
-                "QPushButton {"
-                "    border: 2px solid transparent;"
-                "    border-radius: 8px;"
-                "    background-color: transparent;"
-                "    opacity: 0.4;"
-                "}"
-                "QPushButton:hover {"
-                "    background-color: #e8e8e8;"
-                "    border: 2px solid transparent;"
-                "    opacity: 0.6;"
-                "}");
-        }
+        toolButtons[i]->setStyleSheet(i == selectedTool ? SELECTED_TOOL_STYLE
+                                                        : DEFAULT_TOOL_STYLE);
     }
 }
 
 void MapCreatorWindow::onMapClicked(int r, int c) {
-    auto& tile = map->tileAt(r, c);
+    DisplayTile& tile = map->tileAt(r, c);
+    auto setTile = [&tile](tile_type_e type, int shade) {
+        tile.type = type;
+        tile.color.setRgb(shade, shade, shade);
+        tile.text.clear();
+    };
     switch (selectedTool) {
-        case MOUNTAIN:
-            tile.type = TILE_MOUNTAIN, tile.color.setRgb(187, 187, 187),
-            tile.text.clear();
-            break;
-        case LOOKOUT:
-            tile.type = TILE_LOOKOUT, tile.color.setRgb(187, 187, 187),
-            tile.text.clear();
-            break;
-        case OBSERVATORY:
-            tile.type = TILE_OBSERVATORY, tile.color.setRgb(187, 187, 187),
-            tile.text.clear();
-            break;
-        case DESERT:
-            tile.type = TILE_DESERT, tile.color.setRgb(220, 220, 220),
-            tile.text.clear();
-            break;
-        case SWAMP:
-            tile.type = TILE_SWAMP, tile.color.setRgb(128, 128, 128),
-            tile.text.clear();
-            break;
+        case MOUNTAIN:    setTile(TILE_MOUNTAIN, 187); break;
+        case LOOKOUT:     setTile(TILE_LOOKOUT, 187); break;
+        case OBSERVATORY: setTile(TILE_OBSERVATORY, 187); break;
+        case DESERT:      setTile(TILE_DESERT, 220); break;
+        case SWAMP:       setTile(TILE_SWAMP, 128); break;
         case SPAWN:
             tile.type = TILE_SPAWN, tile.color = Qt::darkCyan;
             tile.text = teamComboBox->currentText();
@@ -179,8 +164,8 @@ void MapCreatorWindow::onMapClicked(int r, int c) {
             }  // neutral tiles of army strength 0 are equivalent to blank tiles
             [[fallthrough]];
         case ERASE:
-            tile.type = TILE_BLANK, tile.color.setRgb(220, 220, 220),
-            tile.lightIcon = false, tile.text.clear();
+            setTile(TILE_BLANK, 220);
+            tile.lightIcon = false;
             break;
         case LIGHT: tile.lightIcon = !tile.lightIcon;
     }
@@ -192,35 +177,26 @@ void MapCreatorWindow::keyPressEvent(QKeyEvent* event) {
         case Qt::Key_Up:
             selectedTool = static_cast<ToolType>(
                 (selectedTool - 1 + toolButtons.size()) % toolButtons.size());
-            updateToolButtonStyles();
-            updateHintBar();
             break;
         case Qt::Key_Down:
             selectedTool =
                 static_cast<ToolType>((selectedTool + 1) % toolButtons.size());
-            updateToolButtonStyles();
-            updateHintBar();
             break;
-        case Qt::Key_C: map->fitCenter(); break;
-        default:        QDialog::keyPressEvent(event); break;
+        case Qt::Key_C: map->fitCenter(); return;
+        default:        QDialog::keyPressEvent(event); return;
     }
+    updateToolButtonStyles();
+    updateHintBar();
 }
 
 void MapCreatorWindow::setupSliders() {
     sliderContainer = new QWidget(this);
     sliderContainer->setFixedSize(550, 70);
-
-    QHBoxLayout* containerLayout = new QHBoxLayout(sliderContainer);
-    containerLayout->setContentsMargins(0, 0, 0, 0);
-    containerLayout->addStretch();
-
-    QWidget* floatingPanel = new QWidget(sliderContainer);
-    floatingPanel->setFixedSize(550, 70);
-    floatingPanel->setStyleSheet(
+    sliderContainer->setStyleSheet(
         "QWidget { background-color: white; border-bottom-left-radius: 8px; "
         "border-bottom-right-radius: 8px; }");
 
-    QVBoxLayout* panelLayout = new QVBoxLayout(floatingPanel);
+    QVBoxLayout* panelLayout = new QVBoxLayout(sliderContainer);
     panelLayout->setContentsMargins(12, 6, 12, 6);
     panelLayout->setSpacing(8);
 
@@ -235,7 +211,7 @@ void MapCreatorWindow::setupSliders() {
                           const QString& border, const QString& fg,
                           const QString& hoverBg, const QString& hoverBorder,
                           const QString& pressedBg) {
-        QPushButton* btn = new QPushButton(text, floatingPanel);
+        QPushButton* btn = new QPushButton(text, sliderContainer);
         btn->setFont(btnFont);
         btn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
         btn->setStyleSheet(
@@ -258,13 +234,11 @@ void MapCreatorWindow::setupSliders() {
         return btn;
     };
 
-    QPushButton* openButton =
-        makeButton("\xF0\x9F\x93\x82 Open", "#e8f5e9", "#a5d6a7", "#2e7d32",
-                   "#c8e6c9", "#81c784", "#a5d6a7");
-    QPushButton* saveButton =
-        makeButton("\xF0\x9F\x92\xBE Save", "#fff3e0", "#ffcc80", "#e65100",
-                   "#ffe0b2", "#ffb74d", "#ffcc80");
-    QPushButton* importButton =
+    auto* openButton = makeButton("\xF0\x9F\x93\x82 Open", "#e8f5e9", "#a5d6a7",
+                                  "#2e7d32", "#c8e6c9", "#81c784", "#a5d6a7");
+    auto* saveButton = makeButton("\xF0\x9F\x92\xBE Save", "#fff3e0", "#ffcc80",
+                                  "#e65100", "#ffe0b2", "#ffb74d", "#ffcc80");
+    auto* importButton =
         makeButton("\xF0\x9F\x8C\x90 Import", "#e8f0fe", "#a8c7fa", "#1a73e8",
                    "#d2e3fc", "#7baaf7", "#aecbfa");
 
@@ -287,13 +261,13 @@ void MapCreatorWindow::setupSliders() {
 
     auto addSlider = [&](const QString& name, QSlider*& slider,
                          auto resizeMap) {
-        auto* label = new QLabel(name, floatingPanel);
+        QLabel* label = new QLabel(name, sliderContainer);
         label->setFont(font);
         label->setStyleSheet("color: black;");
-        slider = new QSlider(Qt::Horizontal, floatingPanel);
+        slider = new QSlider(Qt::Horizontal, sliderContainer);
         slider->setRange(1, 100);
         slider->setValue(10);
-        auto* valueLabel = new QLabel("10", floatingPanel);
+        QLabel* valueLabel = new QLabel("10", sliderContainer);
         valueLabel->setFont(font);
         valueLabel->setStyleSheet("color: black;");
         valueLabel->setAlignment(Qt::AlignCenter);
@@ -313,33 +287,28 @@ void MapCreatorWindow::setupSliders() {
     addSlider("H:", heightSlider, &MapWidget::setMapHeight);
 
     panelLayout->addLayout(sliderRow);
-
-    containerLayout->addWidget(floatingPanel);
-    containerLayout->addStretch();
 }
 
 void MapCreatorWindow::setupMetadataSidebar() {
     sidebarContainer = new QWidget(this);
     sidebarContainer->setObjectName("metadataSidebar");
-    sidebarContainer->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     sidebarContainer->setAttribute(Qt::WA_StyledBackground, true);
     sidebarContainer->setStyleSheet(
         "QWidget#metadataSidebar { background: transparent; }");
 
     sidebarPanel = new QWidget(sidebarContainer);
     sidebarPanel->setObjectName("metadataSidebarPanel");
-    sidebarPanel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     QVBoxLayout* sidebarLayout = new QVBoxLayout(sidebarPanel);
     sidebarLayout->setContentsMargins(16, 32, 16, 32);
     sidebarLayout->setSpacing(18);
 
-    sidebarHeader = new QWidget(sidebarPanel);
+    QWidget* sidebarHeader = new QWidget(sidebarPanel);
     QHBoxLayout* headerLayout = new QHBoxLayout(sidebarHeader);
     headerLayout->setContentsMargins(0, 0, 0, 0);
     headerLayout->setSpacing(8);
 
-    sidebarTitleLabel = new QLabel("Map Metadata", sidebarHeader);
+    QLabel* sidebarTitleLabel = new QLabel("Map Metadata", sidebarHeader);
     sidebarTitleLabel->setObjectName("sidebarTitleLabel");
     sidebarTitleLabel->setFont(QFont("Quicksand", 13, QFont::Bold));
 
@@ -347,8 +316,7 @@ void MapCreatorWindow::setupMetadataSidebar() {
     headerLayout->addStretch();
 
     sidebarToggleButton = new QToolButton(sidebarContainer);
-    sidebarToggleButton->setFixedSize(METADATA_SIDEBAR_COLLAPSED_WIDTH,
-                                      METADATA_SIDEBAR_COLLAPSED_HEIGHT);
+    sidebarToggleButton->setFixedSize(TOGGLE_WIDTH, TOGGLE_HEIGHT);
     sidebarToggleButton->setFont(QFont("Segoe UI Symbol", 24));
     sidebarToggleButton->setAttribute(Qt::WA_Hover, false);
     sidebarToggleButton->setStyleSheet(
@@ -361,7 +329,7 @@ void MapCreatorWindow::setupMetadataSidebar() {
         "    padding: 0;"
         "}");
 
-    metadataFormContainer = new QWidget(sidebarContainer);
+    QWidget* metadataFormContainer = new QWidget(sidebarContainer);
     QFormLayout* formLayout = new QFormLayout(metadataFormContainer);
     formLayout->setContentsMargins(0, 0, 0, 0);
     formLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
@@ -431,10 +399,10 @@ void MapCreatorWindow::setupMetadataSidebar() {
 
     sidebarAnimation =
         new QPropertyAnimation(sidebarContainer, "geometry", this);
-    sidebarAnimation->setDuration(METADATA_SIDEBAR_ANIMATION_MS);
+    sidebarAnimation->setDuration(ANIMATION_MS);
     sidebarAnimation->setEasingCurve(QEasingCurve::OutCubic);
     connect(sidebarAnimation, &QPropertyAnimation::finished, this,
-            [this]() { applyMetadataSidebarState(); });
+            [this] { applyMetadataSidebarState(); });
 
     setMapMetadata({});
     updateMetadataSidebar();
@@ -461,16 +429,10 @@ void MapCreatorWindow::updateMetadataSidebar(bool animate) {
         return;
     }
 
-    const QRect expandedGeometry = metadataSidebarGeometry(true);
-    const QRect hiddenGeometry = metadataSidebarGeometry(false);
-
-    sidebarContainer->setMinimumSize(0, 0);
-    sidebarContainer->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-
     applyMetadataSidebarState();
     sidebarAnimation->setStartValue(sidebarContainer->geometry());
-    sidebarAnimation->setEndValue(metadataSidebarExpanded ? expandedGeometry
-                                                          : hiddenGeometry);
+    sidebarAnimation->setEndValue(
+        metadataSidebarGeometry(metadataSidebarExpanded));
 
     sidebarContainer->raise();
     sidebarAnimation->start();
@@ -479,46 +441,23 @@ void MapCreatorWindow::updateMetadataSidebar(bool animate) {
 void MapCreatorWindow::applyMetadataSidebarState() {
     if (!sidebarContainer || !sidebarPanel) return;
 
-    QVBoxLayout* sidebarLayout =
-        qobject_cast<QVBoxLayout*>(sidebarPanel->layout());
-
     sidebarToggleButton->setText(
         QString::fromUtf8(metadataSidebarExpanded ? "❯" : "❮"));
-    if (sidebarLayout) {
-        sidebarLayout->setContentsMargins(16, 32, 16, 32);
-        sidebarLayout->setSpacing(18);
-    }
-
-    sidebarContainer->setFixedWidth(METADATA_SIDEBAR_EXPANDED_WIDTH +
-                                    METADATA_SIDEBAR_COLLAPSED_WIDTH);
+    sidebarContainer->setFixedWidth(SIDEBAR_WIDTH + TOGGLE_WIDTH);
     sidebarContainer->setFixedHeight(height());
-    sidebarPanel->setGeometry(METADATA_SIDEBAR_COLLAPSED_WIDTH, 0,
-                              METADATA_SIDEBAR_EXPANDED_WIDTH, height());
-    sidebarHeader->setVisible(true);
-    metadataFormContainer->setVisible(true);
-    sidebarPanel->show();
-    sidebarContainer->show();
+    sidebarPanel->setGeometry(TOGGLE_WIDTH, 0, SIDEBAR_WIDTH, height());
 
-    sidebarToggleButton->setGeometry(metadataSidebarButtonGeometry());
+    sidebarToggleButton->setGeometry(
+        0, (sidebarContainer->height() - TOGGLE_HEIGHT) / 2, TOGGLE_WIDTH,
+        TOGGLE_HEIGHT);
     sidebarToggleButton->raise();
 }
 
 QRect MapCreatorWindow::metadataSidebarGeometry(bool expanded) const {
-    if (!map) return QRect();
-
-    const int sidebarWidth =
-        METADATA_SIDEBAR_EXPANDED_WIDTH + METADATA_SIDEBAR_COLLAPSED_WIDTH;
-    const int sidebarHeight = height();
-    const int sidebarY = 0;
-    const int sidebarX = expanded ? width() - sidebarWidth
-                                  : width() - METADATA_SIDEBAR_COLLAPSED_WIDTH;
-    return QRect(sidebarX, sidebarY, sidebarWidth, sidebarHeight);
-}
-
-QRect MapCreatorWindow::metadataSidebarButtonGeometry() const {
-    return QRect(
-        0, (sidebarContainer->height() - METADATA_SIDEBAR_COLLAPSED_HEIGHT) / 2,
-        METADATA_SIDEBAR_COLLAPSED_WIDTH, METADATA_SIDEBAR_COLLAPSED_HEIGHT);
+    const int sidebarWidth = SIDEBAR_WIDTH + TOGGLE_WIDTH;
+    const int sidebarX =
+        expanded ? width() - sidebarWidth : width() - TOGGLE_WIDTH;
+    return {sidebarX, 0, sidebarWidth, height()};
 }
 
 void MapCreatorWindow::setMapMetadata(const MapMetadata& metadata) {
@@ -541,35 +480,27 @@ MapMetadata MapCreatorWindow::currentMetadata() const {
 void MapCreatorWindow::setupHintBar() {
     hintContainer = new QWidget(this);
     hintContainer->setFixedHeight(50);
-
-    QHBoxLayout* containerLayout = new QHBoxLayout(hintContainer);
-    containerLayout->setContentsMargins(0, 0, 0, 0);
-    containerLayout->addStretch();
-
-    QWidget* floatingPanel = new QWidget(hintContainer);
-    floatingPanel->setFixedHeight(50);
-    floatingPanel->setStyleSheet(
+    hintContainer->setStyleSheet(
         "QWidget { background-color: white; border-top-left-radius: 8px; "
         "border-top-right-radius: 8px; }");
 
-    QHBoxLayout* hintLayout = new QHBoxLayout(floatingPanel);
+    QHBoxLayout* hintLayout = new QHBoxLayout(hintContainer);
     hintLayout->setContentsMargins(15, 10, 15, 10);
     hintLayout->setSpacing(10);
 
     QFont font("Quicksand", 10, QFont::Bold);
 
-    hintLabel = new QLabel("Click a tile to place a mountain.", floatingPanel);
+    hintLabel = new QLabel("Click a tile to place a mountain.", hintContainer);
     hintLabel->setFont(font);
     hintLabel->setStyleSheet("color: black;");
     hintLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-    valueLabel = new QLabel("City Strength:", floatingPanel);
+    valueLabel = new QLabel("City Strength:", hintContainer);
     valueLabel->setFont(font);
     valueLabel->setStyleSheet("color: black;");
     valueLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    valueLabel->setVisible(false);
 
-    valueSpinBox = new QSpinBox(floatingPanel);
+    valueSpinBox = new QSpinBox(hintContainer);
     valueSpinBox->setRange(-9999, 9999);
     valueSpinBox->setValue(40);
     valueSpinBox->setMinimumWidth(80);
@@ -584,9 +515,8 @@ void MapCreatorWindow::setupHintBar() {
         "QSpinBox:focus {"
         "    border: 2px solid #4CAF50;"
         "}");
-    valueSpinBox->setVisible(false);
 
-    teamComboBox = new QComboBox(floatingPanel);
+    teamComboBox = new QComboBox(hintContainer);
     ComboBoxPopupCompatibility::configureForManagedPopup(teamComboBox);
     teamComboBox->addItem("");
     for (char c = 'A'; c <= 'Z'; ++c) {
@@ -607,20 +537,15 @@ void MapCreatorWindow::setupHintBar() {
         "QComboBox::drop-down {"
         "    border: none;"
         "}"
-
         "QComboBox::down-arrow {"
         "    image: none;"
         "    border: none;"
         "}");
-    teamComboBox->setVisible(false);
 
     hintLayout->addWidget(hintLabel);
     hintLayout->addWidget(valueLabel);
     hintLayout->addWidget(valueSpinBox);
     hintLayout->addWidget(teamComboBox);
-
-    containerLayout->addWidget(floatingPanel);
-    containerLayout->addStretch();
 
     updateHintBar();
 }
@@ -661,16 +586,12 @@ void MapCreatorWindow::updateHintBar() {
         hintLabel->setText(hints[selectedTool]);
     }
 
-    QWidget* floatingPanel = hintContainer->findChild<QWidget*>();
-    if (floatingPanel) {
-        floatingPanel->adjustSize();
-        const int panelWidth = std::max(floatingPanel->sizeHint().width(), 100);
-        floatingPanel->setFixedWidth(panelWidth);
-        hintContainer->setFixedWidth(panelWidth);
-        hintContainer->move((width() - hintContainer->width()) / 2,
-                            height() - hintContainer->height());
-        hintContainer->raise();
-    }
+    hintContainer->adjustSize();
+    hintContainer->setFixedWidth(
+        std::max(hintContainer->sizeHint().width(), 100));
+    hintContainer->move((width() - hintContainer->width()) / 2,
+                        height() - hintContainer->height());
+    hintContainer->raise();
 }
 
 void MapCreatorWindow::resizeEvent(QResizeEvent* event) {
@@ -760,7 +681,7 @@ void MapCreatorWindow::fromBoard(const Board& board) {
                 default:
                     tile.color = loadedTile.army == 0 ? QColor(220, 220, 220)
                                                       : QColor(128, 128, 128);
-            };
+            }
             if (loadedTile.type == TILE_SPAWN) {
                 unsigned team = loadedTile.spawnTeam;
                 if (team > 0)
@@ -774,7 +695,7 @@ void MapCreatorWindow::fromBoard(const Board& board) {
         }
     }
     if (hasBadTiles) {
-        QTimer::singleShot(0, this, [this]() {
+        QTimer::singleShot(0, this, [this] {
             QMessageBox::warning(this, "Warning",
                                  "Some tiles are not recognized. "
                                  "Please edit or truncate them before saving.");
@@ -790,15 +711,9 @@ void MapCreatorWindow::loadMapDocument(const MapDocument& doc) {
     heightSlider->setValue(map->mapHeight());
 }
 
-const QString MapCreatorWindow::mapFileFilter =
-    "All Supported Maps (*.lgmp *.lg *.json);;"
-    "Official Generals.io Map (*.json);;"
-    "LocalGen v5 (*.lg) - Legacy Format;;"
-    "LocalGen v6 (*.lgmp) - Current Format;;";
-
 void MapCreatorWindow::onOpenMap() {
     QString filename =
-        QFileDialog::getOpenFileName(this, "Open Map", "", mapFileFilter);
+        QFileDialog::getOpenFileName(this, "Open Map", "", MAP_FILE_FILTER);
     if (filename.isEmpty()) return;
 
     MapDocument doc;
@@ -847,7 +762,7 @@ void MapCreatorWindow::onImportFromWeb() {
     }
 
     QNetworkReply* reply = networkManager->get(request);
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply] {
         reply->deleteLater();
 
         // Check for HTTP errors
@@ -881,7 +796,7 @@ void MapCreatorWindow::onImportFromWeb() {
 
 void MapCreatorWindow::onSaveMap() {
     QString filename =
-        QFileDialog::getSaveFileName(this, "Save Map", "", mapFileFilter);
+        QFileDialog::getSaveFileName(this, "Save Map", "", MAP_FILE_FILTER);
     if (filename.isEmpty()) return;
 
     MapDocument doc{currentMetadata(), toBoard()};

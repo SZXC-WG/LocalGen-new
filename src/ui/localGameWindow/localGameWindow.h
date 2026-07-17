@@ -25,12 +25,20 @@
 // Helper class
 class HumanPlayer : public Player {
    public:
-    void init(index_t playerId, const GameConstantsPack& constants) override;
+    void init(index_t playerId, const GameConstantsPack&) override {
+        this->playerId = playerId;
+    }
     void requestMove(const BoardView& boardView,
-                     const std::vector<RankItem>& rank) override;
+                     const std::vector<RankItem>&) override {
+        if (boardViewHandler) {
+            boardViewHandler(boardView);
+        }
+    }
     std::deque<Move>* getMoveQueue() { return &moveQueue; }
     void setBoardViewHandler(
-        std::function<void(const BoardView&)> boardViewHandler);
+        std::function<void(const BoardView&)> boardViewHandler) {
+        this->boardViewHandler = std::move(boardViewHandler);
+    }
 
     index_t playerId = -1;
 
@@ -73,7 +81,6 @@ class LocalGameWindow : public QDialog {
     QLabel* turnLabel = nullptr;
     QFrame* turnLabelShadow = nullptr;
     bool gameRunning = false;
-    bool analysisEnabled = false;
     double halfTurnDurationMs = 500.0;
 
     index_t humanPlayerId = -2;

@@ -3,10 +3,8 @@
 
 #pragma once
 
-#include <QComboBox>
 #include <QDialog>
 #include <QStringList>
-#include <QVector>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,8 +15,7 @@ QT_END_NAMESPACE
 struct LocalGameConfig {
     int gameSpeed;
     bool enableSounds, showAnalysis;
-    QString mapName;
-    QString mapFilePath;
+    QString mapName, mapFilePath;
     int mapWidth, mapHeight;
     QStringList players;
 };

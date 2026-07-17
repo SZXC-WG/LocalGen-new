@@ -13,11 +13,7 @@
 namespace {
 
 double adjustedAxisMax(double value) {
-    if (value <= 1.0) {
-        return 1.0;
-    }
-
-    return value + std::max(1.0, value * 0.08);
+    return value <= 1.0 ? 1.0 : value + std::max(1.0, value * 0.08);
 }
 
 void styleAnalysisAxis(QAbstractAxis* axis, const QColor& foreground,
@@ -53,9 +49,7 @@ QWidget* createHorizontalSwitch(const QString& leftText,
 
     outSwitch = new QSlider(Qt::Horizontal, container);
     outSwitch->setRange(0, 1);
-    outSwitch->setSingleStep(1);
     outSwitch->setPageStep(1);
-    outSwitch->setTickPosition(QSlider::NoTicks);
     outSwitch->setFixedWidth(48);
     outSwitch->setAccessibleName(accessibleName);
     layout->addWidget(outSwitch);
@@ -80,28 +74,21 @@ qreal smoothedLogValue(const QList<QPointF>& history, qreal rawValue) {
     const qreal rawLogValue = std::log10(rawValue);
     const qreal previousSmoothedLog =
         std::log10(std::max<qreal>(1.0, history.constLast().y()));
-    const qreal smoothedLog =
-        previousSmoothedLog +
-        smoothingAlpha * (rawLogValue - previousSmoothedLog);
-    return std::pow(static_cast<qreal>(10.0), smoothedLog);
-}
-
-void appendAnalysisPoint(QList<QPointF>& history, qreal x, qreal y) {
-    history.append(QPointF(x, y));
+    return std::pow(static_cast<qreal>(10.0),
+                    previousSmoothedLog +
+                        smoothingAlpha * (rawLogValue - previousSmoothedLog));
 }
 
 void appendAnalysisHistories(PlayerAnalysisSeries& series, qreal stepValue,
                              qreal armyValue, qreal landValue) {
-    appendAnalysisPoint(
-        series.linearArmyHistory, stepValue,
-        smoothedLinearValue(series.linearArmyHistory, armyValue));
-    appendAnalysisPoint(
-        series.linearLandHistory, stepValue,
-        smoothedLinearValue(series.linearLandHistory, landValue));
-    appendAnalysisPoint(series.logArmyHistory, stepValue,
-                        smoothedLogValue(series.logArmyHistory, armyValue));
-    appendAnalysisPoint(series.logLandHistory, stepValue,
-                        smoothedLogValue(series.logLandHistory, landValue));
+    series.linearArmyHistory.append(QPointF(
+        stepValue, smoothedLinearValue(series.linearArmyHistory, armyValue)));
+    series.linearLandHistory.append(QPointF(
+        stepValue, smoothedLinearValue(series.linearLandHistory, landValue)));
+    series.logArmyHistory.append(
+        QPointF(stepValue, smoothedLogValue(series.logArmyHistory, armyValue)));
+    series.logLandHistory.append(
+        QPointF(stepValue, smoothedLogValue(series.logLandHistory, landValue)));
 }
 
 const QList<QPointF>& historyForMode(const PlayerAnalysisSeries& series,
@@ -130,7 +117,6 @@ QChart* createChart(const QString& title, QValueAxis*& outAxisX) {
     outAxisX->setTitleText("Step");
     outAxisX->setLabelFormat("%.0f");
     outAxisX->setTickCount(6);
-    outAxisX->setMinorTickCount(0);
     outAxisX->setRange(0.0, 1.0);
     styleAnalysisAxis(outAxisX, foreground, gridColor);
     chart->addAxis(outAxisX, Qt::AlignBottom);
@@ -161,14 +147,12 @@ AnalysisChartWidget::AnalysisChartWidget(
     QHBoxLayout* controlsLayout = new QHBoxLayout();
     controlsLayout->setContentsMargins(0, 0, 0, 0);
 
-    QWidget* metricControl = createHorizontalSwitch(
-        "Army", "Land", "Chart metric: Army or Land", this, metricSwitch);
-    controlsLayout->addWidget(metricControl);
+    controlsLayout->addWidget(createHorizontalSwitch(
+        "Army", "Land", "Chart metric: Army or Land", this, metricSwitch));
 
     controlsLayout->addStretch(1);
-    QWidget* scaleControl = createHorizontalSwitch(
-        "Linear", "Log", "Chart scale: Linear or Log", this, scaleSwitch);
-    controlsLayout->addWidget(scaleControl);
+    controlsLayout->addWidget(createHorizontalSwitch(
+        "Linear", "Log", "Chart scale: Linear or Log", this, scaleSwitch));
     mainLayout->addLayout(controlsLayout);
 
     chart = createChart("Army Trend", axisX);
@@ -176,7 +160,6 @@ AnalysisChartWidget::AnalysisChartWidget(
     axisYLinear = new QValueAxis(chart);
     axisYLinear->setLabelFormat("%.0f");
     axisYLinear->setTickCount(6);
-    axisYLinear->setMinorTickCount(0);
     axisYLinear->setRange(0.0, 1.0);
     styleAnalysisAxis(axisYLinear, foreground, gridColor);
     chart->addAxis(axisYLinear, Qt::AlignLeft);
@@ -256,9 +239,7 @@ void AnalysisChartWidget::updateAnalysis(const std::vector<RankItem>& rank) {
     for (PlayerAnalysisSeries& playerSeries : seriesData) {
         const QList<QPointF>& history =
             historyForMode(playerSeries, showingLand, usingLogScale);
-        if (!history.isEmpty()) {
-            playerSeries.series->append(history.constLast());
-        }
+        playerSeries.series->append(history.constLast());
     }
 }
 
@@ -291,8 +272,7 @@ void AnalysisChartWidget::refreshChart() {
 }
 
 void AnalysisChartWidget::updateAxisRanges() {
-    const qreal axisMaxX =
-        std::max<qreal>(1.0, static_cast<qreal>(std::max(0, sampleCount - 1)));
+    const qreal axisMaxX = std::max(1, sampleCount - 1);
     axisX->setRange(0.0, axisMaxX);
 
     const double axisMaxY =

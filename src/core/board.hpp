@@ -15,8 +15,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "move.hpp"
@@ -28,13 +26,13 @@ struct BoardView {
     pos_t row, col;
     std::vector<TileView> tiles;
 
-    TileView& tileAt(pos_t x, pos_t y) { return tiles[x * (col + 2) + y]; };
+    TileView& tileAt(pos_t x, pos_t y) { return tiles[x * (col + 2) + y]; }
     const TileView& tileAt(pos_t x, pos_t y) const {
         return tiles[x * (col + 2) + y];
-    };
+    }
 
-    TileView& tileAt(Coord pos) { return tileAt(pos.x, pos.y); };
-    const TileView& tileAt(Coord pos) const { return tileAt(pos.x, pos.y); };
+    TileView& tileAt(Coord pos) { return tileAt(pos.x, pos.y); }
+    const TileView& tileAt(Coord pos) const { return tileAt(pos.x, pos.y); }
 };
 
 /// Game map board.
@@ -43,12 +41,12 @@ class Board {
     pos_t row = 0, col = 0;
     std::vector<Tile> tiles;
 
-    Tile& tileAt(pos_t x, pos_t y) { return tiles[x * (col + 2) + y]; };
+    Tile& tileAt(pos_t x, pos_t y) { return tiles[x * (col + 2) + y]; }
     const Tile& tileAt(pos_t x, pos_t y) const {
         return tiles[x * (col + 2) + y];
-    };
-    Tile& tileAt(Coord pos) { return tileAt(pos.x, pos.y); };
-    const Tile& tileAt(Coord pos) const { return tileAt(pos.x, pos.y); };
+    }
+    Tile& tileAt(Coord pos) { return tileAt(pos.x, pos.y); }
+    const Tile& tileAt(Coord pos) const { return tileAt(pos.x, pos.y); }
 
     void setWidth(pos_t _col) {
         assert(_col >= 0);
@@ -103,7 +101,7 @@ class Board {
 
         static const std::pair<int, int> dirs[4] = {
             {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-        auto assignLookoutVision = [&](pos_t x, pos_t y) -> void {
+        auto assignLookoutVision = [&](pos_t x, pos_t y) {
             // 1. Find lookout occupier
             index_t occupier = -1;
             army_t maxArmy = 0;
@@ -126,7 +124,7 @@ class Board {
             }
         };
 
-        auto assignObservatoryVision = [&](pos_t x, pos_t y) -> void {
+        auto assignObservatoryVision = [&](pos_t x, pos_t y) {
             for (auto [dx, dy] : dirs) {
                 index_t player = tileAt(x - dx, y - dy).occupier;
                 if (player == -1) continue;
@@ -153,10 +151,9 @@ class Board {
                 }
                 index_t player = tile.occupier;
                 if (player == -1) {
-                    tile_type_e type = tile.type;
-                    if (type == TILE_LOOKOUT)
+                    if (tile.type == TILE_LOOKOUT)
                         assignLookoutVision(x, y);
-                    else if (type == TILE_OBSERVATORY)
+                    else if (tile.type == TILE_OBSERVATORY)
                         assignObservatoryVision(x, y);
                 } else {
                     size_t base = player * RC + x * C + y;
@@ -175,12 +172,12 @@ class Board {
         if (isInvalidPos(x, y)) return false;
         const pos_t C = col + 2, RC = (row + 2) * C;
         return visionCache[player * RC + x * C + y];
-    };
+    }
 
     /// Same as above, but using %Coord.
     bool visible(const Coord& pos, index_t player) const {
         return visible(pos.x, pos.y, player);
-    };
+    }
 
     bool available(index_t player, Move move) const {
         MoveType type = move.type;
@@ -206,7 +203,7 @@ class Board {
 
         // all passed, available move
         return true;
-    };
+    }
 
     void update(bool increaseAllArmy = false) {
         for (auto& tile : tiles) {
@@ -230,8 +227,7 @@ class Board {
 
     void view(index_t player, BoardView& boardView) const {
         boardView.row = row, boardView.col = col;
-        auto& tileViews = boardView.tiles;
-        tileViews.resize((row + 2) * (col + 2));
+        boardView.tiles.resize((row + 2) * (col + 2));
         for (pos_t i = 1; i <= row; ++i) {
             for (pos_t j = 1; j <= col; ++j) {
                 boardView.tileAt(i, j).updateFrom(tileAt(i, j),
@@ -248,9 +244,8 @@ class Board {
 
     BoardView fullView() const {
         BoardView boardView;
-        auto& tileViews = boardView.tiles;
         boardView.row = row, boardView.col = col;
-        tileViews.resize((row + 2) * (col + 2));
+        boardView.tiles.resize((row + 2) * (col + 2));
         for (pos_t i = 1; i <= row; ++i) {
             for (pos_t j = 1; j <= col; ++j) {
                 boardView.tileAt(i, j).updateFrom(tileAt(i, j), true);
@@ -260,11 +255,11 @@ class Board {
     }
 
     TileView view(index_t player, pos_t row, pos_t col) const {
-        return TileView(tileAt(row, col), visible(row, col, player));
+        return {tileAt(row, col), visible(row, col, player)};
     }
     TileView view(index_t player, Coord pos) const {
-        return TileView(tileAt(pos), visible(pos, player));
-    };
+        return {tileAt(pos), visible(pos, player)};
+    }
 
     static Board generate(int width, int height, int spawnCount,
                           std::uint64_t seed, bool placeSwamp = false,

@@ -27,21 +27,14 @@ using speed_t = double;
 struct Coord {
     pos_t x = 0, y = 0;
     constexpr Coord() = default;
-    constexpr Coord(pos_t _x, pos_t _y) : x(_x), y(_y) {}
-    bool operator==(const Coord& other) const {
-        return x == other.x && y == other.y;
+    constexpr Coord(pos_t x, pos_t y) : x(x), y(y) {}
+    bool operator==(const Coord& rhs) const { return x == rhs.x && y == rhs.y; }
+    bool operator!=(const Coord& rhs) const { return x != rhs.x || y != rhs.y; }
+    bool operator<(const Coord& rhs) const {
+        return x == rhs.x ? y < rhs.y : x < rhs.x;
     }
-    bool operator!=(const Coord& other) const {
-        return x != other.x || y != other.y;
-    }
-    bool operator<(const Coord& other) const {
-        return x == other.x ? y < other.y : x < other.x;
-    }
+    Coord operator+(const Coord& rhs) const { return {x + rhs.x, y + rhs.y}; }
 };
-
-inline Coord operator+(const Coord& lhs, const Coord& rhs) {
-    return Coord(lhs.x + rhs.x, lhs.y + rhs.y);
-}
 
 namespace std {
 /// Hash function for Coord, enabling use in `std::unordered_map`.

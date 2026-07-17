@@ -54,7 +54,6 @@ class BotFactory {
 template <typename T>
 struct BotRegistrar {
     BotRegistrar(const std::string& name) {
-        BotFactory::instance().registerBot(
-            name, []() -> BasicBot* { return new T(); });
+        BotFactory::instance().registerBot(name, [] { return new T(); });
     }
 };

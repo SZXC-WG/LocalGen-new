@@ -66,33 +66,23 @@ class TimedBot : public BasicBot {
 };
 
 struct Options {
-    int games = 8;
-    int width = 20;
-    int height = 20;
-    int maxSteps = 600;
-    int threads = 0;
-    bool remainIndex = true;
-    bool silent = false;
-    bool measureLatency = false;
+    int games = 8, width = 20, height = 20, maxSteps = 600, threads = 0;
+    bool remainIndex = true, silent = false, measureLatency = false;
     std::string mapPath;
     Board customBoard;
     std::vector<std::string> bots = {"XiaruizeBot", "GcBot"};
 };
 
 struct BotStats {
-    int wins = 0;
-    int survivalCount = 0;
-    long long totalRank = 0;
-    long long totalArmy = 0;
-    long long totalLand = 0;
+    int wins = 0, survivalCount = 0;
+    long long totalRank = 0, totalArmy = 0, totalLand = 0;
     int totalKills = 0;
     double totalLatencyMicroseconds = 0.0;
     long long totalLatencyCalls = 0;
 };
 
 struct GameResult {
-    int gameNumber = 0;
-    int steps = 0;
+    int gameNumber = 0, steps = 0;
     bool stepLimitReached = false;
     std::string winnerName;
     std::vector<int> ranksByBot;
@@ -100,19 +90,15 @@ struct GameResult {
 };
 
 struct WinRateSummary {
-    double rate = 0.0;
-    double lowerBound = 0.0;
-    double upperBound = 0.0;
+    double rate = 0.0, lowerBound = 0.0, upperBound = 0.0;
 };
 
 struct ConfidenceInterval {
-    double lowerBound = 0.0;
-    double upperBound = 0.0;
+    double lowerBound = 0.0, upperBound = 0.0;
 };
 
 struct TrueSkillRating {
-    double mu = 25.0;
-    double sigma = 25.0 / 3.0;
+    double mu = 25.0, sigma = 25.0 / 3.0;
 };
 
 using TableRow = std::vector<std::string>;
@@ -129,15 +115,12 @@ constexpr double kTrueSkillTau = (25.0 / 3.0) / 100.0;
 constexpr double kTrueSkillMinDelta = 0.0001;
 
 struct Gaussian {
-    double pi = 0.0;
-    double tau = 0.0;
+    double pi = 0.0, tau = 0.0;
 
     Gaussian() = default;
 
-    Gaussian(double mu, double sigma) {
-        pi = 1.0 / (sigma * sigma);
-        tau = pi * mu;
-    }
+    Gaussian(double mu, double sigma)
+        : pi(1.0 / (sigma * sigma)), tau(pi * mu) {}
 
     double mu() const { return pi != 0.0 ? tau / pi : 0.0; }
 
@@ -219,23 +202,17 @@ struct LikelihoodFactor : Factor {
     LikelihoodFactor(Variable* mean, Variable* value, double variance)
         : Factor({mean, value}), mean(mean), value(value), variance(variance) {}
 
-    double down() {
-        const Gaussian msg = *mean / mean->messages[this];
+    double update(Variable* source, Variable* target) {
+        const Gaussian msg = *source / source->messages[this];
         const double a = calcA(msg);
         Gaussian message;
         message.pi = a * msg.pi;
         message.tau = a * msg.tau;
-        return value->updateMessage(this, message);
+        return target->updateMessage(this, message);
     }
 
-    double up() {
-        const Gaussian msg = *value / value->messages[this];
-        const double a = calcA(msg);
-        Gaussian message;
-        message.pi = a * msg.pi;
-        message.tau = a * msg.tau;
-        return mean->updateMessage(this, message);
-    }
+    double down() { return update(mean, value); }
+    double up() { return update(value, mean); }
 
     double calcA(const Gaussian& gaussian) const {
         return 1.0 / (1.0 + variance * gaussian.pi);
@@ -257,16 +234,11 @@ struct SumFactor : Factor {
     double down() { return update(sum, terms, coeffs); }
 
     double up(std::size_t index) {
-        std::vector<double> termCoeffs;
-        termCoeffs.reserve(coeffs.size());
+        std::vector<double> termCoeffs(coeffs.size());
         const double coeff = coeffs[index];
-        for (std::size_t i = 0; i < coeffs.size(); ++i) {
-            if (coeff == 0.0) {
-                termCoeffs.push_back(0.0);
-            } else if (i == index) {
-                termCoeffs.push_back(1.0 / coeff);
-            } else {
-                termCoeffs.push_back(-coeffs[i] / coeff);
+        if (coeff != 0.0) {
+            for (std::size_t i = 0; i < coeffs.size(); ++i) {
+                termCoeffs[i] = i == index ? 1.0 / coeff : -coeffs[i] / coeff;
             }
         }
 
@@ -286,8 +258,7 @@ struct SumFactor : Factor {
 
     double update(Variable* target, const std::vector<Variable*>& values,
                   const std::vector<double>& termCoeffs) {
-        double piInverse = 0.0;
-        double mean = 0.0;
+        double piInverse = 0.0, mean = 0.0;
         for (std::size_t i = 0; i < values.size(); ++i) {
             const Gaussian marginal = *values[i] / values[i]->messages[this];
             mean += termCoeffs[i] * marginal.mu();
@@ -442,11 +413,6 @@ void printSummaryTable(const Options& options,
         const ConfidenceInterval skillInterval =
             calculateGaussianConfidenceInterval(ratings[i].mu,
                                                 ratings[i].sigma);
-        const std::string lowerBound =
-            alignTextRight(formatPercent(winRate.lowerBound), 7);
-        const std::string upperBound =
-            alignTextRight(formatPercent(winRate.upperBound), 7);
-
         TableRow cells = {
             options.bots[i],
             formatFixed(ratings[i].mu),
@@ -454,7 +420,8 @@ void printSummaryTable(const Options& options,
                 formatFixed(skillInterval.upperBound) + "]",
             std::to_string(botStats.wins),
             formatPercent(winRate.rate),
-            "[" + lowerBound + ", " + upperBound + "]",
+            "[" + alignTextRight(formatPercent(winRate.lowerBound), 7) + ", " +
+                alignTextRight(formatPercent(winRate.upperBound), 7) + "]",
             formatFixed(static_cast<double>(botStats.totalRank) /
                         options.games),
             formatFixed(static_cast<double>(botStats.totalKills) /
@@ -634,19 +601,13 @@ bool parseArgs(int argc, char** argv, Options& options) {
         std::string arg = argv[i];
         if (arg == "--games" || arg == "--width" || arg == "--height" ||
             arg == "--steps" || arg == "--threads") {
-            if (i + 1 >= argc) return false;
-            int value = 0;
-            if (!parsePositiveInt(argv[++i], value)) return false;
-            if (arg == "--games")
-                options.games = value;
-            else if (arg == "--width")
-                options.width = value;
-            else if (arg == "--height")
-                options.height = value;
-            else if (arg == "--threads")
-                options.threads = value;
-            else
-                options.maxSteps = value;
+            int* target = arg == "--games"     ? &options.games
+                          : arg == "--width"   ? &options.width
+                          : arg == "--height"  ? &options.height
+                          : arg == "--threads" ? &options.threads
+                                               : &options.maxSteps;
+            if (i + 1 >= argc || !parsePositiveInt(argv[++i], *target))
+                return false;
         } else if (arg == "--map") {
             if (i + 1 >= argc) return false;
             options.mapPath = argv[++i];
@@ -715,8 +676,7 @@ std::size_t botIndexForPlayer(const BasicGame& game, index_t playerId) {
 
 GameResult runSingleGame(const Options& options, int gameNumber,
                          std::uint64_t mapSeed) {
-    GameResult result;
-    result.gameNumber = gameNumber;
+    GameResult result{gameNumber};
     result.ranksByBot.resize(options.bots.size(),
                              static_cast<int>(options.bots.size()));
     result.statsDelta.resize(options.bots.size());
@@ -728,9 +688,8 @@ GameResult runSingleGame(const Options& options, int gameNumber,
             : options.customBoard;
 
     std::vector<Player*> players;
-    std::vector<index_t> teams;
+    std::vector<index_t> teams(options.bots.size());
     players.reserve(options.bots.size());
-    teams.resize(options.bots.size());
     std::iota(teams.begin(), teams.end(), 0);
 
     for (std::size_t i = 0; i < options.bots.size(); ++i) {
@@ -741,8 +700,7 @@ GameResult runSingleGame(const Options& options, int gameNumber,
     }
 
     BasicGame game(options.remainIndex, players, teams, options.bots, board);
-    const int initResult = game.init();
-    if (initResult != 0) {
+    if (const int initResult = game.init(); initResult != 0) {
         std::ostringstream err;
         err << "Failed to initialize game " << gameNumber
             << " (spawn error code " << initResult << ")";
@@ -774,7 +732,7 @@ GameResult runSingleGame(const Options& options, int gameNumber,
         botStats.totalArmy += item.army;
         botStats.totalLand += item.land;
         botStats.totalKills += item.killCount;
-        botStats.survivalCount += item.alive ? 1 : 0;
+        botStats.survivalCount += item.alive;
     }
 
     if (options.measureLatency) {
@@ -793,7 +751,7 @@ int detectWorkerCount(const Options& options) {
     const unsigned detected = std::thread::hardware_concurrency();
     const int preferred =
         options.threads > 0 ? options.threads : static_cast<int>(detected);
-    return std::max(1, std::min(std::max(1, preferred), options.games));
+    return std::clamp(preferred, 1, options.games);
 }
 
 void printGameResult(const GameResult& result) {
@@ -804,15 +762,16 @@ void printGameResult(const GameResult& result) {
 
 void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
     for (std::size_t i = 0; i < stats.size(); ++i) {
-        stats[i].wins += result.statsDelta[i].wins;
-        stats[i].survivalCount += result.statsDelta[i].survivalCount;
-        stats[i].totalRank += result.statsDelta[i].totalRank;
-        stats[i].totalArmy += result.statsDelta[i].totalArmy;
-        stats[i].totalLand += result.statsDelta[i].totalLand;
-        stats[i].totalKills += result.statsDelta[i].totalKills;
-        stats[i].totalLatencyMicroseconds +=
-            result.statsDelta[i].totalLatencyMicroseconds;
-        stats[i].totalLatencyCalls += result.statsDelta[i].totalLatencyCalls;
+        auto& total = stats[i];
+        const auto& delta = result.statsDelta[i];
+        total.wins += delta.wins;
+        total.survivalCount += delta.survivalCount;
+        total.totalRank += delta.totalRank;
+        total.totalArmy += delta.totalArmy;
+        total.totalLand += delta.totalLand;
+        total.totalKills += delta.totalKills;
+        total.totalLatencyMicroseconds += delta.totalLatencyMicroseconds;
+        total.totalLatencyCalls += delta.totalLatencyCalls;
     }
 }
 
@@ -838,7 +797,7 @@ int main(int argc, char** argv) {
     const std::unordered_set<std::string> registered(registeredBots.begin(),
                                                      registeredBots.end());
     for (const auto& botName : options.bots) {
-        if (registered.find(botName) == registered.end()) {
+        if (registered.count(botName) == 0) {
             std::cerr << "Unknown bot: " << botName << "\nAvailable bots:";
             for (const auto& name : registeredBots) {
                 std::cerr << ' ' << name;
@@ -875,12 +834,8 @@ int main(int argc, char** argv) {
         seed = mapSeedGenerator();
     }
 
-    std::mutex outputMutex;
-    std::mutex resultsMutex;
-    std::mutex errorMutex;
+    std::mutex outputMutex, errorMutex;
     std::exception_ptr workerError;
-    std::vector<std::thread> workers;
-    workers.reserve(workerCount);
 
     auto worker = [&]() {
         while (!stopRequested.load()) {
@@ -891,16 +846,13 @@ int main(int argc, char** argv) {
                 GameResult result = runSingleGame(options, gameNumber,
                                                   mapSeeds[gameNumber - 1]);
                 if (!options.silent) {
-                    std::lock_guard<std::mutex> lock(outputMutex);
+                    std::lock_guard lock(outputMutex);
                     printGameResult(result);
                 }
-                {
-                    std::lock_guard<std::mutex> lock(resultsMutex);
-                    results[gameNumber - 1] = std::move(result);
-                }
+                results[gameNumber - 1] = std::move(result);
             } catch (...) {
                 {
-                    std::lock_guard<std::mutex> lock(errorMutex);
+                    std::lock_guard lock(errorMutex);
                     if (!workerError) workerError = std::current_exception();
                 }
                 stopRequested.store(true);
@@ -909,6 +861,8 @@ int main(int argc, char** argv) {
         }
     };
 
+    std::vector<std::thread> workers;
+    workers.reserve(workerCount);
     for (int i = 0; i < workerCount; ++i) {
         workers.emplace_back(worker);
     }

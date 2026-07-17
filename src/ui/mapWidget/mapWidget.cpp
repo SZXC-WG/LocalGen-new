@@ -25,10 +25,9 @@ MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled,
 }
 
 bool MapWidget::event(QEvent* event) {
-    if (event->type() == QEvent::NativeGesture) {
-        if (handleNativeGesture(static_cast<QNativeGestureEvent*>(event))) {
-            return true;
-        }
+    if (event->type() == QEvent::NativeGesture &&
+        handleNativeGesture(static_cast<QNativeGestureEvent*>(event))) {
+        return true;
     }
 
     return QWidget::event(event);
@@ -68,28 +67,21 @@ void MapWidget::realloc(int w, int h) {
 }
 
 void MapWidget::fitCenter() {
-    qreal mapPixelWidth = mapWidth() * cellSize;
-    qreal mapPixelHeight = mapHeight() * cellSize;
+    const qreal mapPixelWidth = mapWidth() * cellSize,
+                mapPixelHeight = mapHeight() * cellSize;
+    const qreal availableWidth = width() - 2 * fitMargin,
+                availableHeight = height() - 2 * fitMargin;
 
-    qreal availableWidth = width() - 2 * fitMargin;
-    qreal availableHeight = height() - 2 * fitMargin;
+    if (availableWidth <= 0 || availableHeight <= 0) return;
 
-    if (availableWidth <= 0 || availableHeight <= 0) {
-        return;
-    }
-
-    qreal scaleX = availableWidth / mapPixelWidth;
-    qreal scaleY = availableHeight / mapPixelHeight;
-    scale = std::min(scaleX, scaleY);
+    scale = std::min(availableWidth / mapPixelWidth,
+                     availableHeight / mapPixelHeight);
 
     minScale = std::min(defaultMinScale, scale * 0.8);
     maxScale = std::max(defaultMaxScale, scale * 1.2);
 
-    qreal scaledMapWidth = mapPixelWidth * scale;
-    qreal scaledMapHeight = mapPixelHeight * scale;
-
-    offset.setX((width() - scaledMapWidth) * 0.5);
-    offset.setY((height() - scaledMapHeight) * 0.5);
+    offset.setX((width() - mapPixelWidth * scale) * 0.5);
+    offset.setY((height() - mapPixelHeight * scale) * 0.5);
 
     update();
 }
@@ -156,7 +148,7 @@ static QSvgRenderer& getSvgRenderer(int cacheId) {
 
 QPixmap& MapWidget::getPixmapCache(int cacheId, int physicalSize) {
     QPixmap& px = pixmapCache[cacheId];
-    if (px.size().width() == physicalSize) return px;
+    if (px.width() == physicalSize) return px;
 
     px = QPixmap(physicalSize, physicalSize);
     px.setDevicePixelRatio(1.0);
@@ -182,8 +174,7 @@ QPixmap& MapWidget::getTextPixmap(const QString& text, qreal physicalScale,
     const qreal scale = physicalScale / dpr;
 
     // Font height on screen = cell height * ratio, bounded by min/max
-    qreal screenCellHeight = cellSize * scale;
-    qreal targetFontHeight = std::clamp(screenCellHeight * fontHeightRatio,
+    qreal targetFontHeight = std::clamp(cellSize * scale * fontHeightRatio,
                                         minFontPixelSize, maxFontPixelSize);
     int fontPixelSize =
         std::max(1, static_cast<int>(std::lround(targetFontHeight * dpr)));
@@ -248,7 +239,7 @@ void MapWidget::paintEvent(QPaintEvent*) {
     // Chunks for batched rendering
     bgRects.clear();
     borderRects.clear();
-    for (int i = 0; i < 11; ++i) tileChunks[i].clear();
+    for (auto& chunk : tileChunks) chunk.clear();
     textChunks.clear();
 
     // Populate chunks
@@ -400,37 +391,18 @@ void MapWidget::zoomAt(const QPointF& widgetPos, qreal zoomMultiplier) {
     update();
 }
 
-bool MapWidget::isTouchpadScrollEvent(const QWheelEvent* event) const {
-    return !event->pixelDelta().isNull() || event->phase() != Qt::NoScrollPhase;
-}
-
 bool MapWidget::handleNativeGesture(QNativeGestureEvent* event) {
-    switch (event->gestureType()) {
-        case Qt::BeginNativeGesture:
-        case Qt::EndNativeGesture:
-        case Qt::PanNativeGesture:
-        case Qt::SmartZoomNativeGesture:
-        case Qt::RotateNativeGesture:
-        case Qt::SwipeNativeGesture:     return false;
-        case Qt::ZoomNativeGesture:      {
-            const qreal zoomMultiplier = std::exp(event->value());
-            zoomAt(event->position(), zoomMultiplier);
-            event->accept();
-            return true;
-        }
-    }
-
-    return false;
+    if (event->gestureType() != Qt::ZoomNativeGesture) return false;
+    zoomAt(event->position(), std::exp(event->value()));
+    event->accept();
+    return true;
 }
 
 void MapWidget::wheelEvent(QWheelEvent* event) {
-    if (isTouchpadScrollEvent(event)) {
-        QPointF panDelta = event->pixelDelta();
-        if (panDelta.isNull()) {
-            offset += QPointF(event->angleDelta()) / 8.0;
-        } else {
-            offset += panDelta;
-        }
+    if (!event->pixelDelta().isNull() || event->phase() != Qt::NoScrollPhase) {
+        const QPointF panDelta = event->pixelDelta();
+        offset +=
+            panDelta.isNull() ? QPointF(event->angleDelta()) / 8.0 : panDelta;
         update();
         event->accept();
         return;
@@ -517,10 +489,9 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 QPoint MapWidget::mapToGrid(const QPoint& pos) const {
-    QPointF scaledPos = (pos - offset) / scale;
-    int gridX = static_cast<int>(scaledPos.x() / cellSize);
-    int gridY = static_cast<int>(scaledPos.y() / cellSize);
-    return QPoint(gridX, gridY);
+    const QPointF scaledPos = (pos - offset) / scale;
+    return {static_cast<int>(scaledPos.x() / cellSize),
+            static_cast<int>(scaledPos.y() / cellSize)};
 }
 
 void MapWidget::setFocusEnabled(bool enabled) {
@@ -542,13 +513,11 @@ void MapWidget::keyPressEvent(QKeyEvent* event) {
             update();
             return;
         case Qt::Key_0:
-            scale *= zoomFactor;
-            if (scale > maxScale) scale = maxScale;
+            scale = std::min(scale * zoomFactor, maxScale);
             update();
             return;
         case Qt::Key_9:
-            scale /= zoomFactor;
-            if (scale < minScale) scale = minScale;
+            scale = std::max(scale / zoomFactor, minScale);
             update();
             return;
     }

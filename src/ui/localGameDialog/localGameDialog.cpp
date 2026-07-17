@@ -16,7 +16,6 @@
 #include <QRandomGenerator>
 #include <QScrollBar>
 #include <QStringList>
-#include <algorithm>
 
 #include "../utils/comboBoxPopupCompatibility.hpp"
 #include "core/bot.h"
@@ -33,8 +32,7 @@ struct LocalMapChoice {
     QString filePath;
     QString fileName;
     QString displayName;
-    int width = 0;
-    int height = 0;
+    int width, height;
 };
 
 QStringList toQStringList(const std::vector<std::string>& vec) {
@@ -59,15 +57,15 @@ LocalGameDialog::LocalGameDialog(QWidget* parent)
 LocalGameDialog::~LocalGameDialog() { delete ui; }
 
 LocalGameConfig LocalGameDialog::config() const {
-    LocalGameConfig config;
-    config.gameSpeed = ui->spinBox_gameSpeed->value();
-    config.enableSounds = ui->checkBox_enableSounds->isChecked();
-    config.showAnalysis = ui->checkBox_showAnalysis->isChecked();
-    config.mapName = ui->comboBox_gameMap->currentText();
-    config.mapFilePath =
-        ui->comboBox_gameMap->currentData(MapPathRole).toString();
-    config.mapWidth = ui->spinBox_mapWidth->value();
-    config.mapHeight = ui->spinBox_mapHeight->value();
+    LocalGameConfig config{
+        ui->spinBox_gameSpeed->value(),
+        ui->checkBox_enableSounds->isChecked(),
+        ui->checkBox_showAnalysis->isChecked(),
+        ui->comboBox_gameMap->currentText(),
+        ui->comboBox_gameMap->currentData(MapPathRole).toString(),
+        ui->spinBox_mapWidth->value(),
+        ui->spinBox_mapHeight->value(),
+        {}};
     auto& players = config.players;
     int numPlayers = ui->gridLayout_players->count();
     players.resize(numPlayers);
@@ -79,11 +77,8 @@ LocalGameConfig LocalGameDialog::config() const {
     return config;
 }
 
-void LocalGameDialog::on_btnStartGame_clicked() {
-    this->done(QDialog::Accepted);
-}
-
-void LocalGameDialog::on_btnCancel_clicked() { this->done(QDialog::Rejected); }
+void LocalGameDialog::on_btnStartGame_clicked() { done(QDialog::Accepted); }
+void LocalGameDialog::on_btnCancel_clicked() { done(QDialog::Rejected); }
 
 void LocalGameDialog::populateAvailableMaps() {
     auto* mapCombo = ui->comboBox_gameMap;
@@ -109,15 +104,13 @@ void LocalGameDialog::populateAvailableMaps() {
             if (doc.board.getWidth() <= 0 || doc.board.getHeight() <= 0)
                 continue;
 
-            LocalMapChoice choice;
-            choice.filePath = fileInfo.absoluteFilePath();
-            choice.fileName = fileInfo.fileName();
-            choice.displayName = doc.metadata.title.trimmed();
+            LocalMapChoice choice{fileInfo.absoluteFilePath(),
+                                  fileInfo.fileName(),
+                                  doc.metadata.title.trimmed(),
+                                  doc.board.getWidth(), doc.board.getHeight()};
             if (choice.displayName.isEmpty()) {
-                choice.displayName = fileInfo.fileName();
+                choice.displayName = choice.fileName;
             }
-            choice.width = doc.board.getWidth();
-            choice.height = doc.board.getHeight();
             choices.push_back(choice);
             ++displayNameCounts[choice.displayName];
         }
@@ -146,14 +139,13 @@ void LocalGameDialog::populateAvailableMaps() {
 
 void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
     QGridLayout* layout = ui->gridLayout_players;
-    int requiredCount = numPlayers;
 
-    while (layout->count() > requiredCount) {
+    while (layout->count() > numPlayers) {
         QLayoutItem* item = layout->takeAt(layout->count() - 1);
         item->widget()->deleteLater();
         delete item;
     }
-    if (layout->count() == requiredCount) return;
+    if (layout->count() == numPlayers) return;
 
     const QStringList botNames = toQStringList(BotFactory::instance().list());
     const QFont& font = ui->labNumPlayers->font();
@@ -161,7 +153,7 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
     QRandomGenerator* rng = QRandomGenerator::global();
 
     const int columns = 2;
-    while (layout->count() < requiredCount) {
+    while (layout->count() < numPlayers) {
         int index = layout->count();
 
         QFrame* cardFrame = new QFrame();
@@ -194,10 +186,8 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
 void LocalGameDialog::on_comboBox_gameMap_currentIndexChanged(int index) {
     if (index < 0) return;
 
-    const QString mapFilePath =
-        ui->comboBox_gameMap->itemData(index, MapPathRole).toString();
-
-    bool isRandom = mapFilePath.isEmpty();
+    const bool isRandom =
+        ui->comboBox_gameMap->itemData(index, MapPathRole).toString().isEmpty();
     ui->spinBox_mapWidth->setEnabled(isRandom);
     ui->spinBox_mapHeight->setEnabled(isRandom);
 

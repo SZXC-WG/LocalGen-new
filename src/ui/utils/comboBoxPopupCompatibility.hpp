@@ -10,8 +10,7 @@ namespace ComboBoxPopupCompatibility {
 
 class ManagedPopupStyle final : public QProxyStyle {
    public:
-    explicit ManagedPopupStyle(const QString& baseStyleKey)
-        : QProxyStyle(baseStyleKey) {}
+    using QProxyStyle::QProxyStyle;
 
     int styleHint(StyleHint hint, const QStyleOption* option,
                   const QWidget* widget,
@@ -25,9 +24,8 @@ inline void configureForManagedPopup(QComboBox* combo,
                                      int maxVisibleItems = 10) {
     combo->setMaxVisibleItems(maxVisibleItems);
 #ifdef Q_OS_LINUX
-    const QString baseStyleKey =
-        combo->style() ? combo->style()->name() : QString();
-    auto* popupStyle = new ManagedPopupStyle(baseStyleKey);
+    auto* popupStyle = new ManagedPopupStyle(
+        combo->style() ? combo->style()->name() : QString());
     popupStyle->setParent(combo);
     combo->setStyle(popupStyle);
 #endif

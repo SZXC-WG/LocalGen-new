@@ -37,9 +37,9 @@ void LeaderboardWidget::paintEvent(QPaintEvent*) {
     painter.fillRect(rect(), Qt::white);
 
     // 2. Header
-    QFont headerFont = font();
-    headerFont.setBold(true);
-    painter.setFont(headerFont);
+    QFont curFont = font();
+    curFont.setBold(true);
+    painter.setFont(curFont);
     painter.setPen(Qt::black);
     if (!collapsed) {
         painter.drawText(QRect(0, 0, layout.player, layout.header),
@@ -51,9 +51,8 @@ void LeaderboardWidget::paintEvent(QPaintEvent*) {
                      Qt::AlignCenter, QStringLiteral("Land"));
 
     // 3. Body (text & icons)
-    QFont bodyFont = font();
-    bodyFont.setBold(false);
-    painter.setFont(bodyFont);
+    curFont.setBold(false);
+    painter.setFont(curFont);
 
     static QSvgRenderer skullRenderer(QStringLiteral(":/images/svg/skull.svg"));
 
@@ -64,10 +63,8 @@ void LeaderboardWidget::paintEvent(QPaintEvent*) {
         painter.setPen(Qt::white);
 
         if (row.hasKill) {
-            int iconX = killIconLeftPadding;
-            if (collapsed) {
-                iconX = (layout.player - killIconSize) / 2;
-            }
+            const int iconX = collapsed ? (layout.player - killIconSize) / 2
+                                        : killIconLeftPadding;
             skullRenderer.render(
                 &painter, QRect(iconX, y + (layout.row - killIconSize) / 2,
                                 killIconSize, killIconSize));
@@ -136,12 +133,10 @@ void LeaderboardWidget::mousePressEvent(QMouseEvent* event) {
 
 void LeaderboardWidget::refreshSize() {
     layout = makeLayout();
-    const int preferredWidth = layout.width();
-    const int preferredHeight = layout.height(static_cast<int>(rows.size()));
-    const bool changed =
-        preferredWidth != width() || preferredHeight != height();
-    setFixedSize(preferredWidth, preferredHeight);
-    if (changed) {
+    const QSize preferredSize(layout.width(),
+                              layout.height(static_cast<int>(rows.size())));
+    if (preferredSize != size()) {
+        setFixedSize(preferredSize);
         emit preferredSizeChanged();
     }
 }
@@ -166,21 +161,21 @@ LeaderboardWidget::Layout LeaderboardWidget::makeLayout() const {
     int armyWidth = headerMetrics.horizontalAdvance(QStringLiteral("Army"));
     int landWidth = headerMetrics.horizontalAdvance(QStringLiteral("Land"));
     for (const auto& row : rows) {
-        hasKill = hasKill || row.hasKill;
+        hasKill |= row.hasKill;
         armyWidth = std::max(
             armyWidth, metrics.horizontalAdvance(QString::number(row.army)));
         landWidth = std::max(
             landWidth, metrics.horizontalAdvance(QString::number(row.land)));
     }
 
-    return {hasKill ? std::max(collapsedColorStripWidth,
-                               killIconSize + collapsedHorizontalPadding * 2)
-                    : collapsedColorStripWidth,
-            armyWidth + collapsedHorizontalPadding * 2,
-            landWidth + collapsedHorizontalPadding * 2,
-            std::max(collapsedHeaderHeight,
-                     headerMetrics.height() + collapsedVerticalPadding * 2),
-            std::max({collapsedRowHeight,
-                      metrics.height() + collapsedVerticalPadding * 2,
-                      killIconSize + collapsedVerticalPadding * 2})};
+    return {
+        std::max(collapsedColorStripWidth,
+                 hasKill ? killIconSize + collapsedHorizontalPadding * 2 : 0),
+        armyWidth + collapsedHorizontalPadding * 2,
+        landWidth + collapsedHorizontalPadding * 2,
+        std::max(collapsedHeaderHeight,
+                 headerMetrics.height() + collapsedVerticalPadding * 2),
+        std::max({collapsedRowHeight,
+                  metrics.height() + collapsedVerticalPadding * 2,
+                  killIconSize + collapsedVerticalPadding * 2})};
 }

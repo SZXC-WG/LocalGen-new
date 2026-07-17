@@ -59,32 +59,27 @@ class Player {
 
     virtual void onGameEvent(const GameEvent& event) {
         std::visit(
-            overloaded{[this, t = event.turn](const GameMessageWin& m) {
-                           this->onWin(t, m);
-                       },
-                       [this, t = event.turn](const GameMessageCapture& m) {
-                           this->onCapture(t, m);
-                       },
-                       [this, t = event.turn](const GameMessageSurrender& m) {
-                           this->onSurrender(t, m);
-                       },
-                       [this, t = event.turn](const GameMessageText& m) {
-                           this->onText(t, m);
-                       }},
+            overloaded{
+                [&](const GameMessageWin& m) { onWin(event.turn, m); },
+                [&](const GameMessageCapture& m) { onCapture(event.turn, m); },
+                [&](const GameMessageSurrender& m) {
+                    onSurrender(event.turn, m);
+                },
+                [&](const GameMessageText& m) { onText(event.turn, m); }},
             event.data);
     }
 
    protected:
-    virtual void onWin(turn_t turn, const GameMessageWin& msg) {}
-    virtual void onCapture(turn_t turn, const GameMessageCapture& msg) {}
-    virtual void onSurrender(turn_t turn, const GameMessageSurrender& msg) {}
-    virtual void onText(turn_t turn, const GameMessageText& msg) {}
+    virtual void onWin(turn_t, const GameMessageWin&) {}
+    virtual void onCapture(turn_t, const GameMessageCapture&) {}
+    virtual void onSurrender(turn_t, const GameMessageSurrender&) {}
+    virtual void onText(turn_t, const GameMessageText&) {}
 
    public:
     std::deque<Move>& getMoveQueue() { return moveQueue; }
 
     Move step() {
-        if (moveQueue.empty()) return Move();
+        if (moveQueue.empty()) return {};
         Move move = moveQueue.front();
         moveQueue.pop_front();
         return move;

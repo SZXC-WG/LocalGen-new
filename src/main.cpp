@@ -23,8 +23,7 @@ static void loadFonts() {
     const QDir appDir(QCoreApplication::applicationDirPath());
     for (const QString& fontFileName : fontFileNames) {
         const QString fontPath = appDir.filePath("fonts/" + fontFileName);
-        const QFileInfo fontFile(fontPath);
-        if (!fontFile.exists()) {
+        if (!QFileInfo::exists(fontPath)) {
             warnings
                 << QString("Required font file not found:\n%1").arg(fontPath);
             continue;

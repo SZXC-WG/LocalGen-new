@@ -12,25 +12,8 @@
 #include <cmath>
 
 #include "core/bot.h"
-#include "core/game.hpp"
 #include "core/map.hpp"
 #include "ui/utils/surrenderConfirmDialog.hpp"
-
-void HumanPlayer::init(index_t playerId, const GameConstantsPack& constants) {
-    this->playerId = playerId;
-}
-
-void HumanPlayer::requestMove(const BoardView& boardView,
-                              const std::vector<RankItem>& rank) {
-    if (boardViewHandler) {
-        boardViewHandler(boardView);
-    }
-}
-
-void HumanPlayer::setBoardViewHandler(
-    std::function<void(const BoardView&)> boardViewHandler) {
-    this->boardViewHandler = std::move(boardViewHandler);
-}
 
 namespace {
 
@@ -46,10 +29,8 @@ inline DisplayTile toDisplayTile(const TileView& tile) {
     DisplayTile display;
     display.type = tile.type;
     if (!tile.visible) {
-        if (tile.type == TILE_SWAMP)
-            display.color.setRgb(128, 128, 128);
-        else
-            display.color.setRgb(57, 57, 57);
+        const int shade = tile.type == TILE_SWAMP ? 128 : 57;
+        display.color.setRgb(shade, shade, shade);
         display.displayBorders = false;
         return display;
     }
@@ -87,11 +68,13 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     pal.setColor(QPalette::Window, QColor(36, 36, 36));
     setPalette(pal);
 
+    auto numPlayers = config.players.size();
+
     Board initialBoard;
     if (config.mapFilePath.isEmpty()) {
-        quint64 seed = QRandomGenerator64::global()->generate();
+        const quint64 seed = QRandomGenerator64::global()->generate();
         initialBoard = Board::generate(config.mapWidth, config.mapHeight,
-                                       config.players.size(), seed);
+                                       numPlayers, seed);
     } else {
         QString errMsg;
         MapDocument mapDoc = openMap_v6(config.mapFilePath, errMsg);
@@ -106,7 +89,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
 
     if (initialBoard.getWidth() <= 0 || initialBoard.getHeight() <= 0) {
         QMessageBox::critical(this, "Local Game",
-                              QString("The selected map is empty or invalid."));
+                              "The selected map is empty or invalid.");
         return;
     }
 
@@ -121,15 +104,14 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
 
     halfTurnDurationMs =
         500.0 / static_cast<double>(std::max(config.gameSpeed, 1));
-    analysisEnabled = config.showAnalysis;
 
     std::vector<Player*> players;
     std::vector<index_t> teams;
     std::vector<std::string> names;
 
-    players.reserve(config.players.size() + 1);
-    teams.reserve(config.players.size() + 1);
-    names.reserve(config.players.size() + 1);
+    players.reserve(numPlayers);
+    teams.reserve(numPlayers);
+    names.reserve(numPlayers);
 
     for (const QString& name : config.players) {
         if (name == "Human") {
@@ -143,23 +125,20 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         }
         std::string stdName = name.toStdString();
         BasicBot* bot = BotFactory::instance().create(stdName);
-        if (bot == nullptr) {
-            continue;
-        }
+        if (bot == nullptr) continue;
         players.push_back(bot);
         teams.push_back(static_cast<index_t>(teams.size()));
         names.push_back(stdName);
     }
 
     game = new BasicGame(true, players, teams, names, initialBoard);
-    const int initResult = game->init();
-    if (initResult != 0) {
+    if (const int initResult = game->init()) {
         QString errMsg = "Failed to initialize local game.";
         if (initResult == 1) {
             errMsg = QString(
                          "The selected map does not have enough spawn points "
                          "or blank tiles to accommodate %1 players.")
-                         .arg(static_cast<int>(config.players.size()));
+                         .arg(numPlayers);
         }
         QMessageBox::critical(this, "Local Game", errMsg);
         delete game;
@@ -195,7 +174,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     connect(chatBox, &ChatBoxWidget::messageSubmitted, this,
             &LocalGameWindow::handleChatSubmission);
 
-    if (analysisEnabled) {
+    if (config.showAnalysis) {
         std::vector<QColor> colors;
         std::vector<QString> playerNames;
         for (index_t i = 0; i < game->getPlayerCount(); ++i) {
@@ -226,12 +205,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
 
 LocalGameWindow::~LocalGameWindow() {
     stopGameLoop();
-    if (game != nullptr) {
-        game->setEventCallback({});
-        delete game;
-        game = nullptr;
-        humanPlayer = nullptr;
-    }
+    if (game != nullptr) delete game;
 }
 
 bool LocalGameWindow::canHumanChat() const {
@@ -344,8 +318,7 @@ void LocalGameWindow::runHalfTurn() {
         return;
     }
 
-    double waitMs = halfTurnDurationMs - elapsedMs;
-    scheduleNextHalfTurn(waitMs > 0.0 ? waitMs : 0.0);
+    scheduleNextHalfTurn(std::max(0.0, halfTurnDurationMs - elapsedMs));
 }
 
 void LocalGameWindow::scheduleNextHalfTurn(double delayMs) {
@@ -356,7 +329,7 @@ void LocalGameWindow::scheduleNextHalfTurn(double delayMs) {
 
 void LocalGameWindow::stopGameLoop() {
     gameRunning = false;
-    if (halfTurnTimer != nullptr && halfTurnTimer->isActive()) {
+    if (halfTurnTimer != nullptr) {
         halfTurnTimer->stop();
     }
     if (gameMap != nullptr) {
@@ -400,24 +373,20 @@ void LocalGameWindow::positionFloatingWidgets() {
 
     if (chatBox != nullptr) {
         int rightBoundary = width();
-        if (analysisChartWidget != nullptr) {
+        if (analysisChartWidget != nullptr)
             rightBoundary = std::min(rightBoundary, analysisChartWidget->x());
-        }
-        if (leaderboardWidget != nullptr) {
+        if (leaderboardWidget != nullptr)
             rightBoundary = std::min(rightBoundary, leaderboardWidget->x());
-        }
 
-        const int x = 0;
-        const int availableWidth = std::max(0, rightBoundary - x);
+        const int availableWidth = std::max(0, rightBoundary);
         const int desiredWidth = std::clamp(width() / 4, 280, 380);
         const int panelWidth = std::min(desiredWidth, availableWidth);
-        const int availableHeight = std::max(0, height());
         const int desiredHeight = std::clamp(height() / 3, 220, 340);
-        const int panelHeight = std::min(desiredHeight, availableHeight);
+        const int panelHeight = std::min(desiredHeight, height());
         const int y = std::max(0, height() - panelHeight);
 
         if (panelWidth > 0 && panelHeight > 0) {
-            chatBox->setGeometry(x, y, panelWidth, panelHeight);
+            chatBox->setGeometry(0, y, panelWidth, panelHeight);
             chatBox->show();
             chatBox->raise();
         } else {

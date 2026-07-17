@@ -30,7 +30,7 @@ struct Move {
     bool takeHalf = false;
 
     constexpr Move() = default;
-    constexpr Move(MoveType _type) : type(_type) {}
-    constexpr Move(MoveType _type, Coord _from, Coord _to, bool _takeHalf)
-        : type(_type), from(_from), to(_to), takeHalf(_takeHalf) {}
+    constexpr Move(MoveType type) : type(type) {}
+    constexpr Move(MoveType type, Coord from, Coord to, bool takeHalf)
+        : type(type), from(from), to(to), takeHalf(takeHalf) {}
 };

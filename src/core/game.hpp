@@ -14,7 +14,6 @@
  */
 
 #include <algorithm>
-#include <array>
 #include <cctype>
 #include <cstdint>
 #include <deque>
@@ -243,7 +242,7 @@ inline std::vector<pos_t> BasicGame::calcDist(Coord pos) {
     pos_t height = board.getHeight(), width = board.getWidth();
     const pos_t dist_inf = height * width + 1;
     std::vector<pos_t> dist((height + 2) * (width + 2), dist_inf);
-    auto grid = [&, this](Coord p) { return p.x * (width + 2) + p.y; };
+    auto grid = [&](Coord p) { return p.x * (width + 2) + p.y; };
     std::vector<std::pair<Coord, pos_t>> q;
     std::size_t head = 0;
     q.emplace_back(pos, 0);
@@ -311,11 +310,9 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
         throw std::invalid_argument(
             "BasicGame players/teams/names size mismatch");
     }
-    for (auto* player : _players) {
-        if (player == nullptr) {
-            throw std::invalid_argument(
-                "BasicGame received null player pointer");
-        }
+    if (std::find(_players.begin(), _players.end(), nullptr) !=
+        _players.end()) {
+        throw std::invalid_argument("BasicGame received null player pointer");
     }
 
     std::vector<index_t> randId(_players.size());
@@ -347,14 +344,12 @@ inline void BasicGame::step() {
         if (!specialTiles.empty()) {
             std::string tileList = specialTiles[0];
             for (std::size_t i = 1; i < specialTiles.size(); ++i) {
-                tileList += ", ";
-                tileList += specialTiles[i];
+                tileList.append(", ").append(specialTiles[i]);
             }
-            int specialTileCount = static_cast<int>(specialTiles.size());
-            if (specialTileCount == 1) {
+            if (specialTiles.size() == 1) {
                 sendSystemMessage("1 special tile is enabled: " + tileList);
             } else {
-                sendSystemMessage(std::to_string(specialTileCount) +
+                sendSystemMessage(std::to_string(specialTiles.size()) +
                                   " special tiles are enabled: " + tileList);
             }
         }
@@ -426,8 +421,7 @@ inline void BasicGame::step() {
         }
     }
 
-    std::for_each(surrenderQueue.begin(), surrenderQueue.end(),
-                  [&](auto& x) { --x.second; });
+    for (auto& entry : surrenderQueue) --entry.second;
 
     // handle afk players
     while (!surrenderQueue.empty() && surrenderQueue.front().second <= 0) {
@@ -566,10 +560,10 @@ inline int BasicGame::initSpawn() {
                                   std::make_move_iterator(spawns.begin()),
                                   std::make_move_iterator(spawns.end()));
         } else {
-            index_t team = it->second;
-            teamSpawns[team].insert(teamSpawns[team].end(),
-                                    std::make_move_iterator(spawns.begin()),
-                                    std::make_move_iterator(spawns.end()));
+            auto& teamSpawn = teamSpawns[it->second];
+            teamSpawn.insert(teamSpawn.end(),
+                             std::make_move_iterator(spawns.begin()),
+                             std::make_move_iterator(spawns.end()));
         }
     }
 
@@ -628,20 +622,17 @@ inline int BasicGame::initSpawn() {
             [](const Tile& t) { return t.type == TILE_PLAIN && t.army == 0; });
         std::shuffle(blankTiles.begin(), blankTiles.end(), rng);
 
-        if (blankTiles.size() >= unassigned.size()) {
-            for (size_t i = 0; i < unassigned.size(); ++i)
-                spawnCoord[unassigned[i]] = blankTiles[i].first;
-            return 0;
-        }
-        return 1;  // Not enough spawn points or blank tiles
+        if (blankTiles.size() < unassigned.size()) return 1;
+
+        for (size_t i = 0; i < unassigned.size(); ++i)
+            spawnCoord[unassigned[i]] = blankTiles[i].first;
     }
 
     return 0;
 }
 
 inline int BasicGame::init() {
-    int spawnReturn = initSpawn();
-    if (spawnReturn != 0) return spawnReturn;
+    if (const int result = initSpawn()) return result;
 
     for (Tile& tile : board.tiles) {
         if (tile.type == TILE_SPAWN) {
@@ -650,7 +641,7 @@ inline int BasicGame::init() {
         }
     }
 
-    alive = std::vector(players.size(), true);
+    alive.assign(players.size(), true);
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         Tile& spawnTile = board.tileAt(spawnCoord[i]);
         spawnTile.occupier = i;
@@ -684,8 +675,8 @@ inline void BasicGame::sendPlayerMessage(index_t sender, std::string text) {
 inline void BasicGame::broadcast(turn_t turn,
                                  const GameMessageData& messageData) {
     GameEvent event{turn, curHalfTurnPhase, messageData};
-    for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
-        players[i]->onGameEvent(event);
+    for (Player* player : players) {
+        player->onGameEvent(event);
     }
     if (eventCallback) eventCallback(event);
 }

@@ -64,11 +64,6 @@ Then find the executable under `build/Release`.
 >
 > Avoid `macdeployqt ... -dmg` here: recent Qt/macOS combinations can leave disallowed bundle metadata on copied frameworks, which breaks the app signature inside the generated DMG.
 
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=SZXC-WG/LocalGen-new&type=Date)](https://star-history.com/#SZXC-WG/LocalGen-new&Date)
-
 ## Disclaimer
 
 The "Local Generals.io" project (hereinafter referred to as "LocalGen") is an independent, open-source project developed by the SZXC-WG community. LocalGen is in no way affiliated with, associated with, endorsed by, sponsored by, or connected to `generals.io` or its original developers.

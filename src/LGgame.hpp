@@ -332,7 +332,7 @@ void LGgame::ranklist(bool print) {
     if (!LGset::modifier::SilentWar) plen = textwidth(L"PLAIN");
     if (!LGset::modifier::SilentWar) clen = textwidth(L"CITY");
     if (!LGset::modifier::SilentWar) tlen = textwidth(L"TOT");
-    if (!LGset::modifier::SilentWar) tlen = textwidth(L"INC");
+    if (!LGset::modifier::SilentWar) inclen = textwidth(L"INC");
     if (!LGset::modifier::SilentWar && printAIH) aihlen = textwidth(L"AIH");
     if (printBot) botlen = textwidth(L"BOT NAME");
     for (int i = 1; i <= LGgame::playerCnt; ++i) {

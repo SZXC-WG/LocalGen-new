@@ -30,5 +30,4 @@ After building, run the executable from `build/Release`:
 - If `--threads` is omitted, the simulator auto-selects a worker count from the machine's available CPU concurrency.
 - Per-game results are printed as soon as each match finishes, so completion order may differ from game number order.
 - `--silent` suppresses the startup banner and per-game logs, leaving only the final summary table.
-- Aggregate summary output is printed as a table, including each bot's FFA TrueSkill rating with a 95% confidence interval as well as win-rate confidence intervals.
-- No reinforcement learning assets were added for this bot.
+- Aggregate summary output is printed as a table, including each bot's FFA OpenSkill mean rating with a 95% confidence interval as well as win-rate confidence intervals.

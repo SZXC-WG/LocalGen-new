@@ -65,7 +65,7 @@ class TimedBot : public BasicBot {
 };
 
 struct Options {
-    int games = 8, width = 20, height = 20, maxSteps = 600, threads = 0;
+    int games = 8, width = 20, height = 20, maxSteps = 1000, threads = 0;
     bool remainIndex = true, silent = false, measureLatency = false;
     std::string mapPath;
     Board customBoard;
@@ -312,7 +312,7 @@ void printUsage() {
            "random map\n"
         << "  --threads N        CPU worker threads (default: auto)\n"
         << "  --steps N          Maximum half-turn steps per game (default: "
-           "600)\n"
+           "1000)\n"
         << "  --silent           Only print the final summary table\n"
         << "  --shuffle          Randomize player index mapping in simulator\n"
         << "  --latency          Measure and report average requestMove() "

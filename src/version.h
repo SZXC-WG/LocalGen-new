@@ -14,19 +14,20 @@
 
 namespace version_namespace {
 
-enum class BuildType { Rel, RC, Beta, Dev };
+enum class BuildType : std::uint8_t { Rel, RC, Beta, Alpha, Dev };
 
 typedef std::uint16_t count_t;
 
 inline std::string buildStr(BuildType type = BuildType::Dev,
                             count_t count = 0) {
     switch (type) {
-        case BuildType::Rel:  return "";
-        case BuildType::RC:   return "-rc." + std::to_string(count);
-        case BuildType::Beta: return "-beta." + std::to_string(count);
-        case BuildType::Dev:  return "-dev";
+        case BuildType::Rel:   return "";
+        case BuildType::RC:    return "-rc." + std::to_string(count);
+        case BuildType::Beta:  return "-beta." + std::to_string(count);
+        case BuildType::Alpha: return "-alpha." + std::to_string(count);
+        case BuildType::Dev:   return "-dev";
+        default:               return "-unknown";
     }
-    return "-unknown";
 }
 
 struct Version {

@@ -310,9 +310,6 @@ class ZlyBot_v2_1 : public BasicBot {
             }
         };
         auto incNode = [&](RouteNode ori, Coord next) -> RouteNode {
-            if (std::clamp(next.x, 1, height) != next.x ||
-                std::clamp(next.y, 1, width) != next.y)
-                return ROUTE_INF;
             const tile_type_e tt = typeAt(next);
             if (isImpassableTile(tt)) return ROUTE_INF;
             ori.dist += DIST_INC;

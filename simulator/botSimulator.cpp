@@ -236,12 +236,12 @@ void printSummaryTable(const Options& options,
         });
     }
 
-    std::stable_sort(rows.begin(), rows.end(),
-                     [](const SummaryRow& lhs, const SummaryRow& rhs) {
-                         if (lhs.skill != rhs.skill)
-                             return lhs.skill > rhs.skill;
-                         return lhs.wins > rhs.wins;
-                     });
+    std::ranges::stable_sort(rows,
+                             [](const SummaryRow& lhs, const SummaryRow& rhs) {
+                                 if (lhs.skill != rhs.skill)
+                                     return lhs.skill > rhs.skill;
+                                 return lhs.wins > rhs.wins;
+                             });
 
     std::vector<std::size_t> widths(header.size(), 0);
     for (std::size_t i = 0; i < header.size(); ++i) {
@@ -364,9 +364,9 @@ bool loadCustomMap(Options& options, std::string& errorMessage) {
 
     const std::filesystem::path mapPath(options.mapPath);
     std::string extension = mapPath.extension().string();
-    std::transform(
-        extension.begin(), extension.end(), extension.begin(),
-        [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
+    std::ranges::transform(extension, extension.begin(), [](unsigned char ch) {
+        return static_cast<char>(std::tolower(ch));
+    });
     if (extension != ".lgmp") {
         errorMessage =
             "Only v6 .lgmp maps are supported by --map: " + options.mapPath;

@@ -123,7 +123,7 @@ class Generator {
 
         for (int cand = 0; cand < kNumCandidates || bestSpawns_.empty();
              ++cand) {
-            std::fill(grid_.begin(), grid_.end(), TILE_BLANK);
+            std::ranges::fill(grid_, TILE_BLANK);
 
             const double currentMargin =
                 baseMargin +
@@ -163,7 +163,7 @@ class Generator {
 
             if (currentMountains > targetMountains) {
                 int candidateTail = 0;
-                std::fill(isCandidate_.begin(), isCandidate_.end(), 0);
+                std::ranges::fill(isCandidate_, 0);
                 for (int i = 0; i < totalTiles_; ++i) {
                     if (grid_[i] != TILE_MOUNTAIN) continue;
                     const int row = i / width_, col = i % width_;
@@ -206,7 +206,7 @@ class Generator {
 
             maxConnectedComponent_.clear();
             int connectedComponentCount = 0;
-            std::fill(visited_.begin(), visited_.end(), 0);
+            std::ranges::fill(visited_, 0);
             for (int i = 0; i < totalTiles_; ++i) {
                 if (grid_[i] != TILE_BLANK || visited_[i]) continue;
                 ++connectedComponentCount;
@@ -240,8 +240,7 @@ class Generator {
             spawns_.push_back(
                 maxConnectedComponent_[fastRand(searchSeed_) %
                                        maxConnectedComponent_.size()]);
-            std::fill(minDistFps_.begin(), minDistFps_.end(),
-                      std::numeric_limits<int>::max());
+            std::ranges::fill(minDistFps_, std::numeric_limits<int>::max());
 
             updateMinSpawnDistances(spawns_[0]);
 
@@ -257,12 +256,11 @@ class Generator {
             }
 
             for (int iter = 0; iter < 2; ++iter) {
-                std::fill(owner_.begin(), owner_.end(), -1);
-                std::fill(curDist_.begin(), curDist_.end(),
-                          std::numeric_limits<int>::max());
-                std::fill(count_.begin(), count_.end(), 0);
-                std::fill(sumRow_.begin(), sumRow_.end(), 0);
-                std::fill(sumCol_.begin(), sumCol_.end(), 0);
+                std::ranges::fill(owner_, -1);
+                std::ranges::fill(curDist_, std::numeric_limits<int>::max());
+                std::ranges::fill(count_, 0);
+                std::ranges::fill(sumRow_, 0);
+                std::ranges::fill(sumCol_, 0);
 
                 int head = 0, tail = 0;
                 for (int i = 0; i < searchSpawnCount_; ++i) {
@@ -312,10 +310,9 @@ class Generator {
                 }
             }
 
-            std::fill(owner_.begin(), owner_.end(), -1);
-            std::fill(curDist_.begin(), curDist_.end(),
-                      std::numeric_limits<int>::max());
-            std::fill(area_.begin(), area_.end(), 0);
+            std::ranges::fill(owner_, -1);
+            std::ranges::fill(curDist_, std::numeric_limits<int>::max());
+            std::ranges::fill(area_, 0);
 
             int head = 0, tail = 0;
             for (int i = 0; i < searchSpawnCount_; ++i) {

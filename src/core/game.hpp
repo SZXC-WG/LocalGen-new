@@ -310,14 +310,13 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
         throw std::invalid_argument(
             "BasicGame players/teams/names size mismatch");
     }
-    if (std::find(_players.begin(), _players.end(), nullptr) !=
-        _players.end()) {
+    if (std::ranges::find(_players, nullptr) != _players.end()) {
         throw std::invalid_argument("BasicGame received null player pointer");
     }
 
     std::vector<index_t> randId(_players.size());
     std::iota(randId.begin(), randId.end(), 0);
-    if (!remainIndex) std::shuffle(randId.begin(), randId.end(), rng);
+    if (!remainIndex) std::ranges::shuffle(randId, rng);
     eliminatedTurn.assign(players.size(), std::numeric_limits<turn_t>::max());
     for (std::size_t i = 0; i < players.size(); ++i) {
         players[randId[i]] = _players[i];
@@ -386,10 +385,9 @@ inline void BasicGame::step() {
     // 3. Normal attack moves
     // 4. Attacks on enemy generals (lowest)
     // Tiebreakers: army size, then old priority (player index)
-    std::sort(moves.begin(), moves.end(),
-              [this, &moveOutMap](const auto& a, const auto& b) {
-                  return compareMovePriority(a, b, moveOutMap);
-              });
+    std::ranges::sort(moves, [this, &moveOutMap](const auto& a, const auto& b) {
+        return compareMovePriority(a, b, moveOutMap);
+    });
 
     // execute moves
     for (auto [player, move] : moves) {
@@ -482,16 +480,14 @@ inline std::vector<RankItem> BasicGame::ranklist() {
         }
     }
 
-    std::sort(rank.begin(), rank.end(),
-              [&](const RankItem& lhs, const RankItem& rhs) {
-                  if (lhs.killCount == 0 && rhs.killCount > 0) return false;
-                  if (lhs.killCount > 0 && rhs.killCount == 0) return true;
-                  if (lhs.army != rhs.army) return lhs.army > rhs.army;
-                  if (eliminatedTurn[lhs.player] != eliminatedTurn[rhs.player])
-                      return eliminatedTurn[lhs.player] >
-                             eliminatedTurn[rhs.player];
-                  return lhs.player < rhs.player;
-              });
+    std::ranges::sort(rank, [&](const RankItem& lhs, const RankItem& rhs) {
+        if (lhs.killCount == 0 && rhs.killCount > 0) return false;
+        if (lhs.killCount > 0 && rhs.killCount == 0) return true;
+        if (lhs.army != rhs.army) return lhs.army > rhs.army;
+        if (eliminatedTurn[lhs.player] != eliminatedTurn[rhs.player])
+            return eliminatedTurn[lhs.player] > eliminatedTurn[rhs.player];
+        return lhs.player < rhs.player;
+    });
     return rank;
 }
 
@@ -536,8 +532,8 @@ inline int BasicGame::initSpawn() {
         labelList.push_back(label);
     }
 
-    std::shuffle(teamList.begin(), teamList.end(), rng);
-    std::shuffle(labelList.begin(), labelList.end(), rng);
+    std::ranges::shuffle(teamList, rng);
+    std::ranges::shuffle(labelList, rng);
 
     std::unordered_map<unsigned, index_t> labelToTeam;
     const size_t mappingCount = std::min(labelList.size(), teamList.size());
@@ -572,14 +568,14 @@ inline int BasicGame::initSpawn() {
     // Phase 4: Assign fixed spawns per team
     for (auto& [team, spawns] : teamSpawns) {
         auto& playersInTeam = teamPlayers[team];
-        std::shuffle(playersInTeam.begin(), playersInTeam.end(), rng);
-        std::shuffle(spawns.begin(), spawns.end(), rng);
+        std::ranges::shuffle(playersInTeam, rng);
+        std::ranges::shuffle(spawns, rng);
 
         const size_t count = std::min(playersInTeam.size(), spawns.size());
         for (size_t i = 0; i < count; ++i) {
             index_t player = playersInTeam[i];
             spawnCoord[player] = spawns[i];
-            auto it = std::find(unassigned.begin(), unassigned.end(), player);
+            auto it = std::ranges::find(unassigned, player);
             if (it != unassigned.end()) {
                 *it = unassigned.back();
                 unassigned.pop_back();
@@ -592,8 +588,8 @@ inline int BasicGame::initSpawn() {
     }
 
     // Phase 5a: Assign spawnTeam==0 flexible spawns first
-    std::shuffle(unassigned.begin(), unassigned.end(), rng);
-    std::shuffle(flexibleSpawns.begin(), flexibleSpawns.end(), rng);
+    std::ranges::shuffle(unassigned, rng);
+    std::ranges::shuffle(flexibleSpawns, rng);
 
     const size_t flexAssigned =
         std::min(unassigned.size(), flexibleSpawns.size());
@@ -604,8 +600,8 @@ inline int BasicGame::initSpawn() {
 
     // Phase 5b: If still unassigned, release excess fixed spawns as flexible
     if (!unassigned.empty() && !excessFixedSpawns.empty()) {
-        std::shuffle(unassigned.begin(), unassigned.end(), rng);
-        std::shuffle(excessFixedSpawns.begin(), excessFixedSpawns.end(), rng);
+        std::ranges::shuffle(unassigned, rng);
+        std::ranges::shuffle(excessFixedSpawns, rng);
 
         const size_t excessAssigned =
             std::min(unassigned.size(), excessFixedSpawns.size());
@@ -620,7 +616,7 @@ inline int BasicGame::initSpawn() {
     if (!unassigned.empty()) {
         auto blankTiles = collectTiles(
             [](const Tile& t) { return t.type == TILE_PLAIN && t.army == 0; });
-        std::shuffle(blankTiles.begin(), blankTiles.end(), rng);
+        std::ranges::shuffle(blankTiles, rng);
 
         if (blankTiles.size() < unassigned.size()) return 1;
 
@@ -668,7 +664,7 @@ inline int BasicGame::init() {
 inline void BasicGame::sendPlayerMessage(index_t sender, std::string text) {
     if (!isValidPlayer(sender) || text.empty()) return;
     const auto isSpace = [](unsigned char ch) { return std::isspace(ch) != 0; };
-    if (std::all_of(text.begin(), text.end(), isSpace)) return;
+    if (std::ranges::all_of(text, isSpace)) return;
     broadcast(curTurn, GameMessageText{sender, std::move(text)});
 }
 

@@ -35,7 +35,7 @@ Here is a summary of current bot implementations included in this directory. The
 Before submitting a bot to this folder, make sure it satisfies **all** of the following requirements:
 
 1. The bot is written in C++ (or another language that can be compiled as C++).
-2. It uses C++17 features only; the code must compile with a C++17-compliant compiler.
+2. It uses C++20 features only; the code must compile with a C++20-compliant compiler.
 3. The entire implementation lives in a single source file (`*.cpp`).
 4. That source file includes the header `src/core/bot.h`.
 5. Your bot class

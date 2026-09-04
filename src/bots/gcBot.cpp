@@ -328,7 +328,7 @@ class GcBot : public BasicBot {
                 if (pTile.occupier != id && !isImpassableTile(pTile.type)) {
                     value_t prevBlockValue = computeTileValue(prevTarget);
                     value_t keepTargetMargin =
-                        std::max(25.0, 0.03 * std::pow(self.army, 0.86));
+                        std::max(100.0, 0.03 * std::pow(self.army, 0.86));
                     if (maxBlockValue - prevBlockValue < keepTargetMargin) {
                         targetPos = prevTarget;
                     }

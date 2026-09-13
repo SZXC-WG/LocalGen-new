@@ -278,16 +278,33 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
     ++killCount[p1];
     alive[p2] = false;
     eliminatedTurn[p2] = curTurn << 1 | curHalfTurnPhase;
-    for (auto& tile : board.tiles) {
-        if (tile.occupier == p2) {
-            tile.occupier = p1;
-            if (tile.type == TILE_GENERAL) {
-                tile.type = TILE_CAPTURED_GENERAL;
-            } else if (tile.army > 1) {
-                tile.army = (tile.army + 1) >> 1;
-            }
+
+    // Leapfrog needs the conquered capital's location. The loop below
+    // relabels it as TILE_CAPTURED_GENERAL, after which it can no longer be
+    // told apart from a general captured earlier, so remember it on the way.
+    std::size_t capturedGeneral = board.tiles.size();
+    std::size_t victorGeneral = board.tiles.size();
+
+    for (std::size_t i = 0; i < board.tiles.size(); ++i) {
+        Tile& tile = board.tiles[i];
+        if (tile.occupier == p1 && tile.type == TILE_GENERAL) victorGeneral = i;
+        if (tile.occupier != p2) continue;
+        tile.occupier = p1;
+        if (tile.type == TILE_GENERAL) {
+            tile.type = TILE_CAPTURED_GENERAL;
+            capturedGeneral = i;
+        } else if (tile.army > 1) {
+            tile.army = (tile.army + 1) >> 1;
         }
     }
+
+    // Leapfrog: the victor's general relocates to the conquered capital, and
+    // its former seat is downgraded to a 'captured general'.
+    if (conf.LeapfrogEnabled && capturedGeneral < board.tiles.size()) {
+        board.tiles[capturedGeneral].type = TILE_GENERAL;
+        board.tiles[victorGeneral].type = TILE_CAPTURED_GENERAL;
+    }
+
     broadcast(curTurn, GameMessageCapture{p1, p2});
 }
 

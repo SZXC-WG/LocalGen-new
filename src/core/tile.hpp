@@ -47,6 +47,18 @@ inline bool isImpassableTile(tile_type_e type) {
            type == TILE_OBSERVATORY;
 }
 
+/// Whether a tile behaves like a city.
+///
+/// Per the project's "general is a city" convention, a general is equivalent
+/// to a city apart from its capital property: only a `TILE_GENERAL` can be
+/// captured (turning into `TILE_CAPTURED_GENERAL`), and only it is the
+/// target of the Leapfrog relocation. Everything else -- growth, and the
+/// vision they provide -- is shared.
+inline bool isCityLikeTile(tile_type_e type) {
+    return type == TILE_CITY || type == TILE_GENERAL ||
+           type == TILE_CAPTURED_GENERAL;
+}
+
 /// Information of a single tile.
 struct Tile {
     index_t occupier = -1;  // -1 stands for unoccupied

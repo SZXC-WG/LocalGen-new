@@ -194,11 +194,21 @@ class Board {
                     else if (tile.type == TILE_OBSERVATORY)
                         assignObservatoryVision(x, y);
                 } else {
-                    // Stage S2: every tile uses the overall radius. Splitting
-                    // city-like tiles onto CityVisionRange/CityVisionMode is
-                    // stage S3.
-                    assignRadiusVision(x, y, player, conf.OverallVisionRange,
-                                       conf.OverallVisionMode);
+                    // City-like tiles may override both the radius and the
+                    // distance metric. The sentinels (-1 and INHERIT) mean
+                    // "inherit from the overall vision settings", so a config
+                    // that never touches them behaves exactly like the plain
+                    // overall radius.
+                    const bool isCity = isCityLikeTile(tile.type);
+                    const int range = (isCity && conf.CityVisionRange >= 0)
+                                          ? conf.CityVisionRange
+                                          : conf.OverallVisionRange;
+                    const config::VisionMode mode =
+                        (isCity && conf.CityVisionMode !=
+                                       config::VisionMode::INHERIT)
+                            ? conf.CityVisionMode
+                            : conf.OverallVisionMode;
+                    assignRadiusVision(x, y, player, range, mode);
                 }
             }
         }

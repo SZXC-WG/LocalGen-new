@@ -98,6 +98,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${LOCALGEN_BOT_SOURCES}
     src/core/board.hpp
     src/core/bot.h
+    src/core/game-config.hpp
     src/core/game.hpp
     src/core/map.hpp
     src/core/mapgen.hpp
@@ -122,6 +123,7 @@ add_executable(LocalGen-bot-simulator
     ${LOCALGEN_BOT_SOURCES}
     src/core/board.hpp
     src/core/bot.h
+    src/core/game-config.hpp
     src/core/game.hpp
     src/core/map.hpp
     src/core/mapgen.hpp

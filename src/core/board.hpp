@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <vector>
 
 #include "game-config.hpp"
@@ -87,9 +88,37 @@ class Board {
     /// visionCache[n][x][y], flattened into 1D for better performance.
     std::vector<uint8_t> visionCache;
 
+    /// Mark every tile within `range` of (x, y) as visible for `player`.
+    ///
+    /// `mode` picks the distance metric: `NEAR8` is Chebyshev distance
+    /// (a `(2R+1) x (2R+1)` square), `NEAR4` is Manhattan distance (a
+    /// diamond). A negative `range` is treated as 0, i.e. the tile itself.
+    /// Out-of-board coordinates are clamped, so edge tiles simply get a
+    /// truncated neighbourhood.
+    void assignRadiusVision(pos_t x, pos_t y, index_t player, int range,
+                            config::VisionMode mode) {
+        const pos_t C = col + 2, RC = (row + 2) * C;
+        if (range < 0) range = 0;
+        const std::size_t base = static_cast<std::size_t>(player) * RC;
+
+        for (pos_t i = std::max<pos_t>(x - range, 1),
+                   iEnd = std::min<pos_t>(x + range, row);
+             i <= iEnd; ++i) {
+            const pos_t dy = (mode == config::VisionMode::NEAR4)
+                                 ? range - std::abs(i - x)
+                                 : range;
+            for (pos_t j = std::max<pos_t>(y - dy, 1),
+                       jEnd = std::min<pos_t>(y + dy, col);
+                 j <= jEnd; ++j) {
+                visionCache[base + i * C + j] = true;
+            }
+        }
+    }
+
    public:
     /// Update the vision cache. Must be called after a board update.
     void updateVisionCache(const config::Config& conf = config::defaultConf) {
+        assert(config::isValidConfig(conf));
         const pos_t C = col + 2, RC = (row + 2) * C;
         if (visionCache.empty()) {
             index_t maxPlayer = 0;
@@ -99,6 +128,13 @@ class Board {
             visionCache.resize((maxPlayer + 1) * RC, false);
         } else {
             visionCache.assign(visionCache.size(), false);
+        }
+
+        // Crystal Clear removes the fog of war entirely: every player sees
+        // the whole board, so the per-tile pass below is unnecessary.
+        if (conf.CrystalClearEnabled) {
+            std::fill(visionCache.begin(), visionCache.end(), true);
+            return;
         }
 
         static const std::pair<int, int> dirs[4] = {
@@ -158,12 +194,11 @@ class Board {
                     else if (tile.type == TILE_OBSERVATORY)
                         assignObservatoryVision(x, y);
                 } else {
-                    size_t base = player * RC + x * C + y;
-                    for (size_t rbase : {base - C, base, base + C}) {
-                        visionCache[rbase - 1] = true;
-                        visionCache[rbase] = true;
-                        visionCache[rbase + 1] = true;
-                    }
+                    // Stage S2: every tile uses the overall radius. Splitting
+                    // city-like tiles onto CityVisionRange/CityVisionMode is
+                    // stage S3.
+                    assignRadiusVision(x, y, player, conf.OverallVisionRange,
+                                       conf.OverallVisionMode);
                 }
             }
         }

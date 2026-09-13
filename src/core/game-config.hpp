@@ -35,6 +35,7 @@ enum class MoveProcessMode : uint8_t { FULL, PARITY };
     /* ---- Move settings ---- */                                      \
     F(MoveProcessMode, MoveProcessMethod, MoveProcessMode::FULL)       \
     /* ---- Modifier flags ---- */                                     \
+    F(bool, CrystalClearEnabled, false)                                \
     F(bool, MistyVeilEnabled, false)                                   \
     F(bool, LeapfrogEnabled, false)                                    \
     F(bool, CityStateEnabled, false)                                   \
@@ -124,7 +125,7 @@ constexpr inline ConfigPatch operator&(const ConfigPatch& lhs,
     F(Watchtower,                                                            \
       unit::CityVisionMode(VisionMode::NEAR4) | unit::CityVisionRange(4))    \
     F(MistyVeil, unit::MistyVeilEnabled(true) | unit::OverallVisionRange(0)) \
-    F(CrystalClear, unit::OverallVisionRange(100))                           \
+    F(CrystalClear, unit::CrystalClearEnabled(true))                         \
     F(FadingSmog, unit::FadingSmogInterval(25))                              \
     /* ---- Behavioral modifiers ---- */                                     \
     F(Leapfrog, unit::LeapfrogEnabled(true))                                 \
@@ -162,6 +163,13 @@ constexpr inline PatchStatus patchStatus(const Config& config,
     GAME_CONFIG_UNIT_LIST(IF_MIXED)
 #undef IF_MIXED
     return PatchStatus::OVERRIDDEN;
+}
+
+/// Crystal Clear and Misty Veil express opposite intents: the former removes
+/// all fog of war, the latter hides everything except the player's own tiles.
+/// Enabling both at once is meaningless and therefore rejected.
+constexpr inline bool isValidConfig(const Config& conf) {
+    return !(conf.CrystalClearEnabled && conf.MistyVeilEnabled);
 }
 
 #undef GAME_CONFIG_UNIT_LIST

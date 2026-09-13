@@ -452,7 +452,7 @@ inline void BasicGame::step() {
     }
     curTurn += curHalfTurnPhase;
     curHalfTurnPhase ^= 1;
-    board.updateVisionCache();
+    board.updateVisionCache(conf);
 
     // request moves (for next turn)
     std::vector<RankItem> rank = ranklist();
@@ -657,7 +657,7 @@ inline int BasicGame::init() {
 
     surrenderQueue = decltype(surrenderQueue)();
 
-    board.updateVisionCache();
+    board.updateVisionCache(conf);
     return 0;
 }
 

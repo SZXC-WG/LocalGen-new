@@ -13,10 +13,12 @@
  * Container of maps.
  */
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <vector>
 
+#include "game-config.hpp"
 #include "move.hpp"
 #include "tile.hpp"
 #include "utils.hpp"
@@ -87,7 +89,7 @@ class Board {
 
    public:
     /// Update the vision cache. Must be called after a board update.
-    void updateVisionCache() {
+    void updateVisionCache(const config::Config& conf = config::defaultConf) {
         const pos_t C = col + 2, RC = (row + 2) * C;
         if (visionCache.empty()) {
             index_t maxPlayer = 0;

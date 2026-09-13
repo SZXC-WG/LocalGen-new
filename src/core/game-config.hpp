@@ -18,29 +18,30 @@
 
 namespace config {
 
-enum class VisionMode : uint8_t { NEAR8, NEAR4 };
+enum class VisionMode : uint8_t { INHERIT, NEAR8, NEAR4 };
 enum class MoveProcessMode : uint8_t { FULL, PARITY };
 
-#define GAME_CONFIG_UNIT_LIST(F)                                 \
-    /* ---- Display settings ---- */                             \
-    F(bool, RanklistShowLand, true)                              \
-    F(bool, RanklistShowArmy, true)                              \
-    F(bool, RanklistShowPlayerName, true)                        \
-    F(bool, RanklistShowColor, true)                             \
-    /* ---- Vision settings ---- */                              \
-    F(VisionMode, OverallVisionMode, VisionMode::NEAR8)          \
-    F(int, OverallVisionRange, 1)                                \
-    F(int, CityVisionRange, 1)                                   \
-    /* ---- Move settings ---- */                                \
-    F(MoveProcessMode, MoveProcessMethod, MoveProcessMode::FULL) \
-    /* ---- Modifier flags ---- */                               \
-    F(bool, MistyVeilEnabled, false)                             \
-    F(bool, LeapfrogEnabled, false)                              \
-    F(bool, CityStateEnabled, false)                             \
-    F(bool, DefenselessEnabled, false)                           \
-    F(bool, DefectionEnabled, false)                             \
-    F(bool, SlipperyEnabled, false)                              \
-    F(int, FadingSmogInterval, 0)
+#define GAME_CONFIG_UNIT_LIST(F)                                       \
+    /* ---- Display settings ---- */                                   \
+    F(bool, RanklistShowLand, true)                                    \
+    F(bool, RanklistShowArmy, true)                                    \
+    F(bool, RanklistShowPlayerName, true)                              \
+    F(bool, RanklistShowColor, true)                                   \
+    /* ---- Vision settings ---- */                                    \
+    F(VisionMode, OverallVisionMode, VisionMode::NEAR8)                \
+    F(int, OverallVisionRange, 1)                                      \
+    F(VisionMode, CityVisionMode, VisionMode::INHERIT)                 \
+    F(int, CityVisionRange, -1) /* -1 means to inherit from overall */ \
+    /* ---- Move settings ---- */                                      \
+    F(MoveProcessMode, MoveProcessMethod, MoveProcessMode::FULL)       \
+    /* ---- Modifier flags ---- */                                     \
+    F(bool, MistyVeilEnabled, false)                                   \
+    F(bool, LeapfrogEnabled, false)                                    \
+    F(bool, CityStateEnabled, false)                                   \
+    F(bool, DefenselessEnabled, false)                                 \
+    F(bool, DefectionEnabled, false)                                   \
+    F(bool, SlipperyEnabled, false)                                    \
+    F(int, FadingSmogInterval, 0) /* 0 means disabled */
 
 struct Config {
 #define DECL(type, name, def) type name = def;
@@ -120,7 +121,8 @@ constexpr inline ConfigPatch operator&(const ConfigPatch& lhs,
 
 #define GAME_CONFIG_MODIFIER_LIST(F)                                         \
     /* ---- Vision modifiers ---- */                                         \
-    F(Watchtower, unit::CityVisionRange(5))                                  \
+    F(Watchtower,                                                            \
+      unit::CityVisionMode(VisionMode::NEAR4) | unit::CityVisionRange(4))    \
     F(MistyVeil, unit::MistyVeilEnabled(true) | unit::OverallVisionRange(0)) \
     F(CrystalClear, unit::OverallVisionRange(100))                           \
     F(FadingSmog, unit::FadingSmogInterval(25))                              \
@@ -154,8 +156,9 @@ constexpr inline PatchStatus patchStatus(const Config& config,
     ConfigPatch defPatch = defaultConf & patch;
     if (confPatch == patch) return PatchStatus::FULLY_ENABLED;
     if (confPatch == defPatch) return PatchStatus::DISABLED;
-#define IF_MIXED(type, name, ...) \
-    if (confPatch.name == patch.name) return PatchStatus::PARTIALLY_ENABLED;
+#define IF_MIXED(type, name, ...)                   \
+    if (patch.name && confPatch.name == patch.name) \
+        return PatchStatus::PARTIALLY_ENABLED;
     GAME_CONFIG_UNIT_LIST(IF_MIXED)
 #undef IF_MIXED
     return PatchStatus::OVERRIDDEN;

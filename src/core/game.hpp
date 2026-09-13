@@ -60,6 +60,26 @@ enum class MovePriority : uint8_t {
     CHASE = 3            // Chasing a fleeing enemy (highest priority)
 };
 
+/// Rank used to order moves within a half-turn; higher runs first.
+///
+/// Without Slippery the enum values are used as-is. With Slippery, CHASE
+/// drops from the top to just above ATTACK_GENERAL, which is what makes
+/// fleeing armies hard to catch: an army fleeing by an ordinary move is
+/// NORMAL and now acts *before* its pursuer, so the pursuer arrives at a
+/// one-troop husk. An army that attacks a general is ATTACK_GENERAL and
+/// still acts after, so it can be caught in the act. DEFENSIVE stays on
+/// top, so friendly reinforcements are unaffected.
+constexpr uint8_t priorityRank(MovePriority priority, bool slippery) {
+    if (!slippery) return static_cast<uint8_t>(priority);
+    switch (priority) {
+        case MovePriority::ATTACK_GENERAL: return 0;
+        case MovePriority::CHASE:          return 1;
+        case MovePriority::NORMAL:         return 2;
+        case MovePriority::DEFENSIVE:      return 3;
+    }
+    return 0;
+}
+
 class BasicGame {
    protected:
     std::mt19937 rng{std::random_device()()};
@@ -190,11 +210,13 @@ class BasicGame {
         const std::pair<index_t, Move>& a, const std::pair<index_t, Move>& b,
         const std::unordered_map<Coord, index_t>& moveOutMap) const {
         if (conf.MoveProcessMethod == config::MoveProcessMode::FULL) {
-            // Priority category (higher enum value = higher priority)
+            // Priority category (higher rank = higher priority). Slippery
+            // reorders the categories; see priorityRank().
             MovePriority pA = getMovePriority(a.first, a.second, moveOutMap);
             MovePriority pB = getMovePriority(b.first, b.second, moveOutMap);
-            if (pA != pB)
-                return static_cast<uint8_t>(pA) > static_cast<uint8_t>(pB);
+            const uint8_t rankA = priorityRank(pA, conf.SlipperyEnabled);
+            const uint8_t rankB = priorityRank(pB, conf.SlipperyEnabled);
+            if (rankA != rankB) return rankA > rankB;
 
             // Army size tiebreaker (larger army = higher priority)
             army_t armyA = board.tileAt(a.second.from).army;

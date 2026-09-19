@@ -117,6 +117,19 @@ class BasicGame {
     std::string getName(index_t player) const { return names[player]; }
     std::vector<std::string> getNames() const { return names; }
 
+    /// How many soft-vision rings Fading Smog should have grown by now.
+    ///
+    /// `FadingSmogInterval` is counted in *half-turns*, so an interval of 25
+    /// is one ring every 12.5 turns. Returns 0 when the modifier is off.
+    /// Note this is not an on/off switch: the interval can be positive while
+    /// no ring has been applied yet, and Fading Smog's other rules still run.
+    int getSmogRings() const {
+        if (conf.FadingSmogInterval <= 0) return 0;
+        const int elapsedHalfTurns =
+            static_cast<int>(curTurn) * 2 + static_cast<int>(curHalfTurnPhase);
+        return elapsedHalfTurns / conf.FadingSmogInterval;
+    }
+
     const BoardView& view(index_t player) const {
         BoardView& playerView = playerViews.at(player);
         board.view(player, playerView);
@@ -321,8 +334,16 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
     }
 
     // Leapfrog: the victor's general relocates to the conquered capital, and
-    // its former seat is downgraded to a 'captured general'.
-    if (conf.LeapfrogEnabled && capturedGeneral < board.tiles.size()) {
+    // its former seat is downgraded to a 'captured general'. Both indices have
+    // to be valid: relocating without demoting the old seat would leave the
+    // victor with two generals. A living player always owns exactly one --
+    // init() seeds every spawn, takeOver() demotes the seat it takes over, and
+    // an unused spawn tile is turned into TILE_BLANK before play starts -- so
+    // the guard below is a safety net rather than a reachable branch.
+    assert(victorGeneral < board.tiles.size() &&
+           "a living player must own a TILE_GENERAL");
+    if (conf.LeapfrogEnabled && capturedGeneral < board.tiles.size() &&
+        victorGeneral < board.tiles.size()) {
         board.tiles[capturedGeneral].type = TILE_GENERAL;
         board.tiles[victorGeneral].type = TILE_CAPTURED_GENERAL;
     }
@@ -491,7 +512,7 @@ inline void BasicGame::step() {
     }
     curTurn += curHalfTurnPhase;
     curHalfTurnPhase ^= 1;
-    board.updateVisionCache(conf);
+    board.updateVisionCache(conf, teams, getSmogRings());
 
     // request moves (for next turn)
     std::vector<RankItem> rank = ranklist();
@@ -696,7 +717,7 @@ inline int BasicGame::init() {
 
     surrenderQueue = decltype(surrenderQueue)();
 
-    board.updateVisionCache(conf);
+    board.updateVisionCache(conf, teams, getSmogRings());
     return 0;
 }
 

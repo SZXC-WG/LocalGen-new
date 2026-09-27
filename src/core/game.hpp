@@ -60,24 +60,13 @@ enum class MovePriority : uint8_t {
     CHASE = 3            // Chasing a fleeing enemy (highest priority)
 };
 
-/// Rank used to order moves within a half-turn; higher runs first.
-///
-/// Without Slippery the enum values are used as-is. With Slippery, CHASE
-/// drops from the top to just above ATTACK_GENERAL, which is what makes
-/// fleeing armies hard to catch: an army fleeing by an ordinary move is
-/// NORMAL and now acts *before* its pursuer, so the pursuer arrives at a
-/// one-troop husk. An army that attacks a general is ATTACK_GENERAL and
-/// still acts after, so it can be caught in the act. DEFENSIVE stays on
-/// top, so friendly reinforcements are unaffected.
+/// Rerank moves if Slippery modifier is active.
+/// Default: ATTACK_GENERAL < NORMAL < DEFENSIVE < CHASE
+/// Slippery: ATTACK_GENERAL < CHASE < NORMAL < DEFENSIVE
 constexpr uint8_t priorityRank(MovePriority priority, bool slippery) {
-    if (!slippery) return static_cast<uint8_t>(priority);
-    switch (priority) {
-        case MovePriority::ATTACK_GENERAL: return 0;
-        case MovePriority::CHASE:          return 1;
-        case MovePriority::NORMAL:         return 2;
-        case MovePriority::DEFENSIVE:      return 3;
-    }
-    return 0;
+    constexpr uint8_t slipperyRanks[] = {0, 2, 3, 1};
+    const uint8_t rank = static_cast<uint8_t>(priority);
+    return slippery ? slipperyRanks[rank] : rank;
 }
 
 class BasicGame {
@@ -118,16 +107,12 @@ class BasicGame {
     std::vector<std::string> getNames() const { return names; }
 
     /// How many soft-vision rings Fading Smog should have grown by now.
-    ///
-    /// `FadingSmogInterval` is counted in *half-turns*, so an interval of 25
-    /// is one ring every 12.5 turns. Returns 0 when the modifier is off.
-    /// Note this is not an on/off switch: the interval can be positive while
-    /// no ring has been applied yet, and Fading Smog's other rules still run.
+    /// This count starts from 0, and grows by 1 every `FadingSmogInterval`
+    /// half-turns. When Fading Smog is off, this function always returns 0.
     int getSmogRings() const {
         if (conf.FadingSmogInterval <= 0) return 0;
-        const int elapsedHalfTurns =
-            static_cast<int>(curTurn) * 2 + static_cast<int>(curHalfTurnPhase);
-        return elapsedHalfTurns / conf.FadingSmogInterval;
+        return (static_cast<int>(curTurn) * 2 + curHalfTurnPhase) /
+               conf.FadingSmogInterval;
     }
 
     const BoardView& view(index_t player) const {
@@ -307,45 +292,29 @@ inline void BasicGame::takeOver(index_t p1, index_t p2) {
             }
         }
     }
-    // No need to broadcast: this is a low-level operation.
 }
+
 inline void BasicGame::capture(index_t p1, index_t p2) {
     ++killCount[p1];
     alive[p2] = false;
     eliminatedTurn[p2] = curTurn << 1 | curHalfTurnPhase;
 
-    // Leapfrog needs the conquered capital's location. The loop below
-    // relabels it as TILE_CAPTURED_GENERAL, after which it can no longer be
-    // told apart from a general captured earlier, so remember it on the way.
-    std::size_t capturedGeneral = board.tiles.size();
-    std::size_t victorGeneral = board.tiles.size();
-
-    for (std::size_t i = 0; i < board.tiles.size(); ++i) {
-        Tile& tile = board.tiles[i];
-        if (tile.occupier == p1 && tile.type == TILE_GENERAL) victorGeneral = i;
-        if (tile.occupier != p2) continue;
-        tile.occupier = p1;
-        if (tile.type == TILE_GENERAL) {
+    for (auto& tile : board.tiles) {
+        if (tile.occupier == p2) {
+            tile.occupier = p1;
+            if (tile.type == TILE_GENERAL) {
+                // Leapfrog: victor's general moves to the captured general
+                // so type would still be TILE_GENERAL.
+                if (!conf.LeapfrogEnabled) tile.type = TILE_CAPTURED_GENERAL;
+            } else if (tile.army > 1) {
+                tile.army = (tile.army + 1) >> 1;
+            }
+        } else if (conf.LeapfrogEnabled && tile.occupier == p1 &&
+                   tile.type == TILE_GENERAL) {
+            // The original general becomes a city,
+            // but keep it as a blank tile in others' fog.
             tile.type = TILE_CAPTURED_GENERAL;
-            capturedGeneral = i;
-        } else if (tile.army > 1) {
-            tile.army = (tile.army + 1) >> 1;
         }
-    }
-
-    // Leapfrog: the victor's general relocates to the conquered capital, and
-    // its former seat is downgraded to a 'captured general'. Both indices have
-    // to be valid: relocating without demoting the old seat would leave the
-    // victor with two generals. A living player always owns exactly one --
-    // init() seeds every spawn, takeOver() demotes the seat it takes over, and
-    // an unused spawn tile is turned into TILE_BLANK before play starts -- so
-    // the guard below is a safety net rather than a reachable branch.
-    assert(victorGeneral < board.tiles.size() &&
-           "a living player must own a TILE_GENERAL");
-    if (conf.LeapfrogEnabled && capturedGeneral < board.tiles.size() &&
-        victorGeneral < board.tiles.size()) {
-        board.tiles[capturedGeneral].type = TILE_GENERAL;
-        board.tiles[victorGeneral].type = TILE_CAPTURED_GENERAL;
     }
 
     broadcast(curTurn, GameMessageCapture{p1, p2});

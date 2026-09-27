@@ -22,6 +22,7 @@
 #include <random>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -50,24 +51,6 @@ struct RankItem {
     turn_t surrLeft = static_cast<turn_t>(-1);
     bool alive = false;
 };
-
-/// Move priority categories (based on generals.io priority system).
-/// Higher values = higher priority.
-enum class MovePriority : uint8_t {
-    ATTACK_GENERAL = 0,  // Attacks on enemy generals (lowest priority)
-    NORMAL = 1,          // Normal attack moves
-    DEFENSIVE = 2,       // Friendly-to-friendly moves
-    CHASE = 3            // Chasing a fleeing enemy (highest priority)
-};
-
-/// Rerank moves if Slippery modifier is active.
-/// Default: ATTACK_GENERAL < NORMAL < DEFENSIVE < CHASE
-/// Slippery: ATTACK_GENERAL < CHASE < NORMAL < DEFENSIVE
-constexpr uint8_t priorityRank(MovePriority priority, bool slippery) {
-    constexpr uint8_t slipperyRanks[] = {0, 2, 3, 1};
-    const uint8_t rank = static_cast<uint8_t>(priority);
-    return slippery ? slipperyRanks[rank] : rank;
-}
 
 class BasicGame {
    protected:
@@ -157,75 +140,6 @@ class BasicGame {
     void neutralize(index_t player);
     void takeOver(index_t p1, index_t p2);
     void capture(index_t p1, index_t p2);
-
-    /// Move priority helper functions
-    /// Check if a move is defensive (friendly-to-friendly, including
-    /// teammates).
-    bool isDefensiveMove(index_t player, const Move& move) const {
-        if (move.type != MoveType::MOVE_ARMY) return false;
-        const Tile& toTile = board.tileAt(move.to);
-        return isValidPlayer(toTile.occupier) &&
-               inSameTeam(toTile.occupier, player);
-    }
-
-    /// Check if a move is an attack on an enemy general.
-    bool isAttackGeneral(index_t player, const Move& move) const {
-        if (move.type != MoveType::MOVE_ARMY) return false;
-        const Tile& toTile = board.tileAt(move.to);
-        return toTile.type == TILE_GENERAL && isValidPlayer(toTile.occupier) &&
-               !inSameTeam(toTile.occupier, player);
-    }
-
-    /// Check if a move is a chase (target tile's enemy occupier is moving out).
-    bool isChaseMove(
-        index_t player, const Move& move,
-        const std::unordered_map<Coord, index_t>& moveOutMap) const {
-        if (move.type != MoveType::MOVE_ARMY) return false;
-        const Tile& toTile = board.tileAt(move.to);
-
-        // Target tile must have an enemy occupier
-        if (!isValidPlayer(toTile.occupier)) return false;
-        if (inSameTeam(toTile.occupier, player)) return false;
-
-        // That enemy must be moving out of the target tile
-        auto it = moveOutMap.find(move.to);
-        return it != moveOutMap.end() && it->second == toTile.occupier;
-    }
-
-    /// Get the priority category of a move.
-    MovePriority getMovePriority(
-        index_t player, const Move& move,
-        const std::unordered_map<Coord, index_t>& moveOutMap) const {
-        if (isChaseMove(player, move, moveOutMap)) return MovePriority::CHASE;
-        if (isAttackGeneral(player, move)) return MovePriority::ATTACK_GENERAL;
-        if (isDefensiveMove(player, move)) return MovePriority::DEFENSIVE;
-        return MovePriority::NORMAL;
-    }
-
-    /// Compare two moves by priority.
-    /// Returns true if `a` should execute before `b`.
-    bool compareMovePriority(
-        const std::pair<index_t, Move>& a, const std::pair<index_t, Move>& b,
-        const std::unordered_map<Coord, index_t>& moveOutMap) const {
-        if (conf.MoveProcessMethod == config::MoveProcessMode::FULL) {
-            // Priority category (higher rank = higher priority). Slippery
-            // reorders the categories; see priorityRank().
-            MovePriority pA = getMovePriority(a.first, a.second, moveOutMap);
-            MovePriority pB = getMovePriority(b.first, b.second, moveOutMap);
-            const uint8_t rankA = priorityRank(pA, conf.SlipperyEnabled);
-            const uint8_t rankB = priorityRank(pB, conf.SlipperyEnabled);
-            if (rankA != rankB) return rankA > rankB;
-
-            // Army size tiebreaker (larger army = higher priority)
-            army_t armyA = board.tileAt(a.second.from).army;
-            army_t armyB = board.tileAt(b.second.from).army;
-            if (armyA != armyB) return armyA > armyB;
-        }
-
-        // Old priority (player index) as final tiebreaker
-        // phase 0: ascending, phase 1: descending
-        return curHalfTurnPhase == 0 ? a.first < b.first : a.first > b.first;
-    }
 
    public:
     BasicGame() = delete;
@@ -384,14 +298,14 @@ inline void BasicGame::step() {
     }
 
     // collect moves
-    std::vector<std::pair<index_t, Move>> moves;
+    std::vector<Move> moves(players.size());
+    std::vector<index_t> moveOrder;
     for (index_t i : getAlivePlayers()) {
-        Player* player = players[i];
-        Move move;
-        while ((move = player->step()).type != MoveType::EMPTY &&
+        Move& move = moves[i];
+        while ((move = players[i]->step()).type != MoveType::EMPTY &&
                !board.available(i, move));
         if (move.type == MoveType::MOVE_ARMY) {
-            moves.emplace_back(i, move);
+            moveOrder.push_back(i);
         } else if (move.type == MoveType::SURRENDER) {
             surrenderQueue.emplace_back(i, 50);
             alive[i] = false;
@@ -400,26 +314,39 @@ inline void BasicGame::step() {
         }
     }
 
-    // build move-out map for chase detection
-    // moveOutMap[coord] = player_index means that player is moving out of coord
-    std::unordered_map<Coord, index_t> moveOutMap;
-    for (const auto& [player, move] : moves) {
-        moveOutMap[move.from] = player;
+    if (conf.MoveOrder == config::MoveOrderMode::ALTERNATING_INDEX) {
+        if (curHalfTurnPhase) std::ranges::reverse(moveOrder);
+    } else {  // PRIORITY
+        std::vector<std::tuple<int, army_t, index_t>> priority(players.size());
+        for (index_t i : moveOrder) {
+            const Move& move = moves[i];
+            const Tile& target = board.tileAt(move.to);
+            // General < normal < defensive < chase; chase takes precedence
+            // even when the fleeing enemy is on a general.
+            int rank = 1;
+            if (isValidPlayer(target.occupier)) {
+                if (inSameTeam(i, target.occupier))
+                    rank = 2;
+                else if (moves[target.occupier].type == MoveType::MOVE_ARMY &&
+                         moves[target.occupier].from == move.to)
+                    rank = 3;
+                else if (target.type == TILE_GENERAL)
+                    rank = 0;
+            }
+            // Slippery: general < chase < normal < defensive.
+            if (conf.SlipperyEnabled && rank > 0) rank = rank % 3 + 1;
+            // Break ties by source army, then alternating player index.
+            priority[i] = {rank, board.tileAt(move.from).army,
+                           curHalfTurnPhase ? i : -i};
+        }
+        std::ranges::sort(moveOrder, [&](index_t a, index_t b) {
+            return priority[a] > priority[b];
+        });
     }
 
-    // sort moves by priority system
-    // Priority order (high to low):
-    // 1. Chase moves (catching fleeing enemies)
-    // 2. Defensive moves (friendly-to-friendly)
-    // 3. Normal attack moves
-    // 4. Attacks on enemy generals (lowest)
-    // Tiebreakers: army size, then old priority (player index)
-    std::ranges::sort(moves, [this, &moveOutMap](const auto& a, const auto& b) {
-        return compareMovePriority(a, b, moveOutMap);
-    });
-
     // execute moves
-    for (auto [player, move] : moves) {
+    for (index_t player : moveOrder) {
+        const Move& move = moves[player];
         if (!alive[player] || !board.available(player, move))
             continue;  // skip just-captured players or invalid moves
 

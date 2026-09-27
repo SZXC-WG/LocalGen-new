@@ -19,7 +19,7 @@
 namespace config {
 
 enum class VisionMode : uint8_t { INHERIT, NEAR8, NEAR4 };
-enum class MoveProcessMode : uint8_t { FULL, PARITY };
+enum class MoveOrderMode : uint8_t { PRIORITY, ALTERNATING_INDEX };
 
 #define GAME_CONFIG_UNIT_LIST(F)                                       \
     /* ---- Display settings ---- */                                   \
@@ -33,7 +33,7 @@ enum class MoveProcessMode : uint8_t { FULL, PARITY };
     F(VisionMode, CityVisionMode, VisionMode::INHERIT)                 \
     F(int, CityVisionRange, -1) /* -1 means to inherit from overall */ \
     /* ---- Move settings ---- */                                      \
-    F(MoveProcessMode, MoveProcessMethod, MoveProcessMode::FULL)       \
+    F(MoveOrderMode, MoveOrder, MoveOrderMode::PRIORITY)               \
     /* ---- Modifier flags ---- */                                     \
     F(bool, CrystalClearEnabled, false)                                \
     F(bool, MistyVeilEnabled, false)                                   \

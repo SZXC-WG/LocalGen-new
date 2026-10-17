@@ -99,7 +99,7 @@ class LyBot : public BasicBot {
     index_t playerCnt = 0;
     turn_t halfTurn = 0;
     turn_t fullTurn = 0;
-    config::Config config;
+    GameConfig config;
     std::vector<index_t> teams;
 
     BoardView board;

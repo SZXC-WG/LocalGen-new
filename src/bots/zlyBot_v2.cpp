@@ -29,7 +29,7 @@ class ZlyBot_v2 : public BasicBot {
     index_t playerCnt;
     index_t id, team;
     std::vector<index_t> teamIds;
-    config::Config config;
+    GameConfig config;
 
     turn_t halfTurn, turn;
 

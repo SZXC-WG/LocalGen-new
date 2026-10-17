@@ -14,135 +14,108 @@
  */
 
 #include <cstdint>
-#include <optional>
-
-namespace config {
+#include <tuple>
+#include <utility>
 
 enum class VisionMode : uint8_t { INHERIT, NEAR8, NEAR4 };
 enum class MoveOrderMode : uint8_t { PRIORITY, ALTERNATING_INDEX };
 
-#define GAME_CONFIG_UNIT_LIST(F)                                       \
-    /* ---- Display settings ---- */                                   \
-    F(bool, RanklistShowLand, true)                                    \
-    F(bool, RanklistShowArmy, true)                                    \
-    F(bool, RanklistShowPlayerName, true)                              \
-    F(bool, RanklistShowColor, true)                                   \
-    /* ---- Vision settings ---- */                                    \
-    F(VisionMode, OverallVisionMode, VisionMode::NEAR8)                \
-    F(int, OverallVisionRange, 1)                                      \
-    F(VisionMode, CityVisionMode, VisionMode::INHERIT)                 \
-    F(int, CityVisionRange, -1) /* -1 means to inherit from overall */ \
-    /* ---- Move settings ---- */                                      \
-    F(MoveOrderMode, MoveOrder, MoveOrderMode::PRIORITY)               \
-    /* ---- Modifier flags ---- */                                     \
-    F(bool, CrystalClearEnabled, false)                                \
-    F(bool, MistyVeilEnabled, false)                                   \
-    F(bool, LeapfrogEnabled, false)                                    \
-    F(bool, CityStateEnabled, false)                                   \
-    F(bool, DefenselessEnabled, false)                                 \
-    F(bool, DefectionEnabled, false)                                   \
-    F(bool, SlipperyEnabled, false)                                    \
-    F(int, FadingSmogInterval, 0) /* 0 means disabled */
+struct GameConfig {
+    // ---- Display settings ----
+    bool RanklistShowLand = true;
+    bool RanklistShowArmy = true;
+    bool RanklistShowPlayerName = true;
+    bool RanklistShowColor = true;
 
-struct Config {
-#define DECL(type, name, def) type name = def;
-    GAME_CONFIG_UNIT_LIST(DECL)
-#undef DECL
+    // ---- Vision settings ----
+    VisionMode OverallVisionMode = VisionMode::NEAR8;
+    int OverallVisionRange = 1;
+    VisionMode CityVisionMode = VisionMode::INHERIT;
+    int CityVisionRange = -1;  // -1 means to inherit from overall
+
+    // ---- Move settings ----
+    MoveOrderMode MoveOrder = MoveOrderMode::PRIORITY;
+
+    // ---- Modifier flags ----
+    bool CrystalClearEnabled = false;
+    bool MistyVeilEnabled = false;
+    bool LeapfrogEnabled = false;
+    bool CityStateEnabled = false;
+    bool DefenselessEnabled = false;
+    bool DefectionEnabled = false;
+    bool SlipperyEnabled = false;
+    int FadingSmogInterval = 0;  // 0 means disabled
+
+    constexpr bool operator==(const GameConfig&) const = default;
 };
 
-#define IF_EQUAL(type, name, ...) \
-    if (lhs.name != rhs.name) return false;
-constexpr inline bool operator==(const Config& lhs, const Config& rhs) {
-    GAME_CONFIG_UNIT_LIST(IF_EQUAL)
-    return true;
-}
-#undef IF_EQUAL
+constexpr GameConfig defaultConf{};
 
-struct ConfigPatch {
-#define DECL(type, name, ...) std::optional<type> name;
-    GAME_CONFIG_UNIT_LIST(DECL)
-#undef DECL
+namespace modifiers {
+
+// ---- Vision modifiers ----
+constexpr GameConfig Watchtower{
+    .CityVisionMode = VisionMode::NEAR4,
+    .CityVisionRange = 4,
+};
+constexpr GameConfig MistyVeil{
+    .OverallVisionRange = 0,
+    .MistyVeilEnabled = true,
+};
+constexpr GameConfig CrystalClear{.CrystalClearEnabled = true};
+constexpr GameConfig FadingSmog{.FadingSmogInterval = 25};
+
+// ---- Behavioral modifiers ----
+constexpr GameConfig Leapfrog{.LeapfrogEnabled = true};
+constexpr GameConfig CityState{.CityStateEnabled = true};
+constexpr GameConfig Defenseless{.DefenselessEnabled = true};
+constexpr GameConfig Defection{.DefectionEnabled = true};
+constexpr GameConfig Slippery{.SlipperyEnabled = true};
+
+// ---- Display modifiers ----
+constexpr GameConfig SilentWar{
+    .RanklistShowLand = false,
+    .RanklistShowArmy = false,
 };
 
-#define IF_EQUAL(type, name, ...) \
-    if (lhs.name != rhs.name) return false;
-constexpr inline bool operator==(const ConfigPatch& lhs,
-                                 const ConfigPatch& rhs) {
-    GAME_CONFIG_UNIT_LIST(IF_EQUAL)
-    return true;
-}
-#undef IF_EQUAL
+}  // namespace modifiers
 
-namespace unit {
-#define UNIT(type, name, ...)            \
-    constexpr ConfigPatch name(type v) { \
-        ConfigPatch p;                   \
-        p.name = v;                      \
-        return p;                        \
+constexpr inline bool isValidConfig(const GameConfig& conf) {
+    return !(conf.CrystalClearEnabled && conf.MistyVeilEnabled);
+}
+
+namespace detail {
+
+constexpr auto asTuple(auto& c) noexcept {
+    auto& [f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
+           f16] = c;
+    return std::tie(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13,
+                    f14, f15, f16);
+}
+
+template <std::size_t I = 0>
+constexpr void forEachField(auto&& fn, auto&... configs) {
+    if constexpr (I < std::tuple_size_v<decltype(asTuple(defaultConf))>) {
+        fn(std::get<I>(asTuple(configs))...);
+        forEachField<I + 1>(fn, configs...);
     }
-GAME_CONFIG_UNIT_LIST(UNIT)
-#undef UNIT
-}  // namespace unit
-
-#define IF_ASSIGN(type, name, ...) \
-    if (rhs.name) res.name = rhs.name;
-constexpr inline ConfigPatch operator|(const ConfigPatch& lhs,
-                                       const ConfigPatch& rhs) {
-    ConfigPatch res = lhs;
-    GAME_CONFIG_UNIT_LIST(IF_ASSIGN)
-    return res;
 }
-#undef IF_ASSIGN
 
-#define IF_ASSIGN_VALUE(type, name, ...) \
-    if (rhs.name) res.name = *rhs.name;
-constexpr inline Config operator|(const Config& lhs, const ConfigPatch& rhs) {
-    Config res = lhs;
-    GAME_CONFIG_UNIT_LIST(IF_ASSIGN_VALUE)
-    return res;
+}  // namespace detail
+
+constexpr inline GameConfig& operator|=(GameConfig& lhs,
+                                        const GameConfig& rhs) {
+    detail::forEachField(
+        [](auto& l, const auto& r, const auto& d) {
+            if (r != d) l = r;
+        },
+        lhs, rhs, defaultConf);
+    return lhs;
 }
-constexpr inline Config operator|(const ConfigPatch& lhs, const Config& rhs) {
-    return rhs | lhs;
+
+constexpr inline GameConfig operator|(GameConfig lhs, const GameConfig& rhs) {
+    return lhs |= rhs;
 }
-#undef IF_ASSIGN_VALUE
-
-#define IF_ASSIGN_OPTIONAL(type, name, ...) \
-    if (rhs.name) res.name = lhs.name;
-constexpr inline ConfigPatch operator&(const Config& lhs,
-                                       const ConfigPatch& rhs) {
-    ConfigPatch res;
-    GAME_CONFIG_UNIT_LIST(IF_ASSIGN_OPTIONAL);
-    return res;
-}
-constexpr inline ConfigPatch operator&(const ConfigPatch& lhs,
-                                       const Config& rhs) {
-    return rhs & lhs;
-}
-#undef IF_ASSIGN_OPTIONAL
-
-#define GAME_CONFIG_MODIFIER_LIST(F)                                         \
-    /* ---- Vision modifiers ---- */                                         \
-    F(Watchtower,                                                            \
-      unit::CityVisionMode(VisionMode::NEAR4) | unit::CityVisionRange(4))    \
-    F(MistyVeil, unit::MistyVeilEnabled(true) | unit::OverallVisionRange(0)) \
-    F(CrystalClear, unit::CrystalClearEnabled(true))                         \
-    F(FadingSmog, unit::FadingSmogInterval(25))                              \
-    /* ---- Behavioral modifiers ---- */                                     \
-    F(Leapfrog, unit::LeapfrogEnabled(true))                                 \
-    F(CityState, unit::CityStateEnabled(true))                               \
-    F(Defenseless, unit::DefenselessEnabled(true))                           \
-    F(Defection, unit::DefectionEnabled(true))                               \
-    F(Slippery, unit::SlipperyEnabled(true))                                 \
-    /* ---- Display modifiers ---- */                                        \
-    F(SilentWar, unit::RanklistShowLand(false) | unit::RanklistShowArmy(false))
-
-namespace modifier {
-#define MODIFIER(name, value) constexpr ConfigPatch name = value;
-GAME_CONFIG_MODIFIER_LIST(MODIFIER)
-#undef MODIFIER
-}  // namespace modifier
-
-constexpr Config defaultConf;
 
 enum class PatchStatus : uint8_t {
     FULLY_ENABLED,
@@ -151,28 +124,22 @@ enum class PatchStatus : uint8_t {
     OVERRIDDEN
 };
 
-constexpr inline PatchStatus patchStatus(const Config& config,
-                                         const ConfigPatch& patch) {
-    ConfigPatch confPatch = config & patch;
-    ConfigPatch defPatch = defaultConf & patch;
-    if (confPatch == patch) return PatchStatus::FULLY_ENABLED;
-    if (confPatch == defPatch) return PatchStatus::DISABLED;
-#define IF_MIXED(type, name, ...)                   \
-    if (patch.name && confPatch.name == patch.name) \
-        return PatchStatus::PARTIALLY_ENABLED;
-    GAME_CONFIG_UNIT_LIST(IF_MIXED)
-#undef IF_MIXED
+constexpr inline PatchStatus patchStatus(const GameConfig& config,
+                                         const GameConfig& preset) {
+    bool allPreset = true, anyPreset = false, allDefault = true;
+    detail::forEachField(
+        [&](const auto& c, const auto& p, const auto& d) {
+            if (p != d) {
+                if (c == p)
+                    anyPreset = true;
+                else
+                    allPreset = false;
+                if (c != d) allDefault = false;
+            }
+        },
+        config, preset, defaultConf);
+    if (allPreset) return PatchStatus::FULLY_ENABLED;
+    if (allDefault) return PatchStatus::DISABLED;
+    if (anyPreset) return PatchStatus::PARTIALLY_ENABLED;
     return PatchStatus::OVERRIDDEN;
 }
-
-/// Crystal Clear and Misty Veil express opposite intents: the former removes
-/// all fog of war, the latter hides everything except the player's own tiles.
-/// Enabling both at once is meaningless and therefore rejected.
-constexpr inline bool isValidConfig(const Config& conf) {
-    return !(conf.CrystalClearEnabled && conf.MistyVeilEnabled);
-}
-
-#undef GAME_CONFIG_UNIT_LIST
-#undef GAME_CONFIG_MODIFIER_LIST
-
-}  // namespace config

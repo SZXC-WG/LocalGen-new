@@ -143,7 +143,7 @@ class Board {
     /// Out-of-board coordinates are clamped, so edge tiles simply get a
     /// truncated neighbourhood.
     void assignRadiusVision(std::vector<uint8_t>& target, pos_t x, pos_t y,
-                            index_t player, int range, config::VisionMode mode,
+                            index_t player, int range, VisionMode mode,
                             uint32_t maskBit = 0) {
         const pos_t C = col + 2, RC = (row + 2) * C;
         if (range < 0) range = 0;
@@ -153,9 +153,8 @@ class Board {
         for (pos_t i = std::max<pos_t>(x - range, 1),
                    iEnd = std::min<pos_t>(x + range, row);
              i <= iEnd; ++i) {
-            const pos_t dy = (mode == config::VisionMode::NEAR4)
-                                 ? range - std::abs(i - x)
-                                 : range;
+            const pos_t dy =
+                (mode == VisionMode::NEAR4) ? range - std::abs(i - x) : range;
             for (pos_t j = std::max<pos_t>(y - dy, 1),
                        jEnd = std::min<pos_t>(y + dy, col);
                  j <= jEnd; ++j) {
@@ -335,10 +334,10 @@ class Board {
     /// 5 run on every half-turn from the very first one (a swamp can hand a
     /// tile back to nobody on turn 1), while rule 2 only expands when this
     /// value grows.
-    void updateVisionCache(const config::Config& conf = config::defaultConf,
+    void updateVisionCache(const GameConfig& conf = defaultConf,
                            const std::vector<index_t>& teams = {},
                            int smogRings = 0) {
-        assert(config::isValidConfig(conf));
+        assert(isValidConfig(conf));
         const pos_t C = col + 2, RC = (row + 2) * C;
         if (visionCache.empty()) {
             index_t maxPlayer = 0;
@@ -478,9 +477,8 @@ class Board {
                     const int range = (isCity && conf.CityVisionRange >= 0)
                                           ? conf.CityVisionRange
                                           : conf.OverallVisionRange;
-                    const config::VisionMode mode =
-                        (isCity &&
-                         conf.CityVisionMode != config::VisionMode::INHERIT)
+                    const VisionMode mode =
+                        (isCity && conf.CityVisionMode != VisionMode::INHERIT)
                             ? conf.CityVisionMode
                             : conf.OverallVisionMode;
                     // A radius that already reaches every tile can be filled
@@ -489,7 +487,7 @@ class Board {
                     // max(row, col) - 1, Manhattan (NEAR4) is the far corner,
                     // (row - 1) + (col - 1) -- using the Chebyshev bound for a
                     // diamond would light up tiles the radius never reaches.
-                    const int reach = (mode == config::VisionMode::NEAR4)
+                    const int reach = (mode == VisionMode::NEAR4)
                                           ? (row - 1) + (col - 1)
                                           : std::max(row, col) - 1;
                     if (range >= reach) {

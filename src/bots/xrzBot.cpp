@@ -25,7 +25,7 @@ class XrzBot : public BasicBot {
     index_t playerCnt;
     index_t id, team;
     std::vector<index_t> teamIds;
-    config::Config config;
+    GameConfig config;
 
     BoardView board;
     std::vector<RankItem> rank;

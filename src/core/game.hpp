@@ -40,7 +40,7 @@ struct GameConstantsPack {
     pos_t mapHeight, mapWidth;
     index_t playerCount;
     std::vector<index_t> teams;
-    config::Config config;
+    GameConfig config;
 };
 
 struct RankItem {
@@ -112,11 +112,12 @@ class BasicGame {
     }
 
    protected:
-    config::Config conf = config::defaultConf;
+    GameConfig conf;
 
    public:
-    config::Config getConfig() const { return conf; }
-    void setConfig(config::ConfigPatch patch) { conf = conf | patch; }
+    GameConfig getConfig() const { return conf; }
+    void setConfig(const GameConfig& config) { conf = config; }
+    void updateConfig(const GameConfig& patch) { conf |= patch; }
     void setEventCallback(std::function<void(const GameEvent&)> callback) {
         eventCallback = std::move(callback);
     }
@@ -314,7 +315,7 @@ inline void BasicGame::step() {
         }
     }
 
-    if (conf.MoveOrder == config::MoveOrderMode::ALTERNATING_INDEX) {
+    if (conf.MoveOrder == MoveOrderMode::ALTERNATING_INDEX) {
         if (curHalfTurnPhase) std::ranges::reverse(moveOrder);
     } else {  // PRIORITY
         std::vector<std::tuple<int, army_t, index_t>> priority(players.size());

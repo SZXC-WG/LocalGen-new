@@ -30,7 +30,7 @@ class ZlyBot_v2_1 : public BasicBot {
     index_t playerCnt;
     index_t id, team;
     std::vector<index_t> teamIds;
-    config::Config config;
+    GameConfig config;
     army_t totalArmy;
     pos_t totalLand;
 

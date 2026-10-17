@@ -113,13 +113,10 @@ class BasicGame {
         return getTeam(player1) == getTeam(player2);
     }
 
-   protected:
-    GameConfig conf;
+   private:
+    const GameConfig conf;
 
    public:
-    GameConfig getConfig() const { return conf; }
-    void setConfig(const GameConfig& config) { conf = config; }
-    void updateConfig(const GameConfig& patch) { conf |= patch; }
     void setEventCallback(std::function<void(const GameEvent&)> callback) {
         eventCallback = std::move(callback);
     }
@@ -148,7 +145,7 @@ class BasicGame {
     BasicGame() = delete;
     BasicGame(bool remainIndex, std::vector<Player*> _players,
               std::vector<index_t> _teams, std::vector<std::string> name,
-              Board _board);
+              Board _board, GameConfig config = defaultConf);
     ~BasicGame();
 
     void step();
@@ -239,16 +236,18 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
 
 inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
                             std::vector<index_t> _teams,
-                            std::vector<std::string> name, Board _board)
-    : initialBoard(_board),
-      players(_players.size()),
+                            std::vector<std::string> name, Board _board,
+                            GameConfig config)
+    : players(_players.size()),
       playerViews(_players.size()),
       names(_players.size()),
       teams(_players.size()),
-      board(_board),
       alive(_players.size()),
       killCount(_players.size()),
-      spawnCoord(_players.size()) {
+      spawnCoord(_players.size()),
+      conf(config),
+      board(_board),
+      initialBoard(_board) {
     if (_players.empty()) {
         throw std::invalid_argument("BasicGame requires at least one player");
     }

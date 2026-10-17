@@ -26,6 +26,7 @@ After building, run the executable from `build/Release`:
 ## Notes
 
 - This simulator uses the same core board/game logic as the app.
+- Each match supports 2 to 16 bots.
 - Independent matches are parallelized across CPU threads.
 - If `--threads` is omitted, the simulator auto-selects a worker count from the machine's available CPU concurrency.
 - Per-game results are printed as soon as each match finishes, so completion order may differ from game number order.

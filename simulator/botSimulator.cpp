@@ -308,7 +308,7 @@ void printUsage() {
         << "  --shuffle          Randomize player index mapping in simulator\n"
         << "  --latency          Measure and report average requestMove() "
            "latency per bot\n"
-        << "  --bots A B ...     Bot names to simulate (default: XiaruizeBot "
+        << "  --bots A B ...     2 to 16 bot names (default: XiaruizeBot "
            "GcBot)\n";
 }
 
@@ -346,6 +346,10 @@ bool parseArgs(int argc, char** argv, Options& options) {
         } else {
             return false;
         }
+    }
+    if (options.bots.size() > 16) {
+        std::cerr << "At most 16 bots are supported.\n";
+        return false;
     }
     return options.bots.size() >= 2;
 }

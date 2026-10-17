@@ -15,9 +15,11 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <utility>
 #include <vector>
 
 #include "game-config.hpp"
@@ -56,14 +58,14 @@ class Board {
         assert(_col >= 0);
         col = _col;
         tiles.resize((row + 2) * (col + 2));
-        visionCache.clear();
+        hardVision.clear();
     }
 
     void setHeight(pos_t _row) {
         assert(_row >= 0);
         row = _row;
         tiles.resize((row + 2) * (col + 2));
-        visionCache.clear();
+        hardVision.clear();
     }
 
     bool isValidPos(pos_t x, pos_t y) const {
@@ -79,485 +81,311 @@ class Board {
     Board() = default;
     Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
         assert(row >= 0 && col >= 0);
-        // board index starts at 1.
-        // padding dummy tiles around for safety and convenience issues:
+        // 1-indexed, dummy padding around
         tiles.resize((_row + 2) * (_col + 2));
     }
 
-    /// Vision system.
+    // =========================================================================
+    // Vision System
+    // =========================================================================
+    //
+    // Each tile stores a 16-bit player bitmask (`mask_t`) across the padded
+    // `(row + 2) x (col + 2)` grid (border padding is always 0):
+    //   - `hardVision`: Direct vision recomputed each half-turn from owned
+    //     tiles, cities, lookouts, observatories, and lit tiles.
+    //   - `softVision`: Persistent fog memory used by Fading Smog, updated via:
+    //       1. Decay:    Previous hard vision becomes soft (`soft |= hard`).
+    //       2. Suppress: Clear soft vision inside own or enemy hard vision.
+    //       3. Prune:    Keep only 4-connected soft components touching own
+    //                    hard vision.
+    //       4. Expand:   Every `FadingSmogInterval` half-turns, spread soft
+    //                    vision 1 orthogonal step from passable visible tiles,
+    //                    then Suppress.
    protected:
-    /// Per-tile vision state, as stored in `visionCache`.
-    enum VisionState : uint8_t {
-        VISION_NONE = 0,  ///< not visible
-        VISION_HARD = 1,  ///< hard vision: what the vision rules give
-        VISION_SOFT = 2   ///< soft vision: Fading Smog's outer layer
-    };
+    using mask_t = uint16_t;
 
-    /// visionCache[n][x][y], flattened into 1D for better performance.
-    std::vector<uint8_t> visionCache;
-
-    /// ---- Fading Smog support (only allocated while the modifier is on) ----
-    ///
-    /// Hard vision of the current and the previous half-turn, double
-    /// buffered: rule 3 has to compare the two, and swapping an index is a
-    /// lot cheaper than copying a plane every half-turn.
-    std::array<std::vector<uint8_t>, 2> hardVision;
-    int hardIndex = 0;
-    /// Soft vision. Persists across half-turns -- rules 2 and 3 accumulate
-    /// into it, rules 4 and 5 remove from it.
-    std::vector<uint8_t> softVision;
-    /// One entry per tile: bitmask over *compacted* team indices of the teams
-    /// whose hard vision covers that tile. Rule 4 asks "is this tile inside
-    /// some enemy's hard vision", which this answers in O(1).
-    std::vector<uint32_t> seeTeamMask;
-    /// Per-tile marker used to deduplicate a single expansion ring.
-    std::vector<uint8_t> ringMark;
-    /// Scratch stacks/buffers, reused across calls to avoid reallocating.
-    struct FloodNode {
-        pos_t i, j;
-    };
-    std::vector<std::size_t> ringBuffer;
-    std::vector<FloodNode> floodStack;
-    std::vector<uint8_t> planeSaturated;
-    /// Scratch: dense team bit per player, plus the distinct team ids seen.
-    std::vector<uint32_t> playerBits;
-    std::vector<index_t> distinctTeams;
-    /// Monotonic stamp so the connectivity flood needs no clearing pass;
-    /// 0 means "not visited".
-    std::vector<uint32_t> visitStamp;
-    uint32_t visitStampValue = 0;
-    /// How many expansion rings have been applied so far (rule 2).
+    std::vector<mask_t> hardVision, softVision, scratch, scratch2;
+    std::vector<std::size_t> floodStack;
     int smogRingsApplied = 0;
 
-    /// Mark every tile within `range` of (x, y) as hard vision for `player`.
-    ///
-    /// `target` receives the writes: either `visionCache` (Fading Smog off)
-    /// or the current hard plane (smog on), both laid out as
-    /// `numPlayers x (row+2) x (col+2)`. `maskBit`, when non-zero, is OR-ed
-    /// into `seeTeamMask` for every tile written, so rule 4's lookup gets
-    /// built in the same cache lines as the vision pass.
-    ///
-    /// `mode` picks the distance metric: `NEAR8` is Chebyshev distance
-    /// (a `(2R+1) x (2R+1)` square), `NEAR4` is Manhattan distance (a
-    /// diamond). A negative `range` is treated as 0, i.e. the tile itself.
-    /// Out-of-board coordinates are clamped, so edge tiles simply get a
-    /// truncated neighbourhood.
-    void assignRadiusVision(std::vector<uint8_t>& target, pos_t x, pos_t y,
-                            index_t player, int range, VisionMode mode,
-                            uint32_t maskBit = 0) {
-        const pos_t C = col + 2, RC = (row + 2) * C;
-        if (range < 0) range = 0;
-        const std::size_t base = static_cast<std::size_t>(player) * RC;
-        const bool wantMask = maskBit != 0 && !seeTeamMask.empty();
+    static mask_t playerBit(index_t player) {
+        assert(player >= 0 && player < 16);
+        return mask_t(1) << player;
+    }
 
-        for (pos_t i = std::max<pos_t>(x - range, 1),
-                   iEnd = std::min<pos_t>(x + range, row);
-             i <= iEnd; ++i) {
-            const pos_t dy =
-                (mode == VisionMode::NEAR4) ? range - std::abs(i - x) : range;
-            for (pos_t j = std::max<pos_t>(y - dy, 1),
-                       jEnd = std::min<pos_t>(y + dy, col);
-                 j <= jEnd; ++j) {
-                const std::size_t tIdx = std::size_t(i) * C + j;
-                target[base + tIdx] = VISION_HARD;
-                if (wantMask) seeTeamMask[tIdx] |= maskBit;
+    // ---- Hard Vision Helpers ------------------------------------------------
+
+    /// Grant `mask` hard vision within `radius` of `(x, y)` (`NEAR8`: square,
+    /// `NEAR4`: diamond).
+    void addRadiusVision(mask_t mask, pos_t x, pos_t y, int radius,
+                         VisionMode mode) {
+        const pos_t stride = col + 2;
+        radius = std::max(radius, 0);
+        for (pos_t i = std::max(x - radius, 1); i <= std::min(x + radius, row);
+             ++i) {
+            const pos_t span =
+                mode == VisionMode::NEAR4 ? radius - std::abs(i - x) : radius;
+            for (pos_t j = std::max(y - span, 1); j <= std::min(y + span, col);
+                 ++j) {
+                hardVision[i * stride + j] |= mask;
             }
         }
     }
 
-    /// Set a single tile to hard vision, given its flattened tile index.
-    void setHard(std::vector<uint8_t>& target, std::size_t base,
-                 std::size_t tileIndex, uint32_t maskBit) {
-        target[base + tileIndex] = VISION_HARD;
-        if (maskBit != 0 && !seeTeamMask.empty())
-            seeTeamMask[tileIndex] |= maskBit;
-    }
+    /// Dilate `scratch` by `radius` steps into `hardVision` (`NEAR8` or
+    /// `NEAR4`). Clobbers `scratch`.
+    void growVision(int radius, VisionMode mode) {
+        if (radius <= 0) {
+            hardVision = scratch;
+            return;
+        }
 
-    /// Allocate the Fading Smog planes and scratch on first use.
-    void ensureSmogBuffers(std::size_t planesSize) {
-        if (hardVision[0].size() == planesSize) return;
-        hardVision[0].assign(planesSize, 0);
-        hardVision[1].assign(planesSize, 0);
-        softVision.assign(planesSize, 0);
-        seeTeamMask.assign(tiles.size(), 0);
-        ringMark.assign(tiles.size(), 0);
-        visitStamp.assign(tiles.size(), 0);
-        visitStampValue = 0;
-        hardIndex = 0;
-        smogRingsApplied = 0;
-    }
+        const pos_t stride = col + 2;
+        const int boardReach = mode == VisionMode::NEAR4
+                                   ? (row - 1) + (col - 1)
+                                   : std::max(row, col) - 1;
 
-    /// Fill one player's whole hard plane. Used when the configured radius
-    /// already covers the board, where a single fill beats doling it out
-    /// tile by tile (`owned x board` writes).
-    void fillPlayerHard(std::vector<uint8_t>& target, index_t player, pos_t RC,
-                        uint32_t maskBit) {
-        const std::size_t base = std::size_t(player) * RC;
-        std::fill(target.begin() + base, target.begin() + base + RC,
-                  VISION_HARD);
-        if (maskBit != 0 && !seeTeamMask.empty())
-            for (pos_t k = 0; k < RC; ++k)
-                seeTeamMask[std::size_t(k)] |= maskBit;
-    }
+        if (radius >= boardReach) {
+            mask_t activePlayers = 0;
+            for (pos_t i = 1; i <= row; ++i) {
+                for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t)
+                    activePlayers |= scratch[t];
+            }
+            for (pos_t i = 1; i <= row; ++i) {
+                std::fill_n(hardVision.begin() + i * stride + 1, col,
+                            activePlayers);
+            }
+            return;
+        }
 
-    /// Rule 3: a tile that had hard vision last half-turn but does not any
-    /// more drops back to soft vision. A tile that is hard again simply
-    /// loses its soft bit -- hard always wins.
-    void applyHardDowngrade(const std::vector<uint8_t>& hardPrev,
-                            const std::vector<uint8_t>& hardCur, pos_t RC,
-                            index_t numPlayers) {
-        for (index_t p = 0; p < numPlayers; ++p) {
-            const std::size_t base = std::size_t(p) * RC;
-            for (pos_t k = 0; k < RC; ++k) {
-                const std::size_t idx = base + k;
-                if (hardCur[idx]) {
-                    softVision[idx] = 0;
-                } else if (hardPrev[idx]) {
-                    softVision[idx] = 1;
+        const mask_t diagMask = mode == VisionMode::NEAR4 ? 0 : ~mask_t(0);
+        std::vector<mask_t>* src = &scratch;
+        std::vector<mask_t>* dst = &scratch2;
+        for (int step = radius; step > 0; --step) {
+            if (step == 1) dst = &hardVision;
+            const mask_t* s = src->data();
+            mask_t* d = dst->data();
+            for (pos_t i = 1; i <= row; ++i) {
+                for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t) {
+                    const mask_t orth = s[t] | s[t - 1] | s[t + 1] |
+                                        s[t - stride] | s[t + stride];
+                    const mask_t diag = s[t - stride - 1] | s[t - stride + 1] |
+                                        s[t + stride - 1] | s[t + stride + 1];
+                    d[t] = orth | (diagMask & diag);
                 }
             }
+            std::swap(src, dst);
         }
     }
 
-    /// Rule 4: soft vision must not survive inside any *enemy* team's hard
-    /// vision. `seeTeamMask` records which teams see each tile, so a single
-    /// AND is enough. Hard vision itself is untouched.
-    void removeSoftUnderEnemyVision(const uint32_t* playerBits, pos_t RC,
-                                    index_t numPlayers) {
-        for (index_t p = 0; p < numPlayers; ++p) {
-            const uint32_t mine = playerBits[std::size_t(p)];
-            const std::size_t base = std::size_t(p) * RC;
-            for (pos_t k = 0; k < RC; ++k) {
-                const std::size_t idx = base + k;
-                if (softVision[idx] && (seeTeamMask[std::size_t(k)] & ~mine))
-                    softVision[idx] = 0;
+    /// Grant 5x5 hard vision around `(x, y)` to the orthogonal neighbour with
+    /// the strictly largest army.
+    void addLookoutVision(pos_t x, pos_t y) {
+        static constexpr std::pair<int, int> kDirs[4] = {
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        index_t owner = -1;
+        army_t maxArmy = 0;
+        for (auto [dx, dy] : kDirs) {
+            const Tile& nb = tileAt(x + dx, y + dy);
+            if (nb.occupier != -1 && nb.army > maxArmy) {
+                owner = nb.occupier;
+                maxArmy = nb.army;
+            }
+        }
+        if (owner != -1) {
+            addRadiusVision(playerBit(owner), x, y, 2, VisionMode::NEAR8);
+        }
+    }
+
+    /// Project an 8-tile hard-vision ray across `(x, y)` away from each
+    /// occupied orthogonal neighbour.
+    void addObservatoryVision(pos_t x, pos_t y) {
+        static constexpr std::pair<int, int> kDirs[4] = {
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        const pos_t stride = col + 2;
+        for (auto [dx, dy] : kDirs) {
+            const index_t player = tileAt(x - dx, y - dy).occupier;
+            if (player == -1) continue;
+            const mask_t mask = playerBit(player);
+            for (pos_t k = 1; k <= 8 && isValidPos(x + k * dx, y + k * dy);
+                 ++k) {
+                hardVision[(x + k * dx) * stride + (y + k * dy)] |= mask;
             }
         }
     }
 
-    /// Rule 5: drop soft vision that can no longer be reached from hard
-    /// vision by 4-connected steps through hard-or-soft tiles. Terrain is
-    /// ignored -- impassable tiles conduct connectivity, they merely cannot
-    /// spread vision (rule 2).
-    void pruneDisconnectedSoft(const std::vector<uint8_t>& hardCur, pos_t C,
-                               pos_t RC, index_t player) {
-        if (++visitStampValue == 0) {  // wrapped; 0 means "not visited"
-            std::fill(visitStamp.begin(), visitStamp.end(), 0);
-            visitStampValue = 1;
+    // ---- Fading Smog (Soft Vision) Helpers ----------------------------------
+
+    /// Suppress: clear soft vision covered by own or enemy hard vision.
+    void clearSuppressedSoft(const std::array<mask_t, 16>& enemyMasks) {
+        for (std::size_t t = 0; t < tiles.size(); ++t) {
+            if (!softVision[t]) continue;
+            mask_t suppressed = hardVision[t];
+            for (mask_t h = hardVision[t]; h; h &= h - 1)
+                suppressed |= enemyMasks[std::countr_zero(h)];
+            softVision[t] &= ~suppressed;
         }
-        const uint32_t stamp = visitStampValue;
-        const std::size_t base = std::size_t(player) * RC;
+    }
 
-        static constexpr int di[4] = {-1, 1, 0, 0};
-        static constexpr int dj[4] = {0, 0, -1, 1};
-
+    /// Prune: keep only 4-connected soft components that touch own hard vision.
+    void pruneDisconnectedSoft() {
+        const std::size_t stride = col + 2;
+        std::ranges::fill(scratch, 0);
         floodStack.clear();
-        for (pos_t i = 1; i <= row; ++i) {
-            for (pos_t j = 1; j <= col; ++j) {
-                const std::size_t tIdx = std::size_t(i) * C + j;
-                if (!hardCur[base + tIdx]) continue;
-                visitStamp[tIdx] = stamp;
-                floodStack.push_back({i, j});
+
+        const auto tryReach = [&](std::size_t t, mask_t fromMask) {
+            if (mask_t added = fromMask & softVision[t] & ~scratch[t]) {
+                scratch[t] |= added;
+                floodStack.push_back(t);
+            }
+        };
+
+        for (std::size_t t = stride; t + stride < tiles.size(); ++t) {
+            if (softVision[t]) {
+                tryReach(t, hardVision[t - stride] | hardVision[t + stride] |
+                                hardVision[t - 1] | hardVision[t + 1]);
             }
         }
-
         while (!floodStack.empty()) {
-            const FloodNode n = floodStack.back();
+            const std::size_t t = floodStack.back();
             floodStack.pop_back();
-            for (int d = 0; d < 4; ++d) {
-                const pos_t ni = n.i + di[d], nj = n.j + dj[d];
-                if (!isValidPos(ni, nj)) continue;
-                const std::size_t tIdx = std::size_t(ni) * C + nj;
-                if (visitStamp[tIdx] == stamp) continue;
-                const std::size_t idx = base + tIdx;
-                if (!hardCur[idx] && !softVision[idx]) continue;
-                visitStamp[tIdx] = stamp;
-                floodStack.push_back({ni, nj});
-            }
+            for (std::size_t nb : {t - stride, t + stride, t - 1, t + 1})
+                tryReach(nb, scratch[t]);
         }
-
-        for (pos_t i = 1; i <= row; ++i) {
-            for (pos_t j = 1; j <= col; ++j) {
-                const std::size_t tIdx = std::size_t(i) * C + j;
-                if (softVision[base + tIdx] && visitStamp[tIdx] != stamp)
-                    softVision[base + tIdx] = 0;
-            }
-        }
+        softVision.swap(scratch);
     }
 
-    /// Rule 2: grow soft vision outward by one ring. Sources are the visible
-    /// tiles that are *passable*; targets may be impassable, they just cannot
-    /// spread further. The ring is computed against the visible set as it is
-    /// before the ring is applied, never against a set growing as we go.
-    void expandSmogRing(const std::vector<uint8_t>& hardCur, pos_t C, pos_t RC,
-                        index_t player) {
-        const std::size_t base = std::size_t(player) * RC;
-        static constexpr int di[4] = {-1, 1, 0, 0};
-        static constexpr int dj[4] = {0, 0, -1, 1};
-
-        ringBuffer.clear();
-        for (pos_t i = 1; i <= row; ++i) {
-            for (pos_t j = 1; j <= col; ++j) {
-                const std::size_t tIdx = std::size_t(i) * C + j;
-                const std::size_t idx = base + tIdx;
-                if (!hardCur[idx] && !softVision[idx]) continue;
-                if (isImpassableTile(tiles[tIdx].type)) continue;
-                for (int d = 0; d < 4; ++d) {
-                    const pos_t ni = i + di[d], nj = j + dj[d];
-                    if (!isValidPos(ni, nj)) continue;
-                    const std::size_t nTile = std::size_t(ni) * C + nj;
-                    const std::size_t nIdx = base + nTile;
-                    if (hardCur[nIdx] || softVision[nIdx]) continue;
-                    if (ringMark[nTile]) continue;  // already in this ring
-                    ringMark[nTile] = 1;
-                    ringBuffer.push_back(nTile);
-                }
-            }
+    /// Expand: grow soft vision by 1 orthogonal step from passable visible
+    /// tiles.
+    void expandSmogRing() {
+        const pos_t stride = col + 2;
+        for (std::size_t t = 0; t < tiles.size(); ++t) {
+            scratch[t] = isImpassableTile(tiles[t].type)
+                             ? 0
+                             : (hardVision[t] | softVision[t]);
         }
-
-        for (std::size_t tileIdx : ringBuffer) {
-            softVision[base + tileIdx] = 1;
-            ringMark[tileIdx] = 0;
+        for (pos_t i = 1; i <= row; ++i) {
+            for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t) {
+                softVision[t] |= scratch[t - 1] | scratch[t + 1] |
+                                 scratch[t - stride] | scratch[t + stride];
+            }
         }
     }
 
    public:
-    /// Update the vision cache. Must be called after a board update.
-    ///
-    /// `teams` maps a player index onto a team index. It is only consulted by
-    /// Fading Smog's rule 4 ("no soft vision inside an enemy's hard vision");
-    /// an empty vector means every player is their own team.
-    ///
-    /// `smogRings` is how many soft-vision rings should have been applied by
-    /// now, i.e. `elapsedHalfTurns / FadingSmogInterval`. It is *not* the
-    /// enable switch -- that is `conf.FadingSmogInterval > 0`. Rules 3, 4 and
-    /// 5 run on every half-turn from the very first one (a swamp can hand a
-    /// tile back to nobody on turn 1), while rule 2 only expands when this
-    /// value grows.
-    void updateVisionCache(const GameConfig& conf = defaultConf,
-                           const std::vector<index_t>& teams = {},
+    /// Recompute player visibility after a board update.
+    void updateVisionCache(const GameConfig& conf,
+                           const std::vector<index_t>& teams,
                            int smogRings = 0) {
         assert(isValidConfig(conf));
-        const pos_t C = col + 2, RC = (row + 2) * C;
-        if (visionCache.empty()) {
-            index_t maxPlayer = 0;
-            for (const auto& tile : tiles) {
-                if (tile.occupier > maxPlayer) maxPlayer = tile.occupier;
-            }
-            visionCache.resize((maxPlayer + 1) * RC, VISION_NONE);
-        }
-        const index_t numPlayers = index_t(visionCache.size() / RC);
+        assert(0 < teams.size() && teams.size() <= 16);
 
-        // Crystal Clear removes the fog of war entirely: every player sees
-        // the whole board, so the per-tile pass below is unnecessary. It also
-        // clears any soft vision: every tile is inside every enemy's hard
-        // vision, so rule 4 would wipe it anyway.
-        if (conf.CrystalClearEnabled) {
-            std::fill(visionCache.begin(), visionCache.end(), VISION_HARD);
-            std::fill(softVision.begin(), softVision.end(), 0);
+        const pos_t stride = col + 2;
+
+        if (hardVision.size() != tiles.size()) {
+            for (auto* plane : {&hardVision, &softVision, &scratch, &scratch2})
+                plane->assign(tiles.size(), 0);
             smogRingsApplied = 0;
+        }
+
+        if (conf.CrystalClearEnabled) {
+            for (pos_t i = 1; i <= row; ++i)
+                std::fill_n(hardVision.begin() + i * stride + 1, col,
+                            ~mask_t(0));
+            std::ranges::fill(softVision, 0);
             return;
         }
 
-        const bool smog = conf.FadingSmogInterval > 0;
-        if (smog) ensureSmogBuffers(visionCache.size());
+        const int cityRange = conf.CityVisionRange >= 0
+                                  ? conf.CityVisionRange
+                                  : conf.OverallVisionRange;
+        const VisionMode cityMode = conf.CityVisionMode != VisionMode::INHERIT
+                                        ? conf.CityVisionMode
+                                        : conf.OverallVisionMode;
+        const bool customCityVision = cityRange != conf.OverallVisionRange ||
+                                      cityMode != conf.OverallVisionMode;
+        const bool smogEnabled = conf.FadingSmogInterval > 0;
 
-        // With Fading Smog on, hard vision goes into a double-buffered plane
-        // so that rule 3 can compare this half-turn against the previous one;
-        // with it off, hard vision lives directly in `visionCache` and the
-        // behaviour is exactly what it was before.
-        std::vector<uint8_t>& hardCur =
-            smog ? hardVision[std::size_t(hardIndex ^ 1)] : visionCache;
-        const std::vector<uint8_t>& hardPrev =
-            smog ? hardVision[std::size_t(hardIndex)] : visionCache;
-        std::fill(hardCur.begin(), hardCur.end(), VISION_NONE);
-        if (smog) std::fill(seeTeamMask.begin(), seeTeamMask.end(), 0);
+        // Decay previous hard vision into soft.
+        if (smogEnabled) {
+            for (std::size_t t = 0; t < tiles.size(); ++t)
+                softVision[t] |= hardVision[t];
+        }
 
-        // Compact team ids onto dense bit positions. The ids themselves are
-        // arbitrary, but there are never more than 16 teams (one per player),
-        // so the mask always fits in the 32 bits of `seeTeamMask`.
-        uint32_t allTeamsBit = 0;
-        if (smog) {
-            playerBits.assign(std::size_t(numPlayers), 0);
-            distinctTeams.clear();
-            for (index_t p = 0; p < numPlayers; ++p) {
-                const index_t t =
-                    (std::size_t(p) < teams.size()) ? teams[std::size_t(p)] : p;
-                auto it =
-                    std::find(distinctTeams.begin(), distinctTeams.end(), t);
-                index_t dense;
-                if (it == distinctTeams.end()) {
-                    dense = index_t(distinctTeams.size());
-                    distinctTeams.push_back(t);
-                } else {
-                    dense = index_t(it - distinctTeams.begin());
-                }
-                assert(dense < 32 &&
-                       "more distinct teams than seeTeamMask bits");
-                playerBits[std::size_t(p)] = 1u << dense;
-                allTeamsBit |= playerBits[std::size_t(p)];
+        // Compute hard vision.
+        // 1. Seed bulk owned tiles
+        for (pos_t i = 1; i <= row; ++i) {
+            for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t) {
+                const Tile& tile = tiles[t];
+                const bool skipCity =
+                    customCityVision && isCityLikeTile(tile.type);
+                scratch[t] = (tile.occupier == -1 || skipCity)
+                                 ? 0
+                                 : playerBit(tile.occupier);
             }
         }
-        const auto bitOf = [&](index_t p) -> uint32_t {
-            return playerBits.empty() ? 0u : playerBits[std::size_t(p)];
-        };
 
-        static const std::pair<int, int> dirs[4] = {
-            {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-        auto assignLookoutVision = [&](pos_t x, pos_t y) {
-            // 1. Find lookout occupier
-            index_t occupier = -1;
-            army_t maxArmy = 0;
-            for (auto [dx, dy] : dirs) {
-                const Tile& tile = tileAt(x + dx, y + dy);
-                if (tile.army > maxArmy && tile.occupier != -1) {
-                    occupier = tile.occupier;
-                    maxArmy = tile.army;
-                }
-            }
-            if (occupier == -1) return;
+        // 2. Dilate
+        growVision(conf.OverallVisionRange, conf.OverallVisionMode);
 
-            // 2. Assign 5x5 lookout vision
-            const std::size_t base = std::size_t(occupier) * RC;
-            const uint32_t bit = bitOf(occupier);
-            for (pos_t i = std::max(x - 2, 1), r = std::min(x + 2, row); i <= r;
-                 ++i) {
-                for (pos_t j = std::max(y - 2, 1), c = std::min(y + 2, col);
-                     j <= c; ++j) {
-                    setHard(hardCur, base, std::size_t(i) * C + j, bit);
-                }
-            }
-        };
-
-        auto assignObservatoryVision = [&](pos_t x, pos_t y) {
-            for (auto [dx, dy] : dirs) {
-                index_t player = tileAt(x - dx, y - dy).occupier;
-                if (player == -1) continue;
-                const std::size_t base = std::size_t(player) * RC;
-                const uint32_t bit = bitOf(player);
-                // Signed arithmetic: `dx * C + dy` is negative for dx == -1.
-                long long tIdx = static_cast<long long>(x) * C + y;
-                const long long step = static_cast<long long>(dx) * C + dy;
-                pos_t nx = x, ny = y;
-                for (int i = 0; i < 8; ++i) {
-                    nx += dx, ny += dy, tIdx += step;
-                    if (isInvalidPos(nx, ny)) break;
-                    setHard(hardCur, base, std::size_t(tIdx), bit);
-                }
-            }
-        };
-
-        // Guards the "radius already covers the board" case: once a player's
-        // plane is full there is nothing left to add, and repeating the fill
-        // per owned tile would cost `owned x board` writes.
-        planeSaturated.assign(std::size_t(numPlayers), 0);
-
+        // 3. Add sparse sources
+        const int cityReach = cityMode == VisionMode::NEAR4
+                                  ? (row - 1) + (col - 1)
+                                  : std::max(row, col) - 1;
+        mask_t fullCityMask = 0;
         for (pos_t x = 1; x <= row; ++x) {
             for (pos_t y = 1; y <= col; ++y) {
                 const Tile& tile = tileAt(x, y);
-                const std::size_t tIdx = std::size_t(x) * C + y;
-                if (tile.lit) {
-                    for (index_t player = 0; player < numPlayers; ++player)
-                        setHard(hardCur, std::size_t(player) * RC, tIdx,
-                                smog ? allTeamsBit : 0u);
-                }
-                const index_t player = tile.occupier;
-                if (player == -1) {
-                    if (tile.type == TILE_LOOKOUT)
-                        assignLookoutVision(x, y);
-                    else if (tile.type == TILE_OBSERVATORY)
-                        assignObservatoryVision(x, y);
-                } else {
-                    // City-like tiles may override both the radius and the
-                    // distance metric. The sentinels (-1 and INHERIT) mean
-                    // "inherit from the overall vision settings", so a config
-                    // that never touches them behaves exactly like the plain
-                    // overall radius.
-                    const bool isCity = isCityLikeTile(tile.type);
-                    const int range = (isCity && conf.CityVisionRange >= 0)
-                                          ? conf.CityVisionRange
-                                          : conf.OverallVisionRange;
-                    const VisionMode mode =
-                        (isCity && conf.CityVisionMode != VisionMode::INHERIT)
-                            ? conf.CityVisionMode
-                            : conf.OverallVisionMode;
-                    // A radius that already reaches every tile can be filled
-                    // in one go instead of doling it out once per owned tile.
-                    // The reach depends on the metric: Chebyshev (NEAR8) is
-                    // max(row, col) - 1, Manhattan (NEAR4) is the far corner,
-                    // (row - 1) + (col - 1) -- using the Chebyshev bound for a
-                    // diamond would light up tiles the radius never reaches.
-                    const int reach = (mode == VisionMode::NEAR4)
-                                          ? (row - 1) + (col - 1)
-                                          : std::max(row, col) - 1;
-                    if (range >= reach) {
-                        if (!planeSaturated[std::size_t(player)]) {
-                            planeSaturated[std::size_t(player)] = 1;
-                            fillPlayerHard(hardCur, player, RC, bitOf(player));
+                if (tile.lit) hardVision[x * stride + y] = ~mask_t(0);
+
+                if (tile.occupier != -1) {
+                    if (customCityVision && isCityLikeTile(tile.type)) {
+                        const mask_t mask = playerBit(tile.occupier);
+                        if (cityRange >= cityReach) {
+                            fullCityMask |= mask;
+                        } else {
+                            addRadiusVision(mask, x, y, cityRange, cityMode);
                         }
-                    } else {
-                        assignRadiusVision(hardCur, x, y, player, range, mode,
-                                           bitOf(player));
                     }
+                } else if (tile.type == TILE_LOOKOUT) {
+                    addLookoutVision(x, y);
+                } else if (tile.type == TILE_OBSERVATORY) {
+                    addObservatoryVision(x, y);
                 }
             }
         }
 
-        if (!smog) return;
-
-        // ---- rule 3: hard vision that goes away becomes soft vision ------
-        applyHardDowngrade(hardPrev, hardCur, RC, numPlayers);
-
-        // ---- rule 4: no soft vision inside an enemy's hard vision --------
-        removeSoftUnderEnemyVision(playerBits.data(), RC, numPlayers);
-
-        // ---- rule 5: drop soft vision cut off from hard vision -----------
-        for (index_t p = 0; p < numPlayers; ++p)
-            pruneDisconnectedSoft(hardCur, C, RC, p);
-
-        // ---- rule 2: expand, then re-apply rules 4 and 5 -----------------
-        // Only on a 12.5-turn boundary, i.e. when `smogRings` grows.
-        const int delta = smogRings - smogRingsApplied;
-        if (delta > 0) {
-            for (int ring = 0; ring < delta; ++ring)
-                for (index_t p = 0; p < numPlayers; ++p)
-                    expandSmogRing(hardCur, C, RC, p);
-
-            removeSoftUnderEnemyVision(playerBits.data(), RC, numPlayers);
-
-            // The second pruning is provably a no-op for a single ring --
-            // every tile added is adjacent to a pre-existing tile that
-            // survives rule 4 -- and only matters when several rings pile up,
-            // since an intermediate ring can be wiped out by rule 4.
-            if (delta >= 2)
-                for (index_t p = 0; p < numPlayers; ++p)
-                    pruneDisconnectedSoft(hardCur, C, RC, p);
-
-            smogRingsApplied = smogRings;
+        if (fullCityMask) {
+            for (pos_t x = 1; x <= row; ++x) {
+                for (pos_t y = 1, t = x * stride + 1; y <= col; ++y, ++t)
+                    hardVision[t] |= fullCityMask;
+            }
         }
 
-        // The plane just written becomes "the previous half-turn".
-        hardIndex ^= 1;
+        if (!smogEnabled) return;
 
-        // ---- compose the externally visible plane ------------------------
-        // Hard always wins: a tile that is hard is never also soft.
-        for (index_t p = 0; p < numPlayers; ++p) {
-            const std::size_t base = std::size_t(p) * RC;
-            for (pos_t k = 0; k < RC; ++k) {
-                const std::size_t idx = base + k;
-                visionCache[idx] =
-                    hardCur[idx]
-                        ? VISION_HARD
-                        : (softVision[idx] ? VISION_SOFT : VISION_NONE);
+        // Update Fading Smog soft vision: Suppress -> Prune -> Expand.
+        std::array<mask_t, 16> enemyMasks{};
+        for (index_t p = 0; p < index_t(teams.size()); ++p) {
+            for (index_t q = 0; q < index_t(teams.size()); ++q) {
+                if (teams[p] != teams[q]) enemyMasks[p] |= playerBit(q);
             }
+        }
+
+        clearSuppressedSoft(enemyMasks);
+        pruneDisconnectedSoft();
+
+        for (; smogRingsApplied < smogRings; ++smogRingsApplied) {
+            expandSmogRing();
+            clearSuppressedSoft(enemyMasks);
         }
     }
 
     /// Tile visibility check for a player.
     bool visible(pos_t x, pos_t y, index_t player) const {
         if (isInvalidPos(x, y)) return false;
-        const pos_t C = col + 2, RC = (row + 2) * C;
-        return visionCache[player * RC + x * C + y];
+        const pos_t t = x * (col + 2) + y;
+        return (hardVision[t] | softVision[t]) >> player & 1;
     }
 
     /// Same as above, but using %Coord.

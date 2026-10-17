@@ -12,8 +12,8 @@
 #include <QPainterPath>
 #include <QSvgRenderer>
 #include <QWheelEvent>
-#include <algorithm>
 #include <cmath>
+#include <numbers>
 
 MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled,
                      int fitMargin)
@@ -91,7 +91,7 @@ static void drawArrow(QPainter& painter, const QPointF& p1, int dx, int dy,
     // 1. Calculate geometry
     QPointF arrowEnd(p1.x() + dx * length, p1.y() + dy * length);
 
-    constexpr qreal lnScale = 0.23570226039551587;  // sqrt(2) / 6
+    constexpr qreal lnScale = std::numbers::sqrt2 / 6.0;
     const qreal C = length * lnScale;
     const qreal c_dx = C * dx;
     const qreal c_dy = C * dy;

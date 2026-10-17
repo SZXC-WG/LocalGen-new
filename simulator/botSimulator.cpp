@@ -9,20 +9,21 @@
 
 #include <algorithm>
 #include <atomic>
+#include <charconv>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
-#include <cstdlib>
 #include <filesystem>
-#include <iomanip>
+#include <format>
 #include <iostream>
 #include <mutex>
 #include <numeric>
 #include <random>
-#include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <thread>
+#include <tuple>
 #include <unordered_set>
 #include <vector>
 
@@ -113,11 +114,13 @@ constexpr double kOpenSkillBeta = 25.0 / 6.0;
 constexpr double kOpenSkillTau = 25.0 / 300.0;
 constexpr double kOpenSkillKappa = 0.0001;
 
-bool parsePositiveInt(const char* text, int& value) {
-    char* end = nullptr;
-    long parsed = std::strtol(text, &end, 10);
-    if (end == text || *end != '\0' || parsed <= 0) return false;
-    value = static_cast<int>(parsed);
+bool parsePositiveInt(std::string_view text, int& value) {
+    int parsed = 0;
+    const auto [ptr, ec] =
+        std::from_chars(text.data(), text.data() + text.size(), parsed);
+    if (ec != std::errc{} || ptr != text.data() + text.size() || parsed <= 0)
+        return false;
+    value = parsed;
     return true;
 }
 
@@ -146,20 +149,10 @@ ConfidenceInterval calculateGaussianConfidenceInterval(double mean,
     return {mean - kConfidenceZ95 * sigma, mean + kConfidenceZ95 * sigma};
 }
 
-std::string formatFixed(double value) {
-    std::ostringstream out;
-    out << std::fixed << std::setprecision(2) << value;
-    return out.str();
-}
+std::string formatFixed(double value) { return std::format("{:.2f}", value); }
 
 std::string formatPercent(double value) {
-    return formatFixed(std::clamp(value, 0.0, 1.0) * 100.0) + '%';
-}
-
-std::string alignTextRight(const std::string& text, std::size_t width) {
-    std::ostringstream out;
-    out << std::right << std::setw(static_cast<int>(width)) << text;
-    return out.str();
+    return std::format("{:.2f}%", std::clamp(value, 0.0, 1.0) * 100.0);
 }
 
 void printTableDivider(const std::vector<std::size_t>& widths) {
@@ -174,10 +167,11 @@ void printTableRow(const TableRow& row, const std::vector<std::size_t>& widths,
                    const std::vector<bool>& leftAligned) {
     std::cout << '|';
     for (std::size_t i = 0; i < row.size(); ++i) {
-        std::cout << ' ' << (leftAligned[i] ? std::left : std::right)
-                  << std::setw(static_cast<int>(widths[i])) << row[i] << " |";
+        std::cout << (leftAligned[i]
+                          ? std::format(" {:<{}} |", row[i], widths[i])
+                          : std::format(" {:>{}} |", row[i], widths[i]));
     }
-    std::cout << std::left << '\n';
+    std::cout << '\n';
 }
 
 void printSummaryTable(const Options& options,
@@ -205,12 +199,12 @@ void printSummaryTable(const Options& options,
         TableRow cells = {
             options.bots[i],
             formatFixed(ratings[i].mu),
-            "[" + formatFixed(skillInterval.lowerBound) + ", " +
-                formatFixed(skillInterval.upperBound) + "]",
+            std::format("[{:.2f}, {:.2f}]", skillInterval.lowerBound,
+                        skillInterval.upperBound),
             std::to_string(botStats.wins),
             formatPercent(winRate.rate),
-            "[" + alignTextRight(formatPercent(winRate.lowerBound), 7) + ", " +
-                alignTextRight(formatPercent(winRate.upperBound), 7) + "]",
+            std::format("[{:>7}, {:>7}]", formatPercent(winRate.lowerBound),
+                        formatPercent(winRate.upperBound)),
             formatFixed(static_cast<double>(botStats.totalRank) /
                         options.games),
             formatFixed(static_cast<double>(botStats.totalKills) /
@@ -226,7 +220,7 @@ void printSummaryTable(const Options& options,
                                           ? botStats.totalLatencyMicroseconds /
                                                 botStats.totalLatencyCalls
                                           : 0.0;
-            cells.push_back(formatFixed(avgLatency) + " us");
+            cells.push_back(std::format("{:.2f} us", avgLatency));
         }
 
         rows.push_back({
@@ -236,12 +230,9 @@ void printSummaryTable(const Options& options,
         });
     }
 
-    std::ranges::stable_sort(rows,
-                             [](const SummaryRow& lhs, const SummaryRow& rhs) {
-                                 if (lhs.skill != rhs.skill)
-                                     return lhs.skill > rhs.skill;
-                                 return lhs.wins > rhs.wins;
-                             });
+    std::ranges::stable_sort(
+        rows, std::ranges::greater{},
+        [](const SummaryRow& r) { return std::tie(r.skill, r.wins); });
 
     std::vector<std::size_t> widths(header.size(), 0);
     for (std::size_t i = 0; i < header.size(); ++i) {
@@ -323,7 +314,7 @@ void printUsage() {
 
 bool parseArgs(int argc, char** argv, Options& options) {
     for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
+        std::string_view arg = argv[i];
         if (arg == "--games" || arg == "--width" || arg == "--height" ||
             arg == "--steps" || arg == "--threads") {
             int* target = arg == "--games"     ? &options.games
@@ -345,7 +336,7 @@ bool parseArgs(int argc, char** argv, Options& options) {
         } else if (arg == "--bots") {
             options.bots.clear();
             while (i + 1 < argc &&
-                   std::string(argv[i + 1]).rfind("--", 0) != 0) {
+                   !std::string_view(argv[i + 1]).starts_with("--")) {
                 options.bots.emplace_back(argv[++i]);
             }
             if (options.bots.empty()) return false;
@@ -368,8 +359,8 @@ bool loadCustomMap(Options& options, std::string& errorMessage) {
         return static_cast<char>(std::tolower(ch));
     });
     if (extension != ".lgmp") {
-        errorMessage =
-            "Only v6 .lgmp maps are supported by --map: " + options.mapPath;
+        errorMessage = std::format(
+            "Only v6 .lgmp maps are supported by --map: {}", options.mapPath);
         return false;
     }
 
@@ -377,14 +368,15 @@ bool loadCustomMap(Options& options, std::string& errorMessage) {
     const MapDocument document =
         openMap_v6(QString::fromStdString(options.mapPath), qtErrorMessage);
     if (!qtErrorMessage.isEmpty()) {
-        errorMessage = "Failed to load map '" + options.mapPath +
-                       "': " + qtErrorMessage.toStdString();
+        errorMessage =
+            std::format("Failed to load map '{}': {}", options.mapPath,
+                        qtErrorMessage.toStdString());
         return false;
     }
 
     if (document.board.getWidth() <= 0 || document.board.getHeight() <= 0) {
-        errorMessage =
-            "Failed to load map '" + options.mapPath + "': empty board.";
+        errorMessage = std::format("Failed to load map '{}': empty board.",
+                                   options.mapPath);
         return false;
     }
 
@@ -425,10 +417,9 @@ GameResult runSingleGame(const Options& options, int gameNumber,
 
     BasicGame game(options.remainIndex, players, teams, options.bots, board);
     if (const int initResult = game.init(); initResult != 0) {
-        std::ostringstream err;
-        err << "Failed to initialize game " << gameNumber
-            << " (spawn error code " << initResult << ")";
-        throw std::runtime_error(err.str());
+        throw std::runtime_error(
+            std::format("Failed to initialize game {} (spawn error code {})",
+                        gameNumber, initResult));
     }
 
     while (static_cast<int>(game.getAlivePlayers().size()) > 1 &&
@@ -479,9 +470,12 @@ int detectWorkerCount(const Options& options) {
 }
 
 void printGameResult(const GameResult& result) {
-    std::cout << "Game " << result.gameNumber << ": " << result.winnerName
-              << (result.stepLimitReached ? " leads at step limit" : " wins")
-              << " after " << result.steps << " half-turns" << std::endl;
+    std::cout << std::format(
+                     "Game {}: {} {} after {} half-turns", result.gameNumber,
+                     result.winnerName,
+                     result.stepLimitReached ? "leads at step limit" : "wins",
+                     result.steps)
+              << std::endl;
 }
 
 void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
@@ -521,8 +515,9 @@ int main(int argc, char** argv) {
     const std::unordered_set<std::string> registered(registeredBots.begin(),
                                                      registeredBots.end());
     for (const auto& botName : options.bots) {
-        if (registered.count(botName) == 0) {
-            std::cerr << "Unknown bot: " << botName << "\nAvailable bots:";
+        if (!registered.contains(botName)) {
+            std::cerr << std::format("Unknown bot: {}\nAvailable bots:",
+                                     botName);
             for (const auto& name : registeredBots) {
                 std::cerr << ' ' << name;
             }
@@ -534,16 +529,16 @@ int main(int argc, char** argv) {
     const int workerCount = detectWorkerCount(options);
 
     if (!options.silent) {
-        std::cout << "Running " << options.games << " games on ";
-        if (options.mapPath.empty()) {
-            std::cout << options.width << 'x' << options.height
-                      << " random maps";
-        } else {
-            std::cout << "custom map " << options.mapPath;
-        }
-        std::cout << " with bots:";
+        const std::string mapDescription =
+            options.mapPath.empty()
+                ? std::format("{}x{} random maps", options.width,
+                              options.height)
+                : std::format("custom map {}", options.mapPath);
+        std::cout << std::format(
+            "Running {} games on {} with bots:", options.games, mapDescription);
         for (const auto& name : options.bots) std::cout << ' ' << name;
-        std::cout << "\nUsing " << workerCount << " CPU worker thread(s).\n"
+        std::cout << std::format("\nUsing {} CPU worker thread(s).\n",
+                                 workerCount)
                   << std::endl;
     }
 

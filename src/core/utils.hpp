@@ -11,6 +11,7 @@
  * Utility functions and definitions
  */
 
+#include <compare>
 #include <cstdint>
 #include <functional>
 
@@ -28,12 +29,10 @@ struct Coord {
     pos_t x = 0, y = 0;
     constexpr Coord() = default;
     constexpr Coord(pos_t x, pos_t y) : x(x), y(y) {}
-    bool operator==(const Coord& rhs) const { return x == rhs.x && y == rhs.y; }
-    bool operator!=(const Coord& rhs) const { return x != rhs.x || y != rhs.y; }
-    bool operator<(const Coord& rhs) const {
-        return x == rhs.x ? y < rhs.y : x < rhs.x;
+    constexpr auto operator<=>(const Coord&) const = default;
+    constexpr Coord operator+(const Coord& rhs) const {
+        return {x + rhs.x, y + rhs.y};
     }
-    Coord operator+(const Coord& rhs) const { return {x + rhs.x, y + rhs.y}; }
 };
 
 namespace std {

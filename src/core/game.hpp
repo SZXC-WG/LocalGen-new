@@ -15,11 +15,13 @@
 
 #include <algorithm>
 #include <cctype>
+#include <concepts>
 #include <cstdint>
 #include <deque>
 #include <functional>
 #include <numeric>
 #include <random>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -340,9 +342,8 @@ inline void BasicGame::step() {
             priority[i] = {rank, board.tileAt(move.from).army,
                            curHalfTurnPhase ? i : -i};
         }
-        std::ranges::sort(moveOrder, [&](index_t a, index_t b) {
-            return priority[a] > priority[b];
-        });
+        std::ranges::sort(moveOrder, std::ranges::greater{},
+                          [&](index_t i) { return priority[i]; });
     }
 
     // execute moves
@@ -437,13 +438,9 @@ inline std::vector<RankItem> BasicGame::ranklist() {
         }
     }
 
-    std::ranges::sort(rank, [&](const RankItem& lhs, const RankItem& rhs) {
-        if (lhs.killCount == 0 && rhs.killCount > 0) return false;
-        if (lhs.killCount > 0 && rhs.killCount == 0) return true;
-        if (lhs.army != rhs.army) return lhs.army > rhs.army;
-        if (eliminatedTurn[lhs.player] != eliminatedTurn[rhs.player])
-            return eliminatedTurn[lhs.player] > eliminatedTurn[rhs.player];
-        return lhs.player < rhs.player;
+    std::ranges::sort(rank, std::ranges::greater{}, [&](const RankItem& r) {
+        return std::tuple(r.killCount > 0, r.army, eliminatedTurn[r.player],
+                          -r.player);
     });
     return rank;
 }
@@ -457,8 +454,8 @@ inline int BasicGame::initSpawn() {
     std::vector<index_t> unassigned(playerCount);
     std::iota(unassigned.begin(), unassigned.end(), 0);
 
-    auto collectTiles =
-        [&](auto predicate) -> std::vector<std::pair<Coord, const Tile*>> {
+    auto collectTiles = [&](std::predicate<const Tile&> auto predicate)
+        -> std::vector<std::pair<Coord, const Tile*>> {
         std::vector<std::pair<Coord, const Tile*>> result;
         for (int i = 1; i <= board.row; ++i)
             for (int j = 1; j <= board.col; ++j)
@@ -483,11 +480,8 @@ inline int BasicGame::initSpawn() {
     // Phase 2: Build random label -> team mapping
     std::unordered_set<index_t> teamSet(teams.begin(), teams.end());
     std::vector<index_t> teamList(teamSet.begin(), teamSet.end());
-    std::vector<unsigned> labelList;
-    labelList.reserve(fixedSpawns.size());
-    for (const auto& [label, _] : fixedSpawns) {
-        labelList.push_back(label);
-    }
+    auto labels = std::views::keys(fixedSpawns);
+    std::vector<unsigned> labelList(labels.begin(), labels.end());
 
     std::ranges::shuffle(teamList, rng);
     std::ranges::shuffle(labelList, rng);

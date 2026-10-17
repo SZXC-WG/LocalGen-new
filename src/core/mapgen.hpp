@@ -245,12 +245,9 @@ class Generator {
             updateMinSpawnDistances(spawns_[0]);
 
             for (int k = 1; k < searchSpawnCount_; ++k) {
-                int bestVertex = -1, maxDistance = -1;
-                for (int u : maxConnectedComponent_) {
-                    if (minDistFps_[u] <= maxDistance) continue;
-                    maxDistance = minDistFps_[u];
-                    bestVertex = u;
-                }
+                int bestVertex =
+                    std::ranges::max(maxConnectedComponent_, {},
+                                     [&](int u) { return minDistFps_[u]; });
                 spawns_.push_back(bestVertex);
                 updateMinSpawnDistances(bestVertex);
             }
@@ -344,9 +341,7 @@ class Generator {
                 }
             }
 
-            const auto [minAreaIt, maxAreaIt] = std::minmax_element(
-                area_.begin(), area_.begin() + searchSpawnCount_);
-            const int minArea = *minAreaIt, maxArea = *maxAreaIt;
+            const auto [minArea, maxArea] = std::ranges::minmax(area_);
 
             int spawnPenalty = 0;
             for (int spawn : spawns_) {

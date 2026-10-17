@@ -42,19 +42,12 @@ enum tile_type_e {
     TILE_NEUTRAL = TILE_BLANK
 };
 
-inline bool isImpassableTile(tile_type_e type) {
+constexpr bool isImpassableTile(tile_type_e type) {
     return type == TILE_MOUNTAIN || type == TILE_LOOKOUT ||
            type == TILE_OBSERVATORY;
 }
 
-/// Whether a tile behaves like a city.
-///
-/// Per the project's "general is a city" convention, a general is equivalent
-/// to a city apart from its capital property: only a `TILE_GENERAL` can be
-/// captured (turning into `TILE_CAPTURED_GENERAL`), and only it is the
-/// target of the Leapfrog relocation. Everything else -- growth, and the
-/// vision they provide -- is shared.
-inline bool isCityLikeTile(tile_type_e type) {
+constexpr bool isCityLikeTile(tile_type_e type) {
     return type == TILE_CITY || type == TILE_GENERAL ||
            type == TILE_CAPTURED_GENERAL;
 }
@@ -69,8 +62,9 @@ struct Tile {
     };
     bool lit = false;
 
-    Tile() = default;
-    Tile(index_t occupier, tile_type_e type, army_t army, bool lit = false)
+    constexpr Tile() = default;
+    constexpr Tile(index_t occupier, tile_type_e type, army_t army,
+                   bool lit = false)
         : occupier(occupier), type(type), army(army), lit(lit) {}
 };
 
@@ -81,11 +75,11 @@ struct TileView {
     tile_type_e type = TILE_BLANK;
     army_t army = 0;
 
-    TileView() = default;
-    TileView(const Tile& tile, bool vis) { updateFrom(tile, vis); }
+    constexpr TileView() = default;
+    constexpr TileView(const Tile& tile, bool vis) { updateFrom(tile, vis); }
 
     /// Tile information + visibility -> TileView
-    void updateFrom(const Tile& tile, bool vis) {
+    constexpr void updateFrom(const Tile& tile, bool vis) {
         if (visible = vis) {
             occupier = tile.occupier;
             type = tile.type == TILE_CAPTURED_GENERAL ? TILE_CITY : tile.type;

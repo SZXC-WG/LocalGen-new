@@ -11,7 +11,9 @@
  * Basic bot infrastructure: abstract class + static factory/registry.
  */
 
+#include <concepts>
 #include <functional>
+#include <ranges>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -35,11 +37,8 @@ class BotFactory {
     }
 
     std::vector<std::string> list() const {
-        std::vector<std::string> names;
-        for (auto& kv : creators) {
-            names.push_back(kv.first);
-        }
-        return names;
+        auto keys = std::views::keys(creators);
+        return {keys.begin(), keys.end()};
     }
 
     BasicBot* create(const std::string& name) const {
@@ -51,7 +50,7 @@ class BotFactory {
     std::unordered_map<std::string, Creator> creators;
 };
 
-template <typename T>
+template <std::derived_from<BasicBot> T>
 struct BotRegistrar {
     BotRegistrar(const std::string& name) {
         BotFactory::instance().registerBot(name, [] { return new T(); });

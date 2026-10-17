@@ -80,7 +80,7 @@ struct TileView {
 
     /// Tile information + visibility -> TileView
     constexpr void updateFrom(const Tile& tile, bool vis) {
-        if (visible = vis) {
+        if ((visible = vis)) {
             occupier = tile.occupier;
             type = tile.type == TILE_CAPTURED_GENERAL ? TILE_CITY : tile.type;
             army = tile.army;

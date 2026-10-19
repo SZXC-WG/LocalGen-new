@@ -4,9 +4,11 @@
 #pragma once
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include <utility>
 #include <vector>
 
 namespace detail {
@@ -65,7 +67,9 @@ class Generator {
           sumRow_(searchSpawnCount_),
           sumCol_(searchSpawnCount_),
           count_(searchSpawnCount_),
-          erosionCandidates_(totalTiles_) {
+          minDistSq_(searchSpawnCount_),
+          erosionCandidates_(totalTiles_),
+          neighbors_(totalTiles_) {
         maxConnectedComponent_.reserve(totalTiles_);
         spawns_.reserve(searchSpawnCount_);
         bestSpawns_.reserve(searchSpawnCount_);
@@ -88,7 +92,8 @@ class Generator {
    private:
     static constexpr int kNumCandidates = 96;
     static constexpr double kComponentPenaltyWeight = 60.0;
-    static constexpr int kDirections[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    static constexpr std::pair<int, int> kDirections[4] = {
+        {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
     constexpr bool inBounds(int row, int col) const noexcept {
         return row >= 0 && row < height_ && col >= 0 && col < width_;
@@ -100,14 +105,8 @@ class Generator {
         minDistFps_[start] = 0;
         while (head < tail) {
             const int u = customQueue_[head++];
-            const int row = u / width_, col = u % width_;
-            for (const auto& dir : kDirections) {
-                const int nr = row + dir[0], nc = col + dir[1];
-                if (!inBounds(nr, nc)) continue;
-                const int v = nr * width_ + nc;
-                if (grid_[v] != TILE_BLANK ||
-                    minDistFps_[v] <= minDistFps_[u] + 1)
-                    continue;
+            for (int v : neighbors_[u]) {
+                if (v < 0 || minDistFps_[v] <= minDistFps_[u] + 1) continue;
                 minDistFps_[v] = minDistFps_[u] + 1;
                 customQueue_[tail++] = v;
             }
@@ -149,9 +148,10 @@ class Generator {
                 for (int step = 1;
                      step < blobSize && currentMountains < initialMountains;
                      ++step) {
-                    const int dir = static_cast<int>(fastRand(searchSeed_) % 4);
-                    curRow += kDirections[dir][0];
-                    curCol += kDirections[dir][1];
+                    const auto [dr, dc] =
+                        kDirections[fastRand(searchSeed_) % 4];
+                    curRow += dr;
+                    curCol += dc;
                     if (!inBounds(curRow, curCol)) break;
 
                     const int curIdx = curRow * width_ + curCol;
@@ -168,8 +168,8 @@ class Generator {
                 for (int i = 0; i < totalTiles_; ++i) {
                     if (grid_[i] != TILE_MOUNTAIN) continue;
                     const int row = i / width_, col = i % width_;
-                    for (const auto& dir : kDirections) {
-                        const int nr = row + dir[0], nc = col + dir[1];
+                    for (auto [dr, dc] : kDirections) {
+                        const int nr = row + dr, nc = col + dc;
                         if (!inBounds(nr, nc)) continue;
                         const int v = nr * width_ + nc;
                         if (grid_[v] != TILE_BLANK) continue;
@@ -193,8 +193,8 @@ class Generator {
                     grid_[u] = TILE_BLANK;
                     --currentMountains;
                     const int row = u / width_, col = u % width_;
-                    for (const auto& dir : kDirections) {
-                        const int nr = row + dir[0], nc = col + dir[1];
+                    for (auto [dr, dc] : kDirections) {
+                        const int nr = row + dr, nc = col + dc;
                         if (!inBounds(nr, nc)) continue;
                         const int v = nr * width_ + nc;
                         if (grid_[v] != TILE_MOUNTAIN || isCandidate_[v])
@@ -218,11 +218,17 @@ class Generator {
                 while (head < tail) {
                     const int u = customQueue_[head++];
                     const int row = u / width_, col = u % width_;
-                    for (const auto& dir : kDirections) {
-                        const int nr = row + dir[0], nc = col + dir[1];
-                        if (!inBounds(nr, nc)) continue;
-                        const int v = nr * width_ + nc;
-                        if (grid_[v] != TILE_BLANK || visited_[v]) continue;
+                    // Cache passable neighbors for the remaining searches.
+                    for (int d = 0; d < 4; ++d) {
+                        const auto [dr, dc] = kDirections[d];
+                        const int nr = row + dr, nc = col + dc;
+                        const int v =
+                            inBounds(nr, nc) &&
+                                    grid_[nr * width_ + nc] == TILE_BLANK
+                                ? nr * width_ + nc
+                                : -1;
+                        neighbors_[u][d] = v;
+                        if (v < 0 || visited_[v]) continue;
                         visited_[v] = 1;
                         customQueue_[tail++] = v;
                     }
@@ -243,19 +249,16 @@ class Generator {
                                        maxConnectedComponent_.size()]);
             std::ranges::fill(minDistFps_, std::numeric_limits<int>::max());
 
-            updateMinSpawnDistances(spawns_[0]);
-
             for (int k = 1; k < searchSpawnCount_; ++k) {
+                updateMinSpawnDistances(spawns_.back());
                 int bestVertex = std::ranges::max(
                     maxConnectedComponent_, {},
                     [&](int u) noexcept { return minDistFps_[u]; });
                 spawns_.push_back(bestVertex);
-                updateMinSpawnDistances(bestVertex);
             }
 
             for (int iter = 0; iter < 2; ++iter) {
                 std::ranges::fill(owner_, -1);
-                std::ranges::fill(curDist_, std::numeric_limits<int>::max());
                 std::ranges::fill(count_, 0);
                 std::ranges::fill(sumRow_, 0);
                 std::ranges::fill(sumCol_, 0);
@@ -263,25 +266,18 @@ class Generator {
                 int head = 0, tail = 0;
                 for (int i = 0; i < searchSpawnCount_; ++i) {
                     owner_[spawns_[i]] = i;
-                    curDist_[spawns_[i]] = 0;
                     customQueue_[tail++] = spawns_[i];
                 }
 
                 while (head < tail) {
                     const int u = customQueue_[head++];
                     const int owner = owner_[u];
-                    ++count_[owner];
-                    sumRow_[owner] += u / width_;
-                    sumCol_[owner] += u % width_;
                     const int row = u / width_, col = u % width_;
-                    for (const auto& dir : kDirections) {
-                        const int nr = row + dir[0], nc = col + dir[1];
-                        if (!inBounds(nr, nc)) continue;
-                        const int v = nr * width_ + nc;
-                        if (grid_[v] != TILE_BLANK ||
-                            curDist_[v] <= curDist_[u] + 1)
-                            continue;
-                        curDist_[v] = curDist_[u] + 1;
+                    ++count_[owner];
+                    sumRow_[owner] += row;
+                    sumCol_[owner] += col;
+                    for (int v : neighbors_[u]) {
+                        if (v < 0 || owner_[v] != -1) continue;
                         owner_[v] = owner;
                         customQueue_[tail++] = v;
                     }
@@ -289,27 +285,25 @@ class Generator {
 
                 for (int i = 0; i < searchSpawnCount_; ++i) {
                     if (count_[i] == 0) continue;
-                    const long long meanRow = sumRow_[i] / count_[i];
-                    const long long meanCol = sumCol_[i] / count_[i];
-                    int bestVertex = spawns_[i];
-                    long long minDistance =
-                        std::numeric_limits<long long>::max();
-                    for (int v : maxConnectedComponent_) {
-                        if (owner_[v] != i) continue;
-                        const long long row = v / width_, col = v % width_;
-                        const long long distSq =
-                            (row - meanRow) * (row - meanRow) +
-                            (col - meanCol) * (col - meanCol);
-                        if (distSq >= minDistance) continue;
-                        minDistance = distSq;
-                        bestVertex = v;
+                    sumRow_[i] /= count_[i];
+                    sumCol_[i] /= count_[i];
+                }
+                std::ranges::fill(minDistSq_,
+                                  std::numeric_limits<long long>::max());
+                for (int v : maxConnectedComponent_) {
+                    const int i = owner_[v];
+                    if (i < 0 || count_[i] == 0) continue;
+                    const long long dr = v / width_ - sumRow_[i];
+                    const long long dc = v % width_ - sumCol_[i];
+                    const long long distSq = dr * dr + dc * dc;
+                    if (distSq < minDistSq_[i]) {
+                        minDistSq_[i] = distSq;
+                        spawns_[i] = v;
                     }
-                    spawns_[i] = bestVertex;
                 }
             }
 
             std::ranges::fill(owner_, -1);
-            std::ranges::fill(curDist_, std::numeric_limits<int>::max());
             std::ranges::fill(area_, 0);
 
             int head = 0, tail = 0;
@@ -324,12 +318,8 @@ class Generator {
                 const int u = customQueue_[head++];
                 const int owner = owner_[u];
                 ++area_[owner];
-                const int row = u / width_, col = u % width_;
-                for (const auto& dir : kDirections) {
-                    const int nr = row + dir[0], nc = col + dir[1];
-                    if (!inBounds(nr, nc)) continue;
-                    const int v = nr * width_ + nc;
-                    if (grid_[v] != TILE_BLANK) continue;
+                for (int v : neighbors_[u]) {
+                    if (v < 0) continue;
 
                     if (owner_[v] == -1) {
                         curDist_[v] = curDist_[u] + 1;
@@ -346,13 +336,8 @@ class Generator {
 
             int spawnPenalty = 0;
             for (int spawn : spawns_) {
-                const int row = spawn / width_, col = spawn % width_;
                 int openNeighbors = 0;
-                for (const auto& dir : kDirections) {
-                    const int nr = row + dir[0], nc = col + dir[1];
-                    if (!inBounds(nr, nc)) continue;
-                    if (grid_[nr * width_ + nc] == TILE_BLANK) ++openNeighbors;
-                }
+                for (int v : neighbors_[spawn]) openNeighbors += v >= 0;
                 if (openNeighbors <= 1)
                     spawnPenalty += 500;
                 else if (openNeighbors == 2)
@@ -392,8 +377,8 @@ class Generator {
         for (int i = 0; i < totalTiles_; ++i) {
             if (grid_[i] != TILE_MOUNTAIN) continue;
             const int row = i / width_, col = i % width_;
-            for (const auto& dir : kDirections) {
-                const int nr = row + dir[0], nc = col + dir[1];
+            for (auto [dr, dc] : kDirections) {
+                const int nr = row + dr, nc = col + dc;
                 if (!inBounds(nr, nc)) continue;
                 const tile_type_e type = grid_[nr * width_ + nc];
                 if (type != TILE_BLANK && type != TILE_SPAWN) continue;
@@ -481,8 +466,9 @@ class Generator {
     std::vector<std::uint8_t> visited_, isCandidate_;
     std::vector<int> customQueue_, maxConnectedComponent_, minDistFps_,
         curDist_, owner_, area_;
-    std::vector<long long> sumRow_, sumCol_, count_;
+    std::vector<long long> sumRow_, sumCol_, count_, minDistSq_;
     std::vector<int> spawns_, bestSpawns_, erosionCandidates_;
+    std::vector<std::array<int, 4>> neighbors_;
 };
 
 }  // namespace detail

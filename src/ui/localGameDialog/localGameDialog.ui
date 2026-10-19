@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>530</width>
-    <height>361</height>
+    <height>560</height>
    </rect>
   </property>
   <property name="font">
@@ -254,6 +254,190 @@
     </layout>
    </item>
    <item>
+    <widget class="QGroupBox" name="groupBox_modifiers">
+     <property name="font">
+      <font>
+       <family>Quicksand</family>
+       <pointsize>10</pointsize>
+      </font>
+     </property>
+     <property name="title">
+      <string>Modifiers</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_modifiers">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="checkBox_watchtower">
+        <property name="font">
+         <font>
+          <family>Quicksand</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Cities and generals provide vision within a four-step, diamond-shaped area.</string>
+        </property>
+        <property name="text">
+         <string>Watchtower</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="checkBox_leapfrog">
+        <property name="font">
+         <font>
+          <family>Quicksand</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Capturing an enemy general moves your general there and turns your previous general into a city.</string>
+        </property>
+        <property name="text">
+         <string>Leapfrog</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="checkBox_mistyVeil">
+        <property name="font">
+         <font>
+          <family>Quicksand</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Your tiles no longer reveal neighboring tiles. Selecting this turns off Crystal Clear.</string>
+        </property>
+        <property name="text">
+         <string>Misty Veil</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="checkBox_slippery">
+        <property name="font">
+         <font>
+          <family>Quicksand</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Defensive and normal moves take priority over chasing moves, making it easier to escape.</string>
+        </property>
+        <property name="text">
+         <string>Slippery</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="checkBox_crystalClear">
+        <property name="font">
+         <font>
+          <family>Quicksand</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Reveal the entire map to all players. Selecting this turns off Misty Veil.</string>
+        </property>
+        <property name="text">
+         <string>Crystal Clear</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="checkBox_silentWar">
+        <property name="font">
+         <font>
+          <family>Quicksand</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Hide army and land totals in the leaderboard and disable analysis charts.</string>
+        </property>
+        <property name="text">
+         <string>Silent War</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="checkBox_fadingSmog">
+        <property name="font">
+         <font>
+          <family>Quicksand</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Retain explored vision and expand it by one ring every 25 half-turns. Enemy territory can block this vision.</string>
+        </property>
+        <property name="text">
+         <string>Fading Smog</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="checkBox_cityState">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="font">
+         <font>
+          <family>Quicksand</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Coming soon. This modifier is not available yet.</string>
+        </property>
+        <property name="text">
+         <string>City State</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="checkBox_defenseless">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="font">
+         <font>
+          <family>Quicksand</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Coming soon. This modifier is not available yet.</string>
+        </property>
+        <property name="text">
+         <string>Defenseless</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="checkBox_defection">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="font">
+         <font>
+          <family>Quicksand</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Coming soon. This modifier is not available yet.</string>
+        </property>
+        <property name="text">
+         <string>Defection</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="groupBox_players">
      <property name="font">
       <font>
@@ -305,7 +489,41 @@
        </layout>
       </item>
       <item>
-       <layout class="QGridLayout" name="gridLayout_players"/>
+       <widget class="QScrollArea" name="scrollArea_players">
+        <property name="frameShape">
+         <enum>QFrame::Shape::NoFrame</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="widgetResizable">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents_players">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>492</width>
+           <height>54</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_players">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+         </layout>
+        </widget>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -22,6 +22,16 @@ void LeaderboardWidget::setRows(std::vector<LeaderboardRow> rows) {
     update();
 }
 
+void LeaderboardWidget::setScoreVisibility(bool showArmy, bool showLand) {
+    if (this->showArmy == showArmy && this->showLand == showLand) {
+        return;
+    }
+    this->showArmy = showArmy;
+    this->showLand = showLand;
+    refreshSize();
+    update();
+}
+
 void LeaderboardWidget::paintEvent(QPaintEvent*) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, false);
@@ -45,10 +55,14 @@ void LeaderboardWidget::paintEvent(QPaintEvent*) {
         painter.drawText(QRect(0, 0, layout.player, layout.header),
                          Qt::AlignCenter, QStringLiteral("Player"));
     }
-    painter.drawText(QRect(armyColumnX, 0, layout.army, layout.header),
-                     Qt::AlignCenter, QStringLiteral("Army"));
-    painter.drawText(QRect(landColumnX, 0, layout.land, layout.header),
-                     Qt::AlignCenter, QStringLiteral("Land"));
+    if (showArmy) {
+        painter.drawText(QRect(armyColumnX, 0, layout.army, layout.header),
+                         Qt::AlignCenter, QStringLiteral("Army"));
+    }
+    if (showLand) {
+        painter.drawText(QRect(landColumnX, 0, layout.land, layout.header),
+                         Qt::AlignCenter, QStringLiteral("Land"));
+    }
 
     // 3. Body (text & icons)
     curFont.setBold(false);
@@ -79,10 +93,14 @@ void LeaderboardWidget::paintEvent(QPaintEvent*) {
         }
 
         painter.setPen(Qt::black);
-        painter.drawText(QRect(armyColumnX, y, layout.army, layout.row),
-                         Qt::AlignCenter, QString::number(row.army));
-        painter.drawText(QRect(landColumnX, y, layout.land, layout.row),
-                         Qt::AlignCenter, QString::number(row.land));
+        if (showArmy) {
+            painter.drawText(QRect(armyColumnX, y, layout.army, layout.row),
+                             Qt::AlignCenter, QString::number(row.army));
+        }
+        if (showLand) {
+            painter.drawText(QRect(landColumnX, y, layout.land, layout.row),
+                             Qt::AlignCenter, QString::number(row.land));
+        }
         y += layout.row;
     }
 
@@ -98,8 +116,12 @@ void LeaderboardWidget::paintEvent(QPaintEvent*) {
         borderLines.append(QLine(0, lineY, width(), lineY));
     }
     borderLines.append(QLine(0, 0, 0, height()));
-    borderLines.append(QLine(armyColumnX, 0, armyColumnX, height()));
-    borderLines.append(QLine(landColumnX, 0, landColumnX, height()));
+    if (showArmy) {
+        borderLines.append(QLine(armyColumnX, 0, armyColumnX, height()));
+    }
+    if (showLand) {
+        borderLines.append(QLine(landColumnX, 0, landColumnX, height()));
+    }
     borderLines.append(QLine(width(), 0, width(), height()));
     painter.drawLines(borderLines);
 
@@ -150,7 +172,8 @@ LeaderboardWidget::Layout LeaderboardWidget::makeLayout() const {
                                    metrics.horizontalAdvance(row.playerName));
         }
         return {std::clamp(playerWidth + horizontalPadding * 2, 140, 260),
-                scoreColumnWidth, scoreColumnWidth, headerHeight, rowHeight};
+                showArmy ? scoreColumnWidth : 0,
+                showLand ? scoreColumnWidth : 0, headerHeight, rowHeight};
     }
 
     QFont headerFont = font();
@@ -162,17 +185,23 @@ LeaderboardWidget::Layout LeaderboardWidget::makeLayout() const {
     int landWidth = headerMetrics.horizontalAdvance(QStringLiteral("Land"));
     for (const auto& row : rows) {
         hasKill |= row.hasKill;
-        armyWidth = std::max(
-            armyWidth, metrics.horizontalAdvance(QString::number(row.army)));
-        landWidth = std::max(
-            landWidth, metrics.horizontalAdvance(QString::number(row.land)));
+        if (showArmy) {
+            armyWidth =
+                std::max(armyWidth,
+                         metrics.horizontalAdvance(QString::number(row.army)));
+        }
+        if (showLand) {
+            landWidth =
+                std::max(landWidth,
+                         metrics.horizontalAdvance(QString::number(row.land)));
+        }
     }
 
     return {
         std::max(collapsedColorStripWidth,
                  hasKill ? killIconSize + collapsedHorizontalPadding * 2 : 0),
-        armyWidth + collapsedHorizontalPadding * 2,
-        landWidth + collapsedHorizontalPadding * 2,
+        showArmy ? armyWidth + collapsedHorizontalPadding * 2 : 0,
+        showLand ? landWidth + collapsedHorizontalPadding * 2 : 0,
         std::max(collapsedHeaderHeight,
                  headerMetrics.height() + collapsedVerticalPadding * 2),
         std::max({collapsedRowHeight,

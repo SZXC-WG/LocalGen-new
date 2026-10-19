@@ -30,6 +30,7 @@ class LeaderboardWidget : public QWidget {
    public:
     explicit LeaderboardWidget(QWidget* parent = nullptr);
     void setRows(std::vector<LeaderboardRow> rows);
+    void setScoreVisibility(bool showArmy, bool showLand);
 
    signals:
     void preferredSizeChanged();
@@ -55,6 +56,8 @@ class LeaderboardWidget : public QWidget {
     QVector<QLine> borderLines;
     QVector<QRect> deadPlayerRects;
     bool collapsed = false;
+    bool showArmy = true;
+    bool showLand = true;
 
     static constexpr int headerHeight = 30, collapsedHeaderHeight = 24;
     static constexpr int rowHeight = 28, collapsedRowHeight = 22;

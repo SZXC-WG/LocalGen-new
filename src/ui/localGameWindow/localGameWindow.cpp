@@ -133,7 +133,8 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     }
 
     game = new BasicGame(true, std::move(players), std::move(teams),
-                         std::move(names), std::move(initialBoard));
+                         std::move(names), std::move(initialBoard),
+                         config.gameConfig);
     if (const int initResult = game->init()) {
         QString errMsg = "Failed to initialize local game.";
         if (initResult == 1) {
@@ -188,6 +189,8 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     }
 
     leaderboardWidget = new LeaderboardWidget(this);
+    leaderboardWidget->setScoreVisibility(config.gameConfig.RanklistShowArmy,
+                                          config.gameConfig.RanklistShowLand);
     connect(leaderboardWidget, &LeaderboardWidget::preferredSizeChanged, this,
             &LocalGameWindow::positionFloatingWidgets);
 

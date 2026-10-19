@@ -4,6 +4,7 @@
 #include "localGameDialog.h"
 
 #include <QAbstractItemView>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QCoreApplication>
 #include <QDir>
@@ -16,6 +17,7 @@
 #include <QRandomGenerator>
 #include <QScrollBar>
 #include <QStringList>
+#include <utility>
 
 #include "../utils/comboBoxPopupCompatibility.hpp"
 #include "core/bot.h"
@@ -49,6 +51,21 @@ QStringList toQStringList(const std::vector<std::string>& vec) {
 LocalGameDialog::LocalGameDialog(QWidget* parent)
     : QDialog(parent), ui(new Ui::LocalGameDialog) {
     ui->setupUi(this);
+    connect(ui->checkBox_crystalClear, &QCheckBox::toggled, this,
+            [this](bool checked) {
+                if (checked) ui->checkBox_mistyVeil->setChecked(false);
+            });
+    connect(ui->checkBox_mistyVeil, &QCheckBox::toggled, this,
+            [this](bool checked) {
+                if (checked) ui->checkBox_crystalClear->setChecked(false);
+            });
+    connect(ui->checkBox_silentWar, &QCheckBox::toggled, this,
+            [this](bool checked) {
+                ui->checkBox_showAnalysis->setEnabled(!checked);
+                ui->checkBox_showAnalysis->setToolTip(
+                    checked ? tr("Analysis is hidden while Silent War is on.")
+                            : QString());
+            });
     ComboBoxPopupCompatibility::configureForManagedPopup(ui->comboBox_gameMap);
     populateAvailableMaps();
     on_spinBox_numPlayers_valueChanged(ui->spinBox_numPlayers->value());
@@ -65,6 +82,22 @@ LocalGameConfig LocalGameDialog::config() const {
         ui->spinBox_mapWidth->value(),
         ui->spinBox_mapHeight->value(),
         {}};
+    const std::pair<QCheckBox*, GameConfig> modifierChoices[] = {
+        {ui->checkBox_watchtower, modifiers::Watchtower},
+        {ui->checkBox_mistyVeil, modifiers::MistyVeil},
+        {ui->checkBox_crystalClear, modifiers::CrystalClear},
+        {ui->checkBox_fadingSmog, modifiers::FadingSmog},
+        {ui->checkBox_leapfrog, modifiers::Leapfrog},
+        {ui->checkBox_slippery, modifiers::Slippery},
+        {ui->checkBox_silentWar, modifiers::SilentWar},
+    };
+    for (const auto& [checkBox, preset] : modifierChoices) {
+        if (checkBox->isChecked()) config.gameConfig |= preset;
+    }
+    config.showAnalysis = config.showAnalysis &&
+                          config.gameConfig.RanklistShowArmy &&
+                          config.gameConfig.RanklistShowLand;
+
     auto& players = config.players;
     int numPlayers = ui->gridLayout_players->count();
     players.resize(numPlayers);
@@ -144,8 +177,6 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
         item->widget()->deleteLater();
         delete item;
     }
-    if (layout->count() == numPlayers) return;
-
     const QStringList botNames = toQStringList(BotFactory::instance().list());
     const QFont& font = ui->labNumPlayers->font();
     const QFont& comboFont = ui->comboBox_gameMap->font();
@@ -179,7 +210,15 @@ void LocalGameDialog::on_spinBox_numPlayers_valueChanged(int numPlayers) {
         cardLayout->addWidget(playerCombo);
 
         layout->addWidget(cardFrame, index / columns, index % columns);
+        cardFrame->show();
     }
+
+    layout->invalidate();
+    ui->scrollArea_players->setFixedHeight(
+        std::min(layout->sizeHint().height(), 180));
+    ui->scrollArea_players->setMinimumWidth(
+        layout->minimumSize().width() +
+        ui->scrollArea_players->verticalScrollBar()->sizeHint().width());
 }
 
 void LocalGameDialog::on_comboBox_gameMap_currentIndexChanged(int index) {

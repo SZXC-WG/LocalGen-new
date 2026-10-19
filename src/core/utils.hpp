@@ -11,6 +11,7 @@
  * Utility functions and definitions
  */
 
+#include <bit>
 #include <compare>
 #include <cstdint>
 #include <functional>
@@ -27,28 +28,21 @@ using speed_t = double;
 
 struct Coord {
     pos_t x = 0, y = 0;
-    constexpr Coord() noexcept = default;
-    constexpr Coord(pos_t x, pos_t y) noexcept : x(x), y(y) {}
-    constexpr auto operator<=>(const Coord&) const noexcept = default;
-    constexpr Coord operator+(const Coord& rhs) const noexcept {
-        return {x + rhs.x, y + rhs.y};
+    auto operator<=>(const Coord&) const = default;
+    constexpr Coord operator+(Coord r) const noexcept {
+        return {x + r.x, y + r.y};
     }
 };
 
-namespace std {
-/// Hash function for Coord, enabling use in `std::unordered_map`.
 template <>
-struct hash<Coord> {
-    constexpr size_t operator()(const Coord& c) const noexcept {
-        return static_cast<size_t>(c.x) << 16 | c.y;
+struct std::hash<Coord> {
+    constexpr size_t operator()(Coord c) const noexcept {
+        return std::bit_cast<size_t>(c);
     }
 };
-}  // namespace std
 
 /// Helper for std::visit
 template <class... Ts>
 struct overloaded : Ts... {
     using Ts::operator()...;
 };
-template <class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;

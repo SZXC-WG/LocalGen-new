@@ -38,23 +38,23 @@ struct MapDocument {
     Board board;
 };
 
-namespace {
+namespace detail {
 
-constexpr quint32 MAGIC_6 = 0x4C47364D;
-constexpr int V5_TYPE_CODES[TILE_TYPE_COUNT] = {3, 0, 2, 4, 1, 5, 6, 7};
-constexpr tile_type_e V5_TILE_TYPES[TILE_TYPE_COUNT] = {
+inline constexpr quint32 MAGIC_6 = 0x4C47364D;
+inline constexpr int V5_TYPE_CODES[TILE_TYPE_COUNT] = {3, 0, 2, 4, 1, 5, 6, 7};
+inline constexpr tile_type_e V5_TILE_TYPES[TILE_TYPE_COUNT] = {
     TILE_BLANK, TILE_SWAMP,  TILE_MOUNTAIN, TILE_SPAWN,
     TILE_CITY,  TILE_DESERT, TILE_LOOKOUT,  TILE_OBSERVATORY};
 
-inline intmax_t PMod(intmax_t& x) {
+constexpr intmax_t PMod(intmax_t& x) noexcept {
     intmax_t res = x & 63;  // 63 = 0b111111
     x >>= 6;
     return res;
 }
 
-constexpr int CHAR_AD = 48;
+inline constexpr int CHAR_AD = 48;
 
-std::string v5Zip(const Board& board) {
+constexpr std::string v5Zip(const Board& board) {
     const int row = board.getHeight(), col = board.getWidth();
 
     std::string strZip;
@@ -86,7 +86,7 @@ std::string v5Zip(const Board& board) {
     return strZip;
 }
 
-Board v5Unzip(std::string strUnzip) {
+inline Board v5Unzip(std::string strUnzip) {
     strUnzip.push_back('\0');
 
     int k = 4, p = 0;
@@ -123,7 +123,7 @@ Board v5Unzip(std::string strUnzip) {
     return board;
 }
 
-}  // namespace
+}  // namespace detail
 
 inline Board openMap_v5(const QString& filename, QString& errMsg) {
     QFile mapFile(filename);
@@ -131,7 +131,7 @@ inline Board openMap_v5(const QString& filename, QString& errMsg) {
         errMsg = "Failed to open map file.";
         return {};
     }
-    return v5Unzip(mapFile.readLine().toStdString());
+    return detail::v5Unzip(mapFile.readLine().toStdString());
 }
 
 inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
@@ -147,7 +147,7 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
 
     quint32 magic = 0;
     ds >> magic;
-    if (magic != MAGIC_6) {
+    if (magic != detail::MAGIC_6) {
         errMsg = "Invalid map file: bad magic number.";
         return {};
     }
@@ -192,7 +192,7 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
     QBitArray bits = QBitArray::fromBits(raw.constData(), expectedBits);
 
     // unpack tile from 19 bits
-    auto unpackTile = [](quint32 p) {
+    constexpr auto unpackTile = [](quint32 p) noexcept {
         Tile tile;
         tile.type = static_cast<tile_type_e>((p >> 16) & 0x7);
         tile.lit = ((p >> 15) & 0x1);
@@ -335,7 +335,7 @@ inline void saveMap_v5(const QString& filename, const Board& board,
         errMsg = "Failed to open map file.";
         return;
     }
-    mapFile.write(QString::fromStdString(v5Zip(board)).toUtf8());
+    mapFile.write(QString::fromStdString(detail::v5Zip(board)).toUtf8());
 }
 
 inline void saveMap_v6(const QString& filename, const MapDocument& doc,
@@ -345,7 +345,7 @@ inline void saveMap_v6(const QString& filename, const MapDocument& doc,
     const int width = board.getWidth(), height = board.getHeight();
 
     // 19 bits per tile, thus packed into uint32
-    auto packTile = [](const Tile& tile) -> quint32 {
+    constexpr auto packTile = [](const Tile& tile) noexcept -> quint32 {
         // [18..16] type (3) | [15] lit | [14..0] army+16384
         int type = tile.type, lit = tile.lit,
             val = tile.type == TILE_SPAWN ? tile.spawnTeam : tile.army;
@@ -378,7 +378,7 @@ inline void saveMap_v6(const QString& filename, const MapDocument& doc,
     ds.setVersion(QDataStream::Qt_6_7);
     ds.setByteOrder(QDataStream::BigEndian);
 
-    ds << MAGIC_6 << metadata.title << metadata.author
+    ds << detail::MAGIC_6 << metadata.title << metadata.author
        << metadata.creationDateTime << metadata.description;
     ds << quint16(width) << quint16(height) << compressed;
 }

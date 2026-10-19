@@ -44,7 +44,8 @@ class Player {
     }
 
    public:
-    void setSendMessageCallback(std::function<void(const std::string&)> cb) {
+    void setSendMessageCallback(
+        std::function<void(const std::string&)> cb) noexcept {
         sendMessageCb = std::move(cb);
     }
 
@@ -76,9 +77,9 @@ class Player {
     virtual void onText(turn_t, const GameMessageText&) {}
 
    public:
-    std::deque<Move>& getMoveQueue() { return moveQueue; }
+    constexpr std::deque<Move>& getMoveQueue() noexcept { return moveQueue; }
 
-    Move step() {
+    [[nodiscard]] Move step() noexcept {
         if (moveQueue.empty()) return {};
         Move move = moveQueue.front();
         moveQueue.pop_front();

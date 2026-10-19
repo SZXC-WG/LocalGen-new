@@ -41,7 +41,7 @@ class BotFactory {
         return {keys.begin(), keys.end()};
     }
 
-    BasicBot* create(const std::string& name) const {
+    [[nodiscard]] BasicBot* create(const std::string& name) const {
         auto it = creators.find(name);
         return it == creators.end() ? nullptr : it->second();
     }
@@ -52,7 +52,7 @@ class BotFactory {
 
 template <std::derived_from<BasicBot> T>
 struct BotRegistrar {
-    BotRegistrar(const std::string& name) {
+    explicit BotRegistrar(const std::string& name) {
         BotFactory::instance().registerBot(name, [] { return new T(); });
     }
 };

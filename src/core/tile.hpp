@@ -15,7 +15,7 @@
 
 #include "utils.hpp"
 
-static constexpr int TILE_TYPE_COUNT = 8;
+inline constexpr int TILE_TYPE_COUNT = 8;
 
 /// Tile types.
 enum tile_type_e {
@@ -42,12 +42,12 @@ enum tile_type_e {
     TILE_NEUTRAL = TILE_BLANK
 };
 
-constexpr bool isImpassableTile(tile_type_e type) {
+constexpr bool isImpassableTile(tile_type_e type) noexcept {
     return type == TILE_MOUNTAIN || type == TILE_LOOKOUT ||
            type == TILE_OBSERVATORY;
 }
 
-constexpr bool isCityLikeTile(tile_type_e type) {
+constexpr bool isCityLikeTile(tile_type_e type) noexcept {
     return type == TILE_CITY || type == TILE_GENERAL ||
            type == TILE_CAPTURED_GENERAL;
 }
@@ -62,9 +62,9 @@ struct Tile {
     };
     bool lit = false;
 
-    constexpr Tile() = default;
+    constexpr Tile() noexcept = default;
     constexpr Tile(index_t occupier, tile_type_e type, army_t army,
-                   bool lit = false)
+                   bool lit = false) noexcept
         : occupier(occupier), type(type), army(army), lit(lit) {}
 };
 
@@ -75,11 +75,13 @@ struct TileView {
     tile_type_e type = TILE_BLANK;
     army_t army = 0;
 
-    constexpr TileView() = default;
-    constexpr TileView(const Tile& tile, bool vis) { updateFrom(tile, vis); }
+    constexpr TileView() noexcept = default;
+    constexpr TileView(const Tile& tile, bool vis) noexcept {
+        updateFrom(tile, vis);
+    }
 
     /// Tile information + visibility -> TileView
-    constexpr void updateFrom(const Tile& tile, bool vis) {
+    constexpr void updateFrom(const Tile& tile, bool vis) noexcept {
         if ((visible = vis)) {
             occupier = tile.occupier;
             type = tile.type == TILE_CAPTURED_GENERAL ? TILE_CITY : tile.type;

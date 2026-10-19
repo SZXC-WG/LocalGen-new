@@ -61,8 +61,8 @@ class BasicGame {
     uint8_t curHalfTurnPhase{};
 
    public:
-    turn_t getCurTurn() const { return curTurn; }
-    uint8_t getHalfTurnPhase() const { return curHalfTurnPhase; }
+    turn_t getCurTurn() const noexcept { return curTurn; }
+    uint8_t getHalfTurnPhase() const noexcept { return curHalfTurnPhase; }
 
    protected:
     std::vector<Player*> players;
@@ -75,26 +75,32 @@ class BasicGame {
     std::vector<turn_t> eliminatedTurn;
     std::vector<Coord> spawnCoord;
 
-    bool isValidPlayer(index_t player) const {
+    constexpr bool isValidPlayer(index_t player) const noexcept {
         return player >= 0 && player < static_cast<index_t>(players.size());
     }
 
    public:
-    bool isAlive(index_t player) const {
+    constexpr bool isAlive(index_t player) const noexcept {
         return isValidPlayer(player) && alive[player];
     }
-    index_t getPlayerCount() const {
+    index_t getPlayerCount() const noexcept {
         return static_cast<index_t>(players.size());
     }
-    index_t getTeam(index_t player) const { return teams[player]; }
-    std::vector<index_t> getTeams() const { return teams; }
-    std::string getName(index_t player) const { return names[player]; }
-    std::vector<std::string> getNames() const { return names; }
+    index_t getTeam(index_t player) const noexcept { return teams[player]; }
+    constexpr const std::vector<index_t>& getTeams() const noexcept {
+        return teams;
+    }
+    const std::string& getName(index_t player) const noexcept {
+        return names[player];
+    }
+    constexpr const std::vector<std::string>& getNames() const noexcept {
+        return names;
+    }
 
     /// How many soft-vision rings Fading Smog should have grown by now.
     /// This count starts from 0, and grows by 1 every `FadingSmogInterval`
     /// half-turns. When Fading Smog is off, this function always returns 0.
-    int getSmogRings() const {
+    int getSmogRings() const noexcept {
         if (conf.FadingSmogInterval <= 0) return 0;
         return (static_cast<int>(curTurn) * 2 + curHalfTurnPhase) /
                conf.FadingSmogInterval;
@@ -108,7 +114,7 @@ class BasicGame {
 
     BoardView fullView() const { return board.fullView(); }
 
-    bool inSameTeam(index_t player1, index_t player2) const {
+    constexpr bool inSameTeam(index_t player1, index_t player2) const noexcept {
         if (!isValidPlayer(player1) || !isValidPlayer(player2)) return false;
         return getTeam(player1) == getTeam(player2);
     }
@@ -117,7 +123,8 @@ class BasicGame {
     const GameConfig conf;
 
    public:
-    void setEventCallback(std::function<void(const GameEvent&)> callback) {
+    void setEventCallback(
+        std::function<void(const GameEvent&)> callback) noexcept {
         eventCallback = std::move(callback);
     }
 
@@ -130,15 +137,15 @@ class BasicGame {
    protected:
     /// Calculate distance from a certain coordinate.
     /// The route can't pass impassable tiles.
-    std::vector<pos_t> calcDist(Coord pos);
+    std::vector<pos_t> calcDist(Coord pos) const;
 
     Board board;
 
     std::deque<std::pair<index_t, turn_t>> surrenderQueue;
     std::function<void(const GameEvent&)> eventCallback;
 
-    void neutralize(index_t player);
-    void takeOver(index_t p1, index_t p2);
+    void neutralize(index_t player) noexcept;
+    void takeOver(index_t p1, index_t p2) noexcept;
     void capture(index_t p1, index_t p2);
 
    public:
@@ -150,10 +157,10 @@ class BasicGame {
 
     void step();
 
-    std::vector<RankItem> ranklist();
+    std::vector<RankItem> ranklist() const;
 
-    int initSpawn();
-    int init();
+    [[nodiscard]] int initSpawn();
+    [[nodiscard]] int init();
 
     std::vector<index_t> getAlivePlayers() const {
         std::vector<index_t> res;
@@ -167,16 +174,20 @@ class BasicGame {
     Board initialBoard;
 
    public:
-    void setInitialBoard(Board initial) { initialBoard = initial; }
-    Board getInitialBoard() { return initialBoard; }
+    void setInitialBoard(Board initial) noexcept {
+        initialBoard = std::move(initial);
+    }
+    constexpr const Board& getInitialBoard() const noexcept {
+        return initialBoard;
+    }
 };
 
-inline std::vector<pos_t> BasicGame::calcDist(Coord pos) {
+inline std::vector<pos_t> BasicGame::calcDist(Coord pos) const {
     static constexpr Coord delta[] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
     pos_t height = board.getHeight(), width = board.getWidth();
     const pos_t dist_inf = height * width + 1;
     std::vector<pos_t> dist((height + 2) * (width + 2), dist_inf);
-    auto grid = [&](Coord p) { return p.x * (width + 2) + p.y; };
+    auto grid = [&](Coord p) noexcept { return p.x * (width + 2) + p.y; };
     std::vector<std::pair<Coord, pos_t>> q;
     std::size_t head = 0;
     q.emplace_back(pos, 0);
@@ -195,8 +206,10 @@ inline std::vector<pos_t> BasicGame::calcDist(Coord pos) {
     return dist;
 }
 
-inline void BasicGame::neutralize(index_t player) { takeOver(-1, player); }
-inline void BasicGame::takeOver(index_t p1, index_t p2) {
+inline void BasicGame::neutralize(index_t player) noexcept {
+    takeOver(-1, player);
+}
+inline void BasicGame::takeOver(index_t p1, index_t p2) noexcept {
     alive[p2] = false;
     for (auto& tile : board.tiles) {
         if (tile.occupier == p2) {
@@ -342,7 +355,7 @@ inline void BasicGame::step() {
                            curHalfTurnPhase ? i : -i};
         }
         std::ranges::sort(moveOrder, std::ranges::greater{},
-                          [&](index_t i) { return priority[i]; });
+                          [&](index_t i) noexcept { return priority[i]; });
     }
 
     // execute moves
@@ -418,7 +431,7 @@ inline void BasicGame::step() {
     }
 }
 
-inline std::vector<RankItem> BasicGame::ranklist() {
+inline std::vector<RankItem> BasicGame::ranklist() const {
     std::vector<RankItem> rank(players.size());
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         rank[i].player = i;
@@ -437,10 +450,11 @@ inline std::vector<RankItem> BasicGame::ranklist() {
         }
     }
 
-    std::ranges::sort(rank, std::ranges::greater{}, [&](const RankItem& r) {
-        return std::tuple(r.killCount > 0, r.army, eliminatedTurn[r.player],
-                          -r.player);
-    });
+    std::ranges::sort(
+        rank, std::ranges::greater{}, [&](const RankItem& r) noexcept {
+            return std::tuple(r.killCount > 0, r.army, eliminatedTurn[r.player],
+                              -r.player);
+        });
     return rank;
 }
 
@@ -467,8 +481,8 @@ inline int BasicGame::initSpawn() {
     std::unordered_map<unsigned, std::vector<Coord>> fixedSpawns;
     std::vector<Coord> flexibleSpawns;
 
-    auto allSpawns =
-        collectTiles([](const Tile& t) { return t.type == TILE_SPAWN; });
+    auto allSpawns = collectTiles(
+        [](const Tile& t) noexcept { return t.type == TILE_SPAWN; });
     for (const auto& [coord, tile] : allSpawns) {
         if (tile->spawnTeam == 0)
             flexibleSpawns.push_back(coord);
@@ -564,8 +578,9 @@ inline int BasicGame::initSpawn() {
 
     // Phase 6: Use blank tiles if still not enough spawns
     if (!unassigned.empty()) {
-        auto blankTiles = collectTiles(
-            [](const Tile& t) { return t.type == TILE_PLAIN && t.army == 0; });
+        auto blankTiles = collectTiles([](const Tile& t) noexcept {
+            return t.type == TILE_PLAIN && t.army == 0;
+        });
         std::ranges::shuffle(blankTiles, rng);
 
         if (blankTiles.size() < unassigned.size()) return 1;
@@ -613,7 +628,9 @@ inline int BasicGame::init() {
 
 inline void BasicGame::sendPlayerMessage(index_t sender, std::string text) {
     if (!isValidPlayer(sender) || text.empty()) return;
-    const auto isSpace = [](unsigned char ch) { return std::isspace(ch) != 0; };
+    const auto isSpace = [](unsigned char ch) noexcept {
+        return std::isspace(ch) != 0;
+    };
     if (std::ranges::all_of(text, isSpace)) return;
     broadcast(curTurn, GameMessageText{sender, std::move(text)});
 }

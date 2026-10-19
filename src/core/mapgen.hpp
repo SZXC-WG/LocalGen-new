@@ -9,9 +9,9 @@
 #include <limits>
 #include <vector>
 
-namespace {
+namespace detail {
 
-std::uint64_t splitmix64(std::uint64_t& x) {
+constexpr std::uint64_t splitmix64(std::uint64_t& x) noexcept {
     std::uint64_t z = (x += 0x9E3779B97F4A7C15ull);
     z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
     z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
@@ -20,20 +20,21 @@ std::uint64_t splitmix64(std::uint64_t& x) {
 }
 
 // xorshift64*
-std::uint32_t fastRand(std::uint64_t& state) {
+constexpr std::uint32_t fastRand(std::uint64_t& state) noexcept {
     state ^= state >> 12;
     state ^= state << 25;
     state ^= state >> 27;
     return (state * 0x2545F4914F6CDD1Dull) >> 32;
 }
 
-int uniformInclusive(std::uint64_t& state, int low, int high) {
+constexpr int uniformInclusive(std::uint64_t& state, int low,
+                               int high) noexcept {
     const std::uint32_t span = static_cast<std::uint32_t>(high - low + 1);
     return low + static_cast<int>(fastRand(state) % span);
 }
 
-int uniformPercentageCount(std::uint64_t& state, int total, int lowPercent,
-                           int highPercent) {
+constexpr int uniformPercentageCount(std::uint64_t& state, int total,
+                                     int lowPercent, int highPercent) noexcept {
     const int low = total * lowPercent / 100, high = total * highPercent / 100;
     return uniformInclusive(state, low, high);
 }
@@ -89,11 +90,11 @@ class Generator {
     static constexpr double kComponentPenaltyWeight = 60.0;
     static constexpr int kDirections[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
-    bool inBounds(int row, int col) const {
+    constexpr bool inBounds(int row, int col) const noexcept {
         return row >= 0 && row < height_ && col >= 0 && col < width_;
     }
 
-    void updateMinSpawnDistances(int start) {
+    void updateMinSpawnDistances(int start) noexcept {
         int head = 0, tail = 0;
         customQueue_[tail++] = start;
         minDistFps_[start] = 0;
@@ -245,9 +246,9 @@ class Generator {
             updateMinSpawnDistances(spawns_[0]);
 
             for (int k = 1; k < searchSpawnCount_; ++k) {
-                int bestVertex =
-                    std::ranges::max(maxConnectedComponent_, {},
-                                     [&](int u) { return minDistFps_[u]; });
+                int bestVertex = std::ranges::max(
+                    maxConnectedComponent_, {},
+                    [&](int u) noexcept { return minDistFps_[u]; });
                 spawns_.push_back(bestVertex);
                 updateMinSpawnDistances(bestVertex);
             }
@@ -484,13 +485,13 @@ class Generator {
     std::vector<int> spawns_, bestSpawns_, erosionCandidates_;
 };
 
-}  // namespace
+}  // namespace detail
 
 inline Board Board::generate(int width, int height, int spawnCount,
                              std::uint64_t seed, bool placeSwamp,
                              bool placeLookout, bool placeObservatory,
                              double mountainDensity) {
-    return Generator(width, height, spawnCount, seed, placeSwamp, placeLookout,
-                     placeObservatory, mountainDensity)
+    return detail::Generator(width, height, spawnCount, seed, placeSwamp,
+                             placeLookout, placeObservatory, mountainDensity)
         .run();
 }

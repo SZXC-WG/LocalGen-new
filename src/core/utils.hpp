@@ -27,10 +27,10 @@ using speed_t = double;
 
 struct Coord {
     pos_t x = 0, y = 0;
-    constexpr Coord() = default;
-    constexpr Coord(pos_t x, pos_t y) : x(x), y(y) {}
-    constexpr auto operator<=>(const Coord&) const = default;
-    constexpr Coord operator+(const Coord& rhs) const {
+    constexpr Coord() noexcept = default;
+    constexpr Coord(pos_t x, pos_t y) noexcept : x(x), y(y) {}
+    constexpr auto operator<=>(const Coord&) const noexcept = default;
+    constexpr Coord operator+(const Coord& rhs) const noexcept {
         return {x + rhs.x, y + rhs.y};
     }
 };
@@ -39,7 +39,7 @@ namespace std {
 /// Hash function for Coord, enabling use in `std::unordered_map`.
 template <>
 struct hash<Coord> {
-    size_t operator()(const Coord& c) const {
+    constexpr size_t operator()(const Coord& c) const noexcept {
         return static_cast<size_t>(c.x) << 16 | c.y;
     }
 };

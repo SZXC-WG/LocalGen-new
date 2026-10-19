@@ -17,7 +17,7 @@
 
 namespace {
 
-inline QColor playerColor(index_t playerId) {
+QColor playerColor(index_t playerId) {
     static const QColor palette[16] = {
         "#FF0000", "#2792FF", "#008000", "#008080", "#FF7010", "#F032E6",
         "#800080", "#9B0101", "#B3AC32", "#9A5E24", "#1031FF", "#594CA5",
@@ -25,7 +25,7 @@ inline QColor playerColor(index_t playerId) {
     return palette[playerId % 16];
 }
 
-inline DisplayTile toDisplayTile(const TileView& tile) {
+DisplayTile toDisplayTile(const TileView& tile) {
     DisplayTile display;
     display.type = tile.type;
     if (!tile.visible) {
@@ -208,7 +208,7 @@ LocalGameWindow::~LocalGameWindow() {
     if (game != nullptr) delete game;
 }
 
-bool LocalGameWindow::canHumanChat() const {
+bool LocalGameWindow::canHumanChat() const noexcept {
     return game != nullptr && humanPlayerId >= 0;
 }
 

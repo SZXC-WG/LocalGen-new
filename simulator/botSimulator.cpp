@@ -58,8 +58,8 @@ class TimedBot : public BasicBot {
         inner_->onGameEvent(event);
     }
 
-    double totalMicroseconds() const { return totalTime_.count(); }
-    long long callCount() const { return callCount_; }
+    double totalMicroseconds() const noexcept { return totalTime_.count(); }
+    long long callCount() const noexcept { return callCount_; }
 
    private:
     BasicBot* inner_;
@@ -116,7 +116,7 @@ constexpr double kOpenSkillBeta = 25.0 / 6.0;
 constexpr double kOpenSkillTau = 25.0 / 300.0;
 constexpr double kOpenSkillKappa = 0.0001;
 
-bool parsePositiveInt(std::string_view text, int& value) {
+bool parsePositiveInt(std::string_view text, int& value) noexcept {
     int parsed = 0;
     const auto [ptr, ec] =
         std::from_chars(text.data(), text.data() + text.size(), parsed);
@@ -126,7 +126,7 @@ bool parsePositiveInt(std::string_view text, int& value) {
     return true;
 }
 
-WinRateSummary calculateWinRateSummary(int wins, int totalGames) {
+WinRateSummary calculateWinRateSummary(int wins, int totalGames) noexcept {
     if (totalGames <= 0) return {};
 
     constexpr double z2 = kConfidenceZ95 * kConfidenceZ95;
@@ -146,8 +146,8 @@ WinRateSummary calculateWinRateSummary(int wins, int totalGames) {
     };
 }
 
-ConfidenceInterval calculateGaussianConfidenceInterval(double mean,
-                                                       double sigma) {
+constexpr ConfidenceInterval calculateGaussianCI(double mean,
+                                                 double sigma) noexcept {
     return {mean - kConfidenceZ95 * sigma, mean + kConfidenceZ95 * sigma};
 }
 
@@ -207,8 +207,7 @@ void printSummaryTable(const Options& options,
         const WinRateSummary winRate =
             calculateWinRateSummary(botStats.wins, options.games);
         const ConfidenceInterval skillInterval =
-            calculateGaussianConfidenceInterval(ratings[i].mu,
-                                                ratings[i].sigma);
+            calculateGaussianCI(ratings[i].mu, ratings[i].sigma);
         TableRow cells = {
             options.bots[i],
             formatFixed(ratings[i].mu),
@@ -245,7 +244,7 @@ void printSummaryTable(const Options& options,
 
     std::ranges::stable_sort(
         rows, std::ranges::greater{},
-        [](const SummaryRow& r) { return std::tie(r.skill, r.wins); });
+        [](const SummaryRow& r) noexcept { return std::tie(r.skill, r.wins); });
 
     std::vector<std::size_t> widths(header.size(), 0);
     for (std::size_t i = 0; i < header.size(); ++i) {
@@ -372,9 +371,10 @@ bool loadCustomMap(Options& options, std::string& errorMessage) {
 
     const std::filesystem::path mapPath(options.mapPath);
     std::string extension = mapPath.extension().string();
-    std::ranges::transform(extension, extension.begin(), [](unsigned char ch) {
-        return static_cast<char>(std::tolower(ch));
-    });
+    std::ranges::transform(extension, extension.begin(),
+                           [](unsigned char ch) noexcept {
+                               return static_cast<char>(std::tolower(ch));
+                           });
     if (extension != ".lgmp") {
         errorMessage =
             "Only v6 .lgmp maps are supported by --map: " + options.mapPath;
@@ -400,7 +400,8 @@ bool loadCustomMap(Options& options, std::string& errorMessage) {
     return true;
 }
 
-std::size_t botIndexForPlayer(const BasicGame& game, index_t playerId) {
+std::size_t botIndexForPlayer(const BasicGame& game,
+                              index_t playerId) noexcept {
     // Each simulator bot gets a unique team id equal to its original index,
     // so the team id stays as a stable bot mapping even when player slots are
     // shuffled inside BasicGame.
@@ -479,7 +480,7 @@ GameResult runSingleGame(const Options& options, int gameNumber,
     return result;
 }
 
-int detectWorkerCount(const Options& options) {
+int detectWorkerCount(const Options& options) noexcept {
     const unsigned detected = std::thread::hardware_concurrency();
     const int preferred =
         options.threads > 0 ? options.threads : static_cast<int>(detected);
@@ -492,7 +493,8 @@ void printGameResult(const GameResult& result) {
               << " after " << result.steps << " half-turns" << std::endl;
 }
 
-void accumulateStats(std::vector<BotStats>& stats, const GameResult& result) {
+constexpr void accumulateStats(std::vector<BotStats>& stats,
+                               const GameResult& result) noexcept {
     for (std::size_t i = 0; i < stats.size(); ++i) {
         auto& total = stats[i];
         const auto& delta = result.statsDelta[i];

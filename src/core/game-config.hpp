@@ -13,8 +13,10 @@
  * Configuration base for games
  */
 
+#include <concepts>
 #include <cstdint>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 enum class VisionMode : uint8_t { INHERIT, NEAR8, NEAR4 };
@@ -46,47 +48,50 @@ struct GameConfig {
     bool SlipperyEnabled = false;
     int FadingSmogInterval = 0;  // 0 means disabled
 
-    constexpr bool operator==(const GameConfig&) const = default;
+    constexpr bool operator==(const GameConfig&) const noexcept = default;
 };
 
-constexpr GameConfig defaultConf{};
+inline constexpr GameConfig defaultConf{};
 
 namespace modifiers {
 
 // ---- Vision modifiers ----
-constexpr GameConfig Watchtower{
+inline constexpr GameConfig Watchtower{
     .CityVisionMode = VisionMode::NEAR4,
     .CityVisionRange = 4,
 };
-constexpr GameConfig MistyVeil{
+inline constexpr GameConfig MistyVeil{
     .OverallVisionRange = 0,
     .MistyVeilEnabled = true,
 };
-constexpr GameConfig CrystalClear{.CrystalClearEnabled = true};
-constexpr GameConfig FadingSmog{.FadingSmogInterval = 25};
+inline constexpr GameConfig CrystalClear{.CrystalClearEnabled = true};
+inline constexpr GameConfig FadingSmog{.FadingSmogInterval = 25};
 
 // ---- Behavioral modifiers ----
-constexpr GameConfig Leapfrog{.LeapfrogEnabled = true};
-constexpr GameConfig CityState{.CityStateEnabled = true};
-constexpr GameConfig Defenseless{.DefenselessEnabled = true};
-constexpr GameConfig Defection{.DefectionEnabled = true};
-constexpr GameConfig Slippery{.SlipperyEnabled = true};
+inline constexpr GameConfig Leapfrog{.LeapfrogEnabled = true};
+inline constexpr GameConfig CityState{.CityStateEnabled = true};
+inline constexpr GameConfig Defenseless{.DefenselessEnabled = true};
+inline constexpr GameConfig Defection{.DefectionEnabled = true};
+inline constexpr GameConfig Slippery{.SlipperyEnabled = true};
 
 // ---- Display modifiers ----
-constexpr GameConfig SilentWar{
+inline constexpr GameConfig SilentWar{
     .RanklistShowLand = false,
     .RanklistShowArmy = false,
 };
 
 }  // namespace modifiers
 
-constexpr inline bool isValidConfig(const GameConfig& conf) {
+constexpr bool isValidConfig(const GameConfig& conf) noexcept {
     return !(conf.CrystalClearEnabled && conf.MistyVeilEnabled);
 }
 
 namespace detail {
 
-constexpr auto asTuple(auto& c) noexcept {
+template <typename T>
+concept GameConfigType = std::same_as<std::remove_cv_t<T>, GameConfig>;
+
+constexpr auto asTuple(GameConfigType auto& c) noexcept {
     auto& [f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
            f16] = c;
     return std::tie(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13,
@@ -94,8 +99,12 @@ constexpr auto asTuple(auto& c) noexcept {
 }
 
 template <std::size_t I = 0>
-constexpr void forEachField(auto&& fn, auto&... configs) {
+constexpr void forEachField(auto&& fn,
+                            GameConfigType auto&... configs) noexcept {
     if constexpr (I < std::tuple_size_v<decltype(asTuple(defaultConf))>) {
+        static_assert(
+            noexcept(fn(std::get<I>(asTuple(configs))...)),
+            "forEachField requires a noexcept callback for every field");
         fn(std::get<I>(asTuple(configs))...);
         forEachField<I + 1>(fn, configs...);
     }
@@ -103,17 +112,17 @@ constexpr void forEachField(auto&& fn, auto&... configs) {
 
 }  // namespace detail
 
-constexpr inline GameConfig& operator|=(GameConfig& lhs,
-                                        const GameConfig& rhs) {
+constexpr GameConfig& operator|=(GameConfig& lhs,
+                                 const GameConfig& rhs) noexcept {
     detail::forEachField(
-        [](auto& l, const auto& r, const auto& d) {
+        [](auto& l, const auto& r, const auto& d) noexcept {
             if (r != d) l = r;
         },
         lhs, rhs, defaultConf);
     return lhs;
 }
 
-constexpr inline GameConfig operator|(GameConfig lhs, const GameConfig& rhs) {
+constexpr GameConfig operator|(GameConfig lhs, const GameConfig& rhs) noexcept {
     return lhs |= rhs;
 }
 
@@ -124,11 +133,11 @@ enum class PatchStatus : uint8_t {
     OVERRIDDEN
 };
 
-constexpr inline PatchStatus patchStatus(const GameConfig& config,
-                                         const GameConfig& preset) {
+constexpr PatchStatus patchStatus(const GameConfig& config,
+                                  const GameConfig& preset) noexcept {
     bool allPreset = true, anyPreset = false, allDefault = true;
     detail::forEachField(
-        [&](const auto& c, const auto& p, const auto& d) {
+        [&](const auto& c, const auto& p, const auto& d) noexcept {
             if (p != d) {
                 if (c == p)
                     anyPreset = true;

@@ -43,13 +43,13 @@ class GeneralsButton : public QAbstractButton {
         m_staticText.setPerformanceHint(QStaticText::AggressiveCaching);
     }
 
-    QColor bgColor() const { return m_bgColor; }
+    QColor bgColor() const noexcept { return m_bgColor; }
     void setBgColor(const QColor& c) {
         m_bgColor = c;
         update();
     }
 
-    QPointF shadowOffset() const { return m_shadowOffset; }
+    QPointF shadowOffset() const noexcept { return m_shadowOffset; }
     void setShadowOffset(const QPointF& o) {
         m_shadowOffset = o;
         update();

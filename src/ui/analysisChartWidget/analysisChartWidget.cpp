@@ -12,7 +12,7 @@
 
 namespace {
 
-double adjustedAxisMax(double value) {
+constexpr double adjustedAxisMax(double value) noexcept {
     return value <= 1.0 ? 1.0 : value + std::max(1.0, value * 0.08);
 }
 
@@ -58,7 +58,8 @@ QWidget* createHorizontalSwitch(const QString& leftText,
     return container;
 }
 
-qreal smoothedLinearValue(const QList<QPointF>& history, qreal rawValue) {
+qreal smoothedLinearValue(const QList<QPointF>& history,
+                          qreal rawValue) noexcept {
     constexpr qreal smoothingAlpha = 0.65;
     if (history.isEmpty() || rawValue <= 0.0) {
         return rawValue;
@@ -67,7 +68,7 @@ qreal smoothedLinearValue(const QList<QPointF>& history, qreal rawValue) {
     return lastValue + smoothingAlpha * (rawValue - lastValue);
 }
 
-qreal smoothedLogValue(const QList<QPointF>& history, qreal rawValue) {
+qreal smoothedLogValue(const QList<QPointF>& history, qreal rawValue) noexcept {
     constexpr qreal smoothingAlpha = 0.65;
     if (rawValue < 1.0) return 1.0;
     if (history.isEmpty()) return rawValue;
@@ -91,8 +92,9 @@ void appendAnalysisHistories(PlayerAnalysisSeries& series, qreal stepValue,
         QPointF(stepValue, smoothedLogValue(series.logLandHistory, landValue)));
 }
 
-const QList<QPointF>& historyForMode(const PlayerAnalysisSeries& series,
-                                     bool showLand, bool useLogScale) {
+constexpr const QList<QPointF>& historyForMode(
+    const PlayerAnalysisSeries& series, bool showLand,
+    bool useLogScale) noexcept {
     if (useLogScale) {
         return showLand ? series.logLandHistory : series.logArmyHistory;
     }

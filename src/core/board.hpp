@@ -32,13 +32,19 @@ struct BoardView {
     pos_t row, col;
     std::vector<TileView> tiles;
 
-    TileView& tileAt(pos_t x, pos_t y) { return tiles[x * (col + 2) + y]; }
-    const TileView& tileAt(pos_t x, pos_t y) const {
+    constexpr TileView& tileAt(pos_t x, pos_t y) noexcept {
+        return tiles[x * (col + 2) + y];
+    }
+    constexpr const TileView& tileAt(pos_t x, pos_t y) const noexcept {
         return tiles[x * (col + 2) + y];
     }
 
-    TileView& tileAt(Coord pos) { return tileAt(pos.x, pos.y); }
-    const TileView& tileAt(Coord pos) const { return tileAt(pos.x, pos.y); }
+    constexpr TileView& tileAt(Coord pos) noexcept {
+        return tileAt(pos.x, pos.y);
+    }
+    constexpr const TileView& tileAt(Coord pos) const noexcept {
+        return tileAt(pos.x, pos.y);
+    }
 };
 
 /// Game map board.
@@ -47,39 +53,49 @@ class Board {
     pos_t row = 0, col = 0;
     std::vector<Tile> tiles;
 
-    Tile& tileAt(pos_t x, pos_t y) { return tiles[x * (col + 2) + y]; }
-    const Tile& tileAt(pos_t x, pos_t y) const {
+    constexpr Tile& tileAt(pos_t x, pos_t y) noexcept {
         return tiles[x * (col + 2) + y];
     }
-    Tile& tileAt(Coord pos) { return tileAt(pos.x, pos.y); }
-    const Tile& tileAt(Coord pos) const { return tileAt(pos.x, pos.y); }
+    constexpr const Tile& tileAt(pos_t x, pos_t y) const noexcept {
+        return tiles[x * (col + 2) + y];
+    }
+    constexpr Tile& tileAt(Coord pos) noexcept { return tileAt(pos.x, pos.y); }
+    constexpr const Tile& tileAt(Coord pos) const noexcept {
+        return tileAt(pos.x, pos.y);
+    }
 
-    void setWidth(pos_t _col) {
+    constexpr void setWidth(pos_t _col) {
         assert(_col >= 0);
         col = _col;
         tiles.resize((row + 2) * (col + 2));
         hardVision.clear();
     }
 
-    void setHeight(pos_t _row) {
+    constexpr void setHeight(pos_t _row) {
         assert(_row >= 0);
         row = _row;
         tiles.resize((row + 2) * (col + 2));
         hardVision.clear();
     }
 
-    bool isValidPos(pos_t x, pos_t y) const {
+    constexpr bool isValidPos(pos_t x, pos_t y) const noexcept {
         return x >= 1 && x <= row && y >= 1 && y <= col;
     }
-    bool isValidPos(Coord pos) const { return isValidPos(pos.x, pos.y); }
-    bool isInvalidPos(pos_t x, pos_t y) const { return !isValidPos(x, y); }
-    bool isInvalidPos(Coord pos) const { return !isValidPos(pos); }
+    constexpr bool isValidPos(Coord pos) const noexcept {
+        return isValidPos(pos.x, pos.y);
+    }
+    constexpr bool isInvalidPos(pos_t x, pos_t y) const noexcept {
+        return !isValidPos(x, y);
+    }
+    constexpr bool isInvalidPos(Coord pos) const noexcept {
+        return !isValidPos(pos);
+    }
 
-    int getWidth() const { return col; }
-    int getHeight() const { return row; }
+    constexpr int getWidth() const noexcept { return col; }
+    constexpr int getHeight() const noexcept { return row; }
 
     Board() = default;
-    Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
+    constexpr Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
         assert(row >= 0 && col >= 0);
         // 1-indexed, dummy padding around
         tiles.resize((_row + 2) * (_col + 2));
@@ -108,7 +124,7 @@ class Board {
     std::vector<std::size_t> floodStack;
     int smogRingsApplied = 0;
 
-    static mask_t playerBit(index_t player) {
+    static constexpr mask_t playerBit(index_t player) noexcept {
         assert(player >= 0 && player < 16);
         return mask_t(1) << player;
     }
@@ -118,7 +134,7 @@ class Board {
     /// Grant `mask` hard vision within `radius` of `(x, y)` (`NEAR8`: square,
     /// `NEAR4`: diamond).
     void addRadiusVision(mask_t mask, pos_t x, pos_t y, int radius,
-                         VisionMode mode) {
+                         VisionMode mode) noexcept {
         const pos_t stride = col + 2;
         radius = std::max(radius, 0);
         for (pos_t i = std::max(x - radius, 1); i <= std::min(x + radius, row);
@@ -180,7 +196,7 @@ class Board {
 
     /// Grant 5x5 hard vision around `(x, y)` to the orthogonal neighbour with
     /// the strictly largest army.
-    void addLookoutVision(pos_t x, pos_t y) {
+    void addLookoutVision(pos_t x, pos_t y) noexcept {
         static constexpr std::pair<int, int> kDirs[4] = {
             {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         index_t owner = -1;
@@ -199,7 +215,7 @@ class Board {
 
     /// Project an 8-tile hard-vision ray across `(x, y)` away from each
     /// occupied orthogonal neighbour.
-    void addObservatoryVision(pos_t x, pos_t y) {
+    void addObservatoryVision(pos_t x, pos_t y) noexcept {
         static constexpr std::pair<int, int> kDirs[4] = {
             {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         const pos_t stride = col + 2;
@@ -217,7 +233,8 @@ class Board {
     // ---- Fading Smog (Soft Vision) Helpers ----------------------------------
 
     /// Suppress: clear soft vision covered by own or enemy hard vision.
-    void clearSuppressedSoft(const std::array<mask_t, 16>& enemyMasks) {
+    constexpr void clearSuppressedSoft(
+        const std::array<mask_t, 16>& enemyMasks) noexcept {
         for (std::size_t t = 0; t < tiles.size(); ++t) {
             if (!softVision[t]) continue;
             mask_t suppressed = hardVision[t];
@@ -257,7 +274,7 @@ class Board {
 
     /// Expand: grow soft vision by 1 orthogonal step from passable visible
     /// tiles.
-    void expandSmogRing() {
+    constexpr void expandSmogRing() noexcept {
         const pos_t stride = col + 2;
         for (std::size_t t = 0; t < tiles.size(); ++t) {
             scratch[t] = isImpassableTile(tiles[t].type)
@@ -382,18 +399,18 @@ class Board {
     }
 
     /// Tile visibility check for a player.
-    bool visible(pos_t x, pos_t y, index_t player) const {
+    constexpr bool visible(pos_t x, pos_t y, index_t player) const noexcept {
         if (isInvalidPos(x, y)) return false;
         const pos_t t = x * (col + 2) + y;
         return (hardVision[t] | softVision[t]) >> player & 1;
     }
 
     /// Same as above, but using %Coord.
-    bool visible(const Coord& pos, index_t player) const {
+    constexpr bool visible(const Coord& pos, index_t player) const noexcept {
         return visible(pos.x, pos.y, player);
     }
 
-    bool available(index_t player, Move move) const {
+    bool available(index_t player, Move move) const noexcept {
         MoveType type = move.type;
         if (type == MoveType::EMPTY) return false;
         if (type == MoveType::SURRENDER) return true;
@@ -419,7 +436,7 @@ class Board {
         return true;
     }
 
-    void update(bool increaseAllArmy = false) {
+    constexpr void update(bool increaseAllArmy = false) noexcept {
         for (auto& tile : tiles) {
             if (tile.occupier == -1) continue;
             switch (tile.type) {
@@ -439,7 +456,7 @@ class Board {
         }
     }
 
-    void view(index_t player, BoardView& boardView) const {
+    constexpr void view(index_t player, BoardView& boardView) const {
         boardView.row = row, boardView.col = col;
         boardView.tiles.resize((row + 2) * (col + 2));
         for (pos_t i = 1; i <= row; ++i) {
@@ -450,13 +467,13 @@ class Board {
         }
     }
 
-    BoardView view(index_t player) const {
+    constexpr BoardView view(index_t player) const {
         BoardView boardView;
         view(player, boardView);
         return boardView;
     }
 
-    BoardView fullView() const {
+    constexpr BoardView fullView() const {
         BoardView boardView;
         boardView.row = row, boardView.col = col;
         boardView.tiles.resize((row + 2) * (col + 2));
@@ -468,10 +485,11 @@ class Board {
         return boardView;
     }
 
-    TileView view(index_t player, pos_t row, pos_t col) const {
+    constexpr TileView view(index_t player, pos_t row,
+                            pos_t col) const noexcept {
         return {tileAt(row, col), visible(row, col, player)};
     }
-    TileView view(index_t player, Coord pos) const {
+    constexpr TileView view(index_t player, Coord pos) const noexcept {
         return {tileAt(pos), visible(pos, player)};
     }
 

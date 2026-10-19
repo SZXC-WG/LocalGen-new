@@ -25,7 +25,7 @@
 // Helper class
 class HumanPlayer : public Player {
    public:
-    void init(index_t playerId, const GameConstantsPack&) override {
+    void init(index_t playerId, const GameConstantsPack&) noexcept override {
         this->playerId = playerId;
     }
     void requestMove(const BoardView& boardView,
@@ -34,9 +34,9 @@ class HumanPlayer : public Player {
             boardViewHandler(boardView);
         }
     }
-    std::deque<Move>* getMoveQueue() { return &moveQueue; }
+    constexpr std::deque<Move>* getMoveQueue() noexcept { return &moveQueue; }
     void setBoardViewHandler(
-        std::function<void(const BoardView&)> boardViewHandler) {
+        std::function<void(const BoardView&)> boardViewHandler) noexcept {
         this->boardViewHandler = std::move(boardViewHandler);
     }
 
@@ -51,10 +51,10 @@ class LocalGameWindow : public QDialog {
 
    public:
     explicit LocalGameWindow(QWidget* parent, const LocalGameConfig& config);
-    ~LocalGameWindow();
+    ~LocalGameWindow() override;
 
    private:
-    bool canHumanChat() const;
+    bool canHumanChat() const noexcept;
     void handleChatSubmission(const QString& message);
     void handleGameEvent(const GameEvent& event);
     ChatMessageEntry formatChatMessage(const GameEvent& event) const;

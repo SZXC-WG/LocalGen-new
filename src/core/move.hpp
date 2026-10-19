@@ -29,8 +29,8 @@ struct Move {
     Coord from, to;
     bool takeHalf = false;
 
-    constexpr Move() = default;
-    constexpr Move(MoveType type) : type(type) {}
-    constexpr Move(MoveType type, Coord from, Coord to, bool takeHalf)
+    constexpr Move() noexcept = default;
+    explicit constexpr Move(MoveType type) noexcept : type(type) {}
+    constexpr Move(MoveType type, Coord from, Coord to, bool takeHalf) noexcept
         : type(type), from(from), to(to), takeHalf(takeHalf) {}
 };

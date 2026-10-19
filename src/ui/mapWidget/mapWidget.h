@@ -35,12 +35,15 @@ class MapWidget : public QWidget {
                        int fitMargin = 25);
 
     void setFocusEnabled(bool enabled);
-    DisplayTile& tileAt(int r, int c) {
+    DisplayTile& tileAt(int r, int c) noexcept {
+        return displayTiles[r * _mapWidth + c];
+    }
+    const DisplayTile& tileAt(int r, int c) const noexcept {
         return displayTiles[r * _mapWidth + c];
     }
 
-    int mapWidth() const { return _mapWidth; }
-    int mapHeight() const { return _mapHeight; }
+    int mapWidth() const noexcept { return _mapWidth; }
+    int mapHeight() const noexcept { return _mapHeight; }
 
     void setMapWidth(int w);
     void setMapHeight(int h);
@@ -67,14 +70,14 @@ class MapWidget : public QWidget {
 
    private:
     // Helper functions
-    QPoint mapToGrid(const QPoint& pos) const;
+    QPoint mapToGrid(const QPoint& pos) const noexcept;
     void zoomAt(const QPointF& widgetPos, qreal zoomMultiplier);
     bool handleNativeGesture(QNativeGestureEvent* event);
 
-    bool isValidGridPos(int x, int y) const {
+    constexpr bool isValidGridPos(int x, int y) const noexcept {
         return x >= 0 && x < mapWidth() && y >= 0 && y < mapHeight();
     }
-    bool isValidGridPos(const QPoint& pos) const {
+    constexpr bool isValidGridPos(const QPoint& pos) const noexcept {
         return isValidGridPos(pos.x(), pos.y());
     }
 

@@ -24,8 +24,8 @@ class LocalGameDialog : public QDialog {
     Q_OBJECT
 
    public:
-    LocalGameDialog(QWidget* parent = nullptr);
-    ~LocalGameDialog();
+    explicit LocalGameDialog(QWidget* parent = nullptr);
+    ~LocalGameDialog() override;
 
     LocalGameConfig config() const;
 

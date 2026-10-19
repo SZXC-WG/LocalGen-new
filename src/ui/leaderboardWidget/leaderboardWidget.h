@@ -41,8 +41,10 @@ class LeaderboardWidget : public QWidget {
    private:
     struct Layout {
         int player = 0, army = 0, land = 0, header = 0, row = 0;
-        int width() const { return player + army + land; }
-        int height(int rowCount) const { return header + rowCount * row; }
+        constexpr int width() const noexcept { return player + army + land; }
+        constexpr int height(int rowCount) const noexcept {
+            return header + rowCount * row;
+        }
     };
 
     void refreshSize();

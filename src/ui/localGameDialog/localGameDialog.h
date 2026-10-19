@@ -15,7 +15,7 @@ QT_END_NAMESPACE
 struct LocalGameConfig {
     int gameSpeed;
     bool enableSounds, showAnalysis;
-    QString mapName, mapFilePath;
+    QString mapFilePath;
     int mapWidth, mapHeight;
     QStringList players;
 };

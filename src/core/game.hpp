@@ -67,7 +67,6 @@ class BasicGame {
    protected:
     std::vector<Player*> players;
     mutable std::vector<BoardView> playerViews;
-    std::unordered_map<Player*, index_t> indexMap;
     std::vector<std::string> names;
     std::vector<index_t> teams;
     std::vector<bool> alive;
@@ -168,17 +167,6 @@ class BasicGame {
         }
         return res;
     }
-
-   protected:
-    Board initialBoard;
-
-   public:
-    void setInitialBoard(Board initial) noexcept {
-        initialBoard = std::move(initial);
-    }
-    constexpr const Board& getInitialBoard() const noexcept {
-        return initialBoard;
-    }
 };
 
 inline void BasicGame::neutralize(index_t player) noexcept {
@@ -232,10 +220,8 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
       teams(_players.size()),
       alive(_players.size()),
       killCount(_players.size()),
-      spawnCoord(_players.size()),
       conf(config),
-      board(std::move(_board)),
-      initialBoard(board) {
+      board(std::move(_board)) {
     if (_players.empty()) {
         throw std::invalid_argument("BasicGame requires at least one player");
     }
@@ -255,7 +241,6 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
         players[randId[i]] = _players[i];
         names[randId[i]] = std::move(name[i]);
         teams[randId[i]] = _teams[i];
-        indexMap[_players[i]] = randId[i];
     }
 }
 
@@ -371,18 +356,13 @@ inline void BasicGame::step() {
         index_t player = surrenderQueue.front().first;
         surrenderQueue.pop_front();
 
-        index_t tMate = player;
         // TODO: implementation for teams
         // If there are players left in the team, the player's land and army
         // will be taken over by the team mate whose general is closest to
         // theirs. Here, "closest" means to have the least distance, where
         // "distance" is the length of the shortest path not passing any
         // impassable tiles defined by `isImpassableTile(type)`.
-        if (tMate == player) {
-            neutralize(player);
-        } else {
-            takeOver(tMate, player);
-        }
+        neutralize(player);
     }
 
     // check win condition

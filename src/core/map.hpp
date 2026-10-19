@@ -13,7 +13,6 @@
  * Supports: `.lg` (v5); `.lgmp` (v6); and `.json` (official).
  */
 
-#include <QBitArray>
 #include <QByteArray>
 #include <QDataStream>
 #include <QDateTime>

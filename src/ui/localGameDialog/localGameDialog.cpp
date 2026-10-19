@@ -61,7 +61,6 @@ LocalGameConfig LocalGameDialog::config() const {
         ui->spinBox_gameSpeed->value(),
         ui->checkBox_enableSounds->isChecked(),
         ui->checkBox_showAnalysis->isChecked(),
-        ui->comboBox_gameMap->currentText(),
         ui->comboBox_gameMap->currentData(MapPathRole).toString(),
         ui->spinBox_mapWidth->value(),
         ui->spinBox_mapHeight->value(),

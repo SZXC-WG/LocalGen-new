@@ -215,7 +215,6 @@ void AnalysisChartWidget::updateAnalysis(const std::vector<RankItem>& rank) {
     army_t maxArmy = armyMax;
     int maxLand = landMax;
 
-    std::vector<bool> updated(seriesData.size(), false);
     for (const RankItem& item : rank) {
         size_t player = static_cast<size_t>(item.player);
         appendAnalysisHistories(seriesData[player], stepValue,
@@ -224,13 +223,6 @@ void AnalysisChartWidget::updateAnalysis(const std::vector<RankItem>& rank) {
 
         maxArmy = std::max(maxArmy, item.army);
         maxLand = std::max(maxLand, item.land);
-        updated[player] = true;
-    }
-
-    for (size_t i = 0; i < seriesData.size(); ++i) {
-        if (!updated[i]) {
-            appendAnalysisHistories(seriesData[i], stepValue, 0.0, 0.0);
-        }
     }
 
     ++sampleCount;

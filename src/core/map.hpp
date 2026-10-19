@@ -23,6 +23,8 @@
 #include <QJsonParseError>
 #include <QString>
 #include <string>
+#include <string_view>
+#include <utility>
 
 #include "board.hpp"
 
@@ -58,6 +60,7 @@ constexpr std::string v5Zip(const Board& board) {
     const int row = board.getHeight(), col = board.getWidth();
 
     std::string strZip;
+    strZip.reserve(4 + 10 * std::size_t(row * col));
     intmax_t k1 = row, k2 = col;
     strZip.push_back(PMod(k1) + CHAR_AD);
     strZip.push_back(PMod(k1) + CHAR_AD);
@@ -86,26 +89,20 @@ constexpr std::string v5Zip(const Board& board) {
     return strZip;
 }
 
-inline Board v5Unzip(std::string strUnzip) {
-    strUnzip.push_back('\0');
-
-    int k = 4, p = 0;
-    for (; strUnzip[p] != '\0'; p++) strUnzip[p] -= CHAR_AD;
-
-    const int row = (strUnzip[1] << 6) + strUnzip[0];
-    const int col = (strUnzip[3] << 6) + strUnzip[2];
+constexpr Board v5Unzip(std::string_view s) {
+    auto dec = [&](std::size_t i) noexcept { return s[i] - CHAR_AD; };
+    const int row = (dec(1) << 6) + dec(0), col = (dec(3) << 6) + dec(2);
 
     Board board(row, col);
+    std::size_t k = 4;
     for (int i = 1; i <= row; i++)
-        for (int j = 1; j <= col; j++) {
+        for (int j = 1; j <= col; j++, k += 8) {
             Tile& tile = board.tileAt(i, j);
-            tile.occupier = strUnzip[k++];
+            tile.occupier = dec(k++);
             if (tile.occupier == 0) tile.occupier = -1;
-            bool f = strUnzip[k] & 1;
-            strUnzip[k] >>= 1;
-            tile.lit = strUnzip[k] & 1;
-            strUnzip[k] >>= 1;
-            const int type = strUnzip[k++];
+            int meta = dec(k++), type = meta >> 2;
+            bool f = meta & 1;
+            tile.lit = (meta >> 1) & 1;
             tile.type = type >= 0 && type < TILE_TYPE_COUNT
                             ? V5_TILE_TYPES[type]
                             : TILE_BLANK;
@@ -114,10 +111,9 @@ inline Board v5Unzip(std::string strUnzip) {
                 tile.army = 0;
             else {
                 army_t army = 0;
-                for (p = 7; p >= 0; p--) army = (army << 6) + strUnzip[k + p];
+                for (int p = 7; p >= 0; p--) army = (army << 6) + dec(k + p);
                 tile.army = f ? -army : army;
             }
-            k += 8;
         }
 
     return board;
@@ -172,7 +168,8 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
         return {};
     }
 
-    const MapMetadata metadata{mapTitle, author, creationDateTime, description};
+    MapMetadata metadata{std::move(mapTitle), std::move(author),
+                         std::move(creationDateTime), std::move(description)};
 
     // decompress map data
     const int width = w16, height = h16;
@@ -215,7 +212,7 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
         }
     }
 
-    return MapDocument{metadata, board};
+    return {std::move(metadata), std::move(board)};
 }
 
 inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
@@ -316,7 +313,7 @@ inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
     }
 
     MapMetadata metadata{mapTitle, author, creationDateTime, description};
-    return MapDocument{metadata, board};
+    return {std::move(metadata), std::move(board)};
 }
 
 inline MapDocument openOfficialMap(const QString& filename, QString& errMsg) {

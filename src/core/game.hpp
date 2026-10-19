@@ -135,10 +135,6 @@ class BasicGame {
     }
 
    protected:
-    /// Calculate distance from a certain coordinate.
-    /// The route can't pass impassable tiles.
-    std::vector<pos_t> calcDist(Coord pos) const;
-
     Board board;
 
     std::deque<std::pair<index_t, turn_t>> surrenderQueue;
@@ -181,30 +177,6 @@ class BasicGame {
         return initialBoard;
     }
 };
-
-inline std::vector<pos_t> BasicGame::calcDist(Coord pos) const {
-    static constexpr Coord delta[] = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
-    pos_t height = board.getHeight(), width = board.getWidth();
-    const pos_t dist_inf = height * width + 1;
-    std::vector<pos_t> dist((height + 2) * (width + 2), dist_inf);
-    auto grid = [&](Coord p) noexcept { return p.x * (width + 2) + p.y; };
-    std::vector<std::pair<Coord, pos_t>> q;
-    std::size_t head = 0;
-    q.emplace_back(pos, 0);
-    while (head < q.size()) {
-        auto [cur, dis] = q.at(head++);
-        for (Coord del : delta) {
-            Coord next = cur + del;
-            if (next.x > 0 && next.x <= height && next.y > 0 &&
-                next.y <= width && !isImpassableTile(board.tileAt(next).type) &&
-                dist.at(grid(next)) == dist_inf) {
-                q.emplace_back(next, dis + 1);
-                dist.at(grid(next)) = dis + 1;
-            }
-        }
-    }
-    return dist;
-}
 
 inline void BasicGame::neutralize(index_t player) noexcept {
     takeOver(-1, player);

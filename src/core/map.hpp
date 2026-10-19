@@ -22,6 +22,8 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 #include <QString>
+#include <QStringTokenizer>
+#include <QStringView>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -127,7 +129,9 @@ inline Board openMap_v5(const QString& filename, QString& errMsg) {
         errMsg = "Failed to open map file.";
         return {};
     }
-    return detail::v5Unzip(mapFile.readLine().toStdString());
+    const QByteArray encoded = mapFile.readLine();
+    return detail::v5Unzip(
+        std::string_view(encoded.constData(), std::size_t(encoded.size())));
 }
 
 inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
@@ -173,7 +177,7 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
 
     // decompress map data
     const int width = w16, height = h16;
-    QByteArray raw = qUncompress(compressed);
+    const QByteArray raw = qUncompress(compressed);
     if (raw.isEmpty()) {
         errMsg = "Failed to decompress map data. The file is corrupted.";
         return {};
@@ -186,7 +190,7 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
         return {};
     }
 
-    QBitArray bits = QBitArray::fromBits(raw.constData(), expectedBits);
+    const auto* bytes = reinterpret_cast<const uchar*>(raw.constData());
 
     // unpack tile from 19 bits
     constexpr auto unpackTile = [](quint32 p) noexcept {
@@ -207,7 +211,8 @@ inline MapDocument openMap_v6(const QString& filename, QString& errMsg) {
         for (int c = 1; c <= width; ++c) {
             quint32 packed = 0;
             for (int b = 0; b < 19; ++b, ++offset)
-                if (bits.testBit(offset)) packed |= (1u << b);
+                if (bytes[offset >> 3] & (1u << (offset & 7)))
+                    packed |= (1u << b);
             board.tileAt(r, c) = unpackTile(packed);
         }
     }
@@ -226,7 +231,7 @@ inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
     QJsonObject obj = doc.object();
     int width = obj.value(QLatin1StringView("width")).toInt(),
         height = obj.value(QLatin1StringView("height")).toInt();
-    QString mapStr = obj.value(QLatin1StringView("map")).toString();
+    const QString mapStr = obj.value(QLatin1StringView("map")).toString();
     if (width <= 0 || height <= 0 || mapStr.isEmpty()) {
         errMsg = "Missing or invalid map configuration.";
         return {};
@@ -259,22 +264,25 @@ inline MapDocument openOfficialMap(const QByteArray& data, QString& errMsg) {
     }
     creationDateTime = creationDateTime.toLocalTime();
 
-    QStringList tileList = mapStr.split(',');
-    if (tileList.size() != width * height) {
+    const QStringView mapView(mapStr);
+    const qsizetype tileCount = mapView.count(u',') + 1;
+    if (tileCount != width * height) {
         errMsg = QString(
                      "Inconsistent map data: number of tiles "
                      "(%1) does not match width*height (%2).")
-                     .arg(tileList.size())
+                     .arg(tileCount)
                      .arg(width * height);
         return {};
     }
 
     Board board(height, width);
+    const auto tileCodes = mapView.tokenize(u',');
+    auto tileIt = tileCodes.begin();
     for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
-            QString tileCode = tileList[r * width + c].trimmed();
+        for (int c = 0; c < width; ++c, ++tileIt) {
+            QStringView tileCode = tileIt->trimmed();
             auto& tile = board.tileAt(r + 1, c + 1);
-            if (tileCode.startsWith("L_")) {
+            if (tileCode.startsWith(u"L_")) {
                 tile.lit = true;
                 tileCode = tileCode.mid(2);
             }
@@ -332,7 +340,8 @@ inline void saveMap_v5(const QString& filename, const Board& board,
         errMsg = "Failed to open map file.";
         return;
     }
-    mapFile.write(QString::fromStdString(detail::v5Zip(board)).toUtf8());
+    const std::string encoded = detail::v5Zip(board);
+    mapFile.write(encoded.data(), qint64(encoded.size()));
 }
 
 inline void saveMap_v6(const QString& filename, const MapDocument& doc,
@@ -349,21 +358,19 @@ inline void saveMap_v6(const QString& filename, const MapDocument& doc,
         return (type << 16) | (lit << 15) | (val + 16384);
     };
 
-    QBitArray bits(height * width * 19);
+    QByteArray raw((height * width * 19 + 7) / 8, '\0');
+    auto* bytes = reinterpret_cast<uchar*>(raw.data());
     int offset = 0;
     for (int r = 1; r <= height; ++r) {
         for (int c = 1; c <= width; ++c) {
             quint32 packed = packTile(board.tileAt(r, c));
             for (int b = 0; b < 19; ++b, ++offset) {
-                bits.setBit(offset, (packed >> b) & 1);
+                if ((packed >> b) & 1)
+                    bytes[offset >> 3] |= (1u << (offset & 7));
             }
         }
     }
-
-    // deflate
-    const int byteLen = (bits.size() + 7) / 8;
-    const uchar* src = reinterpret_cast<const uchar*>(bits.bits());
-    QByteArray compressed = qCompress(src, byteLen, 9);
+    QByteArray compressed = qCompress(raw, 9);
 
     QFile mapFile(filename);
     if (!mapFile.open(QIODevice::WriteOnly)) {

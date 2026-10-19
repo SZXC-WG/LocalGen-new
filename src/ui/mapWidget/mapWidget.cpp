@@ -12,8 +12,10 @@
 #include <QPainterPath>
 #include <QSvgRenderer>
 #include <QWheelEvent>
+#include <algorithm>
 #include <cmath>
 #include <numbers>
+#include <utility>
 
 MapWidget::MapWidget(QWidget* parent, int width, int height, bool focusEnabled,
                      int fitMargin)
@@ -40,8 +42,8 @@ void MapWidget::setMapWidth(int w) {
         std::vector<DisplayTile> newTiles(_mapHeight * w);
         int copyW = std::min(w, _mapWidth);
         for (int r = 0; r < _mapHeight; ++r) {
-            std::copy_n(displayTiles.begin() + r * _mapWidth, copyW,
-                        newTiles.begin() + r * w);
+            auto first = displayTiles.begin() + r * _mapWidth;
+            std::move(first, first + copyW, newTiles.begin() + r * w);
         }
         displayTiles = std::move(newTiles);
     } else {

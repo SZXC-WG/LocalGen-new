@@ -86,6 +86,9 @@ class BasicGame {
     index_t getPlayerCount() const noexcept {
         return static_cast<index_t>(players.size());
     }
+    index_t getAlivePlayerCount() const noexcept {
+        return static_cast<index_t>(std::ranges::count(alive, true));
+    }
     index_t getTeam(index_t player) const noexcept { return teams[player]; }
     constexpr const std::vector<index_t>& getTeams() const noexcept {
         return teams;
@@ -128,7 +131,7 @@ class BasicGame {
         eventCallback = std::move(callback);
     }
 
-    void broadcast(turn_t turn, const GameMessageData& messageData);
+    void broadcast(turn_t turn, GameMessageData messageData);
     void sendPlayerMessage(index_t sender, std::string text);
     void sendSystemMessage(std::string text) {
         broadcast(curTurn, GameMessageText{-1, std::move(text)});
@@ -231,8 +234,8 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
       killCount(_players.size()),
       spawnCoord(_players.size()),
       conf(config),
-      board(_board),
-      initialBoard(_board) {
+      board(std::move(_board)),
+      initialBoard(board) {
     if (_players.empty()) {
         throw std::invalid_argument("BasicGame requires at least one player");
     }
@@ -250,7 +253,7 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
     eliminatedTurn.assign(players.size(), std::numeric_limits<turn_t>::max());
     for (std::size_t i = 0; i < players.size(); ++i) {
         players[randId[i]] = _players[i];
-        names[randId[i]] = name[i];
+        names[randId[i]] = std::move(name[i]);
         teams[randId[i]] = _teams[i];
         indexMap[_players[i]] = randId[i];
     }
@@ -492,10 +495,7 @@ inline int BasicGame::initSpawn() {
                                   std::make_move_iterator(spawns.begin()),
                                   std::make_move_iterator(spawns.end()));
         } else {
-            auto& teamSpawn = teamSpawns[it->second];
-            teamSpawn.insert(teamSpawn.end(),
-                             std::make_move_iterator(spawns.begin()),
-                             std::make_move_iterator(spawns.end()));
+            teamSpawns.emplace(it->second, std::move(spawns));
         }
     }
 
@@ -582,14 +582,14 @@ inline int BasicGame::init() {
         spawnTile.army = 0;  // will be updated in the first turn
     }
 
+    const GameConstantsPack constants{board.getHeight(), board.getWidth(),
+                                      static_cast<index_t>(players.size()),
+                                      teams, conf};
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         players[i]->setSendMessageCallback([this, i](const std::string& text) {
             this->sendPlayerMessage(i, text);
         });
-        players[i]->init(
-            i, GameConstantsPack{board.getHeight(), board.getWidth(),
-                                 static_cast<index_t>(players.size()), teams,
-                                 conf});
+        players[i]->init(i, constants);
     }
 
     surrenderQueue = decltype(surrenderQueue)();
@@ -607,9 +607,8 @@ inline void BasicGame::sendPlayerMessage(index_t sender, std::string text) {
     broadcast(curTurn, GameMessageText{sender, std::move(text)});
 }
 
-inline void BasicGame::broadcast(turn_t turn,
-                                 const GameMessageData& messageData) {
-    GameEvent event{turn, curHalfTurnPhase, messageData};
+inline void BasicGame::broadcast(turn_t turn, GameMessageData messageData) {
+    GameEvent event{turn, curHalfTurnPhase, std::move(messageData)};
     for (Player* player : players) {
         player->onGameEvent(event);
     }

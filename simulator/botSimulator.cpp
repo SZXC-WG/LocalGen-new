@@ -27,6 +27,7 @@
 #include <thread>
 #include <tuple>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "core/bot.h"
@@ -156,7 +157,7 @@ std::string formatFixed(double value) {
     std::ostringstream out;
     out.imbue(std::locale::classic());
     out << std::fixed << std::setprecision(2) << value;
-    return out.str();
+    return std::move(out).str();
 }
 
 std::string formatPercent(double value) {
@@ -166,7 +167,7 @@ std::string formatPercent(double value) {
 std::string alignTextRight(const std::string& text, std::size_t width) {
     std::ostringstream out;
     out << std::right << std::setw(static_cast<int>(width)) << text;
-    return out.str();
+    return std::move(out).str();
 }
 
 void printTableDivider(const std::vector<std::size_t>& widths) {
@@ -382,7 +383,7 @@ bool loadCustomMap(Options& options, std::string& errorMessage) {
     }
 
     QString qtErrorMessage;
-    const MapDocument document =
+    MapDocument document =
         openMap_v6(QString::fromStdString(options.mapPath), qtErrorMessage);
     if (!qtErrorMessage.isEmpty()) {
         errorMessage = "Failed to load map '" + options.mapPath +
@@ -396,7 +397,7 @@ bool loadCustomMap(Options& options, std::string& errorMessage) {
         return false;
     }
 
-    options.customBoard = document.board;
+    options.customBoard = std::move(document.board);
     return true;
 }
 
@@ -432,16 +433,16 @@ GameResult runSingleGame(const Options& options, int gameNumber,
         players.push_back(bot);
     }
 
-    BasicGame game(options.remainIndex, players, teams, options.bots, board);
+    BasicGame game(options.remainIndex, players, std::move(teams), options.bots,
+                   std::move(board));
     if (const int initResult = game.init(); initResult != 0) {
         std::ostringstream err;
         err << "Failed to initialize game " << gameNumber
             << " (spawn error code " << initResult << ")";
-        throw std::runtime_error(err.str());
+        throw std::runtime_error(std::move(err).str());
     }
 
-    while (static_cast<int>(game.getAlivePlayers().size()) > 1 &&
-           result.steps < options.maxSteps) {
+    while (game.getAlivePlayerCount() > 1 && result.steps < options.maxSteps) {
         game.step();
         ++result.steps;
     }
@@ -449,8 +450,7 @@ GameResult runSingleGame(const Options& options, int gameNumber,
     std::vector<RankItem> finalRank = game.ranklist();
 
     result.stepLimitReached =
-        static_cast<int>(game.getAlivePlayers().size()) > 1 &&
-        result.steps >= options.maxSteps;
+        game.getAlivePlayerCount() > 1 && result.steps >= options.maxSteps;
     const std::size_t winnerIndex =
         botIndexForPlayer(game, finalRank.front().player);
     result.winnerName = options.bots[winnerIndex];
@@ -528,8 +528,8 @@ int main(int argc, char** argv) {
     }
 
     const auto registeredBots = BotFactory::instance().list();
-    const std::unordered_set<std::string> registered(registeredBots.begin(),
-                                                     registeredBots.end());
+    const std::unordered_set<std::string_view> registered(
+        registeredBots.begin(), registeredBots.end());
     for (const auto& botName : options.bots) {
         if (!registered.contains(botName)) {
             std::cerr << "Unknown bot: " << botName << "\nAvailable bots:";

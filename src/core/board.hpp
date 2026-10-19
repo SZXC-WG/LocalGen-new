@@ -152,7 +152,7 @@ class Board {
     /// `NEAR4`). Clobbers `scratch`.
     void growVision(int radius, VisionMode mode) {
         if (radius <= 0) {
-            hardVision = scratch;
+            hardVision.swap(scratch);
             return;
         }
 

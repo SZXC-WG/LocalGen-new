@@ -10,6 +10,7 @@
 #include <QVBoxLayout>
 #include <algorithm>
 #include <cmath>
+#include <utility>
 
 #include "core/bot.h"
 #include "core/map.hpp"
@@ -84,7 +85,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
                 QString("Failed to load the selected map.\n%1").arg(errMsg));
             return;
         }
-        initialBoard = mapDoc.board;
+        initialBoard = std::move(mapDoc.board);
     }
 
     if (initialBoard.getWidth() <= 0 || initialBoard.getHeight() <= 0) {
@@ -128,10 +129,11 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         if (bot == nullptr) continue;
         players.push_back(bot);
         teams.push_back(static_cast<index_t>(teams.size()));
-        names.push_back(stdName);
+        names.push_back(std::move(stdName));
     }
 
-    game = new BasicGame(true, players, teams, names, initialBoard);
+    game = new BasicGame(true, std::move(players), std::move(teams),
+                         std::move(names), std::move(initialBoard));
     if (const int initResult = game->init()) {
         QString errMsg = "Failed to initialize local game.";
         if (initResult == 1) {
@@ -288,7 +290,7 @@ void LocalGameWindow::runHalfTurn() {
     if (!gameRunning || game == nullptr) {
         return;
     }
-    if (game->getAlivePlayers().size() <= 1) {
+    if (game->getAlivePlayerCount() <= 1) {
         stopGameLoop();
         return;
     }
@@ -296,7 +298,7 @@ void LocalGameWindow::runHalfTurn() {
     QElapsedTimer elapsedTimer;
     elapsedTimer.start();
     game->step();
-    const bool gameOver = game->getAlivePlayers().size() <= 1;
+    const bool gameOver = game->getAlivePlayerCount() <= 1;
     if (!game->isAlive(humanPlayerId) || gameOver) {
         gameMap->bindMoveQueue(nullptr);
         updateView(game->fullView());

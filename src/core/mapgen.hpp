@@ -359,11 +359,11 @@ class Generator {
             if (score >= bestScore) continue;
 
             bestScore = score;
-            bestGrid_ = grid_;
-            bestSpawns_ = spawns_;
+            bestGrid_.swap(grid_);
+            bestSpawns_.swap(spawns_);
         }
 
-        grid_ = bestGrid_;
+        grid_.swap(bestGrid_);
         for (int i = 0;
              i < outputSpawnCount_ && i < static_cast<int>(bestSpawns_.size());
              ++i) {

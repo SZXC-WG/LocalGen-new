@@ -87,7 +87,6 @@ class XiaruizeBot : public BasicBot {
     turn_t fullTurn = 0;
     GameConfig config;
 
-    std::vector<index_t> teams;
     BoardView board;
     std::vector<RankItem> rankById;
     std::vector<MemoryCell> memory;
@@ -119,17 +118,12 @@ class XiaruizeBot : public BasicBot {
         return player >= 0 && player < playerCount;
     }
 
-    inline bool sameTeam(index_t a, index_t b) const {
-        if (!validPlayer(a) || !validPlayer(b) || teams.empty()) return a == b;
-        return teams[a] == teams[b];
-    }
-
     inline bool isEnemy(index_t occupier) const {
-        return validPlayer(occupier) && !sameTeam(occupier, id);
+        return validPlayer(occupier) && occupier != id;
     }
 
     inline bool isFriendly(index_t occupier) const {
-        return validPlayer(occupier) && sameTeam(occupier, id);
+        return validPlayer(occupier) && occupier == id;
     }
 
     inline bool isAlive(index_t player) const {
@@ -1237,7 +1231,6 @@ class XiaruizeBot : public BasicBot {
         width = constants.mapWidth;
         stride = width + 2;
         config = constants.config;
-        teams = constants.teams;
 
         halfTurn = fullTurn = 0;
         memory.assign((height + 2) * stride, MemoryCell{});

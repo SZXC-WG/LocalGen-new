@@ -38,21 +38,9 @@ class DummyBot : public BasicBot {
     // Those things are sent to your bot via the `init` method, before the game
     // starts.
     // You can choose to ignore them, though. It is your choice.
-    index_t cnt;                   // Player count
-    index_t playerId;              // My index
-    index_t team;                  // My team index
-    std::vector<index_t> teamIds;  // Team IDs
-    pos_t height, width;           // Map height and width
-
-    // Although the game class has given lots of useful methods to quickly tell
-    // something, you may still need to implement them yourself for you can't
-    // actually access the game object.
-    inline bool inSameTeam(index_t anotherPlayer) const {
-        return teamIds[anotherPlayer] == team;
-    }
-    inline bool inSameTeam(index_t player1, index_t player2) const {
-        return teamIds[player1] == teamIds[player2];
-    }
+    index_t cnt;          // Player count
+    index_t playerId;     // My index
+    pos_t height, width;  // Map height and width
 
    public:
     // Remember to override the `init` method to process game constants.
@@ -60,11 +48,9 @@ class DummyBot : public BasicBot {
         // This method is called when the game starts.
         // Game constants are sent via this method.
         // You can use this method to initialize your bot's state.
-        // For example, you can store the player ID and team IDs.
+        // For example, you can store the player ID and map dimensions.
         cnt = constants.playerCount;
         playerId = _playerId;
-        team = constants.teams[_playerId];
-        teamIds = constants.teams;
         height = constants.mapHeight;
         width = constants.mapWidth;
     }
@@ -90,7 +76,7 @@ class DummyBot : public BasicBot {
         }
         struct node {
             tile_type_e type;
-            index_t team;
+            index_t occupier;
             army_t army;
             int dir;
             std::ptrdiff_t lastCount;
@@ -111,13 +97,13 @@ class DummyBot : public BasicBot {
         }
         bool rdret = rng() % 2;
         auto cmp = [&](node a, node b) -> bool {
-            if (a.type == TILE_GENERAL && a.team != playerId) return true;
-            if (b.type == TILE_GENERAL && b.team != playerId) return false;
-            if (a.team == -1) return rdret;
-            if (b.team == -1) return !rdret;
-            if (a.team == playerId && b.team != playerId) return false;
-            if (a.team != playerId && b.team == playerId) return true;
-            if (a.team == playerId && b.team == playerId)
+            if (a.type == TILE_GENERAL && a.occupier != playerId) return true;
+            if (b.type == TILE_GENERAL && b.occupier != playerId) return false;
+            if (a.occupier == -1) return rdret;
+            if (b.occupier == -1) return !rdret;
+            if (a.occupier == playerId && b.occupier != playerId) return false;
+            if (a.occupier != playerId && b.occupier == playerId) return true;
+            if (a.occupier == playerId && b.occupier == playerId)
                 return a.army > b.army;
             return a.army < b.army;
         };

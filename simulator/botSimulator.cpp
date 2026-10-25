@@ -401,14 +401,6 @@ bool loadCustomMap(Options& options, std::string& errorMessage) {
     return true;
 }
 
-std::size_t botIndexForPlayer(const BasicGame& game,
-                              index_t playerId) noexcept {
-    // Each simulator bot gets a unique team id equal to its original index,
-    // so the team id stays as a stable bot mapping even when player slots are
-    // shuffled inside BasicGame.
-    return static_cast<std::size_t>(game.getTeam(playerId));
-}
-
 GameResult runSingleGame(const Options& options, int gameNumber,
                          std::uint64_t mapSeed) {
     const std::size_t botCount = options.bots.size();
@@ -421,20 +413,27 @@ GameResult runSingleGame(const Options& options, int gameNumber,
                                         static_cast<int>(botCount), mapSeed)
                       : options.customBoard;
 
-    std::vector<Player*> players;
-    std::vector<index_t> teams(botCount);
-    players.reserve(botCount);
-    std::iota(teams.begin(), teams.end(), 0);
+    std::vector<std::size_t> botIndices(botCount);
+    std::iota(botIndices.begin(), botIndices.end(), 0);
+    if (!options.remainIndex) {
+        std::mt19937 rng{std::random_device{}()};
+        std::ranges::shuffle(botIndices, rng);
+    }
 
-    for (std::size_t i = 0; i < botCount; ++i) {
-        const std::string& botName = options.bots[i];
+    std::vector<Player*> players;
+    std::vector<std::string> names;
+    players.reserve(botCount);
+    names.reserve(botCount);
+
+    for (std::size_t botIndex : botIndices) {
+        const std::string& botName = options.bots[botIndex];
         BasicBot* bot = BotFactory::instance().create(botName);
         if (options.measureLatency) bot = new TimedBot(bot);
         players.push_back(bot);
+        names.push_back(botName);
     }
 
-    BasicGame game(options.remainIndex, players, std::move(teams), options.bots,
-                   std::move(board));
+    BasicGame game(true, players, std::move(names), std::move(board));
     if (const int initResult = game.init(); initResult != 0) {
         std::ostringstream err;
         err << "Failed to initialize game " << gameNumber
@@ -451,14 +450,13 @@ GameResult runSingleGame(const Options& options, int gameNumber,
 
     result.stepLimitReached =
         game.getAlivePlayerCount() > 1 && result.steps >= options.maxSteps;
-    const std::size_t winnerIndex =
-        botIndexForPlayer(game, finalRank.front().player);
+    const std::size_t winnerIndex = botIndices[finalRank.front().player];
     result.winnerName = options.bots[winnerIndex];
     result.statsDelta[winnerIndex].wins++;
 
     for (std::size_t i = 0; i < botCount; ++i) {
         const RankItem& item = finalRank[i];
-        const std::size_t botIndex = botIndexForPlayer(game, item.player);
+        const std::size_t botIndex = botIndices[item.player];
         BotStats& botStats = result.statsDelta[botIndex];
         result.order[i] = botIndex;
         botStats.totalRank += static_cast<long long>(i) + 1;
@@ -469,8 +467,9 @@ GameResult runSingleGame(const Options& options, int gameNumber,
     }
 
     if (options.measureLatency) {
-        for (std::size_t botIndex = 0; botIndex < players.size(); ++botIndex) {
-            const auto* timed = static_cast<TimedBot*>(players[botIndex]);
+        for (std::size_t player = 0; player < players.size(); ++player) {
+            const std::size_t botIndex = botIndices[player];
+            const auto* timed = static_cast<TimedBot*>(players[player]);
             result.statsDelta[botIndex].totalLatencyMicroseconds +=
                 timed->totalMicroseconds();
             result.statsDelta[botIndex].totalLatencyCalls += timed->callCount();

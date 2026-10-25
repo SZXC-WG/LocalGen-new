@@ -26,8 +26,7 @@ class ZlyBot : public BasicBot {
 
     pos_t height, width, W;
     index_t playerCnt;
-    index_t id, team;
-    std::vector<index_t> teamIds;
+    index_t id;
     GameConfig config;
 
     BoardView board;
@@ -74,8 +73,6 @@ class ZlyBot : public BasicBot {
         width = constants.mapWidth;
         W = width + 2;
         playerCnt = constants.playerCount;
-        teamIds = constants.teams;
-        team = constants.teams.at(playerId);
         config = constants.config;
 
         focus = Coord(0, 0);

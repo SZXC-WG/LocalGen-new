@@ -107,11 +107,9 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         500.0 / static_cast<double>(std::max(config.gameSpeed, 1));
 
     std::vector<Player*> players;
-    std::vector<index_t> teams;
     std::vector<std::string> names;
 
     players.reserve(numPlayers);
-    teams.reserve(numPlayers);
     names.reserve(numPlayers);
 
     for (const QString& name : config.players) {
@@ -120,7 +118,6 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
             humanPlayer->setBoardViewHandler(
                 [this](const BoardView& boardView) { updateView(boardView); });
             players.push_back(humanPlayer);
-            teams.push_back(static_cast<index_t>(teams.size()));
             names.push_back("Human");
             continue;
         }
@@ -128,13 +125,11 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         BasicBot* bot = BotFactory::instance().create(stdName);
         if (bot == nullptr) continue;
         players.push_back(bot);
-        teams.push_back(static_cast<index_t>(teams.size()));
         names.push_back(std::move(stdName));
     }
 
-    game = new BasicGame(true, std::move(players), std::move(teams),
-                         std::move(names), std::move(initialBoard),
-                         config.gameConfig);
+    game = new BasicGame(true, std::move(players), std::move(names),
+                         std::move(initialBoard), config.gameConfig);
     if (const int initResult = game->init()) {
         QString errMsg = "Failed to initialize local game.";
         if (initResult == 1) {

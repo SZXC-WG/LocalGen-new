@@ -14,8 +14,6 @@
  */
 
 #include <algorithm>
-#include <array>
-#include <bit>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -232,15 +230,10 @@ class Board {
 
     // ---- Fading Smog (Soft Vision) Helpers ----------------------------------
 
-    /// Suppress: clear soft vision covered by own or enemy hard vision.
-    constexpr void clearSuppressedSoft(
-        const std::array<mask_t, 16>& enemyMasks) noexcept {
+    /// Suppress: any player's hard vision clears all soft vision in FFA.
+    constexpr void clearSuppressedSoft() noexcept {
         for (std::size_t t = 0; t < tiles.size(); ++t) {
-            if (!softVision[t]) continue;
-            mask_t suppressed = hardVision[t];
-            for (mask_t h = hardVision[t]; h; h &= h - 1)
-                suppressed |= enemyMasks[std::countr_zero(h)];
-            softVision[t] &= ~suppressed;
+            if (hardVision[t]) softVision[t] = 0;
         }
     }
 
@@ -291,11 +284,11 @@ class Board {
 
    public:
     /// Recompute player visibility after a board update.
-    void updateVisionCache(const GameConfig& conf,
-                           const std::vector<index_t>& teams,
+    void updateVisionCache(const GameConfig& conf, index_t playerCount,
                            int smogRings = 0) {
         assert(isValidConfig(conf));
-        assert(0 < teams.size() && teams.size() <= 16);
+        assert(0 < playerCount && playerCount <= 16);
+        const mask_t allPlayers = (uint32_t(1) << playerCount) - 1;
 
         static constexpr std::pair<int, int> kDirs[4] = {
             {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
@@ -311,7 +304,7 @@ class Board {
         if (conf.CrystalClearEnabled) {
             for (pos_t i = 1; i <= row; ++i)
                 std::fill_n(hardVision.begin() + i * stride + 1, col,
-                            ~mask_t(0));
+                            allPlayers);
             std::ranges::fill(softVision, 0);
             return;
         }
@@ -359,7 +352,7 @@ class Board {
         for (pos_t x = 1; x <= row; ++x) {
             for (pos_t y = 1; y <= col; ++y) {
                 const Tile& tile = tileAt(x, y);
-                if (tile.lit) hardVision[x * stride + y] = ~mask_t(0);
+                if (tile.lit) hardVision[x * stride + y] = allPlayers;
 
                 if (tile.occupier != -1) {
                     if (customCityVision && isCityLikeTile(tile.type)) {
@@ -398,19 +391,12 @@ class Board {
         if (!smogEnabled) return;
 
         // Update Fading Smog soft vision: Suppress -> Prune -> Expand.
-        std::array<mask_t, 16> enemyMasks{};
-        for (index_t p = 0; p < index_t(teams.size()); ++p) {
-            for (index_t q = 0; q < index_t(teams.size()); ++q) {
-                if (teams[p] != teams[q]) enemyMasks[p] |= playerBit(q);
-            }
-        }
-
-        clearSuppressedSoft(enemyMasks);
+        clearSuppressedSoft();
         pruneDisconnectedSoft();
 
         for (; smogRingsApplied < smogRings; ++smogRingsApplied) {
             expandSmogRing();
-            clearSuppressedSoft(enemyMasks);
+            clearSuppressedSoft();
         }
     }
 

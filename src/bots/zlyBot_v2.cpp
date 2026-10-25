@@ -27,21 +27,13 @@ class ZlyBot_v2 : public BasicBot {
 
     pos_t height, width, W;
     index_t playerCnt;
-    index_t id, team;
-    std::vector<index_t> teamIds;
+    index_t id;
     GameConfig config;
 
     turn_t halfTurn, turn;
 
     BoardView board;
     std::vector<RankItem> rank;
-
-    inline bool inSameTeam(index_t anotherPlayer) const {
-        return teamIds[anotherPlayer] == team;
-    }
-    inline bool inSameTeam(index_t player1, index_t player2) const {
-        return teamIds[player1] == teamIds[player2];
-    }
 
     Coord focus;
     std::vector<bool> alive;
@@ -249,8 +241,6 @@ class ZlyBot_v2 : public BasicBot {
         width = constants.mapWidth;
         W = width + 2;
         playerCnt = constants.playerCount;
-        teamIds = constants.teams;
-        team = constants.teams.at(playerId);
         config = constants.config;
 
         halfTurn = turn = 0;

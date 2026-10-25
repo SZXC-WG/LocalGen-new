@@ -47,8 +47,7 @@ class ZlyBot_v3 : public BasicBot {
 
     pos_t height, width, W;
     index_t playerCnt;
-    index_t id, team;
-    std::vector<index_t> teamIds;
+    index_t id;
     GameConfig config;
     army_t totalArmy;
     pos_t totalLand;
@@ -57,15 +56,6 @@ class ZlyBot_v3 : public BasicBot {
 
     BoardView board;
     std::vector<RankItem> rank;
-
-    inline bool inSameTeam(index_t anotherPlayer) const {
-        if (anotherPlayer == -1) return false;
-        return teamIds[anotherPlayer] == team;
-    }
-    inline bool inSameTeam(index_t player1, index_t player2) const {
-        if (player1 == -1 || player2 == -1) return player1 == player2;
-        return teamIds[player1] == teamIds[player2];
-    }
 
     inline pos_t idx(pos_t x, pos_t y) const { return x * (width + 2) + y; }
     inline pos_t idx(Coord pos) const { return idx(pos.x, pos.y); }
@@ -168,8 +158,8 @@ class ZlyBot_v3 : public BasicBot {
     }
 
     inline army_t netArmy(Coord pos) const {
-        return inSameTeam(tileAt(pos).occupier) ? tileAt(pos).army
-                                                : -tileAt(pos).army;
+        return tileAt(pos).occupier == id ? tileAt(pos).army
+                                          : -tileAt(pos).army;
     }
 
     std::vector<value_t> getDist(Coord start) {
@@ -295,7 +285,7 @@ class ZlyBot_v3 : public BasicBot {
             RouteNode nextNode = ori;
             nextNode.pos = next;
             nextNode.dist = nextNode.dist + 1;
-            if (inSameTeam(id, tileAt(next).occupier)) {
+            if (tileAt(next).occupier == id) {
                 nextNode.friendArmy += tileAt(next).army - 1;
             } else {
                 nextNode.oppoArmy += tileAt(next).army + 1;
@@ -412,8 +402,6 @@ class ZlyBot_v3 : public BasicBot {
         width = constants.mapWidth;
         W = width + 2;
         playerCnt = constants.playerCount;
-        teamIds = constants.teams;
-        team = constants.teams.at(playerId);
         config = constants.config;
 
         halfTurn = turn = 0;
@@ -428,8 +416,7 @@ class ZlyBot_v3 : public BasicBot {
         logFile.open("zlybot_v3_" + std::to_string(id) + ".log");
 #endif
         ZLYBOT_LOG("init: id=" << id << " height=" << height << " width="
-                               << width << " playerCnt=" << playerCnt
-                               << " team=" << team);
+                               << width << " playerCnt=" << playerCnt);
     }
 
     void requestMove(const BoardView& boardView,
@@ -470,7 +457,7 @@ class ZlyBot_v3 : public BasicBot {
             value_t res = 0;
             if (pos == lastTarget) res += lastTargetBonus + lastMovedArmy;
             res -= tileAt(pos).army;
-            if (tileAt(pos).occupier != -1 && !inSameTeam(tileAt(pos).occupier))
+            if (tileAt(pos).occupier != -1 && tileAt(pos).occupier != id)
                 res += 0 - 4 * distToSpawn[idx(pos)] -
                        2 * armyDistToSpawn[idx(pos)];
             res -= 2 * distToSpawn[idx(pos)];
@@ -497,7 +484,7 @@ class ZlyBot_v3 : public BasicBot {
         for (index_t i = 1; i <= height; ++i) {
             for (index_t j = 1; j <= width; ++j) {
                 Coord cur = {i, j};
-                if (inSameTeam(tileAt(cur).occupier)) continue;
+                if (tileAt(cur).occupier == id) continue;
                 if (isImpassableTile(tileAt(cur).type)) continue;
                 if (tileAt(cur).type == TILE_SWAMP &&
                     tileAt(cur).occupier == -1)

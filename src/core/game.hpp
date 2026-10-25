@@ -15,7 +15,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <concepts>
 #include <cstdint>
 #include <deque>
 #include <functional>
@@ -26,7 +25,6 @@
 #include <string>
 #include <tuple>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -41,7 +39,6 @@
 struct GameConstantsPack {
     pos_t mapHeight, mapWidth;
     index_t playerCount;
-    std::vector<index_t> teams;
     GameConfig config;
 };
 
@@ -68,7 +65,6 @@ class BasicGame {
     std::vector<Player*> players;
     mutable std::vector<BoardView> playerViews;
     std::vector<std::string> names;
-    std::vector<index_t> teams;
     std::vector<bool> alive;
     std::vector<int> killCount;
     std::vector<turn_t> eliminatedTurn;
@@ -87,10 +83,6 @@ class BasicGame {
     }
     index_t getAlivePlayerCount() const noexcept {
         return static_cast<index_t>(std::ranges::count(alive, true));
-    }
-    index_t getTeam(index_t player) const noexcept { return teams[player]; }
-    constexpr const std::vector<index_t>& getTeams() const noexcept {
-        return teams;
     }
     const std::string& getName(index_t player) const noexcept {
         return names[player];
@@ -115,11 +107,6 @@ class BasicGame {
     }
 
     BoardView fullView() const { return board.fullView(); }
-
-    constexpr bool inSameTeam(index_t player1, index_t player2) const noexcept {
-        if (!isValidPlayer(player1) || !isValidPlayer(player2)) return false;
-        return getTeam(player1) == getTeam(player2);
-    }
 
    private:
     const GameConfig conf;
@@ -149,8 +136,8 @@ class BasicGame {
    public:
     BasicGame() = delete;
     BasicGame(bool remainIndex, std::vector<Player*> _players,
-              std::vector<index_t> _teams, std::vector<std::string> name,
-              Board _board, GameConfig config = defaultConf);
+              std::vector<std::string> name, Board _board,
+              GameConfig config = defaultConf);
     ~BasicGame();
 
     void step();
@@ -211,13 +198,11 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
 }
 
 inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
-                            std::vector<index_t> _teams,
                             std::vector<std::string> name, Board _board,
                             GameConfig config)
     : players(_players.size()),
       playerViews(_players.size()),
       names(_players.size()),
-      teams(_players.size()),
       alive(_players.size()),
       killCount(_players.size()),
       conf(config),
@@ -225,9 +210,8 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
     if (_players.empty()) {
         throw std::invalid_argument("BasicGame requires at least one player");
     }
-    if (_players.size() != _teams.size() || _players.size() != name.size()) {
-        throw std::invalid_argument(
-            "BasicGame players/teams/names size mismatch");
+    if (_players.size() != name.size()) {
+        throw std::invalid_argument("BasicGame players/names size mismatch");
     }
     if (std::ranges::find(_players, nullptr) != _players.end()) {
         throw std::invalid_argument("BasicGame received null player pointer");
@@ -240,7 +224,6 @@ inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
     for (std::size_t i = 0; i < players.size(); ++i) {
         players[randId[i]] = _players[i];
         names[randId[i]] = std::move(name[i]);
-        teams[randId[i]] = _teams[i];
     }
 }
 
@@ -300,7 +283,7 @@ inline void BasicGame::step() {
             // even when the fleeing enemy is on a general.
             int rank = 1;
             if (isValidPlayer(target.occupier)) {
-                if (inSameTeam(i, target.occupier))
+                if (target.occupier == i)
                     rank = 2;
                 else if (moves[target.occupier].type == MoveType::MOVE_ARMY &&
                          moves[target.occupier].from == move.to)
@@ -331,11 +314,7 @@ inline void BasicGame::step() {
             move.takeHalf ? (fromTile.army >> 1) : (fromTile.army - 1);
 
         fromTile.army -= takenArmy;
-        if (isValidPlayer(toTile.occupier) &&
-            inSameTeam(toTile.occupier, player)) {
-            if (toTile.type != TILE_GENERAL) {
-                toTile.occupier = player;
-            }
+        if (toTile.occupier == player) {
             toTile.army += takenArmy;
         } else {
             toTile.army -= takenArmy;
@@ -355,13 +334,6 @@ inline void BasicGame::step() {
     while (!surrenderQueue.empty() && surrenderQueue.front().second <= 0) {
         index_t player = surrenderQueue.front().first;
         surrenderQueue.pop_front();
-
-        // TODO: implementation for teams
-        // If there are players left in the team, the player's land and army
-        // will be taken over by the team mate whose general is closest to
-        // theirs. Here, "closest" means to have the least distance, where
-        // "distance" is the length of the shortest path not passing any
-        // impassable tiles defined by `isImpassableTile(type)`.
         neutralize(player);
     }
 
@@ -377,7 +349,7 @@ inline void BasicGame::step() {
     }
     curTurn += curHalfTurnPhase;
     curHalfTurnPhase ^= 1;
-    board.updateVisionCache(conf, teams, getSmogRings());
+    board.updateVisionCache(conf, getPlayerCount(), getSmogRings());
 
     // request moves (for next turn)
     std::vector<RankItem> rank = ranklist();
@@ -414,133 +386,59 @@ inline std::vector<RankItem> BasicGame::ranklist() const {
 }
 
 inline int BasicGame::initSpawn() {
-    spawnCoord.assign(players.size(), Coord{});
+    const std::size_t playerCount = players.size();
+    spawnCoord.clear();
+    spawnCoord.reserve(playerCount);
 
-    const int playerCount = static_cast<int>(players.size());
-    if (playerCount == 0) return 0;
+    // 1. Collect spawn candidates
+    std::unordered_map<unsigned, std::vector<Coord>> spawnGroups;
+    std::vector<Coord> unlabelledSpawns;
+    std::vector<Coord> emptySpawns;
 
-    std::vector<index_t> unassigned(playerCount);
-    std::iota(unassigned.begin(), unassigned.end(), 0);
-
-    auto collectTiles = [&](std::predicate<const Tile&> auto predicate)
-        -> std::vector<std::pair<Coord, const Tile*>> {
-        std::vector<std::pair<Coord, const Tile*>> result;
-        for (int i = 1; i <= board.row; ++i)
-            for (int j = 1; j <= board.col; ++j)
-                if (predicate(board.tileAt(i, j)))
-                    result.emplace_back(Coord(i, j), &board.tileAt(i, j));
-        return result;
-    };
-
-    // Phase 1: Collect spawns by label
-    std::unordered_map<unsigned, std::vector<Coord>> fixedSpawns;
-    std::vector<Coord> flexibleSpawns;
-
-    auto allSpawns = collectTiles(
-        [](const Tile& t) noexcept { return t.type == TILE_SPAWN; });
-    for (const auto& [coord, tile] : allSpawns) {
-        if (tile->spawnTeam == 0)
-            flexibleSpawns.push_back(coord);
-        else
-            fixedSpawns[tile->spawnTeam].push_back(coord);
-    }
-
-    // Phase 2: Build random label -> team mapping
-    std::unordered_set<index_t> teamSet(teams.begin(), teams.end());
-    std::vector<index_t> teamList(teamSet.begin(), teamSet.end());
-    auto labels = std::views::keys(fixedSpawns);
-    std::vector<unsigned> labelList(labels.begin(), labels.end());
-
-    std::ranges::shuffle(teamList, rng);
-    std::ranges::shuffle(labelList, rng);
-
-    std::unordered_map<unsigned, index_t> labelToTeam;
-    const size_t mappingCount = std::min(labelList.size(), teamList.size());
-    for (size_t i = 0; i < mappingCount; ++i) {
-        labelToTeam[labelList[i]] = teamList[i];
-    }
-
-    // Phase 3: Group players and spawns by team
-    std::unordered_map<index_t, std::vector<index_t>> teamPlayers;
-    for (index_t p = 0; p < playerCount; ++p) {
-        teamPlayers[teams[p]].push_back(p);
-    }
-
-    std::unordered_map<index_t, std::vector<Coord>> teamSpawns;
-    for (auto& [label, spawns] : fixedSpawns) {
-        auto it = labelToTeam.find(label);
-        if (it == labelToTeam.end()) {
-            // Label not mapped to any team, convert to flexible
-            flexibleSpawns.insert(flexibleSpawns.end(),
-                                  std::make_move_iterator(spawns.begin()),
-                                  std::make_move_iterator(spawns.end()));
-        } else {
-            teamSpawns.emplace(it->second, std::move(spawns));
-        }
-    }
-
-    std::vector<Coord> excessFixedSpawns;
-
-    // Phase 4: Assign fixed spawns per team
-    for (auto& [team, spawns] : teamSpawns) {
-        auto& playersInTeam = teamPlayers[team];
-        std::ranges::shuffle(playersInTeam, rng);
-        std::ranges::shuffle(spawns, rng);
-
-        const size_t count = std::min(playersInTeam.size(), spawns.size());
-        for (size_t i = 0; i < count; ++i) {
-            index_t player = playersInTeam[i];
-            spawnCoord[player] = spawns[i];
-            auto it = std::ranges::find(unassigned, player);
-            if (it != unassigned.end()) {
-                *it = unassigned.back();
-                unassigned.pop_back();
+    for (pos_t x = 1; x <= board.row; ++x) {
+        for (pos_t y = 1; y <= board.col; ++y) {
+            const Tile& tile = board.tileAt(x, y);
+            const Coord coord{x, y};
+            if (tile.type == TILE_SPAWN) {
+                if (tile.spawnTeam == 0)
+                    unlabelledSpawns.push_back(coord);
+                else
+                    spawnGroups[tile.spawnTeam].push_back(coord);
+            } else if (tile.type == TILE_PLAIN && tile.army == 0) {
+                emptySpawns.push_back(coord);
             }
         }
-        // Excess spawns held separately, released only if spawnTeam==0 runs out
-        for (size_t i = count; i < spawns.size(); ++i) {
-            excessFixedSpawns.push_back(std::move(spawns[i]));
-        }
     }
 
-    // Phase 5a: Assign spawnTeam==0 flexible spawns first
-    std::ranges::shuffle(unassigned, rng);
-    std::ranges::shuffle(flexibleSpawns, rng);
-
-    const size_t flexAssigned =
-        std::min(unassigned.size(), flexibleSpawns.size());
-    for (size_t i = 0; i < flexAssigned; ++i)
-        spawnCoord[unassigned[i]] = flexibleSpawns[i];
-
-    unassigned.erase(unassigned.begin(), unassigned.begin() + flexAssigned);
-
-    // Phase 5b: If still unassigned, release excess fixed spawns as flexible
-    if (!unassigned.empty() && !excessFixedSpawns.empty()) {
-        std::ranges::shuffle(unassigned, rng);
-        std::ranges::shuffle(excessFixedSpawns, rng);
-
-        const size_t excessAssigned =
-            std::min(unassigned.size(), excessFixedSpawns.size());
-        for (size_t i = 0; i < excessAssigned; ++i)
-            spawnCoord[unassigned[i]] = excessFixedSpawns[i];
-
-        unassigned.erase(unassigned.begin(),
-                         unassigned.begin() + excessAssigned);
+    // 2. Sample one spawn from every group as primary, others as extra
+    std::vector<Coord> primaryGroupSpawns;
+    std::vector<Coord> extraGroupSpawns;
+    for (auto& [_, group] : spawnGroups) {
+        std::ranges::shuffle(group, rng);
+        primaryGroupSpawns.push_back(group.front());
+        extraGroupSpawns.insert(extraGroupSpawns.end(), group.begin() + 1,
+                                group.end());
     }
 
-    // Phase 6: Use blank tiles if still not enough spawns
-    if (!unassigned.empty()) {
-        auto blankTiles = collectTiles([](const Tile& t) noexcept {
-            return t.type == TILE_PLAIN && t.army == 0;
-        });
-        std::ranges::shuffle(blankTiles, rng);
+    // 3. Sample N spawns by priority
+    auto addSpawns = [&](std::vector<Coord>& pool) {
+        if (spawnCoord.size() == playerCount) return;
+        std::ranges::shuffle(pool, rng);
+        const std::size_t needed =
+            std::min(playerCount - spawnCoord.size(), pool.size());
+        spawnCoord.insert(spawnCoord.end(), pool.begin(),
+                          pool.begin() + needed);
+    };
 
-        if (blankTiles.size() < unassigned.size()) return 1;
+    addSpawns(primaryGroupSpawns);
+    addSpawns(unlabelledSpawns);
+    addSpawns(extraGroupSpawns);
+    addSpawns(emptySpawns);
 
-        for (size_t i = 0; i < unassigned.size(); ++i)
-            spawnCoord[unassigned[i]] = blankTiles[i].first;
-    }
+    if (spawnCoord.size() < playerCount) return 1;
 
+    // 4. Assign spawns to N players
+    std::ranges::shuffle(spawnCoord, rng);
     return 0;
 }
 
@@ -563,8 +461,7 @@ inline int BasicGame::init() {
     }
 
     const GameConstantsPack constants{board.getHeight(), board.getWidth(),
-                                      static_cast<index_t>(players.size()),
-                                      teams, conf};
+                                      getPlayerCount(), conf};
     for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
         players[i]->setSendMessageCallback([this, i](const std::string& text) {
             this->sendPlayerMessage(i, text);
@@ -574,7 +471,7 @@ inline int BasicGame::init() {
 
     surrenderQueue = decltype(surrenderQueue)();
 
-    board.updateVisionCache(conf, teams, getSmogRings());
+    board.updateVisionCache(conf, getPlayerCount(), getSmogRings());
     return 0;
 }
 

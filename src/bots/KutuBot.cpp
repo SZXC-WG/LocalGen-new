@@ -257,7 +257,6 @@ class KutuBot : public BasicBot {
     turn_t halfTurn = 0;
     turn_t fullTurn = 0;
     GameConfig config;
-    std::vector<index_t> teams;
 
     BoardView board;
     std::vector<RankItem> rankById;
@@ -329,10 +328,7 @@ class KutuBot : public BasicBot {
     }
 
     inline bool isFriendlyOccupier(index_t occupier) const {
-        return occupier == id ||
-               (occupier >= 0 &&
-                occupier < static_cast<index_t>(teams.size()) &&
-                teams[occupier] == teams[id]);
+        return occupier == id;
     }
 
     inline bool isFriendlyTile(const TileView& tile) const {
@@ -344,9 +340,7 @@ class KutuBot : public BasicBot {
     }
 
     inline bool isEnemyOccupier(index_t occupier) const {
-        return occupier >= 0 && occupier != id &&
-               (occupier >= static_cast<index_t>(teams.size()) ||
-                teams[occupier] != teams[id]);
+        return occupier >= 0 && occupier != id;
     }
 
     inline int manhattan(Coord a, Coord b) const {
@@ -2700,7 +2694,6 @@ class KutuBot : public BasicBot {
         W = width + 2;
         playerCnt = constants.playerCount;
         config = constants.config;
-        teams = constants.teams;
         halfTurn = 0;
         fullTurn = 0;
 

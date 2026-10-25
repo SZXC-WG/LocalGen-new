@@ -65,7 +65,7 @@ class SmartRandomBot : public BasicBot {
         }
         struct node {
             tile_type_e type;
-            index_t team;
+            index_t occupier;
             army_t army;
             int dir;
             std::ptrdiff_t lastCount;
@@ -86,13 +86,13 @@ class SmartRandomBot : public BasicBot {
         bool rdret = rng() & 1;
         auto cmp = [&](const node& a, const node& b) -> bool {
             if (a.lastCount != b.lastCount) return a.lastCount > b.lastCount;
-            if (a.type == TILE_GENERAL && a.team != playerId) return true;
-            if (b.type == TILE_GENERAL && b.team != playerId) return false;
-            if (a.team == -1) return rdret;
-            if (b.team == -1) return !rdret;
-            if (a.team == playerId && b.team != playerId) return false;
-            if (a.team != playerId && b.team == playerId) return true;
-            if (a.team == playerId && b.team == playerId)
+            if (a.type == TILE_GENERAL && a.occupier != playerId) return true;
+            if (b.type == TILE_GENERAL && b.occupier != playerId) return false;
+            if (a.occupier == -1) return rdret;
+            if (b.occupier == -1) return !rdret;
+            if (a.occupier == playerId && b.occupier != playerId) return false;
+            if (a.occupier != playerId && b.occupier == playerId) return true;
+            if (a.occupier == playerId && b.occupier == playerId)
                 return a.army > b.army;
             return a.army < b.army;
         };

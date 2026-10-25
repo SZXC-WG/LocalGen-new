@@ -100,7 +100,6 @@ class LyBot : public BasicBot {
     turn_t halfTurn = 0;
     turn_t fullTurn = 0;
     GameConfig config;
-    std::vector<index_t> teams;
 
     BoardView board;
     std::vector<RankItem> rankById;
@@ -162,10 +161,7 @@ class LyBot : public BasicBot {
     }
 
     inline bool isFriendlyOccupier(index_t occupier) const {
-        return occupier == id ||
-               (occupier >= 0 &&
-                occupier < static_cast<index_t>(teams.size()) &&
-                teams[occupier] == teams[id]);
+        return occupier == id;
     }
 
     inline bool isFriendlyTile(const TileView& tile) const {
@@ -643,7 +639,7 @@ class LyBot : public BasicBot {
 
     double targetPlayerScore(index_t player) const {
         if (player < 0 || player >= playerCnt || player == id ||
-            !aliveById[player] || teams[player] == teams[id]) {
+            !aliveById[player]) {
             return -1e100;
         }
         const army_t myArmy = rankById[id].army;
@@ -701,9 +697,7 @@ class LyBot : public BasicBot {
         index_t best = -1;
         double bestScore = -1e100;
         for (index_t player = 0; player < playerCnt; ++player) {
-            if (player == id || !aliveById[player] ||
-                teams[player] == teams[id])
-                continue;
+            if (player == id || !aliveById[player]) continue;
             double score = 0.0;
             Coord guess = chooseTargetPlayerGeneral(player);
             if (guess != Coord{-1, -1} && myGeneral != Coord{-1, -1}) {
@@ -1228,7 +1222,6 @@ class LyBot : public BasicBot {
         W = width + 2;
         playerCnt = constants.playerCount;
         config = constants.config;
-        teams = constants.teams;
         halfTurn = 0;
         fullTurn = 0;
 

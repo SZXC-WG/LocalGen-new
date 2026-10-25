@@ -34,6 +34,7 @@ struct GameConfig {
     int OverallVisionRange = 1;
     VisionMode CityVisionMode = VisionMode::INHERIT;
     int CityVisionRange = -1;  // -1 means to inherit from overall
+    bool AdjacentCityVision = false;
 
     // ---- Move settings ----
     MoveOrderMode MoveOrder = MoveOrderMode::PRIORITY;
@@ -59,6 +60,7 @@ namespace modifiers {
 inline constexpr GameConfig Watchtower{
     .CityVisionMode = VisionMode::NEAR4,
     .CityVisionRange = 4,
+    .AdjacentCityVision = true,
 };
 inline constexpr GameConfig MistyVeil{
     .OverallVisionRange = 0,
@@ -93,9 +95,9 @@ concept GameConfigType = std::same_as<std::remove_cv_t<T>, GameConfig>;
 
 constexpr auto asTuple(GameConfigType auto& c) noexcept {
     auto& [f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
-           f16] = c;
+           f16, f17] = c;
     return std::tie(f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13,
-                    f14, f15, f16);
+                    f14, f15, f16, f17);
 }
 
 template <std::size_t I = 0>

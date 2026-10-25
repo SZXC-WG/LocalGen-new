@@ -297,6 +297,9 @@ class Board {
         assert(isValidConfig(conf));
         assert(0 < teams.size() && teams.size() <= 16);
 
+        static constexpr std::pair<int, int> kDirs[4] = {
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
         const pos_t stride = col + 2;
 
         if (hardVision.size() != tiles.size()) {
@@ -322,6 +325,9 @@ class Board {
         const bool customCityVision = cityRange != conf.OverallVisionRange ||
                                       cityMode != conf.OverallVisionMode;
         const bool smogEnabled = conf.FadingSmogInterval > 0;
+        // Only needed when normal vision is suppressed (e.g. Misty Veil).
+        const bool revealAdjacentCityLikeTiles =
+            conf.AdjacentCityVision && conf.OverallVisionRange < 1;
 
         // Decay previous hard vision into soft.
         if (smogEnabled) {
@@ -362,6 +368,16 @@ class Board {
                             fullCityMask |= mask;
                         } else {
                             addRadiusVision(mask, x, y, cityRange, cityMode);
+                        }
+                    }
+                    // Reveal adjacent city-like tiles to this tile's owner
+                    // (Watchtower: see cities/generals you pass next to).
+                    if (revealAdjacentCityLikeTiles) {
+                        for (auto [dx, dy] : kDirs) {
+                            if (isCityLikeTile(tileAt(x + dx, y + dy).type)) {
+                                hardVision[(x + dx) * stride + (y + dy)] |=
+                                    playerBit(tile.occupier);
+                            }
                         }
                     }
                 } else if (tile.type == TILE_LOOKOUT) {

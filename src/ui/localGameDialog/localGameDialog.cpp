@@ -17,7 +17,6 @@
 #include <QRandomGenerator>
 #include <QScrollBar>
 #include <QStringList>
-#include <utility>
 
 #include "../utils/comboBoxPopupCompatibility.hpp"
 #include "core/bot.h"
@@ -82,21 +81,14 @@ LocalGameConfig LocalGameDialog::config() const {
         ui->spinBox_mapWidth->value(),
         ui->spinBox_mapHeight->value(),
         {}};
-    const std::pair<QCheckBox*, GameConfig> modifierChoices[] = {
-        {ui->checkBox_watchtower, modifiers::Watchtower},
-        {ui->checkBox_mistyVeil, modifiers::MistyVeil},
-        {ui->checkBox_crystalClear, modifiers::CrystalClear},
-        {ui->checkBox_fadingSmog, modifiers::FadingSmog},
-        {ui->checkBox_leapfrog, modifiers::Leapfrog},
-        {ui->checkBox_slippery, modifiers::Slippery},
-        {ui->checkBox_silentWar, modifiers::SilentWar},
-    };
-    for (const auto& [checkBox, preset] : modifierChoices) {
-        if (checkBox->isChecked()) config.gameConfig |= preset;
-    }
-    config.showAnalysis = config.showAnalysis &&
-                          config.gameConfig.RanklistShowArmy &&
-                          config.gameConfig.RanklistShowLand;
+    config.gameConfig.watchtower = ui->checkBox_watchtower->isChecked();
+    config.gameConfig.mistyVeil = ui->checkBox_mistyVeil->isChecked();
+    config.gameConfig.crystalClear = ui->checkBox_crystalClear->isChecked();
+    config.gameConfig.fadingSmog = ui->checkBox_fadingSmog->isChecked();
+    config.gameConfig.leapfrog = ui->checkBox_leapfrog->isChecked();
+    config.gameConfig.slippery = ui->checkBox_slippery->isChecked();
+    config.gameConfig.silentWar = ui->checkBox_silentWar->isChecked();
+    config.showAnalysis = config.showAnalysis && !config.gameConfig.silentWar;
 
     auto& players = config.players;
     int numPlayers = ui->gridLayout_players->count();

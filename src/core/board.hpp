@@ -51,16 +51,15 @@ class Board {
     pos_t row = 0, col = 0;
     std::vector<Tile> tiles;
 
-    constexpr Tile& tileAt(pos_t x, pos_t y) noexcept {
-        return tiles[x * (col + 2) + y];
+    Board() = default;
+    constexpr Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
+        assert(row >= 0 && col >= 0);
+        // 1-indexed, dummy padding around
+        tiles.resize((row + 2) * (col + 2));
     }
-    constexpr const Tile& tileAt(pos_t x, pos_t y) const noexcept {
-        return tiles[x * (col + 2) + y];
-    }
-    constexpr Tile& tileAt(Coord pos) noexcept { return tileAt(pos.x, pos.y); }
-    constexpr const Tile& tileAt(Coord pos) const noexcept {
-        return tileAt(pos.x, pos.y);
-    }
+
+    constexpr int getWidth() const noexcept { return col; }
+    constexpr int getHeight() const noexcept { return row; }
 
     constexpr void setWidth(pos_t _col) {
         assert(_col >= 0);
@@ -89,14 +88,15 @@ class Board {
         return !isValidPos(pos);
     }
 
-    constexpr int getWidth() const noexcept { return col; }
-    constexpr int getHeight() const noexcept { return row; }
-
-    Board() = default;
-    constexpr Board(pos_t _row, pos_t _col) : row(_row), col(_col) {
-        assert(row >= 0 && col >= 0);
-        // 1-indexed, dummy padding around
-        tiles.resize((_row + 2) * (_col + 2));
+    constexpr Tile& tileAt(pos_t x, pos_t y) noexcept {
+        return tiles[x * (col + 2) + y];
+    }
+    constexpr const Tile& tileAt(pos_t x, pos_t y) const noexcept {
+        return tiles[x * (col + 2) + y];
+    }
+    constexpr Tile& tileAt(Coord pos) noexcept { return tileAt(pos.x, pos.y); }
+    constexpr const Tile& tileAt(Coord pos) const noexcept {
+        return tileAt(pos.x, pos.y);
     }
 
     // =========================================================================
@@ -112,91 +112,62 @@ class Board {
     //       2. Suppress: Clear soft vision inside own or enemy hard vision.
     //       3. Prune:    Keep only 4-connected soft components touching own
     //                    hard vision.
-    //       4. Expand:   Every `FadingSmogInterval` half-turns, spread soft
-    //                    vision 1 orthogonal step from passable visible tiles,
-    //                    then Suppress.
+    //       4. Expand:   Every 25 half-turns, spread soft vision 1 orthogonal
+    //                    step from passable visible tiles, then Suppress.
    protected:
     using mask_t = uint16_t;
+    static constexpr std::pair<int, int> kDirs[4] = {
+        {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
-    std::vector<mask_t> hardVision, softVision, scratch, scratch2;
+    std::vector<mask_t> hardVision, softVision, scratch;
     std::vector<std::size_t> floodStack;
     int smogRingsApplied = 0;
 
+    /// Map player index to its bitmask; neutral (-1) shifts out to 0.
     static constexpr mask_t playerBit(index_t player) noexcept {
-        assert(player >= 0 && player < 16);
-        return mask_t(1) << player;
+        assert(player >= -1 && player < 16);
+        return uint32_t(0x8000) >> (15 - player);
+    }
+
+    /// Branchless all-ones (`0xFFFF`) or all-zeros (`0x0000`) mask.
+    static constexpr mask_t maskIf(bool cond) noexcept {
+        return mask_t(0) - mask_t(cond);
     }
 
     // ---- Hard Vision Helpers ------------------------------------------------
 
-    /// Grant `mask` hard vision within `radius` of `(x, y)` (`NEAR8`: square,
-    /// `NEAR4`: diamond).
-    void addRadiusVision(mask_t mask, pos_t x, pos_t y, int radius,
-                         VisionMode mode) noexcept {
+    /// Grant `mask` hard vision within `radius` of `(x, y)`。
+    /// `diamond`: L1 Manhattan vs L-inf Chebyshev.
+    template <int radius, bool diamond>
+    void addRadiusVision(mask_t mask, pos_t x, pos_t y) noexcept {
         const pos_t stride = col + 2;
-        radius = std::max(radius, 0);
-        for (pos_t i = std::max(x - radius, 1); i <= std::min(x + radius, row);
-             ++i) {
-            const pos_t span =
-                mode == VisionMode::NEAR4 ? radius - std::abs(i - x) : radius;
-            for (pos_t j = std::max(y - span, 1); j <= std::min(y + span, col);
-                 ++j) {
-                hardVision[i * stride + j] |= mask;
-            }
+        const pos_t iEnd = std::min(x + radius, row);
+        for (pos_t i = std::max(x - radius, 1); i <= iEnd; ++i) {
+            const pos_t span = diamond ? radius - std::abs(i - x) : radius;
+            const pos_t rowBase = i * stride;
+            const pos_t tEnd = rowBase + std::min(y + span, col);
+            for (pos_t t = rowBase + std::max(y - span, 1); t <= tEnd; ++t)
+                hardVision[t] |= mask;
         }
     }
 
-    /// Dilate `scratch` by `radius` steps into `hardVision` (`NEAR8` or
-    /// `NEAR4`). Clobbers `scratch`.
-    void growVision(int radius, VisionMode mode) {
-        if (radius <= 0) {
-            hardVision.swap(scratch);
-            return;
-        }
-
+    /// Expand `scratch` by one step in all eight directions into `hardVision`.
+    void growVision() noexcept {
         const pos_t stride = col + 2;
-        const int boardReach = mode == VisionMode::NEAR4
-                                   ? (row - 1) + (col - 1)
-                                   : std::max(row, col) - 1;
-
-        if (radius >= boardReach) {
-            mask_t activePlayers = 0;
-            for (pos_t i = 1; i <= row; ++i) {
-                for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t)
-                    activePlayers |= scratch[t];
+        const mask_t* s = scratch.data();
+        for (pos_t i = 1; i <= row; ++i) {
+            for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t) {
+                hardVision[t] = s[t - stride - 1] | s[t - stride] |
+                                s[t - stride + 1] | s[t - 1] | s[t] | s[t + 1] |
+                                s[t + stride - 1] | s[t + stride] |
+                                s[t + stride + 1];
             }
-            for (pos_t i = 1; i <= row; ++i) {
-                std::fill_n(hardVision.begin() + i * stride + 1, col,
-                            activePlayers);
-            }
-            return;
-        }
-
-        const mask_t diagMask = mode == VisionMode::NEAR4 ? 0 : ~mask_t(0);
-        std::vector<mask_t>* src = &scratch;
-        std::vector<mask_t>* dst = &scratch2;
-        for (int step = radius; step > 0; --step) {
-            if (step == 1) dst = &hardVision;
-            const mask_t* s = src->data();
-            mask_t* d = dst->data();
-            for (pos_t i = 1; i <= row; ++i) {
-                for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t) {
-                    const mask_t orth = s[t] | s[t - 1] | s[t + 1] |
-                                        s[t - stride] | s[t + stride];
-                    const mask_t diag = s[t - stride - 1] | s[t - stride + 1] |
-                                        s[t + stride - 1] | s[t + stride + 1];
-                    d[t] = orth | (diagMask & diag);
-                }
-            }
-            std::swap(src, dst);
         }
     }
 
     /// Grant 5x5 hard vision around `(x, y)` to the orthogonal neighbour with
     /// the strictly largest army.
     void addLookoutVision(pos_t x, pos_t y) noexcept {
-        static constexpr std::pair<int, int> kDirs[4] = {
-            {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         index_t owner = -1;
         army_t maxArmy = 0;
         for (auto [dx, dy] : kDirs) {
@@ -206,24 +177,74 @@ class Board {
                 maxArmy = nb.army;
             }
         }
-        if (owner != -1) {
-            addRadiusVision(playerBit(owner), x, y, 2, VisionMode::NEAR8);
-        }
+        if (owner != -1) addRadiusVision<2, false>(playerBit(owner), x, y);
     }
 
     /// Project an 8-tile hard-vision ray across `(x, y)` away from each
     /// occupied orthogonal neighbour.
     void addObservatoryVision(pos_t x, pos_t y) noexcept {
-        static constexpr std::pair<int, int> kDirs[4] = {
-            {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         const pos_t stride = col + 2;
         for (auto [dx, dy] : kDirs) {
             const index_t player = tileAt(x - dx, y - dy).occupier;
             if (player == -1) continue;
             const mask_t mask = playerBit(player);
-            for (pos_t k = 1; k <= 8 && isValidPos(x + k * dx, y + k * dy);
-                 ++k) {
-                hardVision[(x + k * dx) * stride + (y + k * dy)] |= mask;
+            const pos_t reach =
+                dx ? (dx > 0 ? row - x : x - 1) : (dy > 0 ? col - y : y - 1);
+            const pos_t steps = std::min<pos_t>(8, reach);
+            const pos_t offset = dx * stride + dy;
+            for (pos_t k = 0, t = x * stride + y + offset; k < steps;
+                 ++k, t += offset) {
+                hardVision[t] |= mask;
+            }
+        }
+    }
+
+    /// Recompute `hardVision` specialized for the active vision modifiers.
+    template <bool watchtower, bool mistyVeil>
+    void updateHardVision(mask_t allPlayers) {
+        const pos_t stride = col + 2;
+        const Tile* map = tiles.data();
+
+        // 1. Seed bulk owned tiles (cities handled in pass 3 under Watchtower).
+        for (pos_t i = 1; i <= row; ++i) {
+            for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t) {
+                const bool skip = watchtower && isCityLikeTile(map[t].type);
+                scratch[t] = playerBit(map[t].occupier) & maskIf(!skip);
+            }
+        }
+
+        // 2. Dilate normal vision.
+        if constexpr (mistyVeil)
+            hardVision.swap(scratch);
+        else
+            growVision();
+
+        // 3. Add sparse sources (lit tiles, neutral structures, Watchtower).
+        mask_t* vision = hardVision.data();
+        for (pos_t x = 1; x <= row; ++x) {
+            for (pos_t y = 1, t = x * stride + 1; y <= col; ++y, ++t) {
+                const Tile& tile = map[t];
+                if (tile.lit) vision[t] = allPlayers;
+
+                if (tile.type == TILE_LOOKOUT && tile.occupier == -1)
+                    addLookoutVision(x, y);
+                else if (tile.type == TILE_OBSERVATORY && tile.occupier == -1)
+                    addObservatoryVision(x, y);
+
+                if constexpr (watchtower) {
+                    if (!isCityLikeTile(tile.type)) continue;
+                    if (tile.occupier != -1)
+                        addRadiusVision<4, true>(playerBit(tile.occupier), x,
+                                                 y);
+                    // Under Misty Veil, reveal cities to adjacent owners
+                    // (border padding has occupier == -1, which maps to 0).
+                    if constexpr (mistyVeil) {
+                        vision[t] |= playerBit(map[t - stride].occupier) |
+                                     playerBit(map[t + stride].occupier) |
+                                     playerBit(map[t - 1].occupier) |
+                                     playerBit(map[t + 1].occupier);
+                    }
+                }
             }
         }
     }
@@ -231,10 +252,14 @@ class Board {
     // ---- Fading Smog (Soft Vision) Helpers ----------------------------------
 
     /// Suppress: any player's hard vision clears all soft vision in FFA.
-    constexpr void clearSuppressedSoft() noexcept {
+    /// Return whether any soft vision remains to prune.
+    constexpr bool clearSuppressedSoft() noexcept {
+        mask_t anySoft = 0;
         for (std::size_t t = 0; t < tiles.size(); ++t) {
-            if (hardVision[t]) softVision[t] = 0;
+            softVision[t] &= maskIf(!hardVision[t]);
+            anySoft |= softVision[t];
         }
+        return anySoft != 0;
     }
 
     /// Prune: keep only 4-connected soft components that touch own hard vision.
@@ -270,9 +295,8 @@ class Board {
     constexpr void expandSmogRing() noexcept {
         const pos_t stride = col + 2;
         for (std::size_t t = 0; t < tiles.size(); ++t) {
-            scratch[t] = isImpassableTile(tiles[t].type)
-                             ? 0
-                             : (hardVision[t] | softVision[t]);
+            scratch[t] = (hardVision[t] | softVision[t]) &
+                         maskIf(!isImpassableTile(tiles[t].type));
         }
         for (pos_t i = 1; i <= row; ++i) {
             for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t) {
@@ -289,19 +313,15 @@ class Board {
         assert(isValidConfig(conf));
         assert(0 < playerCount && playerCount <= 16);
         const mask_t allPlayers = (uint32_t(1) << playerCount) - 1;
-
-        static constexpr std::pair<int, int> kDirs[4] = {
-            {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-
         const pos_t stride = col + 2;
 
         if (hardVision.size() != tiles.size()) {
-            for (auto* plane : {&hardVision, &softVision, &scratch, &scratch2})
+            for (auto* plane : {&hardVision, &softVision, &scratch})
                 plane->assign(tiles.size(), 0);
             smogRingsApplied = 0;
         }
 
-        if (conf.CrystalClearEnabled) {
+        if (conf.crystalClear) {
             for (pos_t i = 1; i <= row; ++i)
                 std::fill_n(hardVision.begin() + i * stride + 1, col,
                             allPlayers);
@@ -309,90 +329,23 @@ class Board {
             return;
         }
 
-        const int cityRange = conf.CityVisionRange >= 0
-                                  ? conf.CityVisionRange
-                                  : conf.OverallVisionRange;
-        const VisionMode cityMode = conf.CityVisionMode != VisionMode::INHERIT
-                                        ? conf.CityVisionMode
-                                        : conf.OverallVisionMode;
-        const bool customCityVision = cityRange != conf.OverallVisionRange ||
-                                      cityMode != conf.OverallVisionMode;
-        const bool smogEnabled = conf.FadingSmogInterval > 0;
-        // Only needed when normal vision is suppressed (e.g. Misty Veil).
-        const bool revealAdjacentCityLikeTiles =
-            conf.AdjacentCityVision && conf.OverallVisionRange < 1;
-
         // Decay previous hard vision into soft.
-        if (smogEnabled) {
+        if (conf.fadingSmog) {
             for (std::size_t t = 0; t < tiles.size(); ++t)
                 softVision[t] |= hardVision[t];
         }
 
-        // Compute hard vision.
-        // 1. Seed bulk owned tiles
-        for (pos_t i = 1; i <= row; ++i) {
-            for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t) {
-                const Tile& tile = tiles[t];
-                const bool skipCity =
-                    customCityVision && isCityLikeTile(tile.type);
-                scratch[t] = (tile.occupier == -1 || skipCity)
-                                 ? 0
-                                 : playerBit(tile.occupier);
-            }
-        }
+        if (conf.watchtower)
+            conf.mistyVeil ? updateHardVision<true, true>(allPlayers)
+                           : updateHardVision<true, false>(allPlayers);
+        else
+            conf.mistyVeil ? updateHardVision<false, true>(allPlayers)
+                           : updateHardVision<false, false>(allPlayers);
 
-        // 2. Dilate
-        growVision(conf.OverallVisionRange, conf.OverallVisionMode);
-
-        // 3. Add sparse sources
-        const int cityReach = cityMode == VisionMode::NEAR4
-                                  ? (row - 1) + (col - 1)
-                                  : std::max(row, col) - 1;
-        mask_t fullCityMask = 0;
-        for (pos_t x = 1; x <= row; ++x) {
-            for (pos_t y = 1; y <= col; ++y) {
-                const Tile& tile = tileAt(x, y);
-                if (tile.lit) hardVision[x * stride + y] = allPlayers;
-
-                if (tile.occupier != -1) {
-                    if (customCityVision && isCityLikeTile(tile.type)) {
-                        const mask_t mask = playerBit(tile.occupier);
-                        if (cityRange >= cityReach) {
-                            fullCityMask |= mask;
-                        } else {
-                            addRadiusVision(mask, x, y, cityRange, cityMode);
-                        }
-                    }
-                    // Reveal adjacent city-like tiles to this tile's owner
-                    // (Watchtower: see cities/generals you pass next to).
-                    if (revealAdjacentCityLikeTiles) {
-                        for (auto [dx, dy] : kDirs) {
-                            if (isCityLikeTile(tileAt(x + dx, y + dy).type)) {
-                                hardVision[(x + dx) * stride + (y + dy)] |=
-                                    playerBit(tile.occupier);
-                            }
-                        }
-                    }
-                } else if (tile.type == TILE_LOOKOUT) {
-                    addLookoutVision(x, y);
-                } else if (tile.type == TILE_OBSERVATORY) {
-                    addObservatoryVision(x, y);
-                }
-            }
-        }
-
-        if (fullCityMask) {
-            for (pos_t x = 1; x <= row; ++x) {
-                for (pos_t y = 1, t = x * stride + 1; y <= col; ++y, ++t)
-                    hardVision[t] |= fullCityMask;
-            }
-        }
-
-        if (!smogEnabled) return;
+        if (!conf.fadingSmog) return;
 
         // Update Fading Smog soft vision: Suppress -> Prune -> Expand.
-        clearSuppressedSoft();
-        pruneDisconnectedSoft();
+        if (clearSuppressedSoft()) pruneDisconnectedSoft();
 
         for (; smogRingsApplied < smogRings; ++smogRingsApplied) {
             expandSmogRing();
@@ -412,30 +365,23 @@ class Board {
         return visible(pos.x, pos.y, player);
     }
 
+    // =========================================================================
+    // Gameplay & Views
+    // =========================================================================
+
     bool available(index_t player, Move move) const noexcept {
-        MoveType type = move.type;
-        if (type == MoveType::EMPTY) return false;
-        if (type == MoveType::SURRENDER) return true;
-        assert(type == MoveType::MOVE_ARMY);
+        if (move.type == MoveType::EMPTY) return false;
+        if (move.type == MoveType::SURRENDER) return true;
+        assert(move.type == MoveType::MOVE_ARMY);
 
         const Coord &from = move.from, &to = move.to;
-
-        // coordinate validity check
         if (isInvalidPos(from) || isInvalidPos(to)) return false;
-
-        // adjacency check (orthogonal 4-neighborhood)
         if (std::abs(from.x - to.x) + std::abs(from.y - to.y) != 1)
             return false;
 
-        // from tile availability check
         const Tile& fromTile = tileAt(from);
         if (fromTile.occupier != player || fromTile.army <= 1) return false;
-
-        // to tile availability check
-        if (isImpassableTile(tileAt(to).type)) return false;
-
-        // all passed, available move
-        return true;
+        return !isImpassableTile(tileAt(to).type);
     }
 
     constexpr void update(bool increaseAllArmy = false) noexcept {
@@ -460,11 +406,12 @@ class Board {
 
     constexpr void view(index_t player, BoardView& boardView) const {
         boardView.row = row, boardView.col = col;
-        boardView.tiles.resize((row + 2) * (col + 2));
+        boardView.tiles.resize(tiles.size());
+        const pos_t stride = col + 2;
         for (pos_t i = 1; i <= row; ++i) {
-            for (pos_t j = 1; j <= col; ++j) {
-                boardView.tileAt(i, j).updateFrom(tileAt(i, j),
-                                                  visible(i, j, player));
+            for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t) {
+                const bool vis = (hardVision[t] | softVision[t]) >> player & 1;
+                boardView.tiles[t].updateFrom(tiles[t], vis);
             }
         }
     }
@@ -476,13 +423,11 @@ class Board {
     }
 
     constexpr BoardView fullView() const {
-        BoardView boardView;
-        boardView.row = row, boardView.col = col;
-        boardView.tiles.resize((row + 2) * (col + 2));
+        BoardView boardView{row, col, std::vector<TileView>(tiles.size())};
+        const pos_t stride = col + 2;
         for (pos_t i = 1; i <= row; ++i) {
-            for (pos_t j = 1; j <= col; ++j) {
-                boardView.tileAt(i, j).updateFrom(tileAt(i, j), true);
-            }
+            for (pos_t j = 1, t = i * stride + 1; j <= col; ++j, ++t)
+                boardView.tiles[t].updateFrom(tiles[t], true);
         }
         return boardView;
     }

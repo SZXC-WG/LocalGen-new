@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <deque>
 #include <functional>
-#include <numeric>
+#include <limits>
 #include <random>
 #include <ranges>
 #include <stdexcept>
@@ -92,12 +92,11 @@ class BasicGame {
     }
 
     /// How many soft-vision rings Fading Smog should have grown by now.
-    /// This count starts from 0, and grows by 1 every `FadingSmogInterval`
-    /// half-turns. When Fading Smog is off, this function always returns 0.
+    /// This count starts from 0, and grows by 1 every 25 half-turns.
+    /// When Fading Smog is off, this function always returns 0.
     int getSmogRings() const noexcept {
-        if (conf.FadingSmogInterval <= 0) return 0;
-        return (static_cast<int>(curTurn) * 2 + curHalfTurnPhase) /
-               conf.FadingSmogInterval;
+        if (!conf.fadingSmog) return 0;
+        return (static_cast<int>(curTurn) * 2 + curHalfTurnPhase) / 25;
     }
 
     const BoardView& view(index_t player) const {
@@ -135,9 +134,8 @@ class BasicGame {
 
    public:
     BasicGame() = delete;
-    BasicGame(bool remainIndex, std::vector<Player*> _players,
-              std::vector<std::string> name, Board _board,
-              GameConfig config = defaultConf);
+    BasicGame(std::vector<Player*> _players, std::vector<std::string> name,
+              Board _board, GameConfig config);
     ~BasicGame();
 
     void step();
@@ -182,11 +180,11 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
             if (tile.type == TILE_GENERAL) {
                 // Leapfrog: victor's general moves to the captured general
                 // so type would still be TILE_GENERAL.
-                if (!conf.LeapfrogEnabled) tile.type = TILE_CAPTURED_GENERAL;
+                if (!conf.leapfrog) tile.type = TILE_CAPTURED_GENERAL;
             } else if (tile.army > 1) {
                 tile.army = (tile.army + 1) >> 1;
             }
-        } else if (conf.LeapfrogEnabled && tile.occupier == p1 &&
+        } else if (conf.leapfrog && tile.occupier == p1 &&
                    tile.type == TILE_GENERAL) {
             // The original general becomes a city,
             // but keep it as a blank tile in others' fog.
@@ -197,34 +195,27 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
     broadcast(curTurn, GameMessageCapture{p1, p2});
 }
 
-inline BasicGame::BasicGame(bool remainIndex, std::vector<Player*> _players,
+inline BasicGame::BasicGame(std::vector<Player*> _players,
                             std::vector<std::string> name, Board _board,
                             GameConfig config)
-    : players(_players.size()),
-      playerViews(_players.size()),
-      names(_players.size()),
-      alive(_players.size()),
-      killCount(_players.size()),
+    : players(std::move(_players)),
+      playerViews(players.size()),
+      names(std::move(name)),
+      alive(players.size()),
+      killCount(players.size()),
       conf(config),
       board(std::move(_board)) {
-    if (_players.empty()) {
+    if (players.empty()) {
         throw std::invalid_argument("BasicGame requires at least one player");
     }
-    if (_players.size() != name.size()) {
+    if (players.size() != names.size()) {
         throw std::invalid_argument("BasicGame players/names size mismatch");
     }
-    if (std::ranges::find(_players, nullptr) != _players.end()) {
+    if (std::ranges::find(players, nullptr) != players.end()) {
         throw std::invalid_argument("BasicGame received null player pointer");
     }
 
-    std::vector<index_t> randId(_players.size());
-    std::iota(randId.begin(), randId.end(), 0);
-    if (!remainIndex) std::ranges::shuffle(randId, rng);
     eliminatedTurn.assign(players.size(), std::numeric_limits<turn_t>::max());
-    for (std::size_t i = 0; i < players.size(); ++i) {
-        players[randId[i]] = _players[i];
-        names[randId[i]] = std::move(name[i]);
-    }
 }
 
 inline BasicGame::~BasicGame() {
@@ -272,34 +263,30 @@ inline void BasicGame::step() {
         }
     }
 
-    if (conf.MoveOrder == MoveOrderMode::ALTERNATING_INDEX) {
-        if (curHalfTurnPhase) std::ranges::reverse(moveOrder);
-    } else {  // PRIORITY
-        std::vector<std::tuple<int, army_t, index_t>> priority(players.size());
-        for (index_t i : moveOrder) {
-            const Move& move = moves[i];
-            const Tile& target = board.tileAt(move.to);
-            // General < normal < defensive < chase; chase takes precedence
-            // even when the fleeing enemy is on a general.
-            int rank = 1;
-            if (isValidPlayer(target.occupier)) {
-                if (target.occupier == i)
-                    rank = 2;
-                else if (moves[target.occupier].type == MoveType::MOVE_ARMY &&
-                         moves[target.occupier].from == move.to)
-                    rank = 3;
-                else if (target.type == TILE_GENERAL)
-                    rank = 0;
-            }
-            // Slippery: general < chase < normal < defensive.
-            if (conf.SlipperyEnabled && rank > 0) rank = rank % 3 + 1;
-            // Break ties by source army, then alternating player index.
-            priority[i] = {rank, board.tileAt(move.from).army,
-                           curHalfTurnPhase ? i : -i};
+    std::vector<std::tuple<int, army_t, index_t>> priority(players.size());
+    for (index_t i : moveOrder) {
+        const Move& move = moves[i];
+        const Tile& target = board.tileAt(move.to);
+        // General < normal < defensive < chase; chase takes precedence
+        // even when the fleeing enemy is on a general.
+        int rank = 1;
+        if (isValidPlayer(target.occupier)) {
+            if (target.occupier == i)
+                rank = 2;
+            else if (moves[target.occupier].type == MoveType::MOVE_ARMY &&
+                     moves[target.occupier].from == move.to)
+                rank = 3;
+            else if (target.type == TILE_GENERAL)
+                rank = 0;
         }
-        std::ranges::sort(moveOrder, std::ranges::greater{},
-                          [&](index_t i) noexcept { return priority[i]; });
+        // Slippery: general < chase < normal < defensive.
+        if (conf.slippery && rank > 0) rank = rank % 3 + 1;
+        // Break ties by source army, then alternating player index.
+        priority[i] = {rank, board.tileAt(move.from).army,
+                       curHalfTurnPhase ? i : -i};
     }
+    std::ranges::sort(moveOrder, std::ranges::greater{},
+                      [&](index_t i) noexcept { return priority[i]; });
 
     // execute moves
     for (index_t player : moveOrder) {

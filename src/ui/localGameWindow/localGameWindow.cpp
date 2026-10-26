@@ -128,7 +128,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         names.push_back(std::move(stdName));
     }
 
-    game = new BasicGame(true, std::move(players), std::move(names),
+    game = new BasicGame(std::move(players), std::move(names),
                          std::move(initialBoard), config.gameConfig);
     if (const int initResult = game->init()) {
         QString errMsg = "Failed to initialize local game.";
@@ -172,7 +172,8 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     connect(chatBox, &ChatBoxWidget::messageSubmitted, this,
             &LocalGameWindow::handleChatSubmission);
 
-    if (config.showAnalysis) {
+    const bool showScores = !config.gameConfig.silentWar;
+    if (config.showAnalysis && showScores) {
         std::vector<QColor> colors;
         std::vector<QString> playerNames;
         for (index_t i = 0; i < game->getPlayerCount(); ++i) {
@@ -184,8 +185,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     }
 
     leaderboardWidget = new LeaderboardWidget(this);
-    leaderboardWidget->setScoreVisibility(config.gameConfig.RanklistShowArmy,
-                                          config.gameConfig.RanklistShowLand);
+    leaderboardWidget->setScoreVisibility(showScores, showScores);
     connect(leaderboardWidget, &LeaderboardWidget::preferredSizeChanged, this,
             &LocalGameWindow::positionFloatingWidgets);
 

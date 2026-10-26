@@ -433,7 +433,7 @@ GameResult runSingleGame(const Options& options, int gameNumber,
         names.push_back(botName);
     }
 
-    BasicGame game(true, players, std::move(names), std::move(board));
+    BasicGame game(players, std::move(names), std::move(board), {});
     if (const int initResult = game.init(); initResult != 0) {
         std::ostringstream err;
         err << "Failed to initialize game " << gameNumber

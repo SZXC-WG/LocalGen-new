@@ -20,7 +20,7 @@ struct LocalGameConfig {
     QString mapFilePath;
     int mapWidth, mapHeight;
     QStringList players;
-    GameConfig gameConfig = defaultConf;
+    GameConfig gameConfig{};
 };
 
 class LocalGameDialog : public QDialog {

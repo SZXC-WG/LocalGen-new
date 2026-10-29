@@ -44,13 +44,14 @@ constexpr int uniformPercentageCount(std::uint64_t& state, int total,
 class Generator {
    public:
     Generator(int width, int height, int spawnCount, std::uint64_t seed,
-              bool placeSwamp, bool placeLookout, bool placeObservatory,
-              double mountainDensity)
+              bool cityState, bool placeSwamp, bool placeLookout,
+              bool placeObservatory, double mountainDensity)
         : width_(width),
           height_(height),
           totalTiles_(width_ > 0 && height_ > 0 ? width_ * height_ : 0),
           outputSpawnCount_(std::clamp(spawnCount, 0, totalTiles_)),
           searchSpawnCount_(std::max(outputSpawnCount_, 1)),
+          cityState_(cityState),
           placeSwamp_(placeSwamp),
           placeLookout_(placeLookout),
           placeObservatory_(placeObservatory),
@@ -453,11 +454,36 @@ class Generator {
                 }
             }
         }
+        if (cityState_) {
+            const int spawnCount = std::min(
+                outputSpawnCount_, static_cast<int>(bestSpawns_.size()));
+            for (int i = 0; i < spawnCount; ++i) {
+                const int u = bestSpawns_[i];
+                const int row = u / width_, col = u % width_;
+                std::array<int, 4> candidates;
+                int candidateCount = 0;
+                for (auto [dr, dc] : kDirections) {
+                    const int nr = row + dr, nc = col + dc;
+                    if (!inBounds(nr, nc)) continue;
+                    if (board.tileAt(nr + 1, nc + 1).type == TILE_BLANK) {
+                        candidates[candidateCount++] = nr * width_ + nc;
+                    }
+                }
+                if (candidateCount > 0) {
+                    const int pick =
+                        candidates[fastRand(cityArmySeed_) % candidateCount];
+                    Tile& cityTile =
+                        board.tileAt(pick / width_ + 1, pick % width_ + 1);
+                    cityTile.type = TILE_CITY;
+                    cityTile.army = 0;
+                }
+            }
+        }
         return board;
     }
 
     int width_, height_, totalTiles_, outputSpawnCount_, searchSpawnCount_;
-    bool placeSwamp_, placeLookout_, placeObservatory_;
+    bool cityState_, placeSwamp_, placeLookout_, placeObservatory_;
     double mountainDensity_;
 
     std::uint64_t searchSeed_, decorateSeed_, cityArmySeed_;
@@ -474,10 +500,11 @@ class Generator {
 }  // namespace detail
 
 inline Board Board::generate(int width, int height, int spawnCount,
-                             std::uint64_t seed, bool placeSwamp,
-                             bool placeLookout, bool placeObservatory,
-                             double mountainDensity) {
-    return detail::Generator(width, height, spawnCount, seed, placeSwamp,
-                             placeLookout, placeObservatory, mountainDensity)
+                             std::uint64_t seed, bool cityState,
+                             bool placeSwamp, bool placeLookout,
+                             bool placeObservatory, double mountainDensity) {
+    return detail::Generator(width, height, spawnCount, seed, cityState,
+                             placeSwamp, placeLookout, placeObservatory,
+                             mountainDensity)
         .run();
 }

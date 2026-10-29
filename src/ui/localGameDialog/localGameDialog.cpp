@@ -86,6 +86,9 @@ LocalGameConfig LocalGameDialog::config() const {
     config.gameConfig.crystalClear = ui->checkBox_crystalClear->isChecked();
     config.gameConfig.fadingSmog = ui->checkBox_fadingSmog->isChecked();
     config.gameConfig.leapfrog = ui->checkBox_leapfrog->isChecked();
+    config.gameConfig.cityState =
+        ui->checkBox_cityState->isChecked() && config.mapFilePath.isEmpty();
+    config.gameConfig.defenseless = ui->checkBox_defenseless->isChecked();
     config.gameConfig.slippery = ui->checkBox_slippery->isChecked();
     config.gameConfig.silentWar = ui->checkBox_silentWar->isChecked();
     config.showAnalysis = config.showAnalysis && !config.gameConfig.silentWar;
@@ -220,6 +223,7 @@ void LocalGameDialog::on_comboBox_gameMap_currentIndexChanged(int index) {
         ui->comboBox_gameMap->itemData(index, MapPathRole).toString().isEmpty();
     ui->spinBox_mapWidth->setEnabled(isRandom);
     ui->spinBox_mapHeight->setEnabled(isRandom);
+    ui->checkBox_cityState->setEnabled(isRandom);
 
     if (!isRandom) {
         ui->spinBox_mapWidth->setValue(

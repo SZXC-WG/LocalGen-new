@@ -305,8 +305,9 @@ inline void BasicGame::step() {
             toTile.army += takenArmy;
         } else {
             toTile.army -= takenArmy;
-            if (toTile.army < 0) {
-                toTile.army = -toTile.army;
+            if (toTile.army < 0 ||
+                (conf.defenseless && toTile.type == TILE_GENERAL)) {
+                toTile.army = std::max<army_t>(0, -toTile.army);
                 if (toTile.type == TILE_GENERAL) {
                     capture(player, toTile.occupier);
                 }

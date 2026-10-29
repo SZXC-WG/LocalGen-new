@@ -74,8 +74,9 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     Board initialBoard;
     if (config.mapFilePath.isEmpty()) {
         const quint64 seed = QRandomGenerator64::global()->generate();
-        initialBoard = Board::generate(config.mapWidth, config.mapHeight,
-                                       numPlayers, seed);
+        initialBoard =
+            Board::generate(config.mapWidth, config.mapHeight, numPlayers, seed,
+                            config.gameConfig.cityState);
     } else {
         QString errMsg;
         MapDocument mapDoc = openMap_v6(config.mapFilePath, errMsg);

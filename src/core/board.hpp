@@ -441,8 +441,8 @@ class Board {
     }
 
     static Board generate(int width, int height, int spawnCount,
-                          std::uint64_t seed, bool placeSwamp = false,
-                          bool placeLookout = false,
+                          std::uint64_t seed, bool cityState = false,
+                          bool placeSwamp = false, bool placeLookout = false,
                           bool placeObservatory = false,
                           double mountainDensity = 0.25);
 };

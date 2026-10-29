@@ -379,9 +379,6 @@
       </item>
       <item row="3" column="1">
        <widget class="QCheckBox" name="checkBox_cityState">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="font">
          <font>
           <family>Quicksand</family>
@@ -389,7 +386,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Coming soon. This modifier is not available yet.</string>
+         <string>Every player gets a free city next to their general to start the game. Does not apply if a map is set.</string>
         </property>
         <property name="text">
          <string>City State</string>
@@ -398,9 +395,6 @@
       </item>
       <item row="4" column="0">
        <widget class="QCheckBox" name="checkBox_defenseless">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="font">
          <font>
           <family>Quicksand</family>
@@ -408,7 +402,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Coming soon. This modifier is not available yet.</string>
+         <string>Any amount of troops is enough to capture an opponent's general.</string>
         </property>
         <property name="text">
          <string>Defenseless</string>

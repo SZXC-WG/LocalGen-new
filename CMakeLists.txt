@@ -16,19 +16,6 @@ endif()
 
 find_package(Qt6 6.7 REQUIRED COMPONENTS Widgets Svg Network Charts)
 
-set(LOCALGEN_BOT_SOURCES
-    src/bots/smartRandomBot.cpp
-    src/bots/xiaruizeBot.cpp
-    src/bots/szlyBot.cpp
-    src/bots/zlyBot.cpp
-    src/bots/zlyBot_v2.cpp
-    src/bots/zlyBot_v2.1.cpp
-    src/bots/gcBot.cpp
-    src/bots/ktqBot.cpp
-    src/bots/oimBot.cpp
-    src/bots/KutuBot.cpp
-)
-
 set(LOCALGEN_PLATFORM_RESOURCES)
 
 if(WIN32)
@@ -73,8 +60,34 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     APP_VERSION_STRING="${LOCALGEN_FULL_VERSION}"
 )
 
-target_sources(${PROJECT_NAME} PRIVATE
-    src/main.cpp
+set(LOCALGEN_CORE_SOURCES
+    src/core/board.hpp
+    src/core/bot.h
+    src/core/game-config.hpp
+    src/core/game.hpp
+    src/core/map.hpp
+    src/core/mapgen.hpp
+    src/core/message.hpp
+    src/core/move.hpp
+    src/core/player.hpp
+    src/core/tile.hpp
+    src/core/utils.hpp
+)
+
+set(LOCALGEN_BOT_SOURCES
+    src/bots/smartRandomBot.cpp
+    src/bots/xiaruizeBot.cpp
+    src/bots/szlyBot.cpp
+    src/bots/zlyBot.cpp
+    src/bots/zlyBot_v2.cpp
+    src/bots/zlyBot_v2.1.cpp
+    src/bots/gcBot.cpp
+    src/bots/ktqBot.cpp
+    src/bots/oimBot.cpp
+    src/bots/KutuBot.cpp
+)
+
+set(LOCALGEN_UI_SOURCES
     src/ui/mainWindow/mainWindow.cpp
     src/ui/mainWindow/mainWindow.h
     src/ui/mainWindow/mainWindow.ui
@@ -95,18 +108,13 @@ target_sources(${PROJECT_NAME} PRIVATE
     src/ui/mapCreatorWindow/mapCreatorWindow.h
     src/ui/utils/generalsButton.hpp
     src/ui/utils/surrenderConfirmDialog.hpp
+)
+
+target_sources(${PROJECT_NAME} PRIVATE
+    src/main.cpp
+    ${LOCALGEN_CORE_SOURCES}
     ${LOCALGEN_BOT_SOURCES}
-    src/core/board.hpp
-    src/core/bot.h
-    src/core/game-config.hpp
-    src/core/game.hpp
-    src/core/map.hpp
-    src/core/mapgen.hpp
-    src/core/message.hpp
-    src/core/move.hpp
-    src/core/player.hpp
-    src/core/tile.hpp
-    src/core/utils.hpp
+    ${LOCALGEN_UI_SOURCES}
     res/res.qrc
     ${LOCALGEN_PLATFORM_RESOURCES}
 )
@@ -120,18 +128,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Svg Qt6::Network
 
 add_executable(LocalGen-bot-simulator
     simulator/botSimulator.cpp
+    ${LOCALGEN_CORE_SOURCES}
     ${LOCALGEN_BOT_SOURCES}
-    src/core/board.hpp
-    src/core/bot.h
-    src/core/game-config.hpp
-    src/core/game.hpp
-    src/core/map.hpp
-    src/core/mapgen.hpp
-    src/core/message.hpp
-    src/core/move.hpp
-    src/core/player.hpp
-    src/core/tile.hpp
-    src/core/utils.hpp
 )
 
 target_include_directories(LocalGen-bot-simulator PRIVATE

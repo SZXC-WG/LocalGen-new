@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 /**
- * @file SmartRandomBot.cpp
+ * @file smartRandomBot.cpp
  *
  * Legacy `smartRandomBot` from LocalGen v5.
  *
@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <deque>
 #include <random>
+#include <ranges>
+#include <tuple>
 #include <vector>
 
 #include "core/bot.h"
@@ -19,13 +21,12 @@
 
 class SmartRandomBot : public BasicBot {
    private:
-    constexpr static pos_t dx[5] = {0, -1, 0, 1, 0};
-    constexpr static pos_t dy[5] = {0, 0, -1, 0, 1};
+    constexpr static Coord directions[4] = {{-1, 0}, {0, -1}, {1, 0}, {0, 1}};
     std::mt19937 rng{std::random_device{}()};
     std::deque<Coord> lastCoords;
     index_t playerId = -1;
 
-    inline Coord determineMaxArmyPos(const BoardView& boardView) {
+    Coord determineMaxArmyPos(const BoardView& boardView) {
         Coord maxArmyPos(-1, -1);
         army_t maxArmy = 0;
         for (pos_t i = 1; i <= boardView.row; ++i) {
@@ -41,13 +42,14 @@ class SmartRandomBot : public BasicBot {
     }
 
    public:
-    void init(index_t playerId, const GameConstantsPack& constants) override {
+    void init(index_t playerId, const GameConstantsPack&) override {
         this->playerId = playerId;
     }
 
     void requestMove(const BoardView& boardView,
-                     const std::vector<RankItem>& rank) override {
+                     const std::vector<RankItem>&) override {
         moveQueue.clear();
+
         // The concept of "focus" does not exist any more in v6.
         // We will refer to `lastCoords.back()`, and try to move from it.
         Coord coo(-1, -1);
@@ -63,41 +65,37 @@ class SmartRandomBot : public BasicBot {
             lastCoords.clear();
             return;
         }
-        struct node {
-            tile_type_e type;
-            index_t occupier;
-            army_t army;
-            int dir;
-            std::ptrdiff_t lastCount;
+
+        // Filter valid moves from `coo`
+        auto isValidPos = [&](Coord pos) {
+            return pos.x >= 1 && pos.x <= boardView.row && pos.y >= 1 &&
+                   pos.y <= boardView.col;
         };
-        std::vector<node> p;
-        for (int i = 1; i <= 4; ++i) {
-            int nx = coo.x + dx[i], ny = coo.y + dy[i];
-            if (nx < 1 || nx > boardView.row || ny < 1 || ny > boardView.col)
-                continue;
-            const TileView& tile = boardView.tileAt(nx, ny);
-            if (isImpassableTile(tile.type)) continue;
-            p.push_back(node{tile.type, tile.occupier, tile.army, i,
-                             std::find(lastCoords.rbegin(), lastCoords.rend(),
-                                       Coord(nx, ny)) -
-                                 lastCoords.rbegin()});
-        }
-        if (p.empty()) return;
+        auto candidates =
+            directions |
+            std::views::transform([&](Coord offset) { return coo + offset; }) |
+            std::views::filter([&](Coord next) {
+                return isValidPos(next) &&
+                       !isImpassableTile(boardView.tileAt(next).type);
+            });
+        if (candidates.empty()) return;
+
+        // Determine next move by priority
         bool rdret = rng() & 1;
-        auto cmp = [&](const node& a, const node& b) -> bool {
-            if (a.lastCount != b.lastCount) return a.lastCount > b.lastCount;
-            if (a.type == TILE_GENERAL && a.occupier != playerId) return true;
-            if (b.type == TILE_GENERAL && b.occupier != playerId) return false;
-            if (a.occupier == -1) return rdret;
-            if (b.occupier == -1) return !rdret;
-            if (a.occupier == playerId && b.occupier != playerId) return false;
-            if (a.occupier != playerId && b.occupier == playerId) return true;
-            if (a.occupier == playerId && b.occupier == playerId)
-                return a.army > b.army;
-            return a.army < b.army;
-        };
-        int best_dir = std::min_element(p.begin(), p.end(), cmp)->dir;
-        Coord nextCoo(coo.x + dx[best_dir], coo.y + dy[best_dir]);
+        auto recentCoords = lastCoords | std::views::reverse;
+        Coord nextCoo = std::ranges::min(candidates, {}, [&](Coord next) {
+            const TileView& tile = boardView.tileAt(next);
+            bool own = tile.occupier == playerId;
+            return std::tuple{
+                recentCoords.begin() - std::ranges::find(recentCoords, next),
+                tile.type != TILE_GENERAL || own,
+                (tile.occupier == -1) != rdret,
+                own,
+                own ? ~tile.army : tile.army,
+            };
+        });
+
+        // Record & execute the move
         lastCoords.push_back(nextCoo);
         if (lastCoords.size() > 100) lastCoords.pop_front();
         moveQueue.emplace_back(MoveType::MOVE_ARMY, coo, nextCoo, false);

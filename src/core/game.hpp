@@ -332,11 +332,11 @@ inline void BasicGame::step() {
     }
 
     // update board
-    if (curHalfTurnPhase == 0) {
-        board.update(curTurn > 0 && curTurn % 25 == 0);
-    }
     curTurn += curHalfTurnPhase;
     curHalfTurnPhase ^= 1;
+    if (curHalfTurnPhase == 0) {
+        board.update(curTurn % 25 == 0);
+    }
     board.updateVisionCache(conf, getPlayerCount(), getSmogRings());
 
     // request moves (for next turn)
@@ -445,7 +445,7 @@ inline int BasicGame::init() {
         Tile& spawnTile = board.tileAt(spawnCoord[i]);
         spawnTile.occupier = i;
         spawnTile.type = TILE_GENERAL;
-        spawnTile.army = 0;  // will be updated in the first turn
+        spawnTile.army = 1;
     }
 
     const GameConstantsPack constants{board.getHeight(), board.getWidth(),

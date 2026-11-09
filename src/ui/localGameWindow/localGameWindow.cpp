@@ -304,13 +304,9 @@ void LocalGameWindow::runHalfTurn() {
     }
     updateLeaderboard(game->ranklist());
 
-    turn_t curTurn = game->getCurTurn();
-    uint8_t curHalfTurnPhase = game->getHalfTurnPhase();
-    if (curHalfTurnPhase == 0) {
-        turnLabel->setText(QString("Turn %1.").arg(curTurn - 1));
-    } else {
-        turnLabel->setText(QString("Turn %1").arg(curTurn));
-    }
+    turnLabel->setText(
+        QString(game->getHalfTurnPhase() == 0 ? "Turn %1" : "Turn %1.")
+            .arg(game->getCurTurn()));
 
     double elapsedMs = static_cast<double>(elapsedTimer.nsecsElapsed()) / 1e6;
 

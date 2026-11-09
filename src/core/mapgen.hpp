@@ -475,7 +475,7 @@ class Generator {
                     Tile& cityTile =
                         board.tileAt(pick / width_ + 1, pick % width_ + 1);
                     cityTile.type = TILE_CITY;
-                    cityTile.army = 0;
+                    cityTile.army = -1;
                 }
             }
         }

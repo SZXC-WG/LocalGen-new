@@ -32,5 +32,5 @@ struct GameConfig {
 };
 
 constexpr bool isValidConfig(const GameConfig& conf) noexcept {
-    return !(conf.crystalClear && conf.mistyVeil);
+    return !(conf.crystalClear && (conf.mistyVeil || conf.fadingSmog));
 }

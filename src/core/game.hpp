@@ -91,14 +91,6 @@ class BasicGame {
         return names;
     }
 
-    /// How many soft-vision rings Fading Smog should have grown by now.
-    /// This count starts from 0, and grows by 1 every 25 half-turns.
-    /// When Fading Smog is off, this function always returns 0.
-    int getSmogRings() const noexcept {
-        if (!conf.fadingSmog) return 0;
-        return (static_cast<int>(curTurn) * 2 + curHalfTurnPhase) / 25;
-    }
-
     const BoardView& view(index_t player) const {
         BoardView& playerView = playerViews.at(player);
         board.view(player, playerView);
@@ -337,7 +329,8 @@ inline void BasicGame::step() {
     if (curHalfTurnPhase == 0) {
         board.update(curTurn % 25 == 0);
     }
-    board.updateVisionCache(conf, getPlayerCount(), getSmogRings());
+    board.updateVisionCache(conf, getPlayerCount(),
+                            curTurn * 2 + curHalfTurnPhase);
 
     // request moves (for next turn)
     std::vector<RankItem> rank = ranklist();
@@ -431,6 +424,7 @@ inline int BasicGame::initSpawn() {
 }
 
 inline int BasicGame::init() {
+    if (!isValidConfig(conf)) return 2;
     if (const int result = initSpawn()) return result;
 
     for (Tile& tile : board.tiles) {
@@ -459,7 +453,7 @@ inline int BasicGame::init() {
 
     surrenderQueue = decltype(surrenderQueue)();
 
-    board.updateVisionCache(conf, getPlayerCount(), getSmogRings());
+    board.updateVisionCache(conf, getPlayerCount());
     return 0;
 }
 

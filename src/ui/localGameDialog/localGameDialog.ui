@@ -338,7 +338,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Reveal the entire map to all players. Selecting this turns off Misty Veil.</string>
+         <string>Reveal the entire map to all players. Selecting this turns off Misty Veil and Fading Smog.</string>
         </property>
         <property name="text">
          <string>Crystal Clear</string>
@@ -370,7 +370,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Retain explored vision and expand it by one ring every 25 half-turns. Enemy territory can block this vision.</string>
+         <string>Expand vision connected to your territory every 25 half-turns. Enemy territory can block the spread. Selecting this turns off Crystal Clear.</string>
         </property>
         <property name="text">
          <string>Fading Smog</string>

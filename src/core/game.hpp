@@ -154,6 +154,37 @@ class BasicGame {
         return true;
     }
 
+    /// Broadcast a system notice listing any enabled modifiers.
+    void announceModifiers() {
+        static constexpr std::pair<bool Modifiers::*, const char*>
+            kModifiers[] = {
+                {&Modifiers::watchtower, "Watchtower"},
+                {&Modifiers::mistyVeil, "Misty Veil"},
+                {&Modifiers::crystalClear, "Crystal Clear"},
+                {&Modifiers::fadingSmog, "Fading Smog"},
+                {&Modifiers::leapfrog, "Leapfrog"},
+                {&Modifiers::cityState, "City State"},
+                {&Modifiers::defenseless, "Defenseless"},
+                {&Modifiers::defection, "Defection"},
+                {&Modifiers::slippery, "Slippery"},
+                {&Modifiers::silentWar, "Silent War"},
+        };
+
+        std::string modList;
+        std::size_t count = 0;
+        for (auto [field, label] : kModifiers) {
+            if (!(mod.*field)) continue;
+            if (count++ > 0) modList.append(", ");
+            modList.append(label);
+        }
+        if (count == 1) {
+            sendSystemMessage("1 modifier is enabled: " + modList);
+        } else if (count > 1) {
+            sendSystemMessage(std::to_string(count) +
+                              " modifiers are enabled: " + modList);
+        }
+    }
+
     /// Broadcast a system notice listing any special tile types on the board.
     void announceSpecialTiles() {
         bool hasTile[TILE_TYPE_COUNT] = {};
@@ -422,6 +453,7 @@ class BasicGame {
     /// Advance the game by one half-turn.
     void step() {
         if (curTurn == 0 && curHalfTurnPhase == 0) {
+            announceModifiers();
             announceSpecialTiles();
         }
 

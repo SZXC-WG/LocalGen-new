@@ -16,8 +16,8 @@
 #include <deque>
 #include <vector>
 
-#include "core/board.hpp"
 #include "core/move.hpp"
+#include "core/tile.hpp"
 
 struct DisplayTile {
     tile_type_e type = TILE_BLANK;

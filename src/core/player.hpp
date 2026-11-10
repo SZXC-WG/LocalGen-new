@@ -13,7 +13,6 @@
  * Players are basic participants of games.
  */
 
-#include <cstdint>
 #include <deque>
 #include <functional>
 #include <string>

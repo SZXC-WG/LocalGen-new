@@ -6,7 +6,7 @@
 #include <qmath.h>
 
 #include <QAbstractButton>
-#include <QEnterEvent>
+#include <QEvent>
 #include <QPainter>
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>

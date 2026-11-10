@@ -10,7 +10,7 @@
  *
  * Games
  *
- * Core game operations
+ * Core game state machine, turn resolution, and player coordination.
  */
 
 #include <algorithm>
@@ -38,12 +38,14 @@
 #include "utils.hpp"
 #include "vision.hpp"
 
+/// Immutable game parameters passed to players during initialization.
 struct GameConstantsPack {
     pos_t mapHeight, mapWidth;
     index_t playerCount;
     GameConfig config;
 };
 
+/// Leaderboard entry for a single player.
 struct RankItem {
     army_t army = 0;
     index_t player = -1;
@@ -53,39 +55,451 @@ struct RankItem {
     bool alive = false;
 };
 
+/// Core game engine managing board state, turn execution, vision, and events.
 class BasicGame {
    protected:
-    std::mt19937 rng{std::random_device()()};
-    turn_t curTurn{};
-    uint8_t curHalfTurnPhase{};
+    // ---- Core Game State ----------------------------------------------------
 
-   public:
-    turn_t getCurTurn() const noexcept { return curTurn; }
-    uint8_t getHalfTurnPhase() const noexcept { return curHalfTurnPhase; }
+    const GameConfig conf;
+    Board board;
+    Vision vision;
+    std::mt19937 rng{std::random_device{}()};
+    turn_t curTurn = 0;
+    uint8_t curHalfTurnPhase = 0;
 
-   protected:
+    // ---- Player State -------------------------------------------------------
+
     std::vector<Player*> players;
-    mutable std::vector<BoardView> playerViews;
     std::vector<std::string> names;
+    mutable std::vector<BoardView> playerViews;
     std::vector<bool> alive;
     std::vector<int> killCount;
     std::vector<turn_t> eliminatedTurn;
-    std::vector<Coord> spawnCoord;
+
+    // ---- Queues & Callbacks -------------------------------------------------
+
+    std::deque<std::pair<index_t, turn_t>> surrenderQueue;
+    std::function<void(const GameEvent&)> eventCallback;
+
+    // ---- Turn & Player Helpers ----------------------------------------------
+
+    constexpr turn_t curHalfTurn() const noexcept {
+        return (curTurn << 1) | curHalfTurnPhase;
+    }
 
     constexpr bool isValidPlayer(index_t player) const noexcept {
         return player >= 0 && player < static_cast<index_t>(players.size());
     }
 
-   public:
-    constexpr bool isAlive(index_t player) const noexcept {
-        return isValidPlayer(player) && alive[player];
+    void eliminatePlayer(index_t player) noexcept {
+        alive[player] = false;
+        eliminatedTurn[player] = curHalfTurn();
     }
+
+    // ---- Initialization & Spawn Helpers -------------------------------------
+
+    /// Select and assign one general tile per player by priority:
+    /// 1. One random spawn from each labeled team group
+    /// 2. Unlabeled spawn tiles
+    /// 3. Remaining tiles from labeled team groups
+    /// 4. Empty plain tiles
+    [[nodiscard]] bool initSpawn() {
+        const std::size_t playerCount = players.size();
+        std::unordered_map<unsigned, std::vector<Coord>> spawnGroups;
+        std::vector<Coord> unlabelledSpawns, emptySpawns;
+
+        board.forEachTile([&](Coord coord, const Tile& tile) {
+            if (tile.type == TILE_SPAWN) {
+                (tile.spawnTeam == 0 ? unlabelledSpawns
+                                     : spawnGroups[tile.spawnTeam])
+                    .push_back(coord);
+            } else if (tile.type == TILE_PLAIN && tile.army == 0) {
+                emptySpawns.push_back(coord);
+            }
+        });
+
+        std::vector<Coord> primarySpawns, extraSpawns;
+        for (auto& [_, group] : spawnGroups) {
+            std::ranges::shuffle(group, rng);
+            primarySpawns.push_back(group.front());
+            extraSpawns.insert(extraSpawns.end(), group.begin() + 1,
+                               group.end());
+        }
+
+        std::vector<Coord> spawns;
+        spawns.reserve(playerCount);
+        for (auto* pool :
+             {&primarySpawns, &unlabelledSpawns, &extraSpawns, &emptySpawns}) {
+            if (spawns.size() == playerCount) break;
+            std::ranges::shuffle(*pool, rng);
+            const std::size_t needed =
+                std::min(playerCount - spawns.size(), pool->size());
+            spawns.insert(spawns.end(), pool->begin(), pool->begin() + needed);
+        }
+        if (spawns.size() < playerCount) return false;
+
+        std::ranges::shuffle(spawns, rng);
+        for (Tile& tile : board.tiles()) {
+            if (tile.type == TILE_SPAWN) {
+                tile.type = TILE_BLANK;
+                tile.army = 0;
+            }
+        }
+        for (index_t i = 0; i < getPlayerCount(); ++i) {
+            Tile& spawnTile = board.tileAt(spawns[i]);
+            spawnTile.occupier = i;
+            spawnTile.type = TILE_GENERAL;
+            spawnTile.army = 1;
+        }
+        return true;
+    }
+
+    /// Broadcast a system notice listing any special tile types on the board.
+    void announceSpecialTiles() {
+        bool hasTile[TILE_TYPE_COUNT] = {};
+        for (const Tile& tile : board.tiles()) {
+            if (tile.type >= 0 && tile.type < TILE_TYPE_COUNT) {
+                hasTile[tile.type] = true;
+            }
+        }
+
+        static constexpr std::pair<tile_type_e, const char*> kSpecialTypes[] = {
+            {TILE_SWAMP, "swamps"},
+            {TILE_DESERT, "deserts"},
+            {TILE_LOOKOUT, "lookouts"},
+            {TILE_OBSERVATORY, "observatories"},
+        };
+
+        std::string tileList;
+        std::size_t count = 0;
+        for (auto [type, label] : kSpecialTypes) {
+            if (!hasTile[type]) continue;
+            if (count++ > 0) tileList.append(", ");
+            tileList.append(label);
+        }
+        if (count == 1) {
+            sendSystemMessage("1 special tile is enabled: " + tileList);
+        } else if (count > 1) {
+            sendSystemMessage(std::to_string(count) +
+                              " special tiles are enabled: " + tileList);
+        }
+    }
+
+    // ---- Board & Territory Updates ------------------------------------------
+
+    /// Apply full-turn army growth and swamp attrition across all owned tiles.
+    void updateBoard(bool increaseAllArmy = false) noexcept {
+        for (Tile& tile : board.tiles()) {
+            if (tile.occupier == -1) continue;
+            switch (tile.type) {
+                case TILE_DESERT:           continue;
+                case TILE_CITY:
+                case TILE_GENERAL:
+                case TILE_CAPTURED_GENERAL: ++tile.army; break;
+                case TILE_SWAMP:
+                    if (tile.army > 0 && --tile.army == 0) {
+                        tile.occupier = -1;
+                        continue;
+                    }
+                    break;
+                default: break;
+            }
+            if (increaseAllArmy) ++tile.army;
+        }
+    }
+
+    /// Turn all tiles of `player` neutral and mark their general as captured.
+    void neutralize(index_t player) noexcept {
+        alive[player] = false;
+        for (Tile& tile : board.tiles()) {
+            if (tile.occupier == player) {
+                tile.occupier = -1;
+                if (tile.type == TILE_GENERAL) {
+                    tile.type = TILE_CAPTURED_GENERAL;
+                }
+            }
+        }
+    }
+
+    /// Handle `p1` capturing `p2`'s general: eliminate `p2`, halve `p2`'s
+    /// remaining armies, transfer territory to `p1`, and broadcast the capture.
+    void capture(index_t p1, index_t p2) {
+        ++killCount[p1];
+        eliminatePlayer(p2);
+
+        for (Tile& tile : board.tiles()) {
+            if (tile.occupier == p2) {
+                tile.occupier = p1;
+                if (tile.type == TILE_GENERAL) {
+                    // Leapfrog: victor's general moves to the captured general,
+                    // so its type remains TILE_GENERAL.
+                    if (!conf.leapfrog) tile.type = TILE_CAPTURED_GENERAL;
+                } else if (tile.army > 1) {
+                    tile.army = (tile.army + 1) >> 1;
+                }
+            } else if (conf.leapfrog && tile.occupier == p1 &&
+                       tile.type == TILE_GENERAL) {
+                // The original general becomes a city,
+                // but stays displayed as a blank tile in others' fog.
+                tile.type = TILE_CAPTURED_GENERAL;
+            }
+        }
+
+        broadcast(curTurn, GameMessageCapture{p1, p2});
+    }
+
+    /// Tick surrender countdowns and neutralize players whose timers expire.
+    void processSurrenderQueue() noexcept {
+        for (auto& [_, turnsLeft] : surrenderQueue) --turnsLeft;
+        while (!surrenderQueue.empty() && surrenderQueue.front().second <= 0) {
+            neutralize(surrenderQueue.front().first);
+            surrenderQueue.pop_front();
+        }
+    }
+
+    // ---- Move Validation, Ordering & Execution ------------------------------
+
+    /// Check whether `move` is currently legal for `player`.
+    bool isMoveAvailable(index_t player, Move move) const noexcept {
+        if (move.type == MoveType::EMPTY) return false;
+        if (move.type == MoveType::SURRENDER) return true;
+        assert(move.type == MoveType::MOVE_ARMY);
+
+        const Coord &from = move.from, &to = move.to;
+        if (board.isInvalidPos(from) || board.isInvalidPos(to)) return false;
+        if (std::abs(from.x - to.x) + std::abs(from.y - to.y) != 1)
+            return false;
+
+        const Tile& fromTile = board.tileAt(from);
+        if (fromTile.occupier != player || fromTile.army <= 1) return false;
+        return !isImpassableTile(board.tileAt(to).type);
+    }
+
+    /// Compute move execution priority: `(categoryRank, sourceArmy, tieBreak)`.
+    std::tuple<int, army_t, index_t> movePriority(
+        index_t player, const std::vector<Move>& moves) const noexcept {
+        const Move& move = moves[player];
+        const Tile& target = board.tileAt(move.to);
+
+        // Default: general (0) < normal (1) < defensive (2) < chase (3).
+        // Chase takes precedence even when the fleeing enemy is on a general.
+        int rank = 1;
+        if (target.occupier == player) {
+            rank = 2;
+        } else if (isValidPlayer(target.occupier)) {
+            if (moves[target.occupier].type == MoveType::MOVE_ARMY &&
+                moves[target.occupier].from == move.to) {
+                rank = 3;
+            } else if (target.type == TILE_GENERAL) {
+                rank = 0;
+            }
+        }
+        // Slippery: general (0) < chase (1) < normal (2) < defensive (3).
+        if (conf.slippery && rank > 0) rank = rank % 3 + 1;
+
+        return {rank, board.tileAt(move.from).army,
+                curHalfTurnPhase ? player : -player};
+    }
+
+    /// Execute a single army move for `player` if still valid.
+    void executeMove(index_t player, const Move& move) {
+        if (!alive[player] || !isMoveAvailable(player, move)) {
+            return;  // Skip just-captured players or invalid moves.
+        }
+
+        Tile& fromTile = board.tileAt(move.from);
+        Tile& toTile = board.tileAt(move.to);
+
+        const army_t takenArmy =
+            move.takeHalf ? (fromTile.army >> 1) : (fromTile.army - 1);
+        fromTile.army -= takenArmy;
+
+        if (toTile.occupier == player) {
+            toTile.army += takenArmy;
+            return;
+        }
+
+        toTile.army -= takenArmy;
+        if (toTile.army < 0 ||
+            (conf.defenseless && toTile.type == TILE_GENERAL)) {
+            toTile.army = std::max<army_t>(0, -toTile.army);
+            if (toTile.type == TILE_GENERAL) {
+                capture(player, toTile.occupier);
+            }
+            toTile.occupier = player;
+        }
+    }
+
+    /// Poll each alive player's next valid move, process surrenders, sort army
+    /// moves by priority, and execute them in order.
+    void collectAndExecuteMoves() {
+        std::vector<Move> moves(players.size());
+        std::vector<index_t> moveOrder;
+
+        for (index_t i = 0; i < getPlayerCount(); ++i) {
+            if (!alive[i]) continue;
+            Move& move = moves[i];
+            while ((move = players[i]->step()).type != MoveType::EMPTY &&
+                   !isMoveAvailable(i, move));
+            if (move.type == MoveType::MOVE_ARMY) {
+                moveOrder.push_back(i);
+            } else if (move.type == MoveType::SURRENDER) {
+                surrenderQueue.emplace_back(i, 50);
+                eliminatePlayer(i);
+                broadcast(curTurn, GameMessageSurrender{i});
+            }
+        }
+
+        std::ranges::sort(
+            moveOrder, std::ranges::greater{},
+            [&](index_t i) noexcept { return movePriority(i, moves); });
+
+        for (index_t player : moveOrder) {
+            executeMove(player, moves[player]);
+        }
+    }
+
+   public:
+    // ---- Construction & Initialization --------------------------------------
+
+    BasicGame() = delete;
+
+    BasicGame(std::vector<Player*> _players, std::vector<std::string> name,
+              Board _board, GameConfig config)
+        : conf(config),
+          board(std::move(_board)),
+          players(std::move(_players)),
+          names(std::move(name)),
+          playerViews(players.size(),
+                      BoardView(board.getHeight(), board.getWidth())),
+          alive(players.size()),
+          killCount(players.size()),
+          eliminatedTurn(players.size(), std::numeric_limits<turn_t>::max()) {
+        if (players.empty()) {
+            throw std::invalid_argument(
+                "BasicGame requires at least one player");
+        }
+        if (players.size() != names.size()) {
+            throw std::invalid_argument(
+                "BasicGame players/names size mismatch");
+        }
+        if (std::ranges::find(players, nullptr) != players.end()) {
+            throw std::invalid_argument(
+                "BasicGame received null player pointer");
+        }
+    }
+
+    ~BasicGame() {
+        for (Player* player : players) delete player;
+    }
+
+    /// Initialize spawns, board tiles, players, and initial vision.
+    /// Returns 0 on success, 1 if spawns are insufficient, 2 if config is
+    /// invalid.
+    [[nodiscard]] int init() {
+        if (!isValidConfig(conf)) return 2;
+        if (!initSpawn()) return 1;
+
+        alive.assign(players.size(), true);
+        surrenderQueue.clear();
+
+        const GameConstantsPack constants{board.getHeight(), board.getWidth(),
+                                          getPlayerCount(), conf};
+        for (index_t i = 0; i < getPlayerCount(); ++i) {
+            players[i]->setSendMessageCallback(
+                [this, i](const std::string& text) {
+                    sendPlayerMessage(i, text);
+                });
+            players[i]->init(i, constants);
+        }
+
+        vision.update(board, conf, getPlayerCount());
+        return 0;
+    }
+
+    // ---- Simulation & Ranking -----------------------------------------------
+
+    /// Advance the game by one half-turn.
+    void step() {
+        if (curTurn == 0 && curHalfTurnPhase == 0) {
+            announceSpecialTiles();
+        }
+
+        collectAndExecuteMoves();
+        processSurrenderQueue();
+
+        if (getAlivePlayerCount() == 1) {
+            const index_t winner = static_cast<index_t>(
+                std::ranges::find(alive, true) - alive.begin());
+            broadcast(curTurn, GameMessageWin{winner});
+        }
+
+        curTurn += curHalfTurnPhase;
+        curHalfTurnPhase ^= 1;
+        if (curHalfTurnPhase == 0) {
+            updateBoard(curTurn % 25 == 0);
+        }
+        vision.update(board, conf, getPlayerCount(), curHalfTurn());
+
+        const std::vector<RankItem> rank = ranklist();
+        for (index_t i = 0; i < getPlayerCount(); ++i) {
+            if (alive[i]) players[i]->requestMove(view(i), rank);
+        }
+    }
+
+    /// Compute the current player leaderboard sorted by descending rank.
+    std::vector<RankItem> ranklist() const {
+        std::vector<RankItem> rank(players.size());
+        for (index_t i = 0; i < getPlayerCount(); ++i) {
+            rank[i].player = i;
+            rank[i].killCount = killCount[i];
+            rank[i].alive = alive[i];
+        }
+
+        for (auto [player, left] : surrenderQueue) {
+            rank[player].surrLeft = left;
+        }
+
+        for (const Tile& tile : board.tiles()) {
+            if (isValidPlayer(tile.occupier)) {
+                RankItem& item = rank[tile.occupier];
+                item.army += tile.army;
+                ++item.land;
+            }
+        }
+
+        std::ranges::sort(
+            rank, std::ranges::greater{}, [&](const RankItem& r) noexcept {
+                return std::tuple(r.killCount > 0, r.army,
+                                  eliminatedTurn[r.player], -r.player);
+            });
+        return rank;
+    }
+
+    // ---- State & View Queries -----------------------------------------------
+
+    constexpr turn_t getCurTurn() const noexcept { return curTurn; }
+    constexpr uint8_t getHalfTurnPhase() const noexcept {
+        return curHalfTurnPhase;
+    }
+
     index_t getPlayerCount() const noexcept {
         return static_cast<index_t>(players.size());
     }
     index_t getAlivePlayerCount() const noexcept {
         return static_cast<index_t>(std::ranges::count(alive, true));
     }
+    constexpr bool isAlive(index_t player) const noexcept {
+        return isValidPlayer(player) && alive[player];
+    }
+    std::vector<index_t> getAlivePlayers() const {
+        std::vector<index_t> res;
+        for (index_t i = 0; i < getPlayerCount(); ++i) {
+            if (alive[i]) res.push_back(i);
+        }
+        return res;
+    }
+
     const std::string& getName(index_t player) const noexcept {
         return names[player];
     }
@@ -101,412 +515,30 @@ class BasicGame {
 
     BoardView fullView() const { return Vision::fullView(board); }
 
-   private:
-    const GameConfig conf;
+    // ---- Events & Messaging -------------------------------------------------
 
-   public:
     void setEventCallback(
         std::function<void(const GameEvent&)> callback) noexcept {
         eventCallback = std::move(callback);
     }
 
-    void broadcast(turn_t turn, GameMessageData messageData);
-    void sendPlayerMessage(index_t sender, std::string text);
+    void broadcast(turn_t turn, GameMessageData messageData) {
+        GameEvent event{turn, curHalfTurnPhase, std::move(messageData)};
+        for (Player* player : players) {
+            player->onGameEvent(event);
+        }
+        if (eventCallback) eventCallback(event);
+    }
+
+    void sendPlayerMessage(index_t sender, std::string text) {
+        auto notspace = [](unsigned char ch) noexcept {
+            return std::isspace(ch) == 0;
+        };
+        if (isValidPlayer(sender) && std::ranges::any_of(text, notspace))
+            broadcast(curTurn, GameMessageText{sender, std::move(text)});
+    }
+
     void sendSystemMessage(std::string text) {
         broadcast(curTurn, GameMessageText{-1, std::move(text)});
     }
-
-   protected:
-    Board board;
-    Vision vision;
-
-    std::deque<std::pair<index_t, turn_t>> surrenderQueue;
-    std::function<void(const GameEvent&)> eventCallback;
-
-    bool isMoveAvailable(index_t player, Move move) const noexcept;
-    void updateBoard(bool increaseAllArmy = false) noexcept;
-    void neutralize(index_t player) noexcept;
-    void takeOver(index_t p1, index_t p2) noexcept;
-    void capture(index_t p1, index_t p2);
-
-   public:
-    BasicGame() = delete;
-    BasicGame(std::vector<Player*> _players, std::vector<std::string> name,
-              Board _board, GameConfig config);
-    ~BasicGame();
-
-    void step();
-
-    std::vector<RankItem> ranklist() const;
-
-    [[nodiscard]] int initSpawn();
-    [[nodiscard]] int init();
-
-    std::vector<index_t> getAlivePlayers() const {
-        std::vector<index_t> res;
-        for (index_t i = 0; i < static_cast<index_t>(alive.size()); ++i) {
-            if (alive[i]) res.push_back(i);
-        }
-        return res;
-    }
 };
-
-inline bool BasicGame::isMoveAvailable(index_t player,
-                                       Move move) const noexcept {
-    if (move.type == MoveType::EMPTY) return false;
-    if (move.type == MoveType::SURRENDER) return true;
-    assert(move.type == MoveType::MOVE_ARMY);
-
-    const Coord &from = move.from, &to = move.to;
-    if (board.isInvalidPos(from) || board.isInvalidPos(to)) return false;
-    if (std::abs(from.x - to.x) + std::abs(from.y - to.y) != 1) return false;
-
-    const Tile& fromTile = board.tileAt(from);
-    if (fromTile.occupier != player || fromTile.army <= 1) return false;
-    return !isImpassableTile(board.tileAt(to).type);
-}
-
-inline void BasicGame::updateBoard(bool increaseAllArmy) noexcept {
-    for (Tile& tile : board.tiles()) {
-        if (tile.occupier == -1) continue;
-        switch (tile.type) {
-            case TILE_DESERT:           continue;
-            case TILE_CITY:
-            case TILE_GENERAL:
-            case TILE_CAPTURED_GENERAL: ++tile.army; break;
-            case TILE_SWAMP:
-                if (tile.army > 0 && --tile.army == 0) {
-                    tile.occupier = -1;
-                    continue;
-                }
-                break;
-            default: break;
-        }
-        if (increaseAllArmy) ++tile.army;
-    }
-}
-
-inline void BasicGame::neutralize(index_t player) noexcept {
-    takeOver(-1, player);
-}
-inline void BasicGame::takeOver(index_t p1, index_t p2) noexcept {
-    alive[p2] = false;
-    for (Tile& tile : board.tiles()) {
-        if (tile.occupier == p2) {
-            tile.occupier = p1;
-            if (tile.type == TILE_GENERAL) {
-                tile.type = TILE_CAPTURED_GENERAL;
-            }
-        }
-    }
-}
-
-inline void BasicGame::capture(index_t p1, index_t p2) {
-    ++killCount[p1];
-    alive[p2] = false;
-    eliminatedTurn[p2] = curTurn << 1 | curHalfTurnPhase;
-
-    for (Tile& tile : board.tiles()) {
-        if (tile.occupier == p2) {
-            tile.occupier = p1;
-            if (tile.type == TILE_GENERAL) {
-                // Leapfrog: victor's general moves to the captured general
-                // so type would still be TILE_GENERAL.
-                if (!conf.leapfrog) tile.type = TILE_CAPTURED_GENERAL;
-            } else if (tile.army > 1) {
-                tile.army = (tile.army + 1) >> 1;
-            }
-        } else if (conf.leapfrog && tile.occupier == p1 &&
-                   tile.type == TILE_GENERAL) {
-            // The original general becomes a city,
-            // but keep it as a blank tile in others' fog.
-            tile.type = TILE_CAPTURED_GENERAL;
-        }
-    }
-
-    broadcast(curTurn, GameMessageCapture{p1, p2});
-}
-
-inline BasicGame::BasicGame(std::vector<Player*> _players,
-                            std::vector<std::string> name, Board _board,
-                            GameConfig config)
-    : players(std::move(_players)),
-      playerViews(players.size(),
-                  BoardView(_board.getHeight(), _board.getWidth())),
-      names(std::move(name)),
-      alive(players.size()),
-      killCount(players.size()),
-      conf(config),
-      board(std::move(_board)) {
-    if (players.empty()) {
-        throw std::invalid_argument("BasicGame requires at least one player");
-    }
-    if (players.size() != names.size()) {
-        throw std::invalid_argument("BasicGame players/names size mismatch");
-    }
-    if (std::ranges::find(players, nullptr) != players.end()) {
-        throw std::invalid_argument("BasicGame received null player pointer");
-    }
-
-    eliminatedTurn.assign(players.size(), std::numeric_limits<turn_t>::max());
-}
-
-inline BasicGame::~BasicGame() {
-    for (auto player : players) delete player;
-}
-
-inline void BasicGame::step() {
-    // send initial notice
-    if (curTurn == 0 && curHalfTurnPhase == 0) {
-        bool hasTile[TILE_TYPE_COUNT] = {false};
-        for (const Tile& tile : board.tiles()) hasTile[tile.type] = true;
-        std::vector<std::string> specialTiles;
-        if (hasTile[TILE_SWAMP]) specialTiles.push_back("swamps");
-        if (hasTile[TILE_DESERT]) specialTiles.push_back("deserts");
-        if (hasTile[TILE_LOOKOUT]) specialTiles.push_back("lookouts");
-        if (hasTile[TILE_OBSERVATORY]) specialTiles.push_back("observatories");
-        if (!specialTiles.empty()) {
-            std::string tileList = specialTiles[0];
-            for (std::size_t i = 1; i < specialTiles.size(); ++i) {
-                tileList.append(", ").append(specialTiles[i]);
-            }
-            if (specialTiles.size() == 1) {
-                sendSystemMessage("1 special tile is enabled: " + tileList);
-            } else {
-                sendSystemMessage(std::to_string(specialTiles.size()) +
-                                  " special tiles are enabled: " + tileList);
-            }
-        }
-    }
-
-    // collect moves
-    std::vector<Move> moves(players.size());
-    std::vector<index_t> moveOrder;
-    for (index_t i : getAlivePlayers()) {
-        Move& move = moves[i];
-        while ((move = players[i]->step()).type != MoveType::EMPTY &&
-               !isMoveAvailable(i, move));
-        if (move.type == MoveType::MOVE_ARMY) {
-            moveOrder.push_back(i);
-        } else if (move.type == MoveType::SURRENDER) {
-            surrenderQueue.emplace_back(i, 50);
-            alive[i] = false;
-            eliminatedTurn[i] = curTurn << 1 | curHalfTurnPhase;
-            broadcast(curTurn, GameMessageSurrender{i});
-        }
-    }
-
-    std::vector<std::tuple<int, army_t, index_t>> priority(players.size());
-    for (index_t i : moveOrder) {
-        const Move& move = moves[i];
-        const Tile& target = board.tileAt(move.to);
-        // General < normal < defensive < chase; chase takes precedence
-        // even when the fleeing enemy is on a general.
-        int rank = 1;
-        if (isValidPlayer(target.occupier)) {
-            if (target.occupier == i)
-                rank = 2;
-            else if (moves[target.occupier].type == MoveType::MOVE_ARMY &&
-                     moves[target.occupier].from == move.to)
-                rank = 3;
-            else if (target.type == TILE_GENERAL)
-                rank = 0;
-        }
-        // Slippery: general < chase < normal < defensive.
-        if (conf.slippery && rank > 0) rank = rank % 3 + 1;
-        // Break ties by source army, then alternating player index.
-        priority[i] = {rank, board.tileAt(move.from).army,
-                       curHalfTurnPhase ? i : -i};
-    }
-    std::ranges::sort(moveOrder, std::ranges::greater{},
-                      [&](index_t i) noexcept { return priority[i]; });
-
-    // execute moves
-    for (index_t player : moveOrder) {
-        const Move& move = moves[player];
-        if (!alive[player] || !isMoveAvailable(player, move))
-            continue;  // skip just-captured players or invalid moves
-
-        Tile& fromTile = board.tileAt(move.from);
-        Tile& toTile = board.tileAt(move.to);
-
-        army_t takenArmy =
-            move.takeHalf ? (fromTile.army >> 1) : (fromTile.army - 1);
-
-        fromTile.army -= takenArmy;
-        if (toTile.occupier == player) {
-            toTile.army += takenArmy;
-        } else {
-            toTile.army -= takenArmy;
-            if (toTile.army < 0 ||
-                (conf.defenseless && toTile.type == TILE_GENERAL)) {
-                toTile.army = std::max<army_t>(0, -toTile.army);
-                if (toTile.type == TILE_GENERAL) {
-                    capture(player, toTile.occupier);
-                }
-                toTile.occupier = player;
-            }
-        }
-    }
-
-    for (auto& entry : surrenderQueue) --entry.second;
-
-    // handle afk players
-    while (!surrenderQueue.empty() && surrenderQueue.front().second <= 0) {
-        index_t player = surrenderQueue.front().first;
-        surrenderQueue.pop_front();
-        neutralize(player);
-    }
-
-    // check win condition
-    std::vector<index_t> alivePlayers = getAlivePlayers();
-    if (alivePlayers.size() == 1) {
-        broadcast(curTurn, GameMessageWin{alivePlayers.front()});
-    }
-
-    // update board
-    curTurn += curHalfTurnPhase;
-    curHalfTurnPhase ^= 1;
-    if (curHalfTurnPhase == 0) {
-        updateBoard(curTurn % 25 == 0);
-    }
-    vision.update(board, conf, getPlayerCount(),
-                  curTurn * 2 + curHalfTurnPhase);
-
-    // request moves (for next turn)
-    std::vector<RankItem> rank = ranklist();
-    for (index_t i : alivePlayers) {
-        players[i]->requestMove(view(i), rank);
-    }
-}
-
-inline std::vector<RankItem> BasicGame::ranklist() const {
-    std::vector<RankItem> rank(players.size());
-    for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
-        rank[i].player = i;
-        rank[i].killCount = killCount[i];
-        rank[i].alive = alive[i];
-    }
-
-    for (auto [player, left] : surrenderQueue) {
-        rank[player].surrLeft = left;
-    }
-
-    for (const Tile& tile : board.tiles()) {
-        if (isValidPlayer(tile.occupier)) {
-            RankItem& item = rank[tile.occupier];
-            item.army += tile.army, ++item.land;
-        }
-    }
-
-    std::ranges::sort(
-        rank, std::ranges::greater{}, [&](const RankItem& r) noexcept {
-            return std::tuple(r.killCount > 0, r.army, eliminatedTurn[r.player],
-                              -r.player);
-        });
-    return rank;
-}
-
-inline int BasicGame::initSpawn() {
-    const std::size_t playerCount = players.size();
-    spawnCoord.clear();
-    spawnCoord.reserve(playerCount);
-
-    // 1. Collect spawn candidates
-    std::unordered_map<unsigned, std::vector<Coord>> spawnGroups;
-    std::vector<Coord> unlabelledSpawns;
-    std::vector<Coord> emptySpawns;
-
-    board.forEachTile([&](Coord coord, const Tile& tile) {
-        if (tile.type == TILE_SPAWN) {
-            if (tile.spawnTeam == 0)
-                unlabelledSpawns.push_back(coord);
-            else
-                spawnGroups[tile.spawnTeam].push_back(coord);
-        } else if (tile.type == TILE_PLAIN && tile.army == 0) {
-            emptySpawns.push_back(coord);
-        }
-    });
-
-    // 2. Sample one spawn from every group as primary, others as extra
-    std::vector<Coord> primaryGroupSpawns;
-    std::vector<Coord> extraGroupSpawns;
-    for (auto& [_, group] : spawnGroups) {
-        std::ranges::shuffle(group, rng);
-        primaryGroupSpawns.push_back(group.front());
-        extraGroupSpawns.insert(extraGroupSpawns.end(), group.begin() + 1,
-                                group.end());
-    }
-
-    // 3. Sample N spawns by priority
-    auto addSpawns = [&](std::vector<Coord>& pool) {
-        if (spawnCoord.size() == playerCount) return;
-        std::ranges::shuffle(pool, rng);
-        const std::size_t needed =
-            std::min(playerCount - spawnCoord.size(), pool.size());
-        spawnCoord.insert(spawnCoord.end(), pool.begin(),
-                          pool.begin() + needed);
-    };
-
-    addSpawns(primaryGroupSpawns);
-    addSpawns(unlabelledSpawns);
-    addSpawns(extraGroupSpawns);
-    addSpawns(emptySpawns);
-
-    if (spawnCoord.size() < playerCount) return 1;
-
-    // 4. Assign spawns to N players
-    std::ranges::shuffle(spawnCoord, rng);
-    return 0;
-}
-
-inline int BasicGame::init() {
-    if (!isValidConfig(conf)) return 2;
-    if (const int result = initSpawn()) return result;
-
-    for (Tile& tile : board.tiles()) {
-        if (tile.type == TILE_SPAWN) {
-            tile.type = TILE_BLANK;
-            tile.army = 0;
-        }
-    }
-
-    alive.assign(players.size(), true);
-    for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
-        Tile& spawnTile = board.tileAt(spawnCoord[i]);
-        spawnTile.occupier = i;
-        spawnTile.type = TILE_GENERAL;
-        spawnTile.army = 1;
-    }
-
-    const GameConstantsPack constants{board.getHeight(), board.getWidth(),
-                                      getPlayerCount(), conf};
-    for (index_t i = 0; i < static_cast<index_t>(players.size()); ++i) {
-        players[i]->setSendMessageCallback([this, i](const std::string& text) {
-            this->sendPlayerMessage(i, text);
-        });
-        players[i]->init(i, constants);
-    }
-
-    surrenderQueue = decltype(surrenderQueue)();
-
-    vision.update(board, conf, getPlayerCount());
-    return 0;
-}
-
-inline void BasicGame::sendPlayerMessage(index_t sender, std::string text) {
-    if (!isValidPlayer(sender) || text.empty()) return;
-    const auto isSpace = [](unsigned char ch) noexcept {
-        return std::isspace(ch) != 0;
-    };
-    if (std::ranges::all_of(text, isSpace)) return;
-    broadcast(curTurn, GameMessageText{sender, std::move(text)});
-}
-
-inline void BasicGame::broadcast(turn_t turn, GameMessageData messageData) {
-    GameEvent event{turn, curHalfTurnPhase, std::move(messageData)};
-    for (Player* player : players) {
-        player->onGameEvent(event);
-    }
-    if (eventCallback) eventCallback(event);
-}

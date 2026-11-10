@@ -14,6 +14,7 @@
  */
 
 #include <algorithm>
+#include <bit>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -161,20 +162,40 @@ class Board {
         }
     }
 
-    /// Grant 5x5 hard vision around `(x, y)` to the orthogonal neighbor with
-    /// the strictly largest army.
+    /// Grant cross-shaped hard vision around `(x, y)` to orthogonal neighbors.
+    /// Extend it to 5x5 for the uncontested leader in adjacent army totals.
     void addLookoutVision(pos_t x, pos_t y) noexcept {
-        index_t bestPlayer = -1;
-        army_t maxArmy = 0;
+        army_t adjacentArmies[16] = {};
+        mask_t adjacentMask = 0;
         for (auto [dx, dy] : kDirs) {
             const Tile& nb = tileAt(x + dx, y + dy);
-            if (nb.occupier != -1 && nb.army > maxArmy) {
-                bestPlayer = nb.occupier;
-                maxArmy = nb.army;
-            }
+            if (nb.occupier < 0) continue;
+            adjacentArmies[nb.occupier] += nb.army;
+            adjacentMask |= 1 << nb.occupier;
         }
-        if (bestPlayer != -1)
-            addRadiusVision<2, false>(playerBit(bestPlayer), x, y);
+        if (!adjacentMask) return;
+        addRadiusVision<1, true>(adjacentMask, x, y);
+
+        mask_t leaderMask = 0;
+        army_t largest = -2;
+        army_t runnerUp = -2;  // -2 < (any positive integer) * 66 / 100 - 1
+        while (adjacentMask) {
+            const index_t player = std::countr_zero(adjacentMask);
+            const mask_t bit = adjacentMask & (~adjacentMask + 1);
+            const army_t army = adjacentArmies[player];
+            if (army > largest) {
+                leaderMask = bit;
+                runnerUp = largest;
+                largest = army;
+            } else if (army > runnerUp) {
+                runnerUp = army;
+            }
+            adjacentMask ^= bit;
+        }
+
+        if (runnerUp < largest * 66 / 100 - 1) {
+            addRadiusVision<2, false>(leaderMask, x, y);
+        }
     }
 
     /// Project an 7-tile hard-vision ray across `(x, y)` away from each
@@ -185,7 +206,7 @@ class Board {
         for (auto [dx, dy] : kDirs) {
             const index_t player = tileAt(x - dx, y - dy).occupier;
             if (player == -1) continue;
-            const mask_t mask = playerBit(player);
+            const mask_t mask = 1 << player;
             const pos_t edgeDist =
                 dx ? (dx > 0 ? row - x : x - 1) : (dy > 0 ? col - y : y - 1);
             const pos_t range = std::min<pos_t>(7, edgeDist);

@@ -90,8 +90,7 @@ struct TileView {
             occupier = -1;
             switch (tile.type) {
                 case TILE_SPAWN:
-                case TILE_CAPTURED_GENERAL:
-                case TILE_DESERT:           type = TILE_BLANK; break;
+                case TILE_CAPTURED_GENERAL: type = TILE_BLANK; break;
                 case TILE_MOUNTAIN:
                 case TILE_CITY:
                 case TILE_LOOKOUT:

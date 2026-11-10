@@ -14,8 +14,10 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <cctype>
 #include <cstdint>
+#include <cstdlib>
 #include <deque>
 #include <functional>
 #include <limits>
@@ -34,6 +36,7 @@
 #include "player.hpp"
 #include "tile.hpp"
 #include "utils.hpp"
+#include "vision.hpp"
 
 struct GameConstantsPack {
     pos_t mapHeight, mapWidth;
@@ -92,11 +95,11 @@ class BasicGame {
 
     const BoardView& view(index_t player) const {
         BoardView& playerView = playerViews.at(player);
-        board.view(player, playerView);
+        vision.view(board, player, playerView);
         return playerView;
     }
 
-    BoardView fullView() const { return board.fullView(); }
+    BoardView fullView() const { return Vision::fullView(board); }
 
    private:
     const GameConfig conf;
@@ -115,10 +118,13 @@ class BasicGame {
 
    protected:
     Board board;
+    Vision vision;
 
     std::deque<std::pair<index_t, turn_t>> surrenderQueue;
     std::function<void(const GameEvent&)> eventCallback;
 
+    bool isMoveAvailable(index_t player, Move move) const noexcept;
+    void updateBoard(bool increaseAllArmy = false) noexcept;
     void neutralize(index_t player) noexcept;
     void takeOver(index_t p1, index_t p2) noexcept;
     void capture(index_t p1, index_t p2);
@@ -145,12 +151,47 @@ class BasicGame {
     }
 };
 
+inline bool BasicGame::isMoveAvailable(index_t player,
+                                       Move move) const noexcept {
+    if (move.type == MoveType::EMPTY) return false;
+    if (move.type == MoveType::SURRENDER) return true;
+    assert(move.type == MoveType::MOVE_ARMY);
+
+    const Coord &from = move.from, &to = move.to;
+    if (board.isInvalidPos(from) || board.isInvalidPos(to)) return false;
+    if (std::abs(from.x - to.x) + std::abs(from.y - to.y) != 1) return false;
+
+    const Tile& fromTile = board.tileAt(from);
+    if (fromTile.occupier != player || fromTile.army <= 1) return false;
+    return !isImpassableTile(board.tileAt(to).type);
+}
+
+inline void BasicGame::updateBoard(bool increaseAllArmy) noexcept {
+    for (Tile& tile : board.tiles()) {
+        if (tile.occupier == -1) continue;
+        switch (tile.type) {
+            case TILE_DESERT:           continue;
+            case TILE_CITY:
+            case TILE_GENERAL:
+            case TILE_CAPTURED_GENERAL: ++tile.army; break;
+            case TILE_SWAMP:
+                if (tile.army > 0 && --tile.army == 0) {
+                    tile.occupier = -1;
+                    continue;
+                }
+                break;
+            default: break;
+        }
+        if (increaseAllArmy) ++tile.army;
+    }
+}
+
 inline void BasicGame::neutralize(index_t player) noexcept {
     takeOver(-1, player);
 }
 inline void BasicGame::takeOver(index_t p1, index_t p2) noexcept {
     alive[p2] = false;
-    for (auto& tile : board.tiles) {
+    for (Tile& tile : board.tiles()) {
         if (tile.occupier == p2) {
             tile.occupier = p1;
             if (tile.type == TILE_GENERAL) {
@@ -165,7 +206,7 @@ inline void BasicGame::capture(index_t p1, index_t p2) {
     alive[p2] = false;
     eliminatedTurn[p2] = curTurn << 1 | curHalfTurnPhase;
 
-    for (auto& tile : board.tiles) {
+    for (Tile& tile : board.tiles()) {
         if (tile.occupier == p2) {
             tile.occupier = p1;
             if (tile.type == TILE_GENERAL) {
@@ -190,7 +231,8 @@ inline BasicGame::BasicGame(std::vector<Player*> _players,
                             std::vector<std::string> name, Board _board,
                             GameConfig config)
     : players(std::move(_players)),
-      playerViews(players.size()),
+      playerViews(players.size(),
+                  BoardView(_board.getHeight(), _board.getWidth())),
       names(std::move(name)),
       alive(players.size()),
       killCount(players.size()),
@@ -217,7 +259,7 @@ inline void BasicGame::step() {
     // send initial notice
     if (curTurn == 0 && curHalfTurnPhase == 0) {
         bool hasTile[TILE_TYPE_COUNT] = {false};
-        for (Tile& tile : board.tiles) hasTile[tile.type] = true;
+        for (const Tile& tile : board.tiles()) hasTile[tile.type] = true;
         std::vector<std::string> specialTiles;
         if (hasTile[TILE_SWAMP]) specialTiles.push_back("swamps");
         if (hasTile[TILE_DESERT]) specialTiles.push_back("deserts");
@@ -243,7 +285,7 @@ inline void BasicGame::step() {
     for (index_t i : getAlivePlayers()) {
         Move& move = moves[i];
         while ((move = players[i]->step()).type != MoveType::EMPTY &&
-               !board.available(i, move));
+               !isMoveAvailable(i, move));
         if (move.type == MoveType::MOVE_ARMY) {
             moveOrder.push_back(i);
         } else if (move.type == MoveType::SURRENDER) {
@@ -282,7 +324,7 @@ inline void BasicGame::step() {
     // execute moves
     for (index_t player : moveOrder) {
         const Move& move = moves[player];
-        if (!alive[player] || !board.available(player, move))
+        if (!alive[player] || !isMoveAvailable(player, move))
             continue;  // skip just-captured players or invalid moves
 
         Tile& fromTile = board.tileAt(move.from);
@@ -326,10 +368,10 @@ inline void BasicGame::step() {
     curTurn += curHalfTurnPhase;
     curHalfTurnPhase ^= 1;
     if (curHalfTurnPhase == 0) {
-        board.update(curTurn % 25 == 0);
+        updateBoard(curTurn % 25 == 0);
     }
-    board.updateVisionCache(conf, getPlayerCount(),
-                            curTurn * 2 + curHalfTurnPhase);
+    vision.update(board, conf, getPlayerCount(),
+                  curTurn * 2 + curHalfTurnPhase);
 
     // request moves (for next turn)
     std::vector<RankItem> rank = ranklist();
@@ -350,7 +392,7 @@ inline std::vector<RankItem> BasicGame::ranklist() const {
         rank[player].surrLeft = left;
     }
 
-    for (auto& tile : board.tiles) {
+    for (const Tile& tile : board.tiles()) {
         if (isValidPlayer(tile.occupier)) {
             RankItem& item = rank[tile.occupier];
             item.army += tile.army, ++item.land;
@@ -375,20 +417,16 @@ inline int BasicGame::initSpawn() {
     std::vector<Coord> unlabelledSpawns;
     std::vector<Coord> emptySpawns;
 
-    for (pos_t x = 1; x <= board.row; ++x) {
-        for (pos_t y = 1; y <= board.col; ++y) {
-            const Tile& tile = board.tileAt(x, y);
-            const Coord coord{x, y};
-            if (tile.type == TILE_SPAWN) {
-                if (tile.spawnTeam == 0)
-                    unlabelledSpawns.push_back(coord);
-                else
-                    spawnGroups[tile.spawnTeam].push_back(coord);
-            } else if (tile.type == TILE_PLAIN && tile.army == 0) {
-                emptySpawns.push_back(coord);
-            }
+    board.forEachTile([&](Coord coord, const Tile& tile) {
+        if (tile.type == TILE_SPAWN) {
+            if (tile.spawnTeam == 0)
+                unlabelledSpawns.push_back(coord);
+            else
+                spawnGroups[tile.spawnTeam].push_back(coord);
+        } else if (tile.type == TILE_PLAIN && tile.army == 0) {
+            emptySpawns.push_back(coord);
         }
-    }
+    });
 
     // 2. Sample one spawn from every group as primary, others as extra
     std::vector<Coord> primaryGroupSpawns;
@@ -426,7 +464,7 @@ inline int BasicGame::init() {
     if (!isValidConfig(conf)) return 2;
     if (const int result = initSpawn()) return result;
 
-    for (Tile& tile : board.tiles) {
+    for (Tile& tile : board.tiles()) {
         if (tile.type == TILE_SPAWN) {
             tile.type = TILE_BLANK;
             tile.army = 0;
@@ -452,7 +490,7 @@ inline int BasicGame::init() {
 
     surrenderQueue = decltype(surrenderQueue)();
 
-    board.updateVisionCache(conf, getPlayerCount());
+    vision.update(board, conf, getPlayerCount());
     return 0;
 }
 

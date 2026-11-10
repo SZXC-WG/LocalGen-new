@@ -58,18 +58,18 @@ constexpr intmax_t PMod(intmax_t& x) noexcept {
 inline constexpr int CHAR_AD = 48;
 
 constexpr std::string v5Zip(const Board& board) {
-    const int row = board.getHeight(), col = board.getWidth();
+    const int height = board.getHeight(), width = board.getWidth();
 
     std::string strZip;
-    strZip.reserve(4 + 10 * std::size_t(row * col));
-    intmax_t k1 = row, k2 = col;
+    strZip.reserve(4 + 10 * std::size_t(height * width));
+    intmax_t k1 = height, k2 = width;
     strZip.push_back(PMod(k1) + CHAR_AD);
     strZip.push_back(PMod(k1) + CHAR_AD);
     strZip.push_back(PMod(k2) + CHAR_AD);
     strZip.push_back(PMod(k2) + CHAR_AD);
 
-    for (int i = 1; i <= row; i++)
-        for (int j = 1; j <= col; j++) {
+    for (int i = 1; i <= height; i++)
+        for (int j = 1; j <= width; j++) {
             const Tile& tile = board.tileAt(i, j);
             strZip.push_back(tile.occupier + CHAR_AD);
 
@@ -92,12 +92,12 @@ constexpr std::string v5Zip(const Board& board) {
 
 constexpr Board v5Unzip(std::string_view s) {
     auto dec = [&](std::size_t i) noexcept { return s[i] - CHAR_AD; };
-    const int row = (dec(1) << 6) + dec(0), col = (dec(3) << 6) + dec(2);
+    const int height = (dec(1) << 6) + dec(0), width = (dec(3) << 6) + dec(2);
 
-    Board board(row, col);
+    Board board(height, width);
     std::size_t k = 4;
-    for (int i = 1; i <= row; i++)
-        for (int j = 1; j <= col; j++, k += 8) {
+    for (int i = 1; i <= height; i++)
+        for (int j = 1; j <= width; j++, k += 8) {
             Tile& tile = board.tileAt(i, j);
             tile.occupier = dec(k++);
             if (tile.occupier == 0) tile.occupier = -1;

@@ -29,15 +29,12 @@ class SmartRandomBot : public BasicBot {
     Coord determineMaxArmyPos(const BoardView& boardView) {
         Coord maxArmyPos(-1, -1);
         army_t maxArmy = 0;
-        for (pos_t i = 1; i <= boardView.row; ++i) {
-            for (pos_t j = 1; j <= boardView.col; ++j) {
-                const TileView& tile = boardView.tileAt(i, j);
-                if (tile.occupier == playerId && tile.army > maxArmy) {
-                    maxArmy = tile.army;
-                    maxArmyPos = Coord(i, j);
-                }
+        boardView.forEachTile([&](Coord pos, const TileView& tile) noexcept {
+            if (tile.occupier == playerId && tile.army > maxArmy) {
+                maxArmy = tile.army;
+                maxArmyPos = pos;
             }
-        }
+        });
         return maxArmyPos;
     }
 
@@ -67,15 +64,11 @@ class SmartRandomBot : public BasicBot {
         }
 
         // Filter valid moves from `coo`
-        auto isValidPos = [&](Coord pos) {
-            return pos.x >= 1 && pos.x <= boardView.row && pos.y >= 1 &&
-                   pos.y <= boardView.col;
-        };
         auto candidates =
             directions |
             std::views::transform([&](Coord offset) { return coo + offset; }) |
             std::views::filter([&](Coord next) {
-                return isValidPos(next) &&
+                return boardView.isValidPos(next) &&
                        !isImpassableTile(boardView.tileAt(next).type);
             });
         if (candidates.empty()) return;

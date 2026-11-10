@@ -51,7 +51,7 @@ class SzlyBot : public BasicBot {
 
     inline bool isValidPosition(pos_t x, pos_t y,
                                 const BoardView& board) const {
-        return x >= 1 && x <= board.row && y >= 1 && y <= board.col &&
+        return board.isValidPos(x, y) &&
                !isImpassableTile(blockType[idx(x, y)]);
     }
 

@@ -72,6 +72,7 @@ set(LOCALGEN_CORE_SOURCES
     src/core/player.hpp
     src/core/tile.hpp
     src/core/utils.hpp
+    src/core/vision.hpp
 )
 
 set(LOCALGEN_BOT_SOURCES

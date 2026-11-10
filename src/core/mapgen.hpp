@@ -3,6 +3,16 @@
 
 #pragma once
 
+/**
+ * @file mapgen.hpp
+ *
+ * LocalGen Module: core
+ *
+ * Map Generation
+ *
+ * Procedural random map generator.
+ */
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -10,6 +20,10 @@
 #include <limits>
 #include <utility>
 #include <vector>
+
+#include "board.hpp"
+#include "tile.hpp"
+#include "utils.hpp"
 
 namespace detail {
 
@@ -499,10 +513,11 @@ class Generator {
 
 }  // namespace detail
 
-inline Board Board::generate(int width, int height, int spawnCount,
-                             std::uint64_t seed, bool cityState,
-                             bool placeSwamp, bool placeLookout,
-                             bool placeObservatory, double mountainDensity) {
+inline Board generateMap(int width, int height, int spawnCount,
+                         std::uint64_t seed, bool cityState = false,
+                         bool placeSwamp = false, bool placeLookout = false,
+                         bool placeObservatory = false,
+                         double mountainDensity = 0.25) {
     return detail::Generator(width, height, spawnCount, seed, cityState,
                              placeSwamp, placeLookout, placeObservatory,
                              mountainDensity)

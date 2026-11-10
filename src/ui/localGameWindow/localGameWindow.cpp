@@ -14,6 +14,7 @@
 
 #include "core/bot.h"
 #include "core/map.hpp"
+#include "core/mapgen.hpp"
 #include "ui/utils/surrenderConfirmDialog.hpp"
 
 namespace {
@@ -75,8 +76,8 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     if (config.mapFilePath.isEmpty()) {
         const quint64 seed = QRandomGenerator64::global()->generate();
         initialBoard =
-            Board::generate(config.mapWidth, config.mapHeight, numPlayers, seed,
-                            config.gameConfig.cityState);
+            generateMap(config.mapWidth, config.mapHeight, numPlayers, seed,
+                        config.gameConfig.cityState);
     } else {
         QString errMsg;
         MapDocument mapDoc = openMap_v6(config.mapFilePath, errMsg);

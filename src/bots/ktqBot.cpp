@@ -24,29 +24,22 @@ class KtqBot : public BasicBot {
     inline Coord determineMaxArmyPos(const BoardView& boardView) {
         Coord maxArmyPos(-1, -1);
         army_t maxArmy = 1;  // Find a tile with >1 army
-        for (pos_t i = 1; i <= boardView.row; ++i) {
-            for (pos_t j = 1; j <= boardView.col; ++j) {
-                const TileView& tile = boardView.tileAt(i, j);
-                if (tile.occupier == playerId && tile.army > maxArmy) {
-                    maxArmy = tile.army;
-                    maxArmyPos = Coord(i, j);
-                }
+        boardView.forEachTile([&](Coord pos, const TileView& tile) noexcept {
+            if (tile.occupier == playerId && tile.army > maxArmy) {
+                maxArmy = tile.army;
+                maxArmyPos = pos;
             }
-        }
+        });
         return maxArmyPos;
     }
 
    public:
-    void init(index_t playerId, const GameConstantsPack& constants) override {
+    void init(index_t playerId, const GameConstantsPack&) override {
         this->playerId = playerId;
     }
 
     void requestMove(const BoardView& boardView,
-                     const std::vector<RankItem>& rank) override {
-        const int H = boardView.row, W = boardView.col;
-        auto inBoard = [&](pos_t x, pos_t y) {
-            return x >= 1 && x <= H && y >= 1 && y <= W;
-        };
+                     const std::vector<RankItem>&) override {
         moveQueue.clear();
         if (focus.x == -1 || boardView.tileAt(focus).occupier != playerId ||
             boardView.tileAt(focus).army <= 1) {
@@ -64,7 +57,7 @@ class KtqBot : public BasicBot {
 
         for (const Coord& delta : dir) {
             Coord target = focus + delta;
-            if (!inBoard(target.x, target.y)) continue;
+            if (boardView.isInvalidPos(target)) continue;
             const TileView& tile = boardView.tileAt(target);
             const tile_type_e type =
                 tile.type == TILE_DESERT ? TILE_BLANK : tile.type;

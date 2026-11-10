@@ -33,6 +33,7 @@
 #include "core/bot.h"
 #include "core/game.hpp"
 #include "core/map.hpp"
+#include "core/mapgen.hpp"
 
 namespace {
 
@@ -409,8 +410,8 @@ GameResult runSingleGame(const Options& options, int gameNumber,
     result.order.resize(botCount);
 
     Board board = options.mapPath.empty()
-                      ? Board::generate(options.width, options.height,
-                                        static_cast<int>(botCount), mapSeed)
+                      ? generateMap(options.width, options.height,
+                                    static_cast<int>(botCount), mapSeed)
                       : options.customBoard;
 
     std::vector<std::size_t> botIndices(botCount);

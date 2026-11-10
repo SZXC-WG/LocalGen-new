@@ -274,7 +274,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Cities and generals provide vision within a four-step, diamond-shaped area.</string>
+         <string>Cities and generals provide vision within a four-step, diamond-shaped area. Selecting this turns off Crystal Clear.</string>
         </property>
         <property name="text">
          <string>Watchtower</string>
@@ -338,7 +338,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Reveal the entire map to all players. Selecting this turns off Misty Veil and Fading Smog.</string>
+         <string>Reveal the entire map to all players. Selecting this turns off Watchtower, Misty Veil and Fading Smog.</string>
         </property>
         <property name="text">
          <string>Crystal Clear</string>

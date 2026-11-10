@@ -32,5 +32,6 @@ struct Modifiers {
 };
 
 constexpr bool isValidModifiers(const Modifiers& mod) noexcept {
-    return !(mod.crystalClear && (mod.mistyVeil || mod.fadingSmog));
+    return !(mod.crystalClear &&
+             (mod.watchtower || mod.mistyVeil || mod.fadingSmog));
 }

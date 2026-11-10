@@ -53,8 +53,13 @@ LocalGameDialog::LocalGameDialog(QWidget* parent)
     connect(ui->checkBox_crystalClear, &QCheckBox::toggled, this,
             [this](bool checked) {
                 if (!checked) return;
+                ui->checkBox_watchtower->setChecked(false);
                 ui->checkBox_mistyVeil->setChecked(false);
                 ui->checkBox_fadingSmog->setChecked(false);
+            });
+    connect(ui->checkBox_watchtower, &QCheckBox::toggled, this,
+            [this](bool checked) {
+                if (checked) ui->checkBox_crystalClear->setChecked(false);
             });
     connect(ui->checkBox_mistyVeil, &QCheckBox::toggled, this,
             [this](bool checked) {

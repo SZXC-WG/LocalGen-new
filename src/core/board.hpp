@@ -14,6 +14,7 @@
  */
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -177,20 +178,20 @@ class Board {
             addRadiusVision<2, false>(playerBit(bestPlayer), x, y);
     }
 
-    /// Project an 8-tile hard-vision ray across `(x, y)` away from each
+    /// Project an 7-tile hard-vision ray across `(x, y)` away from each
     /// occupied orthogonal neighbor.
     void addObservatoryVision(pos_t x, pos_t y) noexcept {
         const pos_t stride = col + 2;
+        const pos_t center = x * stride + y;
         for (auto [dx, dy] : kDirs) {
             const index_t player = tileAt(x - dx, y - dy).occupier;
             if (player == -1) continue;
             const mask_t mask = playerBit(player);
             const pos_t edgeDist =
                 dx ? (dx > 0 ? row - x : x - 1) : (dy > 0 ? col - y : y - 1);
-            const pos_t steps = std::min<pos_t>(8, edgeDist);
+            const pos_t range = std::min<pos_t>(7, edgeDist);
             const pos_t stepOffset = dx * stride + dy;
-            for (pos_t k = 0, t = x * stride + y + stepOffset; k < steps;
-                 ++k, t += stepOffset) {
+            for (pos_t k = 0, t = center; k <= range; ++k, t += stepOffset) {
                 vision[t] |= mask;
             }
         }

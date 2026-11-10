@@ -29,7 +29,7 @@ class ZlyBot_v2_1 : public BasicBot {
     pos_t height, width, W;
     index_t playerCnt;
     index_t id;
-    GameConfig config;
+    Modifiers modifiers;
     army_t totalArmy;
     pos_t totalLand;
 
@@ -411,7 +411,7 @@ class ZlyBot_v2_1 : public BasicBot {
         width = constants.mapWidth;
         W = width + 2;
         playerCnt = constants.playerCount;
-        config = constants.config;
+        modifiers = constants.modifiers;
 
         halfTurn = turn = 0;
 

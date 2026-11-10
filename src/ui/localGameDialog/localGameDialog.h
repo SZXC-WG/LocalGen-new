@@ -6,7 +6,7 @@
 #include <QDialog>
 #include <QStringList>
 
-#include "core/game-config.hpp"
+#include "core/modifiers.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -20,7 +20,7 @@ struct LocalGameConfig {
     QString mapFilePath;
     int mapWidth, mapHeight;
     QStringList players;
-    GameConfig gameConfig{};
+    Modifiers modifiers{};
 };
 
 class LocalGameDialog : public QDialog {

@@ -85,7 +85,7 @@ class XiaruizeBot : public BasicBot {
     index_t playerCount = 0;
     turn_t halfTurn = 0;
     turn_t fullTurn = 0;
-    GameConfig config;
+    Modifiers modifiers;
 
     BoardView board;
     std::vector<RankItem> rankById;
@@ -1230,7 +1230,7 @@ class XiaruizeBot : public BasicBot {
         height = constants.mapHeight;
         width = constants.mapWidth;
         stride = width + 2;
-        config = constants.config;
+        modifiers = constants.modifiers;
 
         halfTurn = fullTurn = 0;
         memory.assign((height + 2) * stride, MemoryCell{});

@@ -4,16 +4,16 @@
 #pragma once
 
 /**
- * @file game-config.hpp
+ * @file modifiers.hpp
  *
  * LocalGen Module: core
  *
- * Game Configurations
+ * Game Modifiers
  *
  * Each modifier is an independent boolean, disabled by default.
  */
 
-struct GameConfig {
+struct Modifiers {
     // Vision modifiers
     bool watchtower = false;
     bool mistyVeil = false;
@@ -31,6 +31,6 @@ struct GameConfig {
     bool silentWar = false;
 };
 
-constexpr bool isValidConfig(const GameConfig& conf) noexcept {
-    return !(conf.crystalClear && (conf.mistyVeil || conf.fadingSmog));
+constexpr bool isValidModifiers(const Modifiers& mod) noexcept {
+    return !(mod.crystalClear && (mod.mistyVeil || mod.fadingSmog));
 }

@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "board.hpp"
-#include "game-config.hpp"
+#include "modifiers.hpp"
 #include "tile.hpp"
 #include "utils.hpp"
 
@@ -281,9 +281,9 @@ class Vision {
 
    public:
     /// Recompute player visibility after a board update.
-    void update(const Board& board, const GameConfig& conf, index_t playerCount,
-                turn_t halfTurn = 0) {
-        assert(isValidConfig(conf));
+    void update(const Board& board, const Modifiers& modifiers,
+                index_t playerCount, turn_t halfTurn = 0) {
+        assert(isValidModifiers(modifiers));
         assert(0 < playerCount && playerCount <= 16);
         const mask_t allPlayers = (uint32_t(1) << playerCount) - 1;
         const pos_t height = board.getHeight(), width = board.getWidth();
@@ -296,21 +296,21 @@ class Vision {
             softVision.clear();
         }
 
-        if (conf.crystalClear) {
+        if (modifiers.crystalClear) {
             for (pos_t x = 1; x <= height; ++x)
                 std::fill_n(vision.begin() + x * stride + 1, width, allPlayers);
             softVision.clear();
             return;
         }
 
-        if (conf.watchtower)
-            conf.mistyVeil ? updateHardVision<true, true>(board)
-                           : updateHardVision<true, false>(board);
+        if (modifiers.watchtower)
+            modifiers.mistyVeil ? updateHardVision<true, true>(board)
+                                : updateHardVision<true, false>(board);
         else
-            conf.mistyVeil ? updateHardVision<false, true>(board)
-                           : updateHardVision<false, false>(board);
+            modifiers.mistyVeil ? updateHardVision<false, true>(board)
+                                : updateHardVision<false, false>(board);
 
-        if (!conf.fadingSmog) {
+        if (!modifiers.fadingSmog) {
             softVision.clear();
         } else if (softVision.empty() || halfTurn == 0) {
             softReach.assign(totalSize, 0);

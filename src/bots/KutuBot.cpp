@@ -256,7 +256,7 @@ class KutuBot : public BasicBot {
     index_t playerCnt = 0;
     turn_t halfTurn = 0;
     turn_t fullTurn = 0;
-    GameConfig config;
+    Modifiers modifiers;
 
     BoardView board;
     std::vector<RankItem> rankById;
@@ -2693,7 +2693,7 @@ class KutuBot : public BasicBot {
         width = constants.mapWidth;
         W = width + 2;
         playerCnt = constants.playerCount;
-        config = constants.config;
+        modifiers = constants.modifiers;
         halfTurn = 0;
         fullTurn = 0;
 

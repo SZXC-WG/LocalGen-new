@@ -77,7 +77,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
         const quint64 seed = QRandomGenerator64::global()->generate();
         initialBoard =
             generateMap(config.mapWidth, config.mapHeight, numPlayers, seed,
-                        config.gameConfig.cityState);
+                        config.modifiers.cityState);
     } else {
         QString errMsg;
         MapDocument mapDoc = openMap_v6(config.mapFilePath, errMsg);
@@ -131,7 +131,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     }
 
     game = new BasicGame(std::move(players), std::move(names),
-                         std::move(initialBoard), config.gameConfig);
+                         std::move(initialBoard), config.modifiers);
     if (const int initResult = game->init()) {
         QString errMsg = "Failed to initialize local game.";
         if (initResult == 1) {
@@ -174,7 +174,7 @@ LocalGameWindow::LocalGameWindow(QWidget* parent, const LocalGameConfig& config)
     connect(chatBox, &ChatBoxWidget::messageSubmitted, this,
             &LocalGameWindow::handleChatSubmission);
 
-    const bool showScores = !config.gameConfig.silentWar;
+    const bool showScores = !config.modifiers.silentWar;
     if (config.showAnalysis && showScores) {
         std::vector<QColor> colors;
         std::vector<QString> playerNames;

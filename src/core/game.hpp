@@ -30,8 +30,8 @@
 #include <vector>
 
 #include "board.hpp"
-#include "game-config.hpp"
 #include "message.hpp"
+#include "modifiers.hpp"
 #include "move.hpp"
 #include "player.hpp"
 #include "tile.hpp"
@@ -42,7 +42,7 @@
 struct GameConstantsPack {
     pos_t mapHeight, mapWidth;
     index_t playerCount;
-    GameConfig config;
+    Modifiers modifiers;
 };
 
 /// Leaderboard entry for a single player.
@@ -60,7 +60,7 @@ class BasicGame {
    protected:
     // ---- Core Game State ----------------------------------------------------
 
-    const GameConfig conf;
+    const Modifiers mod;
     Board board;
     Vision vision;
     std::mt19937 rng{std::random_device{}()};
@@ -233,11 +233,11 @@ class BasicGame {
                 if (tile.type == TILE_GENERAL) {
                     // Leapfrog: victor's general moves to the captured general,
                     // so its type remains TILE_GENERAL.
-                    if (!conf.leapfrog) tile.type = TILE_CAPTURED_GENERAL;
+                    if (!mod.leapfrog) tile.type = TILE_CAPTURED_GENERAL;
                 } else if (tile.army > 1) {
                     tile.army = (tile.army + 1) >> 1;
                 }
-            } else if (conf.leapfrog && tile.occupier == p1 &&
+            } else if (mod.leapfrog && tile.occupier == p1 &&
                        tile.type == TILE_GENERAL) {
                 // The original general becomes a city,
                 // but stays displayed as a blank tile in others' fog.
@@ -295,7 +295,7 @@ class BasicGame {
             }
         }
         // Slippery: general (0) < chase (1) < normal (2) < defensive (3).
-        if (conf.slippery && rank > 0) rank = rank % 3 + 1;
+        if (mod.slippery && rank > 0) rank = rank % 3 + 1;
 
         return {rank, board.tileAt(move.from).army,
                 curHalfTurnPhase ? player : -player};
@@ -321,7 +321,7 @@ class BasicGame {
 
         toTile.army -= takenArmy;
         if (toTile.army < 0 ||
-            (conf.defenseless && toTile.type == TILE_GENERAL)) {
+            (mod.defenseless && toTile.type == TILE_GENERAL)) {
             toTile.army = std::max<army_t>(0, -toTile.army);
             if (toTile.type == TILE_GENERAL) {
                 capture(player, toTile.occupier);
@@ -365,8 +365,8 @@ class BasicGame {
     BasicGame() = delete;
 
     BasicGame(std::vector<Player*> _players, std::vector<std::string> name,
-              Board _board, GameConfig config)
-        : conf(config),
+              Board _board, Modifiers modifiers)
+        : mod(modifiers),
           board(std::move(_board)),
           players(std::move(_players)),
           names(std::move(name)),
@@ -394,17 +394,17 @@ class BasicGame {
     }
 
     /// Initialize spawns, board tiles, players, and initial vision.
-    /// Returns 0 on success, 1 if spawns are insufficient, 2 if config is
+    /// Returns 0 on success, 1 if spawns are insufficient, 2 if modifiers are
     /// invalid.
     [[nodiscard]] int init() {
-        if (!isValidConfig(conf)) return 2;
+        if (!isValidModifiers(mod)) return 2;
         if (!initSpawn()) return 1;
 
         alive.assign(players.size(), true);
         surrenderQueue.clear();
 
         const GameConstantsPack constants{board.getHeight(), board.getWidth(),
-                                          getPlayerCount(), conf};
+                                          getPlayerCount(), mod};
         for (index_t i = 0; i < getPlayerCount(); ++i) {
             players[i]->setSendMessageCallback(
                 [this, i](const std::string& text) {
@@ -413,7 +413,7 @@ class BasicGame {
             players[i]->init(i, constants);
         }
 
-        vision.update(board, conf, getPlayerCount());
+        vision.update(board, mod, getPlayerCount());
         return 0;
     }
 
@@ -439,7 +439,7 @@ class BasicGame {
         if (curHalfTurnPhase == 0) {
             updateBoard(curTurn % 25 == 0);
         }
-        vision.update(board, conf, getPlayerCount(), curHalfTurn());
+        vision.update(board, mod, getPlayerCount(), curHalfTurn());
 
         const std::vector<RankItem> rank = ranklist();
         for (index_t i = 0; i < getPlayerCount(); ++i) {

@@ -24,7 +24,7 @@ class XrzBot : public BasicBot {
     pos_t height, width, W;
     index_t playerCnt;
     index_t id;
-    GameConfig config;
+    Modifiers modifiers;
 
     BoardView board;
     std::vector<RankItem> rank;
@@ -63,7 +63,7 @@ class XrzBot : public BasicBot {
         width = constants.mapWidth;
         W = width + 2;
         playerCnt = constants.playerCount;
-        config = constants.config;
+        modifiers = constants.modifiers;
 
         previousPos = Coord(-1, -1);
         currentPos = Coord(-1, -1);

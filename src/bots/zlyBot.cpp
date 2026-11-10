@@ -27,7 +27,7 @@ class ZlyBot : public BasicBot {
     pos_t height, width, W;
     index_t playerCnt;
     index_t id;
-    GameConfig config;
+    Modifiers modifiers;
 
     BoardView board;
     std::vector<RankItem> rank;
@@ -73,7 +73,7 @@ class ZlyBot : public BasicBot {
         width = constants.mapWidth;
         W = width + 2;
         playerCnt = constants.playerCount;
-        config = constants.config;
+        modifiers = constants.modifiers;
 
         focus = Coord(0, 0);
         tileTypeWeight[TILE_BLANK] = 30 - 25;

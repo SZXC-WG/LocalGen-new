@@ -63,11 +63,11 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
 set(LOCALGEN_CORE_SOURCES
     src/core/board.hpp
     src/core/bot.h
-    src/core/game-config.hpp
     src/core/game.hpp
     src/core/map.hpp
     src/core/mapgen.hpp
     src/core/message.hpp
+    src/core/modifiers.hpp
     src/core/move.hpp
     src/core/player.hpp
     src/core/tile.hpp

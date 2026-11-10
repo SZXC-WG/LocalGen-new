@@ -87,17 +87,17 @@ LocalGameConfig LocalGameDialog::config() const {
         ui->spinBox_mapWidth->value(),
         ui->spinBox_mapHeight->value(),
         {}};
-    config.gameConfig.watchtower = ui->checkBox_watchtower->isChecked();
-    config.gameConfig.mistyVeil = ui->checkBox_mistyVeil->isChecked();
-    config.gameConfig.crystalClear = ui->checkBox_crystalClear->isChecked();
-    config.gameConfig.fadingSmog = ui->checkBox_fadingSmog->isChecked();
-    config.gameConfig.leapfrog = ui->checkBox_leapfrog->isChecked();
-    config.gameConfig.cityState =
+    config.modifiers.watchtower = ui->checkBox_watchtower->isChecked();
+    config.modifiers.mistyVeil = ui->checkBox_mistyVeil->isChecked();
+    config.modifiers.crystalClear = ui->checkBox_crystalClear->isChecked();
+    config.modifiers.fadingSmog = ui->checkBox_fadingSmog->isChecked();
+    config.modifiers.leapfrog = ui->checkBox_leapfrog->isChecked();
+    config.modifiers.cityState =
         ui->checkBox_cityState->isChecked() && config.mapFilePath.isEmpty();
-    config.gameConfig.defenseless = ui->checkBox_defenseless->isChecked();
-    config.gameConfig.slippery = ui->checkBox_slippery->isChecked();
-    config.gameConfig.silentWar = ui->checkBox_silentWar->isChecked();
-    config.showAnalysis = config.showAnalysis && !config.gameConfig.silentWar;
+    config.modifiers.defenseless = ui->checkBox_defenseless->isChecked();
+    config.modifiers.slippery = ui->checkBox_slippery->isChecked();
+    config.modifiers.silentWar = ui->checkBox_silentWar->isChecked();
+    config.showAnalysis = config.showAnalysis && !config.modifiers.silentWar;
 
     auto& players = config.players;
     int numPlayers = ui->gridLayout_players->count();
